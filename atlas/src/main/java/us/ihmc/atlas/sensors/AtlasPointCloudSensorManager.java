@@ -8,15 +8,15 @@ import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBri
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasPointCloudSensorManager
@@ -24,26 +24,22 @@ public class AtlasPointCloudSensorManager
    private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
    private final TrackingCameraBridge trackingCameraPublisher;
 
-   private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
-
-   private static final String depthTopicNameSurfixToPublish = "_D435";
    private static final String depthTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
-   private static final String trackingTopicNameSurfixToPublish = "_T265";
    private static final String trackingTopicNameToSubscribe = AtlasSensorInformation.trackingCameraTopic;
 
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
-   
-   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String rcdTopicName,
-                                       RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
+
+   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory,
+                                       ROS2Node ros2Node,
+                                       RobotROSClockCalculator rosClockCalculator,
+                                       boolean useTrackingData)
    {
-      MessageTopicNameGenerator depthCloudTopicNameGenerator;
-      depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
+      LogTools.info("Creating sensor bridges...");
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.D435_POINT_CLOUD);
+      LogTools.info("Using ROS clock calculator {}", rosClockCalculator.getClass());
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      MessageTopicNameGenerator trackingCameraTopicNameGenerator;
-      trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
-      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
+      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
 

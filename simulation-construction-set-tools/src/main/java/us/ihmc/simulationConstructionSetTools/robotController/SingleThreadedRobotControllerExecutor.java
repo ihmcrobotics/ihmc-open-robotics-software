@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -12,7 +12,7 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
    private final boolean skipFirstControlCycle;
    private final Robot simulatedRobot;
    
-   SingleThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
+   SingleThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoRegistry parentRegistry)
    {
       this.ticksPerSimulationTick = ticksPerSimulationTick;
       this.robotControlElement = robotControlElement;

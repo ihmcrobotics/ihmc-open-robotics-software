@@ -13,10 +13,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -48,7 +48,7 @@ public class ExplorationHelper
    private final FramePoint2D desiredCopInWorld = new FramePoint2D();
    private final YoFramePoint2D yoDesiredCop;
 
-   public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoVariableRegistry registry)
+   public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoRegistry registry)
    {
       footholdExplorationActive = new YoBoolean(prefix + "FootholdExplorationActive", registry);
       timeExploring = new YoDouble(prefix + "TimeExploring", registry);

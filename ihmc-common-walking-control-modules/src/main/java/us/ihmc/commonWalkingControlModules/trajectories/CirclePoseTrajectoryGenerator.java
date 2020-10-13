@@ -6,32 +6,24 @@ import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -42,7 +34,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTime;
    private final YoPolynomial anglePolynomial;
@@ -117,9 +109,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoBoolean showViz;
 
    public CirclePoseTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, DoubleProvider trajectoryTimeProvider,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.desiredTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new YoDouble(namePrefix + "Time", registry);
 
@@ -180,7 +172,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             localTranslation.set(circleOrigin);
             localRotationAxis.set(rotationAxis);
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
       };
@@ -210,9 +202,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
-         showViz.addVariableChangedListener(new VariableChangedListener()
+         showViz.addListener(new YoVariableChangedListener()
          {
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);
@@ -223,7 +215,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
                bagOfBalls.setVisible(visible);
             }
          });
-         showViz.notifyVariableChangedListeners();
+         showViz.notifyListeners();
       }
       else
       {
@@ -433,7 +425,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       else
       {
          tangentialCircleFramePose.setToZero(currentPosition.getReferenceFrame());
-         tangentialCircleFramePose.setPosition(currentPosition);
+         tangentialCircleFramePose.getPosition().set(currentPosition);
       }
 
       tangentialCircleFramePose.changeFrame(circleFrame);
@@ -442,7 +434,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialCircleFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialCircleFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialCircleFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
       tangentialCircleFrame.setPoseAndUpdate(tangentialCircleFramePose);
       yoTangentialCircleFramePose.setMatchingFrame(tangentialCircleFramePose);
    }

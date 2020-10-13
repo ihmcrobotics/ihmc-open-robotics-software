@@ -2,12 +2,12 @@ package us.ihmc.simulationConstructionSetTools.util.tracks;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -28,14 +28,14 @@ public class Track implements FunctionToIntegrate
 
    private int numPointsPerTread, numTreads;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble track_linear_velocity, track_linear_position, track_linear_force;
 
    public Track(String name, Joint joint, Robot rob, Vector3D offset, RotationMatrix rotation, double trackLength, double trackRadius, double trackWidth,
                 int numPointsPerTread, int numTreads)
    {
-      registry = new YoVariableRegistry(name);
-      rob.addYoVariableRegistry(registry);
+      registry = new YoRegistry(name);
+      rob.addYoRegistry(registry);
       
       this.name = name;
       this.joint = joint;
@@ -109,14 +109,14 @@ public class Track implements FunctionToIntegrate
       linkGraphics.translate(track_offset);
       linkGraphics.rotate(track_rotation);
       linkGraphics.translate(trackLength / 2.0, trackWidth / 2.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(trackWidth, trackRadius, appearance);
 
       linkGraphics.identity();
       linkGraphics.translate(track_offset);
       linkGraphics.rotate(track_rotation);
       linkGraphics.translate(-trackLength / 2.0, trackWidth / 2.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(trackWidth, trackRadius, appearance);
 
       linkGraphics.identity();

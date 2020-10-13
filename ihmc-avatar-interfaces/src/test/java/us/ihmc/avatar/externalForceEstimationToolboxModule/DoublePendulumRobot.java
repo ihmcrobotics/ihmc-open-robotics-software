@@ -1,23 +1,17 @@
 package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -48,12 +42,12 @@ import us.ihmc.simulationconstructionset.Robot;
    /**
     * Manipulator equation matrices, see {@link #updateManipulatorMatrices()}
     */
-   private final DenseMatrix64F H = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F C = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F G = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F qd = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F Hdot = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F Hprev = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj H = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj C = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj G = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj qd = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj Hdot = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj Hprev = new DMatrixRMaj(2, 2);
 
    DoublePendulumRobot(String name, double dt)
    {
@@ -63,14 +57,14 @@ import us.ihmc.simulationconstructionset.Robot;
 
       // setup id robot
       elevator = new RigidBody("elevator", worldFrame);
-      joint1 = new RevoluteJoint("joint1", elevator, Axis.X);
+      joint1 = new RevoluteJoint("joint1", elevator, Axis3D.X);
       link1 = new RigidBody("link1", joint1, Ixx1CoM, Ismall, Ismall, mass1, comOffset1);
-      joint2 = new RevoluteJoint("joint2", link1, new Vector3D(0.0, 0.0, -linkLength1), Axis.X);
+      joint2 = new RevoluteJoint("joint2", link1, new Vector3D(0.0, 0.0, -linkLength1), Axis3D.X);
       link2 = new RigidBody("link2", joint2, Ixx2CoM, Ismall, Ismall, mass2, comOffset2);
 
       // setup scs robot
-      scsJoint1 = new PinJoint("joint1", new Vector3D(0.0, 0.0, 0.0), this, Axis.X);
-      scsJoint2 = new PinJoint("joint2", new Vector3D(0.0, 0.0, -linkLength1), this, Axis.X);
+      scsJoint1 = new PinJoint("joint1", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.X);
+      scsJoint2 = new PinJoint("joint2", new Vector3D(0.0, 0.0, -linkLength1), this, Axis3D.X);
 
       scsJoint1.setDamping(damping1);
       scsJoint2.setDamping(damping2);
@@ -80,7 +74,7 @@ import us.ihmc.simulationconstructionset.Robot;
       scsLink1.setMomentOfInertia(Ixx1CoM, 1e-4, 1e-4);
       scsLink1.setComOffset(comOffset1);
       Graphics3DObject graphics3DObject1 = new Graphics3DObject();
-      graphics3DObject1.rotate(Math.PI, Axis.X);
+      graphics3DObject1.rotate(Math.PI, Axis3D.X);
       graphics3DObject1.addCylinder(linkLength1, 0.02, YoAppearance.Red());
       scsLink1.setLinkGraphics(graphics3DObject1);
 
@@ -89,7 +83,7 @@ import us.ihmc.simulationconstructionset.Robot;
       scsLink2.setMomentOfInertia(Ixx2CoM, 1e-4, 1e-4);
       scsLink2.setComOffset(comOffset2);
       Graphics3DObject graphics3DObject2 = new Graphics3DObject();
-      graphics3DObject2.rotate(Math.PI, Axis.X);
+      graphics3DObject2.rotate(Math.PI, Axis3D.X);
       graphics3DObject2.addCylinder(linkLength1, 0.02, YoAppearance.Blue());
       scsLink2.setLinkGraphics(graphics3DObject2);
 
@@ -161,31 +155,31 @@ import us.ihmc.simulationconstructionset.Robot;
       qd.set(0, 0, qd1);
       qd.set(1, 0, qd2);
 
-      CommonOps.subtract(H, Hprev, Hdot);
-      CommonOps.scale(1.0 / dt, Hdot);
+      CommonOps_DDRM.subtract(H, Hprev, Hdot);
+      CommonOps_DDRM.scale(1.0 / dt, Hdot);
    }
 
-   public DenseMatrix64F getH()
+   public DMatrixRMaj getH()
    {
       return H;
    }
 
-   public DenseMatrix64F getC()
+   public DMatrixRMaj getC()
    {
       return C;
    }
 
-   public DenseMatrix64F getG()
+   public DMatrixRMaj getG()
    {
       return G;
    }
 
-   public DenseMatrix64F getQd()
+   public DMatrixRMaj getQd()
    {
       return qd;
    }
 
-   public DenseMatrix64F getHdot()
+   public DMatrixRMaj getHdot()
    {
       return Hdot;
    }

@@ -35,7 +35,7 @@ public class StickRobotPhysicalProperties
       {
          RigidBodyTransform soleToAnkleFrame = new RigidBodyTransform();
 //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
-         soleToAnkleFrame.setTranslation(new Vector3D(footLength / 2.0 - footBack, 0.0, -StickRobotPhysicalProperties.ankleHeight));
+         soleToAnkleFrame.getTranslation().set(new Vector3D(footLength / 2.0 - footBack, 0.0, -StickRobotPhysicalProperties.ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
       }
    }
@@ -45,7 +45,7 @@ public class StickRobotPhysicalProperties
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
-         controlFrameToWristTransform.setTranslation(0.0, robotSide.negateIfRightSide(0.10), 0.0);
+         controlFrameToWristTransform.getTranslation().set(0.0, robotSide.negateIfRightSide(0.10), 0.0);
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
    }

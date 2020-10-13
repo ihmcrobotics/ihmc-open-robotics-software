@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -15,7 +15,7 @@ public class YoLowLevelState implements LowLevelStateReadOnly
    private YoBoolean isAccelerationValid;
    private YoBoolean isEffortValid;
 
-   public YoLowLevelState(String namePrefix, YoVariableRegistry registry)
+   public YoLowLevelState(String namePrefix, YoRegistry registry)
    {
       this.position = new YoDouble(namePrefix + "_DesiredPosition", registry);
       this.velocity = new YoDouble(namePrefix + "_DesiredVelocity", registry);

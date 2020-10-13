@@ -1,7 +1,7 @@
 package us.ihmc.avatar.testTools;
 
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,9 +22,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -181,7 +181,7 @@ public class AvatarCommonAsserts
 
    public static void assertDesiredPelvisHeightOffsetZero(YoVariableHolder scs, double epsilon)
    {
-      String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
+      String namespace = HeightOffsetHandler.class.getSimpleName();
       double offset = getDoubleYoVariable(scs, "offsetHeightAboveGroundTrajectoryOutput", namespace).getValue();
       Assert.assertEquals(0.0, offset, epsilon);
    }
@@ -214,44 +214,44 @@ public class AvatarCommonAsserts
       return new FrameVector3D(ReferenceFrame.getWorldFrame(), desiredAngularVelocity);
    }
 
-   private static Quaternion findQuat4d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Quaternion findQuat4d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findQuat4d(nameSpace, varname, "", scs);
+      return findQuat4d(namespace, varname, "", scs);
    }
 
-   private static Quaternion findQuat4d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Quaternion findQuat4d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
-      double x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble();
-      double y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble();
-      double z = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble();
-      double s = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble();
+      double x = scs.findVariable(namespace, YoGeometryNameTools.createQxName(prefix, suffix)).getValueAsDouble();
+      double y = scs.findVariable(namespace, YoGeometryNameTools.createQyName(prefix, suffix)).getValueAsDouble();
+      double z = scs.findVariable(namespace, YoGeometryNameTools.createQzName(prefix, suffix)).getValueAsDouble();
+      double s = scs.findVariable(namespace, YoGeometryNameTools.createQsName(prefix, suffix)).getValueAsDouble();
       return new Quaternion(x, y, z, s);
    }
 
-   private static Tuple3DBasics findTuple3d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Tuple3DBasics findTuple3d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findTuple3d(nameSpace, varname, "", scs);
+      return findTuple3d(namespace, varname, "", scs);
    }
 
-   private static Tuple3DBasics findTuple3d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Tuple3DBasics findTuple3d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple3DBasics tuple3d = new Point3D();
-      tuple3d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setZ(scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setX(scs.findVariable(namespace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setY(scs.findVariable(namespace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setZ(scs.findVariable(namespace, YoGeometryNameTools.createZName(prefix, suffix)).getValueAsDouble());
       return tuple3d;
    }
 
-   private static Tuple2DBasics findTuple2d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Tuple2DBasics findTuple2d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findTuple2d(nameSpace, varname, "", scs);
+      return findTuple2d(namespace, varname, "", scs);
    }
 
-   private static Tuple2DBasics findTuple2d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Tuple2DBasics findTuple2d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple2DBasics tuple2d = new Point2D();
-      tuple2d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple2d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setX(scs.findVariable(namespace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setY(scs.findVariable(namespace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
       return tuple2d;
    }
 
@@ -265,9 +265,9 @@ public class AvatarCommonAsserts
       return getYoVariable(scs, name, namespace, YoBoolean.class);
    }
 
-   private static <T extends YoVariable<T>> T getYoVariable(YoVariableHolder scs, String name, String namespace, Class<T> clazz)
+   private static <T extends YoVariable> T getYoVariable(YoVariableHolder scs, String name, String namespace, Class<T> clazz)
    {
-      YoVariable<?> uncheckedVariable = scs.getVariable(namespace, name);
+      YoVariable uncheckedVariable = scs.findVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))

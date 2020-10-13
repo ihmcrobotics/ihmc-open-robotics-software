@@ -6,14 +6,14 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPQPConstraintCalculatorTest
 {
@@ -23,7 +23,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxValueConstraint()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -45,7 +45,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxValueConstraintWithCMP()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
       indexHandler.setHasCMPFeedbackTask(true);
@@ -68,7 +68,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxValueConstraintWithInfiniteLimits()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -170,7 +170,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxRateConstraint()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -197,7 +197,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxRateConstraintWithCMP()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
       indexHandler.setHasCMPFeedbackTask(true);
@@ -225,7 +225,7 @@ public class ICPQPConstraintCalculatorTest
    @Test
    public void testFeedbackMaxRateConstraintWithInfiniteLimits()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
 
@@ -514,7 +514,7 @@ public class ICPQPConstraintCalculatorTest
       double yValueWellPastBound = maxYValue + 3.0;
 
       // test inside
-      DenseMatrix64F value = new DenseMatrix64F(2, 1);
+      DMatrixRMaj value = new DMatrixRMaj(2, 1);
       value.set(0, 0, randomXValue);
       value.set(1, 0, randomYValue);
 
@@ -701,7 +701,7 @@ public class ICPQPConstraintCalculatorTest
       double xValueWellPastLowerBound = minXValue - 3.0;
       double yValueWellPastLowerBound = minYValue - 3.0;
 
-      DenseMatrix64F value = new DenseMatrix64F(2, 1);
+      DMatrixRMaj value = new DMatrixRMaj(2, 1);
       value.set(0, 0, previousXValue);
       value.set(1, 0, previousYValue);
 
@@ -914,7 +914,7 @@ public class ICPQPConstraintCalculatorTest
       double yValueWellPastBound2 = maxYValue + 3.0 - yValueWellPastBound1;
 
       // test inside
-      DenseMatrix64F value = new DenseMatrix64F(4, 1);
+      DMatrixRMaj value = new DMatrixRMaj(4, 1);
       value.set(0, 0, randomXValue1);
       value.set(1, 0, randomYValue1);
       value.set(2, 0, randomXValue2);
@@ -1230,7 +1230,7 @@ public class ICPQPConstraintCalculatorTest
 
 
 
-      DenseMatrix64F value = new DenseMatrix64F(4, 1);
+      DMatrixRMaj value = new DMatrixRMaj(4, 1);
       value.set(0, 0, previousXValue1);
       value.set(1, 0, previousYValue1);
       value.set(2, 0, previousXValue2);
@@ -1473,32 +1473,32 @@ public class ICPQPConstraintCalculatorTest
       MatrixTestTools.assertMatrixEquals(prefix + " bineq is not equal.", expected.bineq, actual.bineq, epsilon);
    }
 
-   private static void assertInequalityHolds(ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
+   private static void assertInequalityHolds(ICPInequalityInput inequalityToTest, DMatrixRMaj variables)
    {
       assertInequalityHolds("", inequalityToTest, variables);
    }
 
-   private static void assertInequalityHolds(String prefix, ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
+   private static void assertInequalityHolds(String prefix, ICPInequalityInput inequalityToTest, DMatrixRMaj variables)
    {
-      DenseMatrix64F constraintValue = new DenseMatrix64F(inequalityToTest.getNumberOfConstraints(), 1);
+      DMatrixRMaj constraintValue = new DMatrixRMaj(inequalityToTest.getNumberOfConstraints(), 1);
 
-      CommonOps.mult(inequalityToTest.Aineq, variables, constraintValue);
+      CommonOps_DDRM.mult(inequalityToTest.Aineq, variables, constraintValue);
       assertVectorLessThan(prefix, constraintValue, inequalityToTest.bineq);
    }
 
-   private static void assertInequalityFails(String prefix, ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
+   private static void assertInequalityFails(String prefix, ICPInequalityInput inequalityToTest, DMatrixRMaj variables)
    {
-      DenseMatrix64F constraintValue = new DenseMatrix64F(inequalityToTest.getNumberOfConstraints(), 1);
+      DMatrixRMaj constraintValue = new DMatrixRMaj(inequalityToTest.getNumberOfConstraints(), 1);
 
-      CommonOps.mult(inequalityToTest.Aineq, variables, constraintValue);
+      CommonOps_DDRM.mult(inequalityToTest.Aineq, variables, constraintValue);
       assertVectorNotLessThan(prefix, constraintValue, inequalityToTest.bineq);
    }
 
-   private static void assertInequalityEquals(String prefix, ICPInequalityInput inequalityToTest, DenseMatrix64F variables)
+   private static void assertInequalityEquals(String prefix, ICPInequalityInput inequalityToTest, DMatrixRMaj variables)
    {
-      DenseMatrix64F constraintValue = new DenseMatrix64F(inequalityToTest.getNumberOfConstraints(), 1);
+      DMatrixRMaj constraintValue = new DMatrixRMaj(inequalityToTest.getNumberOfConstraints(), 1);
 
-      CommonOps.mult(inequalityToTest.Aineq, variables, constraintValue);
+      CommonOps_DDRM.mult(inequalityToTest.Aineq, variables, constraintValue);
 
       boolean hasValueAtBound = false;
       for (int i = 0; i < constraintValue.numRows; i++)
@@ -1510,7 +1510,7 @@ public class ICPQPConstraintCalculatorTest
       assertTrue(prefix, hasValueAtBound);
    }
 
-   private static void assertVectorLessThan(String prefix, DenseMatrix64F vector, DenseMatrix64F upperBound)
+   private static void assertVectorLessThan(String prefix, DMatrixRMaj vector, DMatrixRMaj upperBound)
    {
       for (int i = 0; i < vector.numRows; i++)
       {
@@ -1519,7 +1519,7 @@ public class ICPQPConstraintCalculatorTest
       }
    }
 
-   private static void assertVectorNotLessThan(String prefix, DenseMatrix64F vector, DenseMatrix64F upperBound)
+   private static void assertVectorNotLessThan(String prefix, DMatrixRMaj vector, DMatrixRMaj upperBound)
    {
       boolean allLessThan = true;
       for (int i = 0; i < vector.numRows; i++)

@@ -18,14 +18,14 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class PelvisOrientationManager
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final StateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
    private final YoEnum<PelvisOrientationControlMode> requestedState;
@@ -37,7 +37,7 @@ public class PelvisOrientationManager
 
    public PelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                    LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                   YoVariableRegistry parentRegistry)
+                                   YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       YoDouble yoTime = controllerToolbox.getYoTime();

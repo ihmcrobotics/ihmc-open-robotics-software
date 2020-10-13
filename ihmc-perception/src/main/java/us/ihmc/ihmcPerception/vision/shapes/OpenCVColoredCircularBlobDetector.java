@@ -340,8 +340,8 @@ public class OpenCVColoredCircularBlobDetector
             Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
          }
 
-         colorImagePanel.setBufferedImageSafe(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
-         filterImagePanel.setBufferedImageSafe(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat()));
+         colorImagePanel.setImageUI(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
+         filterImagePanel.setImageUI(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat()));
       }
 
       System.exit(0);

@@ -11,6 +11,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -18,6 +20,8 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
+import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.ConcaveHullViewer.ConcaveHullViewerInput;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 
@@ -38,6 +42,8 @@ public class MultipleConcaveHullViewer extends AnimationTimer
    private static final CategoryTheme Concave = apiFactory.createCategoryTheme("Concave");
    private static final CategoryTheme Hull = apiFactory.createCategoryTheme("Hull");
    private static final CategoryTheme Pocket = apiFactory.createCategoryTheme("Pocket");
+   private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
+   private static final CategoryTheme Processed = apiFactory.createCategoryTheme("Processed");
 
    private static final TypedTopicTheme<Boolean> View = apiFactory.createTypedTopicTheme("view");
 
@@ -48,7 +54,8 @@ public class MultipleConcaveHullViewer extends AnimationTimer
    public static final Topic<Boolean> ViewConstraintEdges = Root.child(ConcaveHullFactory).child(Constraint).child(Edge).topic(View);
    public static final Topic<Boolean> ViewOrderedBorderEdges = Root.child(ConcaveHullFactory).child(Ordered).child(Border).child(Edge).topic(View);
    public static final Topic<Boolean> ViewPriorityQueue = Root.child(ConcaveHullFactory).child(PriorityQueue).topic(View);
-   public static final Topic<Boolean> ViewConcaveHull = Root.child(ConcaveHullFactory).child(Concave).child(Hull).topic(View);
+   public static final Topic<Boolean> ViewRawConcaveHull = Root.child(ConcaveHullFactory).child(Concave).child(Hull).child(Raw).topic(View);
+   public static final Topic<Boolean> ViewProcessedConcaveHull = Root.child(ConcaveHullFactory).child(Concave).child(Hull).child(Processed).topic(View);
    public static final Topic<Boolean> ViewConcavePockets = Root.child(ConcaveHullFactory).child(Concave).child(Pocket).topic(View);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
@@ -64,8 +71,9 @@ public class MultipleConcaveHullViewer extends AnimationTimer
    private final BooleanProperty showConstraintEdges = new SimpleBooleanProperty(this, "viewConstraintEdges", false);
    private final BooleanProperty showOrderedBorderEdges = new SimpleBooleanProperty(this, "viewOrderedBorderEdges", true);
    private final BooleanProperty showPriorityQueue = new SimpleBooleanProperty(this, "viewPriorityQueue", false);
-   private final BooleanProperty showConcaveHull = new SimpleBooleanProperty(this, "viewConcaveHull", false);
+   private final BooleanProperty showRawConcaveHull = new SimpleBooleanProperty(this, "viewConcaveHull", false);
    private final BooleanProperty showConcavePockets = new SimpleBooleanProperty(this, "viewConcavePockets", false);
+   private final BooleanProperty showProcessedConcaveHull = new SimpleBooleanProperty(this, "viewConcaveHull", false);
 
    public MultipleConcaveHullViewer(JavaFXMessager messager)
    {
@@ -76,8 +84,9 @@ public class MultipleConcaveHullViewer extends AnimationTimer
       messager.bindBidirectional(ViewConstraintEdges, showConstraintEdges, true);
       messager.bindBidirectional(ViewOrderedBorderEdges, showOrderedBorderEdges, true);
       messager.bindBidirectional(ViewPriorityQueue, showPriorityQueue, true);
-      messager.bindBidirectional(ViewConcaveHull, showConcaveHull, true);
+      messager.bindBidirectional(ViewRawConcaveHull, showRawConcaveHull, true);
       messager.bindBidirectional(ViewConcavePockets, showConcavePockets, true);
+      messager.bindBidirectional(ViewProcessedConcaveHull, showProcessedConcaveHull, true);
    }
 
    @Override
@@ -100,8 +109,9 @@ public class MultipleConcaveHullViewer extends AnimationTimer
             newViewer.viewConstraintEdgesProperty().bindBidirectional(showConstraintEdges);
             newViewer.viewOrderedBorderEdgesProperty().bindBidirectional(showOrderedBorderEdges);
             newViewer.viewPriorityQueueProperty().bindBidirectional(showPriorityQueue);
-            newViewer.viewConcaveHullProperty().bindBidirectional(showConcaveHull);
+            newViewer.viewRawConcaveHullProperty().bindBidirectional(showRawConcaveHull);
             newViewer.viewConcavePocketsProperty().bindBidirectional(showConcavePockets);
+            newViewer.viewProcessedConcaveHullProperty().bindBidirectional(showProcessedConcaveHull);
          }
       }
 
@@ -134,7 +144,10 @@ public class MultipleConcaveHullViewer extends AnimationTimer
 
    public static ConcaveHullViewerInput toConcaveHullViewerInput(Polygonizer.Output polygonizerOutput)
    {
-      return new ConcaveHullViewerInput(OcTreeMeshBuilder.getRegionColor(polygonizerOutput.getInput().getId()),
-                                        polygonizerOutput.getInput().getTransformToWorld(), polygonizerOutput.getConcaveHullFactoryResult());
+      Color color = OcTreeMeshBuilder.getRegionColor(polygonizerOutput.getInput().getId());
+      RigidBodyTransform transformToWorld = polygonizerOutput.getInput().getTransformToWorld();
+      ConcaveHullFactoryResult concaveHullFactoryResult = polygonizerOutput.getConcaveHullFactoryResult();
+      ConcaveHullCollection processedConcaveHullCollection = polygonizerOutput.getProcessedConcaveHullCollection();
+      return new ConcaveHullViewerInput(color, transformToWorld, concaveHullFactoryResult, processedConcaveHullCollection);
    }
 }

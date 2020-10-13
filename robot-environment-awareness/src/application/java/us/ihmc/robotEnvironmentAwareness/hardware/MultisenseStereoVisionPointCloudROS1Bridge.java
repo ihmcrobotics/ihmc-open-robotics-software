@@ -23,7 +23,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -35,7 +35,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
@@ -59,7 +59,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
       rosMainNode.execute();
 
-      stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+      stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD);
 
       commandScanner = new Scanner(System.in);
       Runnable inputReader = new Runnable()

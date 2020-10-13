@@ -100,15 +100,15 @@ public class PlanarRegionIntersectionCalculator
             {
                double alphaCurrent = currentIntersectionSegment.percentageAlongLineSegment(closestPointOnCurrentLine);
                if (alphaCurrent < 0.0)
-                  currentIntersectionSegment.setFirstEndpoint(closestPointOnCurrentLine);
+                  currentIntersectionSegment.getFirstEndpoint().set(closestPointOnCurrentLine);
                else if (alphaCurrent > 1.0)
-                  currentIntersectionSegment.setSecondEndpoint(closestPointOnCurrentLine);
+                  currentIntersectionSegment.getSecondEndpoint().set(closestPointOnCurrentLine);
 
                double alphaOther = otherIntersectionSegment.percentageAlongLineSegment(closestPointOnOtherLine);
                if (alphaOther < 0.0)
-                  otherIntersectionSegment.setFirstEndpoint(closestPointOnOtherLine);
+                  otherIntersectionSegment.getFirstEndpoint().set(closestPointOnOtherLine);
                else if (alphaOther > 1.0)
-                  otherIntersectionSegment.setSecondEndpoint(closestPointOnOtherLine);
+                  otherIntersectionSegment.getSecondEndpoint().set(closestPointOnOtherLine);
             }
          }
       }

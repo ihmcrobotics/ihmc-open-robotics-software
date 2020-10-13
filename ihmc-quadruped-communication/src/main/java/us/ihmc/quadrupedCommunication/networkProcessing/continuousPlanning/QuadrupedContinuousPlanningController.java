@@ -23,7 +23,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -96,7 +96,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    public QuadrupedContinuousPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
-                                                YoVariableRegistry parentRegistry)
+                                                YoRegistry parentRegistry)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 

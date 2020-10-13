@@ -50,6 +50,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       case WALKING:
          return getDesiredJointBehaviorForWalking();
       case DO_NOTHING_BEHAVIOR:
+         return getDesiredJointBehaviorForDoNothing();
       case STAND_PREP_STATE:
       case STAND_READY:
       case STAND_TRANSITION_STATE:
@@ -218,6 +219,24 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, JointDesiredControlMode.POSITION, 0.0, 0.0);
          configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
       }
+
+      return behaviors;
+   }
+
+
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
+   {
+      if (target != RobotTarget.SCS)
+         return getDesiredJointBehaviorForHangingAround();
+
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+
+      List<String> allJoint = new ArrayList<String>();
+      allJoint.addAll(jointMap.getSpineJointNamesAsStrings());
+      allJoint.addAll(jointMap.getNeckJointNamesAsStrings());
+      allJoint.addAll(jointMap.getArmJointNamesAsStrings());
+      allJoint.addAll(jointMap.getLegJointNamesAsStrings());
+      behaviors.add(new GroupParameter<JointDesiredBehaviorReadOnly>("wholeBody", new JointDesiredBehavior(JointDesiredControlMode.EFFORT), allJoint));
 
       return behaviors;
    }

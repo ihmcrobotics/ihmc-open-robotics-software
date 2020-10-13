@@ -131,7 +131,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          Quaternion calculatedRotationError = new Quaternion();
-         totalError.getRotation(calculatedRotationError);
+         calculatedRotationError.set(totalError.getRotation());
          Quaternion actualError = orientationOffsets[i];
          
          assertTrue(calculatedRotationError.epsilonEquals(actualError, 1e-4));
@@ -190,11 +190,11 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          
          Point3D calculatedTranslationError = new Point3D();
-         totalError.getTranslation(calculatedTranslationError);
+         calculatedTranslationError.set(totalError.getTranslation());
          Vector3D actualTranslationError = translationOffsets[i];
          
          Quaternion calculatedRotationError = new Quaternion();
-         totalError.getRotation(calculatedRotationError);
+         calculatedRotationError.set(totalError.getRotation());
          Quaternion actualRotationError = orientationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualTranslationError, 1e-4));
@@ -253,7 +253,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          Point3D calculatedTranslationError = new Point3D();
-         totalError.getTranslation(calculatedTranslationError);
+         calculatedTranslationError.set(totalError.getTranslation());
          Vector3D actualError = translationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualError, 1e-4));
@@ -274,7 +274,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform(new Quaternion(), new Point3D(1.0, 1.0, 1.0));
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setPosition(1.0, 1.0, 1.0);
+      expectedPose.getPosition().set(1.0, 1.0, 1.0);
       
       TimeStampedTransform3D localizationTimeStampedTransformInWorld = new TimeStampedTransform3D(localizationRigidBody, 1);
       outdatedPoseToUpToDateReferenceFrameUpdater.updateLocalizationTransform(localizationTimeStampedTransformInWorld);
@@ -292,12 +292,12 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    public void testNoDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D upToDatePoseInPresent = new FramePose3D(worldFrame);
-      upToDatePoseInPresent.setPosition(1.0, 1.0, 1.0);
-      upToDatePoseInPresent.setOrientationYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
+      upToDatePoseInPresent.getPosition().set(1.0, 1.0, 1.0);
+      upToDatePoseInPresent.getOrientation().setYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
       
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setOrientationYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
-      expectedPose.setPosition(1.0, 1.0, 1.0);
+      expectedPose.getOrientation().setYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
+      expectedPose.getPosition().set(1.0, 1.0, 1.0);
       
       RigidBodyTransform stateEstimatorRigidBody = new RigidBodyTransform();
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform();
@@ -328,8 +328,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    public void testKnownDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
-      stateEstimatorPresent.setPosition(2.0, 22.0, 1.0);
-      stateEstimatorPresent.setOrientationYawPitchRoll(Math.PI, Math.PI / 32.0, Math.PI / 16.0);
+      stateEstimatorPresent.getPosition().set(2.0, 22.0, 1.0);
+      stateEstimatorPresent.getOrientation().setYawPitchRoll(Math.PI, Math.PI / 32.0, Math.PI / 16.0);
       PoseReferenceFrame stateEsimatorReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", stateEstimatorPresent);
 
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(10,
@@ -338,16 +338,16 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       //create pose in past
       RigidBodyTransform stateEstimatorRigidBodyTransform = new RigidBodyTransform();
       FramePose3D stateEstimatorInPast = new FramePose3D(worldFrame);
-      stateEstimatorInPast.setPosition(1.0, 20.0, 0.8);
-      stateEstimatorInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
+      stateEstimatorInPast.getPosition().set(1.0, 20.0, 0.8);
+      stateEstimatorInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
       stateEstimatorInPast.get(stateEstimatorRigidBodyTransform);
       outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(stateEstimatorRigidBodyTransform, 1);
 
       //create localization pose in past
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform();
       FramePose3D localizationInPast = new FramePose3D(worldFrame);
-      localizationInPast.setPosition(1.5, 21.8, 1.1);
-      localizationInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 16.0, Math.PI / 4);
+      localizationInPast.getPosition().set(1.5, 21.8, 1.1);
+      localizationInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 16.0, Math.PI / 4);
       localizationInPast.get(localizationRigidBody);
       
       TimeStampedTransform3D localizationTimeStampedTransformInWorld = new TimeStampedTransform3D(localizationRigidBody, 1);
@@ -358,8 +358,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       calculatedPose.changeFrame(worldFrame);
       
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), (5.0 * Math.PI) / 64.0, (3.0 * Math.PI) / 16.0);
-      expectedPose.setPosition(2.5, 23.8, 1.3);
+      expectedPose.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), (5.0 * Math.PI) / 64.0, (3.0 * Math.PI) / 16.0);
+      expectedPose.getPosition().set(2.5, 23.8, 1.3);
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + (3.0 * Math.PI) / 64.0 + " x: " + (Math.PI / 8.0));
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
@@ -370,8 +370,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    public void testKnownTranslationAndYawDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
-      stateEstimatorPresent.setPosition(2.0, 22.0, 1.0);
-      stateEstimatorPresent.setOrientationYawPitchRoll(Math.PI, Math.PI / 64.0, Math.PI / 8.0);
+      stateEstimatorPresent.getPosition().set(2.0, 22.0, 1.0);
+      stateEstimatorPresent.getOrientation().setYawPitchRoll(Math.PI, Math.PI / 64.0, Math.PI / 8.0);
       PoseReferenceFrame stateEsimatorReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", stateEstimatorPresent);
       
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(10,
@@ -380,16 +380,16 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       //create pose in past
       RigidBodyTransform stateEstimatorRigidBodyTransform = new RigidBodyTransform();
       FramePose3D stateEstimatorInPast = new FramePose3D(worldFrame);
-      stateEstimatorInPast.setPosition(1.0, 20.0, 0.8);
-      stateEstimatorInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
+      stateEstimatorInPast.getPosition().set(1.0, 20.0, 0.8);
+      stateEstimatorInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
       stateEstimatorInPast.get(stateEstimatorRigidBodyTransform);
       outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(stateEstimatorRigidBodyTransform, 1);
       
       //create localization pose in past
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform();
       FramePose3D localizationInPast = new FramePose3D(worldFrame);
-      localizationInPast.setPosition(1.5, 21.8, 1.1);
-      localizationInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 64.0, Math.PI / 8.0);
+      localizationInPast.getPosition().set(1.5, 21.8, 1.1);
+      localizationInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 64.0, Math.PI / 8.0);
       localizationInPast.get(localizationRigidBody);
       
       TimeStampedTransform3D localizationTimeStampedTransformInWorld = new TimeStampedTransform3D(localizationRigidBody, 1);
@@ -400,8 +400,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       calculatedPose.changeFrame(worldFrame);
       
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
-      expectedPose.setPosition(2.5, 23.8, 1.3);
+      expectedPose.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
+      expectedPose.getPosition().set(2.5, 23.8, 1.3);
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + 0.0 + " x: " + 0.0);
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
@@ -414,8 +414,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    public void testKnownTranslationYawAndPitchDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
-      stateEstimatorPresent.setPosition(2.0, 22.0, 1.0);
-      stateEstimatorPresent.setOrientationYawPitchRoll(Math.PI, Math.PI / 8.0, Math.PI / 8.0);
+      stateEstimatorPresent.getPosition().set(2.0, 22.0, 1.0);
+      stateEstimatorPresent.getOrientation().setYawPitchRoll(Math.PI, Math.PI / 8.0, Math.PI / 8.0);
       PoseReferenceFrame stateEsimatorReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", stateEstimatorPresent);
       
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(10,
@@ -424,16 +424,16 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       //create pose in past
       RigidBodyTransform stateEstimatorRigidBodyTransform = new RigidBodyTransform();
       FramePose3D stateEstimatorInPast = new FramePose3D(worldFrame);
-      stateEstimatorInPast.setPosition(1.0, 20.0, 0.8);
-      stateEstimatorInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
+      stateEstimatorInPast.getPosition().set(1.0, 20.0, 0.8);
+      stateEstimatorInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), Math.PI / 64.0, Math.PI / 8.0);
       stateEstimatorInPast.get(stateEstimatorRigidBodyTransform);
       outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(stateEstimatorRigidBodyTransform, 1);
       
       //create localization pose in past
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform();
       FramePose3D localizationInPast = new FramePose3D(worldFrame);
-      localizationInPast.setPosition(1.5, 21.8, 1.1);
-      localizationInPast.setOrientationYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 32.0, Math.PI / 8.0);
+      localizationInPast.getPosition().set(1.5, 21.8, 1.1);
+      localizationInPast.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 32.0), Math.PI / 32.0, Math.PI / 8.0);
       localizationInPast.get(localizationRigidBody);
       
       TimeStampedTransform3D localizationTimeStampedTransformInWorld = new TimeStampedTransform3D(localizationRigidBody, 1);
@@ -444,8 +444,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       calculatedPose.changeFrame(worldFrame);
       
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setOrientationYawPitchRoll(Math.PI - (Math.PI / 64.0), 9.0 * Math.PI / 64.0, Math.PI / 8.0);
-      expectedPose.setPosition(2.5, 23.8, 1.3);
+      expectedPose.getOrientation().setYawPitchRoll(Math.PI - (Math.PI / 64.0), 9.0 * Math.PI / 64.0, Math.PI / 8.0);
+      expectedPose.getPosition().set(2.5, 23.8, 1.3);
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + Math.PI / 32.0 + " x: " + 0.0);
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
@@ -468,7 +468,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       RigidBodyTransform localizationRigidBody = new RigidBodyTransform();
       localizationRigidBody.setRotationEulerAndZeroTranslation(Math.PI/8, Math.PI/8, Math.PI/8);
       FramePose3D expectedPose = new FramePose3D(worldFrame);
-      expectedPose.setOrientationYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
+      expectedPose.getOrientation().setYawPitchRoll(Math.PI/8, Math.PI/8, Math.PI/8);
       
       TimeStampedTransform3D localizationTimeStampedTransformInWorld = new TimeStampedTransform3D(localizationRigidBody, 1);
       outdatedPoseToUpToDateReferenceFrameUpdater.updateLocalizationTransform(localizationTimeStampedTransformInWorld);
@@ -590,8 +590,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       
       RigidBodyTransform upToDateTransformInPast_Translation = new RigidBodyTransform(upToDateTimeStampedTransformInPast.getTransform3D());
       RigidBodyTransform upToDateTransformInPast_Rotation = new RigidBodyTransform(upToDateTransformInPast_Translation);
-      upToDateTransformInPast_Translation.setRotationToZero();
-      upToDateTransformInPast_Rotation.setTranslationToZero();
+      upToDateTransformInPast_Translation.getRotation().setToZero();
+      upToDateTransformInPast_Rotation.getTranslation().setToZero();
       
       RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
       RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);
@@ -608,8 +608,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private RigidBodyTransform generateRandomUpToDateTransforms(Random random)
    {
       RigidBodyTransform upToDateTransform = new RigidBodyTransform();
-      upToDateTransform.setTranslation(RandomGeometry.nextVector3D(random));
-      upToDateTransform.setRotation(RandomGeometry.nextQuaternion(random));
+      upToDateTransform.getTranslation().set(RandomGeometry.nextVector3D(random));
+      upToDateTransform.getRotation().set(RandomGeometry.nextQuaternion(random));
       return upToDateTransform;
    }
 

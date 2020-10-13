@@ -27,8 +27,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 public class ConcaveHullTools
 {
    /**
-    * Returns true only if removing the vertex would generate a kink in the concave polygon.
-    * Meaning, it would cause several edges to cross each other.
+    * Returns true only if removing the vertex would generate a kink in the concave polygon. Meaning,
+    * it would cause several edges to cross each other.
     */
    public static boolean isVertexPreventingKink(int vertexIndex, List<? extends Point2DReadOnly> concaveHullVertices)
    {
@@ -44,8 +44,11 @@ public class ConcaveHullTools
 
       while (currentIndex != vertexPreviousIndex)
       {
-         if (EuclidGeometryTools.isPoint2DInsideTriangleABC(concaveHullVertices.get(currentIndex), a, b, c))
-            return true;
+         if (EuclidGeometryTools.triangleArea(a, b, c) > 1.0e-12)
+         {
+            if (EuclidGeometryTools.isPoint2DInsideTriangleABC(concaveHullVertices.get(currentIndex), a, b, c))
+               return true;
+         }
          currentIndex = next(currentIndex, concaveHullVertices);
       }
 
@@ -409,7 +412,7 @@ public class ConcaveHullTools
       Point2DReadOnly previousVertex = concaveHullVertices.get(previous(vertexIndex, concaveHullVertices));
       Point2DReadOnly nextVertex = concaveHullVertices.get(next(vertexIndex, concaveHullVertices));
 
-      return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(vertex, previousVertex, nextVertex);
+      return !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(vertex, previousVertex, nextVertex);
    }
 
    public static boolean isAlmostConvexAtVertex(int vertexIndex, double angleTolerance, List<? extends Point2DReadOnly> concaveHullVertices)
@@ -460,17 +463,17 @@ public class ConcaveHullTools
    }
 
    /**
-    * Find the closest edge to a vertex that is visible from the inside of the polygon. In other
-    * words, the line that goes from the given vertex to the computed closestPoint is entirely
-    * inside the polygon.
+    * Find the closest edge to a vertex that is visible from the inside of the polygon. In other words,
+    * the line that goes from the given vertex to the computed closestPoint is entirely inside the
+    * polygon.
     * 
-    * @param vertexIndex the close edge to this vertex.
-    * @param deadIndexRegion the search algorithm starts at
-    *           {@code vertexIndex + deadIndexRegion + 1} and ends at
-    *           {@code vertexIndex - deadIndexRegion - 1}
+    * @param vertexIndex         the close edge to this vertex.
+    * @param deadIndexRegion     the search algorithm starts at
+    *                            {@code vertexIndex + deadIndexRegion + 1} and ends at
+    *                            {@code vertexIndex - deadIndexRegion - 1}
     * @param concaveHullVertices the vertices of the concave hull on which the search is to be
-    *           performed.
-    * @param closestPointToPack coordinates of the closest point found.
+    *                            performed.
+    * @param closestPointToPack  coordinates of the closest point found.
     * @return the index of the closest edge first vertex.
     */
    public static int findInnerClosestEdgeToVertex(int vertexIndex, int deadIndexRegion, List<? extends Point2DReadOnly> concaveHullVertices,

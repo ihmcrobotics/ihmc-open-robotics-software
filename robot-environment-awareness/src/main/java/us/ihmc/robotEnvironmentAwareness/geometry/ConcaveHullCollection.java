@@ -21,6 +21,11 @@ public class ConcaveHullCollection implements Iterable<ConcaveHull>
       add(concaveHull);
    }
 
+   public ConcaveHullCollection(ConcaveHull... concaveHulls)
+   {
+      addAll(concaveHulls);
+   }
+
    public ConcaveHullCollection(List<? extends Point2DReadOnly> concaveHullVertices)
    {
       add(concaveHullVertices);
@@ -33,17 +38,39 @@ public class ConcaveHullCollection implements Iterable<ConcaveHull>
 
    public boolean add(List<? extends Point2DReadOnly> newConcaveHullVertices)
    {
-      return add(new ConcaveHull(newConcaveHullVertices));
+      if (newConcaveHullVertices == null)
+         return false;
+      else
+         return add(new ConcaveHull(newConcaveHullVertices));
    }
 
    public boolean add(ConcaveHull newConcaveHull)
    {
-      return concaveHulls.add(newConcaveHull);
+      if (newConcaveHull == null)
+         return false;
+      else
+         return concaveHulls.add(newConcaveHull);
    }
 
+   public boolean addAll(ConcaveHull... newConcaveHulls)
+   {
+      if (newConcaveHulls == null)
+         return false;
+      
+      boolean modified = false;
+      
+      for (ConcaveHull concaveHull : newConcaveHulls)
+         modified |= add(concaveHull);
+      
+      return modified;
+   }
+   
    public boolean addAll(ConcaveHullCollection other)
    {
-      return concaveHulls.addAll(other.concaveHulls);
+      if (other == null)
+         return false;
+      else
+         return concaveHulls.addAll(other.concaveHulls);
    }
 
    public boolean remove(ConcaveHull newConcaveHull)
@@ -70,6 +97,15 @@ public class ConcaveHullCollection implements Iterable<ConcaveHull>
    public Iterator<ConcaveHull> iterator()
    {
       return concaveHulls.iterator();
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof ConcaveHullCollection)
+         return concaveHulls.equals(((ConcaveHullCollection) object).concaveHulls);
+      else
+         return false;
    }
 
    @Override

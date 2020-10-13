@@ -24,7 +24,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -44,16 +44,16 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private ParameterTree params;
    private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
 
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, Ros2Node ros2Node)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2Node ros2Node)
    {
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            MultisenseParameterPacket.class,
-                                           ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/multisense_parameter",
+                                           ROS2Tools.IHMC_TOPIC_PREFIX + "/multisense_parameter",
                                            s -> receivedPacket(s.takeNextData()));
-      publisher = ROS2Tools.createPublisher(ros2Node, MultisenseParameterPacket.class, ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/initial_multisense_parameter");
+      publisher = ROS2Tools.createPublisher(ros2Node, MultisenseParameterPacket.class, ROS2Tools.IHMC_TOPIC_PREFIX + "/initial_multisense_parameter");
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)
@@ -121,8 +121,8 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
 
          Process process = builder.start();
          LogTools.info("Spindle speed shellout process started");
-         new ProcessStreamGobbler("ROS spindle speed shellout err", process.getErrorStream(), System.err).start();
-         new ProcessStreamGobbler("ROS spindle speed shellout out", process.getInputStream(), printStream).start();
+         new ProcessStreamGobbler("ROS spindle speed shellout err", process, process.getErrorStream(), System.err).start();
+         new ProcessStreamGobbler("ROS spindle speed shellout out", process, process.getInputStream(), printStream).start();
          process.waitFor();
          LogTools.info("Spindle speed shellout process finished");
 

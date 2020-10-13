@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -27,17 +27,17 @@ public class ConstantOrientationTrajectoryGeneratorTest
    private ReferenceFrame referenceFrame;
    private OrientationProvider orientationProvider;
    private static double finalTime = 10.0;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private FrameQuaternion orientation;
 
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       orientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(orientation);
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
    }
 
    @AfterEach

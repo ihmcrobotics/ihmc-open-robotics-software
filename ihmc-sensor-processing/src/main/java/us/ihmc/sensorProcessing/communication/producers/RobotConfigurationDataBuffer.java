@@ -11,6 +11,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -29,7 +30,6 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
  */
 public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigurationData>
 {
-   private static final boolean DEBUG = false;
    final static int BUFFER_SIZE = 1000;
 
    private final RobotConfigurationData[] configurationBuffer = new RobotConfigurationData[BUFFER_SIZE];
@@ -71,10 +71,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       long currentTimestamp;
       while ((currentTimestamp = getNewestTimestamp()) < timestamp)
       {
-         if (DEBUG)
-         {
-            System.out.println("Current timestamp: " + currentTimestamp + ", waiting for " + timestamp);
-         }
+         LogTools.debug("Current timestamp: {}, waiting for {}", currentTimestamp, timestamp);
 
          try
          {
@@ -189,7 +186,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       Vector3D translation = robotConfigurationData.getRootTranslation();
-      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
+      rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = robotConfigurationData.getRootOrientation();
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 

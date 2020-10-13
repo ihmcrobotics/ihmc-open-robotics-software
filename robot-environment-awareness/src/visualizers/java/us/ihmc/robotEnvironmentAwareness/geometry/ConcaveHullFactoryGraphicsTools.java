@@ -50,12 +50,12 @@ public class ConcaveHullFactoryGraphicsTools
       return REAGraphics3DTools.triangles(borderTriangles, REAGraphics3DTools.rainbowColorSupplier(random));
    }
 
-   public static MeshView orderedBorderEdgesToRainbowMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult)
+   public static MeshView orderedBorderEdgesToRainbowMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult, double lineThickness)
    {
-      return orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult, 0.0, 240.0, 0.2, 1.0, 0.9, 0.2);
+      return orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult, lineThickness, 0.0, 240.0, 0.2, 1.0, 0.9, 0.2);
    }
 
-   public static MeshView orderedBorderEdgesToRainbowMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult,
+   public static MeshView orderedBorderEdgesToRainbowMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult, double lineThickness,
                                                                double hullStartHue, double hullEndHue, double edgeStartBrigthness, double edgeEndBrightness,
                                                                double firstHullSaturation, double lastHullSaturation)
    {
@@ -96,7 +96,7 @@ public class ConcaveHullFactoryGraphicsTools
 
             Color startColor = Color.hsb(lineHue, lineSat, edgeStartBrigthness);
             Color endColor = Color.hsb(lineHue, lineSat, edgeEndBrightness);
-            meshBuilder.addLine(edge.getFirstEndpoint(), edge.getSecondEndpoint(), 0.002, startColor, endColor);
+            meshBuilder.addLine(edge.getFirstEndpoint(), edge.getSecondEndpoint(), lineThickness, startColor, endColor);
          }
       }
 

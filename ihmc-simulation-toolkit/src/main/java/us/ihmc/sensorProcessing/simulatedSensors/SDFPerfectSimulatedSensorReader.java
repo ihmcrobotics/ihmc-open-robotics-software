@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly
@@ -41,7 +41,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
    private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
@@ -106,7 +106,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -195,7 +195,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.normalizeRotationPart();
+      temporaryRootToWorldTransform.getRotation().normalize();
       rootJoint.setJointConfiguration(temporaryRootToWorldTransform);
    }
 

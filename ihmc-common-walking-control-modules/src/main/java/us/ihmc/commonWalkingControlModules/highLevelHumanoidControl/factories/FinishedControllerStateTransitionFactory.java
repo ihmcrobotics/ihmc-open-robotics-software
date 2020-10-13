@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FinishedControllerStateTransitionFactory<E extends Enum<E>> implements ControllerStateTransitionFactory<E>
 {
@@ -45,7 +45,7 @@ public class FinishedControllerStateTransitionFactory<E extends Enum<E>> impleme
    /** {@inheritDoc} */
    @Override
    public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends State> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                        YoVariableRegistry parentRegistry)
+                                                        YoRegistry parentRegistry)
    {
       if (stateTransition == null)
       { // TODO When the lambda is changed to a method reference, Gradle throws an exception when compiling the code somehow, while Eclipse/IntelliJ are both fine with it...

@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticParallelTask extends DiagnosticTask
@@ -112,7 +112,7 @@ public class DiagnosticParallelTask extends DiagnosticTask
    }
 
    @Override
-   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   public void attachParentYoVariableRegistry(YoRegistry parentRegistry)
    {
       for (int i = 0; i < diagnosticTasks.length; i++)
          diagnosticTasks[i].attachParentYoVariableRegistry(parentRegistry);

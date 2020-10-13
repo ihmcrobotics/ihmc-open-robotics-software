@@ -158,7 +158,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       if (scs != null)
       {
          scs.gotoInPointNow();
-         scs.tick(2);
+         scs.tickAndReadFromBuffer(2);
          ThreadTools.sleep(100L);
          scs.setInPoint();
          ThreadTools.sleep(100L);

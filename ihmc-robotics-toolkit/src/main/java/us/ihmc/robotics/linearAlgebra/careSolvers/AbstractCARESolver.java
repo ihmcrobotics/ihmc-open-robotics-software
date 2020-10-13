@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
@@ -9,37 +10,37 @@ import us.ihmc.matrixlib.NativeCommonOps;
  */
 public abstract class AbstractCARESolver implements CARESolver
 {
-   private final DenseMatrix64F Rinv = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj Rinv = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F RinvSTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F SRinvSTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F RinvSTransposeC = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F AHat = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F QHat = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F BTranspose = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj RinvSTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj SRinvSTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj RinvSTransposeC = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj AHat = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj QHat = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj BTranspose = new DMatrixRMaj(0, 0);
 
    protected int n;
-   protected final DenseMatrix64F M = new DenseMatrix64F(0, 0);
-   protected final DenseMatrix64F A = new DenseMatrix64F(0, 0);
-   protected final DenseMatrix64F E = new DenseMatrix64F(0, 0);
-   protected final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
+   protected final DMatrixRMaj M = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj A = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj E = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj Q = new DMatrixRMaj(0, 0);
    protected boolean hasE = false;
 
-   protected final DenseMatrix64F P = new DenseMatrix64F(0, 0);
+   protected final DMatrixRMaj P = new DMatrixRMaj(0, 0);
 
    protected boolean isUpToDate = false;
 
    /** {inheritDoc} */
    @Override
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S)
+   public void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R, DMatrixRMaj S)
    {
       int m = Rinv.getNumRows();
       int n = B.getNumRows();
 
 
       BTranspose.set(B);
-      CommonOps.transpose(BTranspose);
+      CommonOps_DDRM.transpose(BTranspose);
 
       Rinv.reshape(m, m);
       M.reshape(n, n);
@@ -47,9 +48,9 @@ public abstract class AbstractCARESolver implements CARESolver
       CARETools.computeM(BTranspose, R, Rinv, M);
 
       // A - B R^-1 S' C
-      DenseMatrix64F ALocal;
+      DMatrixRMaj ALocal;
       // C' Q C - C' S R^-1 S' C
-      DenseMatrix64F QLocal;
+      DMatrixRMaj QLocal;
       if (S == null)
       {
          ALocal = A;
@@ -70,20 +71,20 @@ public abstract class AbstractCARESolver implements CARESolver
          AHat.set(A);
 
          RinvSTranspose.reshape(m, S.getNumCols());
-         CommonOps.multTransB(Rinv, S, RinvSTranspose);
+         CommonOps_DDRM.multTransB(Rinv, S, RinvSTranspose);
 
          SRinvSTranspose.reshape(S.getNumRows(), S.getNumRows());
-         CommonOps.mult(S, RinvSTranspose, SRinvSTranspose);
+         CommonOps_DDRM.mult(S, RinvSTranspose, SRinvSTranspose);
 
          tempMatrix.set(Q);
-         CommonOps.subtractEquals(tempMatrix, SRinvSTranspose);
+         CommonOps_DDRM.subtractEquals(tempMatrix, SRinvSTranspose);
 
          if (C != null)
          {
             QHat.reshape(C.getNumCols(), C.getNumCols());
 
             RinvSTransposeC.reshape(RinvSTranspose.getNumRows(), C.getNumCols());
-            CommonOps.mult(RinvSTranspose, C, RinvSTransposeC);
+            CommonOps_DDRM.mult(RinvSTranspose, C, RinvSTransposeC);
 
             NativeCommonOps.multQuad(C, tempMatrix, QHat);
          }
@@ -94,7 +95,7 @@ public abstract class AbstractCARESolver implements CARESolver
             QHat.set(tempMatrix);
          }
 
-         CommonOps.multAdd(-1.0, B, RinvSTransposeC, AHat);
+         CommonOps_DDRM.multAdd(-1.0, B, RinvSTransposeC, AHat);
 
          ALocal = AHat;
          QLocal = QHat;
@@ -105,14 +106,14 @@ public abstract class AbstractCARESolver implements CARESolver
 
    /** {inheritDoc} */
    @Override
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R)
+   public void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R)
    {
       int m = Rinv.getNumRows();
       int n = B.getNumRows();
       Rinv.reshape(m, m);
 
       BTranspose.set(B);
-      CommonOps.transpose(BTranspose);
+      CommonOps_DDRM.transpose(BTranspose);
 
       M.reshape(n, n);
 
@@ -123,7 +124,7 @@ public abstract class AbstractCARESolver implements CARESolver
 
    /** {inheritDoc} */
    @Override
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F E, DenseMatrix64F M, DenseMatrix64F Q)
+   public void setMatrices(DMatrixRMaj A, DMatrixRMaj E, DMatrixRMaj M, DMatrixRMaj Q)
    {
       MatrixChecking.assertMultiplicationCompatible(A, Q);
 
@@ -147,7 +148,7 @@ public abstract class AbstractCARESolver implements CARESolver
 
    /** {inheritDoc} */
    @Override
-   public DenseMatrix64F getP()
+   public DMatrixRMaj getP()
    {
       return isUpToDate ? P : computeP();
    }

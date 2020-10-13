@@ -8,6 +8,8 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -22,13 +24,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -57,7 +58,6 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +78,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    private int chestYawForLookingAroundIndex = 0;
 
@@ -93,7 +94,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    }
 
    private final BehaviorHelper helper;
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteHumanoidRobotInterface robotInterface;
    private final RemoteREAInterface rea;
 
    private final StateMachine<ExploreAreaBehaviorState, State> stateMachine;
@@ -113,7 +114,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      robot = helper.getOrCreateRobotInterface();
+      robotInterface = helper.getOrCreateRobotInterface();
+      syncedRobot = robotInterface.newSyncedRobot();
       rea = helper.getOrCreateREAInterface();
       footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
 
@@ -217,7 +219,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          //         transform.setTranslation(0.01, -0.01, 0.01);
          //         transform.setTranslation(0.02, -0.02, 0.0);
          //         transform.setTranslation(0.02, -0.02, 0.02);
-         transform.setRotationYaw(0.025);
+         transform.getRotation().setToYawOrientation(0.025);
 
          boolean sendingSlamCorrection = false;
          publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
@@ -237,7 +239,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void onStopStateEntry()
    {
       chestYawForLookingAroundIndex = 0;
-      robot.pauseWalking();
+      robotInterface.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -278,8 +280,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void rememberObservationPoint()
    {
       //TODO: Remember the LIDAR pointing at transform instead of just where the robot was at. But how to get that frame?
-      HumanoidRobotState robotState = robot.pollHumanoidRobotState();
-      MovingReferenceFrame midFeetZUpFrame = robotState.getMidFeetZUpFrame();
+      syncedRobot.update();
+      MovingReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       FramePoint3D midFeetLocation = new FramePoint3D(midFeetZUpFrame);
       midFeetLocation.changeFrame(worldFrame);
 
@@ -311,17 +313,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       boolean savedOutTroublesomeRegions = false;
 
       @Override
-      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
       {
          hullGotLooped.set(true);
 
@@ -355,7 +357,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
       {
       }
 
@@ -370,12 +372,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      public void hullIsInvalid(List<Point2D> invalidHull)
       {
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+      public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
       {
       }
    };
@@ -406,7 +408,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          slamParameters.setMaximumPointProjectionDistance(0.10);
 
          hullGotLooped.set(false);
-         RigidBodyTransform referenceTransform = robot.pollHumanoidRobotState().getIMUFrame().getTransformToWorldFrame();
+         syncedRobot.update();
+         RigidBodyTransform referenceTransform = syncedRobot.getReferenceFrames().getIMUFrame().getTransformToWorldFrame();
          LogTools.info("Doing SLAM with IMU reference Transform \n {} ", referenceTransform);
 
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, referenceTransform, listener);
@@ -459,9 +462,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
    {
-      HumanoidRobotState robotState = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      FramePose3D framePose = new FramePose3D(robotState.getPelvisFrame());
+      FramePose3D framePose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
       framePose.changeFrame(worldFrame);
       Pose3D pose3D = new Pose3D(framePose);
 
@@ -479,7 +482,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       double confidenceFactor = 1.0;
-      robot.publishPose(pose3D, confidenceFactor, robotState.getTimestamp());
+      robotInterface.publishPose(pose3D, confidenceFactor, syncedRobot.getTimestamp());
    }
 
    private void computeMapBoundingBox3D()
@@ -520,19 +523,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onDetermineNextLocationsStateEntry()
    {
-      robot.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
+      robotInterface.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
 
       desiredFramePoses = null;
       determinedNextLocations = false;
 
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
-      FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
-
-      determineNextPlacesToWalkTo(referenceFrames);
+      syncedRobot.update();
+      determineNextPlacesToWalkTo(syncedRobot.getReferenceFrames());
       determinedNextLocations = true;
    }
 
-   private void determineNextPlacesToWalkTo(HumanoidRobotState referenceFrames)
+   private void determineNextPlacesToWalkTo(HumanoidReferenceFrames referenceFrames)
    {
       MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
@@ -631,7 +632,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
 
          FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
-         desiredFramePose.setPosition(desiredLocation);
+         desiredFramePose.getPosition().set(desiredLocation);
 
          desiredFramePose.changeFrame(worldFrame);
          desiredFramePoses.add(desiredFramePose);
@@ -651,8 +652,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
 
          FramePose3D desiredFramePose = new FramePose3D(worldFrame);
-         desiredFramePose.setPosition(goalPoint);
-         desiredFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         desiredFramePose.getPosition().set(goalPoint);
+         desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          desiredFramePoses.add(desiredFramePose);
       }
 
@@ -752,8 +753,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       resetFootstepPlanning();
 
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
-      FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      syncedRobot.update();
+      FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (!desiredFramePoses.isEmpty())
       {
@@ -783,7 +784,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       if (plannerFinished)
       {
-         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.peek();
+         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
          FootstepPlanningResult planResult = plannerResult.getResult();
 
          LogTools.info("planResult = " + planResult);
@@ -854,7 +855,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    //   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
    //   {
-   //      return (walkingCompleted.hasNext());
+   //      return (walkingCompleted.hasValue());
    //      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    //   }
 
@@ -863,8 +864,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onTakeAStepStateEntry()
    {
-      FullHumanoidRobotModel fullRobotModel = robot.pollFullRobotModel();
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
       FootstepDataMessage footstepDataMessage = footstepDataList.get(footstepIndex);
       takeAStepSwingSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
@@ -872,7 +872,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FootstepDataListMessage messageWithOneStep = new FootstepDataListMessage(footstepDataListMessageFromPlan);
       messageWithOneStep.getFootstepDataList().clear();
       messageWithOneStep.getFootstepDataList().add().set(footstepDataMessage);
-      walkingCompleted = robot.requestWalk(messageWithOneStep);
+      walkingCompleted = robotInterface.requestWalk(messageWithOneStep);
 
       LogTools.info("Stepping to " + footstepDataMessage.getLocation());
 
@@ -887,7 +887,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       else
       {
          nextFootstepLocation = null;
-         robot.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
+         robotInterface.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
       }
 
       footstepIndex++;
@@ -895,8 +895,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doTakeAStepStateAction(double timeInState)
    {
-      FullHumanoidRobotModel fullRobotModel = robot.pollFullRobotModel();
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
       if (nextFootstepLocation != null)
       {
@@ -909,13 +908,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
    {
-      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
    {
-      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
@@ -955,7 +954,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
    {
-      return (walkingCompleted.hasNext());
+      return (walkingCompleted.hasValue());
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
@@ -964,8 +963,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       RobotSide swingSide = supportSide.getOppositeSide();
       FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
       us.ihmc.idl.IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
-      ReferenceFrame supportFootFrame = referenceFrames.getSoleFrame(supportSide);
+      syncedRobot.update();
+      ReferenceFrame supportFootFrame = syncedRobot.getReferenceFrames().getSoleFrame(supportSide);
 
       for (Pose3D pose : posesFromThePreviousStep)
       {
@@ -983,7 +982,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          supportFootFrame = nextStepFrame;
       }
 
-      walkingCompleted = robot.requestWalk(footstepDataListMessageToTurnInPlace);
+      walkingCompleted = robotInterface.requestWalk(footstepDataListMessageToTurnInPlace);
    }
 
    private void doTurnInPlaceStateAction(double timeInState)
@@ -993,30 +992,30 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    public void turnChestWithRespectToMidFeetZUpFrame(double chestYaw, double trajectoryTime)
    {
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      ReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       FrameQuaternion chestOrientation = new FrameQuaternion(midFeetZUpFrame, chestYaw, 0.0, 0.0);
       chestOrientation.changeFrame(worldFrame);
-      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
-      robot.requestPelvisGoHome(trajectoryTime);
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      robotInterface.requestPelvisGoHome(trajectoryTime);
    }
 
    public void pitchHeadWithRespectToChest(double headPitch, double trajectoryTime)
    {
-      HumanoidRobotState referenceFrames = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+      ReferenceFrame chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
       FrameQuaternion headOrientation = new FrameQuaternion(chestFrame, 0.0, headPitch, 0.0);
       headOrientation.changeFrame(worldFrame);
-      robot.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
    }
 
    private void rotateChestAndPitchHeadToLookAtPointInWorld(double timeInState,
                                                             RobotSide swingSide,
                                                             Point3D pointToLookAtInWorld,
                                                             FullHumanoidRobotModel fullRobotModel,
-                                                            HumanoidRobotState referenceFrames)
+                                                            HumanoidReferenceFrames referenceFrames)
    {
       //      ReferenceFrame headBaseFrame = fullRobotModel.getHeadBaseFrame();
       MovingReferenceFrame chestFrame = referenceFrames.getChestFrame();
@@ -1054,12 +1053,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       FrameQuaternion chestOrientation = new FrameQuaternion(worldFrame);
       chestOrientation.setYawPitchRoll(yaw, 0.25 * pitch, 0.0);
-      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, worldFrame);
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, worldFrame);
 
 //      double worldYaw = chestOrientation.getYaw();
       FrameQuaternion headOrientation = new FrameQuaternion(worldFrame);
       headOrientation.setYawPitchRoll(yaw, 0.75 * pitch, 0.0);
-      robot.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, worldFrame);
+      robotInterface.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, worldFrame);
    }
 
    //TODO: Hijacking PatrolBehavior Viz here. Should not be doing that. Should have some common vizzes for things like this that are shared.
@@ -1069,7 +1068,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++) // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       helper.publishToUI(PatrolBehaviorAPI.CurrentFootstepPlan, footstepLocations);

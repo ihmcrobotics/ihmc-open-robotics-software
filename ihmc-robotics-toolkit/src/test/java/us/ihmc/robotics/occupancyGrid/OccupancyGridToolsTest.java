@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -36,7 +36,7 @@ public class OccupancyGridToolsTest
       expectedHull.addVertex(pointD);
       expectedHull.update();
 
-      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoRegistry("test"));
       occupancyGrid.registerPoint(pointA);
       occupancyGrid.registerPoint(pointA);
       occupancyGrid.registerPoint(pointB);
@@ -96,7 +96,7 @@ public class OccupancyGridToolsTest
    @Test
    public void testRandomHull()
    {
-      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoRegistry("test"));
       ConvexPolygon2D polygon2D = new ConvexPolygon2D();
 
       Random random = new Random(1738L);
@@ -119,11 +119,11 @@ public class OccupancyGridToolsTest
    @Test
    public void testCellsOnSideOfLine()
    {
-      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoRegistry("test"));
       FrameLine2D verticalLine = new FrameLine2D();
       FrameLine2D horizontalLine = new FrameLine2D();
-      verticalLine.setDirection(1.0, 0.0);
-      horizontalLine.setDirection(0.0, 1.0);
+      verticalLine.getDirection().set(1.0, 0.0);
+      horizontalLine.getDirection().set(0.0, 1.0);
 
       occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 0.0, 1.0));
 

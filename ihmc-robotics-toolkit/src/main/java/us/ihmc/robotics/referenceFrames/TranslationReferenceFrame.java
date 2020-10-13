@@ -21,7 +21,7 @@ public class TranslationReferenceFrame extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {      
       transformToParent.setIdentity();
-      transformToParent.setTranslation(originVector);
+      transformToParent.getTranslation().set(originVector);
    }
 
    public void updateTranslation(FrameTuple3DReadOnly frameVector)

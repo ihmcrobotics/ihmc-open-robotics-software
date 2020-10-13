@@ -191,7 +191,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
       {
          // Rotate the frame of PI around the principal axis, such that the third axis is pointing towards the point cloud.
          RotationMatrix invertThirdAxis = new RotationMatrix();
-         invertThirdAxis.setToRollMatrix(Math.PI);
+         invertThirdAxis.setToRollOrientation(Math.PI);
          coneRotation.multiply(invertThirdAxis);
       }
 
@@ -222,8 +222,8 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
       RigidBodyTransform coneTransform = new RigidBodyTransform();
 
-      coneTransform.setRotation(coneRotation);
-      coneTransform.setTranslation(voxelLocation);
+      coneTransform.getRotation().set(coneRotation);
+      coneTransform.getTranslation().set(voxelLocation);
    }
 
    @Override

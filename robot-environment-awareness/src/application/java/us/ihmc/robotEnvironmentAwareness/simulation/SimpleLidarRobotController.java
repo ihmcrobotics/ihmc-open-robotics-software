@@ -24,20 +24,20 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SimpleLidarRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean spinLidar = new YoBoolean("spinLidar", registry);
    private final YoDouble desiredLidarVelocity = new YoDouble("desiredLidarVelocity", registry);
@@ -57,7 +57,7 @@ public class SimpleLidarRobotController implements RobotController
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
-   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, Ros2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
+   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, ROS2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
                                      YoGraphicsListRegistry yoGraphicsListRegistry) throws IOException
    {
       this.dt = dt;
@@ -69,14 +69,14 @@ public class SimpleLidarRobotController implements RobotController
       lidarRange.set(30.0);
 
       final YoFrameYawPitchRoll lidarYawPitchRoll = new YoFrameYawPitchRoll("lidar", null, registry);
-      lidarYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
+      lidarYawPitchRoll.attachVariableChangedListener(new YoVariableChangedListener()
       {
          private final Quaternion localQuaternion = new Quaternion();
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
-            lidarYawPitchRoll.getQuaternion(localQuaternion);
+            localQuaternion.set(lidarYawPitchRoll);
             rootJoint.setQuaternion(localQuaternion);
          }
       });
@@ -95,7 +95,7 @@ public class SimpleLidarRobotController implements RobotController
       yoGraphicPlanarRegionsList.hideGraphicObject();
       yoGraphicsListRegistry.registerYoGraphic("Regions", yoGraphicPlanarRegionsList);
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override
@@ -136,7 +136,7 @@ public class SimpleLidarRobotController implements RobotController
          for (int i = 0; i < scan.size(); i++)
          {
             Point3D sensorOrigin = new Point3D();
-            transform.getTranslation(sensorOrigin);
+            sensorOrigin.set(transform.getTranslation());
             Point3D scanPoint = scan.getPoint(i);
             if (sensorOrigin.distance(scanPoint) < lidarRange.getDoubleValue())
             {
@@ -164,7 +164,7 @@ public class SimpleLidarRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

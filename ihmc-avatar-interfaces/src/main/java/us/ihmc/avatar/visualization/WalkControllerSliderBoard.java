@@ -17,8 +17,8 @@ import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfi
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.CommonNames;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -28,7 +28,7 @@ public class WalkControllerSliderBoard
    private static double MIN_COM_OFFSET_ABOVE_GROUND = 0.0;
    private static double MAX_COM_OFFSET_ABOVE_GROUND = 0.2;
 
-   public WalkControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel)
+   public WalkControllerSliderBoard(SimulationConstructionSet scs, YoRegistry registry, DRCRobotModel drcRobotModel)
    {
       final YoEnum<SliderBoardMode> sliderBoardMode = new YoEnum<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
@@ -69,7 +69,7 @@ public class WalkControllerSliderBoard
 
       sliderBoardConfigurationManager.clearControls();
 
-      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
+      sliderBoardConfigurationManager.setButton(1, registry.findVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
       sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.3, 0.3);
 
@@ -98,7 +98,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.clearControls();
 
       /* ICPAndCoPFun */
-      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
+      sliderBoardConfigurationManager.setButton(1, registry.findVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.6, 0.6);
       sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.6, 0.6);
 
@@ -119,7 +119,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(4, "captureKpOrthogonal", registry, 0.0, 2.0);
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, -0.20, 0.20);
 
-      sliderBoardConfigurationManager.setButton(1, registry.getVariable("MomentumBasedController", "FeetCoPControlIsActive"));
+      sliderBoardConfigurationManager.setButton(1, registry.findVariable("MomentumBasedController", "FeetCoPControlIsActive"));
 
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
       sliderBoardConfigurationManager.clearControls();
@@ -133,23 +133,23 @@ public class WalkControllerSliderBoard
       //default
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
-      VariableChangedListener listener = new VariableChangedListener()
+      YoVariableChangedListener listener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             System.out.println("SliderBoardMode: " + sliderBoardMode.getEnumValue().toString());
             sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
          }
       };
 
-      sliderBoardMode.addVariableChangedListener(listener);
-      listener.notifyOfVariableChange(null);
+      sliderBoardMode.addListener(listener);
+      listener.changed(null);
 
    }
 
    private void setupIndividualHandControl(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final YoEnum<SliderBoardMode> sliderBoardMode,
-                                           final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+                                           final DRCRobotModel drcRobotModel, final YoRegistry registry)
    {
       sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length - 1);
       SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardParameters()
@@ -179,7 +179,7 @@ public class WalkControllerSliderBoard
    }
 
    private void setupHeadAndHandSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final YoEnum<SliderBoardMode> sliderBoardMode,
-                                        final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+                                        final DRCRobotModel drcRobotModel, final YoRegistry registry)
    {
 
       //Make sure the joints you want to control are not being controlled by any other control module.
@@ -246,16 +246,16 @@ public class WalkControllerSliderBoard
 
       if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))
       {
-         headYawPercentage.addVariableChangedListener(new VariableChangedListener()
+         headYawPercentage.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                alphaFilteredHeadYawPercentage.update(headYawPercentage.getDoubleValue());
                NeckJointName headYaw = NeckJointName.DISTAL_NECK_YAW;
                double neckYawJointRange = sliderBoardControlledNeckJointsWithLimits.get(headYaw).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(headYaw) + "_unconstrained"
+               YoDouble desiredAngle = (YoDouble) registry.findVariable(jointMap.getNeckJointName(headYaw) + "_unconstrained"
                      + CommonNames.q_d);
                desiredAngle.set(alphaFilteredHeadYawPercentage.getDoubleValue() * neckYawJointRange
                      + sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft());
@@ -265,16 +265,16 @@ public class WalkControllerSliderBoard
 
       if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_PITCH))
       {
-         upperHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
+         upperHeadPitchPercentage.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                alphaFilteredUpperHeadPitchPercentage.update(upperHeadPitchPercentage.getDoubleValue());
                NeckJointName upperHeadPitch = NeckJointName.DISTAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(upperHeadPitch) + "_unconstrained"
+               YoDouble desiredAngle = (YoDouble) registry.findVariable(jointMap.getNeckJointName(upperHeadPitch) + "_unconstrained"
                      + CommonNames.q_d);
                desiredAngle.set(alphaFilteredUpperHeadPitchPercentage.getDoubleValue() * jointRange
                      + sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft());
@@ -284,16 +284,16 @@ public class WalkControllerSliderBoard
 
       if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.PROXIMAL_NECK_PITCH))
       {
-         lowerHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
+         lowerHeadPitchPercentage.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                alphaFilteredLowerHeadPitchYawPercentage.update(lowerHeadPitchPercentage.getDoubleValue());
                NeckJointName lowerHeadPitch = NeckJointName.PROXIMAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(lowerHeadPitch) + "_unconstrained"
+               YoDouble desiredAngle = (YoDouble) registry.findVariable(jointMap.getNeckJointName(lowerHeadPitch) + "_unconstrained"
                      + CommonNames.q_d);
                desiredAngle.set(alphaFilteredLowerHeadPitchYawPercentage.getDoubleValue() * jointRange
                      + sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft());

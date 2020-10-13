@@ -45,7 +45,7 @@ public class PositionGraphic
 
    public void setPosition(Point3DReadOnly position)
    {
-      pose.setPosition(position);
+      pose.getPosition().set(position);
       update();
    }
 

@@ -2,14 +2,14 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BasicSphereController implements GenericSphereController
 {
    private final BasicHeightController heightController;
    private final BasicPlanarController planarController;
 
-   public BasicSphereController(SphereControlToolbox controlToolbox, YoVariableRegistry registry)
+   public BasicSphereController(SphereControlToolbox controlToolbox, YoRegistry registry)
    {
       heightController = new BasicHeightController(controlToolbox, registry);
       planarController = new BasicPlanarController(controlToolbox, registry);

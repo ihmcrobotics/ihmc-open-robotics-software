@@ -41,7 +41,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.YoStopwatch;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -82,7 +82,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
    private final double idealStanceWidth;
 
-   public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+   public WalkOverTerrainStateMachineBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
                                               HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
@@ -91,13 +91,13 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       
       
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
 
       
       
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
       
       
 
@@ -113,9 +113,9 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
 
       stateMachine = setupStateMachine(yoTime);
    }
@@ -320,7 +320,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       private final FramePose3D touchdownPose = new FramePose3D();
       private final FramePose3D startLeftFootPose = new FramePose3D();
       private final FramePose3D startRightFootPose = new FramePose3D();
-      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+      private final YoEnum<RobotSide> swingSide = new YoEnum<>("swingSide", registry, RobotSide.class);
 
       PlanFromSingleSupportState()
       {

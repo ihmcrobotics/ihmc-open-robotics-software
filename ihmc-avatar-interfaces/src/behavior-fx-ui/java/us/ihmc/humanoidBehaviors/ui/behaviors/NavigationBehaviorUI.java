@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
+import javafx.scene.layout.Pane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
@@ -10,6 +11,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 
@@ -22,7 +24,7 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    private BodyPathPlanGraphic bodyPathPlanGraphic;
 
    @Override
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
@@ -48,5 +50,11 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    @FXML public void step()
    {
       behaviorMessager.submitMessage(StepThroughAlgorithm, new Object());
+   }
+
+   @Override
+   public void destroy()
+   {
+
    }
 }

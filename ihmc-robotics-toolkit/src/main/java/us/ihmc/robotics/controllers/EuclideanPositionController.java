@@ -12,12 +12,12 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class EuclideanPositionController implements PositionController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoFrameVector3D positionError;
    private final YoFrameVector3D positionErrorCumulated;
@@ -42,17 +42,17 @@ public class EuclideanPositionController implements PositionController
 
    private final YoPID3DGains gains;
 
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
+   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPID3DGains gains, YoVariableRegistry parentRegistry)
+   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPID3DGains gains, YoRegistry parentRegistry)
    {
       this.dt = dt;
 
       this.bodyFrame = bodyFrame;
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       if (gains == null)
          gains = new DefaultYoPID3DGains(prefix, GainCoupling.NONE, true, registry);

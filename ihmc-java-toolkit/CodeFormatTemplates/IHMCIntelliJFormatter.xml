@@ -2,8 +2,19 @@
   <option name="LINE_SEPARATOR" value="&#xA;" />
   <option name="RIGHT_MARGIN" value="160" />
   <JavaCodeStyleSettings>
-    <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
-    <option name="ENABLE_JAVADOC_FORMATTING" value="false" />
+    <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
+      <value>
+        <package name="java.awt" withSubpackages="false" static="false" />
+        <package name="org.hamcrest.Matchers" withSubpackages="false" static="true" />
+        <package name="org.junit.jupiter.api.Assertions" withSubpackages="false" static="true" />
+        <package name="org.hamcrest.MatcherAssert" withSubpackages="false" static="true" />
+        <package name="javax.swing" withSubpackages="false" static="false" />
+      </value>
+    </option>
+    <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
+    <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
+    <option name="JD_PRESERVE_LINE_FEEDS" value="true" />
+    <option name="JD_INDENT_ON_CONTINUATION" value="true" />
   </JavaCodeStyleSettings>
   <JetCodeStyleSettings>
     <option name="ALIGN_IN_COLUMNS_CASE_BRANCH" value="true" />
@@ -55,6 +66,7 @@
     <option name="BINARY_OPERATION_SIGN_ON_NEXT_LINE" value="true" />
     <option name="TERNARY_OPERATION_WRAP" value="5" />
     <option name="ARRAY_INITIALIZER_WRAP" value="5" />
+    <option name="WRAP_COMMENTS" value="true" />
     <option name="WRAP_ON_TYPING" value="0" />
     <indentOptions>
       <option name="INDENT_SIZE" value="3" />

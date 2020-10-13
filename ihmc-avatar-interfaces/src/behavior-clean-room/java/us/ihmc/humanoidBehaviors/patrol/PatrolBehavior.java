@@ -18,11 +18,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
@@ -36,7 +38,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * Walk through a list of waypoints in order, looping forever.
@@ -67,7 +69,8 @@ public class PatrolBehavior implements BehaviorInterface
    }
 
    private final BehaviorHelper helper;
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteHumanoidRobotInterface robotInterface;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteREAInterface rea;
 
@@ -96,7 +99,8 @@ public class PatrolBehavior implements BehaviorInterface
    public PatrolBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      robot = helper.getOrCreateRobotInterface();
+      robotInterface = helper.getOrCreateRobotInterface();
+      syncedRobot = robotInterface.newSyncedRobot();
       footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
       rea = helper.getOrCreateREAInterface();
 
@@ -142,7 +146,7 @@ public class PatrolBehavior implements BehaviorInterface
       helper.createUICallback(Stop, object -> stopNotification.set());
       helper.createUICallback(PlanReviewResult, message ->
       {
-         planReviewResult.add(message);
+         planReviewResult.set(message);
       });
       helper.createUICallback(SkipPerceive, object -> skipPerceive.set());
 
@@ -180,7 +184,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onStopStateEntry()
    {
-      robot.pauseWalking();
+      robotInterface.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -202,7 +206,8 @@ public class PatrolBehavior implements BehaviorInterface
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(robot.pollHumanoidRobotState());
+         syncedRobot.update();
+         upDownExplorer.onNavigateEntry(syncedRobot);
       }
    }
 
@@ -241,9 +246,10 @@ public class PatrolBehavior implements BehaviorInterface
 
       footstepPlannerToolbox.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      syncedRobot.update();
+      FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
-      if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
+      if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasValue())
       {
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
@@ -257,12 +263,14 @@ public class PatrolBehavior implements BehaviorInterface
       {
          defaultFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
       }
-      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters);
+
+      SwingPlannerType swingPlannerType = swingOvers.get() ? SwingPlannerType.POSITION : SwingPlannerType.NONE;
+      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters, swingPlannerType);
    }
 
    private static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
-      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
+      return start.getPosition().distance(goal.getPosition()) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
    private void doPlanStateAction(double timeInState)
@@ -270,9 +278,9 @@ public class PatrolBehavior implements BehaviorInterface
       pollInterrupts();
       footstepPlanResultNotification.poll();
 
-      if (footstepPlanResultNotification.hasNext())
+      if (footstepPlanResultNotification.hasValue())
       {
-         upDownExplorer.onPlanFinished(footstepPlanResultNotification.peek());
+         upDownExplorer.onPlanFinished(footstepPlanResultNotification.read());
       }
    }
 
@@ -286,9 +294,9 @@ public class PatrolBehavior implements BehaviorInterface
       {
          return NAVIGATE;
       }
-      else if (footstepPlanResultNotification.hasNext())
+      else if (footstepPlanResultNotification.hasValue())
       {
-         if (footstepPlanResultNotification.peek().isValidForExecution())
+         if (footstepPlanResultNotification.read().isValidForExecution())
          {
             return REVIEW;
          }
@@ -304,7 +312,7 @@ public class PatrolBehavior implements BehaviorInterface
    private void onReviewStateEntry()
    {
       helper.publishToUI(CurrentFootstepPlan,
-                         FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.peek().getFootstepPlan()));
+                         FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.read().getFootstepPlan()));
    }
 
    private void onReviewStateAction(double timeInState)
@@ -322,13 +330,13 @@ public class PatrolBehavior implements BehaviorInterface
       {
          return WALK;
       }
-      else if (planReviewResult.hasNext())
+      else if (planReviewResult.hasValue())
       {
-         if (planReviewResult.peek() == OperatorPlanReviewResult.REPLAN)
+         if (planReviewResult.read() == OperatorPlanReviewResult.REPLAN)
          {
             return PLAN;
          }
-         else if (planReviewResult.peek() == OperatorPlanReviewResult.WALK)
+         else if (planReviewResult.read() == OperatorPlanReviewResult.WALK)
          {
             return WALK;
          }
@@ -339,15 +347,15 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onWalkStateEntry()
    {
-      PlanarRegionsList planarRegionsList = footstepPlanResultNotification.peek().getPlanarRegionsList();
-      FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
+      PlanarRegionsList planarRegionsList = footstepPlanResultNotification.read().getPlanarRegionsList();
+      FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.read().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = robot.pollHumanoidRobotState();
+      syncedRobot.update();
 
 //      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
 
-      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, planarRegionsList);
+      walkingCompleted = robotInterface.requestWalk(footstepDataListMessage);
 
       helper.publishToUI(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
@@ -359,7 +367,7 @@ public class PatrolBehavior implements BehaviorInterface
 
       FootstepDataMessage footstep = footstepPlan.getFootstepDataList().get(footstepPlan.getFootstepDataList().size() - 1);
 
-      double distance = midFeetZUpPose.getPositionDistance(footstep.getLocation());
+      double distance = midFeetZUpPose.getPosition().distance(footstep.getLocation());
 
       return distance < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
@@ -377,7 +385,7 @@ public class PatrolBehavior implements BehaviorInterface
       {
          return STOP;
       }
-      else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
+      else if (walkingCompleted.hasValue()) // TODO handle robot fell and more
       {
          if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and
          {                                                                                             // looping disabled and it's going to loop
@@ -386,7 +394,8 @@ public class PatrolBehavior implements BehaviorInterface
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+            syncedRobot.update();
+            FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
             PlanTravelDistance planType = decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
 
@@ -421,7 +430,8 @@ public class PatrolBehavior implements BehaviorInterface
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      syncedRobot.update();
+      upDownExplorer.setMidFeetZUpPose(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
@@ -448,8 +458,8 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void pollInterrupts()
    {
-      HighLevelControllerName controllerState = robot.getLatestControllerState();
-      boolean isWalking = robot.isRobotWalking();
+      HighLevelControllerName controllerState = robotInterface.getLatestControllerState();
+      boolean isWalking = robotInterface.isRobotWalking();
 
       if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {

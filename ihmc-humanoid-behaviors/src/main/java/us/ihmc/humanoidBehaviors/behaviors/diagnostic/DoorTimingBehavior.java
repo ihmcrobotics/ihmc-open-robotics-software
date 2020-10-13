@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorStates>
@@ -55,7 +55,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       GO_THROUGH_DOOR
    }
 
-   public DoorTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, boolean userControlled)
+   public DoorTimingBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, boolean userControlled)
    {
       super(robotName, "DoorTimingBehaviorStates", DoorTimingBehaviorStates.class, yoTime, ros2Node);
       this.operatorInControl = userControlled;

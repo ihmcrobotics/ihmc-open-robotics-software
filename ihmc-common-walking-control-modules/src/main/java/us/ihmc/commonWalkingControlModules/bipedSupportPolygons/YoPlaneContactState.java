@@ -8,19 +8,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private static final double THRESHOLD = 1e-7;
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    private final RigidBodyBasics rigidBody;
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
@@ -36,15 +37,15 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final YoBoolean hasContactStateChanged;
 
    public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
-                              double coefficientOfFriction, YoVariableRegistry parentRegistry)
+                              double coefficientOfFriction, YoRegistry parentRegistry)
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
 
    public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
-                              double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
+                              double coefficientOfFriction, double defaultRhoWeight, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new YoBoolean(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new YoDouble(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
@@ -81,9 +82,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);
    }
 
-   public void attachContactChangeListener(VariableChangedListener variableChangedListener)
+   public void attachContactChangeListener(YoVariableChangedListener variableChangedListener)
    {
-      inContact.addVariableChangedListener(variableChangedListener);
+      inContact.addListener(variableChangedListener);
    }
 
    @Override
@@ -158,7 +159,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.coefficientOfFriction.set(coefficientOfFriction);
    }
 
-   public void setContactNormalVector(FrameVector3D normalContactVector)
+   public void setContactNormalVector(FrameVector3DReadOnly normalContactVector)
    {
       if (normalContactVector == null)
       {

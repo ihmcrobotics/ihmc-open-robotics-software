@@ -1,9 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers.schur;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.QRDecomposition;
-import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 /**
@@ -12,29 +13,29 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
  * It is based on the QR algorithm, as described in
  * http://people.inf.ethz.ch/arbenz/ewp/Lnotes/chapter4.pdf
  */
-public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix64F>
+public class QRBasedSchurDecomposition implements SchurDecomposition<DMatrixRMaj>
 {
-   private final QRDecomposition<DenseMatrix64F> qrDecomposition;
-   private final DenseMatrix64F T;
-   private final DenseMatrix64F Tprev;
-   private final DenseMatrix64F Uprev;
+   private final QRDecomposition<DMatrixRMaj> qrDecomposition;
+   private final DMatrixRMaj T;
+   private final DMatrixRMaj Tprev;
+   private final DMatrixRMaj Uprev;
 
-   private final DenseMatrix64F U;
-   private final DenseMatrix64F Q;
-   private final DenseMatrix64F R;
+   private final DMatrixRMaj U;
+   private final DMatrixRMaj Q;
+   private final DMatrixRMaj R;
 
    private int maxIterations = 1000000;
    private double epsilon = 1e-6;
 
    public QRBasedSchurDecomposition(int size)
    {
-      qrDecomposition = DecompositionFactory.qr(size, size);
-      T = new DenseMatrix64F(size, size);
-      Tprev = new DenseMatrix64F(size, size);
-      Uprev = new DenseMatrix64F(size, size);
-      Q = new DenseMatrix64F(size, size);
-      R = new DenseMatrix64F(size, size);
-      U = new DenseMatrix64F(size, size);
+      qrDecomposition = DecompositionFactory_DDRM.qr(size, size);
+      T = new DMatrixRMaj(size, size);
+      Tprev = new DMatrixRMaj(size, size);
+      Uprev = new DMatrixRMaj(size, size);
+      Q = new DMatrixRMaj(size, size);
+      R = new DMatrixRMaj(size, size);
+      U = new DMatrixRMaj(size, size);
    }
 
    public void setMaxIterations(int maxIterations)
@@ -47,7 +48,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
       this.epsilon = epsilon;
    }
 
-   public boolean decompose(DenseMatrix64F A)
+   public boolean decompose(DMatrixRMaj A)
    {
       if (A.getNumRows() != A.getNumCols())
          throw new IllegalArgumentException("A matrix is not square.");
@@ -62,7 +63,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
       Uprev.reshape(A.getNumRows(), A.getNumCols());
 
       Tprev.set(A);
-      CommonOps.setIdentity(Uprev);
+      CommonOps_DDRM.setIdentity(Uprev);
       while (!converged)
       {
          if (iterations > maxIterations)
@@ -72,9 +73,9 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
          qrDecomposition.getQ(Q, false);
          qrDecomposition.getR(R, false);
 
-         CommonOps.mult(R, Q, T);
+         CommonOps_DDRM.mult(R, Q, T);
 
-         CommonOps.mult(Uprev, Q, U);
+         CommonOps_DDRM.mult(Uprev, Q, U);
 
          double TDistance = MatrixToolsLocal.distance(T, Tprev);
          double UDistance = MatrixToolsLocal.distance(U, Uprev);
@@ -90,7 +91,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
       return true;
    }
 
-   public DenseMatrix64F getU(DenseMatrix64F UToPack)
+   public DMatrixRMaj getU(DMatrixRMaj UToPack)
    {
       if (UToPack != null)
       {
@@ -99,11 +100,11 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
       }
       else
       {
-         return new DenseMatrix64F(U);
+         return new DMatrixRMaj(U);
       }
    }
 
-   public DenseMatrix64F getT(DenseMatrix64F TToPack)
+   public DMatrixRMaj getT(DMatrixRMaj TToPack)
    {
       if (TToPack != null)
       {
@@ -112,7 +113,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
       }
       else
       {
-         return new DenseMatrix64F(T);
+         return new DMatrixRMaj(T);
       }
    }
 

@@ -1,12 +1,9 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
-import java.util.Map;
-
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBehavior
@@ -16,13 +13,13 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    private final String namePrefix;
    private final DoubleProvider timeProvider;
 
-   public StateMachineBehavior(String robotName, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, Ros2Node ros2Node)
+   public StateMachineBehavior(String robotName, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, ROS2Node ros2Node)
    {
       this(robotName, stateMachineName, stateMachineName, keyType, timeProvider, ros2Node);
    }
 
    public StateMachineBehavior(String robotName, String namePrefix, String stateMachineName, Class<E> keyType,
-                               DoubleProvider timeProvider, Ros2Node ros2Node)
+                               DoubleProvider timeProvider, ROS2Node ros2Node)
    {
       super(robotName, namePrefix, ros2Node);
       this.keyType = keyType;

@@ -12,8 +12,8 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,15 +32,15 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PolygonWigglingTest
 {
    private static final boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
 
    private final static double epsilon = 0.00001;
@@ -58,7 +58,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
@@ -88,7 +88,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
@@ -132,7 +132,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
@@ -183,7 +183,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters parameters = new WiggleParameters();
@@ -213,7 +213,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-13.0));
-      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
@@ -246,7 +246,7 @@ public class PolygonWigglingTest
          double y = 5.0 * (random.nextDouble() - 0.5);
          double theta = 2.0 * (random.nextDouble() - 0.5) * yawLimit;
          initialFootTransform.setRotationYawAndZeroTranslation(theta);
-         initialFootTransform.setTranslation(x, y, 0.0);
+         initialFootTransform.getTranslation().set(x, y, 0.0);
          initialFoot.applyTransform(initialFootTransform, false);
 
          WiggleParameters parameters = new WiggleParameters();
@@ -566,7 +566,7 @@ public class PolygonWigglingTest
          double y = 5.0 * (random.nextDouble() - 0.5);
          double theta = 2.0 * (random.nextDouble() - 0.5) * yawLimit;
          initialFootTransform.setRotationYawAndZeroTranslation(theta);
-         initialFootTransform.setTranslation(x, y, 0.0);
+         initialFootTransform.getTranslation().set(x, y, 0.0);
          initialFoot.applyTransform(initialFootTransform, false);
 
          ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
@@ -619,7 +619,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
+      initialFootTransform.getTranslation().set(-0.05, 0.09, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
@@ -665,7 +665,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
+      initialFootTransform.getTranslation().set(-0.05, 0.09, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
@@ -711,7 +711,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(0.1, 0.1, 0.0);
+      initialFootTransform.getTranslation().set(0.1, 0.1, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
@@ -751,7 +751,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
+      initialFootTransform.getTranslation().set(-0.05, 0.09, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters parameters = new WiggleParameters();
@@ -796,7 +796,7 @@ public class PolygonWigglingTest
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.05, 0.05, 0.0);
+      initialFootTransform.getTranslation().set(-0.05, 0.05, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters());
@@ -821,11 +821,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfPoint()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point = new Point2D();
@@ -843,7 +843,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX());
          x.set(1, 0, point.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0));
 
@@ -852,7 +852,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          boolean allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -863,7 +863,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -874,7 +874,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX());
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -885,7 +885,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -896,7 +896,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX());
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -907,7 +907,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -918,7 +918,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -929,7 +929,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -940,7 +940,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -951,7 +951,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -962,7 +962,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX());
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -973,7 +973,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -984,7 +984,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX());
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -995,7 +995,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -1006,7 +1006,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() + offset);
          x.set(1, 0, point.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -1017,7 +1017,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point.getX() - offset);
          x.set(1, 0, point.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0);
@@ -1030,11 +1030,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfLine()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
@@ -1061,7 +1061,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point1.getX());
          x.set(1, 0, point1.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1069,7 +1069,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point2.getX());
          x.set(1, 0, point2.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1078,7 +1078,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1087,7 +1087,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1096,7 +1096,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1105,7 +1105,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1114,7 +1114,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          boolean allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1125,7 +1125,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1136,7 +1136,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1147,7 +1147,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1158,7 +1158,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1169,7 +1169,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX());
          x.set(1, 0, point3.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1179,7 +1179,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point1.getY());
          x.set(1, 0, point1.getX());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1189,7 +1189,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point2.getY());
          x.set(1, 0, point2.getX());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1200,7 +1200,7 @@ public class PolygonWigglingTest
          x.set(0, 0, point3.getX() + (0.5 - random.nextDouble()));
          x.set(1, 0, point3.getY() + (0.5 - random.nextDouble()));
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allLessThan = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1211,11 +1211,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfSimpleLine()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
@@ -1235,7 +1235,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point1.getX());
       x.set(1, 0, point1.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       for (int i = 0; i < solution.getNumRows(); i++)
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1243,7 +1243,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point2.getX());
       x.set(1, 0, point2.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       for (int i = 0; i < solution.getNumRows(); i++)
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1252,7 +1252,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point3.getX());
       x.set(1, 0, point3.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       for (int i = 0; i < solution.getNumRows(); i++)
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1262,7 +1262,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -1.0);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       boolean allLessThan = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1275,7 +1275,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 2.0);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allLessThan = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allLessThan &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1285,11 +1285,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfDeltaInsideLine()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D point1 = new Point2D();
@@ -1309,7 +1309,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point1.getX());
       x.set(1, 0, point1.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       boolean allPointsInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allPointsInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1319,7 +1319,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point2.getX());
       x.set(1, 0, point2.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allPointsInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allPointsInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1330,7 +1330,7 @@ public class PolygonWigglingTest
       x.set(0, 0, point3.getX());
       x.set(1, 0, point3.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       for (int i = 0; i < solution.getNumRows(); i++)
          assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
    }
@@ -1340,11 +1340,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfQuadrangle()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D firstQuadrantPoint = new Point2D();
@@ -1377,7 +1377,7 @@ public class PolygonWigglingTest
          x.set(0, 0, firstQuadrantPoint.getX());
          x.set(1, 0, firstQuadrantPoint.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1385,7 +1385,7 @@ public class PolygonWigglingTest
          x.set(0, 0, secondQuadrantPoint.getX());
          x.set(1, 0, secondQuadrantPoint.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1393,7 +1393,7 @@ public class PolygonWigglingTest
          x.set(0, 0, thirdQuadrantPoint.getX());
          x.set(1, 0, thirdQuadrantPoint.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1401,7 +1401,7 @@ public class PolygonWigglingTest
          x.set(0, 0, fourthQuadrantPoint.getX());
          x.set(1, 0, fourthQuadrantPoint.getY());
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1410,7 +1410,7 @@ public class PolygonWigglingTest
          x.set(0, 0, firstQuadrantPoint.getX() - slightOffset);
          x.set(1, 0, firstQuadrantPoint.getY() - slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1418,7 +1418,7 @@ public class PolygonWigglingTest
          x.set(0, 0, secondQuadrantPoint.getX() - slightOffset);
          x.set(1, 0, secondQuadrantPoint.getY() + slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1426,7 +1426,7 @@ public class PolygonWigglingTest
          x.set(0, 0, thirdQuadrantPoint.getX() + slightOffset);
          x.set(1, 0, thirdQuadrantPoint.getY() + slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1434,7 +1434,7 @@ public class PolygonWigglingTest
          x.set(0, 0, fourthQuadrantPoint.getX() + slightOffset);
          x.set(1, 0, fourthQuadrantPoint.getY() - slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1443,7 +1443,7 @@ public class PolygonWigglingTest
          x.set(0, 0, firstQuadrantPoint.getX() - offset);
          x.set(1, 0, firstQuadrantPoint.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1451,7 +1451,7 @@ public class PolygonWigglingTest
          x.set(0, 0, secondQuadrantPoint.getX() - offset);
          x.set(1, 0, secondQuadrantPoint.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1459,7 +1459,7 @@ public class PolygonWigglingTest
          x.set(0, 0, thirdQuadrantPoint.getX() + offset);
          x.set(1, 0, thirdQuadrantPoint.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1467,7 +1467,7 @@ public class PolygonWigglingTest
          x.set(0, 0, fourthQuadrantPoint.getX() + offset);
          x.set(1, 0, fourthQuadrantPoint.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          for (int i = 0; i < solution.getNumRows(); i++)
             assertTrue(solution.get(i, 0) <= b.get(i, 0) + epsilon);
 
@@ -1475,7 +1475,7 @@ public class PolygonWigglingTest
          x.set(0, 0, firstQuadrantPoint.getX() + slightOffset);
          x.set(1, 0, firstQuadrantPoint.getY() + slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          boolean allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1485,7 +1485,7 @@ public class PolygonWigglingTest
          x.set(0, 0, secondQuadrantPoint.getX() + slightOffset);
          x.set(1, 0, secondQuadrantPoint.getY() - slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1495,7 +1495,7 @@ public class PolygonWigglingTest
          x.set(0, 0, thirdQuadrantPoint.getX() - slightOffset);
          x.set(1, 0, thirdQuadrantPoint.getY() - slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1505,7 +1505,7 @@ public class PolygonWigglingTest
          x.set(0, 0, fourthQuadrantPoint.getX() - slightOffset);
          x.set(1, 0, fourthQuadrantPoint.getY() + slightOffset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1515,7 +1515,7 @@ public class PolygonWigglingTest
          x.set(0, 0, firstQuadrantPoint.getX() + offset);
          x.set(1, 0, firstQuadrantPoint.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1525,7 +1525,7 @@ public class PolygonWigglingTest
          x.set(0, 0, secondQuadrantPoint.getX() + offset);
          x.set(1, 0, secondQuadrantPoint.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1535,7 +1535,7 @@ public class PolygonWigglingTest
          x.set(0, 0, thirdQuadrantPoint.getX() - offset);
          x.set(1, 0, thirdQuadrantPoint.getY() - offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1545,7 +1545,7 @@ public class PolygonWigglingTest
          x.set(0, 0, fourthQuadrantPoint.getX() - offset);
          x.set(1, 0, fourthQuadrantPoint.getY() + offset);
 
-         CommonOps.mult(A, x, solution);
+         CommonOps_DDRM.mult(A, x, solution);
          allConditions = true;
          for (int i = 0; i < solution.getNumRows(); i++)
             allConditions &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1556,11 +1556,11 @@ public class PolygonWigglingTest
    @Test
    public void testConvexConstraintOfQuadrangleDeltaInside()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       Point2D firstQuadrantPoint = new Point2D();
@@ -1590,7 +1590,7 @@ public class PolygonWigglingTest
       x.set(0, 0, firstQuadrantPoint.getX());
       x.set(1, 0, firstQuadrantPoint.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       boolean allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1600,7 +1600,7 @@ public class PolygonWigglingTest
       x.set(0, 0, secondQuadrantPoint.getX());
       x.set(1, 0, secondQuadrantPoint.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1610,7 +1610,7 @@ public class PolygonWigglingTest
       x.set(0, 0, thirdQuadrantPoint.getX());
       x.set(1, 0, thirdQuadrantPoint.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1620,7 +1620,7 @@ public class PolygonWigglingTest
       x.set(0, 0, fourthQuadrantPoint.getX());
       x.set(1, 0, fourthQuadrantPoint.getY());
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1630,11 +1630,11 @@ public class PolygonWigglingTest
    @Test
    public void testConstraintOfSquarePolygonInSquarePolygon()
    {
-      DenseMatrix64F A = new DenseMatrix64F(4, 2);
-      DenseMatrix64F b = new DenseMatrix64F(4);
+      DMatrixRMaj A = new DMatrixRMaj(4, 2);
+      DMatrixRMaj b = new DMatrixRMaj(4);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(4, 1);
 
       ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
       ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
@@ -1657,7 +1657,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       boolean allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1667,7 +1667,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1677,7 +1677,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.5);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1687,7 +1687,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, 0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1697,7 +1697,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, -0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1707,7 +1707,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, 0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1717,7 +1717,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.5);
       x.set(1, 0, 0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1727,7 +1727,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.5);
       x.set(1, 0, -0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1737,7 +1737,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, -0.5);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1747,7 +1747,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, -0.6);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1757,7 +1757,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, 0.6);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1767,7 +1767,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.6);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1777,7 +1777,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.6);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1787,7 +1787,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.6);
       x.set(1, 0, -0.6);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1797,11 +1797,11 @@ public class PolygonWigglingTest
    @Test
    public void testConstraintOfSquarePolygonInPentagon()
    {
-      DenseMatrix64F A = new DenseMatrix64F(5, 2);
-      DenseMatrix64F b = new DenseMatrix64F(5);
+      DMatrixRMaj A = new DMatrixRMaj(5, 2);
+      DMatrixRMaj b = new DMatrixRMaj(5);
 
-      DenseMatrix64F x = new DenseMatrix64F(2, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(5, 1);
+      DMatrixRMaj x = new DMatrixRMaj(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(5, 1);
 
       ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
       ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
@@ -1825,7 +1825,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       boolean allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1835,7 +1835,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.1);
       x.set(1, 0, 0.0);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1845,7 +1845,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, -0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1855,7 +1855,7 @@ public class PolygonWigglingTest
       x.set(0, 0, 0.0);
       x.set(1, 0, 0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1865,7 +1865,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, -0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1875,7 +1875,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, -0.2);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1885,7 +1885,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.6);
       x.set(1, 0, -0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1895,7 +1895,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, 0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1905,7 +1905,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.5);
       x.set(1, 0, 0.2);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1915,7 +1915,7 @@ public class PolygonWigglingTest
       x.set(0, 0, -0.6);
       x.set(1, 0, 0.1);
 
-      CommonOps.mult(A, x, solution);
+      CommonOps_DDRM.mult(A, x, solution);
       allInside = true;
       for (int i = 0; i < solution.getNumRows(); i++)
          allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
@@ -1929,7 +1929,7 @@ public class PolygonWigglingTest
       yoPlanePolygon.set(polygon);
    }
 
-   private static void showPlotterAndSleep(ArtifactList artifacts)
+   static void showPlotterAndSleep(ArtifactList artifacts)
    {
       Plotter plotter = new Plotter();
       plotter.setViewRange(2.0);

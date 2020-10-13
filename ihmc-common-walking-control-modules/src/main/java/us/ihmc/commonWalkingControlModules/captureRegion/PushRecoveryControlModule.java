@@ -18,7 +18,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -31,7 +31,7 @@ public class PushRecoveryControlModule
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -71,7 +71,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+                                    WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;

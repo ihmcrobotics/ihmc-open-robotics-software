@@ -75,14 +75,14 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoDouble yoTime;
 
@@ -488,8 +488,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             bodyManager.initialize();
       }
 
+
       pelvisOrientationManager.initialize();
-      balanceManager.initialize();
+//      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
       comHeightManager.initialize();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
@@ -545,6 +546,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
 
    private final FrameVector2D desiredICPVelocityAsFrameVector = new FrameVector2D();
+   private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
 
    private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
@@ -568,6 +570,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
       commandConsumer.consumePlanarRegionsListCommand();
+      commandConsumer.consumePlanarRegionStepConstraintCommand();
       commandConsumer.consumePrepareForLocomotionCommands();
 
       updateFailureDetection();
@@ -655,7 +658,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateManagers(WalkingState currentState)
    {
+      desiredICPVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
+      desiredCoMVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
       balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
+      balanceManager.getDesiredCoMVelocity(desiredCoMVelocityAsFrameVector);
+
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
@@ -679,8 +686,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.compute();
 
       comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
-                                                                                               isRecoveringFromPush, feetManager));
+      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector,
+                                                                                               desiredCoMVelocityAsFrameVector,
+                                                                                               isInDoubleSupport,
+                                                                                               omega0,
+                                                                                               isRecoveringFromPush,
+                                                                                               feetManager));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
@@ -773,7 +784,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
          actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
       }
-      
+
       if (pelvisHeightStatus != null)
       {
          pelvisStatusMessage.setSequenceId(pelvisHeightStatus.getSequenceId());
@@ -841,7 +852,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       return balanceManager.getLinearMomentumRateControlModuleInput();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

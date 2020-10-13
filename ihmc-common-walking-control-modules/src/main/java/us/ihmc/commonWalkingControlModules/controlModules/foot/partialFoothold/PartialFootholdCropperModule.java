@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
@@ -27,10 +27,10 @@ public class PartialFootholdCropperModule
                                        List<? extends FramePoint2DReadOnly> defaultContactPoints,
                                        FootholdRotationParameters rotationParameters,
                                        double dt,
-                                       YoVariableRegistry parentRegistry,
+                                       YoRegistry parentRegistry,
                                        YoGraphicsListRegistry graphicsRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
       shouldShrinkFoothold = new YoBoolean(side.getLowerCaseName() + "ShouldShrinkFoothold", registry);
@@ -38,7 +38,7 @@ public class PartialFootholdCropperModule
       rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
 
-      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, graphicsRegistry);
+      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, null);
       footholdCropper = new FootholdCropper(side.getLowerCaseName(), soleFrame, defaultContactPoints, rotationParameters, dt, registry, graphicsRegistry);
 
       reset();
@@ -58,12 +58,12 @@ public class PartialFootholdCropperModule
          return;
       }
 
-      if (!edgeCalculator.compute(measuredCoP))
-         return;
+      boolean isEdgeTrusted = edgeCalculator.compute(measuredCoP);
 
       FrameLine2DReadOnly lineOfRotation = edgeCalculator.getLineOfRotation();
       RobotSide sideToCrop = footholdCropper.computeSideToCrop(lineOfRotation);
-      if (sideToCrop != null)
+      
+      if (isEdgeTrusted && sideToCrop != null)
       {
          shouldShrinkFoothold.set(cropVerifier.verifyFootholdCrop(desiredCoP, sideToCrop, lineOfRotation));
          if (shouldShrinkFoothold.getBooleanValue())

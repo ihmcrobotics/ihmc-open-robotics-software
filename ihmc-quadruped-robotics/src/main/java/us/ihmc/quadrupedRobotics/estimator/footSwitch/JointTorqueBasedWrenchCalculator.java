@@ -2,9 +2,9 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import java.util.List;
 
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,17 +21,17 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 {
    private final Wrench wrench = new Wrench();
 
-   private final DenseMatrix64F linearPartOfJacobian = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F angularPartOfJacobian = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F linearJacobianInverse = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F angularJacobianInverse = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F linearSelectionMatrix = CommonOps.identity(6);
-   private final DenseMatrix64F angularSelectionMatrix = CommonOps.identity(6);
+   private final DMatrixRMaj linearPartOfJacobian = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj angularPartOfJacobian = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj linearJacobianInverse = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj angularJacobianInverse = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj linearSelectionMatrix = CommonOps_DDRM.identity(6);
+   private final DMatrixRMaj angularSelectionMatrix = CommonOps_DDRM.identity(6);
 
-   private final DenseMatrix64F footLinearForce = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F footAngularForce = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj footLinearForce = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj footAngularForce = new DMatrixRMaj(3, 1);
 
-   private final DenseMatrix64F jointTorques = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj jointTorques = new DMatrixRMaj(3, 1);
 
    private final GeometricJacobian footJacobian;
    private final List<OneDoFJointBasics> joints;
@@ -71,14 +71,14 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       isTorquingIntoJoint = isTorquingIntoJointLimitInternal();
 
       footJacobian.compute();
-      DenseMatrix64F jacobianMatrix = footJacobian.getJacobianMatrix();
-      CommonOps.mult(linearSelectionMatrix, jacobianMatrix, linearPartOfJacobian);
-      CommonOps.mult(angularSelectionMatrix, jacobianMatrix, angularPartOfJacobian);
-      UnrolledInverseFromMinor.inv3(linearPartOfJacobian, linearJacobianInverse, 1.0);
-      UnrolledInverseFromMinor.inv3(angularPartOfJacobian, angularJacobianInverse, 1.0);
+      DMatrixRMaj jacobianMatrix = footJacobian.getJacobianMatrix();
+      CommonOps_DDRM.mult(linearSelectionMatrix, jacobianMatrix, linearPartOfJacobian);
+      CommonOps_DDRM.mult(angularSelectionMatrix, jacobianMatrix, angularPartOfJacobian);
+      UnrolledInverseFromMinor_DDRM.inv3(linearPartOfJacobian, linearJacobianInverse, 1.0);
+      UnrolledInverseFromMinor_DDRM.inv3(angularPartOfJacobian, angularJacobianInverse, 1.0);
 
-      CommonOps.multTransA(-1.0, linearJacobianInverse, jointTorques, footLinearForce);
-      CommonOps.multTransA(-1.0, angularJacobianInverse, jointTorques, footAngularForce);
+      CommonOps_DDRM.multTransA(-1.0, linearJacobianInverse, jointTorques, footLinearForce);
+      CommonOps_DDRM.multTransA(-1.0, angularJacobianInverse, jointTorques, footAngularForce);
 
       wrench.setToZero(footJacobian.getJacobianFrame());
       wrench.getLinearPart().set(footLinearForce);

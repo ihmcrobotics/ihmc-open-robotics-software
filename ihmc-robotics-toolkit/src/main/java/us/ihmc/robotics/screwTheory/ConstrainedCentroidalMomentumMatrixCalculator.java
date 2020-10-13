@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
@@ -17,12 +17,12 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
 {
    private final DynamicallyConsistentNullspaceCalculator dynamicallyConsistentNullspaceCalculator;
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
-   private final DenseMatrix64F selectionMatrix;
-   private final DenseMatrix64F temp = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F constrainedCentroidalMomentumMatrix = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj selectionMatrix;
+   private final DMatrixRMaj temp = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj constrainedCentroidalMomentumMatrix = new DMatrixRMaj(1, 1);
 
    public ConstrainedCentroidalMomentumMatrixCalculator(FloatingJointBasics rootJoint, ReferenceFrame centerOfMassFrame,
-                                                        DenseMatrix64F selectionMatrix)
+                                                        DMatrixRMaj selectionMatrix)
    {
       this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint,
             true);
@@ -35,7 +35,7 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
       dynamicallyConsistentNullspaceCalculator.reset();
    }
 
-   public void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix)
+   public void addConstraint(RigidBodyBasics body, DMatrixRMaj selectionMatrix)
    {
       dynamicallyConsistentNullspaceCalculator.addConstraint(body, selectionMatrix);
    }
@@ -49,22 +49,22 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    {
       dynamicallyConsistentNullspaceCalculator.compute();
       centroidalMomentumCalculator.reset();
-      DenseMatrix64F centroidalMomentumMatrix = this.centroidalMomentumCalculator.getCentroidalMomentumMatrix();
-      DenseMatrix64F sNsBar = dynamicallyConsistentNullspaceCalculator.getSNsBar();
+      DMatrixRMaj centroidalMomentumMatrix = this.centroidalMomentumCalculator.getCentroidalMomentumMatrix();
+      DMatrixRMaj sNsBar = dynamicallyConsistentNullspaceCalculator.getSNsBar();
 
       temp.reshape(centroidalMomentumMatrix.getNumRows(), sNsBar.getNumCols());
-      CommonOps.mult(centroidalMomentumMatrix, sNsBar, temp);
+      CommonOps_DDRM.mult(centroidalMomentumMatrix, sNsBar, temp);
 
       constrainedCentroidalMomentumMatrix.reshape(selectionMatrix.getNumRows(), temp.getNumCols());
-      CommonOps.mult(selectionMatrix, temp, constrainedCentroidalMomentumMatrix);
+      CommonOps_DDRM.mult(selectionMatrix, temp, constrainedCentroidalMomentumMatrix);
    }
 
-   public DenseMatrix64F getConstrainedCentroidalMomentumMatrix()
+   public DMatrixRMaj getConstrainedCentroidalMomentumMatrix()
    {
       return constrainedCentroidalMomentumMatrix;
    }
 
-   public DenseMatrix64F getCentroidalMomentumMatrix()
+   public DMatrixRMaj getCentroidalMomentumMatrix()
    {
       return centroidalMomentumCalculator.getCentroidalMomentumMatrix();
    }

@@ -25,13 +25,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QueuedControllerCommandGenerator implements Updatable, RobotMotionStatusChangedListener
 {
    private static final boolean DEBUG = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private boolean waitingForWalkingStatusToComplete = false;
 
@@ -47,7 +47,7 @@ public class QueuedControllerCommandGenerator implements Updatable, RobotMotionS
    public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
          CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoRegistry parentRegistry)
    {
       this.controllerCommands = controllerCommands;
       this.commandInputManager = commandInputManager;

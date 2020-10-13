@@ -1,8 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning.comPlanning;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -26,15 +31,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class QuadrupedCoMTrajectoryPlannerVisualizer
 {
@@ -93,7 +94,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
 
    public QuadrupedCoMTrajectoryPlannerVisualizer(StepGetter stepGetter)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
@@ -150,7 +151,7 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
 
       scs = new SimulationConstructionSet(robot, scsParameters);
       scs.setDT(simDt, 1);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.5);
       Graphics3DObject linkGraphics = new Graphics3DObject();

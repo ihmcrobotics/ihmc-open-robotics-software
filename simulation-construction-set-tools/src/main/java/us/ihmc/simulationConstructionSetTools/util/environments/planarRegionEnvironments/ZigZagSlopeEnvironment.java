@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class ZigZagSlopeEnvironment extends PlanarRegionEnvironmentInterface
@@ -15,7 +15,7 @@ public class ZigZagSlopeEnvironment extends PlanarRegionEnvironmentInterface
       {
          generator.identity();
          generator.translate(startX + i * rampLengthX, 0.0, heightAtRampMiddle);
-         generator.rotate(rampSlope * slopeSign, Axis.Y);
+         generator.rotate(rampSlope * slopeSign, Axis3D.Y);
          generator.addRectangle(rampLength, 1.0);
          slopeSign *= -1.0;
       }

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -19,14 +18,14 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -45,6 +44,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -61,7 +62,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -80,7 +81,7 @@ public final class KinematicsToolboxControllerTest
    }
 
    private CommandInputManager commandInputManager;
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private KinematicsToolboxController toolboxController;
 
@@ -98,7 +99,7 @@ public final class KinematicsToolboxControllerTest
 
    public void setup(RobotDescription robotDescription, RobotDescription ghostRobotDescription)
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
@@ -159,7 +160,7 @@ public final class KinematicsToolboxControllerTest
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -384,20 +385,15 @@ public final class KinematicsToolboxControllerTest
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
                                                                                             .findFirst().get());
 
-      KinematicsCollidable torsoCollidable = new KinematicsCollidable(torso,
-                                                                      0b001,
-                                                                      0b110,
-                                                                      torsoCollisionShape,
-                                                                      torso.getParentJoint().getFrameAfterJoint(),
-                                                                      0.0);
+      Collidable torsoCollidable = new Collidable(torso, 0b001, 0b110, new FrameCapsule3D(torso.getParentJoint().getFrameAfterJoint(), torsoCollisionShape));
 
-      SideDependentList<KinematicsCollidable> handCollidables = new SideDependentList<>(side ->
+      SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
       {
          RigidBodyBasics hand = hands.get(side);
          int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
          int collisionGroup = 0b001;
          ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new KinematicsCollidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame, 0.0);
+         return new Collidable(hand, collisionMask, collisionGroup, new FrameSphere3D(shapeFrame, handCollisionShape));
       });
 
       toolboxController.registerCollidable(torsoCollidable);
@@ -439,8 +435,8 @@ public final class KinematicsToolboxControllerTest
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            KinematicsCollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
-            assertTrue(collision.getSignedDistance() > -1.0e-3);
+            CollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
+            assertTrue(collision.getCollisionData().getSignedDistance() > -1.0e-3);
          }
       }
    }
@@ -535,7 +531,7 @@ public final class KinematicsToolboxControllerTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return mainRegistry;
          }
@@ -565,7 +561,7 @@ public final class KinematicsToolboxControllerTest
 
       if (linkGraphics != null)
       {
-         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
 
          if (graphics3dInstructions == null)
             return;

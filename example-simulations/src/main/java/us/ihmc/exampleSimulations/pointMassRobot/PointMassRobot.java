@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.pointMassRobot;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -41,15 +41,15 @@ public class PointMassRobot extends Robot
 
       this.setGravity(0.0);
 
-      xJoint = new SliderJoint("pointMassX", new Vector3D(), this, Axis.X);
+      xJoint = new SliderJoint("pointMassX", new Vector3D(), this, Axis3D.X);
       Link xLink = new Link("xLink");
       xJoint.setLink(xLink);
 
-      yJoint = new SliderJoint("pointMassY", new Vector3D(), this, Axis.Y);
+      yJoint = new SliderJoint("pointMassY", new Vector3D(), this, Axis3D.Y);
       Link yLink = new Link("yLink");
       yJoint.setLink(yLink);
 
-      zJoint = new SliderJoint("pointMassZ", new Vector3D(), this, Axis.Z);
+      zJoint = new SliderJoint("pointMassZ", new Vector3D(), this, Axis3D.Z);
       zLink = new Link("zLink");
       zLink.setMass(mass);
       zLink.setMomentOfInertia(0.0, 0.0, 0.0);
@@ -58,7 +58,7 @@ public class PointMassRobot extends Robot
       zLink.setLinkGraphics(zLinkLinkGraphics);
       zJoint.setLink(zLink);
 
-      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3D(), this.getRobotsYoVariableRegistry());
+      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3D(), this.getRobotsYoRegistry());
       zJoint.addExternalForcePoint(externalForcePoint);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

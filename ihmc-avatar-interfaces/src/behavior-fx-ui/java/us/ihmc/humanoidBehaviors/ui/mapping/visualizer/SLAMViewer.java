@@ -59,9 +59,27 @@ public class SLAMViewer
       stereoVisionPointCloudGraphic.addSensorPoseMesh(sensorPose, color);
    }
 
+   /**
+    * default size is 0.05;
+    */
    public void addPointCloud(Point3DReadOnly[] point3dReadOnlies, Color color)
    {
       stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color);
+   }
+
+   public void addPointCloud(List<? extends Point3DReadOnly> point3dReadOnlies, Color color)
+   {
+      stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color);
+   }
+   
+   public void addPointCloud(Point3DReadOnly[] point3dReadOnlies, Color color, double pointSize)
+   {
+      stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color, pointSize);
+   }
+   
+   public void addLines(Point3DReadOnly from, Point3DReadOnly to, Color color, double width)
+   {
+      stereoVisionPointCloudGraphic.addLineMesh(from, to, color, width);
    }
 
    public void addStereoMessage(StereoVisionPointCloudMessage message, Color pointCloudColor)
@@ -124,6 +142,7 @@ public class SLAMViewer
             normalOctreeGraphic.generateMeshes();
             normalOctreeGraphic.update();
             view3dFactory.addNodeToView(normalOctreeGraphic);
+            view3dFactory.setBackgroundColor(Color.WHITE);
 
             Stage stage = new Stage();
             stage.setTitle(title);

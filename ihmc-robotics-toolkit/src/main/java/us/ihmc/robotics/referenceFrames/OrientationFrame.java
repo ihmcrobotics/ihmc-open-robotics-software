@@ -29,6 +29,6 @@ public class OrientationFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      transformToParent.setRotation(frameOrientation);
+      transformToParent.getRotation().set(frameOrientation);
    }
 }

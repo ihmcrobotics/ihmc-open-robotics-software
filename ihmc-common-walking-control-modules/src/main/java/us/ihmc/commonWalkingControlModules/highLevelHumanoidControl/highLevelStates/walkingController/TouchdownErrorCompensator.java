@@ -9,12 +9,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class TouchdownErrorCompensator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SideDependentList<FramePoint3DReadOnly> desiredFootstepPositions = new SideDependentList<>();
 
@@ -31,7 +31,7 @@ public class TouchdownErrorCompensator
    private final FrameVector3D linearVelocity = new FrameVector3D();
 
    public TouchdownErrorCompensator(WalkingMessageHandler walkingMessageHandler, SideDependentList<MovingReferenceFrame> soleFrames,
-                                    YoVariableRegistry parentRegistry)
+                                    YoRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
       this.soleFrames = soleFrames;

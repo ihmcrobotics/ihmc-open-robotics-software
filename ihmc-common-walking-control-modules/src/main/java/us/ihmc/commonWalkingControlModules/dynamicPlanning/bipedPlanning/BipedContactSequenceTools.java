@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalTools;
@@ -36,7 +38,44 @@ public class BipedContactSequenceTools
          }
       }
    }
+   
+   public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double firstSwingStartTime,
+                                                             double currentTime, List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, 
+                                                             int stepsToConsider)
+   {
+      double transitionTime = firstSwingStartTime;
+      
+      stepTransitionsToPack.clear();
+      for (int i = 0; i < Math.min(footstepList.size(), stepsToConsider); i++)
+      {
+         Footstep step = footstepList.get(i);
+         FootstepTiming stepTiming = footstepTimingList.get(i);
 
+         BipedStepTransition liftOffTransition = stepTransitionsToPack.add();
+         liftOffTransition.reset();
+         liftOffTransition.setTransitionTime(transitionTime);
+         liftOffTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getFootstepPose());
+
+         transitionTime += stepTiming.getSwingTime();
+         
+         BipedStepTransition touchDownTransition = stepTransitionsToPack.add();
+         touchDownTransition.reset();
+         touchDownTransition.setTransitionTime(transitionTime);
+         touchDownTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getFootstepPose());
+         
+         transitionTime += stepTiming.getTransferTime();
+      }
+
+      // sort step transitions in ascending order as a function of time
+      stepTransitionsToPack.sort(Comparator.comparingDouble(BipedStepTransition::getTransitionTime));
+
+      // collapse the transitions that occur at the same time
+      BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
+
+      // remove any transitions that already happened
+      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() <= currentTime);
+   }
+   
    /**
     * <p>
     * WARNING: This method generates garbage.

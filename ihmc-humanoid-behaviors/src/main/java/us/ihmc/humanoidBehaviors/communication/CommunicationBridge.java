@@ -12,7 +12,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class CommunicationBridge implements CommunicationBridgeInterface
@@ -182,10 +182,10 @@ public class CommunicationBridge implements CommunicationBridgeInterface
 
    public void registerYovaribleForAutoSendToUI(YoVariable var)
    {
-      var.addVariableChangedListener(new VariableChangedListener()
+      var.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             sendToUI(v.getName(), v.getValueAsDouble());
          }
@@ -194,11 +194,11 @@ public class CommunicationBridge implements CommunicationBridgeInterface
 
    public void registerYovaribleForAutoSendToBehavior(YoVariable var)
    {
-      var.addVariableChangedListener(new VariableChangedListener()
+      var.addListener(new YoVariableChangedListener()
       {
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             sendToBehavior(v.getName(), v.getValueAsDouble());
          }

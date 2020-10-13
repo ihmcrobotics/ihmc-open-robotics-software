@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -36,13 +37,13 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightControlState
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    /**
     * We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a
@@ -103,7 +104,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final FramePoint3D statusActualPosition = new FramePoint3D();
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
-   public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
@@ -249,7 +250,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * set the qp weights for the taskspace linear z command
-    * 
+    *
     * @param linearWeight
     */
    public void setWeights(Vector3DReadOnly linearWeight)
@@ -290,7 +291,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * check that the command is valid and queue the trajectory
-    * 
+    *
     * @param command
     * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
@@ -384,7 +385,11 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    }
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+                                                     FrameVector2DReadOnly desiredCoMVelocity,
+                                                     boolean isInDoubleSupport,
+                                                     double omega0,
+                                                     boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
       PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();

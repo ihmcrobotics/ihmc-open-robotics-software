@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -50,12 +50,12 @@ public class KinematicFootRotationDetector implements FootRotationDetector
                                         MovingReferenceFrame soleFrame,
                                         FootholdRotationParameters rotationParameters,
                                         double controllerDt,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
       String namePrefix = side.getLowerCaseName() + "Kinematic";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       angularVelocityFilterBreakFrequency = rotationParameters.getAngularVelocityFilterBreakFrequency();
@@ -105,6 +105,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       pointingBackwardVector.scale(0.15); // FIXME magic number?
       pointingBackwardVector.changeFrame(worldFrame);
 
+      // This foot drop or lift doesn't work on non-flat ground.
       footDropOrLift.set(pointingBackwardVector.getZ());
       angularVelocityMagnitude.set(footAngularVelocityFiltered.length());
 

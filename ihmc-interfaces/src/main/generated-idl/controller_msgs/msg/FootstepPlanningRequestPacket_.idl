@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__FootstepPlanningRequestPacket__idl__
 
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
@@ -15,17 +16,14 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet FOOTSTEP_PLAN_HEADING_FORWARD =
+      const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      const octet FOOTSTEP_PLAN_HEADING_BACKWARD =
+      const octet SWING_PLANNER_TYPE_POSITION =
       1;
 
-      const octet FOOTSTEP_PLAN_HEADING_LEFT =
+      const octet SWING_PLANNER_TYPE_PROPORTION =
       2;
-
-      const octet FOOTSTEP_PLAN_HEADING_RIGHT =
-      3;
 
       const long NO_PLAN_ID =
       -1;
@@ -50,6 +48,14 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Pose start_right_foot_pose;
         /**
+         * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+         */
+        sequence<geometry_msgs::msg::dds::Point, 10> initial_left_contact_points_2d;
+        /**
+         * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+         */
+        sequence<geometry_msgs::msg::dds::Point, 10> initial_right_contact_points_2d;
+        /**
          * Goal left foot pose
          */
         geometry_msgs::msg::dds::Pose goal_left_foot_pose;
@@ -71,6 +77,10 @@ module controller_msgs
          * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
          */
         boolean abort_if_goal_step_snapping_fails;
+        /**
+         * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+         */
+        boolean abort_if_body_path_planner_fails;
         /**
          * If true, will plan a body path. If false, will follow a straight-line path to the goal
          */
@@ -95,10 +105,10 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double goal_yaw_proximity;
         /**
-         * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+         * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+         * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
          */
-        @defaultValue(value=255)
-        octet requested_path_heading;
+        double requested_path_heading;
         /**
          * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
          */
@@ -126,6 +136,23 @@ module controller_msgs
          */
         @defaultValue(value=-1)
         long planner_request_id;
+        /**
+         * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+         */
+        @defaultValue(value=1.0)
+        double status_publish_period;
+        /**
+         * Specifies swing planner to use. See the above enumeration
+         */
+        octet requested_swing_planner;
+        /**
+         * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+         */
+        boolean perform_position_based_split_fraction_calculation;
+        /**
+         * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+         */
+        boolean perform_area_based_split_fraction_calculation;
         /**
          * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
          * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

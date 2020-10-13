@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -36,12 +36,12 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private ReferenceFrame controlFrame;
    private final ReferenceFrame ankleFrame;
-   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final PIDSE3GainsReadOnly gains;
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration,
-                                PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
+                                PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
 
@@ -67,7 +67,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
 
-      legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+      workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -100,10 +100,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       poseController.onEntry();
       isPerformingTouchdown.set(false);
 
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
-      }
+      if (workspaceLimiterControlModule != null)
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
    }
 
    @Override
@@ -159,7 +157,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      if (workspaceLimiterControlModule != null)
       {
          desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
          desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
@@ -172,9 +170,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         workspaceLimiterControlModule.update();
+         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-         desiredPose.setPosition(desiredAnklePosition);
+         desiredPose.getPosition().set(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
@@ -217,9 +216,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      poseController.onExit();
+      poseController.onExit(timeInState);
    }
 
    @Override

@@ -54,7 +54,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
       {
          // First need to pick up the foot:
          FramePose3D footPoseCloseToActual = new FramePose3D(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
-         footPoseCloseToActual.setPosition(0.0, 0.0, 0.05);
+         footPoseCloseToActual.getPosition().set(0.0, 0.0, 0.05);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
@@ -78,9 +78,9 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState")).getEnumValue();
+         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState")).getEnumValue();
          assertEquals(WalkingStateEnum.STANDING, walkingState);
-         ConstraintType footState = ((YoEnum<ConstraintType>)scs.getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState")).getEnumValue();
+         ConstraintType footState = ((YoEnum<ConstraintType>)scs.findVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }
    }

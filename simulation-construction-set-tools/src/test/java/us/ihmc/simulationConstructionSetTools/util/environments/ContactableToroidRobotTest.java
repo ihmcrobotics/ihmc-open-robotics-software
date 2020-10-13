@@ -61,7 +61,7 @@ public class ContactableToroidRobotTest
       
       Vector3D randomVector = RandomGeometry.nextVector3D(random);
       RigidBodyTransform transform3d = new RigidBodyTransform();
-      transform3d.setTranslation(randomVector);
+      transform3d.getTranslation().set(randomVector);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", transform3d);
 
@@ -100,7 +100,7 @@ public class ContactableToroidRobotTest
       
       Vector3D vector3d = RandomGeometry.nextVector3D(random);
       RigidBodyTransform randomTransform = new RigidBodyTransform();
-      randomTransform.setTranslation(vector3d);
+      randomTransform.getTranslation().set(vector3d);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", randomTransform);
 

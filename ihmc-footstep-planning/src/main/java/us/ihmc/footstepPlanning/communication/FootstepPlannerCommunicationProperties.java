@@ -1,20 +1,17 @@
 package us.ihmc.footstepPlanning.communication;
 
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import us.ihmc.ros2.ROS2Topic;
 
 public class FootstepPlannerCommunicationProperties
 {
-   public static MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
+   public static ROS2Topic outputTopic(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic inputTopic(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }
 }

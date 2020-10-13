@@ -16,7 +16,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OrientationInterpolationTrajectoryGeneratorTest
 {
@@ -27,7 +27,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    private DoubleProvider trajectoryTimeProvider;
    private OrientationProvider initialOrientationProvider;
    private OrientationProvider finalOrientationProvider;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
    
 //   private static int globalCounter = 0;
    private static final double EPSILON = 1e-10;
@@ -38,13 +38,13 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrameTEST");
       orientation = new FrameQuaternion(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);
       initialOrientationProvider = new ConstantOrientationProvider(orientation);
       finalOrientationProvider = new ConstantOrientationProvider(orientation);
-      parentRegistry = new YoVariableRegistry("registry");
+      parentRegistry = new YoRegistry("registry");
    }
    
    @AfterEach
@@ -172,9 +172,9 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
    
-//   private YoVariableRegistry createRegistry()
+//   private YoRegistry createRegistry()
 //   {
-//      YoVariableRegistry registry = new YoVariableRegistry("registry" + globalCounter);
+//      YoRegistry registry = new YoRegistry("registry" + globalCounter);
 //      globalCounter++;
 //      return registry;
 //   }

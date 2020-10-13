@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 
 /**
  * This class represents a map to retrieve reference frame from their hash-code.

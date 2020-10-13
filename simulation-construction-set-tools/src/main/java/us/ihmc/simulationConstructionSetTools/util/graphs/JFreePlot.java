@@ -5,7 +5,7 @@ import java.awt.Color;
 
 import org.jfree.data.xy.XYSeries;
 
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 
 public class JFreePlot extends XYSeries
 {
@@ -28,9 +28,9 @@ public class JFreePlot extends XYSeries
       super(name);
    }
    
-   public JFreePlot(DataBufferEntry xPlot, DataBufferEntry yPlot)
+   public JFreePlot(YoBufferVariableEntry xPlot, YoBufferVariableEntry yPlot)
    {
-      this(xPlot.getData(), yPlot.getData());
+      this(xPlot.getBuffer(), yPlot.getBuffer());
    }
 
    public JFreePlot(double[] xPlot, double[] yPlot)
@@ -38,9 +38,9 @@ public class JFreePlot extends XYSeries
       this("plot", xPlot, yPlot);
    }
 
-   public JFreePlot(DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
+   public JFreePlot(YoBufferVariableEntry xPlot, YoBufferVariableEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
    {
-      this(xPlot.getData(), yPlot.getData(), autoSort, allowDuplicateXValues);
+      this(xPlot.getBuffer(), yPlot.getBuffer(), autoSort, allowDuplicateXValues);
    }
 
    public JFreePlot(double[] xPlot, double[] yPlot, boolean autoSort, boolean allowDuplicateXValues)
@@ -48,9 +48,9 @@ public class JFreePlot extends XYSeries
       this("plot", xPlot, yPlot, autoSort, allowDuplicateXValues);
    }
 
-   public JFreePlot(String name, DataBufferEntry xPlot, DataBufferEntry yPlot)
+   public JFreePlot(String name, YoBufferVariableEntry xPlot, YoBufferVariableEntry yPlot)
    {
-      this(name, xPlot.getData(), yPlot.getData());
+      this(name, xPlot.getBuffer(), yPlot.getBuffer());
    }
 
    public JFreePlot(String name, double[] xPlot, double[] yPlot)
@@ -58,9 +58,9 @@ public class JFreePlot extends XYSeries
       this(name, xPlot, yPlot, true, false);
    }
 
-   public JFreePlot(String name, DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
+   public JFreePlot(String name, YoBufferVariableEntry xPlot, YoBufferVariableEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
    {
-      this(name, xPlot.getData(), yPlot.getData(), autoSort, allowDuplicateXValues);
+      this(name, xPlot.getBuffer(), yPlot.getBuffer(), autoSort, allowDuplicateXValues);
    }
 
    public JFreePlot(String name, double[] xPlot, double[] yPlot, boolean autoSort, boolean allowDuplicateXValues)

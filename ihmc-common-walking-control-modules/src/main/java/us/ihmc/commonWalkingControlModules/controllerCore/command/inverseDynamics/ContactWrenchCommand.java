@@ -20,6 +20,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenchCommand>, VirtualModelControlCommand<ContactWrenchCommand>
 {
+   private int commandId;
    /**
     * The constraint type for this command.
     * <p>
@@ -99,6 +100,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    @Override
    public void set(ContactWrenchCommand other)
    {
+      this.commandId = other.commandId;
       this.constraintType = other.constraintType;
       this.rigidBody = other.rigidBody;
       this.wrench.setIncludingFrame(other.wrench);
@@ -113,6 +115,18 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -122,6 +136,8 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
       else if (object instanceof ContactWrenchCommand)
       {
          ContactWrenchCommand other = (ContactWrenchCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (constraintType != other.constraintType)
             return false;
          if (rigidBody != other.rigidBody)

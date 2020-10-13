@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,13 +22,13 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 public class ExternalWrenchHandler
 {
    private final SpatialForce gravitationalWrench;
-   private final DenseMatrix64F gravitationalWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DMatrixRMaj gravitationalWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj wrenchEquationRightHandSide = new DMatrixRMaj(Wrench.SIZE, 1);
    private final Map<RigidBodyBasics, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBodyBasics, Wrench>();
    /** For garbage free iteration */
    private final List<Wrench> externalWrenchesToCompensateForList = new ArrayList<Wrench>();
    private final SpatialForce totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
-   private final DenseMatrix64F totalWrenchAlreadyAppliedMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DMatrixRMaj totalWrenchAlreadyAppliedMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final List<RigidBodyBasics> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
    private final List<RigidBodyBasics> rigidBodiesWithExternalWrench = new ArrayList<>();
@@ -76,7 +76,7 @@ public class ExternalWrenchHandler
     *
     * @return
     */
-   public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumConvectiveTerm, DenseMatrix64F b, DenseMatrix64F bHat)
+   public final DMatrixRMaj computeWrenchEquationRightHandSide(DMatrixRMaj momentumConvectiveTerm, DMatrixRMaj b, DMatrixRMaj bHat)
    {
       totalWrenchAlreadyApplied.setIncludingFrame(gravitationalWrench);
       for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
@@ -87,14 +87,14 @@ public class ExternalWrenchHandler
       }
 
       totalWrenchAlreadyApplied.get(wrenchEquationRightHandSide);
-      CommonOps.changeSign(wrenchEquationRightHandSide);
-      CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
-      CommonOps.addEquals(wrenchEquationRightHandSide, b);
-      CommonOps.subtractEquals(wrenchEquationRightHandSide, bHat);
+      CommonOps_DDRM.changeSign(wrenchEquationRightHandSide);
+      CommonOps_DDRM.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
+      CommonOps_DDRM.addEquals(wrenchEquationRightHandSide, b);
+      CommonOps_DDRM.subtractEquals(wrenchEquationRightHandSide, bHat);
       return wrenchEquationRightHandSide;
    }
 
-   public DenseMatrix64F getSumOfExternalWrenches()
+   public DMatrixRMaj getSumOfExternalWrenches()
    {
       totalWrenchAlreadyApplied.setToZero(centerOfMassFrame);
 
@@ -158,7 +158,7 @@ public class ExternalWrenchHandler
       return rigidBodiesWithExternalWrench;
    }
 
-   public DenseMatrix64F getGravitationalWrench()
+   public DMatrixRMaj getGravitationalWrench()
    {
       gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;

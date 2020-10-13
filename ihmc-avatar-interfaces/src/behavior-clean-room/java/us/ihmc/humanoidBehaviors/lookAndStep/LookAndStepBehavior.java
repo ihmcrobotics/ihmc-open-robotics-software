@@ -1,333 +1,294 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
-import com.google.common.collect.Lists;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Pair;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
-import us.ihmc.communication.RemoteREAInterface;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepLocalization;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
-import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorState.*;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
-   private TypedNotification<WalkingStatusMessage> walkingStatusNotification;
 
-   public enum LookAndStepBehaviorState
+   private boolean enabled = false;
+   private final BehaviorHelper helper;
+   private final StatusLogger statusLogger;
+   private final RemoteHumanoidRobotInterface robotInterface;
+
+   private final LookAndStepBodyPathPlanning bodyPathPlanning = new LookAndStepBodyPathPlanning();
+   private final LookAndStepLocalization localization = new LookAndStepLocalization();
+   private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
+   private final LookAndStepStepping stepping = new LookAndStepStepping();
+   private final LookAndStepReset reset = new LookAndStepReset();
+   private final LookAndStepSupportRegionsPublisher supportRegionsPublisher = new LookAndStepSupportRegionsPublisher();
+   private final BehaviorStateReference<State> behaviorStateReference;
+   private final LookAndStepBehaviorParameters lookAndStepParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
+   private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final AtomicBoolean isBeingReset = new AtomicBoolean();
+
+   /**
+    * At any time the behavior will be executing on one of this tasks
+    * or "trying" to do it. Sometimes conditions will not be satisfied
+    * to execute the task the behavior will be waiting on those conditions.
+    */
+   public enum State
    {
-      PERCEPT, PLAN, USER, STEP, PLAN_FAILED
+      RESET, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
    }
 
-   private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
-
-   private final BehaviorHelper helper;
-   private final AtomicReference<Boolean> operatorReviewEnabledInput;
-   private final StateMachine<LookAndStepBehaviorState, State> stateMachine;
-   private final PausablePeriodicThread mainThread;
-   private final RemoteREAInterface rea;
-   private final RemoteEnvironmentMapInterface environmentMap;
-
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final RemoteHumanoidRobotInterface robot;
-   private final FootstepPlanningModule footstepPlanningModule;
-
-   private AtomicReference<FootstepPlannerOutput> latestFootstepPlannerOutput = new AtomicReference<>();
-   private final TypedNotification<FootstepPlannerOutput> footstepPlannerOutputNotification = new TypedNotification<>();
-   private final Notification takeStepNotification;
-   private final Notification rePlanNotification;
-   private final Stopwatch planFailedWait = new Stopwatch();
-   private FramePose3D goalPoseBetweenFeet = null;
-
+   /**
+    * We'll make the following assumptions/constraints about the data being passed around between task/modules:
+    * - Data output from module will be read only and the underlying data must not be modified after sending
+    * - Timers are considered parallel tasks/ modules
+    * <p>
+    * Inputs can be polled or triggered by an event
+    * Outputs can be an event or polled by another task
+    */
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      rea = helper.getOrCreateREAInterface();
-      environmentMap = helper.getOrCreateEnvironmentMapInterface();
-      robot = helper.getOrCreateRobotInterface();
-      operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
-      rePlanNotification = helper.createUINotification(RePlan);
-      takeStepNotification = helper.createUINotification(TakeStep);
-      helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
-      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
-      helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
-      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
+      robotInterface = helper.getOrCreateRobotInterface();
+      statusLogger = helper.getOrCreateStatusLogger();
 
-      EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
-      stateMachineFactory.setDoAction(PERCEPT, this::pollInterrupts);
-      stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
-      stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
-      stateMachineFactory.setDoAction(PLAN, this::pollInterrupts);
-      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(USER, STEP, PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.setDoAction(USER, this::pollInterrupts);
-      stateMachineFactory.addTransition(USER, Lists.newArrayList(STEP, PERCEPT), this::transitionFromUser);
-      stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
-      stateMachineFactory.setDoAction(STEP, this::pollInterrupts);
-      stateMachineFactory.addTransition(STEP, PERCEPT, this::transitionFromStep);
-      stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);
-      stateMachineFactory.setDoAction(PLAN_FAILED, this::pollInterrupts);
-      stateMachineFactory.addTransition(PLAN_FAILED, PERCEPT, this::transitionFromPlanFailed);
-      stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
-      stateMachine = stateMachineFactory.getFactory().build(PERCEPT);
+      visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
+      visibilityGraphParameters.setIncludePreferredExtrusions(false);
+      visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
-      mainThread = helper.createPausablePeriodicThread(getClass(), 0.1, stateMachine::doActionAndTransition);
+      lookAndStepParameters = new LookAndStepBehaviorParameters();
+      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
+      swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
+
+      helper.createROS2Callback(LOOK_AND_STEP_PARAMETERS, parameters ->
+      {
+         List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
+
+         if (!lookAndStepParameters.getAllAsStrings().equals(values))
+         {
+            statusLogger.info("Accepting new look and step parameters");
+            lookAndStepParameters.setAllFromStrings(values);
+         }
+      });
+      helper.createUICallback(FootstepPlannerParameters, parameters ->
+      {
+         statusLogger.info("Accepting new footstep planner parameters");
+         footstepPlannerParameters.setAllFromStrings(parameters);
+      });
+      helper.createUICallback(SwingPlannerParameters, parameters ->
+      {
+         statusLogger.info("Accepting new swing planner parameters");
+         swingPlannerParameters.setAllFromStrings(parameters);
+      });
+
+      AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
+      TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
+
+      // Trying to hold a lot of the state here? TODO: In general, where to put what state?
+      AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
+      SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps = new SideDependentList<>();
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
+      ControllerStatusTracker controllerStatusTracker = new ControllerStatusTracker(statusLogger,
+                                                                                   helper.getManagedROS2Node(),
+                                                                                   helper.getRobotModel().getSimpleRobotName());
+      reset.initialize(statusLogger,
+                       controllerStatusTracker,
+                       lookAndStepParameters,
+                       () ->
+                       {
+                          isBeingReset.set(true);
+                          behaviorStateReference.set(State.RESET);
+
+                          operatorReviewEnabledInput.set(true);
+                          helper.publishToUI(OperatorReviewEnabledToUI, true);
+
+                          bodyPathPlanning.reset();
+                          localization.reset();
+                          footstepPlanning.reset();
+                          stepping.reset();
+
+                          robotInterface.pauseWalking();
+                       },
+                       () ->
+                       {
+                          bodyPathPlanning.acceptGoal(null);
+                          lastStanceSide.set(null);
+                          helper.publishToUI(ResetForUI);
+                          lastCommandedFootsteps.clear();
+                          controllerStatusTracker.reset();
+
+                          BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
+                                = new BipedalSupportPlanarRegionParametersMessage();
+                          boolean enableSupportRegions = lookAndStepParameters.getEnableBipedalSupportRegions();
+                          supportPlanarRegionParametersMessage.setEnable(enableSupportRegions);
+                          statusLogger.info("Sending enable support regions: {}", enableSupportRegions);
+                          helper.publishROS2(BipedalSupportPlanarRegionPublisher.getTopic(helper.getRobotModel().getSimpleRobotName()),
+                                             supportPlanarRegionParametersMessage);
+
+//                          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+//                          clearMessage.setRequestClear(true);
+//                          statusLogger.info("Requesting clear REA");
+//                          helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+
+                          statusLogger.info("Clearing SLAM");
+                          helper.publishROS2(SLAMModuleAPI.CLEAR);
+
+                          isBeingReset.set(false);
+                          behaviorStateReference.set(State.BODY_PATH_PLANNING);
+                       });
+      helper.createROS2Callback(RESET, reset::queueReset);
+      helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message ->
+      {
+         reset.queueReset();
+      });
+      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
+      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, supportRegionsPublisher::acceptPlanarRegions);
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
+      helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
+
+      // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
+
+      // TODO: Want to be able to wire up behavior here and see all present modules
+      // TODO: Add more meaning to the construction by establishing data patterns
+      // TODO: Use named interfaces or pass in actual objects to prevent misordered arguments
+
+      // could add meaning by local variables before passing
+      bodyPathPlanning.initialize(
+            statusLogger,
+            helper::publishToUI,
+            robotInterface::pitchHeadWithRespectToChest,
+            visibilityGraphParameters,
+            lookAndStepParameters,
+            operatorReviewEnabledInput::get,
+            robotInterface.newSyncedRobot(),
+            behaviorStateReference::get,
+            controllerStatusTracker,
+            bodyPathPlan ->
+            {
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                  localization.acceptBodyPathPlan(bodyPathPlan);
+               }
+            },
+            approvalNotification
+      );
+      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
+      helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
+      localization.initialize(
+            statusLogger,
+            helper::publishToUI,
+            lookAndStepParameters,
+            robotInterface.newSyncedRobot(),
+            helper.createWalkingCompletedNotification(),
+            () -> {
+               if ((!isBeingReset.get()))
+               {
+                  helper.publishROS2(SLAMModuleAPI.CLEAR);
+                  bodyPathPlanning.acceptGoal(null);
+                  behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+               }
+            },
+            () ->
+            {
+               statusLogger.info("Publishing REACHED GOAL");
+               helper.publishROS2(REACHED_GOAL);
+            },
+            lastCommandedFootsteps,
+            footstepPlanning::acceptLocalizationResult
+      );
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, localization::acceptCapturabilityBasedStatus);
+      footstepPlanning.initialize(
+            statusLogger,
+            lookAndStepParameters,
+            footstepPlannerParameters,
+            swingPlannerParameters,
+            helper::publishToUI,
+            helper.getOrCreateFootstepPlanner(),
+            FootstepPlanningModuleLauncher.createFootPolygons(helper.getRobotModel()),
+            lastStanceSide,
+            operatorReviewEnabledInput::get,
+            robotInterface.newSyncedRobot(),
+            behaviorStateReference::get,
+            controllerStatusTracker,
+            footstepPlanEtc ->
+            {
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.STEPPING);
+                  stepping.acceptFootstepPlan(footstepPlanEtc);
+               }
+            },
+            approvalNotification
+      );
+      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
+      helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
+      {
+         if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+         {
+            footstepPlanning.acceptFootstepCompleted();
+         }
+      });
+      stepping.initialize(
+            statusLogger,
+            robotInterface.newSyncedRobot(),
+            lookAndStepParameters,
+            footstepPlannerParameters,
+            swingPlannerParameters,
+            helper::publishToUI,
+            helper.createFootstepPlanPostProcessor(),
+            robotInterface::requestWalk,
+            () ->
+            {
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                  localization.acceptSwingSleepComplete();
+               }
+            },
+            controllerStatusTracker,
+            behaviorStateReference::get,
+            lastCommandedFootsteps
+      );
    }
 
    @Override
    public void setEnabled(boolean enabled)
    {
-      LogTools.info("Look and step behavior selected = {}", enabled);
-
-      mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
-   }
-
-   private void stateChanged(LookAndStepBehaviorState from, LookAndStepBehaviorState to)
-   {
-      helper.publishToUI(CurrentState, to.name());
-      LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
-   }
-
-   private boolean transitionFromPercept(double timeInState)
-   {
-      return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
-   }
-
-   private void onPlanStateEntry()
-   {
-      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
-      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
-
-      FramePose3D initialPoseBetweenFeet = new FramePose3D();
-      initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
-      double midFeetZ = initialPoseBetweenFeet.getZ();
-
-      if (goalPoseBetweenFeet == null)
+      if (this.enabled != enabled)
       {
-         goalPoseBetweenFeet = new FramePose3D();
-         goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
-         goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
-      }
-
-      double trailingBy = goalPoseBetweenFeet.getX() - initialPoseBetweenFeet.getX();
-
-      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength) - trailingBy, 0.0, 0.0);
-      goalPoseBetweenFeet.setZ(midFeetZ);
-
-      RobotSide initialStanceFootSide = null;
-      FramePose3D initialStanceFootPose = null;
-      FramePose3D leftSolePose = new FramePose3D();
-      leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
-      leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
-      FramePose3D rightSolePose = new FramePose3D();
-      rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
-      rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
-      {
-         initialStanceFootSide = RobotSide.LEFT;
-         initialStanceFootPose = leftSolePose;
-      }
-      else
-      {
-         initialStanceFootSide = RobotSide.RIGHT;
-         initialStanceFootPose = rightSolePose;
-      }
-
-      helper.publishToUI(GoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
-
-      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceFootSide);
-      footstepPlannerRequest.setStartFootPoses(leftSolePose, rightSolePose);
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
-      footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
-      footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
-
-      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
-      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
-      footstepPlannerParameters.setReturnBestEffortPlan(lookAndStepParameters.get(LookAndStepBehaviorParameters.returnBestEffortPlanOverride));
-      footstepPlannerParameters.setCliffHeightToAvoid(lookAndStepParameters.get(LookAndStepBehaviorParameters.cliffHeightToAvoidOverride));
-
-      footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-
-      footstepPlanningModule.addStatusCallback(this::footstepPlanningStatusUpdate);
-
-      ThreadTools.startAsDaemon(() -> footstepPlanningThread(footstepPlannerRequest), "FootstepPlanner");
-   }
-
-   private void footstepPlanningStatusUpdate(FootstepPlannerOutput status)
-   {
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(status.getFootstepPlan()));
-   }
-
-   private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
-   {
-      FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
-      footstepPlannerOutputNotification.add(footstepPlannerOutput);
-
-      latestFootstepPlannerOutput.set(footstepPlannerOutput);
-
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
-      footstepPlannerLogger.logSession();
-      footstepPlannerLogger.deleteOldLogs(10);
-
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
-   }
-
-   private LookAndStepBehaviorState transitionFromPlan(double timeInState)
-   {
-      if (footstepPlannerOutputNotification.hasNext())
-      {
-         if (footstepPlannerOutputNotification.peek().getFootstepPlan().getNumberOfSteps() > 0) // at least 1 footstep
-         {
-            if (operatorReviewEnabledInput.get())
-            {
-               return USER;
-            }
-            else
-            {
-               return STEP;
-            }
-         }
-         else
-         {
-            return PLAN_FAILED;
-         }
-      }
-
-      return null;
-   }
-
-   private void onPlanFailedStateEntry()
-   {
-      planFailedWait.start();
-   }
-
-   private boolean transitionFromPlanFailed(double timeInState)
-   {
-      return planFailedWait.lapElapsed() > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
-   }
-
-   private LookAndStepBehaviorState transitionFromUser(double timeInState)
-   {
-      if (rePlanNotification.read())
-      {
-         return PERCEPT;
-      }
-      else if (takeStepNotification.read())
-      {
-         return STEP;
-      }
-
-      return null;
-   }
-
-   private void onStepStateEntry()
-   {
-      FootstepPlan footstepPlan = latestFootstepPlannerOutput.get().getFootstepPlan();
-
-      FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-      if (footstepPlan.getNumberOfSteps() > 0)
-      {
-         shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(0));
-      }
-
-      LogTools.info("Requesting walk");
-      double swingTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.swingTime);
-      double transferTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.transferTime);
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
-                                                                                                                    swingTime,
-                                                                                                                    transferTime,
-                                                                                                                    ExecutionMode.OVERRIDE);
-      walkingStatusNotification = robot.requestWalk(footstepDataListMessage, robot.pollHumanoidRobotState(), environmentMap.getLatestCombinedRegionsList());
-
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
-   }
-
-   private boolean transitionFromStep(double timeInState)
-   {
-      return walkingStatusNotification.hasNext(); // use rea.isRobotWalking?
-   }
-
-   private void pollInterrupts(double timeInState)
-   {
-      if (walkingStatusNotification != null)
-      {
-         walkingStatusNotification.poll();
-      }
-
-      footstepPlannerOutputNotification.poll();
-      takeStepNotification.poll();
-      rePlanNotification.poll();
-   }
-
-   private boolean arePlanarRegionsExpired()
-   {
-      return environmentMap.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration());
-   }
-
-   public static class LookAndStepBehaviorAPI
-   {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
-      private static final CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
-
-      public static final Topic<String> CurrentState = topic("CurrentState");
-      public static final Topic<Object> TakeStep = topic("TakeStep");
-      public static final Topic<Object> RePlan = topic("RePlan");
-      public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<Point3D> GoalForUI = topic("GoalForUI");
-      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
-      public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
-      public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
-
-      private static final <T> Topic<T> topic(String name)
-      {
-         return RootCategory.child(LookAndStepTheme).topic(apiFactory.createTypedTopicTheme(name));
-      }
-
-      public static final MessagerAPIFactory.MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
+         this.enabled = enabled;
+         helper.setCommunicationCallbacksEnabled(enabled);
+         statusLogger.info("Look and step behavior selected = {}", enabled);
+         behaviorStateReference.broadcast();
+         reset.queueReset();
       }
    }
 }

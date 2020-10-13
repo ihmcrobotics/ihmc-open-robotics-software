@@ -2,9 +2,12 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,7 +45,7 @@ public class PlanThenSnapPlanner
 
    private FootstepPlan footstepPlan = new FootstepPlan();
 
-   public FootstepPlanningResult plan()
+   public FootstepPlanningResult plan() throws SnappingFailedException
    {
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
@@ -53,23 +56,14 @@ public class PlanThenSnapPlanner
       snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
-      for (int i=0; i<numberOfFootsteps; i++)
+      for (int i = 0; i < numberOfFootsteps; i++)
       {
-         SimpleFootstep footstep = footstepPlan.getFootstep(i);
-         try
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         FramePose3D solePose = footstep.getFootstepPose();
+         ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
+         if (footHold != null)
          {
-            FramePose3D solePose = new FramePose3D();
-            footstep.getSoleFramePose(solePose);
-            ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
-            footstep.setSoleFramePose(solePose);
-            if(footHold!=null)
-            {
-               footstep.setFoothold(footHold);
-            }
-         }
-         catch (Exception e)
-         {
-            return FootstepPlanningResult.SNAPPING_FAILED;
+            footstep.getFoothold().set(footHold);
          }
       }
       return result;

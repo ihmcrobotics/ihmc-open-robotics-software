@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ContactStateInterpolator
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final List<YoContactPoint> contactPoints;
    private final FrameLineSegment2D contactLine2D = new FrameLineSegment2D();
@@ -49,12 +49,12 @@ public class ContactStateInterpolator
     * @param dt             - the dt used to increment the time in trajectory
     * @param parentRegistry
     */
-   public ContactStateInterpolator(RobotSide robotSide, YoPlaneContactState contactState, double dt, YoVariableRegistry parentRegistry)
+   public ContactStateInterpolator(RobotSide robotSide, YoPlaneContactState contactState, double dt, YoRegistry parentRegistry)
    {
       this.contactState = contactState;
       this.dt = dt;
       String prefix = robotSide.getCamelCaseNameForStartOfExpression() + name;
-      this.registry = new YoVariableRegistry(prefix);
+      this.registry = new YoRegistry(prefix);
       this.contactPoints = contactState.getContactPoints();
       contactPointInterpolationActivated = new boolean[contactPoints.size()];
 

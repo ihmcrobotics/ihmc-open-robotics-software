@@ -11,6 +11,7 @@ public class PolygonizerParametersProperty extends ParametersProperty<Polygonize
    private final DoubleField peakAngleThreshold = new DoubleField(PolygonizerParameters::getPeakAngleThreshold, (p, v) -> p.setPeakAngleThreshold(v));
    private final DoubleField lengthThreshold = new DoubleField(PolygonizerParameters::getLengthThreshold, (p, v) -> p.setLengthThreshold(v));
    private final DoubleField depthThreshold = new DoubleField(PolygonizerParameters::getDepthThreshold, (p, v) -> p.setDepthThreshold(v));
+   private final BooleanField enableNarrowPassageFilterField = new BooleanField(PolygonizerParameters::getCutNarrowPassage, (p, v) -> p.setCutNarrowPassage(v));
 
    public PolygonizerParametersProperty(Object bean, String name)
    {
@@ -21,22 +22,22 @@ public class PolygonizerParametersProperty extends ParametersProperty<Polygonize
    {
       bindFieldBidirectionalToNumberProperty(property, concaveHullThreshold);
    }
-   
+
    public void bindBidirectionalMinNumberOfNodes(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minNumberOfNodes);
    }
-   
+
    public void bindBidirectionalShallowAngleThreshold(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, shallowAngleThreshold);
    }
-   
+
    public void bindBidirectionalPeakAngleThreshold(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, peakAngleThreshold);
    }
-   
+
    public void bindBidirectionalLengthThreshold(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, lengthThreshold);
@@ -47,6 +48,11 @@ public class PolygonizerParametersProperty extends ParametersProperty<Polygonize
       bindFieldBidirectionalToNumberProperty(property, depthThreshold);
    }
    
+   public void bindBidirectionalEnableNarrowPassageFilter(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, enableNarrowPassageFilterField);
+   }
+
    @Override
    protected PolygonizerParameters getValueCopy(PolygonizerParameters valueToCopy)
    {

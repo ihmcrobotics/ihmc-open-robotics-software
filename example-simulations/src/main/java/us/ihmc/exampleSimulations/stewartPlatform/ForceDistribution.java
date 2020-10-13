@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -51,7 +51,7 @@ public class ForceDistribution
 
    }
 
-   private DenseMatrix64F aMatrix66 = new DenseMatrix64F(6, 6);
+   private DMatrixRMaj aMatrix66 = new DMatrixRMaj(6, 6);
 
 
    public void solveActuatorForcesSingleLeg(double[] act_force, double Fx, double Fy, double Fz, double Nx, double Ny, double Nz, Vector3D[] a_hat,
@@ -79,16 +79,16 @@ public class ForceDistribution
       {
          {Fx}, {Fy}, {Fz}, {Nx}, {Ny}, {Nz}
       };
-      DenseMatrix64F bMatrix = new DenseMatrix64F(vals2);
+      DMatrixRMaj bMatrix = new DMatrixRMaj(vals2);
 
-      double det = CommonOps.det(aMatrix66);
+      double det = CommonOps_DDRM.det(aMatrix66);
 
       // System.out.println(det);
       if (Math.abs(det) < 0.000001)
          return;
 
-      DenseMatrix64F x = new DenseMatrix64F(aMatrix66.getNumRows(), 1);
-      CommonOps.solve(aMatrix66, bMatrix, x);
+      DMatrixRMaj x = new DMatrixRMaj(aMatrix66.getNumRows(), 1);
+      CommonOps_DDRM.solve(aMatrix66, bMatrix, x);
 
 
       for (int i = 0; i < 6; i++)

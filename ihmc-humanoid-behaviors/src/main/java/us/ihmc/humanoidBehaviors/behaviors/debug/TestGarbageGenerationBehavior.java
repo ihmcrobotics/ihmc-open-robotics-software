@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestGarbageGenerationBehavior extends AbstractBehavior
@@ -33,7 +33,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ChestTrajectoryMessage> chestPublisher;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public TestGarbageGenerationBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
+   public TestGarbageGenerationBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;

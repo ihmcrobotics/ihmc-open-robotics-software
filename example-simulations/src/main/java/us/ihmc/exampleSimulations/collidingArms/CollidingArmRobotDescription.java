@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.collidingArms;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -59,7 +59,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       super(name);
 
       // Base:
-      PinJointDescription baseJoint = new PinJointDescription("base", baseOffset, Axis.Z);
+      PinJointDescription baseJoint = new PinJointDescription("base", baseOffset, Axis3D.Z);
       LinkDescription baseLink = new LinkDescription("baseLink");
       baseLink.setMassAndRadiiOfGyration(baseMass, baseRadiusOfGyrationX, baseRadiusOfGyrationY, baseRadiusOfGyrationZ);
 
@@ -67,7 +67,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       AppearanceDefinition baseAppearance = YoAppearance.AliceBlue();
       baseLinkGraphics.addCylinder(baseHeight, baseRadius, baseAppearance);
       baseLinkGraphics.translate(new Vector3D(0.0, 0.0, shoulderOffsetZ));
-      baseLinkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      baseLinkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       baseLinkGraphics.translate(0.0, 0.0, -shoulderMotorWidth / 2.0);
       baseLinkGraphics.addCylinder(shoulderMotorWidth, shoulderMotorRadius, YoAppearance.Black());
       baseLink.setLinkGraphics(baseLinkGraphics);
@@ -83,7 +83,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       this.addRootJoint(baseJoint);
 
       // Upper Arm:
-      PinJointDescription shoulderJoint = new PinJointDescription("shoulder", new Vector3D(0.0, 0.0, shoulderOffsetZ), Axis.Y);
+      PinJointDescription shoulderJoint = new PinJointDescription("shoulder", new Vector3D(0.0, 0.0, shoulderOffsetZ), Axis3D.Y);
       LinkDescription upperArm = new LinkDescription("upperArm");
       upperArm.setCenterOfMassOffset(new Vector3D(0.0, 0.0, upperArmLength / 2.0));
       upperArm.setMassAndRadiiOfGyration(upperArmMass, upperArmRadiusOfGyrationX, upperArmRadiusOfGyrationY, upperArmRadiusOfGyrationZ);
@@ -92,7 +92,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       AppearanceDefinition upperArmAppearance = YoAppearance.Red();
       upperArmGraphics.addCylinder(upperArmLength, upperArmRadius, upperArmAppearance);
       upperArmGraphics.translate(new Vector3D(0.0, 0.0, upperArmLength));
-      upperArmGraphics.rotate(Math.PI / 2.0, Axis.X);
+      upperArmGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       upperArmGraphics.translate(0.0, 0.0, -elbowMotorWidth / 2.0);
       upperArmGraphics.addCylinder(elbowMotorWidth, elbowMotorRadius, YoAppearance.Black());
       upperArm.setLinkGraphics(upperArmGraphics);
@@ -108,7 +108,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       baseJoint.addJoint(shoulderJoint);
 
       // Lower arm:
-      PinJointDescription elbowJoint = new PinJointDescription("elbow", new Vector3D(0.0, 0.0, upperArmLength), Axis.Y);
+      PinJointDescription elbowJoint = new PinJointDescription("elbow", new Vector3D(0.0, 0.0, upperArmLength), Axis3D.Y);
       LinkDescription lowerArm = new LinkDescription("lowerArm");
       lowerArm.setCenterOfMassOffset(new Vector3D(0.0, 0.0, lowerArmLength / 2.0));
       lowerArm.setMassAndRadiiOfGyration(lowerArmMass, lowerArmRadiusOfGyrationX, lowerArmRadiusOfGyrationY, lowerArmRadiusOfGyrationZ);

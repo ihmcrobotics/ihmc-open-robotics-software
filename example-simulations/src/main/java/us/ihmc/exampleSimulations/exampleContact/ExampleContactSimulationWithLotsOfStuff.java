@@ -34,7 +34,7 @@ public class ExampleContactSimulationWithLotsOfStuff
          newBox2.setController(controller);
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox2, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox2.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox2.getRobotsYoRegistry());    // 0.9,0.9);
 
          linearGroundModel.setGroundProfile3D(tableEnvironment);
          newBox2.setGroundContactModel(linearGroundModel);
@@ -62,7 +62,7 @@ public class ExampleContactSimulationWithLotsOfStuff
 
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox2, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox2.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox2.getRobotsYoRegistry());    // 0.9,0.9);
 
          linearGroundModel.setGroundProfile3D(tableEnvironment);
          newBox2.setGroundContactModel(linearGroundModel);
@@ -89,7 +89,7 @@ public class ExampleContactSimulationWithLotsOfStuff
          newBox2.setController(controller);
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox2, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox2.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox2.getRobotsYoRegistry());    // 0.9,0.9);
          linearGroundModel.setGroundProfile3D(tableEnvironment);
          newBox2.setGroundContactModel(linearGroundModel);
          newBox2.setGravity(-9.81);

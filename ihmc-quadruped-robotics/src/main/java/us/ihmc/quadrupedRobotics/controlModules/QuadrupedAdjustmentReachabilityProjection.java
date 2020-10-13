@@ -1,33 +1,27 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class QuadrupedAdjustmentReachabilityProjection
 {
@@ -35,7 +29,7 @@ public class QuadrupedAdjustmentReachabilityProjection
    private static final boolean visualize = true;
    private static final int numberOfVertices = 9;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrantDependentList<List<YoFramePoint2D>> reachabilityVertices = new QuadrantDependentList<>();
    private final QuadrantDependentList<List<YoFramePoint2D>> reachabilityVerticesInWorld = new QuadrantDependentList<>();
@@ -48,7 +42,7 @@ public class QuadrupedAdjustmentReachabilityProjection
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
 
-   public QuadrupedAdjustmentReachabilityProjection(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedAdjustmentReachabilityProjection(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       contactStates = controllerToolbox.getFootContactStates();
 

@@ -18,7 +18,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -41,7 +40,6 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class PointFeedbackControlCommand implements FeedbackControlCommand<PointFeedbackControlCommand>
 {
@@ -117,8 +115,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * can be to control the end-effector.
     * </p>
     *
-    * @param base the rigid-body located right before the first joint to be used for controlling the
-    *           end-effector.
+    * @param base        the rigid-body located right before the first joint to be used for controlling
+    *                    the end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
@@ -223,16 +221,17 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param desiredPosition the position the {@code bodyFixedPoint} should reach. Not modified.
+    * @param desiredPosition           the position the {@code bodyFixedPoint} should reach. Not
+    *                                  modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code bodyFixedPoint}
-    *           with respect to the {@code base}. Not modified.
+    *                                  with respect to the {@code base}. Not modified.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
@@ -248,18 +247,20 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse dynamics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse dynamics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param desiredPosition the position that the {@code bodyFixedPoint} should reach. Not modified.
-    * @param desiredLinearVelocity the desired linear velocity of the {@code bodyFixedPoint} with
-    *           respect to the {@code base}. Not modified.
+    * @param desiredPosition               the position that the {@code bodyFixedPoint} should reach.
+    *                                      Not modified.
+    * @param desiredLinearVelocity         the desired linear velocity of the {@code bodyFixedPoint}
+    *                                      with respect to the {@code base}. Not modified.
     * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
-    *           {@code bodyFixedPoint} with respect to the {@code base}. Not modified.
+    *                                      {@code bodyFixedPoint} with respect to the {@code base}. Not
+    *                                      modified.
     */
    public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -277,17 +278,19 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for virtual model control.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for virtual model control.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param desiredPosition the position that the {@code bodyFixedPoint} should reach. Not modified.
+    * @param desiredPosition       the position that the {@code bodyFixedPoint} should reach. Not
+    *                              modified.
     * @param desiredLinearVelocity the desired linear velocity of the {@code bodyFixedPoint} with
-    *           respect to the {@code base}. Not modified.
-    * @param feedForwardForce the feed-forward force to exert at {@code bodyFixedPoint}. Not modified.
+    *                              respect to the {@code base}. Not modified.
+    * @param feedForwardForce      the feed-forward force to exert at {@code bodyFixedPoint}. Not
+    *                              modified.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
    {
@@ -321,7 +324,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *
     * @param bodyFixedPointInEndEffectorFrame the position of the {@code bodyFixedPoint}. Not modified.
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
-    *            {@code endEffector.getBodyFixedFrame()}.
+    *                                         {@code endEffector.getBodyFixedFrame()}.
     */
    public void setBodyFixedPointToControl(FramePoint3DReadOnly bodyFixedPointInEndEffectorFrame)
    {
@@ -381,7 +384,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * </p>
     *
     * @param weightMatrix weight matrix holding the linear weights to use for each component of the
-    *           desired acceleration. Not modified.
+    *                     desired acceleration. Not modified.
     */
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
@@ -515,6 +518,18 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.POINT;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      spatialAccelerationCommand.setCommandId(id);
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return spatialAccelerationCommand.getCommandId();
    }
 
    @Override

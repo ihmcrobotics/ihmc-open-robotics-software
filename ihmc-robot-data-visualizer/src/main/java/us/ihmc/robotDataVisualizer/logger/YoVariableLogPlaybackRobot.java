@@ -15,13 +15,13 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataVisualizer.VisualizerRobot;
 import us.ihmc.robotDataVisualizer.visualizer.JointUpdater;
-import us.ihmc.yoVariables.listener.RewoundListener;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.simulationconstructionset.RewoundListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.compression.SnappyUtils;
 
@@ -32,7 +32,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    private final YoLong timestamp;
    private final YoDouble robotTime;
    private final FileChannel logChannel;
-   private final List<YoVariable<?>> variables;
+   private final List<YoVariable> variables;
 
    // Compressed data helpers
    private final boolean compressed;
@@ -57,13 +57,13 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    private int readEveryNTicks = 1;
 
    public YoVariableLogPlaybackRobot(File selectedFile, RobotDescription robotDescription,
-         List<JointState> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
+         List<JointState> jointStates, List<YoVariable> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
       super(robotDescription);
 
-      this.timestamp = new YoLong("timestamp", getRobotsYoVariableRegistry());
-      this.robotTime = new YoDouble("robotTime", getRobotsYoVariableRegistry());
+      this.timestamp = new YoLong("timestamp", getRobotsYoRegistry());
+      this.robotTime = new YoDouble("robotTime", getRobotsYoRegistry());
 
 
 
@@ -106,7 +106,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       logLine = ByteBuffer.allocate(bufferSize);
       logLongArray = logLine.asLongBuffer();
 
-      currentRecordTick = new YoInteger("currentRecordTick", getRobotsYoVariableRegistry());
+      currentRecordTick = new YoInteger("currentRecordTick", getRobotsYoRegistry());
 
       try
       {
@@ -207,7 +207,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
          for (int i = 0; i < variables.size(); i++)
          {
-            YoVariable<?> variable = variables.get(i);
+            YoVariable variable = variables.get(i);
             variable.setValueFromLongBits(logLongArray.get(), true);
          }
 
@@ -309,9 +309,9 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       }
    }
 
-   public void addCurrentRecordTickListener(VariableChangedListener listener)
+   public void addCurrentRecordTickListener(YoVariableChangedListener listener)
    {
-      currentRecordTick.addVariableChangedListener(listener);
+      currentRecordTick.addListener(listener);
    }
 
    @Override

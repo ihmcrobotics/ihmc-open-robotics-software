@@ -4,6 +4,8 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FootstepNode
@@ -13,7 +15,8 @@ public class FootstepNode
 
    private Point2D midFootPoint;
    private final int hashCode;
-   private int nodeIndex = -1;
+
+   private final List<FootstepNode> childNodes = new ArrayList<>();
 
    public FootstepNode(double x, double y)
    {
@@ -35,16 +38,6 @@ public class FootstepNode
       this.latticeNode = latticeNode;
       this.robotSide = robotSide;
       hashCode = computeHashCode(this);
-   }
-
-   public void setNodeIndex(int nodeIndex)
-   {
-      this.nodeIndex = nodeIndex;
-   }
-
-   public int getNodeIndex()
-   {
-      return nodeIndex;
    }
 
    public double getX()
@@ -87,6 +80,19 @@ public class FootstepNode
       return robotSide;
    }
 
+   public List<FootstepNode> getChildNodes()
+   {
+      return childNodes;
+   }
+
+   public void addChildNode(FootstepNode childNode)
+   {
+      if (!childNodes.contains(childNode))
+      {
+         childNodes.add(childNode);
+      }
+   }
+
    public double euclideanDistance(FootstepNode other)
    {
       return Math.sqrt(euclideanDistanceSquared(other));
@@ -99,6 +105,24 @@ public class FootstepNode
       return dx * dx + dy * dy;
    }
 
+   public int computeYawIndexDistance(FootstepNode other)
+   {
+      int dYaw = Math.abs(latticeNode.getYawIndex() - other.getYawIndex());
+      return Math.min(dYaw, LatticeNode.yawDivisions - dYaw);
+   }
+
+   public int computeXYManhattanDistance(FootstepNode other)
+   {
+      int manhattanDistance = Math.abs(getXIndex() - other.getXIndex());
+      manhattanDistance += Math.abs(getYIndex() - other.getYIndex());
+      return manhattanDistance;
+   }
+
+   public int computeManhattanDistance(FootstepNode other)
+   {
+      return computeXYManhattanDistance(other) + computeYawIndexDistance(other);
+   }
+
    public boolean equalPosition(FootstepNode other)
    {
       return getXIndex() == other.getXIndex() && getYIndex() == other.getYIndex();
@@ -108,6 +132,12 @@ public class FootstepNode
    {
       return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),
                               EuclidCoreRandomTools.nextDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
+   }
+
+   public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY, RobotSide robotSide)
+   {
+      return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),
+                              EuclidCoreRandomTools.nextDouble(random, Math.PI), robotSide);
    }
 
    public Point2D getOrComputeMidFootPoint(double stepWidth)

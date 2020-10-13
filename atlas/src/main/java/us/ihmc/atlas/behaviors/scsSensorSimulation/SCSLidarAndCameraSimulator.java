@@ -1,10 +1,7 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
-import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
-import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
@@ -12,11 +9,15 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,18 +26,14 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
-import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -47,12 +44,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Objects;
 
 /**
  * Potential improvements:
@@ -63,22 +55,27 @@ import java.util.Objects;
  */
 public class SCSLidarAndCameraSimulator
 {
+   private final ROS2Node ros2Node;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
    {
-      this(ros2Node, environment.getTerrainObject3D(), robotModel);
+      this(pubSubImplementation, environment.getTerrainObject3D(), robotModel);
    }
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
-      robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      robotConfigurationData = new ROS2Input<>(ros2Node,
+                                               RobotConfigurationData.class,
+                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withInput());
+
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       Robot robot = new Robot("Robot");
 
@@ -118,9 +115,9 @@ public class SCSLidarAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 robotModel.getSimpleRobotName(),
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                                              .withOutput());
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);
@@ -137,11 +134,8 @@ public class SCSLidarAndCameraSimulator
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
 
-      if (!SystemUtils.IS_OS_WINDOWS)
-         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
-
+      scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(0.25));
       scs.startOnAThread();
-
       scs.simulate();
    }
 
@@ -149,7 +143,7 @@ public class SCSLidarAndCameraSimulator
    {
       double height = 0.2;
       double radius = 0.05;
-      GimbalJoint gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), lidarRobot, Axis.Z, Axis.X, Axis.Y);
+      GimbalJoint gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), lidarRobot, Axis3D.Z, Axis3D.X, Axis3D.Y);
       Link link = new Link("lidar");
       link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -161,7 +155,7 @@ public class SCSLidarAndCameraSimulator
       gimbalJoint.addCameraMount(robotCam);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      transform.getTranslation().set(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       LidarScanParameters lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
       LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
       lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
@@ -181,8 +175,8 @@ public class SCSLidarAndCameraSimulator
 
    private void doControl()
    {
-      HumanoidRobotState humanoidRobotState = remoteSyncedHumanoidFrames.pollHumanoidRobotState();
-      tempNeckFramePose.setToZero(humanoidRobotState.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+      syncedRobot.update();
+      tempNeckFramePose.setToZero(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
       tempNeckFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       floatingHeadJoint.setPosition(tempNeckFramePose.getPosition());
@@ -212,10 +206,18 @@ public class SCSLidarAndCameraSimulator
                                                   DefaultExceptionHandler.PRINT_STACKTRACE);
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture(image);
       return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(),
+                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(),
                                                      cinderBlockTexture,
                                                      0.02,
                                                      false);
+   }
+
+   public void destroy()
+   {
+      LogTools.info("Shutting down");
+      ThreadTools.startAsDaemon(scs::stopSimulationThread, "WaitForSimulationThreadToStop");
+      scs.closeAndDispose();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args) throws IOException
@@ -224,9 +226,8 @@ public class SCSLidarAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
-      new SCSLidarAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
+      new SCSLidarAndCameraSimulator(PubSubImplementation.INTRAPROCESS, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
    }
 }

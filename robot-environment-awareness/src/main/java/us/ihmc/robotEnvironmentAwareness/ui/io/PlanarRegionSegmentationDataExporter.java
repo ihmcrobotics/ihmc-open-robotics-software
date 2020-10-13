@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegionsConverter;
@@ -32,9 +33,17 @@ public class PlanarRegionSegmentationDataExporter
 
    public PlanarRegionSegmentationDataExporter(REAUIMessager uiMessager)
    {
-      planarRegionSegmentationState = uiMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationState);
-      dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UISegmentationDataExporterDirectory, new File("Data/Segmentation/").getAbsolutePath());
-      uiMessager.registerTopicListener(REAModuleAPI.UISegmentationDataExportRequest, this::exportSegmentationData);
+    this(uiMessager, REAModuleAPI.PlanarRegionsSegmentationState, REAModuleAPI.UISegmentationDataExporterDirectory, REAModuleAPI.UISegmentationDataExportRequest)  ;
+   }
+
+   public PlanarRegionSegmentationDataExporter(REAUIMessager uiMessager,
+                                               Topic<PlanarRegionSegmentationMessage[]> planarSegmentationStateTopic,
+                                               Topic<String> uiSegmentationDataExporterDirectoryTopic,
+                                               Topic<Boolean> uiSegmentationDataExportRequestTopic)
+   {
+      planarRegionSegmentationState = uiMessager.createInput(planarSegmentationStateTopic);
+      dataDirectoryPath = uiMessager.createInput(uiSegmentationDataExporterDirectoryTopic, new File("Data/Segmentation/").getAbsolutePath());
+      uiMessager.registerTopicListener(uiSegmentationDataExportRequestTopic, this::exportSegmentationData);
    }
 
    public PlanarRegionSegmentationDataExporter(File dataDirectoryPath)

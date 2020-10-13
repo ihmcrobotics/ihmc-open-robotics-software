@@ -44,6 +44,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -58,7 +59,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -68,7 +69,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static final boolean VISUALIZE = false;
    private static final String robotName = "testBot";
 
-   private RealtimeRos2Node localNode = null;
+   private RealtimeROS2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
    private SharedMemoryMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
@@ -103,7 +104,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
@@ -215,8 +216,9 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlanningRequestPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
@@ -290,8 +292,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(localNode, FootstepPlanningRequestPacket.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT));
+            .createPublisherTypeNamed(localNode, FootstepPlanningRequestPacket.class,
+                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -371,18 +373,24 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlannerParametersPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(localNode, VisibilityGraphsParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, VisibilityGraphsParametersPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+         FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
+
+         // step only with requested side is exception, has to be in interval [-1,1]
+         randomParameters.setStepOnlyWithRequestedSide((byte) (random.nextInt(2) - 1));
+
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
@@ -441,14 +449,14 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
-            .createPublisher(localNode, FootstepPlanningToolboxOutputStatus.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+            .createPublisherTypeNamed(localNode, FootstepPlanningToolboxOutputStatus.class,
+                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput());
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId);
-      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic);
       AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathData);
       AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPosition);
       AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientation);
@@ -457,8 +465,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
 
          Pose2D goalPose = new Pose2D();
-         goalPose.setPosition(EuclidCoreRandomTools.nextPoint2D(random));
-         goalPose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
+         goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
          int sequenceId = RandomNumbers.nextInt(random, 0, 100);
@@ -469,15 +477,15 @@ public class RemoteFootstepPlannerUIMessagingTest
          for (int i = 2; i < RandomNumbers.nextInt(random, 2, 100); i++)
          {
             Pose3D pose = new Pose3D();
-            pose.setPosition(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
-            pose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
+            pose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+            pose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
             bodyPath.add(pose);
          }
          Point3D lowLevelGoalPosition = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
          Quaternion lowLevelGoalOrientation = EuclidCoreRandomTools.nextQuaternion(random, 100.0);
 
          FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
-         outputPacket.getLowLevelPlannerGoal().set(goalPose);
+         outputPacket.getGoalPose().set(goalPose);
          outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
          outputPacket.getFootstepDataList().set(footstepDataListMessage);
          outputPacket.setPlanId(planId);
@@ -485,8 +493,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setFootstepPlanningResult(result.toByte());
          for (int i = 0; i < bodyPath.size(); i++)
             outputPacket.getBodyPath().add().set(bodyPath.get(i));
-         outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);
-         outputPacket.getLowLevelPlannerGoal().getOrientation().set(lowLevelGoalOrientation);
+         outputPacket.getGoalPose().getPosition().set(lowLevelGoalPosition);
+         outputPacket.getGoalPose().getOrientation().set(lowLevelGoalOrientation);
 
          footstepOutputStatusPublisher.publish(outputPacket);
 
@@ -698,7 +706,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
-      assertEquals("Wiggle inside deltas aren't equal.", parameters.getWiggleInsideDelta(), packet.getWiggleInsideDelta(), epsilon);
+      assertEquals("Wiggle inside delta targets aren't equal.", parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon);
+      assertEquals("Wiggle inside delta minimums aren't equal.", parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon);
       assertEquals("Maximum step reaches aren't equal.", parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon);
       assertEquals("Maximum step yaws aren't equal.", parameters.getMaximumStepYaw(), packet.getMaximumStepYaw(), epsilon);
       assertEquals("Minimum step widths aren't equal.", parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon);
@@ -709,42 +718,33 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max X forward and down aren't equal", parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals("Max Z forward and down aren't equal", parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      assertEquals("Max step z isn't equal.", parameters.getMaximumStepZ(), packet.getMaximumStepZ(), epsilon);
+      assertEquals("Max left step z isn't equal.", parameters.getMaximumLeftStepZ(), packet.getMaximumLeftStepZ(), epsilon);
+      assertEquals("Max right step z isn't equal.", parameters.getMaximumRightStepZ(), packet.getMaximumRightStepZ(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
-      assertEquals("Wiggle into convex hull isn't equal.", parameters.getWiggleIntoConvexHullOfPlanarRegions(),
-                   packet.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals("Wiggle while planning isn't equal.", parameters.getWiggleWhilePlanning(), packet.getWiggleWhilePlanning());
+      assertEquals("Wiggle into convex hull isn't equal.", parameters.getEnableConcaveHullWiggler(), packet.getEnableConcaveHullWiggler());
       assertEquals("Max XY wiggle distance isn't equal.", parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon);
       assertEquals("Max yaw wiggle isn't equal.", parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon);
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),
                    epsilon);
       assertEquals("Max step width isn't equal.", parameters.getMaximumStepWidth(), packet.getMaximumStepWidth(), epsilon);
-      assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
+      assertEquals("Cliff base height to avoid isn't equal.", parameters.getCliffBaseHeightToAvoid(), packet.getCliffBaseHeightToAvoid(), epsilon);
       assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
                    packet.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
-      assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
-                   epsilon);
+      assertEquals("Cliff top height to avoid isn't equal.", parameters.getCliffTopHeightToAvoid(), packet.getCliffTopHeightToAvoid(), epsilon);
+      assertEquals("Minimum distance from cliff tops isn't equal.", parameters.getMinimumDistanceFromCliffTops(),
+                   packet.getMinimumDistanceFromCliffTops(), epsilon);
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
       assertEquals("Body box base X isn't equal.", parameters.getBodyBoxBaseX(), packet.getBodyBoxBaseX(), epsilon);
       assertEquals("Body box base Y isn't equal.", parameters.getBodyBoxBaseY(), packet.getBodyBoxBaseY(), epsilon);
       assertEquals("Body box base Z isn't equal.", parameters.getBodyBoxBaseZ(), packet.getBodyBoxBaseZ(), epsilon);
-      assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
-      assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
-      assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
-      assertEquals("Use quadratic height cost flags aren't equal.", parameters.useQuadraticHeightCost(), packet.getUseQuadraticHeightCost());
+      assertEquals("Maximum snap height isn't equal", parameters.getMaximumSnapHeight(), packet.getMaximumSnapHeight(), epsilon);
+      assertEquals("Min clearance from stance isn't equal.", parameters.getMinClearanceFromStance(), packet.getMinClearanceFromStance(), epsilon);
 
       assertEquals("A star heuristics weights aren't equal.", parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon);
-      assertEquals("Vis graph with A star heuristics weights aren't equal.", parameters.getVisGraphWithAStarHeuristicsWeight().getValue(),
-                   packet.getVisGraphWithAStarHeuristicsWeight(), epsilon);
-      assertEquals("Depth first heuristics weights aren't equal.", parameters.getDepthFirstHeuristicsWeight().getValue(),
-                   packet.getDepthFirstHeuristicsWeight(), epsilon);
-      assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
-                   packet.getBodyPathBasedHeuristicsWeight(), epsilon);
-      assertEquals("Number of bounding box checks weren't equal", parameters.getNumberOfBoundingBoxChecks(), packet.getNumberOfBoundingBoxChecks());
-
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
       assertEquals("Pitch weights aren't equal.", parameters.getPitchWeight(), packet.getPitchWeight(), epsilon);

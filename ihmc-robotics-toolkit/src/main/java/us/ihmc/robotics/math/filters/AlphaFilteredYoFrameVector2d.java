@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 {
@@ -18,11 +18,11 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, double, ReferenceFrame)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, double, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                  double alpha, ReferenceFrame referenceFrame)
    {
       return new AlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, registry, alpha, referenceFrame);
@@ -30,11 +30,11 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, DoubleProvider, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                  DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       return createAlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, "", registry, alpha, referenceFrame);
@@ -42,12 +42,12 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, DoubleProvider, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
    public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description,
-                                                                                 YoVariableRegistry registry, DoubleProvider alpha,
+                                                                                 YoRegistry registry, DoubleProvider alpha,
                                                                                  ReferenceFrame referenceFrame)
    {
       return new AlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, registry, alpha, referenceFrame);
@@ -55,11 +55,11 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, double, FrameTuple2DReadOnly)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, double, FrameTuple2DReadOnly)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                  double alpha, FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       return new AlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D);
@@ -67,11 +67,11 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, DoubleProvider, FrameTuple2DReadOnly)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, DoubleProvider, FrameTuple2DReadOnly)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                  DoubleProvider alpha, FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       return createAlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, "", registry, alpha, unfilteredFrameTuple2D);
@@ -79,41 +79,41 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoVariableRegistry, DoubleProvider, FrameTuple2DReadOnly)}
+    *             {@link #createAlphaFilteredYoFrameVector2d(String, String, YoRegistry, DoubleProvider, FrameTuple2DReadOnly)}
     *             instead.
     */
    @Deprecated
    public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description,
-                                                                                 YoVariableRegistry registry, DoubleProvider alpha,
+                                                                                 YoRegistry registry, DoubleProvider alpha,
                                                                                  FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       return new AlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D);
    }
 
-   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
+   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, double alpha, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry), referenceFrame);
    }
 
-   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
+   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, alpha, referenceFrame, null);
    }
 
-   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, double alpha,
                                        FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry),
            unfilteredFrameTuple2D.getReferenceFrame(), unfilteredFrameTuple2D);
    }
 
-   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+   public AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha,
                                        FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       this(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple2D.getReferenceFrame(), unfilteredFrameTuple2D);
    }
 
-   private AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
+   private AlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
                                         FrameTuple2DReadOnly unfilteredFrameTuple2D)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

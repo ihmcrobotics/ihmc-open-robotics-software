@@ -2,15 +2,20 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -26,6 +31,7 @@ import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -35,14 +41,15 @@ import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MotionQPInputCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble nullspaceProjectionAlpha;
    private final YoDouble secondaryTaskJointsWeight = new YoDouble("secondaryTaskJointsWeight", registry);
 
@@ -56,18 +63,18 @@ public class MotionQPInputCalculator
 
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
-   private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
+   private final DMatrixRMaj tempPrimaryTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
 
-   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
-   private final DenseMatrix64F projectedTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialVector.SIZE, 1);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
+   private final DMatrixRMaj projectedTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
+   private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(SpatialVector.SIZE, 1);
+   private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DMatrixRMaj tempTaskWeightSubspace = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
 
-   private final DenseMatrix64F lineConstraintSelection = new DenseMatrix64F(1, 2);
-   private final DenseMatrix64F lineConstraintJacobian = new DenseMatrix64F(1, 12);
+   private final DMatrixRMaj lineConstraintSelection = new DMatrixRMaj(1, 2);
+   private final DMatrixRMaj lineConstraintJacobian = new DMatrixRMaj(1, 12);
 
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+   private final DMatrixRMaj tempSelectionMatrix = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
@@ -75,27 +82,27 @@ public class MotionQPInputCalculator
 
    private final JointIndexHandler jointIndexHandler;
 
-   private final DenseMatrix64F allTaskJacobian;
+   private final DMatrixRMaj allTaskJacobian;
 
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
                                   JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       this(centerOfMassFrame, null, centroidalMomentumRateCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
    }
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
                                   JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       this(centerOfMassFrame, centroidalMomentumCalculator, null, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
    }
 
    private MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
                                    CentroidalMomentumRateCalculator centroidalMomentumRateCalculator, JointIndexHandler jointIndexHandler,
-                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
+                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
@@ -117,7 +124,7 @@ public class MotionQPInputCalculator
          nullspaceProjectionAlpha = null;
       }
 
-      allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
+      allTaskJacobian = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
 
       parentRegistry.addChild(registry);
@@ -165,7 +172,7 @@ public class MotionQPInputCalculator
 
       int taskSize = 0;
 
-      DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
+      DMatrixRMaj selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
       int robotTaskSize = selectionMatrix.getNumRows();
 
       if (robotTaskSize > 0)
@@ -179,9 +186,9 @@ public class MotionQPInputCalculator
             qpInputToPack.reshape(robotTaskSize);
             NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
 
-            CommonOps.insert(projectedTaskJacobian, qpInputToPack.taskJacobian, taskSize, 0);
-            CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), qpInputToPack.taskObjective, taskSize, 0);
-            CommonOps.insert(privilegedConfigurationHandler.getWeights(), qpInputToPack.taskWeightMatrix, taskSize, taskSize);
+            CommonOps_DDRM.insert(projectedTaskJacobian, qpInputToPack.taskJacobian, taskSize, 0);
+            CommonOps_DDRM.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), qpInputToPack.taskObjective, taskSize, 0);
+            CommonOps_DDRM.insert(privilegedConfigurationHandler.getWeights(), qpInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
       }
 
@@ -198,7 +205,7 @@ public class MotionQPInputCalculator
       qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       qpInputToPack.setUseWeightScalar(false);
 
-      DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
+      DMatrixRMaj selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
 
       int taskSize = selectionMatrix.getNumRows();
 
@@ -220,6 +227,36 @@ public class MotionQPInputCalculator
       qpInputToPack.taskJacobian.set(projectedTaskJacobian);
 
       return true;
+   }
+
+   /**
+    * Configures the appropriate variable substitution to perform in the QP for satisfying the physical
+    * constraint for a kinematic loop.
+    * <p>
+    * The {@code qpVariableSubstitutionToPack} can then be add to the QP to register an additional
+    * substitution perform.
+    * </p>
+    * 
+    * @param function                     the explicit function representing a kinematic loop in the
+    *                                     multi-body system.
+    * @param qpVariableSubstitutionToPack the variable substitution to be configured. Modified.
+    * @see InverseDynamicsQPSolver#addAccelerationSubstitution(QPVariableSubstitution)
+    * @see InverseKinematicsQPSolver#addVariableSubstitution(QPVariableSubstitution)
+    */
+   public void convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitution qpVariableSubstitutionToPack)
+   {
+      DMatrixRMaj loopJacobian = function.getLoopJacobian();
+      DMatrixRMaj loopConvectiveTerm = function.getLoopConvectiveTerm();
+      List<? extends OneDoFJointReadOnly> loopJoints = function.getLoopJoints();
+      qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
+
+      qpVariableSubstitutionToPack.transformation.set(loopJacobian);
+      qpVariableSubstitutionToPack.bias.set(loopConvectiveTerm);
+
+      for (int i = 0; i < loopJoints.size(); i++)
+      {
+         qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
+      }
    }
 
    /**
@@ -255,8 +292,8 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
-         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+         CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
       }
 
       RigidBodyBasics base = commandToConvert.getBase();
@@ -276,14 +313,14 @@ public class MotionQPInputCalculator
        * @formatter:on
        */
       commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
-      CommonOps.subtractEquals(tempTaskObjective, jacobianCalculator.getConvectiveTermMatrix());
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
+      CommonOps_DDRM.subtractEquals(tempTaskObjective, jacobianCalculator.getConvectiveTermMatrix());
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
       tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
+      CommonOps_DDRM.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
@@ -373,8 +410,8 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
-         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+         CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
       }
 
       RigidBodyBasics base = commandToConvert.getBase();
@@ -393,13 +430,13 @@ public class MotionQPInputCalculator
        * @formatter:on
        */
       commandToConvert.getDesiredSpatialVelocity(tempTaskObjective);
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
       tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
+      CommonOps_DDRM.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Dealing with the primary base:
       RigidBodyBasics primaryBase = commandToConvert.getPrimaryBase();
@@ -483,23 +520,23 @@ public class MotionQPInputCalculator
       tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
-      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
-      DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
+      DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
+      CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
       linearMomentum.changeFrame(centerOfMassFrame);
       angularMomentum.get(0, tempTaskObjective);
       linearMomentum.get(3, tempTaskObjective);
-      DenseMatrix64F convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
+      DMatrixRMaj convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
-      CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
+      CommonOps_DDRM.subtractEquals(tempTaskObjective, convectiveTerm);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
 
@@ -530,13 +567,13 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(tempTaskWeight);
-         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+         CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
       }
 
       // Compute the task Jacobian: J = S * A
-      DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
+      DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
+      CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
@@ -545,7 +582,7 @@ public class MotionQPInputCalculator
       linearMomentum.get(3, tempTaskObjective);
 
       // Compute the task objective: p = S * h
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
 
@@ -580,8 +617,8 @@ public class MotionQPInputCalculator
 
       // Compute the task Jacobian: J = S * A
       tempTaskJacobian.reshape(2, numberOfDoFs);
-      DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempTaskJacobian);
+      DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
+      CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempTaskJacobian);
 
       if (vertices.size() < 2)
       {
@@ -639,7 +676,7 @@ public class MotionQPInputCalculator
     *                                         {@code qpInputToPack.taskObjective}. Modified.
     */
    private void setupLineConstraint(int constraintIndex, Tuple2DReadOnly firstPointOnLine, Tuple2DReadOnly secondPointOnLine,
-                                    DenseMatrix64F centroidalMomemtumMatrixLinearXY, QPInput qpInputToPack)
+                                    DMatrixRMaj centroidalMomemtumMatrixLinearXY, QPInput qpInputToPack)
    {
       double directionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double directionY = secondPointOnLine.getY() - firstPointOnLine.getY();
@@ -650,8 +687,8 @@ public class MotionQPInputCalculator
       lineConstraintSelection.set(0, -directionY);
       lineConstraintSelection.set(1, directionX);
       lineConstraintJacobian.reshape(1, numberOfDoFs);
-      CommonOps.mult(lineConstraintSelection, centroidalMomemtumMatrixLinearXY, lineConstraintJacobian);
-      CommonOps.insert(lineConstraintJacobian, qpInputToPack.taskJacobian, constraintIndex, 0);
+      CommonOps_DDRM.mult(lineConstraintSelection, centroidalMomemtumMatrixLinearXY, lineConstraintJacobian);
+      CommonOps_DDRM.insert(lineConstraintJacobian, qpInputToPack.taskJacobian, constraintIndex, 0);
 
       qpInputToPack.taskObjective.set(constraintIndex, directionX * firstPointOnLine.getY() - directionY * firstPointOnLine.getX());
    }
@@ -683,7 +720,7 @@ public class MotionQPInputCalculator
          if (columns == null)
             return false;
 
-         CommonOps.insert(commandToConvert.getDesiredAcceleration(jointIndex), qpInputToPack.taskObjective, row, 0);
+         CommonOps_DDRM.insert(commandToConvert.getDesiredAcceleration(jointIndex), qpInputToPack.taskObjective, row, 0);
          for (int column : columns)
          {
             qpInputToPack.taskJacobian.set(row, column, 1.0);
@@ -723,7 +760,7 @@ public class MotionQPInputCalculator
          if (columns == null)
             return false;
 
-         CommonOps.insert(commandToConvert.getDesiredVelocity(jointIndex), qpInputToPack.taskObjective, row, 0);
+         CommonOps_DDRM.insert(commandToConvert.getDesiredVelocity(jointIndex), qpInputToPack.taskObjective, row, 0);
          for (int column : columns)
          {
             qpInputToPack.taskJacobian.set(row, column, 1.0);
@@ -736,14 +773,14 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   private void recordTaskJacobian(DenseMatrix64F taskJacobian)
+   private void recordTaskJacobian(DMatrixRMaj taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
       allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
-      CommonOps.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
+      CommonOps_DDRM.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
    }
 
-   public DenseMatrix64F getCentroidalMomentumMatrix()
+   public DMatrixRMaj getCentroidalMomentumMatrix()
    {
       if (centroidalMomentumCalculator != null)
          return centroidalMomentumCalculator.getCentroidalMomentumMatrix();
@@ -751,14 +788,14 @@ public class MotionQPInputCalculator
          return centroidalMomentumRateCalculator.getCentroidalMomentumMatrix();
    }
 
-   public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
+   public DMatrixRMaj getCentroidalMomentumConvectiveTerm()
    {
       return centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
    }
 
    private final SpatialForce momentumRate = new SpatialForce();
 
-   public SpatialForceReadOnly computeCentroidalMomentumRateFromSolution(DenseMatrix64F jointAccelerations)
+   public SpatialForceReadOnly computeCentroidalMomentumRateFromSolution(DMatrixRMaj jointAccelerations)
    {
       centroidalMomentumRateCalculator.getMomentumRate(jointAccelerations, momentumRate);
       return momentumRate;
@@ -766,7 +803,7 @@ public class MotionQPInputCalculator
 
    private final Momentum momentum = new Momentum();
 
-   public MomentumReadOnly computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
+   public MomentumReadOnly computeCentroidalMomentumFromSolution(DMatrixRMaj jointVelocities)
    {
       if (centroidalMomentumCalculator != null)
          centroidalMomentumCalculator.getMomentum(jointVelocities, momentum);

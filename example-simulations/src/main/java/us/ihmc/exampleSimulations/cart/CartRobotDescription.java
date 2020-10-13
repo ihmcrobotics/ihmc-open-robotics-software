@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.cart;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -53,19 +53,19 @@ public class CartRobotDescription extends RobotDescription
 
       PinJointDescription frontWheelJoint = new PinJointDescription("frontWheel", new Vector3D(xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                                -zLengthBody / 2.0 - radiusWheel),
-                                                                    Axis.Y);
+                                                                    Axis3D.Y);
       LinkDescription frontWheelLink = new LinkDescription("frontWheelLink");
       frontWheelLink.setCenterOfMassOffset(new Vector3D(0.0, 0.0, 0.0));
       frontWheelLink.setMassAndRadiiOfGyration(massWheel, radiusWheel, radiusWheel, lengthWheel);
 
       LinkGraphicsDescription frontWheelGraphics = new LinkGraphicsDescription();
       AppearanceDefinition frontWheelAppearance = YoAppearance.Black();
-      frontWheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      frontWheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       frontWheelGraphics.translate(new Vector3D(0.0, 0.0, -lengthWheel / 2.0));
       frontWheelGraphics.addCylinder(lengthWheel, radiusWheel, frontWheelAppearance);
       frontWheelGraphics.identity();
       frontWheelGraphics.translate(new Vector3D(radiusWheel, lengthWheel / 2.0, 0.0));
-      frontWheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      frontWheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       frontWheelGraphics.addCylinder(lengthWheel, radiusWheel * 0.1, YoAppearance.AliceBlue());
       frontWheelLink.setLinkGraphics(frontWheelGraphics);
 
@@ -74,19 +74,19 @@ public class CartRobotDescription extends RobotDescription
 
       PinJointDescription rearWheelJoint = new PinJointDescription("rearWheel", new Vector3D(-xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                              -zLengthBody / 2.0 - radiusWheel),
-                                                                   Axis.Y);
+                                                                   Axis3D.Y);
       LinkDescription rearWheelLink = new LinkDescription("rearWheelLink");
       rearWheelLink.setCenterOfMassOffset(new Vector3D(0.0, 0.0, 0.0));
       rearWheelLink.setMassAndRadiiOfGyration(massWheel, radiusWheel, radiusWheel, lengthWheel);
 
       LinkGraphicsDescription rearWheelGraphics = new LinkGraphicsDescription();
       AppearanceDefinition rearWheelAppearance = YoAppearance.Grey();
-      rearWheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      rearWheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       rearWheelGraphics.translate(new Vector3D(0.0, 0.0, -lengthWheel / 2.0));
       rearWheelGraphics.addCylinder(lengthWheel, radiusWheel, rearWheelAppearance);
       rearWheelGraphics.identity();
       rearWheelGraphics.translate(new Vector3D(radiusWheel, lengthWheel / 2.0, 0.0));
-      rearWheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      rearWheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       rearWheelGraphics.addCylinder(lengthWheel, radiusWheel * 0.1, YoAppearance.AliceBlue());
       rearWheelLink.setLinkGraphics(rearWheelGraphics);
 

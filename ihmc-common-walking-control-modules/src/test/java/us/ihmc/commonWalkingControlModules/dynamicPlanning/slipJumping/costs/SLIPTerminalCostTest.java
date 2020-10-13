@@ -1,19 +1,39 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.Assert;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.controlVectorSize;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.fx;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.fy;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.fz;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.k;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.stateVectorSize;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.tauX;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.tauY;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.tauZ;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaX;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaXDot;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaY;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaYDot;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaZ;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.thetaZDot;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.x;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.xDot;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.xF;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.y;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.yDot;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.yF;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.z;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.zDot;
 
-import java.math.BigDecimal;
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
 {
@@ -60,11 +80,11 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
       LQTrackingCostFunction<SLIPState> costFunction = getCostFunction();
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-      DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+      DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
       double cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState, desiredControl, desiredState, constants);
 

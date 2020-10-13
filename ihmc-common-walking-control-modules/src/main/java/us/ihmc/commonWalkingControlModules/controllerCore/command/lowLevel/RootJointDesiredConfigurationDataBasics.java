@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -32,24 +32,24 @@ public interface RootJointDesiredConfigurationDataBasics extends RootJointDesire
 
    void setDesiredAcceleration(FrameVector3DReadOnly angularAcceleration, FrameVector3DReadOnly linearAcceleration);
 
-   default void setDesiredConfiguration(DenseMatrix64F q)
+   default void setDesiredConfiguration(DMatrixRMaj q)
    {
       setDesiredConfiguration(q, 0);
    }
 
-   default void setDesiredVelocity(DenseMatrix64F qd)
+   default void setDesiredVelocity(DMatrixRMaj qd)
    {
       setDesiredVelocity(qd, 0);
    }
 
-   default void setDesiredAcceleration(DenseMatrix64F qdd)
+   default void setDesiredAcceleration(DMatrixRMaj qdd)
    {
       setDesiredAcceleration(qdd, 0);
    }
 
-   void setDesiredConfiguration(DenseMatrix64F q, int startIndex);
+   void setDesiredConfiguration(DMatrixRMaj q, int startIndex);
 
-   void setDesiredVelocity(DenseMatrix64F qd, int startIndex);
+   void setDesiredVelocity(DMatrixRMaj qd, int startIndex);
 
-   void setDesiredAcceleration(DenseMatrix64F qdd, int startIndex);
+   void setDesiredAcceleration(DMatrixRMaj qdd, int startIndex);
 }

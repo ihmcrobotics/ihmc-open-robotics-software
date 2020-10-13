@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 public class SpringJointOutputWriter implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    ArrayList<OneDegreeOfFreedomJoint> elasticJoints = new ArrayList<>();
    private final HashMap<OneDegreeOfFreedomJoint, AlphaFilteredYoVariable> filteredDesiredJointAngles = new HashMap<>();
@@ -73,7 +73,7 @@ public class SpringJointOutputWriter implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

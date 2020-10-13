@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import java.awt.image.BufferedImage;
 import java.util.function.LongUnaryOperator;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -27,7 +27,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    private static final boolean DEBUG = false;
 
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
-                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, Ros2Node ros2Node,
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2Node ros2Node,
                                 LongUnaryOperator robotMonotonicTimeCalculator, final RosMainNode rosMainNode)
    {
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
@@ -47,7 +47,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
          {
-            IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
+            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
             if (DEBUG)
             {
                PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
@@ -64,14 +64,14 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    {
       private final IHMCROS2Publisher<FisheyePacket> publisher;
 
-      public CompressedFisheyeHandler(Ros2Node ros2Node)
+      public CompressedFisheyeHandler(ROS2Node ros2Node)
       {
-         publisher = ROS2Tools.createPublisher(ros2Node, FisheyePacket.class, ROS2Tools.getDefaultTopicNameGenerator());
+         publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FisheyePacket.class, ROS2Tools.IHMC_ROOT);
       }
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          IntrinsicParameters intrinsicParameters)
+                          CameraPinholeBrown intrinsicParameters)
       {
          if (DEBUG)
          {

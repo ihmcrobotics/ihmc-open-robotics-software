@@ -4,20 +4,23 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class SlipRandomOnNextStepPerturber extends ModularRobotController
 {
@@ -263,8 +266,8 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       double randomSlipTranslateZ = pseudoRandomRealNumberWithinRange(minTranslationToSlipNextStep.getZ(), maxTranslationToSlipNextStep.getZ());
       nextTranslationToSlip.set(randomSlipTranslateX, randomSlipTranslateY, randomSlipTranslateZ);
 
-      nextRotationToSlip.setYawPitchRoll(pseudoRandomRealNumberWithinRange(minRotationToSlipNextStep.getYawPitchRoll(),
-            maxRotationToSlipNextStep.getYawPitchRoll()));
+      nextRotationToSlip.set(pseudoRandomRealNumberWithinRange(minRotationToSlipNextStep,
+            maxRotationToSlipNextStep));
 
       double randomSlipAfterTimeDelta = pseudoRandomPositiveNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
       double randomPercentToSlipPerTick = pseudoRandomPositiveNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
@@ -275,14 +278,12 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
    }
 
-   private double[] pseudoRandomRealNumberWithinRange(double[] min, double[] max)
+   private YawPitchRoll pseudoRandomRealNumberWithinRange(YawPitchRollReadOnly min, YawPitchRollReadOnly max)
    {
-      double[] randoms = new double[3];
-      for (int i = 0; i < randoms.length; i++)
-      {
-         randoms[i] = pseudoRandomRealNumberWithinRange(min[i], max[i]);
-      }
-      return randoms;
+      YawPitchRoll next = new YawPitchRoll();
+      for (int i = 0; i < 3; i++)
+         next.setElement(i, RandomNumbers.nextDouble(random, min.getElement(i), max.getElement(i)));
+      return next;
    }
 
    private double pseudoRandomRealNumberWithinRange(double minRange, double maxRange)

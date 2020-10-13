@@ -4,10 +4,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -29,7 +28,7 @@ public class Point2DStandardDeviationCalculator
 
    private final Point2D previousMean = new Point2D();
 
-   public Point2DStandardDeviationCalculator(String prefix, Point2DReadOnly variable, YoVariableRegistry registry)
+   public Point2DStandardDeviationCalculator(String prefix, Point2DReadOnly variable, YoRegistry registry)
    {
       this.variable = variable;
 

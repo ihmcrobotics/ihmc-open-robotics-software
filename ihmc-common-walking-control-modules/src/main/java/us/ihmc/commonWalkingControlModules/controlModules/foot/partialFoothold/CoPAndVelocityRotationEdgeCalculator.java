@@ -1,24 +1,21 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-
-import java.awt.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
@@ -35,7 +32,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                MovingReferenceFrame soleFrame,
                                                FootholdRotationParameters rotationParameters,
                                                double dt,
-                                               YoVariableRegistry parentRegistry,
+                                               YoRegistry parentRegistry,
                                                Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -60,7 +57,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                DoubleProvider stableRotationPositionThreshold,
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
-                                               YoVariableRegistry parentRegistry,
+                                               YoRegistry parentRegistry,
                                                Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -93,14 +90,14 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                DoubleProvider stableRotationPositionThreshold,
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
-                                               YoVariableRegistry parentRegistry,
+                                               YoRegistry parentRegistry,
                                                Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this.velocityEdgeCalculator = velocityEdgeCalculator;
 
       String namePrefix = side.getLowerCaseName() + "CoPAndVelocity";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copHistoryBreakFrequency.getValue(), dt);
       pointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "PointOfRotation", "", registry, alpha, soleFrame);

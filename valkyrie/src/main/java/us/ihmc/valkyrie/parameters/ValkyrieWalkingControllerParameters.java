@@ -41,7 +41,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 {
    private final RobotTarget target;
 
-   private final ValkyrieJointMap jointMap;
+   protected final ValkyrieJointMap jointMap;
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;

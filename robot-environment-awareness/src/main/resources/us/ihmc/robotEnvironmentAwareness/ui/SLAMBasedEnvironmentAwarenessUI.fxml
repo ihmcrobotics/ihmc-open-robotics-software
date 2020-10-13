@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="560.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="847.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="568.0" prefWidth="945.0" BorderPane.alignment="CENTER" />
+		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="525.0" prefWidth="700.0" BorderPane.alignment="CENTER" />
 	</center>
    <right>
 		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="1000" prefWidth="200.0">
@@ -17,49 +17,49 @@
 		</AnchorPane>
    </right>   	
    <bottom>
-      <TabPane prefHeight="204.0" prefWidth="893.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane prefHeight="319.0" prefWidth="900.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
          <tabs>
-            <Tab text="NormalEstimation">
+             <Tab text="NormalEstimation">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="normalEstimationAnchorPane" source="NormalEstimationAnchorPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="FrameNormalEstimation">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="frameNormalEstimationAnchorPane" source="FrameNormalEstimationAnchorPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="SLAM Parameters">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="surfaceElementICPPane" source="SurfaceElementICPPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="BoundingBox">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="boundingBoxAnchorPane" source="BoundingBoxAnchorPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="DataManager">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <fx:include fx:id="normalEstimationAnchorPane" source="NormalEstimationAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="RegionSegmentation">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="regionSegmentationAnchorPane" source="RegionSegmentationAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="CustomRegionMerge">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="customRegionMergeAnchorPane" source="CustomRegionMergeAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab text="Polygonizer">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="polygonizerAnchorPane" source="PolygonizerAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="DataExporter">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="dataExporterAnchorPane" source="DataExporterAnchorPane.fxml" />
+                        <fx:include fx:id="slamDataManagerAnchorPane" source="SLAMDataManagerAnchorPane.fxml" />
                      </children>
                   </AnchorPane>
                </content>

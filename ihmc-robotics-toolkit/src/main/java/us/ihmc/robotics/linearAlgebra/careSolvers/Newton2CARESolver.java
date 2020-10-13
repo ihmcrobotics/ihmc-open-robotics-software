@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
@@ -24,11 +25,11 @@ public class Newton2CARESolver extends AbstractCARESolver
   private final int maxIterations;
   private final double convergenceEpsilon;
 
-  private final DenseMatrix64F PE = new DenseMatrix64F(0, 0);
-  private final DenseMatrix64F PDotk = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj PE = new DMatrixRMaj(0, 0);
+  private final DMatrixRMaj PDotk = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F EInverse = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F Ak = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj EInverse = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Ak = new DMatrixRMaj(0, 0);
 
   private final CARESolver backendSolver;
 
@@ -43,7 +44,7 @@ public class Newton2CARESolver extends AbstractCARESolver
 
 
   /** {@inheritDoc} */
-  public DenseMatrix64F computeP()
+  public DMatrixRMaj computeP()
   {
      int n = A.getNumRows();
 
@@ -54,7 +55,7 @@ public class Newton2CARESolver extends AbstractCARESolver
 
      backendSolver.setMatrices(A, hasE ? E : null, M, Q);
      if (hasE)
-        CommonOps.mult(backendSolver.getP(), E, PE);
+        CommonOps_DDRM.mult(backendSolver.getP(), E, PE);
      else
         PE.set(backendSolver.getP());
 
@@ -66,15 +67,15 @@ public class Newton2CARESolver extends AbstractCARESolver
         CARETools.computeRiccatiRate(PE, A, Q, M, PDotk);
 
         // Ak = A - M P
-        CommonOps.mult(-1.0, M, PE, Ak);
-        CommonOps.addEquals(Ak, A);
+        CommonOps_DDRM.mult(-1.0, M, PE, Ak);
+        CommonOps_DDRM.addEquals(Ak, A);
 
         lyapunovSolver.setMatrices(Ak, PDotk);
-        DenseMatrix64F Pk = lyapunovSolver.getX();
+        DMatrixRMaj Pk = lyapunovSolver.getX();
 
         converged = MatrixToolsLocal.isZero(Pk, convergenceEpsilon);
 
-        CommonOps.addEquals(PE, Pk);
+        CommonOps_DDRM.addEquals(PE, Pk);
 
         iteration++;
         if (iteration > maxIterations)
@@ -86,7 +87,7 @@ public class Newton2CARESolver extends AbstractCARESolver
         P.reshape(n, n);
         EInverse.reshape(n, n);
         NativeCommonOps.invert(E, EInverse);
-        CommonOps.mult(PE, EInverse, P);
+        CommonOps_DDRM.mult(PE, EInverse, P);
      }
      else
      {

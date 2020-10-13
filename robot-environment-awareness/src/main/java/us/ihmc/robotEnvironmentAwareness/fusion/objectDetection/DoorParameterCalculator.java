@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class DoorParameterCalculator extends AbstractObjectParameterCalculator<DoorParameterPacket>
 {
@@ -54,7 +54,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
       }
    }
 
-   public DoorParameterCalculator(Ros2Node ros2Node, Class<DoorParameterPacket> packetType)
+   public DoorParameterCalculator(ROS2Node ros2Node, Class<DoorParameterPacket> packetType)
    {
       super(ros2Node, packetType);
    }
@@ -385,7 +385,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
       {
          RigidBodyTransform vertexInWorld = new RigidBodyTransform(pcaTransform);
          vertexInWorld.appendTranslation(xInPCA, yInPCA, 0.0);
-         doorVerticesInPCA.put(vertexName, new Point3D(vertexInWorld.getTranslationVector()));
+         doorVerticesInPCA.put(vertexName, new Point3D(vertexInWorld.getTranslation()));
       }
 
       private double area()

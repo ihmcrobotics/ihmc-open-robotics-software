@@ -16,8 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PartialFootholdControlModule
 {
@@ -30,7 +34,7 @@ public class PartialFootholdControlModule
       FULL, PARTIAL
    };
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoEnum<PartialFootholdState> footholdState;
 
@@ -98,7 +102,7 @@ public class PartialFootholdControlModule
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
                                        WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
@@ -116,7 +120,7 @@ public class PartialFootholdControlModule
       unsafePolygon = new FrameConvexPolygon2D(defaultFootPolygon);
       lineOfRotation = new FrameLine2D(soleFrame);
 
-      registry = new YoVariableRegistry(namePrefix + name);
+      registry = new YoRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
       footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);

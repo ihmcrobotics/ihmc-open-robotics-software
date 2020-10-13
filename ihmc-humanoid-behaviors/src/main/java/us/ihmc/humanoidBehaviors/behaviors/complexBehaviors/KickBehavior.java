@@ -23,7 +23,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -43,7 +43,7 @@ public class KickBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+   public KickBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
@@ -55,7 +55,7 @@ public class KickBehavior extends AbstractBehavior
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
       footTrajectoryBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
-      registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(footTrajectoryBehavior.getYoRegistry());
    }
 
    @Override

@@ -28,7 +28,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -39,7 +39,7 @@ public class ReachabilityMapSolver
    private static final double DEFAULT_STABILITY_THRESHOLD = 0.00002;
    private static final double DEFAULT_MIN_PROGRESSION = 0.0005;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoDouble solutionQualityThreshold = new YoDouble("solutionQualityThreshold", registry);
@@ -58,7 +58,7 @@ public class ReachabilityMapSolver
    private final SelectionMatrix3D angularSelection = new SelectionMatrix3D(null, true, true, true);
    private final RobotConfigurationData defaultArmConfiguration;
 
-   public ReachabilityMapSolver(OneDoFJointBasics[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public ReachabilityMapSolver(OneDoFJointBasics[] robotArmJoints, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.robotArmJoints = robotArmJoints;
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();

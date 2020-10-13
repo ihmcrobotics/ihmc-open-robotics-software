@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -14,9 +14,9 @@ import us.ihmc.robotics.math.QuaternionCalculus;
 
 public class RobotJointVelocityAccelerationIntegrator
 {
-   private final DenseMatrix64F jointConfigurations = new DenseMatrix64F(100, 0);
-   private final DenseMatrix64F jointVelocities = new DenseMatrix64F(100, 0);
-   private final DenseMatrix64F jointAccelerations = new DenseMatrix64F(100, 0);
+   private final DMatrixRMaj jointConfigurations = new DMatrixRMaj(100, 0);
+   private final DMatrixRMaj jointVelocities = new DMatrixRMaj(100, 0);
+   private final DMatrixRMaj jointAccelerations = new DMatrixRMaj(100, 0);
 
    private final double controlDT;
    private double maximumOneDoFJointVelocity = Double.POSITIVE_INFINITY;
@@ -63,7 +63,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D translationIntegrated = new Vector3D();
    private final Vector3D translation = new Vector3D();
 
-   public void integrateJointVelocities(JointBasics[] joints, DenseMatrix64F jointVelocitiesToIntegrate)
+   public void integrateJointVelocities(JointBasics[] joints, DMatrixRMaj jointVelocitiesToIntegrate)
    {
       int jointConfigurationStartIndex = 0;
       int jointStartIndex = 0;
@@ -138,7 +138,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D angularAccelerationIntegrated = new Vector3D();
    private final Vector3D linearAccelerationIntegrated = new Vector3D();
 
-   public void integrateJointAccelerations(JointBasics[] joints, DenseMatrix64F jointAccelerationsToIntegrate)
+   public void integrateJointAccelerations(JointBasics[] joints, DMatrixRMaj jointAccelerationsToIntegrate)
    {
       int jointStartIndex = 0;
 
@@ -195,17 +195,17 @@ public class RobotJointVelocityAccelerationIntegrator
       }
    }
 
-   public DenseMatrix64F getJointConfigurations()
+   public DMatrixRMaj getJointConfigurations()
    {
       return jointConfigurations;
    }
 
-   public DenseMatrix64F getJointVelocities()
+   public DMatrixRMaj getJointVelocities()
    {
       return jointVelocities;
    }
 
-   public DenseMatrix64F getJointAccelerations()
+   public DMatrixRMaj getJointAccelerations()
    {
       return jointAccelerations;
    }

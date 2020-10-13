@@ -1,21 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -67,8 +66,8 @@ public class SmoothCoMIntegrationToolboxTest
 
          double time = t0 + Math.random() * (tFinal - t0);
 
-         DenseMatrix64F alphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F alphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaCoMPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaCoMPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, alphaCoMPrimeAutomatic, 0, linear3D);
          calculateAlphaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, alphaCoMPrimeManual);
@@ -84,8 +83,8 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
 
-         DenseMatrix64F betaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F betaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaCoMPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaCoMPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, betaCoMPrimeAutomatic, 0, linear3D);
          calculateBetaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, betaCoMPrimeManual);
@@ -101,7 +100,7 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
 
-         DenseMatrix64F gammaCoMPrimeManual = new DenseMatrix64F(1, 1);
+         DMatrixRMaj gammaCoMPrimeManual = new DMatrixRMaj(1, 1);
 
          double gammaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          calculateGammaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, gammaCoMPrimeManual);
@@ -137,8 +136,8 @@ public class SmoothCoMIntegrationToolboxTest
 
          double time = t0 + Math.random() * (tFinal - t0);
 
-         DenseMatrix64F dAlphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F dAlphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj dAlphaCoMPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj dAlphaCoMPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, dAlphaCoMPrimeAutomatic, 1, linear3D);
          calculateDAlphaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, dAlphaCoMPrimeManual);
@@ -154,8 +153,8 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
 
-         DenseMatrix64F dBetaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F dBetaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj dBetaCoMPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj dBetaCoMPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, dBetaCoMPrimeAutomatic, 1, linear3D);
          calculateDBetaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, dBetaCoMPrimeManual);
@@ -171,7 +170,7 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
 
-         DenseMatrix64F dGammaCoMPrimeManual = new DenseMatrix64F(1, 1);
+         DMatrixRMaj dGammaCoMPrimeManual = new DMatrixRMaj(1, 1);
 
          double dGammaCoMPrimeAutomatic = SmoothCoMIntegrationToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
          calculateDGammaCoMPrime3DByHandLinear(omega0, time, t0, tFinal, dGammaCoMPrimeManual);
@@ -286,9 +285,9 @@ public class SmoothCoMIntegrationToolboxTest
       for (int i = 0; i < nTests; i++)
       {
          int nPolynomialCoeffs = random.nextInt(9) + 1;
-         DenseMatrix64F alphaBetaCoMPrime = new DenseMatrix64F(3, 3 * nPolynomialCoeffs);
+         DMatrixRMaj alphaBetaCoMPrime = new DMatrixRMaj(3, 3 * nPolynomialCoeffs);
          DenseMatrixVector3D alphaBetaCoMPrimeVector = new DenseMatrixVector3D(1, nPolynomialCoeffs);
-         DenseMatrix64F alphaPrimeTerminal = new DenseMatrix64F(3, 3 * nPolynomialCoeffs);
+         DMatrixRMaj alphaPrimeTerminal = new DMatrixRMaj(3, 3 * nPolynomialCoeffs);
          DenseMatrixVector3D alphaPrimeTerminalVector = new DenseMatrixVector3D(1, nPolynomialCoeffs);
 
          for (int row = 0; row < 3; row++)
@@ -307,10 +306,10 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
 
-         DenseMatrix64F polynomialCoeffs = new DenseMatrix64F(3 * nPolynomialCoeffs, 1);
+         DMatrixRMaj polynomialCoeffs = new DMatrixRMaj(3 * nPolynomialCoeffs, 1);
          DenseMatrixVector3D polynomialCoeffsVector = new DenseMatrixVector3D(nPolynomialCoeffs, 1);
 
-         for (Axis axis : Axis.values)
+         for (Axis3D axis : Axis3D.values)
          {
             int rowOffset = nPolynomialCoeffs * axis.ordinal();
 
@@ -355,26 +354,26 @@ public class SmoothCoMIntegrationToolboxTest
          cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
                                   EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
 
-         DenseMatrix64F generalizedAlphaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
-         DenseMatrix64F generalizedBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
-         DenseMatrix64F expectedGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj generalizedAlphaCoMPrime = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj generalizedBetaCoMPrime = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj expectedGeneralizedAlphaBetaCoMPrime = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, generalizedAlphaCoMPrime, alphaBetaCoMDerivativeOrder,
                                                                                      cmpPolynomial3D);
          SmoothCoMIntegrationToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, generalizedBetaCoMPrime, alphaBetaCoMDerivativeOrder,
                                                                                     cmpPolynomial3D);
-         CommonOps.subtract(generalizedAlphaCoMPrime, generalizedBetaCoMPrime, expectedGeneralizedAlphaBetaCoMPrime);
+         CommonOps_DDRM.subtract(generalizedAlphaCoMPrime, generalizedBetaCoMPrime, expectedGeneralizedAlphaBetaCoMPrime);
 
-         DenseMatrix64F actualGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj actualGeneralizedAlphaBetaCoMPrime = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualGeneralizedAlphaBetaCoMPrime,
                                                                                          alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
 
-         DenseMatrix64F error = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
-         CommonOps.subtract(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, error);
+         DMatrixRMaj error = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         CommonOps_DDRM.subtract(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, error);
          for (int j = 0; j < error.getNumElements(); j++)
             error.set(j, Math.abs(error.get(j)));
          assertTrue("Expected: " + expectedGeneralizedAlphaBetaCoMPrime + "\nwas: " + actualGeneralizedAlphaBetaCoMPrime + "\nerror: " + error,
-                    MatrixFeatures.isEquals(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, 1.0e-12));
+                    MatrixFeatures_DDRM.isEquals(expectedGeneralizedAlphaBetaCoMPrime, actualGeneralizedAlphaBetaCoMPrime, 1.0e-12));
       }
       for (int i = 0; i < nTests; i++)
       { // Test calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D with DenseMatrixVector3D
@@ -387,7 +386,7 @@ public class SmoothCoMIntegrationToolboxTest
          cmpPolynomial3D.setCubic(t0, tf, EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame),
                                   EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame));
 
-         DenseMatrix64F expectedGeneralizedAlphaBetaCoMPrime = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj expectedGeneralizedAlphaBetaCoMPrime = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
 
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, expectedGeneralizedAlphaBetaCoMPrime,
                                                                                          alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
@@ -397,25 +396,25 @@ public class SmoothCoMIntegrationToolboxTest
          SmoothCoMIntegrationToolbox.calculateGeneralizedAlphaBetaCoMPrimeOnCMPSegment3D(omega0, time, actualGeneralizedAlphaBetaCoMPrime,
                                                                                          alphaBetaCoMDerivativeOrder, cmpPolynomial3D);
 
-         DenseMatrix64F error = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
+         DMatrixRMaj error = new DMatrixRMaj(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
 
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols; k++)
-            error.set(0, k, expectedGeneralizedAlphaBetaCoMPrime.get(0, k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).get(0, k));
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).numCols; k++)
+            error.set(0, k, expectedGeneralizedAlphaBetaCoMPrime.get(0, k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).get(0, k));
 
-         int colOffset = actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols;
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols; k++)
+         int colOffset = actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).numCols; k++)
             error.set(1, colOffset + k,
-                      expectedGeneralizedAlphaBetaCoMPrime.get(1, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).get(0, k));
+                      expectedGeneralizedAlphaBetaCoMPrime.get(1, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).get(0, k));
 
-         colOffset += actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols;
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).numCols; k++)
+         colOffset += actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Z).numCols; k++)
             error.set(2, colOffset + k,
-                      expectedGeneralizedAlphaBetaCoMPrime.get(2, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).get(0, k));
+                      expectedGeneralizedAlphaBetaCoMPrime.get(2, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Z).get(0, k));
 
          for (int j = 0; j < error.getNumElements(); j++)
             error.set(j, Math.abs(error.get(j)));
          assertTrue("Expected: " + expectedGeneralizedAlphaBetaCoMPrime + "\nwas: " + actualGeneralizedAlphaBetaCoMPrime + "\nerror: " + error,
-                    MatrixFeatures.isZeros(error, 1.0e-12));
+                    MatrixFeatures_DDRM.isZeros(error, 1.0e-12));
       }
 
       for (int i = 0; i < nTests; i++)
@@ -638,7 +637,7 @@ public class SmoothCoMIntegrationToolboxTest
       }
    }
 
-   public static void calculateAlphaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F alphaCoMPrimeLinear)
+   public static void calculateAlphaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DMatrixRMaj alphaCoMPrimeLinear)
    {
       alphaCoMPrimeLinear.set(0, 0, 1);
       alphaCoMPrimeLinear.set(0, 1, time);
@@ -651,7 +650,7 @@ public class SmoothCoMIntegrationToolboxTest
    }
 
    public static void calculateDAlphaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal,
-                                                            DenseMatrix64F alphaCoMPrimeLinear)
+                                                            DMatrixRMaj alphaCoMPrimeLinear)
    {
       alphaCoMPrimeLinear.set(0, 0, 0);
       alphaCoMPrimeLinear.set(0, 1, 1);
@@ -663,7 +662,7 @@ public class SmoothCoMIntegrationToolboxTest
       alphaCoMPrimeLinear.set(2, 5, 1);
    }
 
-   public static void calculateBetaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F betaCoMPrimeLinear)
+   public static void calculateBetaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DMatrixRMaj betaCoMPrimeLinear)
    {
       betaCoMPrimeLinear.set(0, 0, Math.exp(omega0 * (timeInitial - time)) * 1);
       betaCoMPrimeLinear.set(0, 1, Math.exp(omega0 * (timeInitial - time)) * timeInitial);
@@ -675,7 +674,7 @@ public class SmoothCoMIntegrationToolboxTest
       betaCoMPrimeLinear.set(2, 5, Math.exp(omega0 * (timeInitial - time)) * timeInitial);
    }
 
-   public static void calculateDBetaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F betaCoMPrimeLinear)
+   public static void calculateDBetaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DMatrixRMaj betaCoMPrimeLinear)
    {
       betaCoMPrimeLinear.set(0, 0, -omega0 * Math.exp(omega0 * (timeInitial - time)) * 1);
       betaCoMPrimeLinear.set(0, 1, -omega0 * Math.exp(omega0 * (timeInitial - time)) * timeInitial);
@@ -687,13 +686,13 @@ public class SmoothCoMIntegrationToolboxTest
       betaCoMPrimeLinear.set(2, 5, -omega0 * Math.exp(omega0 * (timeInitial - time)) * timeInitial);
    }
 
-   public static void calculateGammaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F gammaCoMPrimeLinear)
+   public static void calculateGammaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DMatrixRMaj gammaCoMPrimeLinear)
    {
       gammaCoMPrimeLinear.set(0, 0, Math.exp(omega0 * (timeInitial - time)));
    }
 
    public static void calculateDGammaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal,
-                                                            DenseMatrix64F gammaCoMPrimeLinear)
+                                                            DMatrixRMaj gammaCoMPrimeLinear)
    {
       gammaCoMPrimeLinear.set(0, 0, -omega0 * Math.exp(omega0 * (timeInitial - time)));
    }

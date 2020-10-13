@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -18,11 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,7 +26,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PosePlaybackSCSBridge
 {
@@ -45,7 +45,7 @@ public class PosePlaybackSCSBridge
    private boolean playOnlyOnePose = false;
 
    private final PlaybackPoseInterpolator interpolator;
-   private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
+   private final YoRegistry registry = new YoRegistry("PlaybackPoseSCSBridge");
 
    // private final YoBoolean plotBalls = new YoBoolean("plotBalls", registry);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -92,7 +92,7 @@ public class PosePlaybackSCSBridge
 
       scs = new SimulationConstructionSet(sdfRobot);
       scs.setDT(controlDT, 1);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
 
       String listName = getClass().getSimpleName();
       yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
@@ -163,7 +163,7 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class CaptureSnapshotListener implements VariableChangedListener
+   private class CaptureSnapshotListener implements YoVariableChangedListener
    {
       private final FullHumanoidRobotModel fullRobotModel;
 
@@ -175,7 +175,7 @@ public class PosePlaybackSCSBridge
          this.controller = controller;
       }
 
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          PlaybackPose pose = new PlaybackPose(fullRobotModel, sdfRobot);
 
@@ -257,8 +257,8 @@ public class PosePlaybackSCSBridge
             double roll = robotSide.negateIfLeftSide(0.4);
             FrameQuaternion palmOrientationWithRespectToHandFrame = new FrameQuaternion(handFrame, yaw, pitch, roll);
 
-            palmPose.setPosition(palmPositionWithRespectToHandFrame);
-            palmPose.setOrientation(palmOrientationWithRespectToHandFrame);
+            palmPose.getPosition().set(palmPositionWithRespectToHandFrame);
+            palmPose.getOrientation().set(palmOrientationWithRespectToHandFrame);
 
             PoseReferenceFrame palmFrame = new PoseReferenceFrame("palmFrame", palmPose);
             palmFrame.update();
@@ -269,7 +269,7 @@ public class PosePlaybackSCSBridge
 
    }
 
-   private class LoadSequenceFromFileListener implements VariableChangedListener
+   private class LoadSequenceFromFileListener implements YoVariableChangedListener
    {
       private final FullRobotModel fullRobotModel;
       
@@ -278,7 +278,7 @@ public class PosePlaybackSCSBridge
          this.fullRobotModel = fullRobotModel;
       }
       
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -295,9 +295,9 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class LoadLastSequenceListener implements VariableChangedListener
+   private class LoadLastSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -312,9 +312,9 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class LoadFrameByFrameSequenceListener implements VariableChangedListener
+   private class LoadFrameByFrameSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -332,9 +332,9 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class PlayPoseFromFrameByFrameSequenceListener implements VariableChangedListener
+   private class PlayPoseFromFrameByFrameSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          //         if(!((YoBoolean) yoVariable).getBooleanValue())
          //            return;
@@ -343,9 +343,9 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class SaveSequenceListener implements VariableChangedListener
+   private class SaveSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (((YoBoolean) yoVariable).getBooleanValue())
          {
@@ -355,18 +355,18 @@ public class PosePlaybackSCSBridge
       }
    }
 
-   private class ClearSequenceListener implements VariableChangedListener
+   private class ClearSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          posePlaybackRobotPoseSequence.clear();
          System.out.println("Clearing Sequence");
       }
    }
 
-   private class ResetToBasePoseListener implements VariableChangedListener
+   private class ResetToBasePoseListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (sdfRobot != null && previousPose != null)
          {

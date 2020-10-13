@@ -2,10 +2,11 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.EnumMap;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -93,34 +94,34 @@ public class SkippyRobotV2 extends Robot
       bodyMap.put(SkippyBody.ELEVATOR, elevator);
 
       rootJoint = new SixDoFJoint("rootJoint", elevator);
-      Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
+      Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis3D.Z);
       RigidBodyBasics torso = new RigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
       bodyMap.put(SkippyBody.TORSO, torso);
 
       RevoluteJoint idHipJoint = new RevoluteJoint("idHipJoint", torso, new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3D(1.0, 0.0, 0.0));
-      Matrix3D inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z);
+      Matrix3D inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis3D.Z);
       RigidBodyBasics leg = new RigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
       bodyMap.put(SkippyBody.LEG, leg);
       jointMap.put(SkippyJoint.HIP_PITCH, idHipJoint);
 
       RigidBodyTransform legToFoot = new RigidBodyTransform();
-      legToFoot.setTranslation(0.0, 0.0, -LEG_LENGTH / 2.0);
-      footReferenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("footFrame", leg.getBodyFixedFrame(), legToFoot);
+      legToFoot.getTranslation().set(0.0, 0.0, -LEG_LENGTH / 2.0);
+      footReferenceFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("footFrame", leg.getBodyFixedFrame(), legToFoot);
 
       RevoluteJoint idShoulderJoint = new RevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), new Vector3D(0.0, 1.0, 0.0));
-      Matrix3D inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X);
+      Matrix3D inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis3D.X);
       RigidBodyBasics shoulder = new RigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
       jointMap.put(SkippyJoint.SHOULDER_ROLL, idShoulderJoint);
       bodyMap.put(SkippyBody.SHOULDER, shoulder);
 
       //One end effector at each shoulder extremity
       RigidBodyTransform leftShoulder = new RigidBodyTransform();
-      leftShoulder.setTranslation(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
-      leftShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("leftShoulderFrame", shoulder.getBodyFixedFrame(), leftShoulder);
+      leftShoulder.getTranslation().set(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      leftShoulderFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("leftShoulderFrame", shoulder.getBodyFixedFrame(), leftShoulder);
 
       RigidBodyTransform rightShoulder = new RigidBodyTransform();
-      rightShoulder.setTranslation(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
-      rightShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("rightShoulderFrame", shoulder.getBodyFixedFrame(), rightShoulder);
+      rightShoulder.getTranslation().set(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      rightShoulderFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("rightShoulderFrame", shoulder.getBodyFixedFrame(), rightShoulder);
 
       // --- scs robot ---
       scsRootJoint = new FloatingJoint("rootJoint", new Vector3D(), this);
@@ -130,12 +131,12 @@ public class SkippyRobotV2 extends Robot
 
       this.addRootJoint(scsRootJoint);
 
-      PinJoint shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), this, Axis.Y);
+      PinJoint shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), this, Axis3D.Y);
       shoulderJoint.setLink(createArm());
       scsRootJoint.addJoint(shoulderJoint);
       scsJointMap.put(SkippyJoint.SHOULDER_ROLL, shoulderJoint);
 
-      PinJoint hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
+      PinJoint hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis3D.X);
       hipJoint.setLink(createLeg());
       scsRootJoint.addJoint(hipJoint);
       scsJointMap.put(SkippyJoint.HIP_PITCH, hipJoint);
@@ -151,7 +152,7 @@ public class SkippyRobotV2 extends Robot
       shoulderJoint.addGroundContactPoint(arm2ContactPoint);
 
       // add ground contact model
-      LinearGroundContactModel ground = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      LinearGroundContactModel ground = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       ground.setZStiffness(2000.0);
       ground.setZDamping(1500.0);
       ground.setXYStiffness(50000.0);
@@ -169,7 +170,7 @@ public class SkippyRobotV2 extends Robot
       Link torso = new Link("torso");
       torso.setMass(TORSO_MASS);
       torso.setComOffset(0.0, 0.0, 0.0);
-      torso.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z));
+      torso.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis3D.Z));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -TORSO_LENGTH / 2.0);
@@ -189,16 +190,16 @@ public class SkippyRobotV2 extends Robot
       Link arms = new Link("arms");
       arms.setMass(SHOULDER_MASS);
       arms.setComOffset(0.0, 0.0, 0.0);
-      arms.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X));
+      arms.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis3D.X));
 
       // arm graphics:
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
+      linkGraphics.rotate(Math.toRadians(90), Axis3D.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, SHOULDER_COLOR);
       // joint graphics:
-      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.Y);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.translate(-SHOULDER_LENGTH / 2.0, 0.0, -JOINT_RADIUS);
       linkGraphics.addCylinder(2.0 * JOINT_RADIUS, 2.0 * JOINT_RADIUS / 3.0, JOINT_COLOR);
       arms.setLinkGraphics(linkGraphics);
@@ -216,7 +217,7 @@ public class SkippyRobotV2 extends Robot
       Link leg = new Link("leg");
       leg.setMass(LEG_MASS);
       leg.setComOffset(0.0, 0.0, -LEG_LENGTH / 2.0);
-      leg.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z));
+      leg.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis3D.Z));
 
       // leg graphics:
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -224,7 +225,7 @@ public class SkippyRobotV2 extends Robot
       linkGraphics.addCylinder(LEG_LENGTH, LEG_RADIUS, LEG_COLOR);
       // joint graphics:
       linkGraphics.identity();
-      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.Y);
       linkGraphics.translate(0.0, 0.0, -JOINT_RADIUS);
       linkGraphics.addCylinder(2.0 * JOINT_RADIUS, 2.0 * JOINT_RADIUS / 3.0, JOINT_COLOR);
       leg.setLinkGraphics(linkGraphics);
@@ -251,7 +252,7 @@ public class SkippyRobotV2 extends Robot
       // update root joint position
       RigidBodyTransform rootJointTransform = new RigidBodyTransform();
       scsRootJoint.getTransformToWorld(rootJointTransform);
-      rootJointTransform.normalizeRotationPart();
+      rootJointTransform.getRotation().normalize();
       rootJoint.setJointConfiguration(rootJointTransform);
 
       // update root joint velocity
@@ -281,7 +282,7 @@ public class SkippyRobotV2 extends Robot
 
    public Point3D getFootLocation()
    {
-      return footContactPoint.getPositionPoint();
+      return footContactPoint.getPositionCopy();
    }
 
    public RigidBodyBasics getSkippyFoot()
@@ -291,7 +292,7 @@ public class SkippyRobotV2 extends Robot
 
    public Point3D computeFootLocation()
    {
-      return footContactPoint.getPositionPoint();
+      return footContactPoint.getPositionCopy();
    }
 
    public boolean getFootFS()

@@ -1,31 +1,40 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class TestDoorOpenBehaviorService extends AbstractBehavior
 {
    boolean isDoorOpen = false;
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+ //  private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
 
-   public TestDoorOpenBehaviorService(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
+   private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
+
+   public TestDoorOpenBehaviorService(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, yoNamePrefix, ros2Node);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+ 
 
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
 
       addBehaviorService(doorOpenDetectorBehaviorService);
+     
+
+        doorToBehaviorPublisher = createPublisher(DoorLocationPacket.class, behaviorInputTopic);
+        doorToUIPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
+        
    }
 
    @Override
@@ -33,6 +42,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    {
       publishTextToSpeech("watching the door");
       doorOpenDetectorBehaviorService.initialize();
+      doorOpenDetectorBehaviorService.reset();
       doorOpenDetectorBehaviorService.run(true);
    }
 

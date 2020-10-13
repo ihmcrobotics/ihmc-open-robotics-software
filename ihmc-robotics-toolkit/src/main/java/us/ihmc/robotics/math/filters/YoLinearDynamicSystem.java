@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.linearDynamicSystems.LinearDynamicSystem;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -19,7 +19,7 @@ public class YoLinearDynamicSystem
    private final YoDouble[] outputVariables;
 
    public YoLinearDynamicSystem(LinearDynamicSystem linearDynamicSystem, String statePrefix, String inputPrefix, String outputPrefix,
-                                YoVariableRegistry registry)
+                                YoRegistry registry)
    {
       this.linearDynamicSystem = linearDynamicSystem;
       int order = linearDynamicSystem.getOrder();

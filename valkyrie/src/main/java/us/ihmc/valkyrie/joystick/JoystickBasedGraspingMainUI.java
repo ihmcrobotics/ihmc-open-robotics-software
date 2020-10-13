@@ -13,7 +13,6 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -25,7 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class JoystickBasedGraspingMainUI
 {
@@ -42,7 +41,7 @@ public class JoystickBasedGraspingMainUI
    @FXML
    private GraspingPaneController graspingPaneController;
 
-   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
          throws Exception
    {
@@ -68,12 +67,12 @@ public class JoystickBasedGraspingMainUI
       mainPane.setCenter(subScene);
 
       javaFXRobotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
       

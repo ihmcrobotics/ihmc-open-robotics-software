@@ -13,6 +13,8 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -91,9 +93,8 @@ public class StartGoalOrientationEditor extends AnimationTimer
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(regionTransform);
-      Vector3D planeNormal = planarRegion.getNormal();
-      Point3D pointOnPlane = new Point3D();
-      regionTransform.getTranslation(pointOnPlane);
+      Vector3DReadOnly planeNormal = planarRegion.getNormal();
+      Point3DReadOnly pointOnPlane = planarRegion.getPoint();
 
       return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
    }

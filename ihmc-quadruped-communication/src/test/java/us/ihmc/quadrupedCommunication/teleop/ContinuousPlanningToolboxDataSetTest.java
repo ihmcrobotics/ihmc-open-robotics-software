@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.text.DecimalFormat;
@@ -35,8 +34,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -61,7 +59,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning.QuadrupedContinuousPlanningModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
@@ -85,8 +82,8 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ContinuousPlanningToolboxDataSetTest
@@ -130,7 +127,7 @@ public class ContinuousPlanningToolboxDataSetTest
    private PawStepPlannerParametersBasics footstepPlannerParameters = null;
    private QuadrupedContinuousPlanningModule continuousPlanningModule = null;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
 
    private final AtomicReference<PawStepPlan> planReference = new AtomicReference<>(null);
    private final AtomicReference<List<Pose3D>> pathReference = new AtomicReference<>(null);
@@ -215,34 +212,35 @@ public class ContinuousPlanningToolboxDataSetTest
                                                      false,
                                                      false,
                                                      pubSubImplementation);
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
+      YoRegistry testRegistry = new YoRegistry("testRegistry");
       continuousPlanningModule = new QuadrupedContinuousPlanningModule(robotName, null, xGaitSettings, null, false, false, pubSubImplementation);
       continuousPlanningModule.setRootRegistry(testRegistry, null);
-      planningFailed = ((YoBoolean) testRegistry.getVariable("planningFailed"));
+      planningFailed = ((YoBoolean) testRegistry.findVariable("planningFailed"));
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PawStepPlanningToolboxOutputStatus.class,
-                                           PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PawStepPlanningToolboxOutputStatus.class,
+                                                    PawStepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           QuadrupedTimedStepListMessage.class,
-                                           getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2TopicQualifier.OUTPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    QuadrupedTimedStepListMessage.class,
+                                                    ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                              .withOutput(),
                                            s -> processTimedStepListMessage(s.takeNextData()));
 
-      requestPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                   QuadrupedContinuousPlanningRequestPacket.class,
-                                                   getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
-      planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
-      plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                             PawStepPlannerParametersPacket.class,
-                                                             getTopicNameGenerator(robotName,
-                                                                                   ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX,
-                                                                                   ROS2Tools.ROS2TopicQualifier.INPUT));
+      requestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                            QuadrupedContinuousPlanningRequestPacket.class,
+                                                            ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                                      .withInput());
+      planarRegionsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic);
+      plannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                      PawStepPlannerParametersPacket.class,
+                                                                      ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                                                .withInput());
 
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      footstepStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic);
 
       ros2Node.spin();
 
@@ -583,7 +581,7 @@ public class ContinuousPlanningToolboxDataSetTest
       QuadrantDependentList<FramePoint3D> feetPositions = new QuadrantDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getQuadrupedStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getQuadrupedStartYaw());
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
       startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getQuadrupedStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);

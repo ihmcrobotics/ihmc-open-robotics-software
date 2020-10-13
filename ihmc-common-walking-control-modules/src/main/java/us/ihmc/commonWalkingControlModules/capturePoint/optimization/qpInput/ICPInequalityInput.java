@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
  * Formulated as Aineq x <= bineq
@@ -8,9 +8,9 @@ import org.ejml.data.DenseMatrix64F;
 public class ICPInequalityInput
 {
    /** matrix multiplier of the constrained variable. */
-   public final DenseMatrix64F Aineq;
+   public final DMatrixRMaj Aineq;
    /** desired bounds for the constrained variable. */
-   public final DenseMatrix64F bineq;
+   public final DMatrixRMaj bineq;
 
    private int numberOfConstraints;
    private int numberOfVariables;
@@ -19,8 +19,8 @@ public class ICPInequalityInput
    {
       this.numberOfConstraints = numberOfConstraints;
       this.numberOfVariables = numberOfVariables;
-      Aineq = new DenseMatrix64F(numberOfConstraints, numberOfVariables);
-      bineq = new DenseMatrix64F(numberOfConstraints, 1);
+      Aineq = new DMatrixRMaj(numberOfConstraints, numberOfVariables);
+      bineq = new DMatrixRMaj(numberOfConstraints, 1);
    }
 
    /**

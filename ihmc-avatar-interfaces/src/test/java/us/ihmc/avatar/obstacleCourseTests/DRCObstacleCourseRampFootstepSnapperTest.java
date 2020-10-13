@@ -28,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -129,11 +130,11 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FootstepDataMessage footstepData = corruptedFootstepDataList.getFootstepDataList().get(i);
          footstepData.getLocation().setZ(footstepData.getLocation().getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
-         double[] yawPitchRoll = new double[3];
-         tempFrameOrientation.getYawPitchRoll(yawPitchRoll);
-         yawPitchRoll[1] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
-         yawPitchRoll[2] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
-         tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
+         YawPitchRoll yawPitchRoll = new YawPitchRoll();
+         yawPitchRoll.set(tempFrameOrientation);
+         yawPitchRoll.setPitch(RandomNumbers.nextDouble(random, Math.PI / 4.0));
+         yawPitchRoll.setRoll(RandomNumbers.nextDouble(random, Math.PI / 4.0));
+         tempFrameOrientation.set(yawPitchRoll);
          footstepData.getOrientation().set(tempFrameOrientation);
       }
 

@@ -84,6 +84,14 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
    @Tag("controller-api-slow-4")
    @Test
    @Override
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      super.testForceExecutionWithSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow-4")
+   @Test
+   @Override
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

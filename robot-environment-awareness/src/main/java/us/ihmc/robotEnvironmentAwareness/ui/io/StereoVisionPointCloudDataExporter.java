@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
@@ -37,10 +38,18 @@ public class StereoVisionPointCloudDataExporter
 
    public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager)
    {
-      stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.DepthPointCloudState);
-      dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIStereoDataExporterDirectory, new File("Data/").getAbsolutePath());
+      this(uiMessager, REAModuleAPI.DepthPointCloudState, REAModuleAPI.UIStereoDataExporterDirectory, REAModuleAPI.UIStereoDataExportRequest);
+   }
 
-      uiMessager.registerTopicListener(REAModuleAPI.UIStereoDataExportRequest, this::toggleRecording);
+   public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager,
+                                             Topic<StereoVisionPointCloudMessage> depthPointCloudStateTopic,
+                                             Topic<String> uiStereoDataExporterDirectoryTopic,
+                                             Topic<Boolean> uiStereoDataExportRequestTopic)
+   {
+      stereovisionPointCloudMessage = uiMessager.createInput(depthPointCloudStateTopic);
+      dataDirectoryPath = uiMessager.createInput(uiStereoDataExporterDirectoryTopic, new File("Data/").getAbsolutePath());
+
+      uiMessager.registerTopicListener(uiStereoDataExportRequestTopic, this::toggleRecording);
    }
 
    private void toggleRecording(boolean enable)
@@ -66,6 +75,8 @@ public class StereoVisionPointCloudDataExporter
    {
       StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
 
+      if(message == null)
+         return;
       Point3D[] pointCloud = PointCloudCompression.decompressPointCloudToArray(message);
 
       Path path = Paths.get(dataDirectoryPath.get());

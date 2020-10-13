@@ -5,13 +5,11 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersUIController
 {
@@ -94,7 +92,7 @@ public class VisibilityGraphsParametersUIController
 
       // set JavaFX user input to update stored properties and publish messager message
       javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
-      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+      javaFXStoredPropertyMap.addAnyJavaFXValueChangedListener(() -> publishParameters());
    }
 
    private void publishParameters()

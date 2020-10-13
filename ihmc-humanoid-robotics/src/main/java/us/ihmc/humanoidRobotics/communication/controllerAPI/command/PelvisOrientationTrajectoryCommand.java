@@ -13,6 +13,7 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
       FrameBasedCommand<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryCommand>
 {
    private long sequenceId;
+   private boolean forceExecution = false;
    private boolean enableUserPelvisControlDuringWalking = false;
    private final SO3TrajectoryControllerCommand so3Trajectory;
 
@@ -30,6 +31,8 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void clear()
    {
       sequenceId = 0;
+      forceExecution = false;
+      enableUserPelvisControlDuringWalking = false;
       so3Trajectory.clear();
    }
 
@@ -37,6 +40,7 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void set(PelvisOrientationTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
+      setForceExecution(other.getForceExecution());
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
       so3Trajectory.set(other.so3Trajectory);
    }
@@ -51,6 +55,7 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
+      setForceExecution(message.getForceExecution());
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
@@ -73,6 +78,16 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
    }
 
    @Override

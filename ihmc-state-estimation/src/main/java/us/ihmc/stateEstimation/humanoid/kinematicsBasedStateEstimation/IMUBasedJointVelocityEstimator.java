@@ -4,8 +4,8 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -13,7 +13,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -29,12 +29,12 @@ public class IMUBasedJointVelocityEstimator
    private final FrameVector3D childAngularVelocity = new FrameVector3D();
    private final FrameVector3D parentAngularVelocity = new FrameVector3D();
 
-   private final DenseMatrix64F jacobianAngularPart64F;
-   private final DenseMatrix64F omega = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F qd_estimated;
+   private final DMatrixRMaj jacobianAngularPart64F;
+   private final DMatrixRMaj omega = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj qd_estimated;
    private final DampedLeastSquaresSolver solver;
 
-   public IMUBasedJointVelocityEstimator(GeometricJacobian jacobian, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
+   public IMUBasedJointVelocityEstimator(GeometricJacobian jacobian, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry)
          throws IllegalArgumentException
    {
       this.parentIMU = parentIMU;
@@ -59,11 +59,11 @@ public class IMUBasedJointVelocityEstimator
       }
 
       solver = new DampedLeastSquaresSolver(joints.length);
-      jacobianAngularPart64F = new DenseMatrix64F(3, joints.length);
-      qd_estimated = new DenseMatrix64F(joints.length, 1);
+      jacobianAngularPart64F = new DMatrixRMaj(3, joints.length);
+      qd_estimated = new DMatrixRMaj(joints.length, 1);
    }
 
-   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
+   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry)
    {
       this(new GeometricJacobian(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink(), childIMU.getMeasurementLink().getBodyFixedFrame()), parentIMU,
            childIMU, registry);
@@ -76,7 +76,7 @@ public class IMUBasedJointVelocityEstimator
    {
       jacobian.compute();
       // jacobian is 6xn
-      CommonOps.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
+      CommonOps_DDRM.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
 
       childAngularVelocity.setToZero(childIMU.getMeasurementFrame());
       childAngularVelocity.set(childIMU.getAngularVelocityMeasurement());

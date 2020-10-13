@@ -52,7 +52,7 @@ public class CollisionExampleTest1
 
       double energy_world_before = 0.5 * u1_world.dot(u1_world) + 0.5 * u2_world.dot(u2_world);
 
-      R_world_collision.setToRollMatrix(xRotation);
+      R_world_collision.setToRollOrientation(xRotation);
 
       Vector3D offset_world = new Vector3D(0.0, 0.0, R1 + R2);
       R_world_collision.transform(offset_world);

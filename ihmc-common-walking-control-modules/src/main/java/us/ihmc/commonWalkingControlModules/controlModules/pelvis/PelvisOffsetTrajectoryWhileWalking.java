@@ -13,10 +13,10 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class PelvisOffsetTrajectoryWhileWalking
 {
@@ -24,7 +24,7 @@ public class PelvisOffsetTrajectoryWhileWalking
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isStanding = new YoBoolean("pelvisIsStanding", registry);
    private final YoBoolean isInTransfer = new YoBoolean("pelvisInInTransfer", registry);
@@ -69,19 +69,19 @@ public class PelvisOffsetTrajectoryWhileWalking
    private double initialTime;
 
    public PelvisOffsetTrajectoryWhileWalking(HighLevelHumanoidControllerToolbox controllerToolbox, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this(controllerToolbox.getYoTime(), controllerToolbox.getReferenceFrames(), pelvisOffsetWhileWalkingParameters, controllerToolbox.getControlDT(), parentRegistry);
    }
 
    public PelvisOffsetTrajectoryWhileWalking(YoDouble yoTime, CommonHumanoidReferenceFrames referenceFrames,
-         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
+         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoRegistry parentRegistry)
    {
       this(yoTime, referenceFrames.getSoleZUpFrames(), referenceFrames.getPelvisFrame(), pelvisOffsetWhileWalkingParameters, controlDT, parentRegistry);
    }
 
    public PelvisOffsetTrajectoryWhileWalking(YoDouble yoTime, SideDependentList<? extends ReferenceFrame> soleZUpFrames, ReferenceFrame pelvisFrame,
-         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoVariableRegistry parentRegistry)
+         PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters, double controlDT, YoRegistry parentRegistry)
    {
       this.yoTime = yoTime;
       this.soleZUpFrames = soleZUpFrames;

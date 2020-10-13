@@ -1,9 +1,9 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
@@ -11,18 +11,18 @@ import us.ihmc.matrixlib.MatrixTools;
 
 public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
 {
-   private final SingularValueDecomposition<DenseMatrix64F> decomposer;
-   private final DenseMatrix64F sigma;
-   private final DenseMatrix64F sigmaDampedSigma;
-   private final DenseMatrix64F v;
+   private final SingularValueDecomposition_F64<DMatrixRMaj> decomposer;
+   private final DMatrixRMaj sigma;
+   private final DMatrixRMaj sigmaDampedSigma;
+   private final DMatrixRMaj v;
 
-   private final DenseMatrix64F nullspace;
-   private final DenseMatrix64F Q;
+   private final DMatrixRMaj nullspace;
+   private final DMatrixRMaj Q;
 
-   private final DenseMatrix64F nullspaceProjector;
-   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+   private final DMatrixRMaj nullspaceProjector;
+   private final DMatrixRMaj tempMatrixForProjectionInPlace;
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
    private double alpha = 0.0;
 
@@ -32,15 +32,15 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
 
       this.alpha = alpha;
 
-      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
-      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
+      nullspaceProjector = new DMatrixRMaj(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DMatrixRMaj(matrixSize, matrixSize);
 
-      decomposer = DecompositionFactory.svd(matrixSize, matrixSize, false, true, false);
-      sigma = new DenseMatrix64F(matrixSize, matrixSize);
-      sigmaDampedSigma = new DenseMatrix64F(matrixSize, matrixSize);
-      v = new DenseMatrix64F(matrixSize, matrixSize);
-      nullspace = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
-      Q = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
+      decomposer = DecompositionFactory_DDRM.svd(matrixSize, matrixSize, false, true, false);
+      sigma = new DMatrixRMaj(matrixSize, matrixSize);
+      sigmaDampedSigma = new DMatrixRMaj(matrixSize, matrixSize);
+      v = new DMatrixRMaj(matrixSize, matrixSize);
+      nullspace = new DMatrixRMaj(matrixSize, matrixSize);    // oversized, using reshape later
+      Q = new DMatrixRMaj(matrixSize, matrixSize);    // oversized, using reshape later
    }
 
    @Override
@@ -61,7 +61,7 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf)
    {
       tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
       projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
@@ -80,10 +80,10 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
     * @param projectedMatrixToPack matrix to store the resulting projection, C in the equation. Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj projectedMatrixToPack)
    {
       computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
-      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
+      CommonOps_DDRM.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }
 
    /**
@@ -97,7 +97,7 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
     * @param nullspaceProjectorToPack matrix to store the resulting nullspace matrix. Modified.
     */
    @Override
-   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   public void computeNullspaceProjector(DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj nullspaceProjectorToPack)
    {
       int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
 
@@ -107,7 +107,7 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
       if (alpha == 0.0)
       {
          nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-         CommonOps.multOuter(nullspace, nullspaceProjectorToPack);
+         CommonOps_DDRM.multOuter(nullspace, nullspaceProjectorToPack);
       }
       else
       {
@@ -115,13 +115,13 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
          tempMatrix.reshape(v.getNumRows(), sigmaDampedSigma.getNumCols());
 
          DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
-         CommonOps.multTransB(-1.0, tempMatrix, Q, nullspaceProjectorToPack);
+         CommonOps_DDRM.multTransB(-1.0, tempMatrix, Q, nullspaceProjectorToPack);
          MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
       }
 
    }
 
-   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F QToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
+   private void computeNullspace(DMatrixRMaj nullspaceToPack, DMatrixRMaj QToPack, DMatrixRMaj matrixToComputeNullspaceOf, int nullity)
    {
       nullspaceToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), nullity);
       decomposer.decompose(matrixToComputeNullspaceOf);
@@ -134,11 +134,11 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
       boolean transposed = false;
       decomposer.getV(v, transposed);
 
-      CommonOps.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, QToPack, 0, 0);
-      CommonOps.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
+      CommonOps_DDRM.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, QToPack, 0, 0);
+      CommonOps_DDRM.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
    }
 
-   private void computeDampedSigmaOperator(DenseMatrix64F dampedSigmaToPack, DenseMatrix64F sigma, double alpha)
+   private void computeDampedSigmaOperator(DMatrixRMaj dampedSigmaToPack, DMatrixRMaj sigma, double alpha)
    {
       int minor = Math.min(sigma.getNumRows(), sigma.getNumCols());
       dampedSigmaToPack.reshape(minor, minor);

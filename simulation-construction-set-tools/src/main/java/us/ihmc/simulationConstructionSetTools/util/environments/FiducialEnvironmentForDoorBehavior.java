@@ -17,8 +17,8 @@ public class FiducialEnvironmentForDoorBehavior implements CommonAvatarEnvironme
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
-      Vector3D position = new Vector3D(2.0, 0.0, 1.0);
-      CombinedTerrainObject3D fiducualTerrainObject = DefaultCommonAvatarEnvironment.addFiducial(0.2032, position, 0.0, Fiducial.FIDUCIAL50);
+      Vector3D position = new Vector3D(0.025875, 0.68183125, 1.1414125);
+      CombinedTerrainObject3D fiducualTerrainObject = DefaultCommonAvatarEnvironment.addFlatFiducial(0.2032, position, 0.0, Fiducial.FIDUCIAL150);
       combinedTerrainObject.addTerrainObject(fiducualTerrainObject);
    }
 

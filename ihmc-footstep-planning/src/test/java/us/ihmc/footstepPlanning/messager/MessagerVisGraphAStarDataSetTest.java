@@ -42,7 +42,7 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
                                                                  return false;
                                                               if (dataSet.getPlannerInput().getVisGraphIsInDevelopment())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getTestNamePrefix().toLowerCase());
+                                                              return dataSet.getPlannerInput().containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
                                                            });
       super.runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }

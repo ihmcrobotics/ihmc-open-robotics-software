@@ -1,6 +1,6 @@
 package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,7 +29,7 @@ class MultiPendulumRobot extends Robot
    private double[] comOffset;
    private double[] inertia;
    private double[] mass;
-   private Axis[] axes;
+   private Axis3D[] axes;
 
    private final RigidBody elevator = new RigidBody("elevator", worldFrame);
    private final OneDoFJoint[] joints;
@@ -46,7 +46,7 @@ class MultiPendulumRobot extends Robot
       mass = new double[N];
       joints = new OneDoFJoint[N];
       scsJoints = new OneDegreeOfFreedomJoint[N];
-      axes = new Axis[N];
+      axes = new Axis3D[N];
 
       for (int i = 0; i < N; i++)
       {
@@ -55,7 +55,7 @@ class MultiPendulumRobot extends Robot
          comOffset[i] = EuclidCoreRandomTools.nextDouble(random, 0.2 * linkLength[i], 0.8 * linkLength[i]);
          mass[i] = EuclidCoreRandomTools.nextDouble(random, 0.5, 1.5);
          inertia[i] = EuclidCoreRandomTools.nextDouble(random, 0.25, 0.75);
-         axes[i] = Axis.values[i % 3];
+         axes[i] = Axis3D.values[i % 3];
 
          // setup id robot
          RigidBodyBasics predecessor = i == 0 ? elevator : joints[i - 1].getSuccessor();
@@ -71,7 +71,7 @@ class MultiPendulumRobot extends Robot
          scsLink.setMomentOfInertia(inertia[i], smallInertia, smallInertia);
          scsLink.setComOffset(comOffset);
          Graphics3DObject graphics3DObject = new Graphics3DObject();
-         graphics3DObject.rotate(Math.PI, Axis.X);
+         graphics3DObject.rotate(Math.PI, Axis3D.X);
          graphics3DObject.addCylinder(linkLength[i], 0.02, YoAppearance.randomColor(random));
          scsLink.setLinkGraphics(graphics3DObject);
          scsJoints[i].setLink(scsLink);

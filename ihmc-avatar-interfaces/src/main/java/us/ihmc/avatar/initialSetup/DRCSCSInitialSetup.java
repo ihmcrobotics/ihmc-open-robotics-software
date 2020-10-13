@@ -1,6 +1,7 @@
 package us.ihmc.avatar.initialSetup;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -8,6 +9,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -36,6 +38,12 @@ public class DRCSCSInitialSetup
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
 
+   /**
+    * Whether to use {@link ExperimentalSimulation} instead of the default SCS's default physics
+    * engine.
+    */
+   private boolean useExperimentalPhysicsEngine = false;
+
    public DRCSCSInitialSetup(GroundProfile3D groundProfile, double simulateDT)
    {
       this.groundProfile3D = groundProfile;
@@ -55,16 +63,33 @@ public class DRCSCSInitialSetup
       this.runMultiThreaded = runMultiThreaded;
    }
 
+   /**
+    * Sets whether to use {@link ExperimentalSimulation} instead of the default SCS's default physics
+    * engine.
+    * 
+    * @param when {@code true}, {@link AvatarSimulationFactory} will setup SCS to use
+    *             {@link ExperimentalSimulation} instead of its default physics engine.
+    */
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
+
    public boolean getRunMultiThreaded()
    {
       return runMultiThreaded;
+   }
+
+   public boolean getUseExperimentalPhysicsEngine()
+   {
+      return useExperimentalPhysicsEngine;
    }
 
    public void initializeRobot(Robot robot, DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       robot.setGravity(gravity);
 
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoRegistry());
       robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel, simulateDT);
       if (enableGroundSlipping)
          groundContactModel.enableSlipping();
@@ -141,10 +166,10 @@ public class DRCSCSInitialSetup
       }
 
       /*
-       * This makes sure that the initial values of all YoVariables that are added to the scs (i.e.
-       * at index 0 of the data buffer) are properly stored in the data buffer
+       * This makes sure that the initial values of all YoVariables that are added to the scs (i.e. at
+       * index 0 of the data buffer) are properly stored in the data buffer
        */
-      scs.getDataBuffer().copyValuesThrough();
+      scs.getDataBuffer().fillBuffer();
 
    }
 

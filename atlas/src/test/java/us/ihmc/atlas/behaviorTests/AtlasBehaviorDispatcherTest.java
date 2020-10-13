@@ -34,6 +34,13 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
+   @Test
+   public void testDispatchKarateKidDiagnosticBehavior() throws SimulationExceededMaximumTimeException
+   {
+      super.testDispatchKarateKidDiagnosticBehavior();
+   }
+
    @Tag("humanoid-behaviors")
    @Override
    @Test

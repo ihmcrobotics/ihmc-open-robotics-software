@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -20,6 +21,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
@@ -34,16 +36,20 @@ public class Polygonizer
    private static final CategoryTheme Factory = apiFactory.createCategoryTheme("Factory");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
+   private static final TypedTopicTheme<UnaryOperator<ConcaveHullCollection>> PostProcessorTheme = apiFactory.createTypedTopicTheme("PostProcessorTheme");
    private static final TypedTopicTheme<List<Input>> InputTheme = apiFactory.createTypedTopicTheme("input");
    private static final TypedTopicTheme<List<Output>> OutputTheme = apiFactory.createTypedTopicTheme("output");
 
    public static final Topic<ConcaveHullFactoryParameters> PolygonizerParameters = Root.child(ConcaveHull).child(Factory).topic(Parameters);
+   public static final Topic<UnaryOperator<ConcaveHullCollection>> PolygonizerPostProcessor = Root.topic(PostProcessorTheme);
    public static final Topic<List<Input>> PolygonizerInput = Root.topic(InputTheme);
    public static final Topic<List<Output>> PolygonizerOutput = Root.topic(OutputTheme);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private final AtomicReference<ConcaveHullFactoryParameters> parameters;
+   private final AtomicReference<UnaryOperator<ConcaveHullCollection>> postProcessor;
+
    private final Messager messager;
    private final ExecutorService executorService;
 
@@ -57,6 +63,7 @@ public class Polygonizer
       this.messager = messager;
       this.executorService = executorService;
       parameters = messager.createInput(PolygonizerParameters, new ConcaveHullFactoryParameters());
+      postProcessor = messager.createInput(PolygonizerPostProcessor, null);
       messager.registerTopicListener(PolygonizerInput, this::processAndPublishLater);
    }
 
@@ -75,8 +82,19 @@ public class Polygonizer
 
    private Output process(Input input)
    {
-      ConcaveHullFactoryResult result = SimpleConcaveHullFactory.createConcaveHull(input.points, input.lineConstraints, parameters.get());
-      return new Output(input, result);
+      try
+      {
+         ConcaveHullFactoryResult result = SimpleConcaveHullFactory.createConcaveHull(input.points, input.lineConstraints, parameters.get());
+         if (postProcessor.get() == null)
+            return new Output(input, result, null);
+         else
+            return new Output(input, result, postProcessor.get().apply(result.getConcaveHullCollection()));
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
 
    public static Input toInput(PlanarRegionSegmentationRawData data)
@@ -129,11 +147,13 @@ public class Polygonizer
    {
       private final Input input;
       private final ConcaveHullFactoryResult concaveHullFactoryResult;
+      private final ConcaveHullCollection processedConcaveHullCollection;
 
-      public Output(Input input, ConcaveHullFactoryResult concaveHullFactoryResult)
+      public Output(Input input, ConcaveHullFactoryResult concaveHullFactoryResult, ConcaveHullCollection processedConcaveHullCollection)
       {
          this.input = input;
          this.concaveHullFactoryResult = concaveHullFactoryResult;
+         this.processedConcaveHullCollection = processedConcaveHullCollection;
       }
 
       public Input getInput()
@@ -144,6 +164,11 @@ public class Polygonizer
       public ConcaveHullFactoryResult getConcaveHullFactoryResult()
       {
          return concaveHullFactoryResult;
+      }
+
+      public ConcaveHullCollection getProcessedConcaveHullCollection()
+      {
+         return processedConcaveHullCollection;
       }
    }
 }

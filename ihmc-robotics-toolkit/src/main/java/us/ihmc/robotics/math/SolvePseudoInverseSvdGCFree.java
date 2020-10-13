@@ -19,11 +19,11 @@
 package us.ihmc.robotics.math;
 
 import org.ejml.UtilEjml;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 
 /**
@@ -45,18 +45,18 @@ import org.ejml.ops.CommonOps;
  * 
  * @author Jesper Smith
  */
-public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F> {
+public class SolvePseudoInverseSvdGCFree implements LinearSolverDense<DMatrixRMaj> {
 
     // Used to compute pseudo inverse
-    private SingularValueDecomposition<DenseMatrix64F> svd;
+    private SingularValueDecomposition_F64<DMatrixRMaj> svd;
 
     // the results of the pseudo-inverse
-    private DenseMatrix64F pinv = new DenseMatrix64F(1,1);
+    private DMatrixRMaj pinv = new DMatrixRMaj(1,1);
 
     // relative threshold used to select singular values
     private double threshold = UtilEjml.EPS;
 
-    private final DenseMatrix64F tempV;
+    private final DMatrixRMaj tempV;
     
     /**
      * Creates a new solver targeted at the specified matrix size.
@@ -66,8 +66,8 @@ public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F>
      */
     public SolvePseudoInverseSvdGCFree(int maxRows, int maxCols) {
 
-        svd = DecompositionFactory.svd(maxRows,maxCols,true,true,true);
-        tempV = new DenseMatrix64F(maxCols, maxCols);
+        svd = DecompositionFactory_DDRM.svd(maxRows,maxCols,true,true,true);
+        tempV = new DMatrixRMaj(maxCols, maxCols);
     }
 
     /**
@@ -78,15 +78,15 @@ public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F>
     }
 
     @Override
-    public boolean setA(DenseMatrix64F A) {
+    public boolean setA(DMatrixRMaj A) {
         pinv.reshape(A.numCols,A.numRows,false);
         tempV.reshape(A.numCols, A.numCols);
         
         if( !svd.decompose(A) )
             return false;
 
-        DenseMatrix64F U_t = svd.getU(null,true);
-        DenseMatrix64F V = svd.getV(tempV,false);
+        DMatrixRMaj U_t = svd.getU(null,true);
+        DMatrixRMaj V = svd.getV(tempV,false);
         double []S = svd.getSingularValues();
         int N = Math.min(A.numRows,A.numCols);
 
@@ -119,7 +119,7 @@ public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F>
         }
 
         // V*W*U^T
-        CommonOps.mult(V,U_t, pinv);
+        CommonOps_DDRM.mult(V,U_t, pinv);
 
         return true;
     }
@@ -130,12 +130,12 @@ public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F>
     }
 
     @Override
-    public void solve( DenseMatrix64F b, DenseMatrix64F x) {
-        CommonOps.mult(pinv,b,x);
+    public void solve( DMatrixRMaj b, DMatrixRMaj x) {
+        CommonOps_DDRM.mult(pinv,b,x);
     }
 
     @Override
-    public void invert(DenseMatrix64F A_inv) {
+    public void invert(DMatrixRMaj A_inv) {
         A_inv.set(pinv);
     }
 
@@ -158,7 +158,7 @@ public class SolvePseudoInverseSvdGCFree implements LinearSolver<DenseMatrix64F>
     }
 
     @Override
-    public SingularValueDecomposition<DenseMatrix64F> getDecomposition() {
+    public SingularValueDecomposition_F64<DMatrixRMaj> getDecomposition() {
         return svd;
     }
 }

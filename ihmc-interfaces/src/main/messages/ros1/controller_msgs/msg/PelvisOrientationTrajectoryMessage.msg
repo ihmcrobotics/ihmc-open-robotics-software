@@ -7,6 +7,10 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# When the robot is walking, restrictions on upper-body motion may be applied.
+# To by-pass the safety check and force the execution of this message, set this field to true.
+bool force_execution
+
 # Whether the pelvis orientation is allowed to be controlled by the user when the robot is walking.
 bool enable_user_pelvis_control_during_walking
 

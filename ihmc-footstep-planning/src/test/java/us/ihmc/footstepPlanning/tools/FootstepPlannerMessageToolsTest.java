@@ -183,6 +183,7 @@ public class FootstepPlannerMessageToolsTest
             footstepPlannerParameters.set(((BooleanStoredPropertyKey) key), randomValue);
          }
       }
+      footstepPlannerParameters.setStepOnlyWithRequestedSide((byte) RandomNumbers.nextInt(random, -1, 1));
 
       return footstepPlannerParameters;
    }

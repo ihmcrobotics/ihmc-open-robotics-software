@@ -8,7 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -32,12 +32,12 @@ public class GoHomeBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
 
-   public GoHomeBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public GoHomeBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, null, ros2Node, yoTime);
    }
 
-   public GoHomeBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public GoHomeBehavior(String robotName, String namePrefix, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, namePrefix, ros2Node);
 

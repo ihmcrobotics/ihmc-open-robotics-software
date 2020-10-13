@@ -19,15 +19,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.*;
@@ -46,12 +43,12 @@ public abstract class QuadrupedToolboxModule
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final YoRegistry registry = new YoRegistry(name);
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final String robotName;
    protected final FullQuadrupedRobotModel fullRobotModel;
 
-   protected final RealtimeRos2Node realtimeRos2Node;
+   protected final RealtimeROS2Node realtimeROS2Node;
    protected final CommandInputManager inputManager;
    protected final OutputManager outputManager;
    protected final NetworkSubscriber networkSubscriber;
@@ -101,11 +98,11 @@ public abstract class QuadrupedToolboxModule
       this.startYoVariableServer = startYoVariableServer;
       this.dataServerSettings = dataServerSettings;
       this.fullRobotModel = fullRobotModelToLog;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
-      networkSubscriber = new NetworkSubscriber(getSubscriberTopicNameGenerator(), inputManager, getPublisherTopicNameGenerator(), outputManager,
-                                                realtimeRos2Node);
+      networkSubscriber = new NetworkSubscriber(getInputTopic(), inputManager, getOutputTopic(), outputManager,
+                                                realtimeROS2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -122,11 +119,11 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
                                               s -> robotDataReceiver.receivedPacket(s.takeNextData()));
       }
       else
@@ -137,14 +134,14 @@ public abstract class QuadrupedToolboxModule
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools
-            .createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+            .createCallbackSubscriptionTypeNamed(realtimeROS2Node, ToolboxStateMessage.class, getInputTopic(), s -> receivedPacket(s.takeNextData()));
 
 
-      registerExtraSubscribers(realtimeRos2Node);
-      realtimeRos2Node.spin();
+      registerExtraSubscribers(realtimeROS2Node);
+      realtimeROS2Node.spin();
    }
 
-   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
    {
       rootRegistry.addChild(registry);
       if (rootGraphicsListRegistry != null)
@@ -316,7 +313,7 @@ public abstract class QuadrupedToolboxModule
          yoVariableServer.close();
          yoVariableServer = null;
       }
-      realtimeRos2Node.destroy();
+      realtimeROS2Node.destroy();
 
       if (DEBUG)
          PrintTools.debug(this, "Destroyed");
@@ -375,7 +372,7 @@ public abstract class QuadrupedToolboxModule
       toolboxRunnable = null;
    }
 
-   abstract public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node);
+   abstract public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node);
 
    abstract public QuadrupedToolboxController getToolboxController();
 
@@ -387,7 +384,7 @@ public abstract class QuadrupedToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> createMapOfSupportedOutputMessages();
+   abstract public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages();
 
    /**
     * @return the collection of commands that cannot wake up this module.
@@ -405,7 +402,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator();
+   public abstract ROS2Topic getOutputTopic();
 
-   public abstract ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+   public abstract ROS2Topic getInputTopic();
 }

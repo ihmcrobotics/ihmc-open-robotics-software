@@ -34,24 +34,24 @@ public class VirtualBodyForces
    {
       // q_yaw = con.getVar("q_yaw"); q_roll = con.getVar("q_roll"); q_pitch = con.getVar("q_pitch");
 
-      q_hip1_x = (YoDouble)rob.getVariable("q_hip1_x");
-      q_hip1_z = (YoDouble)rob.getVariable("q_hip1_z");
-      q_knee1 = (YoDouble)rob.getVariable("q_knee1");
-      q_hip2_x = (YoDouble)rob.getVariable("q_hip2_x");
-      q_hip2_z = (YoDouble)rob.getVariable("q_hip2_z");
-      q_knee2 = (YoDouble)rob.getVariable("q_knee2");
-      q_hip3_x = (YoDouble)rob.getVariable("q_hip3_x");
-      q_hip3_z = (YoDouble)rob.getVariable("q_hip3_z");
-      q_knee3 = (YoDouble)rob.getVariable("q_knee3");
-      q_hip4_x = (YoDouble)rob.getVariable("q_hip4_x");
-      q_hip4_z = (YoDouble)rob.getVariable("q_hip4_z");
-      q_knee4 = (YoDouble)rob.getVariable("q_knee4");
-      q_hip5_x = (YoDouble)rob.getVariable("q_hip5_x");
-      q_hip5_z = (YoDouble)rob.getVariable("q_hip5_z");
-      q_knee5 = (YoDouble)rob.getVariable("q_knee5");
-      q_hip6_x = (YoDouble)rob.getVariable("q_hip6_x");
-      q_hip6_z = (YoDouble)rob.getVariable("q_hip6_z");
-      q_knee6 = (YoDouble)rob.getVariable("q_knee6");
+      q_hip1_x = (YoDouble)rob.findVariable("q_hip1_x");
+      q_hip1_z = (YoDouble)rob.findVariable("q_hip1_z");
+      q_knee1 = (YoDouble)rob.findVariable("q_knee1");
+      q_hip2_x = (YoDouble)rob.findVariable("q_hip2_x");
+      q_hip2_z = (YoDouble)rob.findVariable("q_hip2_z");
+      q_knee2 = (YoDouble)rob.findVariable("q_knee2");
+      q_hip3_x = (YoDouble)rob.findVariable("q_hip3_x");
+      q_hip3_z = (YoDouble)rob.findVariable("q_hip3_z");
+      q_knee3 = (YoDouble)rob.findVariable("q_knee3");
+      q_hip4_x = (YoDouble)rob.findVariable("q_hip4_x");
+      q_hip4_z = (YoDouble)rob.findVariable("q_hip4_z");
+      q_knee4 = (YoDouble)rob.findVariable("q_knee4");
+      q_hip5_x = (YoDouble)rob.findVariable("q_hip5_x");
+      q_hip5_z = (YoDouble)rob.findVariable("q_hip5_z");
+      q_knee5 = (YoDouble)rob.findVariable("q_knee5");
+      q_hip6_x = (YoDouble)rob.findVariable("q_hip6_x");
+      q_hip6_z = (YoDouble)rob.findVariable("q_hip6_z");
+      q_knee6 = (YoDouble)rob.findVariable("q_knee6");
 
       q_yaw = con.q_yaw;
       q_roll = con.q_roll;

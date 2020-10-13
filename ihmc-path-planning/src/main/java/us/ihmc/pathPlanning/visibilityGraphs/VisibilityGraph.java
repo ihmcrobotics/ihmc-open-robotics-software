@@ -238,7 +238,7 @@ public class VisibilityGraph
    public static VisibilityGraphNode createNodeWithNoRegion(Point3DReadOnly sourceInWorld)
    {
       RigidBodyTransform sourceSpoofTransform = new RigidBodyTransform();
-      sourceSpoofTransform.setTranslation(sourceInWorld);
+      sourceSpoofTransform.getTranslation().set(sourceInWorld);
 
       ConvexPolygon2D sourceSpoof = new ConvexPolygon2D();
       sourceSpoof.addVertex(0.0, 0.0);

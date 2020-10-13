@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SecondOrderFilteredYoVariableParameters
@@ -9,7 +9,7 @@ public class SecondOrderFilteredYoVariableParameters
    private final YoDouble dampingRatio;
    private final SecondOrderFilterType filterType;
 
-   public SecondOrderFilteredYoVariableParameters(String name, YoVariableRegistry registry, double naturalFrequencyInHz, double dampingRatio,
+   public SecondOrderFilteredYoVariableParameters(String name, YoRegistry registry, double naturalFrequencyInHz, double dampingRatio,
          SecondOrderFilterType filterType)
    {
       this.naturalFrequencyInHz = new YoDouble(name + "NaturalFrequency", registry);

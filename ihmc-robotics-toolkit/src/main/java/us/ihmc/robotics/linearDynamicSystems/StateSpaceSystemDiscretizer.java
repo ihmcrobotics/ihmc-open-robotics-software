@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface StateSpaceSystemDiscretizer
 {
@@ -12,6 +12,6 @@ public interface StateSpaceSystemDiscretizer
     * @param Q process noise covariance matrix
     * @param dt time step
     */
-   public abstract void discretize(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, double dt);
+   public abstract void discretize(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj Q, double dt);
 
 }

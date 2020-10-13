@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoRMSCalculatorTest
 {
@@ -27,7 +27,7 @@ public class YoRMSCalculatorTest
       int nValues = 100;
       double[] values = getValues(nValues, random);
 
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoRMSCalculator calculator = new YoRMSCalculator("testCalculator", registry);
       for (int i = 0; i < nValues; i++)
       {

@@ -4,16 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -48,23 +47,23 @@ public class KinematicsStreamingToolboxMessageReplay
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
    {
       messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotConfigurationData.class, controllerPubGenerator);
-      capturabilityBasedStatusPublisher = ROS2Tools.createPublisher(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
+      capturabilityBasedStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic);
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxSubTopicNameGenerator);
-      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubTopicNameGenerator);
-      toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxSubTopicNameGenerator);
+      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxInputTopic);
+      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
+      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       ros2Node.spin();
    }

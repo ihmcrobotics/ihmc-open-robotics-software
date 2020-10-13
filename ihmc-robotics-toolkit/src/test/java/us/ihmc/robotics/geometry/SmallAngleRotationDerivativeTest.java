@@ -4,9 +4,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -39,10 +37,10 @@ public class SmallAngleRotationDerivativeTest
 
       double perturbationMagnitude = 1e-6;
       double delta = 1e-12;
-      for (Axis axis : Axis.values())
+      for (Axis3D axis : Axis3D.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         Axis.set(perturbationRotationVector, axis, perturbationMagnitude);
+         Axis3D.set(perturbationRotationVector, axis, perturbationMagnitude);
 
          // expected
          Vector3D expected = new Vector3D(perturbationRotationVector);

@@ -6,11 +6,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.GroundPlaneEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoGroundPlaneEstimator extends GroundPlaneEstimator
 {
@@ -18,14 +17,14 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
    private final YoFrameVector3D yoGroundPlaneNormal;
    private final YoFrameYawPitchRoll yoGroundPlaneOrientation;
 
-   public YoGroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public YoGroundPlaneEstimator(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this("", parentRegistry, graphicsListRegistry, YoAppearance.Glass());
    }
 
-   public YoGroundPlaneEstimator(String prefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
+   public YoGroundPlaneEstimator(String prefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       yoGroundPlanePoint = new YoFramePoint3D(prefix + "GroundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
       yoGroundPlaneNormal = new YoFrameVector3D(prefix + "GroundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);

@@ -4,19 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPostProcessorParameters;
-import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasQuadTreeFootstepPlanningParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasUIParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -27,7 +15,6 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -37,14 +24,16 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -68,11 +57,13 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -181,7 +172,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       this.target = target;
 
-      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
+      InputStream stream = selectedVersion.getSdfFileAsStream();
+      if (stream == null)
+      {
+         LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), stream, this);
 
       sensorInformation = new AtlasSensorInformation(atlasVersion, target);
 
@@ -287,6 +283,15 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw);
+   }
+
+   @Override
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
+                                                                                           double initialYaw,
+                                                                                           double initialX,
+                                                                                           double initialY)
+   {
+      return new AtlasSimInitialSetup(groundHeight, initialYaw, initialX, initialY);
    }
 
    @Override
@@ -444,16 +449,15 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       switch (selectedVersion.getHandModel())
       {
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeRos2Node,
-                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
             return null;
@@ -542,7 +546,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          switch (linkHolder.getName())
          {
             case "pelvis":
-               addAdditionalPelvisImuInImuFrame(linkHolder);
                break;
             case "utorso":
                addCustomCrashProtectionVisual(linkHolder);
@@ -703,39 +706,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
    }
 
-   private void addAdditionalPelvisImuInImuFrame(SDFLinkHolder pelvis)
-   {
-      SDFSensor sdfImu = new SDFSensor();
-      sdfImu.setName("imu_sensor_at_imu_frame");
-      sdfImu.setType("imu");
-      sdfImu.setPose("-0.0905 -0.000004 -0.0125 0.0 3.14159265359 -0.78539816339");
-
-      SDFSensor.IMU imu = new SDFSensor.IMU();
-
-      SDFSensor.IMU.IMUNoise imuNoise = new SDFSensor.IMU.IMUNoise();
-      imuNoise.setType("gaussian");
-
-      SDFSensor.IMU.IMUNoise.NoiseParameters rateNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
-      rateNoise.setMean("0");
-      rateNoise.setStddev("0.0002");
-      rateNoise.setBias_mean("7.5e-06");
-      rateNoise.setBias_stddev("8e-07");
-
-      SDFSensor.IMU.IMUNoise.NoiseParameters accelNoise = new SDFSensor.IMU.IMUNoise.NoiseParameters();
-      accelNoise.setMean("0");
-      accelNoise.setStddev("0.017");
-      accelNoise.setBias_mean("0.1");
-      accelNoise.setBias_stddev("0.001");
-
-      imuNoise.setRate(rateNoise);
-      imuNoise.setAccel(accelNoise);
-
-      imu.setNoise(imuNoise);
-      sdfImu.setImu(imu);
-
-      pelvis.getSensors().add(sdfImu);
-   }
-
    private void addChestIMU(SDFLinkHolder chestLink)
    {
       SDFSensor chestIMU = new SDFSensor();
@@ -877,15 +847,33 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
-      return new AtlasFootstepPostProcessorParameters();
+      return new AtlasFootstepPlannerParameters(fileNameSuffix);
    }
 
    @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return new AtlasSwingPlannerParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new AtlasSwingPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
+   {
+      return new AtlasSplitFractionCalculatorParameters();
    }
 
    @Override
@@ -929,8 +917,16 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new AtlasKinematicsCollisionModel();
+      return new AtlasKinematicsCollisionModel(jointMap);
+   }
+
+   @Override
+   public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(jointMap, selectedVersion);
+      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+      return collisionModel;
    }
 }

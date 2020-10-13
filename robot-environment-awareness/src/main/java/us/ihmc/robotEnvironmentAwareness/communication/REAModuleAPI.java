@@ -24,8 +24,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationPara
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
-import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -58,8 +56,6 @@ public class REAModuleAPI
    private static final CategoryTheme Preserve = apiFactory.createCategoryTheme("Preserve");
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
-   private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
-   private static final CategoryTheme SLAMFrame = apiFactory.createCategoryTheme("SLAMFrame");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -73,6 +69,7 @@ public class REAModuleAPI
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
    private static final TypedTopicTheme<Integer> Capacity = apiFactory.createTypedTopicTheme("Capacity");
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
+   private static final TypedTopicTheme<Long> Lifetime = apiFactory.createTypedTopicTheme("Lifetime");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Min = apiFactory.createTopicTheme("Min");
@@ -86,20 +83,27 @@ public class REAModuleAPI
    private static final Category ModuleCategory = Root.child(Module);
    private static final Category OcTreeCategory = ModuleCategory.child(OcTree);
    private static final Category PlanarRegionsCategory = ModuleCategory.child(PlanarRegions);
-   private static final Category SLAMCategory = ModuleCategory.child(SLAM);
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
    public static final Topic<Double> OcTreeResolution = OcTreeCategory.topic(Resolution);
+   public static final Topic<Long> OcTreeNodeLifetimeMillis = OcTreeCategory.child(Node).topic(Lifetime);
    public static final Topic<Boolean> LidarBufferEnable = OcTreeCategory.child(Lidar).child(Buffer).topic(Enable);
    public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> LidarBufferMessageCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(Message).topic(Capacity);
+
    public static final Topic<Boolean> StereoVisionBufferEnable = OcTreeCategory.child(StereoVision).child(Buffer).topic(Enable);
    public static final Topic<Boolean> StereoVisionBufferPreservingEnable = OcTreeCategory.child(StereoVision).child(Buffer).child(Preserve).topic(Enable);
    public static final Topic<Integer> StereoVisionBufferOcTreeCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> StereoVisionBufferSize = OcTreeCategory.child(StereoVision).child(Buffer).topic(Size);
    public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
+
    public static final Topic<Boolean> DepthCloudBufferEnable = OcTreeCategory.child(DepthCloud).child(Buffer).topic(Enable);
+   public static final Topic<Boolean> DepthCloudBufferPreservingEnable = OcTreeCategory.child(DepthCloud).child(Buffer).child(Preserve).topic(Enable);
+   public static final Topic<Integer> DepthCloudBufferOcTreeCapacity = OcTreeCategory.child(DepthCloud).child(Buffer).child(OcTree).topic(Capacity);
+   public static final Topic<Integer> DepthCloudBufferSize = OcTreeCategory.child(DepthCloud).child(Buffer).topic(Size);
+   public static final Topic<Integer> DepthCloudBufferMessageCapacity = OcTreeCategory.child(DepthCloud).child(Buffer).child(Message).topic(Capacity);
+
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
 
@@ -133,17 +137,22 @@ public class REAModuleAPI
    public static final Topic<DisplayType> UIOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
    public static final Topic<Boolean> UIPlanarRegionHideNodes = Root.child(UI).child(PlanarRegions).child(Node).topic(Hide);
    public static final Topic<Boolean> UIOcTreeBoundingBoxShow = Root.child(UI).child(OcTree).child(BoundingBox).topic(Show);
-   public static final Topic<Boolean> UIOcTreeShowLidarBuffer = Root.child(UI).child(OcTree).child(Lidar).child(Buffer).topic(Show);
-   public static final Topic<Boolean> UIOcTreeShowStereoVisionBuffer = Root.child(UI).child(OcTree).child(StereoVision).child(Buffer).topic(Show);
    public static final Topic<Double> UIOcTreeHitLocationSize = Root.child(UI).child(OcTree).topic(Display);
+
+   public static final Topic<Boolean> UIOcTreeShowLidarBuffer = Root.child(UI).child(OcTree).child(Lidar).child(Buffer).topic(Show);
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
+
+   public static final Topic<Boolean> UIOcTreeShowStereoVisionBuffer = Root.child(UI).child(OcTree).child(StereoVision).child(Buffer).topic(Show);
    public static final Topic<Boolean> UIStereoVisionShow = Root.child(UI).child(StereoVision).topic(Show);
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
+
+   public static final Topic<Boolean> UIOcTreeShowDepthCloudBuffer = Root.child(UI).child(OcTree).child(DepthCloud).child(Buffer).topic(Show);
    public static final Topic<Boolean> UIDepthCloudShow = Root.child(UI).child(DepthCloud).topic(Show);
    public static final Topic<Boolean> UIDepthCloudClear = Root.child(UI).child(DepthCloud).topic(Clear);
+   public static final Topic<Integer> UIDepthCloudSize = Root.child(UI).child(DepthCloud).topic(Size);
 
    public static final Topic<Boolean> UISensorPoseHistoryClear = Root.child(UI).child(SensorFrame).topic(Clear);
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
@@ -156,13 +165,16 @@ public class REAModuleAPI
    public static final Topic<String> UIStereoDataExporterDirectory = Root.child(UI).child(DataExporter).child(StereoVision).topic(Path);
 
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
+   public static final Topic<NormalOcTreeMessage> LidarBufferState = OcTreeCategory.child(Lidar).child(Buffer).topic(Data);
+
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVision).topic(Data);
+   public static final Topic<NormalOcTreeMessage> StereoVisionBufferState = OcTreeCategory.child(StereoVision).child(Buffer).topic(Data);
+
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = ModuleCategory.child(DepthCloud).topic(Data);
+   public static final Topic<NormalOcTreeMessage> DepthCloudBufferState = OcTreeCategory.child(DepthCloud).child(Buffer).topic(Data);
+
    public static final Topic<StampedPosePacket> TrackingCameraMessageState = ModuleCategory.child(Tracking).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
-   public static final Topic<NormalOcTreeMessage> LidarBufferState = OcTreeCategory.child(Lidar).child(Buffer).topic(Data);
-   public static final Topic<NormalOcTreeMessage> StereoVisionBufferState = OcTreeCategory.child(StereoVision).child(Buffer).topic(Data);
-   public static final Topic<NormalOcTreeMessage> DepthCloudBufferState = OcTreeCategory.child(DepthCloud).child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = PlanarRegionsCategory.topic(Data);
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = PlanarRegionsCategory.child(Segmentation).topic(Data);
    public static final Topic<LineSegment3DMessage[]> PlanarRegionsIntersectionState = PlanarRegionsCategory.child(Intersection).topic(Data);
@@ -172,6 +184,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> RequestOctree = OcTreeCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestLidarBuffer = OcTreeCategory.child(Lidar).child(Buffer).child(Request).topic(Data);
    public static final Topic<Boolean> RequestStereoVisionBuffer = OcTreeCategory.child(StereoVision).child(Buffer).child(Request).topic(Data);
+   public static final Topic<Boolean> RequestDepthCloudBuffer = OcTreeCategory.child(DepthCloud).child(Buffer).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegions = PlanarRegionsCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegionsIntersections = PlanarRegionsCategory.child(Intersection).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegionSegmentation = PlanarRegionsCategory.child(Request).child(Segmentation).topic(Data);
@@ -180,27 +193,6 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveMainUpdaterConfiguration = OcTreeCategory.topic(Save);
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
-
-   public static final Topic<Boolean> SLAMEnable = SLAMCategory.topic(Enable);
-   public static final Topic<Boolean> SLAMClear = SLAMCategory.topic(Clear);
-   public static final Topic<Boolean> SLAMVizClear = SLAMCategory.child(UI).topic(Clear);
-   public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
-   public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
-   public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
-   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = SLAMCategory.child(PlanarRegions).topic(Data);
-   public static final Topic<Pose3D> SLAMSensorFrameState = SLAMCategory.child(SensorFrame).topic(Data);
-
-   public static final Topic<RandomICPSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
-
-   public static final Topic<Boolean> ShowLatestFrame = SLAMCategory.child(UI).child(DepthCloud).child(Buffer).topic(Enable);
-   public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).child(Custom).topic(Enable);
-   public static final Topic<Boolean> ShowSLAMOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
-   public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).child(Custom).topic(Enable);
-   public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
-   public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
-
-   public static final Topic<String> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Status);
-   public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

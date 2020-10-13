@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner;
 
-import org.ejml.data.D1Matrix64F;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 
 /**
  * {@code DenseMatrixVector3D} represents a 3D vector holding onto three independent matrices for
@@ -18,12 +18,12 @@ import us.ihmc.euclid.Axis;
 public class DenseMatrixVector3D
 {
    /** Array of the x, y, and z matrices for quick index based access. */
-   private final DenseMatrix64F[] matrixArray;
+   private final DMatrixRMaj[] matrixArray;
    /** The three components of this vector. */
-   private final DenseMatrix64F x, y, z;
+   private final DMatrixRMaj x, y, z;
 
    /**
-    * Creates a new vector 3D of {@code DenseMatrix64F} and initializes the size of each
+    * Creates a new vector 3D of {@code DMatrixRMaj} and initializes the size of each
     * matrix-component.
     * 
     * @param numRows the number of rows for each component.
@@ -31,10 +31,10 @@ public class DenseMatrixVector3D
     */
    public DenseMatrixVector3D(int numRows, int numCols)
    {
-      x = new DenseMatrix64F(numRows, numCols);
-      y = new DenseMatrix64F(numRows, numCols);
-      z = new DenseMatrix64F(numRows, numCols);
-      matrixArray = new DenseMatrix64F[] {x, y, z};
+      x = new DMatrixRMaj(numRows, numCols);
+      y = new DMatrixRMaj(numRows, numCols);
+      z = new DMatrixRMaj(numRows, numCols);
+      matrixArray = new DMatrixRMaj[] {x, y, z};
    }
 
    /**
@@ -42,7 +42,7 @@ public class DenseMatrixVector3D
     * 
     * @param numRows the number of rows for each component.
     * @param numCols the number of columns for each component.
-    * @see DenseMatrix64F#reshape(int, int)
+    * @see DMatrixRMaj#reshape(int, int)
     */
    public void reshape(int numRows, int numCols)
    {
@@ -54,7 +54,7 @@ public class DenseMatrixVector3D
    /**
     * Sets all components to zero.
     * 
-    * @see DenseMatrix64F#zero()
+    * @see DMatrixRMaj#zero()
     */
    public void zero()
    {
@@ -84,13 +84,13 @@ public class DenseMatrixVector3D
     * </pre>
     * 
     * @param other the other vector to add to {@code this}. Not modified.
-    * @see CommonOps#addEquals(D1Matrix64F, D1Matrix64F)
+    * @see CommonOps_DDRM#addEquals(DMatrix1Row, DMatrix1Row)
     */
    public void add(DenseMatrixVector3D other)
    {
-      CommonOps.addEquals(x, other.x);
-      CommonOps.addEquals(y, other.y);
-      CommonOps.addEquals(z, other.z);
+      CommonOps_DDRM.addEquals(x, other.x);
+      CommonOps_DDRM.addEquals(y, other.y);
+      CommonOps_DDRM.addEquals(z, other.z);
    }
 
    /**
@@ -102,13 +102,13 @@ public class DenseMatrixVector3D
     * 
     * @param a the first term in the addition. Not modified.
     * @param b the second term in the addition. Not modified.
-    * @see CommonOps#add(D1Matrix64F, D1Matrix64F, D1Matrix64F)
+    * @see CommonOps_DDRM#add(DMatrix1Row, DMatrix1Row, DMatrix1Row)
     */
    public void add(DenseMatrixVector3D a, DenseMatrixVector3D b)
    {
-      CommonOps.add(a.x, b.x, x);
-      CommonOps.add(a.y, b.y, y);
-      CommonOps.add(a.z, b.z, z);
+      CommonOps_DDRM.add(a.x, b.x, x);
+      CommonOps_DDRM.add(a.y, b.y, y);
+      CommonOps_DDRM.add(a.z, b.z, z);
    }
 
    /**
@@ -120,13 +120,13 @@ public class DenseMatrixVector3D
     * </pre>
     * 
     * @param other the other vector to subtract to {@code this}. Not modified.
-    * @see CommonOps#subtractEquals(D1Matrix64F, D1Matrix64F)
+    * @see CommonOps_DDRM#subtractEquals(DMatrix1Row, DMatrix1Row)
     */
    public void sub(DenseMatrixVector3D other)
    {
-      CommonOps.subtractEquals(x, other.x);
-      CommonOps.subtractEquals(y, other.y);
-      CommonOps.subtractEquals(z, other.z);
+      CommonOps_DDRM.subtractEquals(x, other.x);
+      CommonOps_DDRM.subtractEquals(y, other.y);
+      CommonOps_DDRM.subtractEquals(z, other.z);
    }
 
    /**
@@ -138,13 +138,13 @@ public class DenseMatrixVector3D
     * 
     * @param a the first term in the difference. Not modified.
     * @param b the second term in the difference. Not modified.
-    * @see CommonOps#subtract(D1Matrix64F, D1Matrix64F, D1Matrix64F)
+    * @see CommonOps_DDRM#subtract(DMatrix1Row, DMatrix1Row, DMatrix1Row)
     */
    public void sub(DenseMatrixVector3D a, DenseMatrixVector3D b)
    {
-      CommonOps.subtract(a.x, b.x, x);
-      CommonOps.subtract(a.y, b.y, y);
-      CommonOps.subtract(a.z, b.z, z);
+      CommonOps_DDRM.subtract(a.x, b.x, x);
+      CommonOps_DDRM.subtract(a.y, b.y, y);
+      CommonOps_DDRM.subtract(a.z, b.z, z);
    }
 
    /**
@@ -153,7 +153,7 @@ public class DenseMatrixVector3D
     * @param axis either X, Y, or Z.
     * @return the corresponding matrix.
     */
-   public DenseMatrix64F getMatrix(Axis axis)
+   public DMatrixRMaj getMatrix(Axis3D axis)
    {
       return matrixArray[axis.ordinal()];
    }
@@ -165,7 +165,7 @@ public class DenseMatrixVector3D
     * @param axisIndex the axis index &in; [0, 2].
     * @return the corresponding matrix.
     */
-   public DenseMatrix64F getMatrix(int axisIndex)
+   public DMatrixRMaj getMatrix(int axisIndex)
    {
       return matrixArray[axisIndex];
    }
@@ -175,7 +175,7 @@ public class DenseMatrixVector3D
     * 
     * @return the x matrix.
     */
-   public DenseMatrix64F getMatrixX()
+   public DMatrixRMaj getMatrixX()
    {
       return x;
    }
@@ -185,7 +185,7 @@ public class DenseMatrixVector3D
     * 
     * @return the y matrix.
     */
-   public DenseMatrix64F getMatrixY()
+   public DMatrixRMaj getMatrixY()
    {
       return y;
    }
@@ -195,7 +195,7 @@ public class DenseMatrixVector3D
     * 
     * @return the z matrix.
     */
-   public DenseMatrix64F getMatrixZ()
+   public DMatrixRMaj getMatrixZ()
    {
       return z;
    }
@@ -210,11 +210,11 @@ public class DenseMatrixVector3D
     */
    public boolean epsilonEquals(DenseMatrixVector3D other, double epsilon)
    {
-      if (!MatrixFeatures.isEquals(x, other.x, epsilon))
+      if (!MatrixFeatures_DDRM.isEquals(x, other.x, epsilon))
          return false;
-      if (!MatrixFeatures.isEquals(y, other.y, epsilon))
+      if (!MatrixFeatures_DDRM.isEquals(y, other.y, epsilon))
          return false;
-      if (!MatrixFeatures.isEquals(z, other.z, epsilon))
+      if (!MatrixFeatures_DDRM.isEquals(z, other.z, epsilon))
          return false;
       return true;
    }
