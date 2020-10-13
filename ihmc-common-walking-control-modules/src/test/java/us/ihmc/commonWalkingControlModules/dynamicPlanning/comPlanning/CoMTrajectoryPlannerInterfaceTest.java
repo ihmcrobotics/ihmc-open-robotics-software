@@ -185,10 +185,10 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 
       FramePoint3D initialDCM = new FramePoint3D();
       CapturePointTools.computeCapturePointPosition(comPosition, comVelocity, omega.getDoubleValue(), initialDCM);
-//      DCMTrajectoryTestTools
-//            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
-//                                      firstContact.getCopStartPosition(), initialDCM);
-//      initialDCM.addZ(nominalHeight);
+      DCMTrajectoryTestTools
+            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
+                                      firstContact.getCopStartPosition(), initialDCM);
+      initialDCM.addZ(nominalHeight);
 
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());

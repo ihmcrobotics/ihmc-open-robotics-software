@@ -22,7 +22,9 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
 
    protected CoMTrajectoryPlannerInterface createComTrajectoryPlanner()
    {
-      return new CoMTrajectoryPlanner(gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(gravityZ, nominalHeight, registry);
+      planner.setMaintainInitialCoMVelocityContinuity(false);
+      return planner;
    }
 
    @Test
