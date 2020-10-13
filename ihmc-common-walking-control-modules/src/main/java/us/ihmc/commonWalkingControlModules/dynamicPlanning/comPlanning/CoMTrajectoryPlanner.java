@@ -241,32 +241,62 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final SettableContactStateProvider startContactSequenceForContinuity = new SettableContactStateProvider();
    private final SettableContactStateProvider nextContactSequenceForContinuity = new SettableContactStateProvider();
-   private static final double defaultContinuitySegmentDuration = 0.1;
+   private static final double defaultContinuitySegmentDuration = 0.15;
    private final FramePoint3D fakeContinuityPosition = new FramePoint3D();
 
    private void insertKnotForContinuity(List<? extends ContactStateProvider> contactSequence)
    {
       double initialSegmentDuration = contactSequence.get(0).getTimeInterval().getDuration();
-      double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
-      double endTime = contactSequence.get(0).getTimeInterval().getEndTime();
-      FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
-      FramePoint3DReadOnly endPosition = contactSequence.get(0).getCopEndPosition();
-
+      boolean isInitialSegmentLongEnough = true;
       double continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * initialSegmentDuration);
-      fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / initialSegmentDuration);
-      startContactSequenceForContinuity.setStartCopPosition(startPosition);
-      startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
-      startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + continuitySegmentDuration);
+      if (defaultContinuitySegmentDuration > 0.5 * initialSegmentDuration)
+         isInitialSegmentLongEnough = false;
 
-      nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
-      nextContactSequenceForContinuity.setEndCopPosition(endPosition);
-      nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + continuitySegmentDuration, endTime);
+      if (isInitialSegmentLongEnough || contactSequence.size() < 3)
+      {
+         double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
+         double endTime = contactSequence.get(0).getTimeInterval().getEndTime();
+         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
+         FramePoint3DReadOnly endPosition = contactSequence.get(0).getCopEndPosition();
 
-      contactSequenceInternal.clear();
-      contactSequenceInternal.add(startContactSequenceForContinuity);
-      contactSequenceInternal.add(nextContactSequenceForContinuity);
-      for (int i = 1; i < contactSequence.size(); i++)
-         contactSequenceInternal.add(contactSequence.get(i));
+         fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / initialSegmentDuration);
+         startContactSequenceForContinuity.setStartCopPosition(startPosition);
+         startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
+         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + continuitySegmentDuration);
+
+         nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
+         nextContactSequenceForContinuity.setEndCopPosition(endPosition);
+         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + continuitySegmentDuration, endTime);
+
+         contactSequenceInternal.clear();
+         contactSequenceInternal.add(startContactSequenceForContinuity);
+         contactSequenceInternal.add(nextContactSequenceForContinuity);
+         for (int i = 1; i < contactSequence.size(); i++)
+            contactSequenceInternal.add(contactSequence.get(i));
+      }
+      else
+      {
+         double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
+         double nextEndTime = contactSequence.get(1).getTimeInterval().getEndTime();
+         continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * (nextEndTime - startTime));
+         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
+         FramePoint3DReadOnly endPosition = contactSequence.get(1).getCopEndPosition();
+
+         fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / (nextEndTime - startTime));
+         startContactSequenceForContinuity.setStartCopPosition(startPosition);
+         startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
+         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + continuitySegmentDuration);
+
+         nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
+         nextContactSequenceForContinuity.setEndCopPosition(endPosition);
+         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + continuitySegmentDuration, nextEndTime);
+
+         contactSequenceInternal.clear();
+         contactSequenceInternal.add(startContactSequenceForContinuity);
+         contactSequenceInternal.add(nextContactSequenceForContinuity);
+         for (int i = 2; i < contactSequence.size(); i++)
+            contactSequenceInternal.add(contactSequence.get(i));
+      }
    }
 
    private final IGrowArray gw = new IGrowArray();
