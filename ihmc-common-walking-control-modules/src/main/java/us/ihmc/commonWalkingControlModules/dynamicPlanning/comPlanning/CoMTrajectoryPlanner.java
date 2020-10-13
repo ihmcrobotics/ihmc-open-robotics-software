@@ -278,6 +278,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
          double nextEndTime = contactSequence.get(1).getTimeInterval().getEndTime();
+         double duration = nextEndTime - startTime;
+         double minDuration = Math.min(0.01, 0.25 * duration);
+         double maxAdjustmentDuration = nextEndTime - minDuration;
+         double adjustmentDuration = Math.min(0.2, maxAdjustmentDuration);
 //         continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * (nextEndTime - startTime));
 //         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
 //         FramePoint3DReadOnly endPosition = contactSequence.get(1).getCopEndPosition();
@@ -286,12 +290,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 //         startContactSequenceForContinuity.setStartCopPosition(startPosition);
          //         startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
          startContactSequenceForContinuity.set(contactSequence.get(0));
-         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + 0.2);
+         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + adjustmentDuration);
 
 //         nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
 //         nextContactSequenceForContinuity.setEndCopPosition(endPosition);
          nextContactSequenceForContinuity.set(contactSequence.get(1));
-         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + 0.2, nextEndTime);
+         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime +  adjustmentDuration, nextEndTime);
 
          contactSequenceInternal.clear();
          contactSequenceInternal.add(startContactSequenceForContinuity);
