@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -146,10 +147,7 @@ public abstract class TransferState extends WalkingState
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
 
-      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
-      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
-
-      if (shouldComputeToeLineContact || shouldComputeToePointContact)
+      if ( feetManager.getCurrentConstraintType(trailingLeg) != FootControlModule.ConstraintType.TOES)
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
@@ -165,9 +163,9 @@ public abstract class TransferState extends WalkingState
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d);
 
-         if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
+         if (feetManager.okForPointToeOff())
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
-         else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
+         else if (feetManager.okForLineToeOff())
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
       }
    }
