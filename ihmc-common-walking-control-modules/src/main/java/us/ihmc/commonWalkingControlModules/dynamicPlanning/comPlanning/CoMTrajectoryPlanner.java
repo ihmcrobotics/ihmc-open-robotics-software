@@ -252,7 +252,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       if (defaultContinuitySegmentDuration > 0.5 * initialSegmentDuration)
          isInitialSegmentLongEnough = false;
 
-      if (isInitialSegmentLongEnough || contactSequence.size() < 3)
+      if (contactSequence.size() < 3)
       {
          double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
          double endTime = contactSequence.get(0).getTimeInterval().getEndTime();
@@ -278,18 +278,20 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          double startTime = contactSequence.get(0).getTimeInterval().getStartTime();
          double nextEndTime = contactSequence.get(1).getTimeInterval().getEndTime();
-         continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * (nextEndTime - startTime));
-         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
-         FramePoint3DReadOnly endPosition = contactSequence.get(1).getCopEndPosition();
+//         continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * (nextEndTime - startTime));
+//         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
+//         FramePoint3DReadOnly endPosition = contactSequence.get(1).getCopEndPosition();
 
-         fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / (nextEndTime - startTime));
-         startContactSequenceForContinuity.setStartCopPosition(startPosition);
-         startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
-         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + continuitySegmentDuration);
+//         fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / (nextEndTime - startTime));
+//         startContactSequenceForContinuity.setStartCopPosition(startPosition);
+         //         startContactSequenceForContinuity.setEndCopPosition(fakeContinuityPosition);
+         startContactSequenceForContinuity.set(contactSequence.get(0));
+         startContactSequenceForContinuity.getTimeInterval().setInterval(startTime, startTime + 0.2);
 
-         nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
-         nextContactSequenceForContinuity.setEndCopPosition(endPosition);
-         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + continuitySegmentDuration, nextEndTime);
+//         nextContactSequenceForContinuity.setStartCopPosition(fakeContinuityPosition);
+//         nextContactSequenceForContinuity.setEndCopPosition(endPosition);
+         nextContactSequenceForContinuity.set(contactSequence.get(1));
+         nextContactSequenceForContinuity.getTimeInterval().setInterval(startTime + 0.2, nextEndTime);
 
          contactSequenceInternal.clear();
          contactSequenceInternal.add(startContactSequenceForContinuity);
