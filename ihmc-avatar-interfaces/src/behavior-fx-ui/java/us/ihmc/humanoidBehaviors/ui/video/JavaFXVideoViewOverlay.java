@@ -10,7 +10,7 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 
-public class JavaFXROS2VideoViewOverlay
+public class JavaFXVideoViewOverlay
 {
    private final JavaFXVideoView videoView;
    private SizeMode currentMode = SizeMode.MIN;
@@ -35,7 +35,7 @@ public class JavaFXROS2VideoViewOverlay
       }
    }
 
-   public JavaFXROS2VideoViewOverlay(JavaFXVideoView videoView)
+   public JavaFXVideoViewOverlay(JavaFXVideoView videoView)
    {
       this.videoView = videoView;
 

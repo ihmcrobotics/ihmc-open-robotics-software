@@ -15,6 +15,7 @@ import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import javax.imageio.ImageIO;
@@ -38,7 +39,7 @@ public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sen
    {
       super(sensor_msgs.CompressedImage._TYPE);
 
-      String ros1Topic = "/depthcam/color/image_raw/compressed";
+      String ros1Topic = RosTools.D435_VIDEO;
       LogTools.info("Subscribing ROS 1: {}", ros1Topic);
       ros1Node.attachSubscriber(ros1Topic, this);
 
