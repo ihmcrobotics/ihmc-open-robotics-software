@@ -1,6 +1,9 @@
 package us.ihmc.tools.saveableModule;
 
-import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.EnumParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -10,90 +13,136 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+// TODO add support for parameters
+
 public abstract class SaveableModuleState
 {
-   private final List<YoDouble> doubles = new ArrayList<>();
-   private final List<YoInteger> integers = new ArrayList<>();
-   private final List<YoBoolean> booleans = new ArrayList<>();
-   private final List<YoEnum<?>> enums = new ArrayList<>();
+   private final List<YoDouble> yoDoubles = new ArrayList<>();
+   private final List<YoInteger> yoIntegers = new ArrayList<>();
+   private final List<YoBoolean> yoBooleans = new ArrayList<>();
+   private final List<YoEnum<?>> yoEnums = new ArrayList<>();
+
+   private final List<DoubleParameter> doubleParameters = new ArrayList<>();
+   private final List<IntegerParameter> integerParameters = new ArrayList<>();
+   private final List<BooleanParameter> booleanParameters = new ArrayList<>();
+   private final List<EnumParameter<?>> enumParameters = new ArrayList<>();
 
    public void registerDoubleToSave(YoDouble yoDouble)
    {
-      doubles.add(yoDouble);
+      yoDoubles.add(yoDouble);
+   }
+
+   public void registerDoubleToSave(DoubleParameter doubleParameter)
+   {
+      doubleParameters.add(doubleParameter);
    }
 
    public void registerIntegerToSave(YoInteger yoInteger)
    {
-      integers.add(yoInteger);
+      yoIntegers.add(yoInteger);
+   }
+
+   public void registerIntegerToSave(IntegerParameter integerPara)
+   {
+      integerParameters.add(integerPara);
    }
 
    public void registerBooleanToSave(YoBoolean yoBoolean)
    {
-      booleans.add(yoBoolean);
+      yoBooleans.add(yoBoolean);
+   }
+
+   public void registerBooleanToSave(BooleanParameter booleanParameter)
+   {
+      booleanParameters.add(booleanParameter);
    }
 
    public void registerEnumToSave(YoEnum<?> yoEnum)
    {
-      enums.add(yoEnum);
+      yoEnums.add(yoEnum);
    }
 
+   public void registerEnumToSave(EnumParameter<?> enumParameter)
+   {
+      enumParameters.add(enumParameter);
+   }
    public void registerStateToSave(SaveableModuleState other)
    {
-      for (int i = 0; i < other.getDoublesToSave().size(); i++)
-         doubles.add(other.getDoublesToSave().get(i));
-      for (int i = 0; i < other.getIntegersToSave().size(); i++)
-         integers.add(other.getIntegersToSave().get(i));
-      for (int i = 0; i < other.getBooleansToSave().size(); i++)
-         booleans.add(other.getBooleansToSave().get(i));
-      for (int i = 0; i < other.getEnumsToSave().size(); i++)
-         enums.add(other.getEnumsToSave().get(i));
+      for (int i = 0; i < other.getYoDoublesToSave().size(); i++)
+         yoDoubles.add(other.getYoDoublesToSave().get(i));
+      for (int i = 0; i < other.getYoIntegersToSave().size(); i++)
+         yoIntegers.add(other.getYoIntegersToSave().get(i));
+      for (int i = 0; i < other.getYoBooleansToSave().size(); i++)
+         yoBooleans.add(other.getYoBooleansToSave().get(i));
+      for (int i = 0; i < other.getYoEnumsToSave().size(); i++)
+         yoEnums.add(other.getYoEnumsToSave().get(i));
    }
 
-   public List<YoDouble> getDoublesToSave()
+   private List<YoDouble> getYoDoublesToSave()
    {
-      return doubles;
+      return yoDoubles;
    }
 
-   public List<YoInteger> getIntegersToSave()
+   private List<DoubleParameter> getDoubleParametersToSave()
    {
-      return integers;
+      return doubleParameters;
    }
 
-   public List<YoBoolean> getBooleansToSave()
+   private List<YoInteger> getYoIntegersToSave()
    {
-      return booleans;
+      return yoIntegers;
    }
 
-   public List<YoEnum<?>> getEnumsToSave()
+   private List<IntegerParameter> getIntegerParametersToSave()
    {
-      return enums;
+      return integerParameters;
+   }
+
+   private List<YoBoolean> getYoBooleansToSave()
+   {
+      return yoBooleans;
+   }
+
+   private List<BooleanParameter> getBooleanParametersToSave()
+   {
+      return booleanParameters;
+   }
+
+   private List<YoEnum<?>> getYoEnumsToSave()
+   {
+      return yoEnums;
+   }
+
+   private List<EnumParameter<?>> getEnumParametersToSave()
+   {
+      return enumParameters;
    }
 
    @Override
    public String toString()
    {
       String string = "";
-      for (int i = 0; i < doubles.size(); i++)
+      for (int i = 0; i < yoDoubles.size(); i++)
       {
-         YoDouble yoDouble = doubles.get(i);
+         YoDouble yoDouble = yoDoubles.get(i);
          string += "\n" + yoDouble.getName();
          string += "\n" + yoDouble.getValue();
       }
-      for (int i = 0; i < integers.size(); i++)
+      for (int i = 0; i < yoIntegers.size(); i++)
       {
-         YoInteger yoInteger = integers.get(i);
+         YoInteger yoInteger = yoIntegers.get(i);
          string += "\n" + yoInteger.getName();
          string += "\n" + yoInteger.getValue();
       }
-      for (int i = 0; i < booleans.size(); i++)
+      for (int i = 0; i < yoBooleans.size(); i++)
       {
-         YoBoolean yoBoolean = booleans.get(i);
+         YoBoolean yoBoolean = yoBooleans.get(i);
          string += "\n" + yoBoolean.getName();
          string += "\n" + yoBoolean.getValue();
       }
-      for (int i = 0; i < enums.size(); i++)
+      for (int i = 0; i < yoEnums.size(); i++)
       {
-         YoEnum<?> yoEnum = enums.get(i);
+         YoEnum<?> yoEnum = yoEnums.get(i);
          string += "\n" + yoEnum.getName();
          string += "\n" + yoEnum.getOrdinal();
       }
@@ -105,14 +154,14 @@ public abstract class SaveableModuleState
    {
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
-      for (int i = 0; i < doubles.size(); i++)
-         doubles.get(i).set(SaveableModuleTools.readNextDouble(scanner));
-      for (int i = 0; i < integers.size(); i++)
-         integers.get(i).set(SaveableModuleTools.readNextInt(scanner));
-      for (int i = 0; i < booleans.size(); i++)
-         booleans.get(i).set(SaveableModuleTools.readNextBoolean(scanner));
-      for (int i = 0; i < enums.size(); i++)
-         enums.get(i).set(SaveableModuleTools.readNextInt(scanner));
+      for (int i = 0; i < yoDoubles.size(); i++)
+         yoDoubles.get(i).set(SaveableModuleTools.readNextDouble(scanner));
+      for (int i = 0; i < yoIntegers.size(); i++)
+         yoIntegers.get(i).set(SaveableModuleTools.readNextInt(scanner));
+      for (int i = 0; i < yoBooleans.size(); i++)
+         yoBooleans.get(i).set(SaveableModuleTools.readNextBoolean(scanner));
+      for (int i = 0; i < yoEnums.size(); i++)
+         yoEnums.get(i).set(SaveableModuleTools.readNextInt(scanner));
 
       scanner.close();
    }
