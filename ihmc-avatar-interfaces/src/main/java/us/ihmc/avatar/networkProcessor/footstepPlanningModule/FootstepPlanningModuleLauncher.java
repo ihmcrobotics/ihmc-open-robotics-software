@@ -133,7 +133,14 @@ public class FootstepPlanningModuleLauncher
          FootstepPlanningRequestPacket requestPacket = s.takeNextData();
          request.setFromPacket(requestPacket);
          generateLog.set(requestPacket.getGenerateLog());
-         new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
+         new Thread(() ->
+                    {
+                       footstepPlanningModule.getSplitFractionParameters().
+                             setCalculateSplitFractionsFromArea(request.performAreaBasedSplitFractionCalculation());
+                       footstepPlanningModule.getSplitFractionParameters().
+                             setCalculateSplitFractionsFromPositions(request.performPositionBasedSplitFractionCalculation());
+                       footstepPlanningModule.handleRequest(request);
+                    }, "FootstepPlanningRequestHandler").start();
       });
    }
 
