@@ -67,6 +67,8 @@ public interface SplitFractionCalculatorParametersBasics extends SplitFractionCa
 
    default void set(SplitFractionCalculatorParametersPacket packet)
    {
+      setCalculateSplitFractionsFromArea(packet.getCalculateSplitFractionsFromArea());
+      setCalculateSplitFractionsFromPositions(packet.getCalculateSplitFractionsFromPositions());
       if (packet.getDefaultTransferSplitFraction() != -1.0)
          setDefaultTransferSplitFraction(packet.getDefaultTransferSplitFraction());
       if (packet.getStepHeightForLargeStepDown() != -1.0)

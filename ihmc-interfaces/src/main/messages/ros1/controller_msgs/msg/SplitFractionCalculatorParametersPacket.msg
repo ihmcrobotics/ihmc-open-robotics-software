@@ -3,6 +3,10 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+bool calculate_split_fractions_from_area
+
+bool calculate_split_fractions_from_positions
+
 # Default value for the ICP plan's transfer split fraction.
 # Field default value -1.0
 float64 default_transfer_split_fraction

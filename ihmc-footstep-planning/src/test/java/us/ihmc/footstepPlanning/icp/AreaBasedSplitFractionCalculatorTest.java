@@ -29,6 +29,7 @@ public class AreaBasedSplitFractionCalculatorTest
       double splitFractionIfOtherFootHasNoWidth = 0.5;
       double fractionLoadIfFootHasFullSupport = 0.8;
       double splitFractionIfFootHasFullSupport = 0.9;
+      parameters.setCalculateSplitFractionsFromArea(true);
       parameters.setFractionLoadIfOtherFootHasNoWidth(fractionLoadIfOtherFootHasNoWidth);
       parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(splitFractionIfOtherFootHasNoWidth);
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
