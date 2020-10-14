@@ -3,20 +3,12 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 import java.util.function.*;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class SplitFractionFromAreaCalculator
 {
@@ -27,9 +19,9 @@ public class SplitFractionFromAreaCalculator
    private final SideDependentList<ConvexPolygon2D> defaultFootPolygons;
 
    private IntSupplier numberOfStepsProvider;
-   private IntFunction<List<Point2D>> stepPolygonGetter;
+   private IntFunction<List<? extends Point2DReadOnly>> stepPolygonGetter;
    private IntFunction<RobotSide> stepSideProvider;
-   private Supplier<List<Point2D>> firstSupportPolygonProvider;
+   private Supplier<List<? extends Point2DReadOnly>> firstSupportPolygonProvider;
    private DoubleSupplier finalTransferWeightDistributionProvider;
    private DoubleSupplier finalTransferSplitFractionProvider;
    private IntToDoubleFunction transferWeightDistributionProvider;
@@ -91,12 +83,12 @@ public class SplitFractionFromAreaCalculator
       this.transferSplitFractionConsumer = transferSplitFractionConsumer;
    }
 
-   public void setFirstSupportPoseProvider(Supplier<List<Point2D>> firstSupportPolygonProvider)
+   public void setFirstSupportPolygonProvider(Supplier<List<? extends Point2DReadOnly>> firstSupportPolygonProvider)
    {
       this.firstSupportPolygonProvider = firstSupportPolygonProvider;
    }
 
-   public void setStepPolygonGetter(IntFunction<List<Point2D>> stepPolygonGetter)
+   public void setStepPolygonGetter(IntFunction<List<? extends Point2DReadOnly>> stepPolygonGetter)
    {
       this.stepPolygonGetter = stepPolygonGetter;
    }
@@ -120,7 +112,7 @@ public class SplitFractionFromAreaCalculator
          if (stepNumber == 0)
          {
             previousPolygon.clear();
-            List<Point2D> stepPolygon = firstSupportPolygonProvider.get();
+            List<? extends Point2DReadOnly> stepPolygon = firstSupportPolygonProvider.get();
             previousPolygon.clear();
             for (int i = 0; i < stepPolygon.size(); i++)
                previousPolygon.addVertex(stepPolygon.get(i));
@@ -128,7 +120,7 @@ public class SplitFractionFromAreaCalculator
          }
          else
          {
-            List<Point2D> stepPolygon = stepPolygonGetter.apply(stepNumber - 1);
+            List<? extends Point2DReadOnly> stepPolygon = stepPolygonGetter.apply(stepNumber - 1);
             if (stepPolygon != null && !stepPolygon.isEmpty())
             {
                previousPolygon.clear();
@@ -142,7 +134,7 @@ public class SplitFractionFromAreaCalculator
             }
          }
 
-         List<Point2D> stepPolygon = stepPolygonGetter.apply(stepNumber);
+         List<? extends Point2DReadOnly> stepPolygon = stepPolygonGetter.apply(stepNumber);
 
          if (stepPolygon != null && !stepPolygon.isEmpty())
          {
