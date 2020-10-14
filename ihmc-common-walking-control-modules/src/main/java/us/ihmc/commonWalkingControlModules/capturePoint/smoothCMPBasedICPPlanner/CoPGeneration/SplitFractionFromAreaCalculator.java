@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -16,7 +17,7 @@ public class SplitFractionFromAreaCalculator
    private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
 
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
-   private final SideDependentList<ConvexPolygon2D> defaultFootPolygons;
+   private final SideDependentList<? extends ConvexPolygon2DReadOnly> defaultFootPolygons;
 
    private IntSupplier numberOfStepsProvider;
    private IntFunction<List<? extends Point2DReadOnly>> stepPolygonGetter;
@@ -32,7 +33,7 @@ public class SplitFractionFromAreaCalculator
    private IntFunction<DoubleConsumer> transferSplitFractionConsumer;
 
    public SplitFractionFromAreaCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters,
-                                          SideDependentList<ConvexPolygon2D> defaultFootPolygons)
+                                          SideDependentList<? extends ConvexPolygon2DReadOnly> defaultFootPolygons)
    {
       this.splitFractionParameters = splitFractionParameters;
       this.defaultFootPolygons = defaultFootPolygons;

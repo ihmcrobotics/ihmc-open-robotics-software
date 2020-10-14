@@ -156,6 +156,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
    private final SplitFractionFromPositionCalculator positionSplitFractionCalculator;
+   private final SplitFractionFromAreaCalculator areaSplitFractionCalculator;
 
    /**
     * Creates CoP planner object. Should be followed by call to {@link #initializeParameters(ICPPlannerParameters)} ()} to
@@ -311,6 +312,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(defaultSplitFractionParameters);
 
+      positionSplitFractionCalculator.setNumberOfStepsProvider(this::getNumberOfFootstepsRegistered);
+
       positionSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
       positionSplitFractionCalculator.setFinalTransferWeightDistributionProvider(finalTransferWeightDistribution::getDoubleValue);
 
@@ -332,6 +335,29 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                                                   });
       positionSplitFractionCalculator.setStepPoseGetter((i) -> getFootstep(i).getFootstepPose());
 
+      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(defaultSplitFractionParameters, defaultFootPolygons);
+
+      areaSplitFractionCalculator.setNumberOfStepsProvider(this::getNumberOfFootstepsRegistered);
+
+      areaSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
+      areaSplitFractionCalculator.setFinalTransferWeightDistributionProvider(finalTransferWeightDistribution::getDoubleValue);
+
+      areaSplitFractionCalculator.setTransferSplitFractionProvider((i) -> transferSplitFractions.get(i).getDoubleValue());
+      areaSplitFractionCalculator.setTransferWeightDistributionProvider((i) -> transferWeightDistributions.get(i).getDoubleValue());
+
+      areaSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
+      areaSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
+
+      areaSplitFractionCalculator.setTransferWeightDistributionConsumer((i) -> (d) -> transferWeightDistributions.get(i).set(d));
+      areaSplitFractionCalculator.setTransferSplitFractionConsumer((i) -> (d) -> transferSplitFractions.get(i).set(d));
+
+      areaSplitFractionCalculator.setFirstSupportPolygonProvider(() ->
+                                                {
+                                                   RobotSide stanceSide = getFootstep(0).getRobotSide().getOppositeSide();
+                                                   return supportFootPolygonsInSoleZUpFrames.get(stanceSide).getPolygonVerticesView();
+                                                });
+      areaSplitFractionCalculator.setStepSideProvider((i) -> getFootstep(i).getRobotSide());
+      areaSplitFractionCalculator.setStepPolygonGetter((i) -> getFootstep(i).getPredictedContactPoints());
 
       parentRegistry.addChild(registry);
       clear();
@@ -616,8 +642,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          isDoneWalking.set(false); // start walking
 
       positionSplitFractionCalculator.computeSplitFractionsFromPosition();
-      computeSplitFractionsFromArea();
-
+      areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && (holdDesiredState.getBooleanValue() || numberOfUpcomingFootsteps == 0))
@@ -691,7 +716,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
 
       positionSplitFractionCalculator.computeSplitFractionsFromPosition();
-      computeSplitFractionsFromArea();
+      areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
       // compute cop waypoint location
       computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), supportSide.getOppositeSide(), false);
@@ -1563,9 +1588,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
 
-   private final PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
-   private final PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
-
       /*
 
    public void computeSplitFractionsFromPosition()
@@ -1642,6 +1664,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
 
 
+      /*
    public void computeSplitFractionsFromArea()
    {
       if (getNumberOfFootstepsRegistered() == 0|| !splitFractionParameters.calculateSplitFractionsFromArea())
@@ -1656,15 +1679,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          if (stepNumber == 0)
          {
             RobotSide stanceSide = getFootstep(0).getRobotSide().getOppositeSide();
-            stanceFootPose.setToZero(soleFrames.get(stanceSide));
-            stanceFootPose.changeFrame(worldFrame);
-            previousFrame.setPoseAndUpdate(stanceFootPose);
             previousPolygon.set(supportFootPolygonsInSoleZUpFrames.get(stanceSide));
          }
          else
          {
             Footstep previousStep = getFootstep(stepNumber - 1);
-            previousFrame.setPoseAndUpdate(previousStep.getFootstepPose());
             if (previousStep.hasPredictedContactPoints())
             {
                previousPolygon.clear();
@@ -1679,7 +1698,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          }
 
          Footstep currentStep = getFootstep(stepNumber);
-         currentFrame.setPoseAndUpdate(currentStep.getFootstepPose());
          if (currentStep.hasPredictedContactPoints())
          {
             currentPolygon.clear();
@@ -1755,4 +1773,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          }
       }
    }
+
+       */
 }
