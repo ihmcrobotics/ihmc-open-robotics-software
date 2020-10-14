@@ -14,6 +14,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -45,6 +46,10 @@ public class CoPTrajectoryGeneratorTest
                                                                                       CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
                                                                                       registry);
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      copTrajectory.registerState(state);
+
       state.setInitialCoP(new FramePoint2D());
 
       for (RobotSide robotSide : RobotSide.values)
