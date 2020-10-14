@@ -20,7 +20,7 @@ public abstract class SaveableModuleState
       yoVariables.add(yoDouble);
    }
 
-   public void registerParameterToSave(YoParameter doubleParameter)
+   public void registerVariableToSave(YoParameter doubleParameter)
    {
       yoParameters.add(doubleParameter);
    }
