@@ -60,6 +60,8 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +101,9 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.getCdrSerializedSize(data.getSideStepDirection(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -121,6 +126,8 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.write(data.getFlatStepType(), cdr);
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.write(data.getStairsStepType(), cdr);
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.write(data.getSideStepDirection(), cdr);
+      cdr.write_type_7(data.getCancelRequestedBehavior());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuixCrutchMessage data, us.ihmc.idl.CDR cdr)
@@ -141,6 +148,8 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.read(data.getFlatStepType(), cdr);	
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.read(data.getStairsStepType(), cdr);	
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.read(data.getSideStepDirection(), cdr);	
+      data.setCancelRequestedBehavior(cdr.read_type_7());
+      	
 
    }
 
@@ -161,6 +170,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_a("side_step_direction", new controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType(), data.getSideStepDirection());
 
+      ser.write_type_7("cancel_requested_behavior", data.getCancelRequestedBehavior());
    }
 
    @Override
@@ -180,6 +190,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_a("side_step_direction", new controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType(), data.getSideStepDirection());
 
+      data.setCancelRequestedBehavior(ser.read_type_7("cancel_requested_behavior"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuixCrutchMessage src, controller_msgs.msg.dds.QuixCrutchMessage dest)
