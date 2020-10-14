@@ -87,7 +87,7 @@ public class KDTree {
     private KDNode nearestNeighbors(KDNode node, KDNode current){
         if (current == null) return null;
 
-        System.out.println(node + " " + current);
+//        System.out.println(node + " " + current);
 
         KDNode best;
         int comp = node.compareTo(current);

@@ -55,6 +55,8 @@ public class JMEPointCloudViewer extends SimpleApplication
    private DMatrixRMaj pointMat1;
    private DMatrixRMaj pointMat2;
 
+   public KDTree kdt1, kdt2;
+
    private Vector4f[] colors;
    private Mesh pcl1;
    private Mesh pcl2;
@@ -78,7 +80,7 @@ public class JMEPointCloudViewer extends SimpleApplication
    {
       super();
 
-      //              setupKDTreeTester();
+      // setupKDTreeTester();
 
       // setupROS1PointCloudReceiver();
 
@@ -144,6 +146,9 @@ public class JMEPointCloudViewer extends SimpleApplication
    {
       ipcEnabled = true;
 
+      kdt1 = new KDTree();
+      kdt2 = new KDTree();
+
       ArrayList<Point3D> pointCloud1 = new ArrayList<>();
       ArrayList<Point3D> pointCloud2 = new ArrayList<>();
       ArrayList<Color> pclColors1 = new ArrayList<>();
@@ -154,25 +159,28 @@ public class JMEPointCloudViewer extends SimpleApplication
       m_icp.loadData("pointcloud1.pcd", pointCloud1, pclColors1);
       m_icp.loadData("pointcloud2.pcd", pointCloud2, pclColors2);
 
+      KDTree.insertPoints(kdt1, pointCloud1);
+      KDTree.insertPoints(kdt2, pointCloud2);
+
       pointVectors3f = new Vector3f[pointCloud1.size()];
       pointVectors3fTransformed = new Vector3f[pointCloud2.size()];
 
-      points3D = new Point3D[pointCloud1.size()];
-      points3DTransformed = new Point3D[pointCloud2.size()];
+//      points3D = new Point3D[pointCloud1.size()];
+//      points3DTransformed = new Point3D[pointCloud2.size()];
 
-      RotationMatrix rot = new RotationMatrix(FastMath.PI * 0.2f, FastMath.PI * 0.3f, FastMath.PI * 0.1f);
+//      RotationMatrix rot = new RotationMatrix(FastMath.PI * 0.2f, FastMath.PI * 0.3f, FastMath.PI * 0.1f);
       // tf.setTranslation(-0.1f, 0.2f,-0.13f);
 
-      for (int i = 0; i < pointCloud1.size(); i++)
-      {
-         points3D[i] = new Point3D(pointCloud1.get(i));
-      }
-      for (int i = 0; i < pointCloud2.size(); i++)
-      {
-         points3DTransformed[i] = new Point3D(pointCloud2.get(i));
-      }
+//      for (int i = 0; i < pointCloud1.size(); i++)
+//      {
+//         points3D[i] = new Point3D(pointCloud1.get(i));
+//      }
+//      for (int i = 0; i < pointCloud2.size(); i++)
+//      {
+//         points3DTransformed[i] = new Point3D(pointCloud2.get(i));
+//      }
 
-      m_icp.centerPointCloud(points3D);
+//      m_icp.centerPointCloud(points3D);
       // m_icp.centerPointCloud(points3DTransformed);
 
       // for(int i = 0; i<pointCloud1.size(); i++){
@@ -182,8 +190,9 @@ public class JMEPointCloudViewer extends SimpleApplication
 
       // System.out.println(points3D.length + "\t" + pointVectors3f.length + "\t" + points3DTransformed.length + "\t" + pointVectors3fTransformed.length);
 
-      copyPointsEuclidToJME(points3D, pointVectors3f);
-      copyPointsEuclidToJME(points3DTransformed, pointVectors3fTransformed);
+      m_icp.centerPointTree(kdt1);
+      copyPointsEuclidToJME(kdt1.pointList, pointVectors3f);
+      copyPointsEuclidToJME(kdt2.pointList, pointVectors3fTransformed);
    }
 
    public void copyPointsEuclidToJME(Point3D[] pclEuclid, Vector3f[] pclJME)
@@ -192,6 +201,16 @@ public class JMEPointCloudViewer extends SimpleApplication
       {
          // System.out.println(pclEuclid.length + " " + pclJME.length + " " + i);
          pclJME[i] = new Vector3f(pclEuclid[i].getX32(), pclEuclid[i].getY32(), pclEuclid[i].getZ32());
+      }
+   }
+
+   public void copyPointsEuclidToJME(ArrayList<KDNode> pclEuclid, Vector3f[] pclJME)
+   {
+      for (int i = 0; i < pclEuclid.size(); i++)
+      {
+         pclJME[i] = new Vector3f(pclEuclid.get(i).point3d.getX32(),
+                                  pclEuclid.get(i).point3d.getY32(),
+                                  pclEuclid.get(i).point3d.getZ32());
       }
    }
 
@@ -333,14 +352,15 @@ public class JMEPointCloudViewer extends SimpleApplication
 
             double totalError = 0;
 
+
             if (ind % delay == 0)
             {
                RotationMatrix rotation = new RotationMatrix();
                Vector3D translation = new Vector3D();
 
-               totalError = m_icp.alignPointClouds(points3D, points3DTransformed, rotation, translation);
+               totalError = m_icp.alignPointTrees(kdt1, kdt2, rotation, translation);
 
-               copyPointsEuclidToJME(points3DTransformed, pointVectors3fTransformed);
+               copyPointsEuclidToJME(kdt2.pointList, pointVectors3fTransformed);
                System.out.println(ind / delay + " - " + totalError);
             }
             ind += 1;

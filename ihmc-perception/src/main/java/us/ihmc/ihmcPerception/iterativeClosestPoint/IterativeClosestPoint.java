@@ -26,7 +26,7 @@ public class IterativeClosestPoint
 
    private double threshold = 0.4f;
 
-   private String dataPath = "./ihmc-open-robotics-software/ihmc-perception/src/main/java/us/ihmc/ihmcPerception/lineSegmentDetector/";
+   private String dataPath = "./ihmc-open-robotics-software/ihmc-perception/src/main/java/us/ihmc/ihmcPerception/iterativeClosestPoint/";
 
    public void loadData(String pcdFile, ArrayList<Point3D> pcl, ArrayList<Color> colors)
    {
@@ -97,9 +97,6 @@ public class IterativeClosestPoint
 
       double error = 0;
 
-      Point3D[] points3D = (Point3D[]) kdt1.pointList.toArray();
-      Point3D[] points3DTransformed = (Point3D[]) kdtTransformed.pointList.toArray();
-
       centerPointTree(kdtTransformed);
 
       DMatrixRMaj crossCovariance = new DMatrixRMaj(3, 3);
@@ -111,12 +108,37 @@ public class IterativeClosestPoint
       return error;
    }
 
-    private void transformPointTree(KDTree kdtTransformed, RotationMatrix rotationToPack, Object o)
+    private void transformPointTree(KDTree kdt, RotationMatrix rotationToPack, Vector3D translation)
     {
+       if (rotation != null)
+       {
+          for (int i = 0; i < kdt.size; i++)
+          {
+             rotation.transform(kdt.pointList.get(i).point3d);
+          }
+       }
+       if (translation != null)
+       {
+          for (int i = 0; i < kdt.size; i++)
+          {
+             kdt.pointList.get(i).point3d.add(translation);
+          }
+       }
     }
 
-    private void centerPointTree(KDTree kdtTransformed)
+    public void centerPointTree(KDTree kdt)
     {
+       Point3D centroid = new Point3D(0, 0, 0);
+
+       for (int i = 0; i < kdt.size; i++)
+       {
+          centroid.add(kdt.pointList.get(i).point3d);
+       }
+       centroid.scale(1 / (double) kdt.size);
+       for (int i = 0; i < kdt.size; i++)
+       {
+          kdt.pointList.get(i).point3d.sub(centroid);
+       }
     }
 
     public void findCorrespondences(Point3D[] pcl1, Point3D[] pcl2, int[] corresp)
@@ -147,6 +169,8 @@ public class IterativeClosestPoint
 
          Point3D p1 = kdt1.pointList.get(i).point3d;
          Point3D p2 = kdt2.nearestNeighbors(kdt1.pointList.get(i)).point3d;
+         System.out.println("ICP Iterates");
+
 
          Vector3D correspVec = new Vector3D();
          correspVec.sub(p1, p2);
