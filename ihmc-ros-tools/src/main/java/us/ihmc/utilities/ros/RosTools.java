@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class RosTools
 {
+   public static final String MULTISENSE_VIDEO = "/multisense/left/image_rect_color/compressed";
    public static final String D435_VIDEO = "/depthcam/color/image_raw/compressed";
    public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
 
