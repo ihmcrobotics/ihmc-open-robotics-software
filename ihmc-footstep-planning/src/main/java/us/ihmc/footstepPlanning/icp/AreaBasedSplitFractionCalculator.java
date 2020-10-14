@@ -73,15 +73,15 @@ public class AreaBasedSplitFractionCalculator
                                                    ConvexPolygon2D initialStanceFoothold = startFootholds.get(stanceSide);
                                                    if (initialStanceFoothold.isEmpty())
                                                    {
-                                                      return footPolygons.get(stanceSide).getVertexBufferView();
+                                                      return footPolygons.get(stanceSide).getPolygonVerticesView();
                                                    }
                                                    else
                                                    {
-                                                      return initialStanceFoothold.getVertexBufferView();
+                                                      return initialStanceFoothold.getPolygonVerticesView();
                                                    }
                                                 });
       calculator.setStepSideProvider((i) -> footstepPlan.getFootstep(i).getRobotSide());
-      calculator.setStepPolygonGetter((i) -> footstepPlan.getFootstep(i).getFoothold().getVertexBufferView());
+      calculator.setStepPolygonGetter((i) -> footstepPlan.getFootstep(i).getFoothold().getPolygonVerticesView());
 
       calculator.computeSplitFractionsFromArea();
 
