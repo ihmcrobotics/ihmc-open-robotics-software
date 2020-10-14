@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.video;
 import sensor_msgs.CompressedImage;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -29,10 +30,7 @@ public class JavaFXROS1VideoView extends JavaFXVideoView
       {
          try
          {
-            byte[] payload = message.getData().array();
-            int offset = message.getData().arrayOffset();
-            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
-            acceptVideo(bufferedImage);
+            acceptVideo(RosTools.bufferedImageFromRosMessageJpeg(message));
          }
          catch (Exception e)
          {

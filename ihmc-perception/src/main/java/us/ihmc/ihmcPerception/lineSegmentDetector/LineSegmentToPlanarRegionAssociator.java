@@ -5,6 +5,10 @@ import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -12,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,26 +25,27 @@ import java.util.PriorityQueue;
 
 public class LineSegmentToPlanarRegionAssociator
 {
-   private Quaternion cameraOrientation;
-   private Point3D cameraPosition;
    private CameraPinholeBrown camIntrinsics;
+   private final PoseReferenceFrame regionFrame;
+   private final PoseReferenceFrame cameraFrame;
+
+   public LineSegmentToPlanarRegionAssociator(ReferenceFrame sensorFrame)
+   {
+      regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
+      cameraFrame = new PoseReferenceFrame("CameraFrame", sensorFrame);
+      cameraFrame.setOrientationAndUpdate(new RotationMatrix(0, -1, 0, 0, 0, -1, 1, 0, 0));
+   }
 
    private Mat curLines;
 
-   public void loadParams(CameraPinholeBrown intrinsics, Quaternion camOrientation, Point3D camPosition)
+   public void loadParams(CameraPinholeBrown intrinsics)
    {
       this.camIntrinsics = intrinsics;
-      this.cameraOrientation = camOrientation;
-      this.cameraPosition = camPosition;
    }
 
    public ArrayList<Point> projectPlanarRegion(PlanarRegion region, Point2D regionMidPoint)
    {
-
-      RigidBodyTransform tfLocalToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(tfLocalToWorld);
-
-      QuaternionBasedTransform tfWorldToCamera = new QuaternionBasedTransform(cameraOrientation, cameraPosition);
+      regionFrame.setPoseAndUpdate(region.getTransformToWorld());
 
       List<Point2D> concaveHull = region.getConcaveHull();
 
@@ -49,14 +55,13 @@ public class LineSegmentToPlanarRegionAssociator
 
       for (int i = 0; i < concaveHull.size(); i++)
       {
-         Point3D p3d = new Point3D(concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
-         p3d.applyTransform(tfLocalToWorld);
-         p3d.applyInverseTransform(tfWorldToCamera);
-         Point3D tfdP3d = new Point3D(-p3d.getY(), -p3d.getZ(), p3d.getX());
-         if (tfdP3d.getZ() >= 0)
+         FramePoint3D vertex = new FramePoint3D(regionFrame, concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
+         vertex.changeFrame(cameraFrame);
+
+         if (vertex.getZ() >= 0)
          {
-            double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
-            double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
+            double px = camIntrinsics.cx + camIntrinsics.fx * vertex.getX() / vertex.getZ();
+            double py = camIntrinsics.cy + camIntrinsics.fy * vertex.getY() / vertex.getZ();
             regionMidPoint.add(px, py);
             regionSize += 1;
             pointList.add(new Point(px, py));
@@ -188,16 +193,6 @@ public class LineSegmentToPlanarRegionAssociator
    public void setCamIntrinsics(CameraPinholeBrown camIntrinsics)
    {
       this.camIntrinsics = camIntrinsics;
-   }
-
-   public void setCameraOrientation(Quaternion cameraOrientation)
-   {
-      this.cameraOrientation = cameraOrientation;
-   }
-
-   public void setCameraPosition(Point3D cameraPosition)
-   {
-      this.cameraPosition = cameraPosition;
    }
 
    public void setCurLines(Mat curLines)

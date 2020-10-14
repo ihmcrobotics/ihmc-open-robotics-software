@@ -58,7 +58,7 @@ public class JavaFXROS1VideoViewer
    {
       URI masterURI = NetworkParameters.getROSURI();
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
-      RosMainNode ros1Node = new RosMainNode(masterURI, "networkProcessor/rosModule", true);
+      RosMainNode ros1Node = new RosMainNode(masterURI, "video_viewer", true);
 
       new JavaFXROS1VideoViewer(ros1Node);
       ros1Node.execute();
