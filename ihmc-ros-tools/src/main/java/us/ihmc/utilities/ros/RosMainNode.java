@@ -147,6 +147,7 @@ public class RosMainNode implements NodeMain
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
+   @Override
    public void onStart(ConnectedNode connectedNode)
    {
       parameters = connectedNode.getParameterTree();
@@ -219,17 +220,22 @@ public class RosMainNode implements NodeMain
       return connectedNode.getCurrentTime();
    }
 
+   @Override
    public void onShutdown(Node node)
    {
       isShutdownInProgress = true;
    }
 
+   @Override
    public void onShutdownComplete(Node node)
    {
+
    }
 
+   @Override
    public void onError(Node node, Throwable throwable)
    {
+
    }
 
    public final GraphName getDefaultNodeName()
