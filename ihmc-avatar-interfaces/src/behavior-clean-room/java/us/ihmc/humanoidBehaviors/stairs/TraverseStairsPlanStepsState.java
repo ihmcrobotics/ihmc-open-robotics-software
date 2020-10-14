@@ -99,6 +99,18 @@ public class TraverseStairsPlanStepsState implements State
 
    private void planSteps()
    {
+      if (planningModule.isPlanning())
+      {
+         planningModule.halt();
+      }
+
+      while (planningModule.isPlanning())
+      {
+         // wait...
+         LogTools.info("Waiting for previous plan to complete...");
+         ThreadTools.sleep(10);
+      }
+
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
@@ -125,7 +137,7 @@ public class TraverseStairsPlanStepsState implements State
 
       LogTools.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
-      LogTools.info(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
+      LogTools.info(getClass().getSimpleName() + " numer of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
 
       // lower height of first step down
       mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));
