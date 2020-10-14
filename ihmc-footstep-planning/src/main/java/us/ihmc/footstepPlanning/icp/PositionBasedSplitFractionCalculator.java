@@ -62,8 +62,12 @@ public class PositionBasedSplitFractionCalculator
       calculator.setTransferWeightDistributionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferWeightDistribution(d));
       calculator.setTransferSplitFractionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferSplitFraction(d));
 
+      calculator.setFirstSupportPoseProvider(() -> startFootPoses.get(footstepPlan.getFootstep(0).getRobotSide()));
+      calculator.setStepPoseGetter(i -> footstepPlan.getFootstep(i).getFootstepPose());
+
       calculator.computeSplitFractionsFromPosition();
 
+      /*
       if (footstepPlan.getNumberOfSteps() == 0)
       {
          return;
@@ -126,5 +130,7 @@ public class PositionBasedSplitFractionCalculator
             }
          }
       }
+
+       */
    }
 }
