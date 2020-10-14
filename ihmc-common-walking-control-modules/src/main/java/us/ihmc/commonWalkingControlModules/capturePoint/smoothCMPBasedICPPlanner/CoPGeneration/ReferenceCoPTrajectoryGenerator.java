@@ -155,6 +155,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    // Visualization
    private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
+   private final SplitFractionFromPositionCalculator positionSplitFractionCalculator;
+
    /**
     * Creates CoP planner object. Should be followed by call to {@link #initializeParameters(ICPPlannerParameters)} ()} to
     * pass planning parameters
@@ -306,6 +308,30 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationWaypoints = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier());
       copLocationWaypoints.clear();
       copPointsConstructed = true;
+
+      positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(defaultSplitFractionParameters);
+
+      positionSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
+      positionSplitFractionCalculator.setFinalTransferWeightDistributionProvider(finalTransferWeightDistribution::getDoubleValue);
+
+      positionSplitFractionCalculator.setTransferSplitFractionProvider((i) -> transferSplitFractions.get(i).getDoubleValue());
+      positionSplitFractionCalculator.setTransferWeightDistributionProvider((i) -> transferWeightDistributions.get(i).getDoubleValue());
+
+      positionSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
+      positionSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
+
+      positionSplitFractionCalculator.setTransferWeightDistributionConsumer((i) -> (d) -> transferWeightDistributions.get(i).set(d));
+      positionSplitFractionCalculator.setTransferSplitFractionConsumer((i) -> (d) -> transferSplitFractions.get(i).set(d));
+
+      positionSplitFractionCalculator.setFirstSupportPoseProvider(() ->
+                                                                  {
+                                                                     RobotSide initialStanceSide = getFootstep(0).getRobotSide().getOppositeSide();
+                                                                     stanceFootPose.setToZero(soleFrames.get(initialStanceSide));
+                                                                     stanceFootPose.changeFrame(worldFrame);
+                                                                     return stanceFootPose;
+                                                                  });
+      positionSplitFractionCalculator.setStepPoseGetter((i) -> getFootstep(i).getFootstepPose());
+
 
       parentRegistry.addChild(registry);
       clear();
@@ -589,7 +615,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else
          isDoneWalking.set(false); // start walking
 
-      computeSplitFractionsFromPosition();
+      positionSplitFractionCalculator.computeSplitFractionsFromPosition();
       computeSplitFractionsFromArea();
 
 
@@ -664,7 +690,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       isDoneWalking.set(false);
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
 
-      computeSplitFractionsFromPosition();
+      positionSplitFractionCalculator.computeSplitFractionsFromPosition();
       computeSplitFractionsFromArea();
 
       // compute cop waypoint location
@@ -1534,6 +1560,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePose3D nextFootPose = new FramePose3D();
 
 
+   private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
+
+   private final PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
+   private final PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
+
+      /*
 
    public void computeSplitFractionsFromPosition()
    {
@@ -1606,11 +1639,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
-   private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
+    */
 
-   private final PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
-   private final PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
 
    public void computeSplitFractionsFromArea()
    {
