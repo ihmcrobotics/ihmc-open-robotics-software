@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -17,10 +19,10 @@ public class SplitFractionFromPositionCalculator
    private final FramePose3D nextFootPose = new FramePose3D();
 
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
-   private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
    private IntSupplier numberOfStepsProvider;
-   private final IntFunction<Footstep> stepGetter;
+   private IntFunction<FramePose3DReadOnly> stepPoseGetter;
+   private Supplier<? extends Pose3DReadOnly> firstSupportPoseProvider;
    private DoubleSupplier finalTransferWeightDistributionProvider;
    private DoubleSupplier finalTransferSplitFractionProvider;
    private IntToDoubleFunction transferWeightDistributionProvider;
@@ -30,14 +32,9 @@ public class SplitFractionFromPositionCalculator
    private IntFunction<DoubleConsumer> transferWeightDistributionConsumer;
    private IntFunction<DoubleConsumer> transferSplitFractionConsumer;
 
-   public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters,
-                                              SideDependentList<? extends ReferenceFrame> soleFrames,
-                                              IntFunction<Footstep> stepGetter)
+   public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
-      this.soleFrames = soleFrames;
-
-      this.stepGetter = stepGetter;
    }
 
    public void setNumberOfStepsProvider(IntSupplier numberOfStepsProvider)
@@ -85,6 +82,15 @@ public class SplitFractionFromPositionCalculator
       this.transferSplitFractionConsumer = transferSplitFractionConsumer;
    }
 
+   public void setFirstSupportPoseProvider(Supplier<? extends Pose3DReadOnly> firstSupportPoseProvider)
+   {
+      this.firstSupportPoseProvider = firstSupportPoseProvider;
+   }
+
+   public void setStepPoseGetter(IntFunction<FramePose3DReadOnly> stepPoseGetter)
+   {
+      this.stepPoseGetter = stepPoseGetter;
+   }
 
    public void computeSplitFractionsFromPosition()
    {
@@ -100,16 +106,14 @@ public class SplitFractionFromPositionCalculator
       {
          if (stepNumber == 0)
          {
-            RobotSide initialStanceSide = stepGetter.apply(stepNumber).getRobotSide().getOppositeSide();
-            stanceFootPose.setToZero(soleFrames.get(initialStanceSide));
-            stanceFootPose.changeFrame(worldFrame);
+            stanceFootPose.setIncludingFrame(worldFrame, firstSupportPoseProvider.get());
          }
          else
          {
-            stanceFootPose.set(stepGetter.apply(stepNumber - 1).getFootstepPose());
+            stanceFootPose.set(stepPoseGetter.apply(stepNumber - 1));
          }
 
-         nextFootPose.set(stepGetter.apply(stepNumber).getFootstepPose());
+         nextFootPose.set(stepPoseGetter.apply(stepNumber));
 
          // This step is a big step down.
          double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
