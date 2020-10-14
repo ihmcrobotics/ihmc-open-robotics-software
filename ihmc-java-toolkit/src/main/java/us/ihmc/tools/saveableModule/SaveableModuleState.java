@@ -65,7 +65,7 @@ public abstract class SaveableModuleState
             Field valueField;
             try
             {
-               valueField = ParameterData.class.getField("value");
+               valueField = ParameterData.class.getDeclaredField("value");
             }
             catch (NoSuchFieldException e)
             {
