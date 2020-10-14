@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
@@ -19,7 +20,7 @@ public class PlanningFootstepTest
       {
          PlanningFootstep stepA = getRandomPlanningFootstep(random);
 
-         stepB.loadValues(stepA.toString());
+         stepB.loadValues(SaveableModuleStateTools.readSaveableRegistryToDataMap(SaveableModuleStateTools.writeStateToSaveableRegistry(stepA)));
 
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(stepA, stepB, 1e-7);
       }

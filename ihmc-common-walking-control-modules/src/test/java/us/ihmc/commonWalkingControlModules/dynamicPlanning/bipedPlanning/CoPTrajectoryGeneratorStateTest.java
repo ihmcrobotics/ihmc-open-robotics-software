@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
@@ -72,7 +73,7 @@ public class CoPTrajectoryGeneratorStateTest
          stateA.initializeStance(RobotSide.LEFT, randomLeftFootPolygon, soleFrames.get(RobotSide.LEFT));
          stateA.initializeStance(RobotSide.RIGHT, randomRightFootPolygon, soleFrames.get(RobotSide.RIGHT));
 
-         stateB.loadValues(stateA.toString());
+         stateB.loadValues(SaveableModuleStateTools.readSaveableRegistryToDataMap(SaveableModuleStateTools.writeStateToSaveableRegistry(stateA)));
 
          EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming0, stateB.getTiming(0), epsilon);
