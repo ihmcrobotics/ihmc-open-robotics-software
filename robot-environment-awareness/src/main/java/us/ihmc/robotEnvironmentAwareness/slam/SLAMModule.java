@@ -34,9 +34,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
-import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
 import us.ihmc.ros2.ROS2Node;
 
