@@ -64,8 +64,6 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
 
       for (RobotSide robotSide : RobotSide.values)
       {
-
-
          YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
          SaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
          footPoses.put(robotSide, footPose);
