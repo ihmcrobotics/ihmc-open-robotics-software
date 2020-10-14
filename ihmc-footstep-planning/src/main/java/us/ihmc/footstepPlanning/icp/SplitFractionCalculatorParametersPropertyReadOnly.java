@@ -7,6 +7,16 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface SplitFractionCalculatorParametersPropertyReadOnly extends StoredPropertySetReadOnly, SplitFractionCalculatorParametersReadOnly
 {
+   default boolean calculateSplitFractionsFromPositions()
+   {
+      return get(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromPositions);
+   }
+
+   default boolean calculateSplitFractionsFromArea()
+   {
+      return get(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromArea);
+   }
+
    /**
     * Default value for the transfer split fraction of the icp plan.
     * @see ICPPlannerParameters#getTransferSplitFraction() 
