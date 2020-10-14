@@ -10,6 +10,16 @@ public interface SplitFractionCalculatorParametersBasics extends SplitFractionCa
       setAll(parameters.getAll());
    }
 
+   default void setCalculateSplitFractionsFromPositions(boolean calculate)
+   {
+      set(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromPositions, calculate);
+   }
+
+   default void setCalculateSplitFractionsFromArea(boolean calculate)
+   {
+      set(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromArea, calculate);
+   }
+
    default void setDefaultTransferSplitFraction(double defaultTransferSplitFraction)
    {
       set(SplitFractionCalculatorParameterKeys.defaultTransferSplitFraction, defaultTransferSplitFraction);
