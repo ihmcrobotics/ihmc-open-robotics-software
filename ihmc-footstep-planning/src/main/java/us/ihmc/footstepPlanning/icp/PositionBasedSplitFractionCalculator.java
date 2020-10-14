@@ -20,14 +20,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * is some fraction of the transfer duration determined by the transfer split fraction {@link PlannedFootstep#setTransferSplitFraction}.
  *
  * <p>
- *    This module defines several parameters that allow the weight distribution and split fraction to be modified based on the step position, specifically
- *    changes in step height. This is done so that the robot "commits" to large step downs. That is to say, when the robot is stepping down, there is a minimum
- *    step down height that causes it to start to shift its upcoming CoP midpoint and time to cause it to rapidly shift the weight on the next step.
+ * This module defines several parameters that allow the weight distribution and split fraction to be modified based on the step position, specifically
+ * changes in step height. This is done so that the robot "commits" to large step downs. That is to say, when the robot is stepping down, there is a minimum
+ * step down height that causes it to start to shift its upcoming CoP midpoint and time to cause it to rapidly shift the weight on the next step.
  * </p>
  * <p>
- *    This is done by defining the desired weight distribution and split fraction if the upcoming foothold is below a certain threshold, defined by some maximum
- *    step down distance. Then, once the step is below another threshold, it starts linearly interpolating to these values, until it has reached its largest
- *    step down distance.
+ * This is done by defining the desired weight distribution and split fraction if the upcoming foothold is below a certain threshold, defined by some maximum
+ * step down distance. Then, once the step is below another threshold, it starts linearly interpolating to these values, until it has reached its largest
+ * step down distance.
  * </p>
  */
 public class PositionBasedSplitFractionCalculator
