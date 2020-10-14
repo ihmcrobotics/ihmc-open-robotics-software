@@ -1,12 +1,7 @@
 package us.ihmc.footstepPlanning.icp;
 
-import javafx.scene.transform.Scale;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionFromPositionCalculator;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionTools;
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -32,12 +27,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class PositionBasedSplitFractionCalculator
 {
-   private final SplitFractionCalculatorParametersReadOnly parameters;
    private final SplitFractionFromPositionCalculator calculator;
 
-   public PositionBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters)
+   public PositionBasedSplitFractionCalculator(SplitFractionCalculatorParametersPropertyReadOnly parameters)
    {
-      this.parameters = parameters;
       this.calculator = new SplitFractionFromPositionCalculator(parameters);
    }
 

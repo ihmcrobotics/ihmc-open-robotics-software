@@ -1,10 +1,11 @@
 package us.ihmc.footstepPlanning.icp;
 
 import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-public interface SplitFractionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
+public interface SplitFractionCalculatorParametersPropertyReadOnly extends StoredPropertySetReadOnly, SplitFractionCalculatorParametersReadOnly
 {
    /**
     * Default value for the transfer split fraction of the icp plan.
