@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import javafx.geometry.Side;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -44,18 +43,18 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       footsteps = new YoPreallocatedList<>(PlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
       footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, 3);
       footstepShiftFractions = new YoPreallocatedList<>(PlanningShiftFraction.class, () -> createShiftFractions(registry), "footstepShiftFraction", registry, 3);
-      registerIntegerToSave(footsteps.getYoPosition());
-      registerIntegerToSave(footstepTimings.getYoPosition());
-      registerIntegerToSave(footstepShiftFractions.getYoPosition());
+      registerVariableToSave(footsteps.getYoPosition());
+      registerVariableToSave(footstepTimings.getYoPosition());
+      registerVariableToSave(footstepShiftFractions.getYoPosition());
 
       finalTransferSplitFraction = new YoDouble("finalTransferSplitFraction", registry);
       finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
       finalTransferDuration = new YoDouble("finalTransferDuration", registry);
       percentageStandingWeightDistributionOnLeftFoot = new YoDouble("percentageStandingWeightDistributionOnLeftFoot", registry);
-      registerDoubleToSave(finalTransferSplitFraction);
-      registerDoubleToSave(finalTransferWeightDistribution);
-      registerDoubleToSave(finalTransferDuration);
-      registerDoubleToSave(percentageStandingWeightDistributionOnLeftFoot);
+      registerVariableToSave(finalTransferSplitFraction);
+      registerVariableToSave(finalTransferWeightDistribution);
+      registerVariableToSave(finalTransferDuration);
+      registerVariableToSave(percentageStandingWeightDistributionOnLeftFoot);
 
       percentageStandingWeightDistributionOnLeftFoot.set(0.5);
 
@@ -82,7 +81,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
             vertexBuffer.add(vertex);
          }
          YoInteger numberOfVertices = new YoInteger(prefix + "NumVertices", registry);
-         registerIntegerToSave(numberOfVertices);
+         registerVariableToSave(numberOfVertices);
          YoFrameConvexPolygon2D footPolygonInSole = new YoFrameConvexPolygon2D(vertexBuffer,
                                                                                numberOfVertices,
                                                                                soleFrame);

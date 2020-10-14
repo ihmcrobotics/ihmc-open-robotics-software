@@ -121,25 +121,25 @@ public class CoPTrajectoryParameters extends SaveableModuleState
       numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
       numberOfStepsToConsider.set(defaultNumberOfStepsToConsider);
 
-      registerDoubleToSave(minimumDistanceInsidePolygon);
-      registerDoubleToSave(stepLengthToPutExitCoPOnToes);
-      registerDoubleToSave(stepHeightToPutExitCoPOnToesSteppingDown);
-      registerDoubleToSave(stepLengthToPutExitCoPOnToesSteppingDown);
-      registerDoubleToSave(entryCMPMinX);
-      registerDoubleToSave(entryCMPMaxX);
-      registerDoubleToSave(ballCMPMinX);
-      registerDoubleToSave(ballCMPMaxX);
-      registerDoubleToSave(exitCMPMinX);
-      registerDoubleToSave(exitCMPMaxX);
-      registerBooleanToSave(planWithExitCMPOnToes);
-      registerBooleanToSave(planWithExitCMPOnToesWhenSteppingDown);
+      registerVariableToSave(minimumDistanceInsidePolygon);
+      registerVariableToSave(stepLengthToPutExitCoPOnToes);
+      registerVariableToSave(stepHeightToPutExitCoPOnToesSteppingDown);
+      registerVariableToSave(stepLengthToPutExitCoPOnToesSteppingDown);
+      registerVariableToSave(entryCMPMinX);
+      registerVariableToSave(entryCMPMaxX);
+      registerVariableToSave(ballCMPMinX);
+      registerVariableToSave(ballCMPMaxX);
+      registerVariableToSave(exitCMPMinX);
+      registerVariableToSave(exitCMPMaxX);
+      registerVariableToSave(planWithExitCMPOnToes);
+      registerVariableToSave(planWithExitCMPOnToesWhenSteppingDown);
       SaveableModuleStateTools.registerYoTuple2DToSave(entryCMPOffset, this);
       SaveableModuleStateTools.registerYoTuple2DToSave(ballCMPOffset, this);
       SaveableModuleStateTools.registerYoTuple2DToSave(exitCMPOffset, this);
-      registerDoubleToSave(entryCMPLengthOffsetFactor);
-      registerDoubleToSave(ballCMPLengthOffsetFactor);
-      registerDoubleToSave(exitCMPLengthOffsetFactor);
-      registerIntegerToSave(numberOfStepsToConsider);
+      registerVariableToSave(entryCMPLengthOffsetFactor);
+      registerVariableToSave(ballCMPLengthOffsetFactor);
+      registerVariableToSave(exitCMPLengthOffsetFactor);
+      registerVariableToSave(numberOfStepsToConsider);
    }
 
    public YoRegistry getRegistry()

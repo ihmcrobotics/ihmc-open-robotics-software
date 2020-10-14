@@ -17,8 +17,8 @@ public class PlanningTiming extends SaveableModuleState
    {
       swingTime = new YoDouble("swingTime" + suffix, registry);
       transferTime = new YoDouble("transferTime" + suffix, registry);
-      registerDoubleToSave(swingTime);
-      registerDoubleToSave(transferTime);
+      registerVariableToSave(swingTime);
+      registerVariableToSave(transferTime);
 
       clear();
    }
