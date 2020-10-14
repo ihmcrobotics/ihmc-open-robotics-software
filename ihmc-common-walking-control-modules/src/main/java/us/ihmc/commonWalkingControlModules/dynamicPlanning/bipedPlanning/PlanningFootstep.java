@@ -26,9 +26,9 @@ public class PlanningFootstep extends SaveableModuleState
       footstepPose = new YoFramePose3D("footstepPose" + suffix, ReferenceFrame.getWorldFrame(), registry);
       SaveableModuleStateTools.registerYoFramePose3DToSave(footstepPose, this);
       predictedContactPoints = new YoPreallocatedList<>(YoPoint2D.class, () -> createYoContactPoint(suffix, registry), "footstep" + suffix + "ContactPoint", registry, 6);
-      registerIntegerToSave(predictedContactPoints.getYoPosition());
+      registerVariableToSave(predictedContactPoints.getYoPosition());
       stepSide = new YoEnum<>("stepSide" + suffix, registry, RobotSide.class);
-      registerEnumToSave(stepSide);
+      registerVariableToSave(stepSide);
 
       clear();
    }

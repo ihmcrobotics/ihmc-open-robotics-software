@@ -26,10 +26,10 @@ public class PlanningShiftFraction extends SaveableModuleState
       swingSplitFraction = new YoDouble("swingSplitFraction" + suffix, registry);
       transferSplitFraction = new YoDouble("transferSplitFraction" + suffix, registry);
       transferWeightDistribution = new YoDouble("transferWeightDistribution" + suffix, registry);
-      registerDoubleToSave(swingDurationShiftFraction);
-      registerDoubleToSave(swingSplitFraction);
-      registerDoubleToSave(transferSplitFraction);
-      registerDoubleToSave(transferWeightDistribution);
+      registerVariableToSave(swingDurationShiftFraction);
+      registerVariableToSave(swingSplitFraction);
+      registerVariableToSave(transferSplitFraction);
+      registerVariableToSave(transferWeightDistribution);
 
       clear();
    }
