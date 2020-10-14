@@ -4,9 +4,13 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.tools.saveableModule.SaveableModuleState;
 import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.YoVector2D;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,84 +46,65 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
    private static final int defaultNumberOfStepsToConsider = 3;
 
-   protected final YoDouble minimumDistanceInsidePolygon;
+   protected final DoubleParameter minimumDistanceInsidePolygon;
 
-   protected final YoDouble stepLengthToPutExitCoPOnToes;
-   protected final YoDouble stepHeightToPutExitCoPOnToesSteppingDown;
-   protected final YoDouble stepLengthToPutExitCoPOnToesSteppingDown;
+   protected final DoubleParameter stepLengthToPutExitCoPOnToes;
+   protected final DoubleParameter stepHeightToPutExitCoPOnToesSteppingDown;
+   protected final DoubleParameter stepLengthToPutExitCoPOnToesSteppingDown;
 
-   protected final YoBoolean planWithExitCMPOnToes;
-   protected final YoBoolean planWithExitCMPOnToesWhenSteppingDown;
+   protected final BooleanParameter planWithExitCMPOnToes;
+   protected final BooleanParameter planWithExitCMPOnToesWhenSteppingDown;
 
-   protected final YoDouble entryCMPMinX;
-   protected final YoDouble entryCMPMaxX;
+   protected final DoubleParameter entryCMPMinX;
+   protected final DoubleParameter entryCMPMaxX;
 
-   protected final YoDouble ballCMPMinX;
-   protected final YoDouble ballCMPMaxX;
+   protected final DoubleParameter ballCMPMinX;
+   protected final DoubleParameter ballCMPMaxX;
 
-   protected final YoDouble exitCMPMinX;
-   protected final YoDouble exitCMPMaxX;
+   protected final DoubleParameter exitCMPMinX;
+   protected final DoubleParameter exitCMPMaxX;
 
-   protected final YoVector2D entryCMPOffset;
-   protected final YoVector2D ballCMPOffset;
-   protected final YoVector2D exitCMPOffset;
+   protected final ParameterVector2D entryCMPOffset;
+   protected final ParameterVector2D ballCMPOffset;
+   protected final ParameterVector2D exitCMPOffset;
 
-   protected final YoDouble entryCMPLengthOffsetFactor;
-   protected final YoDouble ballCMPLengthOffsetFactor;
-   protected final YoDouble exitCMPLengthOffsetFactor;
+   protected final DoubleParameter entryCMPLengthOffsetFactor;
+   protected final DoubleParameter ballCMPLengthOffsetFactor;
+   protected final DoubleParameter exitCMPLengthOffsetFactor;
 
-   protected final YoInteger numberOfStepsToConsider;
+   protected final IntegerParameter numberOfStepsToConsider;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    public CoPTrajectoryParameters()
    {
-      minimumDistanceInsidePolygon = new YoDouble("minimumDistanceInsidePolygon", registry);
-      minimumDistanceInsidePolygon.set(defaultMinimumDistanceInsidePolygon);
+      minimumDistanceInsidePolygon = new DoubleParameter("minimumDistanceInsidePolygon", registry, defaultMinimumDistanceInsidePolygon);
 
-      stepLengthToPutExitCoPOnToes = new YoDouble("stepLengthToPutExitCoPOnToes", registry);
-      stepHeightToPutExitCoPOnToesSteppingDown = new YoDouble("stepHeightToPutExitCoPOnToesSteppingDown", registry);
-      stepLengthToPutExitCoPOnToesSteppingDown = new YoDouble("stepLengthToPutExitCoPOnToesSteppingDown", registry);
-      stepLengthToPutExitCoPOnToes.set(defaultStepLengthToPutExitCoPOnToes);
-      stepHeightToPutExitCoPOnToesSteppingDown.set(defaultStepHeightToPutExitCoPOnToesSteppingDown);
-      stepLengthToPutExitCoPOnToesSteppingDown.set(defaultStepLengthToPutExitCoPOnToesSteppingDown);
+      stepLengthToPutExitCoPOnToes = new DoubleParameter("stepLengthToPutExitCoPOnToes", registry, defaultStepLengthToPutExitCoPOnToes);
+      stepHeightToPutExitCoPOnToesSteppingDown = new DoubleParameter("stepHeightToPutExitCoPOnToesSteppingDown", registry, defaultStepHeightToPutExitCoPOnToesSteppingDown);
+      stepLengthToPutExitCoPOnToesSteppingDown = new DoubleParameter("stepLengthToPutExitCoPOnToesSteppingDown", registry, defaultStepLengthToPutExitCoPOnToesSteppingDown);
 
-      planWithExitCMPOnToes = new YoBoolean("planWithExitCMPOnToes", registry);
-      planWithExitCMPOnToesWhenSteppingDown = new YoBoolean("planWithExitCMPOnToesWhenSteppingDown", registry);
-      planWithExitCMPOnToes.set(defaultPlanWithExitCMPOnToes);
-      planWithExitCMPOnToesWhenSteppingDown.set(defaultPlanWithExitCMPOnToesWhenSteppingDown);
+      planWithExitCMPOnToes = new BooleanParameter("planWithExitCMPOnToes", registry, defaultPlanWithExitCMPOnToes);
+      planWithExitCMPOnToesWhenSteppingDown = new BooleanParameter("planWithExitCMPOnToesWhenSteppingDown", registry,defaultPlanWithExitCMPOnToesWhenSteppingDown);
 
-      entryCMPMinX = new YoDouble("entryCMPMinX", registry);
-      entryCMPMaxX = new YoDouble("entryCMPMaxX", registry);
-      entryCMPMinX.set(defaultEntryCMPMinX);
-      entryCMPMaxX.set(defaultEntryCMPMaxX);
+      entryCMPMinX = new DoubleParameter("entryCMPMinX", registry, defaultEntryCMPMinX);
+      entryCMPMaxX = new DoubleParameter("entryCMPMaxX", registry, defaultEntryCMPMaxX);
 
-      ballCMPMinX = new YoDouble("ballCMPMinX", registry);
-      ballCMPMaxX = new YoDouble("ballCMPMaxX", registry);
-      ballCMPMinX.set(defaultBallCMPMinX);
-      ballCMPMaxX.set(defaultBallCMPMaxX);
+      ballCMPMinX = new DoubleParameter("ballCMPMinX", registry, defaultBallCMPMinX);
+      ballCMPMaxX = new DoubleParameter("ballCMPMaxX", registry, defaultBallCMPMaxX);
 
-      exitCMPMinX = new YoDouble("exitCMPMinX", registry);
-      exitCMPMaxX = new YoDouble("exitCMPMaxX", registry);
-      exitCMPMinX.set(defaultExitCMPMinX);
-      exitCMPMaxX.set(defaultExitCMPMaxX);
+      exitCMPMinX = new DoubleParameter("exitCMPMinX", registry, defaultExitCMPMinX);
+      exitCMPMaxX = new DoubleParameter("exitCMPMaxX", registry, defaultExitCMPMaxX);
 
-      entryCMPOffset = new YoVector2D("entryCMPOffset", registry);
-      ballCMPOffset = new YoVector2D("ballCMPOffset", registry);
-      exitCMPOffset = new YoVector2D("exitCMPOffset", registry);
-      entryCMPOffset.set(defaultEntryCMPOffset);
-      ballCMPOffset.set(defaultBallCMPOffset);
-      exitCMPOffset.set(defaultExitCMPOffset);
+      entryCMPOffset = new ParameterVector2D("entryCMPOffset", defaultEntryCMPOffset, registry);
+      ballCMPOffset = new ParameterVector2D("ballCMPOffset", defaultBallCMPOffset, registry);
+      exitCMPOffset = new ParameterVector2D("exitCMPOffset", defaultExitCMPOffset, registry);
 
-      entryCMPLengthOffsetFactor = new YoDouble("entryCMPLengthOffsetFactor", registry);
-      ballCMPLengthOffsetFactor = new YoDouble("ballCMPLengthOffsetFactor", registry);
-      exitCMPLengthOffsetFactor = new YoDouble("exitCMPLengthOffsetFactor", registry);
-      entryCMPLengthOffsetFactor.set(defaultEntryCMPLengthOffsetFactor);
-      ballCMPLengthOffsetFactor.set(defaultBallCMPLengthOffsetFactor);
-      exitCMPLengthOffsetFactor.set(defaultExitCMPLengthOffsetFactor);
+      entryCMPLengthOffsetFactor = new DoubleParameter("entryCMPLengthOffsetFactor", registry, defaultEntryCMPLengthOffsetFactor);
+      ballCMPLengthOffsetFactor = new DoubleParameter("ballCMPLengthOffsetFactor", registry, defaultBallCMPLengthOffsetFactor);
+      exitCMPLengthOffsetFactor = new DoubleParameter("exitCMPLengthOffsetFactor", registry, defaultExitCMPLengthOffsetFactor);
 
-      numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
-      numberOfStepsToConsider.set(defaultNumberOfStepsToConsider);
+      numberOfStepsToConsider = new IntegerParameter("numberOfStepsToConsider", registry, defaultNumberOfStepsToConsider);
 
       registerVariableToSave(minimumDistanceInsidePolygon);
       registerVariableToSave(stepLengthToPutExitCoPOnToes);
@@ -133,9 +118,12 @@ public class CoPTrajectoryParameters extends SaveableModuleState
       registerVariableToSave(exitCMPMaxX);
       registerVariableToSave(planWithExitCMPOnToes);
       registerVariableToSave(planWithExitCMPOnToesWhenSteppingDown);
-      SaveableModuleStateTools.registerYoTuple2DToSave(entryCMPOffset, this);
-      SaveableModuleStateTools.registerYoTuple2DToSave(ballCMPOffset, this);
-      SaveableModuleStateTools.registerYoTuple2DToSave(exitCMPOffset, this);
+      registerVariableToSave(entryCMPOffset.getXParameter());
+      registerVariableToSave(entryCMPOffset.getYParameter());
+      registerVariableToSave(ballCMPOffset.getXParameter());
+      registerVariableToSave(ballCMPOffset.getYParameter());
+      registerVariableToSave(exitCMPOffset.getXParameter());
+      registerVariableToSave(exitCMPOffset.getYParameter());
       registerVariableToSave(entryCMPLengthOffsetFactor);
       registerVariableToSave(ballCMPLengthOffsetFactor);
       registerVariableToSave(exitCMPLengthOffsetFactor);
@@ -168,62 +156,62 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
    public double getMinimumDistanceInsidePolygon()
    {
-      return minimumDistanceInsidePolygon.getDoubleValue();
+      return minimumDistanceInsidePolygon.getValue();
    }
 
    public boolean getPlanWithExitCMPOnToes()
    {
-      return planWithExitCMPOnToes.getBooleanValue();
+      return planWithExitCMPOnToes.getValue();
    }
 
    public boolean getPlanWithExitCMPOnToesWhenSteppingDown()
    {
-      return planWithExitCMPOnToesWhenSteppingDown.getBooleanValue();
+      return planWithExitCMPOnToesWhenSteppingDown.getValue();
    }
 
    public double getStepLengthToPutExitCoPOnToes()
    {
-      return stepLengthToPutExitCoPOnToes.getDoubleValue();
+      return stepLengthToPutExitCoPOnToes.getValue();
    }
 
    public double getStepLengthToPutExitCoPOnToesSteppingDown()
    {
-      return stepLengthToPutExitCoPOnToesSteppingDown.getDoubleValue();
+      return stepLengthToPutExitCoPOnToesSteppingDown.getValue();
    }
 
    public double getStepHeightToPutExitCoPOnToesSteppingDown()
    {
-      return stepHeightToPutExitCoPOnToesSteppingDown.getDoubleValue();
+      return stepHeightToPutExitCoPOnToesSteppingDown.getValue();
    }
 
    public double getEntryCMPMinX()
    {
-      return entryCMPMinX.getDoubleValue();
+      return entryCMPMinX.getValue();
    }
 
    public double getEntryCMPMaxX()
    {
-      return entryCMPMaxX.getDoubleValue();
+      return entryCMPMaxX.getValue();
    }
 
    public double getBallCMPMinX()
    {
-      return ballCMPMinX.getDoubleValue();
+      return ballCMPMinX.getValue();
    }
 
    public double getBallCMPMaxX()
    {
-      return ballCMPMaxX.getDoubleValue();
+      return ballCMPMaxX.getValue();
    }
 
    public double getExitCMPMinX()
    {
-      return exitCMPMinX.getDoubleValue();
+      return exitCMPMinX.getValue();
    }
 
    public double getExitCMPMaxX()
    {
-      return exitCMPMaxX.getDoubleValue();
+      return exitCMPMaxX.getValue();
    }
 
    public Vector2DReadOnly getEntryCMPOffset()
@@ -243,22 +231,22 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
    public double getEntryCMPLengthOffsetFactor()
    {
-      return entryCMPLengthOffsetFactor.getDoubleValue();
+      return entryCMPLengthOffsetFactor.getValue();
    }
 
    public double getBallCMPLengthOffsetFactor()
    {
-      return ballCMPLengthOffsetFactor.getDoubleValue();
+      return ballCMPLengthOffsetFactor.getValue();
    }
 
    public double getExitCMPLengthOffsetFactor()
    {
-      return exitCMPLengthOffsetFactor.getDoubleValue();
+      return exitCMPLengthOffsetFactor.getValue();
    }
 
    public int getNumberOfStepsToConsider()
    {
-      return numberOfStepsToConsider.getIntegerValue();
+      return numberOfStepsToConsider.getValue();
    }
 
    public PlanForToeOffCalculator getPlanForToeOffCalculator()
