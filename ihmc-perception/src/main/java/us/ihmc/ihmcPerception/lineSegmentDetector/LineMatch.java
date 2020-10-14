@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
-class LineMatch
+public class LineMatch
 {
    double[] prevLine, curLine;
 

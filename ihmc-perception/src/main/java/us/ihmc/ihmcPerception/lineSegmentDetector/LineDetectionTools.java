@@ -19,6 +19,7 @@ public class LineDetectionTools
       Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
 
       FastLineDetector fld = Ximgproc.createFastLineDetector(20, 1.41421356f, 50, 50, 3, true);
+      org.bytedeco.opencv.global.opencv_ximgproc.
       fld.detect(gray, lines);
       return lines;
    }

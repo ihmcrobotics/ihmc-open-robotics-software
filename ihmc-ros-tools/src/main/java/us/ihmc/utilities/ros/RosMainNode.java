@@ -23,6 +23,7 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -114,6 +115,10 @@ public class RosMainNode implements NodeMain
       if (type.equals(CompressedImage.class))
       {
          attachSubscriber(topicName, new ROS1Subscriber<>(CompressedImage._TYPE, callback).getSubscriber());
+      }
+      else if (type.equals(CameraInfo.class))
+      {
+         attachSubscriber(topicName, new ROS1Subscriber<>(CameraInfo._TYPE, callback).getSubscriber());
       }
       else
       {
