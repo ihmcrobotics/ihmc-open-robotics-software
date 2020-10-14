@@ -14,12 +14,12 @@ public class DefaultSplitFractionCalculatorParameters extends StoredPropertySet 
       this(projectName, pathToResources, null);
    }
 
-   public DefaultSplitFractionCalculatorParameters(SplitFractionCalculatorParametersReadOnly footstepPostProcessingParameters) // for message passing or temp access
+   public DefaultSplitFractionCalculatorParameters(SplitFractionCalculatorParametersPropertyReadOnly footstepPostProcessingParameters) // for message passing or temp access
    {
       this("ihmc-open-robotics-software", "ihmc-footstep-planning/src/main/resources", footstepPostProcessingParameters);
    }
 
-   private DefaultSplitFractionCalculatorParameters(String projectName, String pathToResources, SplitFractionCalculatorParametersReadOnly footstepPostProcessingParameters)
+   private DefaultSplitFractionCalculatorParameters(String projectName, String pathToResources, SplitFractionCalculatorParametersPropertyReadOnly footstepPostProcessingParameters)
    {
       super(SplitFractionCalculatorParameterKeys.keys, DefaultSplitFractionCalculatorParameters.class, projectName, pathToResources);
 

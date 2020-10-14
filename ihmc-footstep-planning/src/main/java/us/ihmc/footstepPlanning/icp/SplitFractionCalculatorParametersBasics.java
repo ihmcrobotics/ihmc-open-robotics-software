@@ -3,9 +3,9 @@ package us.ihmc.footstepPlanning.icp;
 import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-public interface SplitFractionCalculatorParametersBasics extends SplitFractionCalculatorParametersReadOnly, StoredPropertySetBasics
+public interface SplitFractionCalculatorParametersBasics extends SplitFractionCalculatorParametersPropertyReadOnly, StoredPropertySetBasics
 {
-   default void set(SplitFractionCalculatorParametersReadOnly parameters)
+   default void set(SplitFractionCalculatorParametersPropertyReadOnly parameters)
    {
       setAll(parameters.getAll());
    }
