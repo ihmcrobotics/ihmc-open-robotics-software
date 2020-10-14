@@ -29,6 +29,7 @@ public class BuildingExplorationBehaviorAPI
    public static final MessagerAPIFactory.Topic<Boolean> Start = topic("Start");
    public static final MessagerAPIFactory.Topic<Boolean> Stop = topic("Stop");
    public static final MessagerAPIFactory.Topic<Point3D> Goal = topic("Goal");
+   public static final MessagerAPIFactory.Topic<Boolean> PlaceGoal = topic("PlaceGoal");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
