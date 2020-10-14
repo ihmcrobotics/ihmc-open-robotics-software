@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import javafx.geometry.Side;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionFromAreaCalculator;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionFromPositionCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
@@ -69,6 +66,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private final SplitFractionFromPositionCalculator positionSplitFractionCalculator;
    private final SplitFractionFromAreaCalculator areaSplitFractionCalculator;
 
+   private final YoSplitFractionCalculatorParameters splitFractionParameters;
+
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
 
@@ -82,7 +81,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    }
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
-                                        SplitFractionCalculatorParametersReadOnly splitFractionParameters,
+                                        SplitFractionCalculatorParametersReadOnly defaultSplitFractionParameters,
                                         ConvexPolygon2DReadOnly defaultSupportPolygon,
                                         YoRegistry parentRegistry)
    {
@@ -94,7 +93,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       registry = new YoRegistry(getClass().getSimpleName());
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble("SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
       exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
-
+      splitFractionParameters = new YoSplitFractionCalculatorParameters(defaultSplitFractionParameters, registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          stepFrames.put(robotSide, new RecyclingArrayList<>(3, new Supplier<PoseReferenceFrame>()
@@ -117,6 +116,20 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionParameters);
 
+      SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>(defaultSupportPolygon, defaultSupportPolygon);
+      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionParameters, defaultFootPolygons);
+
+      parentRegistry.addChild(registry);
+      clear();
+   }
+
+   @Override
+   public void registerState(CoPTrajectoryGeneratorState state)
+   {
+      super.registerState(state);
+
+      state.registerStateToSave(splitFractionParameters);
+
       positionSplitFractionCalculator.setNumberOfStepsProvider(state::getNumberOfFootstep);
 
       positionSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
@@ -137,9 +150,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                                      return state.getFootPose(stanceSide);
                                                                   });
       positionSplitFractionCalculator.setStepPoseGetter((i) -> state.getFootstep(i).getFootstepPose());
-
-      SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>(defaultSupportPolygon, defaultSupportPolygon);
-      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionParameters, defaultFootPolygons);
 
       areaSplitFractionCalculator.setNumberOfStepsProvider(state::getNumberOfFootstep);
 
@@ -162,9 +172,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                                  });
       areaSplitFractionCalculator.setStepSideProvider((i) -> state.getFootstep(i).getRobotSide());
       areaSplitFractionCalculator.setStepPolygonGetter((i) -> state.getFootstep(i).getPredictedContactPoints());
-
-      parentRegistry.addChild(registry);
-      clear();
    }
 
    public YoRegistry getYoRegistry()
@@ -199,10 +206,9 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       transferWeightDistributions.clear();
       for (int i = 0; i < state.getNumberOfFootstep(); i++)
       {
-         transferSplitFractions.get(i).set(state.getShiftFraction(i).getTransferSplitFraction());
-         transferWeightDistributions.get(i).set(state.getShiftFraction(i).getTransferWeightDistribution());
+         transferSplitFractions.add().set(state.getShiftFraction(i).getTransferSplitFraction());
+         transferWeightDistributions.add().set(state.getShiftFraction(i).getTransferWeightDistribution());
       }
-
    }
 
    public void set(Point2DReadOnly constantCop)
