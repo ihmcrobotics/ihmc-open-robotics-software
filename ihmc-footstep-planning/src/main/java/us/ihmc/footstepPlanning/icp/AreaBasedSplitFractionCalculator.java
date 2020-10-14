@@ -29,16 +29,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class AreaBasedSplitFractionCalculator
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final SplitFractionCalculatorParametersReadOnly parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final SplitFractionFromAreaCalculator calculator;
 
-   public AreaBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
+   public AreaBasedSplitFractionCalculator(SplitFractionCalculatorParametersPropertyReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this.parameters = parameters;
       this.footPolygons = footPolygons;
 
       calculator = new SplitFractionFromAreaCalculator(parameters, footPolygons);
