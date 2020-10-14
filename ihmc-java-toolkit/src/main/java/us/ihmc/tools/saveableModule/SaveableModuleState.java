@@ -43,7 +43,7 @@ public abstract class SaveableModuleState
       return yoVariables;
    }
 
-   public void loadValues(Map<String, ParameterData> dataMap) throws NoSuchFieldException, IllegalAccessException
+   public void loadValues(Map<String, ParameterData> dataMap)
    {
       Map<String, ParameterData> localMap = new HashMap<>(dataMap);
 
@@ -62,9 +62,25 @@ public abstract class SaveableModuleState
 
          if (data != null)
          {
-            Field valueField = ParameterData.class.getField("value");
+            Field valueField;
+            try
+            {
+               valueField = ParameterData.class.getField("value");
+            }
+            catch (NoSuchFieldException e)
+            {
+               throw new RuntimeException("This should never happen.");
+            }
             valueField.setAccessible(true);
-            String value = (String) valueField.get(data);
+            String value;
+            try
+            {
+               value  = (String) valueField.get(data);
+            }
+            catch (IllegalAccessException e)
+            {
+               throw new RuntimeException("This also should never happen.");
+            }
             variable.parseValue(value);
          }
       }

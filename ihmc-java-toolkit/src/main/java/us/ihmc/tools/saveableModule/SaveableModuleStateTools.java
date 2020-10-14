@@ -8,7 +8,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.parameters.ParameterData;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
-import us.ihmc.yoVariables.parameters.xml.Parameters;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import javax.swing.*;
@@ -99,7 +98,7 @@ public class SaveableModuleStateTools
       }
    }
 
-   public static void load(SaveableModuleState state) throws NoSuchFieldException, IllegalAccessException
+   public static void load(SaveableModuleState state)
    {
       JFileChooser fileChooser = new JFileChooser();
       Path directory = rootPath;
@@ -118,7 +117,7 @@ public class SaveableModuleStateTools
       load(file, state);
    }
 
-   public static void load(File fileToLoad, SaveableModuleState stateToLoad) throws NoSuchFieldException, IllegalAccessException
+   public static void load(File fileToLoad, SaveableModuleState stateToLoad)
    {
       if (fileToLoad == null)
          throw new IllegalArgumentException("File has not been set.");
@@ -128,7 +127,7 @@ public class SaveableModuleStateTools
       try
       {
          InputStream inputStream = new FileInputStream(fileToLoad);
-         stateToLoad.loadValues(readStream(inputStream));
+         stateToLoad.loadValues(readStreamToDataMap(inputStream));
          inputStream.close();
       }
       catch (IOException ex)
@@ -137,38 +136,57 @@ public class SaveableModuleStateTools
       }
    }
 
-   private static Map<String, ParameterData> readStream(InputStream inputStream) throws IOException
+   public static SaveableRegistry writeStateToSaveableRegistry(SaveableModuleState stateToSave)
+   {
+      SaveableRegistry registry = new SaveableRegistry(stateToSave.getClass().getSimpleName());
+      List<YoParameter> parameters = stateToSave.getParametersToSave();
+      List<YoVariable> variables = stateToSave.getVariablesToSave();
+
+      for (int i = 0; i < parameters.size(); i++)
+         addParameter(parameters.get(i), registry);
+      for (int i = 0; i < variables.size(); i++)
+         addVariable(variables.get(i), registry);
+
+      return registry;
+   }
+
+   public static Map<String, ParameterData> readSaveableRegistryToDataMap(SaveableRegistry registry)
    {
       Map<String, ParameterData> parameterValues = new HashMap<>();
 
+      if (registry.getParameters() != null)
+      {
+         for (Parameter param : registry.getParameters())
+         {
+            String name = param.getName();
+            ParameterData data = new ParameterData(param.getValue(), param.getMin(), param.getMax());
+            if (parameterValues.put(name, data) != null)
+            {
+               throw new IllegalArgumentException("Invalid file, more than one entry for parameter " + name);
+            }
+         }
+      }
+
+      return parameterValues;
+   }
+
+   private static Map<String, ParameterData> readStreamToDataMap(InputStream inputStream) throws IOException
+   {
       try
       {
          JAXBContext jaxbContext = JAXBContext.newInstance(SaveableRegistry.class);
          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
          SaveableRegistry registry = (SaveableRegistry) jaxbUnmarshaller.unmarshal(inputStream);
-         if (registry.getParameters() != null)
-         {
-            for (Parameter param : registry.getParameters())
-            {
-               String name = param.getName();
-               ParameterData data = new ParameterData(param.getValue(), param.getMin(), param.getMax());
-               if (parameterValues.put(name, data) != null)
-               {
-                  throw new IllegalArgumentException("Invalid file, more than one entry for parameter " + name);
-               }
-            }
-         }
+         return readSaveableRegistryToDataMap(registry);
       }
       catch (JAXBException e)
       {
          throw new IOException(e);
       }
-
-      return parameterValues;
    }
 
-   public static void writeStream(OutputStream outputStream, SaveableModuleState stateToSave) throws IOException
+   private static void writeStream(OutputStream outputStream, SaveableModuleState stateToSave) throws IOException
    {
       try
       {
@@ -177,14 +195,7 @@ public class SaveableModuleStateTools
 
          jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-         SaveableRegistry registry = new SaveableRegistry(stateToSave.getClass().getSimpleName());
-         List<YoParameter> parameters = stateToSave.getParametersToSave();
-         List<YoVariable> variables = stateToSave.getVariablesToSave();
-
-         for (int i = 0; i < parameters.size(); i++)
-            addParameter(parameters.get(i), registry);
-         for (int i = 0; i < variables.size(); i++)
-            addVariable(variables.get(i), registry);
+         SaveableRegistry registry = writeStateToSaveableRegistry(stateToSave);
 
          jaxbMarshaller.marshal(registry, outputStream);
       }
