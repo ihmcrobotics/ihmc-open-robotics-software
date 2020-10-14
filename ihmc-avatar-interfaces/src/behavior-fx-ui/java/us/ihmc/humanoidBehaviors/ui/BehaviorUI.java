@@ -14,6 +14,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
@@ -28,7 +29,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.utilities.ros.RosMainNode;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +75,10 @@ public class BehaviorUI
    public BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       this.behaviorMessager = behaviorMessager;
+
+      URI masterURI = NetworkParameters.getROSURI();
+      LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
+      RosMainNode ros1Node = new RosMainNode(masterURI, "BehaviorUI", true);
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_ui");
 
@@ -135,7 +142,7 @@ public class BehaviorUI
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
+         directRobotUIController.init(mainAnchorPane, subScene3D, ros1Node, ros2Node, robotModel);
          view3DFactory.addNodeToView(directRobotUIController);
          robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
          view3DFactory.addNodeToView(robotVisualizer);

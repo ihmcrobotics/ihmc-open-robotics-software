@@ -12,6 +12,7 @@ import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 
 public class JavaFXVideoView extends ImageView
 {
@@ -50,7 +51,17 @@ public class JavaFXVideoView extends ImageView
       executorService.shutdownNow();
    }
 
+   protected void acceptVideo(BufferedImage bufferedImage)
+   {
+      submitTask(() -> bufferedImage);
+   }
+
    protected void acceptVideo(IDLSequence.Byte compressedImageData)
+   {
+      submitTask(() -> jpegDecompressor.decompressJPEGDataToBufferedImage(compressedImageData.toArray()));
+   }
+
+   private void submitTask(Supplier<BufferedImage> bufferedImageSupplier)
    {
       if (running)
       {
@@ -58,27 +69,7 @@ public class JavaFXVideoView extends ImageView
          {
             try
             {
-               // decompress and pack writableimage
-               BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(compressedImageData.toArray());
-               LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
-
-               WritableImage nextImage = writableImageBuffer.next();
-
-               if (nextImage != null)
-               {
-                  PixelWriter pixelWriter = nextImage.getPixelWriter();
-                  for (int x = 0; x < bufferedImage.getWidth(); x++)
-                  {
-                     for (int y = 0; y < bufferedImage.getHeight(); y++)
-                     {
-                        pixelWriter.setArgb(flipX ? bufferedImage.getWidth()  - 1 - x : x,
-                                            flipY ? bufferedImage.getHeight() - 1 - y : y,
-                                            bufferedImage.getRGB(x, y));
-                     }
-                  }
-
-                  writableImageBuffer.commit();
-               }
+               commitImage(bufferedImageSupplier.get());
             }
             catch (Throwable t)
             {
@@ -87,6 +78,29 @@ public class JavaFXVideoView extends ImageView
                throw t;
             }
          });
+      }
+   }
+
+   private void commitImage(BufferedImage bufferedImage)
+   {
+      LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
+
+      WritableImage nextImage = writableImageBuffer.next();
+
+      if (nextImage != null)
+      {
+         PixelWriter pixelWriter = nextImage.getPixelWriter();
+         for (int x = 0; x < bufferedImage.getWidth(); x++)
+         {
+            for (int y = 0; y < bufferedImage.getHeight(); y++)
+            {
+               pixelWriter.setArgb(flipX ? bufferedImage.getWidth()  - 1 - x : x,
+                                   flipY ? bufferedImage.getHeight() - 1 - y : y,
+                                   bufferedImage.getRGB(x, y));
+            }
+         }
+
+         writableImageBuffer.commit();
       }
    }
 
@@ -106,20 +120,6 @@ public class JavaFXVideoView extends ImageView
             setImage(latestImage);
 
          writableImageBuffer.flush();
-      }
-   }
-
-   private void exceptionHandlingWrapper(Runnable runnable)
-   {
-      try
-      {
-         runnable.run();
-      }
-      catch (Throwable t)
-      {
-         LogTools.error("Exception in thread: {}: {}", Thread.currentThread().getName(), t.getMessage());
-         t.printStackTrace();
-         throw t;
       }
    }
 }

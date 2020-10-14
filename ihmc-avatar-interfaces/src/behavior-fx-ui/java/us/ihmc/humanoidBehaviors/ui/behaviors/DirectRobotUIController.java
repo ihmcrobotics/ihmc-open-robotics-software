@@ -29,8 +29,9 @@ import us.ihmc.humanoidBehaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS1VideoView;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
-import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXVideoViewOverlay;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -43,6 +44,8 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 
 public class DirectRobotUIController extends Group
 {
@@ -82,15 +85,15 @@ public class DirectRobotUIController extends Group
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
    private LivePlanarRegionsGraphic mapRegionsGraphic;
    private LivePlanarRegionsGraphic supportRegionsGraphic;
-   private JavaFXROS2VideoViewOverlay multisenseVideoOverlay;
+   private JavaFXVideoViewOverlay multisenseVideoOverlay;
    private StackPane multisenseVideoStackPane;
-   private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
+   private JavaFXVideoViewOverlay realsenseVideoOverlay;
    private StackPane realsenseVideoStackPane;
    private JavaFXReactiveSlider stanceHeightReactiveSlider;
    private JavaFXReactiveSlider leanForwardReactiveSlider;
    private JavaFXReactiveSlider neckReactiveSlider;
 
-   public void init(AnchorPane mainAnchorPane, SubScene subScene, ROS2Node ros2Node, DRCRobotModel robotModel)
+   public void init(AnchorPane mainAnchorPane, SubScene subScene, RosMainNode ros1Node, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -235,7 +238,7 @@ public class DirectRobotUIController extends Group
       supportRegionsGraphic.setEnabled(false);
       getChildren().add(supportRegionsGraphic);
 
-      multisenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
+      multisenseVideoOverlay = new JavaFXVideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
       multisenseVideoStackPane = new StackPane(multisenseVideoOverlay.getNode());
       multisenseVideoStackPane.setVisible(false);
       AnchorPane.setTopAnchor(multisenseVideoStackPane, 10.0);
@@ -243,7 +246,7 @@ public class DirectRobotUIController extends Group
       multisenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> multisenseVideoOverlay.toggleMode());
       mainAnchorPane.getChildren().add(multisenseVideoStackPane);
 
-      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 640, 480, false, false));
+      realsenseVideoOverlay = new JavaFXVideoViewOverlay(new JavaFXROS1VideoView(ros1Node, RosTools.D435_VIDEO, 640, 480, false, false));
       realsenseVideoStackPane = new StackPane(realsenseVideoOverlay.getNode());
       realsenseVideoStackPane.setVisible(false);
       AnchorPane.setBottomAnchor(realsenseVideoStackPane, 10.0);
