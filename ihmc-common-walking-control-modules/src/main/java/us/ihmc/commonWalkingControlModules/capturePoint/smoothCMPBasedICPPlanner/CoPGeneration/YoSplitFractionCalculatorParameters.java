@@ -51,18 +51,18 @@ public class YoSplitFractionCalculatorParameters extends SaveableModuleState imp
                                                                     registry,
                                                                     defaultParameters.getFractionTimeOnFootIfOtherFootHasNoWidth());
 
-      registerBooleanToSave(computeSplitFractionsFromArea);
-      registerBooleanToSave(computeSplitFractionsFromPositions);
-      registerDoubleToSave(defaultTransferSplitFraction);
-      registerDoubleToSave(stepHeightForLargeStepDown);
-      registerDoubleToSave(largestStepDownHeight);
-      registerDoubleToSave(transferSplitFractionAtFullDepth);
-      registerDoubleToSave(transferWeightDistributionAtFullDepth);
-      registerDoubleToSave(transferFinalWeightDistributionatFullDepth);
-      registerDoubleToSave(fractionLoadIfFootHasFullSupport);
-      registerDoubleToSave(fractionTimeOnFootIfFootHasFullSupport);
-      registerDoubleToSave(fractionLoadIfOtherFootHasNoWidth);
-      registerDoubleToSave(fractionTimeOnFootIfOtherFootHasNoWidth);
+      registerParameterToSave(computeSplitFractionsFromArea);
+      registerParameterToSave(computeSplitFractionsFromPositions);
+      registerParameterToSave(defaultTransferSplitFraction);
+      registerParameterToSave(stepHeightForLargeStepDown);
+      registerParameterToSave(largestStepDownHeight);
+      registerParameterToSave(transferSplitFractionAtFullDepth);
+      registerParameterToSave(transferWeightDistributionAtFullDepth);
+      registerParameterToSave(transferFinalWeightDistributionatFullDepth);
+      registerParameterToSave(fractionLoadIfFootHasFullSupport);
+      registerParameterToSave(fractionTimeOnFootIfFootHasFullSupport);
+      registerParameterToSave(fractionLoadIfOtherFootHasNoWidth);
+      registerParameterToSave(fractionTimeOnFootIfOtherFootHasNoWidth);
 
    }
 
