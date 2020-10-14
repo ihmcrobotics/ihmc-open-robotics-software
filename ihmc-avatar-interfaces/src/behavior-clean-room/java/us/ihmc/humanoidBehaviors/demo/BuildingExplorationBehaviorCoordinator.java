@@ -646,7 +646,8 @@ public class BuildingExplorationBehaviorCoordinator
             LogTools.info("Exiting " + getClass().getSimpleName());
          }
 
-         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, false);
+//         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, false);
+         messager.submitMessage(BehaviorModule.API.BehaviorSelection, "null");
       }
 
       @Override
