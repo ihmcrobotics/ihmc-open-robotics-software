@@ -25,6 +25,7 @@ public class PositionBasedSplitFractionCalculatorTest
 
       double fullSplitFractionFromHeight = 0.895;
       double fullWeightDistributionFromHeight = 0.8;
+      parameters.setCalculateSplitFractionsFromPositions(true);
       parameters.setTransferSplitFractionAtFullDepth(fullSplitFractionFromHeight);
       parameters.setTransferWeightDistributionAtFullDepth(fullWeightDistributionFromHeight);
 
@@ -146,6 +147,7 @@ public class PositionBasedSplitFractionCalculatorTest
 
       double fullSplitFractionFromHeight = 0.895;
       double fullWeightDistributionFromHeight = 0.8;
+      parameters.setCalculateSplitFractionsFromPositions(true);
       parameters.setTransferSplitFractionAtFullDepth(fullSplitFractionFromHeight);
       parameters.setTransferWeightDistributionAtFullDepth(fullWeightDistributionFromHeight);
 
