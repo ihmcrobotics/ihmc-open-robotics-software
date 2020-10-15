@@ -612,9 +612,6 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
-         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, true);
-         ThreadTools.sleep(100);
-
          Quaternion goalOrientation = new Quaternion();
 
          if (robotConfigurationDataSupplier.get() != null)
@@ -646,7 +643,6 @@ public class BuildingExplorationBehaviorCoordinator
             LogTools.info("Exiting " + getClass().getSimpleName());
          }
 
-//         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, false);
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, "null");
       }
 

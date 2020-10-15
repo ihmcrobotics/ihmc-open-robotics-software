@@ -70,9 +70,7 @@ public class TraverseStairsPlanStepsState implements State
    public void onEntry()
    {
       LogTools.info("Entering " + getClass().getSimpleName());
-
-      executeStepsSignaled.set(false);
-      planSteps.set(true);
+      reset();
 
       if (goalInput.get() == null)
       {
@@ -95,6 +93,13 @@ public class TraverseStairsPlanStepsState implements State
       {
          planSteps();
       }
+   }
+
+   public void reset()
+   {
+      output = null;
+      executeStepsSignaled.set(false);
+      planSteps.set(true);
    }
 
    private void planSteps()
@@ -133,7 +138,14 @@ public class TraverseStairsPlanStepsState implements State
 
       int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
       planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
+
+      double onSameStairThreshold = 0.05;
+      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) ->
+                                                   {
+                                                      boolean longEnoughPath = bestPathSize >= targetNumberOfFootsteps;
+                                                      boolean finalStepsOnSameStair = Math.abs(bestPathFinalStep.getTranslationZ() - bestSecondToFinalState.getTranslationZ()) < onSameStairThreshold;
+                                                      return longEnoughPath && finalStepsOnSameStair;
+                                                   });
 
       LogTools.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
