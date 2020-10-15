@@ -277,7 +277,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                 transferWeightDistributions.get(footstepIndex).getDoubleValue(),
                                                 previousPolygon,
                                                 currentPolygon,
-                                                supportSide);
+                                                supportSide,
+                                                footstepIndex == 0);
             computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
                                              shiftFraction.getSwingDurationShiftFraction(),
                                              shiftFraction.getSwingSplitFraction(),
@@ -400,12 +401,15 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactState.setDuration(segmentDuration);
    }
 
+   private double continuityDuration = 0.2;
+
    private void computeCoPPointsForFootstepTransfer(double duration,
                                                     double splitFraction,
                                                     double weightDistribution,
                                                     FrameConvexPolygon2DReadOnly previousPolygon,
                                                     FrameConvexPolygon2DReadOnly nextPolygon,
-                                                    RobotSide supportSide)
+                                                    RobotSide supportSide,
+                                                    boolean setupForContinuityMaintaining)
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       previousCoPPosition.setIncludingFrame(previousContactState.getCopStartPosition());
@@ -420,12 +424,16 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       computeEntryCoPPointLocation(tempPointForCoPCalculation, previousPolygon, nextPolygon, supportSide);
       midfootCoP.interpolate(previousCoPPosition, tempPointForCoPCalculation, weightDistribution);
 
-      previousContactState.setDuration(splitFraction * duration);
+      double firstSegmentDuration = splitFraction * duration;
+      if (setupForContinuityMaintaining)
+         firstSegmentDuration = Math.min(firstSegmentDuration, continuityDuration);
+      previousContactState.setDuration(firstSegmentDuration);
       previousContactState.setEndCopPosition(midfootCoP);
 
+      double secondSegmentDuration = duration - firstSegmentDuration;
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
-      contactStateProvider.setDuration((1.0 - splitFraction) * duration);
+      contactStateProvider.setDuration(secondSegmentDuration);
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
    }
 
