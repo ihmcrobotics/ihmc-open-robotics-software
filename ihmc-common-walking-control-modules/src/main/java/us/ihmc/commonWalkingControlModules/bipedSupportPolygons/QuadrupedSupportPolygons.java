@@ -10,9 +10,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedSupportPolygons
 {
@@ -27,7 +27,7 @@ public class QuadrupedSupportPolygons
 
    private static boolean VISUALIZE = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedSupportPolygons");
+   private final YoRegistry registry = new YoRegistry("QuadrupedSupportPolygons");
 
    // Reference frames:
    private final ReferenceFrame centerOfFeetZUpFrame;
@@ -46,7 +46,7 @@ public class QuadrupedSupportPolygons
    private final QuadrantDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new QuadrantDependentList<>();
 
    public QuadrupedSupportPolygons(ReferenceFrame centerOfFeetZUpFrame, QuadrantDependentList<YoPlaneContactState> contactStates,
-                                   QuadrantDependentList<MovingReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                                   QuadrantDependentList<MovingReferenceFrame> soleZUpFrames, YoRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfFeetZUpFrame = centerOfFeetZUpFrame;

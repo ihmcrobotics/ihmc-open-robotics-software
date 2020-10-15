@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -32,7 +32,7 @@ public class FallingSphereRobot extends Robot
    YoDouble q_x, q_y, q_z, qd_x, qd_y, qd_z, qdd_x, qdd_y, qdd_z;
    YoDouble q_qs, q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz, qdd_wx, qdd_wy, qdd_wz;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FallingSphereEnergy");
+   private final YoRegistry registry = new YoRegistry("FallingSphereEnergy");
    
    private final YoDouble qdd2_wx = new YoDouble("qdd2_wx", registry);
    private final YoDouble qdd2_wy = new YoDouble("qdd2_wy", registry);
@@ -120,7 +120,7 @@ public class FallingSphereRobot extends Robot
 
       initRobot();
       
-      this.getRobotsYoVariableRegistry().addChild(registry);
+      this.getRobotsYoRegistry().addChild(registry);
       this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
@@ -145,26 +145,26 @@ public class FallingSphereRobot extends Robot
    {
       t.set(0.0);
 
-      q_x = (YoDouble) this.getVariable("q_x");
-      q_y = (YoDouble) this.getVariable("q_y");
-      q_z = (YoDouble) this.getVariable("q_z");
-      qd_x = (YoDouble) this.getVariable("qd_x");
-      qd_y = (YoDouble) this.getVariable("qd_y");
-      qd_z = (YoDouble) this.getVariable("qd_z");
-      qdd_x = (YoDouble) this.getVariable("qdd_x");
-      qdd_y = (YoDouble) this.getVariable("qdd_y");
-      qdd_z = (YoDouble) this.getVariable("qdd_z");
+      q_x = (YoDouble) this.findVariable("q_x");
+      q_y = (YoDouble) this.findVariable("q_y");
+      q_z = (YoDouble) this.findVariable("q_z");
+      qd_x = (YoDouble) this.findVariable("qd_x");
+      qd_y = (YoDouble) this.findVariable("qd_y");
+      qd_z = (YoDouble) this.findVariable("qd_z");
+      qdd_x = (YoDouble) this.findVariable("qdd_x");
+      qdd_y = (YoDouble) this.findVariable("qdd_y");
+      qdd_z = (YoDouble) this.findVariable("qdd_z");
 
-      q_qs = (YoDouble) this.getVariable("q_qs");
-      q_qx = (YoDouble) this.getVariable("q_qx");
-      q_qy = (YoDouble) this.getVariable("q_qy");
-      q_qz = (YoDouble) this.getVariable("q_qz");
-      qd_wx = (YoDouble) this.getVariable("qd_wx");
-      qd_wy = (YoDouble) this.getVariable("qd_wy");
-      qd_wz = (YoDouble) this.getVariable("qd_wz");
-      qdd_wx = (YoDouble) this.getVariable("qdd_wx");
-      qdd_wy = (YoDouble) this.getVariable("qdd_wy");
-      qdd_wz = (YoDouble) this.getVariable("qdd_wz");
+      q_qs = (YoDouble) this.findVariable("q_qs");
+      q_qx = (YoDouble) this.findVariable("q_qx");
+      q_qy = (YoDouble) this.findVariable("q_qy");
+      q_qz = (YoDouble) this.findVariable("q_qz");
+      qd_wx = (YoDouble) this.findVariable("qd_wx");
+      qd_wy = (YoDouble) this.findVariable("qd_wy");
+      qd_wz = (YoDouble) this.findVariable("qd_wz");
+      qdd_wx = (YoDouble) this.findVariable("qdd_wx");
+      qdd_wy = (YoDouble) this.findVariable("qdd_wy");
+      qdd_wz = (YoDouble) this.findVariable("qdd_wz");
 
       q_x.set(0.0);
       q_y.set(0.0);

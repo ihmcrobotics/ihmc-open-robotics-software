@@ -1,17 +1,15 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,7 +37,7 @@ public class GeoregressionConversionToolsTest
          RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(rand);
          
          georegressionTransform.setTranslation(rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
-         georegressionTransform.setRotation(new DenseMatrix64F(new double[][]
+         georegressionTransform.setRotation(new DMatrixRMaj(new double[][]
          {
             {rotationMatrix.getM00(), rotationMatrix.getM01(), rotationMatrix.getM02()}, {rotationMatrix.getM10(), rotationMatrix.getM11(), rotationMatrix.getM12()},
             {rotationMatrix.getM20(), rotationMatrix.getM21(), rotationMatrix.getM22()}

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.Slider?>
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="410.0" prefWidth="1888.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SurfaceElementICPPaneController">
+   <children>
+      <VBox layoutX="10.0" layoutY="10.0" prefHeight="147.0" prefWidth="400.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Source Points" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="surface element resolution" textAlignment="CENTER" />
+                        <Spinner fx:id="surfaceElementResolution" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="window margin" textAlignment="CENTER" />
+                        <Spinner fx:id="windowMargin" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="38.0" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" text="Max Number of Surfels" textAlignment="RIGHT" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="38.0" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" text="Max Number of Correspondences" textAlignment="RIGHT" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum number of hit" textAlignment="CENTER" />
+                        <Spinner fx:id="minimumNumberOfHit" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="bound ratio" textAlignment="CENTER" />
+                        <Spinner fx:id="boundRatio" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Slider fx:id="maxNumberOfSurfels" prefHeight="38.0" prefWidth="194.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
+                        <Slider fx:id="maxNumberOfCorrespondences" prefHeight="38.0" prefWidth="194.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <VBox layoutX="418.0" layoutY="10.0" prefHeight="147.0" prefWidth="500.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Convergence" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="100.0" prefWidth="300.0">
+               <children>
+                  <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="converged iteration threshold" textAlignment="CENTER" />
+                        <Spinner fx:id="steadyStateDetectorIterationThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="quality threshold" textAlignment="CENTER" />
+                        <Spinner fx:id="qualityConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="translational effort threshold" textAlignment="CENTER" />
+                        <Spinner fx:id="translationalEffortConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="rotational effor threshold" textAlignment="CENTER" />
+                        <Spinner fx:id="rotationalEffortConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max optimization iters" textAlignment="CENTER" />
+                        <Spinner fx:id="maxOptimizationIterations" editable="true" maxWidth="1.7976931348623157E308" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="min correspondening dist" textAlignment="CENTER" />
+                        <Spinner fx:id="minCorrespondingDistance" editable="true" maxWidth="1.7976931348623157E308" />
+
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <VBox layoutX="1564.0" layoutY="13.0" prefHeight="135.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 1; -fx-padding: 1;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Filter" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <ToggleButton fx:id="enableInitialQualityFilter" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="initial quality threshold" textAlignment="CENTER" />
+            <Spinner fx:id="initialQualityThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+         </children>
+      </VBox>
+      <VBox layoutX="1137.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Computation" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <ToggleButton fx:id="computeSurfaceNormalsInFrame" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Compute Frame Normals" />
+            <ToggleButton fx:id="insertMissInOcTree" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Insert Miss in OcTree" />
+            <ToggleButton fx:id="computeFramesInParallel" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Parallel Compute Frames" />
+            <ToggleButton fx:id="warmStartDriftTransform" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Warm Start Drift Transform" />
+         </children>
+      </VBox>
+      <VBox layoutX="1347.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Optimization" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <ToggleButton fx:id="includePitchAndRoll" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Include Pitch and Roll" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="translation perturbation" textAlignment="CENTER" />
+            <Spinner fx:id="translationPerturbation" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="rotation perturbation" textAlignment="CENTER" />
+            <Spinner fx:id="rotationPerturbation" editable="true" maxWidth="1.7976931348623157E308" />
+         </children>
+      </VBox>
+      <VBox layoutX="927.0" layoutY="13.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 1; -fx-padding: 1;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Queue" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="longest time to lag" textAlignment="CENTER" />
+            <Spinner fx:id="longestTimeToLag" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max queue size" textAlignment="CENTER" />
+            <Spinner fx:id="maxQueueSize" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="stationary velocity" textAlignment="CENTER" />
+            <Spinner fx:id="stationaryVelocity" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max velocity" textAlignment="CENTER" />
+            <Spinner fx:id="maxVelocity" editable="true" maxWidth="1.7976931348623157E308" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

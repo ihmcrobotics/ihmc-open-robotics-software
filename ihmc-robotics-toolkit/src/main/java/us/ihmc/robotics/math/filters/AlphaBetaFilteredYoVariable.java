@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -51,7 +51,7 @@ public class AlphaBetaFilteredYoVariable extends YoDouble
    private final YoDouble positionState;
    private final YoDouble xMeasuredVariable;
 
-   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, double beta, YoDouble positionVariable,
+   public AlphaBetaFilteredYoVariable(String name, YoRegistry registry, double alpha, double beta, YoDouble positionVariable,
          YoDouble xMeasuredVariable, double DT)
    {
       super(name, registry);
@@ -64,7 +64,7 @@ public class AlphaBetaFilteredYoVariable extends YoDouble
       reset();
    }
 
-   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble betaVariable,
+   public AlphaBetaFilteredYoVariable(String name, YoRegistry registry, YoDouble alphaVariable, YoDouble betaVariable,
          YoDouble positionVariable, YoDouble xMeasuredVariable, double DT)
    {
       super(name, registry);

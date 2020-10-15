@@ -6,17 +6,17 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class YoFrameEuclideanWaypoint implements FrameEuclideanWaypointBasics
 {
    private final YoMutableFramePoint3D position;
    private final YoMutableFrameVector3D linearVelocity;
 
-   public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       position = new YoMutableFramePoint3D(namePrefix + "Position", nameSuffix, registry);
       linearVelocity = new YoMutableFrameVector3D(namePrefix + "LinearVelocity", nameSuffix, registry);

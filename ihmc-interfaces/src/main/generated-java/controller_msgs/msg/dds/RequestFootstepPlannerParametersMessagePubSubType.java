@@ -40,7 +40,6 @@ public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -56,7 +55,6 @@ public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -66,14 +64,12 @@ public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihm
 
    public static void write(controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_7(data.getUnusedPlaceholderField());
 
    }
 
    public static void read(controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setUnusedPlaceholderField(cdr.read_type_7());
       	
 
@@ -82,16 +78,13 @@ public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihm
    @Override
    public final void serialize(controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_7("unused_placeholder_field", data.getUnusedPlaceholderField());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage data)
    {
-
-      data.setUnusedPlaceholderField(ser.read_type_7("unused_placeholder_field"));
-   }
+      data.setUnusedPlaceholderField(ser.read_type_7("unused_placeholder_field"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage src, controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage dest)
    {

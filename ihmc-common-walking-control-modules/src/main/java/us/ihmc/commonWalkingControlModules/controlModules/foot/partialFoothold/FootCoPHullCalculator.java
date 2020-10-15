@@ -7,7 +7,7 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -25,11 +25,11 @@ public class FootCoPHullCalculator
    public FootCoPHullCalculator(String namePrefix,
                                 OccupancyGrid occupancyGrid,
                                 FootholdRotationParameters rotationParameters,
-                                YoVariableRegistry parentRegistry)
+                                YoRegistry parentRegistry)
    {
       this.occupancyGrid = occupancyGrid;
       String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
+      YoRegistry registry = new YoRegistry(namePrefix + name);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
 

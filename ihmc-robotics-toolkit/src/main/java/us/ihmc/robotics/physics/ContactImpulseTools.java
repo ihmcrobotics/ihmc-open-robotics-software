@@ -1,54 +1,91 @@
 package us.ihmc.robotics.physics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix3;
+import org.ejml.data.DMatrix3x3;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
+/**
+ * This class implements the math introduced in Section III of <i>"Per-Contact Iteration Method for
+ * Solving Contact Dynamics"</i>.
+ *
+ * @author Sylvain Bertrand
+ */
 public class ContactImpulseTools
 {
-   public static DenseMatrix64F cross(DenseMatrix64F v1, DenseMatrix64F v2)
+   /**
+    * Given two vectors of three elements, this methods computes the vector that is the cross product
+    * of <tt>v1&times;v2</tt> and returns the result as a new vector.
+    */
+   public static DMatrixRMaj cross(DMatrixRMaj v1, DMatrixRMaj v2)
    {
-      DenseMatrix64F cross = new DenseMatrix64F(3, 1);
+      DMatrixRMaj cross = new DMatrixRMaj(3, 1);
       cross(v1, v2, cross);
       return cross;
    }
 
-   public static void cross(DenseMatrix64F v1, DenseMatrix64F v2, DenseMatrix64F cross)
+   /**
+    * Given two vectors of three elements, this methods computes the vector that is the cross product
+    * of <tt>v1&times;v2</tt> and stores the result in {@code crossToPack}.
+    */
+   public static void cross(DMatrixRMaj v1, DMatrixRMaj v2, DMatrixRMaj crossToPack)
    {
-      if (!MatrixFeatures.isVector(v1) || v1.getNumElements() != 3)
+      if (!MatrixFeatures_DDRM.isVector(v1) || v1.getNumElements() != 3)
          throw new IllegalArgumentException("Improper argument");
-      if (!MatrixFeatures.isVector(v2) || v2.getNumElements() != 3)
+      if (!MatrixFeatures_DDRM.isVector(v2) || v2.getNumElements() != 3)
          throw new IllegalArgumentException("Improper argument");
-
-      cross.reshape(3, 1);
 
       double x = v1.get(1) * v2.get(2) - v1.get(2) * v2.get(1);
       double y = v1.get(2) * v2.get(0) - v1.get(0) * v2.get(2);
       double z = v1.get(0) * v2.get(1) - v1.get(1) * v2.get(0);
-      cross.set(0, x);
-      cross.set(1, y);
-      cross.set(2, z);
+
+      crossToPack.reshape(3, 1);
+      crossToPack.set(0, x);
+      crossToPack.set(1, y);
+      crossToPack.set(2, z);
    }
 
-   public static DenseMatrix64F invert(DenseMatrix64F M)
+   /**
+    * This method computes the following:
+    * 
+    * <pre>
+    * c = scale * a + b
+    * </pre>
+    */
+   public static void scaleAdd(double scale, DMatrix3 a, DMatrix3 b, DMatrix3 c)
    {
-      DenseMatrix64F M_inv = new DenseMatrix64F(M.getNumCols(), M.getNumRows());
-      CommonOps.invert(M, M_inv);
+      c.a1 = scale * a.a1 + b.a1;
+      c.a2 = scale * a.a2 + b.a2;
+      c.a3 = scale * a.a3 + b.a3;
+   }
+
+   /**
+    * Convenience method for computing the inverse of the given matrix and returns the result as a new
+    * matrix.
+    */
+   public static DMatrixRMaj invert(DMatrixRMaj M)
+   {
+      DMatrixRMaj M_inv = new DMatrixRMaj(M.getNumCols(), M.getNumRows());
+      CommonOps_DDRM.invert(M, M_inv);
       return M_inv;
    }
 
-   public static double multQuad(DenseMatrix64F x, DenseMatrix64F H)
+   /**
+    * Computes: <tt>x<sup>T</sup>Hx</tt> with {@code x} being vector such that the result of this
+    * operation is a scalar.
+    */
+   public static double multQuad(DMatrixRMaj x, DMatrixRMaj H)
    {
-      if (!MatrixFeatures.isVector(x))
+      if (!MatrixFeatures_DDRM.isVector(x))
          throw new IllegalArgumentException("x is not a vector.");
       if (x.getNumRows() != H.getNumRows())
          throw new IllegalArgumentException("x and H are not compatible.");
-      if (!MatrixFeatures.isSquare(H))
+      if (!MatrixFeatures_DDRM.isSquare(H))
          throw new IllegalArgumentException("H is not square.");
       double result = 0.0;
 
@@ -72,9 +109,9 @@ public class ContactImpulseTools
     * return = a + b * c
     * </pre>
     */
-   public static DenseMatrix64F addMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
+   public static DMatrixRMaj addMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c)
    {
-      DenseMatrix64F d = new DenseMatrix64F(b.getNumRows(), c.getNumCols());
+      DMatrixRMaj d = new DMatrixRMaj(b.getNumRows(), c.getNumCols());
       addMult(a, b, c, d);
       return d;
    }
@@ -84,10 +121,10 @@ public class ContactImpulseTools
     * d = a + b * c
     * </pre>
     */
-   public static void addMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   public static void addMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
-      CommonOps.mult(b, c, d);
-      CommonOps.addEquals(d, a);
+      CommonOps_DDRM.mult(b, c, d);
+      CommonOps_DDRM.addEquals(d, a);
    }
 
    /**
@@ -95,9 +132,9 @@ public class ContactImpulseTools
     * return = -a * b
     * </pre>
     */
-   public static DenseMatrix64F negateMult(DenseMatrix64F a, DenseMatrix64F b)
+   public static DMatrixRMaj negateMult(DMatrixRMaj a, DMatrixRMaj b)
    {
-      DenseMatrix64F c = new DenseMatrix64F(a.getNumRows(), b.getNumCols());
+      DMatrixRMaj c = new DMatrixRMaj(a.getNumRows(), b.getNumCols());
       negateMult(a, b, c);
       return c;
    }
@@ -107,218 +144,353 @@ public class ContactImpulseTools
     * c = -a * b
     * </pre>
     */
-   public static void negateMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
+   public static void negateMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c)
    {
-      CommonOps.mult(a, b, c);
-      CommonOps.changeSign(c);
+      CommonOps_DDRM.mult(a, b, c);
+      CommonOps_DDRM.changeSign(c);
    }
 
-   public static double computeR(double mu, double theta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   /**
+    * @param source
+    * @param startRow
+    * @param startColumn
+    * @param destination
+    */
+   public static void extract(DMatrix source, int startRow, int startColumn, DMatrix3x3 destination)
+   {
+      EuclidCoreTools.checkMatrixMinimumSize(startRow + 3, startColumn + 3, source);
+      destination.a11 = source.unsafe_get(startRow, startColumn);
+      destination.a12 = source.unsafe_get(startRow, startColumn + 1);
+      destination.a13 = source.unsafe_get(startRow++, startColumn + 2);
+      destination.a21 = source.unsafe_get(startRow, startColumn);
+      destination.a22 = source.unsafe_get(startRow, startColumn + 1);
+      destination.a23 = source.unsafe_get(startRow++, startColumn + 2);
+      destination.a31 = source.unsafe_get(startRow, startColumn);
+      destination.a32 = source.unsafe_get(startRow, startColumn + 1);
+      destination.a33 = source.unsafe_get(startRow, startColumn + 2);
+   }
+
+   public static double computeR(double mu, double theta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       return computeR(mu, Math.cos(theta), Math.sin(theta), M_inv, c);
    }
 
-   public static double computeR(double mu, double cosTheta, double sinTheta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeR(double mu, double cosTheta, double sinTheta, DMatrix M_inv, DMatrix c)
    {
       // Equation (14) in the paper
       //                                -c_z
       // r = -------------------------------------------------------------
       //     M_inv_zz / mu + M_inv_zx * cos(theta) + M_inv_zy * sin(theta)
-      double r = M_inv.get(8) / mu + M_inv.get(6) * cosTheta + M_inv.get(7) * sinTheta;
-      r = -c.get(2) / r;
+      double r = M_inv.unsafe_get(2, 2) / mu + M_inv.unsafe_get(2, 0) * cosTheta + M_inv.unsafe_get(2, 1) * sinTheta;
+      r = -c.unsafe_get(2, 0) / r;
       return r;
    }
 
-   public static double computeLambdaZ(double r, double theta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeLambdaZ(double r, double theta, DMatrix M_inv, DMatrix c)
    {
-      return ContactImpulseTools.computeLambdaZ(r, Math.cos(theta), Math.sin(theta), M_inv, c);
+      return computeLambdaZ(r, Math.cos(theta), Math.sin(theta), M_inv, c);
    }
 
-   public static double computeLambdaZ(double r, double cosTheta, double sinTheta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeLambdaZ(double r, double cosTheta, double sinTheta, DMatrix M_inv, DMatrix c)
    {
       // Equation (13) in the paper
       // lambda_z = (-c_z - M_inv_zx * r * cos(theta) - M_inv_zy * r * sin(theta)) / M_inv_zz
-      return -(c.get(2) + r * (M_inv.get(6) * cosTheta + M_inv.get(7) * sinTheta)) / M_inv.get(8);
+      return -(c.unsafe_get(2, 0) + r * (M_inv.unsafe_get(2, 0) * cosTheta + M_inv.unsafe_get(2, 1) * sinTheta)) / M_inv.unsafe_get(2, 2);
    }
 
-   public static DenseMatrix64F computePostImpulseVelocity(DenseMatrix64F c, DenseMatrix64F M_inv, DenseMatrix64F lambda)
+   public static DMatrixRMaj computePostImpulseVelocity(DMatrixRMaj c, DMatrixRMaj M_inv, DMatrixRMaj lambda)
    {
       return addMult(c, M_inv, lambda);
    }
 
-   public static void computePostImpulseVelocity(DenseMatrix64F c, DenseMatrix64F M_inv, DenseMatrix64F lambda, DenseMatrix64F vToPack)
-   {
-      addMult(c, M_inv, lambda, vToPack);
-   }
-
-   public static double computeE1(DenseMatrix64F v, DenseMatrix64F M)
+   public static double computeE1(DMatrixRMaj v, DMatrixRMaj M)
    {
       // E = v^T M v
       return 0.5 * multQuad(v, M);
    }
 
-   public static double computeE2(DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeE2(DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
       // E = 0.5 * lambda^T M^-1 lambda + lambda^T c
-      return 0.5 * multQuad(lambda, M_inv) + CommonOps.dot(lambda, c);
+      return 0.5 * multQuad(lambda, M_inv) + CommonOps_DDRM.dot(lambda, c);
    }
 
-   public static double computeE3(DenseMatrix64F M, DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeE3(DMatrixRMaj M, DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
       // E = 0.5 * lambda^T M^-1 lambda + lambda^T c + 0.5 * c^T M c
       return computeE2(M_inv, c, lambda) + 0.5 * multQuad(c, M);
    }
 
-   public static DenseMatrix64F nablaH1(DenseMatrix64F M_inv)
+   public static DMatrixRMaj nablaH1(DMatrixRMaj M_inv)
    { // Introduced in Section III.A. Careful there's a typo in the paper where M is used instead of its inverse.
-      DenseMatrix64F nablaH1 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj nablaH1 = new DMatrixRMaj(3, 1);
       nablaH1.set(0, M_inv.get(2, 0));
       nablaH1.set(1, M_inv.get(2, 1));
       nablaH1.set(2, M_inv.get(2, 2));
       return nablaH1;
    }
 
-   public static DenseMatrix64F nablaH2(DenseMatrix64F lambda, double mu)
+   public static DMatrixRMaj nablaH2(DMatrixRMaj lambda, double mu)
    {
-      DenseMatrix64F nablaH2 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj nablaH2 = new DMatrixRMaj(3, 1);
       nablaH2.set(0, 2.0 * lambda.get(0));
       nablaH2.set(1, 2.0 * lambda.get(1));
       nablaH2.set(2, -2.0 * mu * mu * lambda.get(2));
       return nablaH2;
    }
 
-   public static DenseMatrix64F eta(DenseMatrix64F M_inv, DenseMatrix64F lambda, double mu)
+   public static DMatrixRMaj eta(DMatrixRMaj M_inv, DMatrixRMaj lambda, double mu)
    {
-      DenseMatrix64F nablaH1 = nablaH1(M_inv);
-      DenseMatrix64F nablaH2 = nablaH2(lambda, mu);
-      DenseMatrix64F eta = cross(nablaH1, nablaH2);
-      NormOps.normalizeF(eta);
+      DMatrixRMaj nablaH1 = nablaH1(M_inv);
+      DMatrixRMaj nablaH2 = nablaH2(lambda, mu);
+      DMatrixRMaj eta = cross(nablaH1, nablaH2);
+      NormOps_DDRM.normalizeF(eta);
       return eta;
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
-      return ContactImpulseTools.computeProjectedGradient(mu,
-                                                          M_inv,
-                                                          c,
-                                                          EuclidCoreTools.norm(lambda.get(0), lambda.get(1)),
-                                                          Math.atan2(lambda.get(1), lambda.get(0)));
+      return computeProjectedGradient(mu, M_inv, c, EuclidCoreTools.norm(lambda.get(0), lambda.get(1)), Math.atan2(lambda.get(1), lambda.get(0)));
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double theta)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double theta)
    {
       return computeProjectedGradient(mu, M_inv, c, computeR(mu, theta, M_inv, c), theta);
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double r, double theta)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double r, double theta)
    {
       return computeProjectedGradient(mu, M_inv, c, r, Math.cos(theta), Math.sin(theta));
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double r, double cosTheta, double sinTheta)
+   public static double computeProjectedGradient(double mu, DMatrix M_inv, DMatrix c, double r, double cosTheta, double sinTheta)
    {
-      // Equation (15) in the paper
-      double nablaH1_x = M_inv.get(6);
-      double nablaH1_y = M_inv.get(7);
-      double nablaH1_z = M_inv.get(8);
+      double nablaH1_x = M_inv.unsafe_get(2, 0);
+      double nablaH1_y = M_inv.unsafe_get(2, 1);
+      double nablaH1_z = M_inv.unsafe_get(2, 2);
 
       double nablaH2_x = cosTheta;
       double nablaH2_y = sinTheta;
       double nablaH2_z = -mu;
 
+      // Equation (10) in the paper
       double eta_x = nablaH1_y * nablaH2_z - nablaH1_z * nablaH2_y;
       double eta_y = nablaH1_z * nablaH2_x - nablaH1_x * nablaH2_z;
       double eta_z = nablaH1_x * nablaH2_y - nablaH1_y * nablaH2_x;
 
+      // Equation (15) in the paper, we actually use the left equality only so skipping equation (16).
       double r_inv = 1.0 / r;
-      double c_x = c.get(0) * r_inv;
-      double c_y = c.get(1) * r_inv;
-      double c_z = c.get(2) * r_inv;
+      double c_x = c.unsafe_get(0, 0) * r_inv;
+      double c_y = c.unsafe_get(1, 0) * r_inv;
+      double c_z = c.unsafe_get(2, 0) * r_inv;
 
-      double lambda_z_prime = (M_inv.get(6) * cosTheta + M_inv.get(7) * sinTheta + c_z) / M_inv.get(8);
+      double lambda_z_prime = (M_inv.unsafe_get(2, 0) * cosTheta + M_inv.unsafe_get(2, 1) * sinTheta + c_z) / M_inv.unsafe_get(2, 2);
 
-      double dE_dLambda_0 = M_inv.get(0) * cosTheta + M_inv.get(1) * sinTheta + c_x - M_inv.get(2) * lambda_z_prime;
-      double dE_dLambda_1 = M_inv.get(3) * cosTheta + M_inv.get(4) * sinTheta + c_y - M_inv.get(5) * lambda_z_prime;
-      double dE_dLambda_2 = M_inv.get(6) * cosTheta + M_inv.get(7) * sinTheta + c_z - M_inv.get(8) * lambda_z_prime;
+      double dE_dLambda_0 = M_inv.unsafe_get(0, 0) * cosTheta + M_inv.unsafe_get(0, 1) * sinTheta + c_x - M_inv.unsafe_get(0, 2) * lambda_z_prime;
+      double dE_dLambda_1 = M_inv.unsafe_get(1, 0) * cosTheta + M_inv.unsafe_get(1, 1) * sinTheta + c_y - M_inv.unsafe_get(1, 2) * lambda_z_prime;
+      double dE_dLambda_2 = M_inv.unsafe_get(2, 0) * cosTheta + M_inv.unsafe_get(2, 1) * sinTheta + c_z - M_inv.unsafe_get(2, 2) * lambda_z_prime;
 
       return dE_dLambda_0 * eta_x + dE_dLambda_1 * eta_y + dE_dLambda_2 * eta_z;
    }
 
-   public static double computeProjectedGradientInefficient(DenseMatrix64F M_inv, DenseMatrix64F lambda, DenseMatrix64F c, double mu)
+   public static double computeProjectedGradientInefficient(DMatrixRMaj M_inv, DMatrixRMaj lambda, DMatrixRMaj c, double mu)
    {
-      DenseMatrix64F gradient = ContactImpulseTools.addMult(c, M_inv, lambda);
-      DenseMatrix64F eta = ContactImpulseTools.eta(M_inv, lambda, mu);
-      return CommonOps.dot(gradient, eta);
+      DMatrixRMaj gradient = addMult(c, M_inv, lambda);
+      DMatrixRMaj eta = eta(M_inv, lambda, mu);
+      return CommonOps_DDRM.dot(gradient, eta);
    }
 
-   public static double computeEThetaNumericalDerivative(double theta, double dtheta, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeEThetaNumericalDerivative(double theta, double dtheta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      double costMinus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta - 0.5 * dtheta, mu, M_inv, c));
-      double costPlus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta + 0.5 * dtheta, mu, M_inv, c));
+      double costMinus = computeE2(M_inv, c, computeLambda(theta - 0.5 * dtheta, mu, M_inv, c));
+      double costPlus = computeE2(M_inv, c, computeLambda(theta + 0.5 * dtheta, mu, M_inv, c));
       return (costPlus - costMinus) / dtheta;
    }
 
-   public static DenseMatrix64F computeLambda(double theta, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static DMatrixRMaj computeLambda(double theta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      return computeLambda(theta, ContactImpulseTools.computeR(mu, theta, M_inv, c), mu, M_inv, c);
+      return computeLambda(theta, computeR(mu, theta, M_inv, c), mu, M_inv, c);
    }
 
-   public static DenseMatrix64F computeLambda(double theta, double r, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static DMatrixRMaj computeLambda(double theta, double r, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      DenseMatrix64F lambda = new DenseMatrix64F(3, 1);
+      DMatrixRMaj lambda = new DMatrixRMaj(3, 1);
       lambda.set(0, r * Math.cos(theta));
       lambda.set(1, r * Math.sin(theta));
-      lambda.set(2, ContactImpulseTools.computeLambdaZ(r, theta, M_inv, c));
+      lambda.set(2, computeLambdaZ(r, theta, M_inv, c));
       return lambda;
    }
 
-   public static boolean isInsideFrictionCone(double mu, DenseMatrix64F lambda)
+   public static boolean isInsideFrictionCone(double mu, DMatrix lambda)
    {
       return isInsideFrictionCone(mu, lambda, 0.0);
    }
 
-   public static boolean isInsideFrictionCone(double mu, DenseMatrix64F lambda, double epsilon)
+   public static boolean isInsideFrictionCone(double mu, DMatrix lambda, double epsilon)
    {
-      return isInsideFrictionCone(mu, lambda.get(0), lambda.get(1), lambda.get(2), epsilon);
+      return isInsideFrictionCone(mu, lambda.unsafe_get(0, 0), lambda.unsafe_get(1, 0), lambda.unsafe_get(2, 0), epsilon);
    }
 
-   public static boolean isInsideFrictionCone(double mu, double lambda_x, double lambda_y, double lambda_z)
-   {
-      return isInsideFrictionCone(mu, lambda_x, lambda_y, lambda_z, 0.0);
-   }
-
+   /**
+    * @param mu       coefficient of friction.
+    * @param lambda_x linear component of the impulse along the x-axis, i.e. first tangential
+    *                 component.
+    * @param lambda_y linear component of the impulse along the y-axis, i.e. second tangential
+    *                 component.
+    * @param lambda_z linear component of the impulse along the z-axis, i.e. normal component.
+    * @param epsilon  tolerance to account numerical inaccuracies.
+    * @return {@code true} if the impulse satisfies the friction cone, {@code false} if it violates it.
+    */
    public static boolean isInsideFrictionCone(double mu, double lambda_x, double lambda_y, double lambda_z, double epsilon)
    {
       return EuclidCoreTools.square(mu * lambda_z) + epsilon >= EuclidCoreTools.normSquared(lambda_x, lambda_y);
    }
 
-   public static boolean lineOfSightTest(double mu, DenseMatrix64F lambda, DenseMatrix64F lambda_v_0)
+   /**
+    * @see #isInsideFrictionEllipsoid(double, double, double, double, double, double)
+    */
+   public static boolean isInsideFrictionEllipsoid(double mu, DMatrix lambda, double e_zz)
    {
-      double theta = Math.atan2(lambda.get(1), lambda.get(0));
-      return lineOfSightTest(mu, EuclidCoreTools.norm(lambda.get(0), lambda.get(1)), Math.cos(theta), Math.sin(theta), lambda_v_0);
+      return isInsideFrictionEllipsoid(mu, lambda.unsafe_get(0, 0), lambda.unsafe_get(1, 0), lambda.unsafe_get(2, 0), lambda.unsafe_get(3, 0), e_zz);
    }
 
-   public static boolean lineOfSightTest(double mu, double r, double cosTheta, double sinTheta, DenseMatrix64F lambda_v_0)
+   /**
+    * @see #isInsideFrictionEllipsoid(double, double, double, double, double, double)
+    */
+   public static boolean isInsideFrictionEllipsoid(double mu, DMatrix3 lambda_linear, double lambda_angular, double e_zz)
+   {
+      return isInsideFrictionEllipsoid(mu, lambda_linear, lambda_angular, e_zz, 0);
+   }
+
+   /**
+    * @see #isInsideFrictionEllipsoid(double, double, double, double, double, double, double)
+    */
+   public static boolean isInsideFrictionEllipsoid(double mu, DMatrix3 lambda_linear, double lambda_angular, double e_zz, double epsilon)
+   {
+      return isInsideFrictionEllipsoid(mu, lambda_linear.a1, lambda_linear.a2, lambda_linear.a3, lambda_angular, e_zz, epsilon);
+   }
+
+   /**
+    * Tests whether the given impulse is inside the ellipsoid of friction.
+    * <p>
+    * This method uses the ellipsoid Coulomb friction law as introduced in <i>Computation of
+    * Three-Dimensional Rigid-Body Dynamics with Multiple Unilateral Contacts Using Time-Stepping and
+    * Gauss-Seidel Methods</i>:
+    * 
+    * <pre>
+    * F<sub>x</sub><sup>2</sup>/e<sub>x</sub><sup>2</sup> + F<sub>y</sub><sup>2</sup>/e<sub>y</sub><sup>2</sup> + T<sub>z</sub><sup>2</sup>/e<sub>zz</sub><sup>2</sup> &leq; &mu;F<sub>z</sub><sup>2</sup>
+    * </pre>
+    * 
+    * where <tt>F<sub>x</sub></tt> and <tt>F<sub>y</sub></tt> are the tangential forces,
+    * <tt>T<sub>z</sub></tt> the normal moment, <tt>F<sub>z</sub></tt> the normal force, and
+    * <tt>&mu;</tt> the coefficient of friction. <tt>e<sub>i</sub> are positive constants defined by
+    * the user.
+    * </p>
+    * <p>
+    * This method assumes <tt>e<sub>x</sub> = e<sub>y</sub> = 1<tt> and only requires <tt>e<sub>zz</sub></tt>.
+    * </p>
+    * 
+    * @param mu        coefficient of friction.
+    * @param lambda_x  linear component of the impulse along the x-axis, i.e. first tangential
+    *                  component.
+    * @param lambda_y  linear component of the impulse along the y-axis, i.e. second tangential
+    *                  component.
+    * @param lambda_z  linear component of the impulse along the z-axis, i.e. normal component.
+    * @param lambda_zz angular component of the impulse around the z-axis.
+    * @param e_zz      the constant <tt>e<sub>zz</sub></tt> as shown above.
+    * @return {@code true} if the impulse satisfies the friction law, {@code false} if it violates it.
+    */
+   public static boolean isInsideFrictionEllipsoid(double mu, double lambda_x, double lambda_y, double lambda_z, double lambda_zz, double e_zz)
+   {
+      return isInsideFrictionEllipsoid(mu, lambda_x, lambda_y, lambda_z, lambda_zz, e_zz, 0);
+   }
+
+   /**
+    * Tests whether the given impulse is inside the ellipsoid of friction.
+    * <p>
+    * This method uses the generalized Coulomb friction as introduced in <i>Computation of
+    * Three-Dimensional Rigid-Body Dynamics with Multiple Unilateral Contacts Using Time-Stepping and
+    * Gauss-Seidel Methods</i>:
+    * 
+    * <pre>
+    * F<sub>x</sub><sup>2</sup>/e<sub>x</sub><sup>2</sup> + F<sub>y</sub><sup>2</sup>/e<sub>y</sub><sup>2</sup> + T<sub>z</sub><sup>2</sup>/e<sub>zz</sub><sup>2</sup> &leq; &mu;F<sub>z</sub><sup>2</sup>
+    * </pre>
+    * 
+    * where <tt>F<sub>x</sub></tt> and <tt>F<sub>y</sub></tt> are the tangential forces,
+    * <tt>T<sub>z</sub></tt> the normal moment, <tt>F<sub>z</sub></tt> the normal force, and
+    * <tt>&mu;</tt> the coefficient of friction. <tt>e<sub>i</sub> are positive constants defined by
+    * the user.
+    * </p>
+    * <p>
+    * This method assumes <tt>e<sub>x</sub> = e<sub>y</sub> = 1<tt> and only requires <tt>e<sub>zz</sub></tt>.
+    * </p>
+    * 
+    * @param mu        coefficient of friction.
+    * @param lambda_x  linear component of the impulse along the x-axis, i.e. first tangential
+    *                  component.
+    * @param lambda_y  linear component of the impulse along the y-axis, i.e. second tangential
+    *                  component.
+    * @param lambda_z  linear component of the impulse along the z-axis, i.e. normal component.
+    * @param lambda_zz angular component of the impulse around the z-axis.
+    * @param e_zz      the constant <tt>e<sub>zz</sub></tt> as shown above.
+    * @param epsilon   tolerance to account numerical inaccuracies.
+    * @return {@code true} if the impulse satisfies the friction law, {@code false} if it violates it.
+    */
+   public static boolean isInsideFrictionEllipsoid(double mu, double lambda_x, double lambda_y, double lambda_z, double lambda_zz, double e_zz, double epsilon)
+   {
+      return EuclidCoreTools.square(mu * lambda_z) + epsilon >= EuclidCoreTools.normSquared(lambda_x, lambda_y, lambda_zz / e_zz);
+   }
+
+   public static boolean lineOfSightTest(double mu, DMatrix lambda, DMatrix lambda_v_0)
+   {
+      double theta = Math.atan2(lambda.unsafe_get(1, 0), lambda.unsafe_get(0, 0));
+      return lineOfSightTest(mu, EuclidCoreTools.norm(lambda.unsafe_get(0, 0), lambda.unsafe_get(1, 0)), Math.cos(theta), Math.sin(theta), lambda_v_0);
+   }
+
+   public static boolean lineOfSightTest(double mu, double r, double cosTheta, double sinTheta, DMatrix lambda_v_0)
    {
       // Simplified line-of-sight for NableH2 . (lambda_v_0 - lambda) < 0
-      return cosTheta * lambda_v_0.get(0) + sinTheta * lambda_v_0.get(1) - mu * lambda_v_0.get(2) > 0.0;
+      return cosTheta * lambda_v_0.unsafe_get(0, 0) + sinTheta * lambda_v_0.unsafe_get(1, 0) - mu * lambda_v_0.unsafe_get(2, 0) > 0.0;
    }
 
-   public static DenseMatrix64F computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv,
-                                                  DenseMatrix64F lambda_v_0, DenseMatrix64F c, boolean verbose)
+   public static DMatrixRMaj computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrix M_inv, DMatrix lambda_v_0, DMatrix c,
+                                               boolean verbose)
    {
-      Vector3D lambdaOpt = new Vector3D();
-      computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, lambdaOpt, verbose);
-      DenseMatrix64F lambdaOptMatrix = new DenseMatrix64F(3, 1);
-      lambdaOpt.get(lambdaOptMatrix);
+      DMatrixRMaj lambdaOptMatrix = new DMatrixRMaj(3, 1);
+      computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, lambdaOptMatrix, verbose);
       return lambdaOptMatrix;
    }
 
-   public static boolean computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv, DenseMatrix64F lambda_v_0,
-                                           DenseMatrix64F c, Tuple3DBasics contactImpulseToPack, boolean verbose)
+   /**
+    * This method implements the bisection method used to find the optimal impulse that minimize the
+    * tangential velocity while canceling the normal velocity.
+    * <p>
+    * This algorithm will fail if the contact is opening or sticking. The z-component of the given data
+    * is assumed to be the normal component of the contact.
+    * </p>
+    * <p>
+    * Before starting the bisection, a lower and upper bounds have to be determined. The beta
+    * parameters are used for this initial phase. No value were suggested in the paper.
+    * </p>
+    * 
+    * @param beta1        algorithm's parameter used for the initial guessing.
+    * @param beta2        algorithm's parameter used for stepping backward.
+    * @param beta3        algorithm's parameter used for stepping forward.
+    * @param gamma        algorithm's termination parameter.
+    * @param mu           the coefficient of friction.
+    * @param M_inv        the 3-by-3 inverse of the apparent inertia matrix. Not modified.
+    * @param lambda_v_0   the 3-by-1 impulse that fully cancels the contact velocity while ignoring the
+    *                     cone of friction. Not modified.
+    * @param c            the 3-by-1 contact velocity. Not modified.
+    * @param lambdaToPack output of this algorithm: the impulse that satisfies the cone of friction,
+    *                     minimize the tangential velocity, and cancel the normal velocity. Modified.
+    * @param verbose      useful for debugging when this algorithm is acting up.
+    */
+   public static void computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrix M_inv, DMatrix lambda_v_0, DMatrix c,
+                                        DMatrix lambdaToPack, boolean verbose)
    {
       // Initial guess using lambda_v_0
-      double thetaLo0 = Math.atan2(lambda_v_0.get(1), lambda_v_0.get(0));
+      double thetaLo0 = Math.atan2(lambda_v_0.unsafe_get(1, 0), lambda_v_0.unsafe_get(0, 0));
       double cosTheta = Math.cos(thetaLo0);
       double sinTheta = Math.sin(thetaLo0);
       double rLo0 = computeR(mu, cosTheta, sinTheta, M_inv, c);
@@ -435,24 +607,22 @@ public class ContactImpulseTools
          }
       }
 
-      double lambdaMid_x = rMid * cosThetaMid;
-      double lambdaMid_y = rMid * sinThetaMid;
-      double lambdaMid_z = computeLambdaZ(rMid, cosThetaMid, sinThetaMid, M_inv, c);
-      contactImpulseToPack.set(lambdaMid_x, lambdaMid_y, lambdaMid_z);
-      return true;
+      lambdaToPack.unsafe_set(0, 0, rMid * cosThetaMid);
+      lambdaToPack.unsafe_set(1, 0, rMid * sinThetaMid);
+      lambdaToPack.unsafe_set(2, 0, computeLambdaZ(rMid, cosThetaMid, sinThetaMid, M_inv, c));
    }
 
-   public static String toStringForUnitTest(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv, DenseMatrix64F lambda_v_0,
-                                            DenseMatrix64F c)
+   public static String toStringForUnitTest(double beta1, double beta2, double beta3, double gamma, double mu, DMatrix M_inv, DMatrix lambda_v_0, DMatrix c)
    {
       return beta1 + ", " + beta2 + ", " + beta3 + ", " + gamma + ", " + mu + ", " + matrixToString(M_inv) + ", " + matrixToString(c);
    }
 
-   private static String matrixToString(DenseMatrix64F m)
+   private static String matrixToString(DMatrix m)
    {
-      String ret = "new DenseMatrix64F(" + m.getNumRows() + ", " + m.getNumCols() + ", true";
-      for (int i = 0; i < m.getNumElements(); i++)
-         ret += ", " + m.get(i);
+      String ret = "new DMatrixRMaj(" + m.getNumRows() + ", " + m.getNumCols() + ", true";
+      for (int row = 0; row < m.getNumRows(); row++)
+         for (int col = 0; col < m.getNumCols(); col++)
+            ret += ", " + m.get(row, col);
       ret += ")";
       return ret;
    }
@@ -461,31 +631,4 @@ public class ContactImpulseTools
    {
       return value * value * value;
    }
-
-   public static double polarGradient2(DenseMatrix64F M_inv, DenseMatrix64F c, double theta, double mu)
-   { // Obtained by directly evaluating dE/dTheta
-      double c_x = c.get(0);
-      double c_y = c.get(1);
-      double c_z = c.get(2);
-
-      double cosTheta = Math.cos(theta);
-      double sinTheta = Math.sin(theta);
-
-      double Mxx = M_inv.get(0, 0);
-      double Mxy = M_inv.get(0, 1);
-      double Myy = M_inv.get(1, 1);
-      double Mzx = M_inv.get(2, 0);
-      double Mzy = M_inv.get(2, 1);
-      double Mzz = M_inv.get(2, 2);
-
-      double Mtheta = Mzx * cosTheta + Mzy * sinTheta;
-
-      return -c_z * mu
-            * (((-Mzy * c_x + Mzx * c_y) * Mtheta + (Mzy * (Mxx * cosTheta + Mxy * sinTheta) - Mzx * (Mxy * cosTheta + Myy * sinTheta)) * c_z) * mu * mu
-                  + Mzz * (-(sinTheta * Mtheta + Mzy) * c_x + (cosTheta * Mtheta + Mzx) * c_y
-                        + (cosTheta * sinTheta * Mxx - Mxy + 2 * sinTheta * sinTheta * Mxy - sinTheta * cosTheta * Myy) * c_z) * mu
-                  + Mzz * ((-sinTheta * c_x + cosTheta * c_y) * Mzz + c_z * (Mzx * sinTheta - Mzy * cosTheta)))
-            / cube(Mzz + Mtheta * mu);
-   }
-
 }

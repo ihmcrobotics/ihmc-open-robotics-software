@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Application;
@@ -9,14 +10,15 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class PointCloudDataLoader extends Application
 {
    private static final boolean SHOW_PLANAR_REGIONS = true;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
+   private static final boolean SHOW_FRAME_BY_FRAME = true;
 
    private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegion";
    private static final String POINT_CLOUD_FILE_NAME = "PointCloud";
@@ -28,6 +30,7 @@ public class PointCloudDataLoader extends Application
       view3dFactory.addCameraController(0.05, 2000.0, true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
+      view3dFactory.setBackgroundColor(Color.WHITE);
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
       PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic(true);
@@ -86,7 +89,21 @@ public class PointCloudDataLoader extends Application
             List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
             System.out.println("Point cloud messages (" + messagesFromFile.size() + ")");
             stereoVisionPointCloudGraphic.initializeMeshes();
-            stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMeshes(messagesFromFile, Color.GREEN);
+            if (SHOW_FRAME_BY_FRAME)
+            {
+               Random random = new Random();
+               for (int i = 0; i < messagesFromFile.size(); i++)
+               {
+                  double randomRed = random.nextDouble();
+                  double randomGreen = random.nextDouble();
+                  double randomBlue = random.nextDouble();
+                  stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMesh(messagesFromFile.get(i), Color.color(randomRed, randomGreen, randomBlue));
+               }
+            }
+            else
+            {
+               stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMeshes(messagesFromFile, Color.GREEN);
+            }
             stereoVisionPointCloudGraphic.generateMeshes();
             stereoVisionPointCloudGraphic.update();
             view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);

@@ -1,17 +1,15 @@
 package us.ihmc.robotics.optimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.RandomMatrices;
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 /**
  * @author twan
  *         Date: 8/9/13
@@ -29,16 +27,16 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 
       QuadraticProgram quadraticProgram = createRandomQuadraticProgram(random, objectiveSize, solutionSize, constraintSize);
 
-      DenseMatrix64F initialGuess = new DenseMatrix64F(solutionSize, 1);
+      DMatrixRMaj initialGuess = new DMatrixRMaj(solutionSize, 1);
 
       ActiveSearchSolutionInfo solutionInfo = solve(quadraticProgram, initialGuess);
 
       assertTrue(solutionInfo.isConverged());
 
-      DenseMatrix64F axMinusB = new DenseMatrix64F(solutionSize, 1);
-      CommonOps.mult(quadraticProgram.getA(), solutionInfo.getSolution(), axMinusB);
-      CommonOps.subtractEquals(axMinusB, quadraticProgram.getB());
-      assertTrue(MatrixFeatures.isConstantVal(axMinusB, 0.0, 1e-12));
+      DMatrixRMaj axMinusB = new DMatrixRMaj(solutionSize, 1);
+      CommonOps_DDRM.mult(quadraticProgram.getA(), solutionInfo.getSolution(), axMinusB);
+      CommonOps_DDRM.subtractEquals(axMinusB, quadraticProgram.getB());
+      assertTrue(MatrixFeatures_DDRM.isConstantVal(axMinusB, 0.0, 1e-12));
    }
 
 	@Test
@@ -48,21 +46,21 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       int solutionSize = 3;
       int constraintSize = 1;
 
-      DenseMatrix64F a = new DenseMatrix64F(objectiveSize, solutionSize);
-      CommonOps.setIdentity(a);
+      DMatrixRMaj a = new DMatrixRMaj(objectiveSize, solutionSize);
+      CommonOps_DDRM.setIdentity(a);
 
-      DenseMatrix64F b = new DenseMatrix64F(objectiveSize, 1);
+      DMatrixRMaj b = new DMatrixRMaj(objectiveSize, 1);
       b.zero();
 
-      DenseMatrix64F c = new DenseMatrix64F(constraintSize, solutionSize);
-      CommonOps.setIdentity(c);
+      DMatrixRMaj c = new DMatrixRMaj(constraintSize, solutionSize);
+      CommonOps_DDRM.setIdentity(c);
 
-      DenseMatrix64F d = new DenseMatrix64F(constraintSize, 1);
+      DMatrixRMaj d = new DMatrixRMaj(constraintSize, 1);
       d.set(0, 0, -1.0);
 
       QuadraticProgram quadraticProgram = new QuadraticProgram(a, b, c, d);
 
-      DenseMatrix64F initialGuess = new DenseMatrix64F(solutionSize, 1);
+      DMatrixRMaj initialGuess = new DMatrixRMaj(solutionSize, 1);
       initialGuess.set(0, 0, -10.0);
       initialGuess.set(1, 0, -10.0);
       initialGuess.set(2, 0, -10.0);
@@ -70,11 +68,11 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 
       assertTrue(solutionInfo.isConverged());
 
-      DenseMatrix64F expectedResult = new DenseMatrix64F(solutionSize, 1);
+      DMatrixRMaj expectedResult = new DMatrixRMaj(solutionSize, 1);
       expectedResult.set(0, 0, d.get(0, 0));
       expectedResult.set(1, 0, 0.0);
       expectedResult.set(2, 0, 0.0);
-      assertTrue(MatrixFeatures.isEquals(expectedResult, solutionInfo.getSolution(), 1e-12));
+      assertTrue(MatrixFeatures_DDRM.isEquals(expectedResult, solutionInfo.getSolution(), 1e-12));
    }
 
 	/**
@@ -89,9 +87,9 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       int constraintSize = 5;
       Random random = new Random(1235125L);
       QuadraticProgram quadraticProgram = createRandomQuadraticProgram(random, objectiveSize, solutionSize, constraintSize);
-      DenseMatrix64F initialGuess = new DenseMatrix64F(solutionSize, 1);
+      DMatrixRMaj initialGuess = new DMatrixRMaj(solutionSize, 1);
       // need a feasible initial guess, so initial guess should already be the answer
-      CommonOps.solve(quadraticProgram.getC(), quadraticProgram.getD(), initialGuess);
+      CommonOps_DDRM.solve(quadraticProgram.getC(), quadraticProgram.getD(), initialGuess);
       ActiveSearchSolutionInfo solutionInfo = solve(quadraticProgram, initialGuess);
 
       assertTrue(solutionInfo.isConverged());
@@ -99,7 +97,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       // TODO: assert that answer is initial guess
    }
 
-   private ActiveSearchSolutionInfo solve(QuadraticProgram quadraticProgram, DenseMatrix64F initialGuess)
+   private ActiveSearchSolutionInfo solve(QuadraticProgram quadraticProgram, DMatrixRMaj initialGuess)
    {
       ActiveSearchOptimizationSettings settings = new ActiveSearchOptimizationSettings(1e-12, 50, true);
       ActiveSearchQuadraticProgramOptimizer optimizer = new ActiveSearchQuadraticProgramOptimizer(settings);
@@ -110,10 +108,10 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 
    private static QuadraticProgram createRandomQuadraticProgram(Random random, int objectiveSize, int solutionSize, int constraintSize)
    {
-      DenseMatrix64F a = RandomMatrices.createRandom(objectiveSize, solutionSize, random);
-      DenseMatrix64F b = RandomMatrices.createRandom(objectiveSize, 1, random);
-      DenseMatrix64F c = RandomMatrices.createRandom(constraintSize, solutionSize, random);
-      DenseMatrix64F d = RandomMatrices.createRandom(constraintSize, 1, random);
+      DMatrixRMaj a = RandomMatrices_DDRM.rectangle(objectiveSize, solutionSize, random);
+      DMatrixRMaj b = RandomMatrices_DDRM.rectangle(objectiveSize, 1, random);
+      DMatrixRMaj c = RandomMatrices_DDRM.rectangle(constraintSize, solutionSize, random);
+      DMatrixRMaj d = RandomMatrices_DDRM.rectangle(constraintSize, 1, random);
       return new QuadraticProgram(a, b, c, d);
    }
 }

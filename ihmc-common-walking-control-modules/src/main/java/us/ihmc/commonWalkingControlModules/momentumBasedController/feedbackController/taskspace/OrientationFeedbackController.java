@@ -1,18 +1,20 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_TORQUE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_TORQUE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -21,24 +23,24 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
-import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -46,40 +48,40 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean isEnabled;
 
-   private final FrameQuaternionBasics yoDesiredOrientation;
-   private final FrameQuaternionBasics yoCurrentOrientation;
-   private final FrameQuaternionBasics yoErrorOrientation;
+   private final FBQuaternion3D yoDesiredOrientation;
+   private final FBQuaternion3D yoCurrentOrientation;
+   private final FBQuaternion3D yoErrorOrientation;
 
-   private final FrameQuaternionBasics yoErrorOrientationCumulated;
+   private final FBQuaternion3D yoErrorOrientationCumulated;
 
-   private final FrameVector3DBasics yoDesiredRotationVector;
-   private final FrameVector3DBasics yoCurrentRotationVector;
-   private final FrameVector3DBasics yoErrorRotationVector;
+   private final FBVector3D yoDesiredRotationVector;
+   private final FBVector3D yoCurrentRotationVector;
+   private final FBVector3D yoErrorRotationVector;
 
-   private final FrameVector3DBasics yoErrorRotationVectorIntegrated;
+   private final FBVector3D yoErrorRotationVectorIntegrated;
 
-   private final FrameVector3DBasics yoDesiredAngularVelocity;
-   private final FrameVector3DBasics yoCurrentAngularVelocity;
-   private final FrameVector3DBasics yoErrorAngularVelocity;
-   private final AlphaFilteredYoMutableFrameVector3D yoFilteredErrorAngularVelocity;
-   private final FrameVector3DBasics yoFeedForwardAngularVelocity;
-   private final FrameVector3DBasics yoFeedbackAngularVelocity;
-   private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackAngularVelocity;
+   private final FBVector3D yoDesiredAngularVelocity;
+   private final FBVector3D yoCurrentAngularVelocity;
+   private final FBVector3D yoErrorAngularVelocity;
+   private final FBAlphaFilteredVector3D yoFilteredErrorAngularVelocity;
+   private final FBVector3D yoFeedForwardAngularVelocity;
+   private final FBVector3D yoFeedbackAngularVelocity;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularVelocity;
 
-   private final FrameVector3DBasics yoDesiredAngularAcceleration;
-   private final FrameVector3DBasics yoFeedForwardAngularAcceleration;
-   private final FrameVector3DBasics yoFeedbackAngularAcceleration;
-   private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackAngularAcceleration;
-   private final FrameVector3DBasics yoAchievedAngularAcceleration;
+   private final FBVector3D yoDesiredAngularAcceleration;
+   private final FBVector3D yoFeedForwardAngularAcceleration;
+   private final FBVector3D yoFeedbackAngularAcceleration;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularAcceleration;
+   private final FBVector3D yoAchievedAngularAcceleration;
 
-   private final FrameVector3DBasics yoDesiredAngularTorque;
-   private final FrameVector3DBasics yoFeedForwardAngularTorque;
-   private final FrameVector3DBasics yoFeedbackAngularTorque;
-   private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackAngularTorque;
+   private final FBVector3D yoDesiredAngularTorque;
+   private final FBVector3D yoFeedForwardAngularTorque;
+   private final FBVector3D yoFeedbackAngularTorque;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularTorque;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
@@ -119,19 +121,29 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
-   public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-                                        YoVariableRegistry parentRegistry)
+   private final int controllerIndex;
+   private int currentCommandId;
+
+   public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
+                                        YoRegistry parentRegistry)
+   {
+      this(endEffector, 0, ccToolbox, fbToolbox, parentRegistry);
+   }
+
+   public OrientationFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox ccToolbox,
+                                        FeedbackControllerToolbox fbToolbox, YoRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
+      this.controllerIndex = controllerIndex;
+      FeedbackControllerSettings settings = ccToolbox.getFeedbackControllerSettings();
       if (settings != null)
          computeIntegralTerm = settings.enableIntegralTerm();
       else
          computeIntegralTerm = true;
 
-      if (toolbox.getRootJoint() != null)
+      if (ccToolbox.getRootJoint() != null)
       {
-         this.rootBody = toolbox.getRootJoint().getSuccessor();
+         this.rootBody = ccToolbox.getRootJoint().getSuccessor();
          isRootBody = this.endEffector.getName().equals(rootBody.getName());
       }
       else
@@ -140,53 +152,69 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rootBody = null;
       }
 
-      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
+      rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
-      dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getOrientationGains(endEffector, computeIntegralTerm);
+      registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "OrientationFBController");
+      dt = ccToolbox.getControlDT();
+      gains = fbToolbox.getOrCreateOrientationGains(endEffector, controllerIndex, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      isEnabled = new YoBoolean(endEffectorName + "IsOrientationFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredOrientation = feedbackControllerToolbox.getOrientation(endEffector, DESIRED, isEnabled);
-      yoCurrentOrientation = feedbackControllerToolbox.getOrientation(endEffector, CURRENT, isEnabled);
-      yoErrorOrientation = feedbackControllerToolbox.getOrientation(endEffector, ERROR, isEnabled);
+      yoDesiredOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, DESIRED, isEnabled);
+      yoCurrentOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, CURRENT, isEnabled);
+      yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
 
-      yoErrorOrientationCumulated = computeIntegralTerm ? feedbackControllerToolbox.getOrientation(endEffector, ERROR_CUMULATED, isEnabled) : null;
+      yoDesiredRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled);
+      yoCurrentRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled);
+      yoErrorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
 
-      yoDesiredRotationVector = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ROTATION_VECTOR, isEnabled);
-      yoCurrentRotationVector = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, ROTATION_VECTOR, isEnabled);
-      yoErrorRotationVector = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ROTATION_VECTOR, isEnabled);
-
-      yoErrorRotationVectorIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled)
-            : null;
-
-      yoDesiredAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ANGULAR_VELOCITY, isEnabled);
-
-      if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
+      if (computeIntegralTerm)
       {
-         yoCurrentAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, ANGULAR_VELOCITY, isEnabled);
-         yoErrorAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ANGULAR_VELOCITY, isEnabled);
-         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
+         yoErrorOrientationCumulated = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled);
+         yoErrorRotationVectorIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled);
+      }
+      else
+      {
+         yoErrorOrientationCumulated = null;
+         yoErrorRotationVectorIntegrated = null;
+      }
+
+      yoDesiredAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ANGULAR_VELOCITY, isEnabled);
+
+      if (ccToolbox.isEnableInverseDynamicsModule() || ccToolbox.isEnableVirtualModelControlModule())
+      {
+         yoCurrentAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ANGULAR_VELOCITY, isEnabled);
+         yoErrorAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ANGULAR_VELOCITY, isEnabled);
+         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
          if (breakFrequency != null)
-            yoFilteredErrorAngularVelocity = feedbackControllerToolbox.getAlphaFilteredDataVector(endEffector, ERROR, ANGULAR_VELOCITY, dt, breakFrequency,
-                                                                                                  isEnabled);
+            yoFilteredErrorAngularVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData3D(endEffector,
+                                                                                            controllerIndex,
+                                                                                            ERROR,
+                                                                                            ANGULAR_VELOCITY,
+                                                                                            dt,
+                                                                                            breakFrequency,
+                                                                                            isEnabled);
          else
             yoFilteredErrorAngularVelocity = null;
 
-         if (toolbox.isEnableInverseDynamicsModule())
+         if (ccToolbox.isEnableInverseDynamicsModule())
          {
-            yoDesiredAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ANGULAR_ACCELERATION, isEnabled);
-            yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled);
-            yoFeedbackAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, ANGULAR_ACCELERATION, isEnabled);
-            rateLimitedFeedbackAngularAcceleration = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_ACCELERATION, dt,
-                                                                                                        maximumRate, isEnabled);
-            yoAchievedAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, ACHIEVED, ANGULAR_ACCELERATION, isEnabled);
+            yoDesiredAngularAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ANGULAR_ACCELERATION, isEnabled);
+            yoFeedForwardAngularAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled);
+            yoFeedbackAngularAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, ANGULAR_ACCELERATION, isEnabled);
+            rateLimitedFeedbackAngularAcceleration = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
+                                                                                                  controllerIndex,
+                                                                                                  FEEDBACK,
+                                                                                                  ANGULAR_ACCELERATION,
+                                                                                                  dt,
+                                                                                                  maximumRate,
+                                                                                                  isEnabled);
+            yoAchievedAngularAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ACHIEVED, ANGULAR_ACCELERATION, isEnabled);
          }
          else
          {
@@ -197,13 +225,18 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
             yoAchievedAngularAcceleration = null;
          }
 
-         if (toolbox.isEnableVirtualModelControlModule())
+         if (ccToolbox.isEnableVirtualModelControlModule())
          {
-            yoDesiredAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ANGULAR_TORQUE, isEnabled);
-            yoFeedForwardAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, ANGULAR_TORQUE, isEnabled);
-            yoFeedbackAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, ANGULAR_TORQUE, isEnabled);
-            rateLimitedFeedbackAngularTorque = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_TORQUE, dt, maximumRate,
-                                                                                                  isEnabled);
+            yoDesiredAngularTorque = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ANGULAR_TORQUE, isEnabled);
+            yoFeedForwardAngularTorque = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, ANGULAR_TORQUE, isEnabled);
+            yoFeedbackAngularTorque = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, ANGULAR_TORQUE, isEnabled);
+            rateLimitedFeedbackAngularTorque = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
+                                                                                            controllerIndex,
+                                                                                            FEEDBACK,
+                                                                                            ANGULAR_TORQUE,
+                                                                                            dt,
+                                                                                            maximumRate,
+                                                                                            isEnabled);
          }
          else
          {
@@ -231,12 +264,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rateLimitedFeedbackAngularTorque = null;
       }
 
-      if (toolbox.isEnableInverseKinematicsModule())
+      if (ccToolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, ANGULAR_VELOCITY, isEnabled);
-         yoFeedForwardAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled);
-         rateLimitedFeedbackAngularVelocity = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_VELOCITY, dt, maximumRate,
-                                                                                                 isEnabled);
+         yoFeedbackAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, ANGULAR_VELOCITY, isEnabled);
+         yoFeedForwardAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled);
+         rateLimitedFeedbackAngularVelocity = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
+                                                                                           controllerIndex,
+                                                                                           FEEDBACK,
+                                                                                           ANGULAR_VELOCITY,
+                                                                                           dt,
+                                                                                           maximumRate,
+                                                                                           isEnabled);
       }
       else
       {
@@ -251,8 +289,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public void submitFeedbackControlCommand(OrientationFeedbackControlCommand command)
    {
       if (command.getEndEffector() != endEffector)
-         throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
+         throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
+      currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
 
@@ -266,22 +305,27 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoDesiredOrientation.setIncludingFrame(command.getReferenceOrientation());
       yoDesiredOrientation.getRotationVector(yoDesiredRotationVector);
+      yoDesiredOrientation.setCommandId(currentCommandId);
       yoDesiredAngularVelocity.setIncludingFrame(command.getReferenceAngularVelocity());
       yoDesiredAngularVelocity.checkReferenceFrameMatch(yoDesiredOrientation);
+      yoDesiredAngularVelocity.setCommandId(currentCommandId);
       if (yoFeedForwardAngularVelocity != null)
       {
          yoFeedForwardAngularVelocity.setIncludingFrame(command.getReferenceAngularVelocity());
          yoFeedForwardAngularVelocity.checkReferenceFrameMatch(yoDesiredOrientation);
+         yoFeedForwardAngularVelocity.setCommandId(currentCommandId);
       }
       if (yoFeedForwardAngularAcceleration != null)
       {
          yoFeedForwardAngularAcceleration.setIncludingFrame(command.getReferenceAngularAcceleration());
          yoFeedForwardAngularAcceleration.checkReferenceFrameMatch(yoDesiredOrientation);
+         yoFeedForwardAngularAcceleration.setCommandId(currentCommandId);
       }
       if (yoFeedForwardAngularTorque != null)
       {
          yoFeedForwardAngularTorque.setIncludingFrame(command.getReferenceTorque());
          yoFeedForwardAngularTorque.checkReferenceFrameMatch(yoDesiredOrientation);
+         yoFeedForwardAngularTorque.setCommandId(currentCommandId);
       }
    }
 
@@ -293,7 +337,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    @Override
    public void initialize()
-   {
+   { // TODO See SpatialFeedbackController.initialize()
       if (rateLimitedFeedbackAngularAcceleration != null)
          rateLimitedFeedbackAngularAcceleration.reset();
       if (rateLimitedFeedbackAngularVelocity != null)
@@ -330,8 +374,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setIncludingFrame(desiredAngularAcceleration);
       yoFeedbackAngularAcceleration.changeFrame(trajectoryFrame);
+      yoFeedbackAngularAcceleration.setCommandId(currentCommandId);
       rateLimitedFeedbackAngularAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularAcceleration.update();
+      rateLimitedFeedbackAngularAcceleration.setCommandId(currentCommandId);
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAngularAcceleration);
 
       desiredAngularAcceleration.changeFrame(endEffectorFrame);
@@ -339,6 +385,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoDesiredAngularAcceleration.setIncludingFrame(desiredAngularAcceleration);
       yoDesiredAngularAcceleration.changeFrame(trajectoryFrame);
+      yoDesiredAngularAcceleration.setCommandId(currentCommandId);
 
       inverseDynamicsOutput.setAngularAcceleration(endEffectorFrame, desiredAngularAcceleration);
    }
@@ -361,14 +408,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       yoFeedbackAngularVelocity.changeFrame(trajectoryFrame);
+      yoFeedbackAngularVelocity.setCommandId(currentCommandId);
       rateLimitedFeedbackAngularVelocity.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularVelocity.update();
+      rateLimitedFeedbackAngularVelocity.setCommandId(currentCommandId);
       desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackAngularVelocity);
 
       desiredAngularVelocity.add(feedForwardAngularVelocity);
 
       yoDesiredAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       yoDesiredAngularVelocity.changeFrame(trajectoryFrame);
+      yoDesiredAngularVelocity.setCommandId(currentCommandId);
 
       desiredAngularVelocity.changeFrame(endEffectorFrame);
       inverseKinematicsOutput.setAngularVelocity(endEffectorFrame, desiredAngularVelocity);
@@ -413,8 +463,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularTorque.setIncludingFrame(desiredAngularTorque);
       yoFeedbackAngularTorque.changeFrame(trajectoryFrame);
+      yoFeedbackAngularTorque.setCommandId(currentCommandId);
       rateLimitedFeedbackAngularTorque.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularTorque.update();
+      rateLimitedFeedbackAngularTorque.setCommandId(currentCommandId);
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackAngularTorque);
 
       desiredAngularTorque.changeFrame(endEffectorFrame);
@@ -422,6 +474,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoDesiredAngularTorque.setIncludingFrame(desiredAngularTorque);
       yoDesiredAngularTorque.changeFrame(trajectoryFrame);
+      yoDesiredAngularTorque.setCommandId(currentCommandId);
    }
 
    @Override
@@ -453,7 +506,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoCurrentOrientation.setToZero(endEffectorFrame);
       yoCurrentOrientation.changeFrame(trajectoryFrame);
+      yoCurrentOrientation.setCommandId(currentCommandId);
       yoCurrentOrientation.getRotationVector(yoCurrentRotationVector);
+      yoCurrentRotationVector.setCommandId(currentCommandId);
 
       desiredOrientation.setIncludingFrame(yoDesiredOrientation);
       desiredOrientation.changeFrame(endEffectorFrame);
@@ -465,7 +520,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoErrorRotationVector.setIncludingFrame(feedbackTermToPack);
       yoErrorRotationVector.changeFrame(trajectoryFrame);
+      yoErrorRotationVector.setCommandId(currentCommandId);
       yoErrorOrientation.setRotationVectorIncludingFrame(yoErrorRotationVector);
+      yoErrorRotationVector.setCommandId(currentCommandId);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
@@ -498,6 +555,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       endEffectorFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       yoCurrentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       yoCurrentAngularVelocity.changeFrame(trajectoryFrame);
+      yoCurrentAngularVelocity.setCommandId(currentCommandId);
 
       feedbackTermToPack.setToZero(trajectoryFrame);
       feedbackTermToPack.sub(yoDesiredAngularVelocity, yoCurrentAngularVelocity);
@@ -516,6 +574,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(trajectoryFrame);
          yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
          yoFilteredErrorAngularVelocity.update();
+         yoFilteredErrorAngularVelocity.setCommandId(currentCommandId);
          feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
       }
       else
@@ -523,6 +582,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
       }
       yoErrorAngularVelocity.changeFrame(trajectoryFrame);
+      yoErrorAngularVelocity.setCommandId(currentCommandId);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
@@ -564,7 +624,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          feedbackTermToPack.setToZero(endEffectorFrame);
          yoErrorOrientationCumulated.setToZero(trajectoryFrame);
+         yoErrorOrientationCumulated.setCommandId(currentCommandId);
          yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
+         yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);
          return;
       }
 
@@ -578,6 +640,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
       errorOrientationCumulated.multiply(yoErrorOrientation);
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
+      yoErrorOrientationCumulated.setCommandId(currentCommandId);
       errorOrientationCumulated.normalizeAndLimitToPi();
 
       errorOrientationCumulated.getRotationVector(feedbackTermToPack);
@@ -587,6 +650,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorRotationVectorIntegrated.setIncludingFrame(feedbackTermToPack);
       yoErrorRotationVectorIntegrated.changeFrame(trajectoryFrame);
+      yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
@@ -609,7 +673,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseDynamicsOutput;
    }
 
@@ -617,7 +681,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public SpatialVelocityCommand getInverseKinematicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseKinematicsOutput;
    }
 
@@ -625,7 +689,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public VirtualModelControlCommand<?> getVirtualModelControlOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
+   }
+
+   public int getControllerIndex()
+   {
+      return controllerIndex;
    }
 }

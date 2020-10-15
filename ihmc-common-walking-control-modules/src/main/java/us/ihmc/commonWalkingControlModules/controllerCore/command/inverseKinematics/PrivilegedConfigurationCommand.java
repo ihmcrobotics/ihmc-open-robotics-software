@@ -21,6 +21,7 @@ public class PrivilegedConfigurationCommand
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
    }
 
+   private int commandId;
    /** sets whether or not to utilize the privileged configuration calculator */
    private boolean enable = false;
    private final OneDoFJointPrivilegedConfigurationParameters defaultParameters = new OneDoFJointPrivilegedConfigurationParameters();
@@ -42,6 +43,7 @@ public class PrivilegedConfigurationCommand
     */
    public void clear()
    {
+      commandId = 0;
       enable = false;
       defaultParameters.clear();
       joints.clear();
@@ -57,6 +59,8 @@ public class PrivilegedConfigurationCommand
    public void set(PrivilegedConfigurationCommand other)
    {
       clear();
+
+      commandId = other.commandId;
       enable = other.enable;
       defaultParameters.set(other.defaultParameters);
 
@@ -138,7 +142,7 @@ public class PrivilegedConfigurationCommand
    /**
     * Adds a joint to set the privileged configuration for.
     *
-    * @param joint the joint to set the configuration of.
+    * @param joint                   the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
     */
    public void addJoint(OneDoFJointBasics joint, double privilegedConfiguration)
@@ -153,9 +157,9 @@ public class PrivilegedConfigurationCommand
    /**
     * Adds a joint to set the privileged configuration option for.
     *
-    * @param joint the joint to set the configuration of.
+    * @param joint                   the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration option for the joint to
-    *           achieve.
+    *                                achieve.
     */
    public void addJoint(OneDoFJointBasics joint, PrivilegedConfigurationOption privilegedConfiguration)
    {
@@ -175,7 +179,7 @@ public class PrivilegedConfigurationCommand
    /**
     * Updates the desired privileged configuration for a joint already registered give its index.
     *
-    * @param jointIndex index of the joint to set the configuration of.
+    * @param jointIndex              index of the joint to set the configuration of.
     * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
     */
    public void setOneDoFJoint(int jointIndex, double privilegedConfiguration)
@@ -190,9 +194,9 @@ public class PrivilegedConfigurationCommand
     * Updates the desired privileged configuration option for a joint already registered give its
     * index.
     *
-    * @param jointIndex index of the joint to set the configuration opiton of.
+    * @param jointIndex              index of the joint to set the configuration opiton of.
     * @param privilegedConfiguration the desired privileged configuration option for the joint to
-    *           achieve.
+    *                                achieve.
     */
    public void setOneDoFJoint(int jointIndex, PrivilegedConfigurationOption privilegedConfiguration)
    {
@@ -288,6 +292,18 @@ public class PrivilegedConfigurationCommand
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -298,6 +314,8 @@ public class PrivilegedConfigurationCommand
       {
          PrivilegedConfigurationCommand other = (PrivilegedConfigurationCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (enable != other.enable)
             return false;
          if (!defaultParameters.equals(other.defaultParameters))

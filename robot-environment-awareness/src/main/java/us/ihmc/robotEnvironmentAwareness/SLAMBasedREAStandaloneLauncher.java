@@ -3,31 +3,67 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.messager.Messager;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
+import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
+import us.ihmc.tools.io.WorkspacePathTools;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "defaultSLAMSegmentationModuleConfiguration.txt";
 
-   private SLAMBasedEnvironmentAwarenessUI ui;
-   private SLAMModule module;
+   private Messager slamMessager;
+   private SLAMModule slamModule;
+   private SLAMBasedEnvironmentAwarenessUI slamUI;
+
+   private Messager segmentationMessager;
+   private PlanarSegmentationModule segmentationModule;
+   private PlanarSegmentationUI planarSegmentationUI;
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = SLAMModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
+      slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
+      slamUI = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage);
+      slamModule = SLAMModule.createIntraprocessModule(slamMessager);
 
-      ui.show();
-      module.start();
+      segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+      segmentationMessager.startMessager();
+
+      Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/robot-environment-awareness/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+
+      Stage secondStage = new Stage();
+      planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
+      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath.toFile(), segmentationMessager);
+
+      slamModule.attachOcTreeConsumer(segmentationModule);
+
+      slamUI.show();
+      planarSegmentationUI.show();
+      slamModule.start();
+      segmentationModule.start();
    }
 
    @Override
    public void stop() throws Exception
    {
-      ui.stop();
-      module.stop();
+      slamUI.stop();
+      slamModule.stop();
+
+      planarSegmentationUI.stop();
+      segmentationModule.stop();
+
+      slamMessager.closeMessager();
+      segmentationMessager.closeMessager();
 
       Platform.exit();
    }

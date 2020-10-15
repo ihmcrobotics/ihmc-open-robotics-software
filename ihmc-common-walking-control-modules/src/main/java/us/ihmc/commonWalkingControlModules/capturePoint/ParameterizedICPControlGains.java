@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParameterizedICPControlGains implements ICPControlGainsProvider
@@ -17,7 +17,7 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
    private final DoubleProvider feedbackPartMaxValueParallelToMotion;
    private final DoubleProvider feedbackPartMaxValueOrthogonalToMotion;
 
-   public ParameterizedICPControlGains(String suffix, YoVariableRegistry registry)
+   public ParameterizedICPControlGains(String suffix, YoRegistry registry)
    {
       kpParallelToMotion = new DoubleParameter("captureKpParallel" + suffix, registry);
       kpOrthogonalToMotion = new DoubleParameter("captureKpOrthogonal" + suffix, registry);
@@ -29,7 +29,7 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
       feedbackPartMaxValueOrthogonalToMotion= new DoubleParameter("feedbackPartMaxValueOrthogonalToMotion" + suffix, registry, Double.POSITIVE_INFINITY);
    }
 
-   public ParameterizedICPControlGains(String suffix, ICPControlGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedICPControlGains(String suffix, ICPControlGainsReadOnly defaults, YoRegistry registry)
    {
       kpParallelToMotion = new DoubleParameter("captureKpParallel" + suffix, registry, defaults.getKpParallelToMotion());
       kpOrthogonalToMotion = new DoubleParameter("captureKpOrthogonal" + suffix, registry, defaults.getKpOrthogonalToMotion());

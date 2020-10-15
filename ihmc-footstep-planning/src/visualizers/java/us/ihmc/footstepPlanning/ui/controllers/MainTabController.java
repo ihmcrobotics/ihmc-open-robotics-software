@@ -1,14 +1,15 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,6 +18,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
@@ -25,7 +28,6 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
@@ -34,7 +36,6 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,19 +54,23 @@ public class MainTabController
    @FXML
    private CheckBox acceptNewRegions;
    @FXML
-   private CheckBox performAStarSearch;
+   private CheckBox assumeFlatGround;
    @FXML
    private CheckBox planBodyPath;
    @FXML
-   private CheckBox assumeFlatGround;
+   private CheckBox performAStarSearch;
+   @FXML
+   private CheckBox performPositionBasedSplitFractionCalculation;
+   @FXML
+   private CheckBox performAreaBasedSplitFractionCalculation;
    @FXML
    private CheckBox ignorePartialFootholds;
-   @FXML
-   private CheckBox autoPostProcess;
    @FXML
    private Spinner<Double> timeout;
    @FXML
    private Spinner<Double> horizonLength;
+   @FXML
+   private ComboBox<SwingPlannerType> swingPlannerType;
 
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
@@ -100,7 +105,7 @@ public class MainTabController
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
    @FXML
-   private ComboBox<us.ihmc.footstepPlanning.FootstepPlanHeading> pathHeading;
+   private Spinner<Double> pathHeading;
 
    @FXML
    private Spinner<Double> goalYaw;
@@ -221,12 +226,13 @@ public class MainTabController
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
+      pathHeading.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(- Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
       initialSupportSide.setValue(RobotSide.LEFT);
 
-      pathHeading.setItems(FXCollections.observableArrayList(FootstepPlanHeading.values()));
-      pathHeading.setValue(FootstepPlanHeading.FORWARD);
+      swingPlannerType.setItems(FXCollections.observableArrayList(SwingPlannerType.values()));
+      swingPlannerType.setValue(SwingPlannerType.NONE);
 
       messager.bindBidirectional(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty(), true);
       messager.bindBidirectional(OverrideStepTimings, overrideTiming.selectedProperty(), true);
@@ -236,7 +242,6 @@ public class MainTabController
       messager.bindBidirectional(OverrideSwingHeight, overrideSwingHeight.selectedProperty(), true);
       messager.bindBidirectional(ManualSwingHeight, swingHeightSpinner.valueFactoryProperty().getValue().valueProperty(), true);
 
-      messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
       messager.bindBidirectional(SnapGoalSteps, snapGoalSteps.selectedProperty(), true);
       messager.bindBidirectional(AbortIfGoalStepSnapFails, abortIfGoalStepSnapFails.selectedProperty(), true);
 
@@ -261,7 +266,7 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide.valueProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.valueProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.getValueFactory().valueProperty(), false);
 
       goalPositionProperty.bindBidirectionalX(goalXPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
@@ -275,8 +280,11 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
-      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
+      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
+      messager.bindBidirectional(PerformPositionBasedSplitFractionCalculation, performPositionBasedSplitFractionCalculation.selectedProperty(), true);
+      messager.bindBidirectional(PerformAreaBasedSplitFractionCalculation, performAreaBasedSplitFractionCalculation.selectedProperty(), true);
+      messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
@@ -301,7 +309,25 @@ public class MainTabController
    @FXML
    public void loadLog()
    {
-      messager.submitMessage(RequestLoadLog, true);
+      messager.submitMessage(RequestLoadLog, LoadRequestType.FILE_CHOOSER);
+   }
+
+   @FXML
+   public void loadLatestLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.LATEST);
+   }
+
+   @FXML
+   public void loadPreviousLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.PREVIOUS);
+   }
+
+   @FXML
+   public void loadNextLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.NEXT);
    }
 
    private void setStartFromRobot()

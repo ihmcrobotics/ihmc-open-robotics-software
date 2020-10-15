@@ -30,7 +30,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WrapperForMultipleToeOffCalculatorsTest
 {
@@ -42,7 +42,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
    private WrapperForMultipleToeOffCalculators generator;
    private EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -50,7 +50,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
       toeOffCalculators = new EnumMap<>(ToeOffEnum.class);
 
       for (RobotSide robotSide : RobotSide.values)

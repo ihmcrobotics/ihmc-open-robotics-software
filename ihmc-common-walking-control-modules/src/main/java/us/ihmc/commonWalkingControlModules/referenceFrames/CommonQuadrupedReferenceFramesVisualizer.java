@@ -4,18 +4,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 
 public class CommonQuadrupedReferenceFramesVisualizer
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonQuadrupedReferenceFramesVisualizer(CommonQuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonQuadrupedReferenceFramesVisualizer(CommonQuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotQuadrant robotQudarant : RobotQuadrant.values)

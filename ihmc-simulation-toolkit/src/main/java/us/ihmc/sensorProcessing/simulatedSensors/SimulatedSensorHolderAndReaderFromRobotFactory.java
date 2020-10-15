@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,11 +22,11 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SensorReaderFactory");
+   private final YoRegistry registry = new YoRegistry("SensorReaderFactory");
    private final Robot robot;
 
    private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
@@ -46,9 +47,9 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    @Override
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
    {
-      ArrayList<Joint> rootJoints = robot.getRootJoints();
+      List<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
       {
          throw new RuntimeException("Robot has more than 1 rootJoint");
@@ -80,7 +81,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       parentRegistry.addChild(registry);
    }
 
-   private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoVariableRegistry registry)
+   private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoRegistry registry)
    {
       for (Entry<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionEntry : forceSensorDefinitions2.entrySet())
       {
@@ -109,7 +110,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
    }
 
-   private void createAndAddOrientationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddOrientationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
@@ -131,7 +132,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
    }
 
-   private void createAndAddAngularVelocitySensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddAngularVelocitySensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
@@ -153,7 +154,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
    }
 
-   private void createAndAddLinearAccelerationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddLinearAccelerationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 

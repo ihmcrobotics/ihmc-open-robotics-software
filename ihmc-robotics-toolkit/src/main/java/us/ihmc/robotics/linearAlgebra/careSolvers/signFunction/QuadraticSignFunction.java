@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
@@ -10,11 +11,11 @@ public class QuadraticSignFunction implements SignFunction
    private int maxIterations = Integer.MAX_VALUE;
    private double epsilon = 1e-12;
 
-   private final DenseMatrix64F Wprev = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F ZInverse = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F Z = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F ZDiff = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj Wprev = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj ZInverse = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Z = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj ZDiff = new DMatrixRMaj(0, 0);
 
    public void setMaxIterations(int maxIterations)
    {
@@ -27,7 +28,7 @@ public class QuadraticSignFunction implements SignFunction
    }
 
    @Override
-   public boolean compute(DenseMatrix64F K)
+   public boolean compute(DMatrixRMaj K)
    {
       int size = K.getNumRows();
 
@@ -45,15 +46,15 @@ public class QuadraticSignFunction implements SignFunction
          if (iterations > maxIterations)
             return false;
 
-         double determinate = CommonOps.det(Wprev);
+         double determinate = CommonOps_DDRM.det(Wprev);
          double c = Math.pow(Math.abs(determinate), -1.0 / (2 * size));
          Z.set(Wprev);
-         CommonOps.scale(c, Z);
+         CommonOps_DDRM.scale(c, Z);
 
          NativeCommonOps.invert(Z, ZInverse);
 
-         CommonOps.subtract(Z, ZInverse, ZDiff);
-         CommonOps.add(Z, -0.5, ZDiff, W);
+         CommonOps_DDRM.subtract(Z, ZInverse, ZDiff);
+         CommonOps_DDRM.add(Z, -0.5, ZDiff, W);
 
          converged = MatrixToolsLocal.distance(W, Wprev) < epsilon;
 
@@ -65,7 +66,7 @@ public class QuadraticSignFunction implements SignFunction
    }
 
    @Override
-   public DenseMatrix64F getW(DenseMatrix64F WToPack)
+   public DMatrixRMaj getW(DMatrixRMaj WToPack)
    {
       if (WToPack != null)
       {
@@ -73,6 +74,6 @@ public class QuadraticSignFunction implements SignFunction
          return null;
       }
       else
-         return new DenseMatrix64F(W);
+         return new DMatrixRMaj(W);
    }
 }

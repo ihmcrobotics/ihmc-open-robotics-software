@@ -6,10 +6,10 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -22,7 +22,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
@@ -42,7 +46,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public final class SpatialFeedbackControllerTest
 {
@@ -54,7 +58,7 @@ public final class SpatialFeedbackControllerTest
       double controlDT = 0.004;
       double simulationTime = 4.0;
       Random random = new Random(562968L);
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
 
       // Create two floating joints. This test attempts to control the end effector body with respect to the moving base body.
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -93,7 +97,7 @@ public final class SpatialFeedbackControllerTest
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       QPInput motionQPInput = new QPInput(MultiBodySystemTools.computeDegreesOfFreedom(joints));
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(0, 0);
+      DMatrixRMaj jointAccelerations = new DMatrixRMaj(0, 0);
       double damping = 0.001;
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
@@ -126,7 +130,7 @@ public final class SpatialFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
@@ -170,10 +174,10 @@ public final class SpatialFeedbackControllerTest
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       QPInput motionQPInput = new QPInput(numberOfDoFs);
-      LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
-      DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
+      LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
+      DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
       FramePoint3D currentPosition = new FramePoint3D();
@@ -194,7 +198,7 @@ public final class SpatialFeedbackControllerTest
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
-         CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerations);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
@@ -230,7 +234,7 @@ public final class SpatialFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
@@ -273,29 +277,29 @@ public final class SpatialFeedbackControllerTest
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       QPInput motionQPInput = new QPInput(numberOfDoFs);
-      LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
-      DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
+      LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
+      DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F jointAccelerationsFromJerryQP = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
+      DMatrixRMaj jointAccelerationsFromJerryQP = new DMatrixRMaj(numberOfDoFs, 1);
+      DMatrixRMaj jointAccelerationsFromQPOASES = new DMatrixRMaj(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
       SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
       OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver();
 
-      DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      DenseMatrix64F solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F solverInput_Aeq = new DenseMatrix64F(0, numberOfDoFs);
-      DenseMatrix64F solverInput_beq = new DenseMatrix64F(0, 1);
-      DenseMatrix64F solverInput_Ain = new DenseMatrix64F(0, numberOfDoFs);
-      DenseMatrix64F solverInput_bin = new DenseMatrix64F(0, 1);
-      DenseMatrix64F solverInput_lb = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F solverInput_ub = new DenseMatrix64F(numberOfDoFs, 1);
-      CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+      DMatrixRMaj solverInput_H = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
+      DMatrixRMaj solverInput_f = new DMatrixRMaj(numberOfDoFs, 1);
+      DMatrixRMaj solverInput_Aeq = new DMatrixRMaj(0, numberOfDoFs);
+      DMatrixRMaj solverInput_beq = new DMatrixRMaj(0, 1);
+      DMatrixRMaj solverInput_Ain = new DMatrixRMaj(0, numberOfDoFs);
+      DMatrixRMaj solverInput_bin = new DMatrixRMaj(0, 1);
+      DMatrixRMaj solverInput_lb = new DMatrixRMaj(numberOfDoFs, 1);
+      DMatrixRMaj solverInput_ub = new DMatrixRMaj(numberOfDoFs, 1);
+      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
-      DenseMatrix64F tempJtW = new DenseMatrix64F(numberOfDoFs, 6);
+      DMatrixRMaj tempJtW = new DMatrixRMaj(numberOfDoFs, 6);
 
       FramePoint3D currentPosition = new FramePoint3D();
       FrameQuaternion currentOrientation = new FrameQuaternion();
@@ -314,22 +318,22 @@ public final class SpatialFeedbackControllerTest
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
-         CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
-         CommonOps.mult(tempJtW, motionQPInput.taskObjective, solverInput_f); // f = - J^T W xDDot
-         CommonOps.scale(-1.0, solverInput_f);
+         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
+         CommonOps_DDRM.mult(tempJtW, motionQPInput.taskObjective, solverInput_f); // f = - J^T W xDDot
+         CommonOps_DDRM.scale(-1.0, solverInput_f);
 
          for (int diag = 0; diag < numberOfDoFs; diag++)
             solverInput_H.add(diag, diag, 1e-8);
 
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-         jerryQPSolver.solve(jointAccelerationsFromJerryQP, new DenseMatrix64F(1, 1), new DenseMatrix64F(1, 1));
+         jerryQPSolver.solve(jointAccelerationsFromJerryQP);
          oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
                              jointAccelerationsFromQPOASES, true);
 
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
-         CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
+         CommonOps_DDRM.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
 
          integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerationsFromJerryQP);
          integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());

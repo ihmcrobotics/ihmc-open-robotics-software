@@ -14,6 +14,11 @@
                         <registry name="ICPOptimizationController">
                             <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         </registry>
+                        <registry name="ICPController">
+                            <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                            <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97"/>
+                        </registry>
                         <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
@@ -197,7 +202,6 @@
                         </registry>
                         <registry name="FeetManager">
                             <registry name="SupportStateParameters">
-<parameter name="avoidFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="dampFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
                             </registry>
@@ -225,6 +229,7 @@
                              <parameter name="Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
                              <parameter name="Verification_InlineCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="0.002"/>
                              <parameter name="Verification_TransverseCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="5.0E-4"/>
+                             <parameter name="Cropping_FootDropThresholdForCrop" type="DoubleParameter" min="0.0" max="1.0" value="0.02"/>
                              <parameter name="applyPartialFootholds" type="BooleanParameter" value="true"/>
                         </registry>
                         <registry name="BalanceManager">
@@ -235,7 +240,7 @@
                             <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
-                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.012"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.013"/>
                         </registry>
                     </registry>
                 </registry>

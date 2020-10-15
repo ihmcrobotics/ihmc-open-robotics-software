@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.algorithms.MultiBodyResponseCalculator;
@@ -38,7 +38,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.0, 0.0, 1.0);
+   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.0, 0.0, 0.0);
 
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
@@ -50,19 +50,19 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    private final ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifier;
    private final ImpulseBasedJointTwistProvider jointTwistModifier;
 
-   private final DenseMatrix64F jointVelocityNoImpulse = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F jointVelocityDueToOtherImpulse = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F jointVelocity = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F jointVelocityPrevious = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F jointVelocityUpdate = new DenseMatrix64F(matrixInitialSize, 1);
+   private final DMatrixRMaj jointVelocityNoImpulse = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj jointVelocityDueToOtherImpulse = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj jointVelocity = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj jointVelocityPrevious = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj jointVelocityUpdate = new DMatrixRMaj(matrixInitialSize, 1);
 
-   private final DenseMatrix64F solverInput_A = new DenseMatrix64F(matrixInitialSize, matrixInitialSize);
-   private final DenseMatrix64F solverInput_b = new DenseMatrix64F(matrixInitialSize, 1);
+   private final DMatrixRMaj solverInput_A = new DMatrixRMaj(matrixInitialSize, matrixInitialSize);
+   private final DMatrixRMaj solverInput_b = new DMatrixRMaj(matrixInitialSize, 1);
    private final LinearComplementarityProblemSolver solver = new LinearComplementarityProblemSolver();
 
-   private final DenseMatrix64F impulse = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F impulsePrevious = new DenseMatrix64F(matrixInitialSize, 1);
-   private final DenseMatrix64F impulseUpdate = new DenseMatrix64F(matrixInitialSize, 1);
+   private final DMatrixRMaj impulse = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj impulsePrevious = new DMatrixRMaj(matrixInitialSize, 1);
+   private final DMatrixRMaj impulseUpdate = new DMatrixRMaj(matrixInitialSize, 1);
 
    private final RigidBodyBasics rootBody;
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
@@ -117,7 +117,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
 
          double qd = joint.getQd() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
-         qd *= 1.0 + constraintParameters.getCoefficientOfRestitution();
+         if (Math.abs(qd) >= constraintParameters.getRestitutionThreshold())
+            qd *= 1.0 + constraintParameters.getCoefficientOfRestitution();
 
          if (activeLimit == ActiveLimit.LOWER)
          {
@@ -170,13 +171,13 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
 
          for (RigidBodyBasics externalTarget : rigidBodyTwistModifier.getRigidBodies())
          {
-            DenseMatrix64F externalInertiaMatrix = rigidBodyTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
+            DMatrixRMaj externalInertiaMatrix = rigidBodyTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
             twistChangeProvider.getTwistOfBody(externalTarget).get(0, i, externalInertiaMatrix);
          }
 
          for (JointBasics externalTarget : jointTwistModifier.getJoints())
          {
-            DenseMatrix64F externalInertiaMatrix = jointTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
+            DMatrixRMaj externalInertiaMatrix = jointTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
             externalInertiaMatrix.set(responseCalculator.getJointTwistChange(externalTarget));
          }
 
@@ -213,7 +214,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          {
             jointVelocityDueToOtherImpulse.set(i, externalJointTwistModifier.getJointState(jointsAtLimit.get(i)));
          }
-         CommonOps.add(jointVelocityNoImpulse, jointVelocityDueToOtherImpulse, jointVelocity);
+         CommonOps_DDRM.add(jointVelocityNoImpulse, jointVelocityDueToOtherImpulse, jointVelocity);
       }
       else
       {
@@ -228,7 +229,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
       else
       {
-         CommonOps.subtract(jointVelocity, jointVelocityPrevious, jointVelocityUpdate);
+         CommonOps_DDRM.subtract(jointVelocity, jointVelocityPrevious, jointVelocityUpdate);
          jointVelocityPrevious.set(jointVelocity);
       }
 
@@ -238,15 +239,13 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          solverInput_b.set(i, activeLimit.transform(jointVelocity.get(i)));
       }
 
-      DenseMatrix64F solverOutput_f = solver.solve(solverInput_A, solverInput_b);
+      DMatrixRMaj solverOutput_f = solver.solve(solverInput_A, solverInput_b);
 
       for (int i = 0; i < jointsAtLimit.size(); i++)
       {
          ActiveLimit activeLimit = activeLimits.get(i);
          impulse.set(i, activeLimit.transform(solverOutput_f.get(i)));
       }
-      
-      CommonOps.scale(constraintParameters.getConstraintForceMixing(), impulse);
 
       if (isFirstUpdate)
       {
@@ -254,10 +253,10 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
       else
       {
-         CommonOps.add(1.0 - alpha, impulsePrevious, alpha, impulse, impulse);
+         CommonOps_DDRM.add(1.0 - alpha, impulsePrevious, alpha, impulse, impulse);
       }
 
-      isImpulseZero = NormOps.normP2(impulse) < 1.0e-12;
+      isImpulseZero = NormOps_DDRM.normP2(impulse) < 1.0e-12;
 
       impulsePrevious.set(impulse);
       isFirstUpdate = false;
@@ -300,7 +299,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       return activeLimits;
    }
 
-   public DenseMatrix64F getImpulse()
+   public DMatrixRMaj getImpulse()
    {
       return impulse;
    }
@@ -308,13 +307,13 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    @Override
    public double getImpulseUpdate()
    {
-      return NormOps.normP2(impulseUpdate);
+      return NormOps_DDRM.normP2(impulseUpdate);
    }
 
    @Override
    public double getVelocityUpdate()
    {
-      return NormOps.normP2(jointVelocityUpdate);
+      return NormOps_DDRM.normP2(jointVelocityUpdate);
    }
 
    @Override
@@ -354,12 +353,12 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    }
 
    @Override
-   public DenseMatrix64F getJointVelocityChange(int index)
+   public DMatrixRMaj getJointVelocityChange(int index)
    {
       if (!isConstraintActive())
          return null;
 
-      DenseMatrix64F response = responseCalculator.propagateImpulse();
+      DMatrixRMaj response = responseCalculator.propagateImpulse();
       if (response != null)
          return response;
 
@@ -370,7 +369,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       return responseCalculator.propagateImpulse();
    }
 
-   public DenseMatrix64F getJointVelocityDueToOtherImpulse()
+   public DMatrixRMaj getJointVelocityDueToOtherImpulse()
    {
       return jointVelocityDueToOtherImpulse;
    }

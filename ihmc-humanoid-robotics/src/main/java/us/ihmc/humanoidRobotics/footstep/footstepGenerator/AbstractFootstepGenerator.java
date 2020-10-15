@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunc
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,7 +47,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected SideDependentList<ReferenceFrame> soleFrames;
    protected boolean startStancePreferenceSpecified = false;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected HeightMapWithPoints heightMap;
    protected SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();

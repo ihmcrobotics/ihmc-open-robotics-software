@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FlatGroundContactForceOptimizerTest
 {
@@ -39,7 +39,7 @@ public class FlatGroundContactForceOptimizerTest
    public void simpleTest()
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
 
       double friction = 0.8;
       int vectorsPerContact = 3;
@@ -61,7 +61,7 @@ public class FlatGroundContactForceOptimizerTest
       {
          scs = new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
       }
 
       FrameVector3D torque = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);

@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.agileHexapod;
 
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AgileHexapodController extends AgileHexapodControllerBase implements RobotController
@@ -26,7 +26,7 @@ public class AgileHexapodController extends AgileHexapodControllerBase implement
    private static final int B_SUPPORT_A_SWING = 50;
    private static final int B_SUPPORT_A_DOWN = 60;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("AgileHexapodController");
+   private final YoRegistry registry = new YoRegistry("AgileHexapodController");
 
    public YoDouble q_pitch = new YoDouble("q_pitch", registry), q_roll = new YoDouble("q_roll", registry), q_yaw = new YoDouble("q_yaw", registry);
    public YoDouble qd_pitch = new YoDouble("qd_pitch", registry), qd_roll = new YoDouble("qd_roll", registry),
@@ -1047,7 +1047,7 @@ public class AgileHexapodController extends AgileHexapodControllerBase implement
 
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

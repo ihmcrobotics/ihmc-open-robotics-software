@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VirtualModelMomentumControllerTestHelper
@@ -41,7 +41,7 @@ public class VirtualModelMomentumControllerTestHelper
       double simulationDuration = 20.0;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controllerModel.getOneDoFJoints()));
 
@@ -173,7 +173,7 @@ public class VirtualModelMomentumControllerTestHelper
 
    private static class DummyArmMomentumController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("controller");
+      private final YoRegistry registry = new YoRegistry("controller");
 
       private final Map<JointBasics, YoDouble> yoJointTorques = new HashMap<>();
 
@@ -208,7 +208,7 @@ public class VirtualModelMomentumControllerTestHelper
             yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (VirtualModelControllerTestHelper.ForcePointController forcePointController : forcePointControllers)
-            registry.addChild(forcePointController.getYoVariableRegistry());
+            registry.addChild(forcePointController.getYoRegistry());
       }
 
       @Override
@@ -241,7 +241,7 @@ public class VirtualModelMomentumControllerTestHelper
          }
          virtualModelController.populateTorqueSolution(virtualModelControlSolution);
 
-         DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
+         DMatrixRMaj jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
             OneDoFJointBasics joint = controlledJoints[i];
@@ -299,7 +299,7 @@ public class VirtualModelMomentumControllerTestHelper
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

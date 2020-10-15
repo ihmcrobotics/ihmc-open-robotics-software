@@ -121,7 +121,7 @@ public class SimpleArmRobot extends Robot
       pitch1Joint.addJoint(pitch2Joint);
       scsJointMap.put(ArmJoint.PITCH_2, pitch2Joint);
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       this.setGroundContactModel(groundContactModel);
 
       showCoordinatesRecursively(yawJoint, false);

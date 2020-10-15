@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.robotics.time.YoStopwatch;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SleepBehavior extends AbstractBehavior
@@ -10,12 +10,12 @@ public class SleepBehavior extends AbstractBehavior
    private final YoDouble sleepTime;
    private final YoStopwatch stopwatch;
 
-   public SleepBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public SleepBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, ros2Node, yoTime, 1.0);
    }
 
-   public SleepBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, double sleepTime)
+   public SleepBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, double sleepTime)
    {
       super(robotName, ros2Node);
 

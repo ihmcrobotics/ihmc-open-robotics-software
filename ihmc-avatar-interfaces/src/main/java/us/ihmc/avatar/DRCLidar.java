@@ -1,7 +1,7 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import us.ihmc.commons.Conversions;
@@ -24,7 +24,7 @@ public class DRCLidar
 {
    public static LidarMount getSensor(FloatingRootJointRobot robot, String sensorName)
    {
-      ArrayList<LidarMount> lidarSensors = robot.getSensors(LidarMount.class);
+      List<LidarMount> lidarSensors = robot.getSensors(LidarMount.class);
 
       if (lidarSensors.size() == 0)
       {

@@ -1,9 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
@@ -23,23 +24,23 @@ import us.ihmc.matrixlib.NativeCommonOps;
  */
 public class EigenvectorCARESolver extends AbstractCARESolver
 {
-   private final EigenDecomposition<DenseMatrix64F> eigen = DecompositionFactory.eig(0, true);
+   private final EigenDecomposition_F64<DMatrixRMaj> eigen = DecompositionFactory_DDRM.eig(0, true);
 
-   private final DenseMatrix64F EInverse = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseA = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseATranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseMEInverseTranspose = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj EInverse = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseA = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseATranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseMEInverseTranspose = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F hamiltonian = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj hamiltonian = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F u = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F u1 = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F u2 = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F u1Inv = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj u = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj u1 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj u2 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj u1Inv = new DMatrixRMaj(0, 0);
 
    /** {@inheritDoc} */
-   public DenseMatrix64F computeP()
+   public DMatrixRMaj computeP()
    {
       EInverseATranspose.reshape(n, n);
 
@@ -49,9 +50,9 @@ public class EigenvectorCARESolver extends AbstractCARESolver
          EInverseA.reshape(n, n);
          EInverseTranspose.reshape(n, n);
          NativeCommonOps.invert(E, EInverse);
-         CommonOps.mult(E, A, EInverseA);
+         CommonOps_DDRM.mult(E, A, EInverseA);
 
-         CommonOps.transpose(EInverse, EInverseTranspose);
+         CommonOps_DDRM.transpose(EInverse, EInverseTranspose);
          NativeCommonOps.multQuad(EInverseTranspose, M, EInverseMEInverseTranspose);
       }
       else
@@ -59,7 +60,7 @@ public class EigenvectorCARESolver extends AbstractCARESolver
          EInverseA.set(A);
          EInverseMEInverseTranspose.set(M);
       }
-      CommonOps.transpose(EInverseA, EInverseATranspose);
+      CommonOps_DDRM.transpose(EInverseA, EInverseATranspose);
 
       // defining Hamiltonian
       hamiltonian.reshape(2 * n, 2 * n);
@@ -97,7 +98,7 @@ public class EigenvectorCARESolver extends AbstractCARESolver
       NativeCommonOps.invert(u1, u1Inv);
 
       P.reshape(n, n);
-      CommonOps.mult(u2, u1Inv, P);
+      CommonOps_DDRM.mult(u2, u1Inv, P);
 
       isUpToDate = true;
 

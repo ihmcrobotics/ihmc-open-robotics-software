@@ -1,12 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class DifferentialIDMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {
 
@@ -18,7 +16,7 @@ public class DifferentialIDMassMatrixCalculatorTest extends MassMatrixCalculator
 
       DifferentialIDMassMatrixCalculator massMatrixCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, elevator);
       massMatrixCalculator.compute();
-      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
+      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
       double kineticEnergyFromMassMatrix = computeKineticEnergy(joints, massMatrix);
 
       assertEquals(expectedKineticEnergy, kineticEnergyFromMassMatrix, 1e-12);

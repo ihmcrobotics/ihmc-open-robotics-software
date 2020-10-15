@@ -3,12 +3,12 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble finalPosition;
    private final YoDouble currentPosition;
    private final YoDouble currentVelocity;
@@ -19,9 +19,9 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
    private final YoDouble currentTime;
    private final OneDoFJointBasics joint;
 
-   public OneDoFJointQuinticTrajectoryGenerator(String namePrefix, OneDoFJointBasics joint, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+   public OneDoFJointQuinticTrajectoryGenerator(String namePrefix, OneDoFJointBasics joint, DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.joint = joint;
       this.polynomial = new YoPolynomial(namePrefix + "Polynomial", 6, registry);
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);

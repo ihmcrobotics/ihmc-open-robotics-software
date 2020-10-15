@@ -56,7 +56,9 @@ public class FootstepPlannerMessageTools
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setIdealSideStepWidth(parameters.getIdealSideStepWidth());
       packet.setIdealBackStepLength(parameters.getIdealBackStepLength());
-      packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
+      packet.setIdealStepLengthAtMaxStepZ(parameters.getIdealStepLengthAtMaxStepZ());
+      packet.setWiggleInsideDeltaTarget(parameters.getWiggleInsideDeltaTarget());
+      packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
       packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
@@ -68,11 +70,12 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
-      packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setMaximumStepZ(parameters.getMaxStepZ());
+      packet.setMaximumSwingZ(parameters.getMaxSwingZ());
+      packet.setMaximumSwingReach(parameters.getMaxSwingReach());
       packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
       packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
       packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
-      packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
@@ -92,11 +95,15 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMaximumSnapHeight(parameters.getMaximumSnapHeight());
-      packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
-      packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+      packet.setMinClearanceFromStance(parameters.getMinClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
       packet.setMaximumBranchFactor(parameters.getMaximumBranchFactor());
       packet.setEnableExpansionMask(parameters.getEnabledExpansionMask());
+      packet.setEnableShinCollisionCheck(parameters.getEnableShinCollisionCheck());
+      packet.setShinToeClearance(parameters.getShinToeClearance());
+      packet.setShinHeelClearance(parameters.getShinHeelClearance());
+      packet.setShinLength(parameters.getShinLength());
+      packet.setShinHeightOffet(parameters.getShinHeightOffset());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.YoGraphicTrajectory3D.TrajectoryColorType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BlendedPositionTrajectoryGeneratorVisualizer
 {
@@ -12,7 +12,7 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
    public BlendedPositionTrajectoryGeneratorVisualizer(String namePrefix,
                                                        BlendedPoseTrajectoryGenerator trajectory,
                                                        DoubleProvider swingDuration,
-                                                       YoVariableRegistry registry,
+                                                       YoRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       this(namePrefix, trajectory.getPositionTrajectoryGenerator(), swingDuration, registry, graphicsListRegistry);
@@ -21,7 +21,7 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
    public BlendedPositionTrajectoryGeneratorVisualizer(String namePrefix,
                                                        BlendedPositionTrajectoryGenerator trajectory,
                                                        DoubleProvider swingDuration,
-                                                       YoVariableRegistry registry,
+                                                       YoRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       trajectoryViz = new YoGraphicTrajectory3D(namePrefix + "BlendedTrajectory",

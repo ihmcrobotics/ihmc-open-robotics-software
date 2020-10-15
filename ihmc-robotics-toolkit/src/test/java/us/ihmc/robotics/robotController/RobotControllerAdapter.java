@@ -1,16 +1,16 @@
 package us.ihmc.robotics.robotController;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Designed for convenience in tests if you don't want to implement everything.
  */
 public class RobotControllerAdapter implements RobotController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
-   public RobotControllerAdapter(YoVariableRegistry registry)
+   public RobotControllerAdapter(YoRegistry registry)
    {
       this.registry = registry;
    }
@@ -21,7 +21,7 @@ public class RobotControllerAdapter implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

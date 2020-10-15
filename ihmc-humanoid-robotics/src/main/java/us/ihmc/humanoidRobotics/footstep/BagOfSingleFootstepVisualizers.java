@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.ArrayList;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -15,7 +15,7 @@ public class BagOfSingleFootstepVisualizers
    private final SideDependentList<Integer> indices = new SideDependentList<Integer>(0, 0);
 
 
-   public BagOfSingleFootstepVisualizers(int maxNumberOfFootstepsPerSide, int maxContactPoints, YoVariableRegistry registry,
+   public BagOfSingleFootstepVisualizers(int maxNumberOfFootstepsPerSide, int maxContactPoints, YoRegistry registry,
            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       singleFootstepVisualizers = new SideDependentList<ArrayList<SingleFootstepVisualizer>>(new ArrayList<SingleFootstepVisualizer>(),

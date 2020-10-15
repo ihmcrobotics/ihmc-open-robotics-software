@@ -1,9 +1,9 @@
 package us.ihmc.robotics.physics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.TIntSet;
@@ -45,16 +45,16 @@ public class LinearComplementarityProblemSolver
    private final TIntSet clampedIndexSet = new TIntHashSet(10, 0.5f, -1);
    private final TIntSet notClampedIndexSet = new TIntHashSet(10, 0.5f, -1);
 
-   private final DenseMatrix64F A_CC = new DenseMatrix64F(10, 10);
-   private final DenseMatrix64F A_Cd = new DenseMatrix64F(10, 10);
-   private final DenseMatrix64F delta_f_C = new DenseMatrix64F(10, 1);
+   private final DMatrixRMaj A_CC = new DMatrixRMaj(10, 10);
+   private final DMatrixRMaj A_Cd = new DMatrixRMaj(10, 10);
+   private final DMatrixRMaj delta_f_C = new DMatrixRMaj(10, 1);
 
-   private final DenseMatrix64F f = new DenseMatrix64F(10, 1);
-   private final DenseMatrix64F a = new DenseMatrix64F(10, 1);
-   private final DenseMatrix64F delta_f = new DenseMatrix64F(10, 1);
-   private final DenseMatrix64F delta_a = new DenseMatrix64F(10, 1);
+   private final DMatrixRMaj f = new DMatrixRMaj(10, 1);
+   private final DMatrixRMaj a = new DMatrixRMaj(10, 1);
+   private final DMatrixRMaj delta_f = new DMatrixRMaj(10, 1);
+   private final DMatrixRMaj delta_a = new DMatrixRMaj(10, 1);
 
-   private final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.chol(10);
+   private final LinearSolverDense<DMatrixRMaj> linearSolver = LinearSolverFactory_DDRM.chol(10);
 
    private double tolerance = 1.0e-12;
 
@@ -62,7 +62,7 @@ public class LinearComplementarityProblemSolver
    {
    }
 
-   public DenseMatrix64F solve(DenseMatrix64F A, DenseMatrix64F b)
+   public DMatrixRMaj solve(DMatrixRMaj A, DMatrixRMaj b)
    {
       int problemSize = checkInputSize(A, b);
       f.reshape(problemSize, 1);
@@ -97,15 +97,15 @@ public class LinearComplementarityProblemSolver
       return f;
    }
 
-   public void driveToZeroFrictionless(int d, DenseMatrix64F A)
+   public void driveToZeroFrictionless(int d, DMatrixRMaj A)
    {
       while (true)
       {
          fDirection(d, A);
-         CommonOps.mult(A, delta_f, delta_a);
+         CommonOps_DDRM.mult(A, delta_f, delta_a);
          MaxStepResult maxStep = maxStep(d);
-         CommonOps.addEquals(f, maxStep.scale, delta_f);
-         CommonOps.addEquals(a, maxStep.scale, delta_a);
+         CommonOps_DDRM.addEquals(f, maxStep.scale, delta_f);
+         CommonOps_DDRM.addEquals(a, maxStep.scale, delta_a);
 
          if (clampedIndexSet.remove(maxStep.j))
          {
@@ -123,7 +123,7 @@ public class LinearComplementarityProblemSolver
       }
    }
 
-   public void fDirection(int d, DenseMatrix64F A)
+   public void fDirection(int d, DMatrixRMaj A)
    {
       delta_f.zero();
 
@@ -151,7 +151,7 @@ public class LinearComplementarityProblemSolver
          }
 
          // Solving for A_CC * delta_f_C = - A_Cd
-         CommonOps.changeSign(A_Cd);
+         CommonOps_DDRM.changeSign(A_Cd);
 
          // TODO Naive approach here, can save some time as mentioned in the paper by using an iterative method.
          linearSolver.setA(A_CC);
@@ -224,7 +224,7 @@ public class LinearComplementarityProblemSolver
       return new MaxStepResult(scale, j);
    }
 
-   private static int checkInputSize(DenseMatrix64F A, DenseMatrix64F b)
+   private static int checkInputSize(DMatrixRMaj A, DMatrixRMaj b)
    {
       int problemSize = b.getNumRows();
 

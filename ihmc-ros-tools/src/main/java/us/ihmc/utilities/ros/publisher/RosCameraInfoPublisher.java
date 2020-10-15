@@ -2,7 +2,7 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
 
@@ -25,7 +25,7 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
    {
    }
 
-   public void publish(String frameID, IntrinsicParameters params, Time t)
+   public void publish(String frameID, CameraPinholeBrown params, Time t)
    {
         CameraInfo message = getMessage();
         Header header = message.getHeader();

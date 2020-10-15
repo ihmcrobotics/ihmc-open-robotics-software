@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -8,12 +9,14 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -26,13 +29,12 @@ import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 {
-   private final boolean showInterval;
    private static final int TRAJECTORY_RADIAL_RESOLUTION = 16;
    private static final double TRAJECTORY_MESH_RADIUS = 0.01;
 
@@ -45,6 +47,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private static final int DEFAULT_NUMBER_OF_FRAMES = 1;
    private final LinkedList<SensorFrame> sensorOriginHistory = new LinkedList<SensorFrame>();
    private final AtomicReference<Integer> numberOfFramesToShow;
+   private final AtomicBoolean clearRequest = new AtomicBoolean(false);
+   private boolean isRunning = false;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
 
@@ -55,14 +59,13 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private Function<T, SensorFrame> function;
 
    public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function,
-                            Topic<Boolean> clearTopic, boolean showInterval)
+                            Topic<Boolean> clearTopic)
    {
-      this.showInterval = showInterval;
       this.function = function;
       if (numberOfFramesTopic == null)
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
-         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
+         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10);
       uiMessager.registerTopicListener(clearTopic, (c) -> clear());
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
@@ -76,7 +79,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       root.setMouseTransparent(true);
 
       latestMessage = uiMessager.createInput(messageState);
-      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
+      {
          if (isMessagerOpen)
             start();
          else
@@ -84,14 +88,28 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       });
    }
 
-   public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function, Topic<Boolean> clearTopic)
+   @Override
+   public void start()
    {
-      this(uiMessager, messageState, numberOfFramesTopic, function, clearTopic, false);
+      super.start();
+      isRunning = true;
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+      isRunning = false;
    }
 
    @Override
    public void handle(long now)
    {
+      if (clearRequest.getAndSet(false))
+      {
+         clearNow();
+      }
+
       if (latestMessage.get() == null)
          return;
 
@@ -116,8 +134,11 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       for (int i = 0; i < numberOfSensorFrames; i++)
       {
          sensorOriginHistory.get(i).getOrigin(point);
-         int redScaler = (int) (0xFF * (1 - (sensorOriginHistory.get(i).confidence)));
-         int greenScaler = (int) (0xFF * (sensorOriginHistory.get(i).confidence));
+         double confidence = sensorOriginHistory.get(i).confidence;
+         if (confidence < 0)
+            confidence = 0.0;
+         int redScaler = (int) (0xFF * (1 - confidence));
+         int greenScaler = (int) (0xFF * confidence);
          Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), point, confidenceColor);
 
@@ -125,12 +146,19 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
       if (numberOfSensorFrames > 1)
       {
-         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
-                                                                                                              TRAJECTORY_RADIAL_RESOLUTION,
-                                                                                                              TRAJECTORY_MESH_RADIUS);
-         segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
-         for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
-            meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         try
+         {
+            SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
+                                                                                                                 TRAJECTORY_RADIAL_RESOLUTION,
+                                                                                                                 TRAJECTORY_MESH_RADIUS);
+            segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
+            for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+               meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         }
+         catch (NotARotationMatrixException e)
+         {
+            LogTools.warn("Could not compute sensor frame trajectory mesh!");
+         }
       }
 
       MeshView historyMeshView = new MeshView(meshBuilder.generateMesh());
@@ -144,7 +172,15 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
    }
 
-   private void clear()
+   public void clear()
+   {
+      if (isRunning)
+         clearRequest.set(true);
+      else
+         Platform.runLater(this::clearNow);
+   }
+
+   private void clearNow()
    {
       sensorOriginHistory.clear();
       historyRoot.getChildren().clear();
@@ -167,7 +203,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 
    public static Function<StampedPosePacket, SensorFrame> createStampedPosePacketSensorFrameExtractor()
    {
-      return message -> {
+      return message ->
+      {
          Pose3D pose = message.getPose();
          return new SensorFrame(pose.getPosition(), pose.getOrientation(), message.getConfidenceFactor());
       };
@@ -199,5 +236,4 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
          return new Point3D(affine.getTx(), affine.getTy(), affine.getTz());
       }
    }
-
 }

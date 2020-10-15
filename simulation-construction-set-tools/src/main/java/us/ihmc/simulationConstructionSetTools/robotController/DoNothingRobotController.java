@@ -1,11 +1,11 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DoNothingRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DoNothing");
+   private final YoRegistry registry = new YoRegistry("DoNothing");
 
    @Override
    public void initialize()
@@ -13,7 +13,7 @@ public class DoNothingRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

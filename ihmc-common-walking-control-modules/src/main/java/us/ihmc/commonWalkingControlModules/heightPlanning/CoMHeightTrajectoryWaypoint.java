@@ -7,8 +7,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoMHeightTrajectoryWaypoint
 {
@@ -20,7 +20,7 @@ public class CoMHeightTrajectoryWaypoint
    private final YoFramePoint3D yoMinWaypoint;
    private final YoFramePoint3D yoMaxWaypoint;
 
-   public CoMHeightTrajectoryWaypoint(String name, YoVariableRegistry registry)
+   public CoMHeightTrajectoryWaypoint(String name, YoRegistry registry)
    {
       yoWaypoint = new YoFramePoint3D(name + "InWorld", ReferenceFrame.getWorldFrame(), registry);
       yoMinWaypoint = new YoFramePoint3D(name + "MinInWorld", ReferenceFrame.getWorldFrame(), registry);

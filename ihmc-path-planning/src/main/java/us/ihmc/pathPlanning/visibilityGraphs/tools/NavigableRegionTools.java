@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
@@ -47,14 +48,14 @@ public class NavigableRegionTools
       Point3D pointOnRegion = new Point3D();
 
       NavigableRegion closestContainer = containers.get(0);
-      Vector3D regionNormal = closestContainer.getHomePlanarRegion().getNormal();
+      Vector3DReadOnly regionNormal = closestContainer.getHomePlanarRegion().getNormal();
       closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
       double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
 
       for (int i = 1; i < containers.size(); i++)
       {
          NavigableRegion candidate = containers.get(i);
-         candidate.getHomePlanarRegion().getNormal(regionNormal);
+         regionNormal = candidate.getHomePlanarRegion().getNormal();
          candidate.getHomePlanarRegion().getPointInRegion(pointOnRegion);
          double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
          if (distance < minDistance)

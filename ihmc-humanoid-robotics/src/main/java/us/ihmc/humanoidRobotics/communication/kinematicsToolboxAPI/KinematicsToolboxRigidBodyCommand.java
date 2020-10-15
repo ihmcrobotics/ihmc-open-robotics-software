@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import java.util.Objects;
+
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
@@ -56,14 +58,14 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    }
 
    public void set(KinematicsToolboxRigidBodyMessage message, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
-                   ReferenceFrameHashCodeResolver referenceFrameResolver)
+                   ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver)
    {
+      Objects.requireNonNull(rigidBodyHashCodeResolver);
+      Objects.requireNonNull(referenceFrameHashCodeResolver);
+
       sequenceId = message.getSequenceId();
       endEffectorHashCode = message.getEndEffectorHashCode();
-      if (rigidBodyHashCodeResolver == null)
-         endEffector = null;
-      else
-         endEffector = (RigidBodyBasics) rigidBodyHashCodeResolver.getRigidBody(endEffectorHashCode);
+      endEffector = rigidBodyHashCodeResolver.castAndGetRigidBody(endEffectorHashCode);
       desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
@@ -79,15 +81,12 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
       selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
 
-      if (referenceFrameResolver != null)
-      {
-         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrame(angularSelection.getSelectionFrameId());
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrame(linearSelection.getSelectionFrameId());
-         selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrame(angularWeight.getWeightFrameId());
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrame(linearWeight.getWeightFrameId());
-         weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
-      }
+      ReferenceFrame angularSelectionFrame = referenceFrameHashCodeResolver.getReferenceFrame(angularSelection.getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = referenceFrameHashCodeResolver.getReferenceFrame(linearSelection.getSelectionFrameId());
+      selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
+      ReferenceFrame angularWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(angularWeight.getWeightFrameId());
+      ReferenceFrame linearWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(linearWeight.getWeightFrameId());
+      weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 
    public RigidBodyBasics getEndEffector()

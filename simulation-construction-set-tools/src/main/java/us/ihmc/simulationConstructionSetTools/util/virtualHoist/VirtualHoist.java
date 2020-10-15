@@ -6,20 +6,20 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VirtualHoist implements RobotController
 {
    private ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<ExternalForcePoint>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("VirtualHoist");
+   private final YoRegistry registry = new YoRegistry("VirtualHoist");
 
    private final YoBoolean hoistOn = new YoBoolean("hoistOn", registry);
    private final YoBoolean hoistUp = new YoBoolean("hoistUp", registry);
@@ -48,7 +48,7 @@ public class VirtualHoist implements RobotController
       for (int i = 0; i < hoistPointPositions.size(); i++)
       {
          Vector3D hoistPointPosition = hoistPointPositions.get(i);
-         ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_hoist" + i, hoistPointPosition, robot.getRobotsYoVariableRegistry());
+         ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_hoist" + i, hoistPointPosition, robot.getRobotsYoRegistry());
          externalForcePoints.add(externalForcePoint);
          jointToAttachHoist.addExternalForcePoint(externalForcePoint);
 
@@ -68,9 +68,9 @@ public class VirtualHoist implements RobotController
       hoistUp.set(false);
       hoistDown.set(false);
 
-      q_x = (YoDouble) robot.getVariable("q_x");
-      q_y = (YoDouble) robot.getVariable("q_y");
-      q_z = (YoDouble) robot.getVariable("q_z");
+      q_x = (YoDouble) robot.findVariable("q_x");
+      q_y = (YoDouble) robot.findVariable("q_y");
+      q_z = (YoDouble) robot.findVariable("q_z");
 
       teepeeLocation.set(0.0, 0.0, 1.25);
    }
@@ -203,7 +203,7 @@ public class VirtualHoist implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

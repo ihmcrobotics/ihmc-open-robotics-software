@@ -1,68 +1,82 @@
 package us.ihmc.footstepPlanning.log;
 
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FootstepPlannerIterationData
 {
-   private FootstepNode stanceNode = null;
-   private FootstepNode idealStep = null;
-   private final List<FootstepNode> childNodes = new ArrayList<>();
-   private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
+   private FootstepGraphNode parentNode = null;
+   private FootstepGraphNode idealChildNode = null;
+   private final List<FootstepGraphNode> childNodes = new ArrayList<>();
+
+   // TODO log all snap data separately, or do fancy graphics logging
+   private final FootstepSnapData parentEndSnapData = FootstepSnapData.identityData();
+   private final FootstepSnapData parentStartSnapData = FootstepSnapData.identityData();
 
    public FootstepPlannerIterationData()
    {
       clear();
    }
 
-   public void setStanceNode(FootstepNode stanceNode)
+   public void setParentNode(FootstepGraphNode parentNode)
    {
-      this.stanceNode = stanceNode;
+      this.parentNode = parentNode;
    }
 
-   public void setIdealStep(FootstepNode idealStep)
+   public void setIdealChildNode(FootstepGraphNode idealChildNode)
    {
-      this.idealStep = idealStep;
+      this.idealChildNode = idealChildNode;
    }
 
-   public void setStanceNodeSnapData(FootstepNodeSnapData stanceNodeSnapData)
+   public void setParentEndSnapData(FootstepSnapData parentEndSnapData)
    {
-      this.stanceNodeSnapData.set(stanceNodeSnapData);
+      this.parentEndSnapData.set(parentEndSnapData);
    }
 
-   public void addChildNode(FootstepNode childNode)
+   public void setParentStartSnapData(FootstepSnapData parentStartSnapData)
+   {
+      this.parentStartSnapData.set(parentStartSnapData);
+   }
+
+   public void addChildNode(FootstepGraphNode childNode)
    {
       childNodes.add(childNode);
    }
 
-   public FootstepNode getStanceNode()
+   public FootstepGraphNode getParentNode()
    {
-      return stanceNode;
+      return parentNode;
    }
 
-   public FootstepNode getIdealStep()
+   public FootstepGraphNode getIdealChildNode()
    {
-      return idealStep;
+      return idealChildNode;
    }
 
-   public List<FootstepNode> getChildNodes()
+   public List<FootstepGraphNode> getChildNodes()
    {
       return childNodes;
    }
 
-   public FootstepNodeSnapData getStanceNodeSnapData()
+   public FootstepSnapData getParentEndSnapData()
    {
-      return stanceNodeSnapData;
+      return parentEndSnapData;
+   }
+
+   public FootstepSnapData getParentStartSnapData()
+   {
+      return parentStartSnapData;
    }
 
    public void clear()
    {
-      stanceNode = null;
-      idealStep = null;
+      parentNode = null;
+      idealChildNode = null;
       childNodes.clear();
-      stanceNodeSnapData.clear();
+      parentEndSnapData.clear();
+      parentStartSnapData.clear();
    }
 }

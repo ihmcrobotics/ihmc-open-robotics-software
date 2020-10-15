@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.exampleContact;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel
 
 public class ContactController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("ContactController");
+   private final YoRegistry registry = new YoRegistry("ContactController");
    
    private final SimpleStickSlipContactModel contactModel;
    
@@ -59,7 +59,7 @@ public class ContactController implements RobotController
       contactModel.doContact();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NoisyYoDoubleTest
 {
-   YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("testRegistry");
+   YoRegistry yoVariableRegistry = new YoRegistry("testRegistry");
 
 	@Test
    public void testSimpleConstructor()

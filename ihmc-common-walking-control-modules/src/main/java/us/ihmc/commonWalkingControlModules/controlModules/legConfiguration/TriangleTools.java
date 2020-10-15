@@ -75,4 +75,64 @@ public class TriangleTools
       interiorAngleAcceleration -= Math.pow(interiorAngleVelocity, 2.0) / Math.tan(interiorAngle);
       return interiorAngleAcceleration;
    }
+
+   /**
+    * Calculate an unknown side length of a fully defined 2D Triangle by the law of Sine.
+    * <p>
+    * Given a triangle with the three sides a, b, and c, this methods calculates the length of the side
+    * c, given:
+    * <ul>
+    * <li>the lengths of a and b.
+    * <li>the angle opposite of side b, angle B.
+    * </ul>
+    * </p>
+    *
+    * @param sideALength the length of the side a.
+    * @param sideBLength the length of the side b.
+    * @param angleB the angle opposite side b.
+    * @param isAngleAObtuse Whether the angle opposite of side a is obtuse or not, only used if there are two possible triangles
+    * @return the value of the unknown side length.
+    */
+   public static double computeSideLengthFromSideSideAngle(double sideALength, double sideBLength, double angleB, boolean isAngleAObtuse)
+   {
+      double lawSinesB;
+      double angleA;
+      double angleC;
+      if (angleB >= Math.PI/2)
+      {
+         if (sideALength >= sideBLength)
+         {
+            return Double.NaN;
+         }
+      }
+      else
+      {
+         if (sideALength > sideBLength)
+         {
+            double height = sideALength * Math.sin(angleB);
+            if (sideBLength < height)
+            {
+               return Double.NaN;
+            }
+            else if (sideBLength > height)
+            {
+               lawSinesB = Math.sin(angleB) / sideBLength;
+               if (isAngleAObtuse)
+               {
+                  angleA = Math.PI - Math.asin(lawSinesB * sideALength);
+               }
+               else
+               {
+                  angleA = Math.asin(lawSinesB * sideALength);
+               }
+               angleC = Math.PI - angleA - angleB;
+               return Math.sin(angleC) / lawSinesB;
+            }
+         }
+      }
+      lawSinesB = Math.sin(angleB) / sideBLength;
+      angleA = Math.asin(lawSinesB * sideALength);
+      angleC = Math.PI - angleA - angleB;
+      return Math.sin(angleC) / lawSinesB;
+   }
 }

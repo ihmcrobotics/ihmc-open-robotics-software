@@ -17,9 +17,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactableBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @author twan
@@ -30,7 +30,7 @@ public class WrenchVisualizer
    private static final double FORCE_VECTOR_SCALE = 0.0015;
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Map<RigidBodyBasics, YoFrameVector3D> forces = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
    private final Map<RigidBodyBasics, YoFrameVector3D> torques = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
    private final Map<RigidBodyBasics, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<RigidBodyBasics, YoFramePoint3D>();
@@ -43,19 +43,19 @@ public class WrenchVisualizer
    private final ArrayList<RigidBodyBasics> rigidBodies = new ArrayList<RigidBodyBasics>();
    
    public static WrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, List<? extends ContactableBody> contactableBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       return new WrenchVisualizer(name, extractRigidBodyList(contactableBodies), vizScaling, yoGraphicsListRegistry, parentRegistry);
    }
 
    public WrenchVisualizer(String name, List<RigidBodyBasics> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this(name, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
 
    public WrenchVisualizer(String name, List<RigidBodyBasics> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry, AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
+         YoRegistry parentRegistry, AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 

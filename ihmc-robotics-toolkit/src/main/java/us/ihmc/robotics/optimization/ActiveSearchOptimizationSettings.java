@@ -1,8 +1,8 @@
 package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 /**
 * @author twan
@@ -12,13 +12,13 @@ class ActiveSearchOptimizationSettings
 {
    private final double epsilonConstraintActive;
    private final int maxIterations;
-   private final LinearSolver<DenseMatrix64F> linearSolver;
+   private final LinearSolverDense<DMatrixRMaj> linearSolver;
 
    public ActiveSearchOptimizationSettings(double epsilonConstraintActive, int maxIterations, boolean useSVD)
    {
       this.epsilonConstraintActive = epsilonConstraintActive;
       this.maxIterations = maxIterations;
-      this.linearSolver = LinearSolverFactory.pseudoInverse(useSVD);
+      this.linearSolver = LinearSolverFactory_DDRM.pseudoInverse(useSVD);
    }
 
    public double getEpsilonConstraintActive()
@@ -31,7 +31,7 @@ class ActiveSearchOptimizationSettings
       return maxIterations;
    }
 
-   public LinearSolver<DenseMatrix64F> getLinearSolver()
+   public LinearSolverDense<DMatrixRMaj> getLinearSolver()
    {
       return linearSolver;
    }

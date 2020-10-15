@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class BasicCoPPlanner
    private double initialTime = 0.0;
    private final YoDouble timeInCurrentStateRemaining;
 
-   public BasicCoPPlanner(SideDependentList<? extends ContactablePlaneBody> contactableFeet, ReferenceFrame midFootZUpGroundFrame, YoVariableRegistry registry)
+   public BasicCoPPlanner(SideDependentList<? extends ContactablePlaneBody> contactableFeet, ReferenceFrame midFootZUpGroundFrame, YoRegistry registry)
    {
       this.contactableFeet = contactableFeet;
 

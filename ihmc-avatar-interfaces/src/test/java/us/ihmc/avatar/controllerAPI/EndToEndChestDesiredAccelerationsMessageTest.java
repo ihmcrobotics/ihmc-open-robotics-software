@@ -89,7 +89,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       double[] qdd_ds = new double[joints.length];
       for (int i = 0; i < joints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + joints[i].getName()).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + joints[i].getName()).getValueAsDouble();
       }
       return qdd_ds;
    }
@@ -101,7 +101,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       for (int i = 0; i < joints.length; i++)
       {
          String name = prefix + "_" + joints[i].getName() + "_qdd_d";
-         qdd_ds[i] = scs.getVariable(name).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(name).getValueAsDouble();
       }
       return qdd_ds;
    }

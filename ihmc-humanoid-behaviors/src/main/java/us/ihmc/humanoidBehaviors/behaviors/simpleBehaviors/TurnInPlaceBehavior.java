@@ -1,19 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -28,8 +24,8 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private PipeLine<BehaviorAction> pipeLine;
    private final  WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
 
-   public TurnInPlaceBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
-                              HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime )
+   public TurnInPlaceBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                              HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime )
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);

@@ -2,18 +2,14 @@ package us.ihmc.simulationConstructionSetTools.util.graphics;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraphicsExample
 {
@@ -21,7 +17,7 @@ public class GraphicsExample
    {
       // create registries...
       YoGraphicsListRegistry registries = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("GraphicsExample");
+      YoRegistry registry = new YoRegistry("GraphicsExample");
       YoGraphicsList yoGraphicsList = new YoGraphicsList("GraphicsExampleGraphicList");
 
       // create scs

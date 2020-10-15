@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -8,14 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -29,9 +25,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameSO3TrajectoryPointTest
 {
@@ -46,7 +42,7 @@ public class YoFrameSO3TrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
@@ -104,7 +100,7 @@ public class YoFrameSO3TrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameSO3TrajectoryPoint testedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                new YoVariableRegistry("schnoop"), expectedFrame);
+                                                                                                new YoRegistry("schnoop"), expectedFrame);
 
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedOrientation, expectedAngularVelocity,
                                          testedYoFrameSO3TrajectoryPoint, epsilon);
@@ -125,7 +121,7 @@ public class YoFrameSO3TrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameSO3TrajectoryPoint testedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                new YoVariableRegistry("schnoop"), expectedFrame);
+                                                                                                new YoRegistry("schnoop"), expectedFrame);
 
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedOrientation, expectedAngularVelocity,
                                          testedYoFrameSO3TrajectoryPoint, epsilon);
@@ -155,7 +151,7 @@ public class YoFrameSO3TrajectoryPointTest
       expectedOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expectedFrame);
       expectedAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFrame);
 
-      YoFrameSO3TrajectoryPoint expectedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint("sdfsd", "asd", new YoVariableRegistry("asawe"),
+      YoFrameSO3TrajectoryPoint expectedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint("sdfsd", "asd", new YoRegistry("asawe"),
                                                                                                   expectedFrame);
 
       testedYoFrameSO3TrajectoryPoint.set(expectedYoFrameSO3TrajectoryPoint);
@@ -180,7 +176,7 @@ public class YoFrameSO3TrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameSO3TrajectoryPoint testedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                new YoVariableRegistry("schnoop"), expectedFrame);
+                                                                                                new YoRegistry("schnoop"), expectedFrame);
 
       testedYoFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity);
 
@@ -217,7 +213,7 @@ public class YoFrameSO3TrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameSO3TrajectoryPoint testedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                new YoVariableRegistry("schnoop"), expectedFrame);
+                                                                                                new YoRegistry("schnoop"), expectedFrame);
       testedYoFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity);
 
       expectedTime = 0.0;
@@ -258,7 +254,7 @@ public class YoFrameSO3TrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameSO3TrajectoryPoint testedYoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                new YoVariableRegistry("schnoop"), expectedFrame);
+                                                                                                new YoRegistry("schnoop"), expectedFrame);
       testedYoFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity);
 
       testedYoFrameSO3TrajectoryPoint.setToNaN();
@@ -334,7 +330,7 @@ public class YoFrameSO3TrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -429,7 +425,7 @@ public class YoFrameSO3TrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

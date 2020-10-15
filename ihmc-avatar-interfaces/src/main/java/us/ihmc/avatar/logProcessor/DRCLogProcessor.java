@@ -12,7 +12,7 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataVisualizer.logger.LogVisualizer;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
 
 public abstract class DRCLogProcessor
 {
@@ -69,9 +69,9 @@ public abstract class DRCLogProcessor
    private class UpdateLogDataProcessorButton extends JButton implements ActionListener
    {
       private static final long serialVersionUID = -112620995090732618L;
-      private final DataProcessingFunction dataProcessingFunction;
+      private final YoBufferProcessor dataProcessingFunction;
 
-      public UpdateLogDataProcessorButton(DataProcessingFunction dataProcessingFunction)
+      public UpdateLogDataProcessorButton(YoBufferProcessor dataProcessingFunction)
       {
          super("Rerun log data processors");
          this.addActionListener(this);

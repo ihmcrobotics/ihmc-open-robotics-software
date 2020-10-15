@@ -18,8 +18,7 @@ import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -51,9 +50,15 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
  */
 public class REACommunicationProperties
 {
-   public static final MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2TopicQualifier.OUTPUT);
-   public static final MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2TopicQualifier.INPUT);
-   public static final MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE + "/custom_region", ROS2TopicQualifier.INPUT);
+   public static final ROS2Topic outputTopic = ROS2Tools.REA.withRobot(null).withOutput();
+   public static final ROS2Topic lidarOutputTopic = ROS2Tools.REA.withPrefix("lidar").withRobot(null).withOutput();
+   public static final ROS2Topic stereoOutputTopic = ROS2Tools.REALSENSE_REA;
+   public static final ROS2Topic depthOutputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withOutput();
+   public static final ROS2Topic inputTopic = ROS2Tools.REA.withRobot(null).withInput();
+   public static final ROS2Topic stereoInputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withInput();
+   public static final ROS2Topic subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
+                                                                                 .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
+                                                                                 .withInput();
 
    private static final NetClassList privateNetClassList = new NetClassList();
    static

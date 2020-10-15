@@ -7,12 +7,12 @@ import us.ihmc.sensorProcessing.outputData.LowLevelActuatorMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelStateReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LowLevelActuatorSimulator implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final PIDController jointController;
 
    private final OneDegreeOfFreedomJoint simulatedJoint;
@@ -39,7 +39,7 @@ public class LowLevelActuatorSimulator implements RobotController
    {
       this.controlDT = controlDT;
       this.actuatorMode = actuatorMode;
-      registry = new YoVariableRegistry(simulatedJoint.getName() + name);
+      registry = new YoRegistry(simulatedJoint.getName() + name);
       gains = new YoPIDGains(simulatedJoint.getName() + "Actuator", registry);
       jointController = new PIDController(gains, simulatedJoint.getName() + "LowLevelActuatorSimulator", registry);
 
@@ -127,7 +127,7 @@ public class LowLevelActuatorSimulator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

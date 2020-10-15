@@ -1,34 +1,34 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.QRDecomposition;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+
 import us.ihmc.commons.MathTools;
 
 public class QRNullspaceCalculator implements NullspaceCalculator
 {
-   private final QRDecomposition<DenseMatrix64F> decomposer;
+   private final QRDecomposition<DMatrixRMaj> decomposer;
 
-   private final DenseMatrix64F nullspace;
-   private final DenseMatrix64F Q;
-   private final DenseMatrix64F R;
+   private final DMatrixRMaj nullspace;
+   private final DMatrixRMaj Q;
+   private final DMatrixRMaj R;
 
-   private final DenseMatrix64F nullspaceProjector;
-   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+   private final DMatrixRMaj nullspaceProjector;
+   private final DMatrixRMaj tempMatrixForProjectionInPlace;
 
    public QRNullspaceCalculator(int matrixSize)
    {
       MathTools.checkIntervalContains(matrixSize, 1, Integer.MAX_VALUE);
 
-      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
-      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
+      nullspaceProjector = new DMatrixRMaj(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DMatrixRMaj(matrixSize, matrixSize);
 
-      decomposer = DecompositionFactory.qr(matrixSize, matrixSize);
-      nullspace = new DenseMatrix64F(matrixSize, matrixSize);
-      Q = new DenseMatrix64F(matrixSize, matrixSize);
-      R = new DenseMatrix64F(matrixSize, matrixSize);
+      decomposer = DecompositionFactory_DDRM.qr(matrixSize, matrixSize);
+      nullspace = new DMatrixRMaj(matrixSize, matrixSize);
+      Q = new DMatrixRMaj(matrixSize, matrixSize);
+      R = new DMatrixRMaj(matrixSize, matrixSize);
    }
 
    /**
@@ -43,7 +43,7 @@ public class QRNullspaceCalculator implements NullspaceCalculator
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf)
    {
       tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
       projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
@@ -62,10 +62,10 @@ public class QRNullspaceCalculator implements NullspaceCalculator
     * @param projectedMatrixToPack matrix to store the resulting projection, C in the equation. Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj projectedMatrixToPack)
    {
       computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
-      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
+      CommonOps_DDRM.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }
 
    /**
@@ -79,17 +79,17 @@ public class QRNullspaceCalculator implements NullspaceCalculator
     * @param nullspaceProjectorToPack matrix to store the resulting nullspace matrix. Modified.
     */
    @Override
-   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   public void computeNullspaceProjector(DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj nullspaceProjectorToPack)
    {
       int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
       computeNullspace(nullspace, matrixToComputeNullspaceOf, nullity);
 
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-      CommonOps.multOuter(nullspace, nullspaceProjectorToPack);
+      CommonOps_DDRM.multOuter(nullspace, nullspaceProjectorToPack);
    }
 
-   private final DenseMatrix64F transposed = new DenseMatrix64F(0, 0);
-   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
+   private final DMatrixRMaj transposed = new DMatrixRMaj(0, 0);
+   private void computeNullspace(DMatrixRMaj nullspaceToPack, DMatrixRMaj matrixToComputeNullspaceOf, int nullity)
    {
       int size = matrixToComputeNullspaceOf.getNumCols();
       int rank = matrixToComputeNullspaceOf.getNumRows();
@@ -98,10 +98,10 @@ public class QRNullspaceCalculator implements NullspaceCalculator
       R.reshape(size, rank);
       transposed.reshape(size, rank);
 
-      CommonOps.transpose(matrixToComputeNullspaceOf, transposed);
+      CommonOps_DDRM.transpose(matrixToComputeNullspaceOf, transposed);
       decomposer.decompose(transposed);
       decomposer.getQ(Q, false);
 
-      CommonOps.extract(Q, 0, Q.getNumRows(), Q.getNumCols() - nullity, Q.getNumCols(), nullspaceToPack, 0, 0);
+      CommonOps_DDRM.extract(Q, 0, Q.getNumRows(), Q.getNumCols() - nullity, Q.getNumCols(), nullspaceToPack, 0, 0);
    }
 }

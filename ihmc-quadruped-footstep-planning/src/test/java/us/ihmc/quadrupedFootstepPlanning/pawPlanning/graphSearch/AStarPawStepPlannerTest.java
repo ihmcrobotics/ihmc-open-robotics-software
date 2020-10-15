@@ -33,7 +33,7 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -233,7 +233,7 @@ public class AStarPawStepPlannerTest
    private void runTest(double stanceLength, double stanceWidth, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList planarRegionsList,
                         double timeout, RobotQuadrant initialQuadrant)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(stanceLength);
       xGaitSettings.setStanceWidth(stanceWidth);

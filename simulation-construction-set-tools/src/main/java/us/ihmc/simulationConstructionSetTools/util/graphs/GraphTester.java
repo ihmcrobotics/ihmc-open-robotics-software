@@ -5,14 +5,14 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraphTester
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("registry");
-   private final DataBuffer buffer = new DataBuffer(10);
+   private final YoRegistry registry = new YoRegistry("registry");
+   private final YoBuffer buffer = new YoBuffer(10);
    private final YoDouble xPlot = new YoDouble("xPlot", registry);
    private final YoDouble yPlot = new YoDouble("yPlot", registry);
 
@@ -26,7 +26,7 @@ public class GraphTester
 
    private void setupData(double divisor)
    {
-      buffer.setIndex(0);
+      buffer.setCurrentIndex(0);
 
       for (double i = 1; i < 150; i++)
       {
@@ -34,7 +34,7 @@ public class GraphTester
          yPlot.set(Math.sin(i / divisor));
 
 
-         buffer.tickAndUpdate();
+         buffer.tickAndWriteIntoBuffer();
       }
 
    }

@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * The purpose of this class is to check if it is probable that the foot is rotating, given a
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
 public class RotationVerificator
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final ReferenceFrame soleFrame;
    private final YoFrameVector2D copError;
@@ -44,11 +44,11 @@ public class RotationVerificator
     */
    private final YoBoolean desiredCopOnCorrectSide;
 
-   public RotationVerificator(String namePrefix, ReferenceFrame soleFrame, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+   public RotationVerificator(String namePrefix, ReferenceFrame soleFrame, ExplorationParameters explorationParameters, YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
-      registry = new YoVariableRegistry(namePrefix + name);
+      registry = new YoRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
       copError = new YoFrameVector2D(namePrefix + "CopError", "", soleFrame, registry);

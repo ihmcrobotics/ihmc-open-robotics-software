@@ -40,12 +40,9 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
@@ -63,13 +60,10 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -83,12 +77,9 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_6(data.getFrameDt());
-
 
       if(data.getRobotConfigurations().size() <= 1000)
       cdr.write_type_e(data.getRobotConfigurations());else
@@ -98,13 +89,10 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
 
    public static void read(controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setFrameDt(cdr.read_type_6());
       	
-
       cdr.read_type_e(data.getRobotConfigurations());	
 
    }
@@ -112,22 +100,16 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_6("frame_dt", data.getFrameDt());
-
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setFrameDt(ser.read_type_6("frame_dt"));
-
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
    }
 

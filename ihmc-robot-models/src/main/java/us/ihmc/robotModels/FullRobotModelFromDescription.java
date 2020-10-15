@@ -139,7 +139,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void addSensorDefinitions(JointBasics joint, JointDescription jointDescription)
    {
-      ArrayList<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
+      List<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
 
       // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
 //      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());

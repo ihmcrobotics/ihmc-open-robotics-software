@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__HandCollisionDetectedPacket__idl__
 #define __controller_msgs__msg__HandCollisionDetectedPacket__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,61 +7,27 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet ROBOT_SIDE_LEFT =
-
+      const octet ROBOT_SIDE_LEFT =
       0;
 
-
-
-   
-   const octet ROBOT_SIDE_RIGHT =
-
+      const octet ROBOT_SIDE_RIGHT =
       1;
 
 
-
-   
-   /**
-   
-    * Message for the IHMC humanoid behavior module.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::HandCollisionDetectedPacket_")
+      /**
+       * Message for the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HandCollisionDetectedPacket_")
       struct HandCollisionDetectedPacket
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet robot_side;
-
-
-    
-
-
-    long collision_severity_level_one_to_three;
-
-
-
+        long collision_severity_level_one_to_three;
       };
-
     };
   };
 };

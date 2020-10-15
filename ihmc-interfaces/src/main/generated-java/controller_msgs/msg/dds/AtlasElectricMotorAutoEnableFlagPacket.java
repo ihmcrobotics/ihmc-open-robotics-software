@@ -7,27 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Atlas specific message.
-   
- */
+       * Atlas specific message.
+       */
 public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectricMotorAutoEnableFlagPacket> implements Settable<AtlasElectricMotorAutoEnableFlagPacket>, EpsilonComparable<AtlasElectricMotorAutoEnableFlagPacket>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public boolean should_auto_enable_;
 
    public AtlasElectricMotorAutoEnableFlagPacket()
    {
-
-
-
    }
 
    public AtlasElectricMotorAutoEnableFlagPacket(AtlasElectricMotorAutoEnableFlagPacket other)
@@ -38,34 +29,26 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
    public void set(AtlasElectricMotorAutoEnableFlagPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       should_auto_enable_ = other.should_auto_enable_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
-
 
    public void setShouldAutoEnable(boolean should_auto_enable)
    {
@@ -94,9 +77,7 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.should_auto_enable_, other.should_auto_enable_, epsilon)) return false;
 
@@ -113,9 +94,7 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
       AtlasElectricMotorAutoEnableFlagPacket otherMyClass = (AtlasElectricMotorAutoEnableFlagPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.should_auto_enable_ != otherMyClass.should_auto_enable_) return false;
 
@@ -129,10 +108,8 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasElectricMotorAutoEnableFlagPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("should_auto_enable=");
       builder.append(this.should_auto_enable_);
       builder.append("}");

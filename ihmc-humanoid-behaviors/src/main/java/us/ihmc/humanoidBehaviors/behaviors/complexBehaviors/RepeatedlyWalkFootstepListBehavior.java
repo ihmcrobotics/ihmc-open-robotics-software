@@ -18,8 +18,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,7 +40,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final YoInteger iterations = new YoInteger("iterations", registry);
    private final YoInteger iterationCounter = new YoInteger("iterationCounter", registry);
    private final YoInteger stepsAlongPath = new YoInteger("stepsAlongPath", registry);
-   private final YoEnum<RobotSide> initialSwingSide = YoEnum.create("initialSwingSide", RobotSide.class, registry);
+   private final YoEnum<RobotSide> initialSwingSide = new YoEnum<>("initialSwingSide", registry, RobotSide.class);
 
    private final FootstepDataListMessage forwardFootstepList = new FootstepDataListMessage();
    private final FootstepDataListMessage backwardFootstepList = new FootstepDataListMessage();
@@ -50,7 +50,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final ReferenceFrame midFootZUpFrame;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public RepeatedlyWalkFootstepListBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public RepeatedlyWalkFootstepListBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry)
    {
       super(robotName, ros2Node);
 

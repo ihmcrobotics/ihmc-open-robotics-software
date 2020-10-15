@@ -49,7 +49,7 @@ public class PlanarRegionToolsTest
 
          Point3DReadOnly projectedRandomPoint = PlanarRegionTools.projectInZToPlanarRegion(randomPointToProject, randomRegion);
 
-         Vector3D surfaceNormalInWorld = randomRegion.getNormal();
+         Vector3DReadOnly surfaceNormalInWorld = randomRegion.getNormal();
 
          RigidBodyTransformReadOnly transformToWorld = randomRegion.getTransformToWorld();
 

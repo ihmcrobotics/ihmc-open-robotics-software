@@ -1,17 +1,17 @@
 package us.ihmc.quadrupedPlanning.footstepChooser;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class PlanarGroundPointFootSnapper implements PointFootSnapper
 {
-   private final AtomicReference<QuadrupedGroundPlaneMessage> groundPlaneMessage = new AtomicReference<>();
+   private final AtomicReference<GroundPlaneMessage> groundPlaneMessage = new AtomicReference<>();
    private final Plane3D plane = new Plane3D();
    private final Point3D snappedPoint = new Point3D();
 
@@ -23,7 +23,7 @@ public class PlanarGroundPointFootSnapper implements PointFootSnapper
    }
 
 
-   public void submitGroundPlane(QuadrupedGroundPlaneMessage groundPlaneMessage)
+   public void submitGroundPlane(GroundPlaneMessage groundPlaneMessage)
    {
       this.groundPlaneMessage.set(groundPlaneMessage);
    }
@@ -31,7 +31,7 @@ public class PlanarGroundPointFootSnapper implements PointFootSnapper
    @Override
    public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
-      QuadrupedGroundPlaneMessage groundPlaneMessage = this.groundPlaneMessage.get();
+      GroundPlaneMessage groundPlaneMessage = this.groundPlaneMessage.get();
 
       if(groundPlaneMessage == null)
       {

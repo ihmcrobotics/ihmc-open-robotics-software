@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FilteredDiscreteVelocityYoVariableTest
@@ -18,7 +18,7 @@ public class FilteredDiscreteVelocityYoVariableTest
    public void testFilteredDiscreteVelocityNoDirectionChange()
    {
       double alpha = 0.99;
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       YoDouble time = new YoDouble("time", registry);
       FilteredDiscreteVelocityYoVariable filteredDiscreteVelocityYoVariable = new FilteredDiscreteVelocityYoVariable("filteredDiscreteVelocityYoVariable", "",
@@ -41,7 +41,7 @@ public class FilteredDiscreteVelocityYoVariableTest
    public void testFilteredDiscreteVelocityWithDirectionChange()
    {
       double alpha = 0.99;
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       YoDouble time = new YoDouble("time", registry);
       FilteredDiscreteVelocityYoVariable filteredDiscreteVelocityYoVariable = new FilteredDiscreteVelocityYoVariable("filteredDiscreteVelocityYoVariable", "",

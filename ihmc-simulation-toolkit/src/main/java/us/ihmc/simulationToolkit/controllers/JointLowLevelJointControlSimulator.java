@@ -7,12 +7,12 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JointLowLevelJointControlSimulator implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final PIDController jointPositionController;
    private final PIDController jointVelocityController;
 
@@ -25,7 +25,7 @@ public class JointLowLevelJointControlSimulator implements RobotController
                                              JointDesiredOutputReadOnly jointDesiredOutput, boolean isUpperBodyJoint,
                                              boolean isBackJoint, boolean isExoJoint, double totalMass, double controlDT)
    {
-      registry = new YoVariableRegistry(simulatedJoint.getName() + name);
+      registry = new YoRegistry(simulatedJoint.getName() + name);
       this.controlDT = controlDT;
       jointPositionController = new PIDController(simulatedJoint.getName() + "PositionControllerSimulator", registry);
       jointVelocityController = new PIDController(simulatedJoint.getName() + "VelocityControllerSimulator", registry);
@@ -148,7 +148,7 @@ public class JointLowLevelJointControlSimulator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

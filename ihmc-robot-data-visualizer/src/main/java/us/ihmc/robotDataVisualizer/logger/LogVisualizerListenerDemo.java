@@ -1,6 +1,6 @@
 package us.ihmc.robotDataVisualizer.logger;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -48,14 +48,14 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
    }
 
    @Override
-   public void setYoVariableRegistry(YoVariableRegistry registry)
+   public void setYoVariableRegistry(YoRegistry registry)
    {
       // To get the full name of a variable, right click on a variable in the logger and select "Copy Full Name to Clipboard".
       // Remove the "root.loggedMain"
       //
       // You only have to give the last part of the namespace, more might break if we rename parts of the name.
 
-      desiredCoMHeight = (YoDouble) registry.getVariable("LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight");
+      desiredCoMHeight = (YoDouble) registry.findVariable("LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight");
    }
 
 }

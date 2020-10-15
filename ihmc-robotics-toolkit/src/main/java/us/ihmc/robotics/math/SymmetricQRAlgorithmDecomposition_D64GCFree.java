@@ -18,14 +18,14 @@
 
 package us.ihmc.robotics.math;
 
-import org.ejml.alg.dense.decomposition.eig.symm.SymmetricQREigenHelper;
-import org.ejml.alg.dense.decomposition.eig.symm.SymmetricQrAlgorithm;
-import org.ejml.data.Complex64F;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
-import org.ejml.interfaces.decomposition.TridiagonalSimilarDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.Complex_F64;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.eig.symm.SymmetricQREigenHelper_DDRM;
+import org.ejml.dense.row.decomposition.eig.symm.SymmetricQrAlgorithm_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+import org.ejml.interfaces.decomposition.TridiagonalSimilarDecomposition_F64;
 
 /**
  * <p>
@@ -46,16 +46,16 @@ import org.ejml.ops.CommonOps;
  * 
  * @author Sylvain Bertrand
  */
-public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecomposition<DenseMatrix64F>
+public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecomposition_F64<DMatrixRMaj>
 {
 
    // computes a tridiagonal matrix whose eigenvalues are the same as the original
    // matrix and can be easily computed.
-   private TridiagonalSimilarDecomposition<DenseMatrix64F> decomp;
+   private TridiagonalSimilarDecomposition_F64<DMatrixRMaj> decomp;
    // helper class for eigenvalue and eigenvector algorithms
-   private SymmetricQREigenHelper helper;
+   private SymmetricQREigenHelper_DDRM helper;
    // computes the eigenvectors
-   private SymmetricQrAlgorithm vector;
+   private SymmetricQrAlgorithm_DDRM vector;
 
    // should it compute eigenvectors at the same time as the eigenvalues?
    private boolean computeVectorsWithValues = false;
@@ -71,28 +71,28 @@ public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecompo
    private double offSaved[];
 
    // temporary variable used to store/compute eigenvectors
-   private DenseMatrix64F V;
+   private DMatrixRMaj V;
    // the extracted eigenvectors
-   private DenseMatrix64F eigenvectors[];
+   private DMatrixRMaj eigenvectors[];
 
    // should it compute eigenvectors or just eigenvalues
    boolean computeVectors;
 
-   public SymmetricQRAlgorithmDecomposition_D64GCFree(TridiagonalSimilarDecomposition<DenseMatrix64F> decomp, boolean computeVectors)
+   public SymmetricQRAlgorithmDecomposition_D64GCFree(TridiagonalSimilarDecomposition_F64<DMatrixRMaj> decomp, boolean computeVectors)
    {
 
       this.decomp = decomp;
       this.computeVectors = computeVectors;
 
-      helper = new SymmetricQREigenHelper();
+      helper = new SymmetricQREigenHelper_DDRM();
 
-      vector = new SymmetricQrAlgorithm(helper);
+      vector = new SymmetricQrAlgorithm_DDRM(helper);
    }
 
    public SymmetricQRAlgorithmDecomposition_D64GCFree(boolean computeVectors)
    {
 
-      this(DecompositionFactory.tridiagonal(0), computeVectors);
+      this(DecompositionFactory_DDRM.tridiagonal(0), computeVectors);
    }
 
    public void setComputeVectorsWithValues(boolean computeVectorsWithValues)
@@ -121,13 +121,13 @@ public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecompo
    }
 
    @Override
-   public Complex64F getEigenvalue(int index)
+   public Complex_F64 getEigenvalue(int index)
    {
-      return new Complex64F(values[index], 0);
+      return new Complex_F64(values[index], 0);
    }
 
    @Override
-   public DenseMatrix64F getEigenVector(int index)
+   public DMatrixRMaj getEigenVector(int index)
    {
       return eigenvectors[index];
    }
@@ -145,7 +145,7 @@ public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecompo
     * @return true if it decomposed the matrix or false if an error was detected.  This will not catch all errors.
     */
    @Override
-   public boolean decompose(DenseMatrix64F orig)
+   public boolean decompose(DMatrixRMaj orig)
    {
       if (orig.numCols != orig.numRows)
          throw new IllegalArgumentException("Matrix must be square.");
@@ -206,7 +206,7 @@ public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecompo
          return false;
 
       // the V matrix contains the eigenvectors.  Convert those into column vectors
-      eigenvectors = CommonOps.rowsToVector(V, eigenvectors);
+      eigenvectors = CommonOps_DDRM.rowsToVector(V, eigenvectors);
 
       // save a copy of them since this data structure will be recycled next
       values = helper.copyEigenvalues(values);
@@ -238,7 +238,7 @@ public class SymmetricQRAlgorithmDecomposition_D64GCFree implements EigenDecompo
       // the ordering of the eigenvalues might have changed
       values = helper.copyEigenvalues(values);
       // the V matrix contains the eigenvectors.  Convert those into column vectors
-      eigenvectors = CommonOps.rowsToVector(V, eigenvectors);
+      eigenvectors = CommonOps_DDRM.rowsToVector(V, eigenvectors);
 
       return true;
    }

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -40,6 +40,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  */
 public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -82,6 +83,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void set(VirtualForceCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearForce.set(other.desiredLinearForce);
       selectionMatrix.set(other.selectionMatrix);
@@ -97,6 +99,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       command.getLinearSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
@@ -294,7 +297,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *           linear force is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
+   public void getDesiredLinearForce(DMatrixRMaj desiredLinearForceToPack)
    {
       desiredLinearForceToPack.reshape(6, 1);
       desiredLinearForceToPack.zero();
@@ -322,7 +325,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredLinearForceToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredLinearForceToPack)
    {
       getDesiredLinearForce(desiredLinearForceToPack);
    }
@@ -383,7 +386,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(3, 6);
       selectionMatrixToPack.zero();
@@ -429,6 +432,18 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -439,6 +454,8 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       {
          VirtualForceCommand other = (VirtualForceCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearForce.equals(other.desiredLinearForce))

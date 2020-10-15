@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -50,7 +50,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public FootstepListBehavior(String robotName, Ros2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
+   public FootstepListBehavior(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {
       super(robotName, ros2Node);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);

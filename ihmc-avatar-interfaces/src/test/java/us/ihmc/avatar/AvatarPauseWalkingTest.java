@@ -28,7 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -294,7 +294,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
-      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
+      YoRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       walkPaused = new YoBoolean("isWalkPaused", registry);
       ThreadTools.sleep(1000);
       setupCameraSideView();

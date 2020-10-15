@@ -1,13 +1,14 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -22,19 +23,19 @@ public class YoOptimizedPolynomial
    private final YoDouble[] coefficients;
    private final YoInteger numberOfCoefficients;
 
-   private final DenseMatrix64F H;
-   private final DenseMatrix64F Haccel;
-   private final DenseMatrix64F Hjerk;
-   private final DenseMatrix64F g;
-   private final DenseMatrix64F x;
+   private final DMatrixRMaj H;
+   private final DMatrixRMaj Haccel;
+   private final DMatrixRMaj Hjerk;
+   private final DMatrixRMaj g;
+   private final DMatrixRMaj x;
 
-   private final DenseMatrix64F jacobian;
-   private final DenseMatrix64F weight;
-   private final DenseMatrix64F objective;
+   private final DMatrixRMaj jacobian;
+   private final DMatrixRMaj weight;
+   private final DMatrixRMaj objective;
 
-   private final DenseMatrix64F jtW;
+   private final DMatrixRMaj jtW;
 
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
    private double regularizationWeight = 1.0e-8;
    private double defaultPointWeight = 1.0;
@@ -44,27 +45,27 @@ public class YoOptimizedPolynomial
    private double minX = Double.POSITIVE_INFINITY;
    private double maxX = Double.NEGATIVE_INFINITY;
 
-   public YoOptimizedPolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoOptimizedPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.maximumNumberOfCoefficients = maximumNumberOfCoefficients;
 
-      solver = LinearSolverFactory.symmPosDef(maximumNumberOfCoefficients);
+      solver = LinearSolverFactory_DDRM.symmPosDef(maximumNumberOfCoefficients);
 
       coefficients = new YoDouble[maximumNumberOfCoefficients];
 
-      H = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      Haccel = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      Hjerk = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      g = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
-      x = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      H = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      Haccel = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      Hjerk = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      g = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
+      x = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
 
-      jacobian = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      weight = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      objective = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      jacobian = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      weight = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      objective = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
 
       xPowers = new double[maximumNumberOfCoefficients];
 
-      jtW = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      jtW = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
       numberOfCoefficients.set(maximumNumberOfCoefficients);
@@ -190,15 +191,15 @@ public class YoOptimizedPolynomial
          setVelocityConstraint(i + positionPoints.size(), velocityPoints.get(i));
 
       jtW.reshape(nCoeffs, size);
-      CommonOps.multTransA(jacobian, weight, jtW);
+      CommonOps_DDRM.multTransA(jacobian, weight, jtW);
 
-      CommonOps.mult(jtW, jacobian, H);
-      CommonOps.mult(jtW, objective, g);
+      CommonOps_DDRM.mult(jtW, jacobian, H);
+      CommonOps_DDRM.mult(jtW, objective, g);
 
       if (accelerationMinimizationWeight > 0.0)
       {
          computeCostHessianOfIntegralSquared(Haccel, 2);
-         CommonOps.addEquals(H, accelerationMinimizationWeight, Haccel);
+         CommonOps_DDRM.addEquals(H, accelerationMinimizationWeight, Haccel);
       }
       else
       {
@@ -208,7 +209,7 @@ public class YoOptimizedPolynomial
       if (jerkMinimizationWeight > 0.0)
       {
          computeCostHessianOfIntegralSquared(Hjerk, 3);
-         CommonOps.addEquals(H, jerkMinimizationWeight, Hjerk);
+         CommonOps_DDRM.addEquals(H, jerkMinimizationWeight, Hjerk);
       }
       else
       {
@@ -334,7 +335,7 @@ public class YoOptimizedPolynomial
     * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the
     * YoPolynomials order-th derivative at x)
     */
-   public void getXPowersDerivativeVector(int order, double x, DenseMatrix64F xPowersDerivativeVectorToPack)
+   public void getXPowersDerivativeVector(int order, double x, DMatrixRMaj xPowersDerivativeVectorToPack)
    {
       double time = normalizeTime(x);
       setXPowers(xPowers, time);
@@ -377,7 +378,7 @@ public class YoOptimizedPolynomial
    /**
     * Used to compute the hessian of the cost function defined by the integral of the squared value of the derivative function
     */
-   void computeCostHessianOfIntegralSquared(DenseMatrix64F hessianToPack, int derivativeToIntegrate)
+   void computeCostHessianOfIntegralSquared(DMatrixRMaj hessianToPack, int derivativeToIntegrate)
    {
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {

@@ -1,16 +1,14 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -23,19 +21,19 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotController
 {
    private static final ReferenceFrame WORLD_FRAME = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry("rotatablePlaneTerrainProfile");
+   private final YoRegistry registry = new YoRegistry("rotatablePlaneTerrainProfile");
    private final FramePose3D planePose = new FramePose3D(WORLD_FRAME);
    private final PoseReferenceFrame planeFrame = new PoseReferenceFrame("planeFrame", planePose);
    private final FramePlane3d plane = new FramePlane3d(planeFrame);
@@ -56,7 +54,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 
    private YoFramePoint3D desiredGroundPosition = new YoFramePoint3D("desiredGroundPosition", WORLD_FRAME, registry);
    private final YoFramePoseUsingYawPitchRoll yoPlanePose = new YoFramePoseUsingYawPitchRoll(desiredGroundPosition, filteredDesiredGroundOrientation);
-   private ArrayList<GroundContactPoint> groundContactPoints;
+   private List<GroundContactPoint> groundContactPoints;
    
    public RotatablePlaneTerrainProfile(Point3D center, Robot robot, YoGraphicsListRegistry graphicsRegistry, double dt)
    {
@@ -70,12 +68,12 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       filteredDesiredGroundPitchAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
       filteredDesiredGroundRollAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
       
-      yoPlanePose.attachVariableChangedListener(new VariableChangedListener()
+      yoPlanePose.attachVariableChangedListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
-            yoPlanePose.getFramePose(planePose);
+            planePose.set(yoPlanePose);
             planeFrame.setPoseAndUpdate(planePose);
          }
       });
@@ -118,7 +116,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
     * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
     */
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       testPoint.setIncludingFrame(WORLD_FRAME, x, y, z);
       testPoint.changeFrame(plane.getReferenceFrame());
@@ -200,7 +198,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

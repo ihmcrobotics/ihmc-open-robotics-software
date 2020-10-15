@@ -2,14 +2,14 @@ package us.ihmc.avatar;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulationRobotVisualizer
 {
    private final MirroredYoVariableRegistry registry;
    private final YoGraphicsListRegistry graphicsListRegistry;
 
-   public SimulationRobotVisualizer(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public SimulationRobotVisualizer(YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.graphicsListRegistry = graphicsListRegistry;
       this.registry = new MirroredYoVariableRegistry(registry);
@@ -22,7 +22,7 @@ public class SimulationRobotVisualizer
          graphicsListRegistry.update();
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

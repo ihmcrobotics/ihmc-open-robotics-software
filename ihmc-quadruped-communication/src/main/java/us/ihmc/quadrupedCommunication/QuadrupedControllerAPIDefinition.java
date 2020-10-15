@@ -1,7 +1,11 @@
 package us.ihmc.quadrupedCommunication;
 
 import static us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor.NO_ID;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyHeightMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyOrientationMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedFootLoadBearingRequestMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,15 +13,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import controller_msgs.msg.dds.QuadrupedFootLoadBearingMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.SoleTrajectoryMessage;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedFootLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.ros2.ROS2Topic;
 
 public class QuadrupedControllerAPIDefinition
 {
@@ -51,7 +74,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
       quadrupedStatusMessages.add(HighLevelStateChangeStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
-      quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
+      quadrupedStatusMessages.add(GroundPlaneMessage.class);
       quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
       quadrupedStatusMessages.add(ControllerCrashNotificationPacket.class);
 
@@ -68,14 +91,14 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedStatusMessages;
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getQuadrupedControllerInputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
    }
 
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()

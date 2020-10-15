@@ -1,46 +1,46 @@
 package us.ihmc.robotics.math.trajectories;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
 import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolder
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc, dPos;
+   private double pos, vel, acc, jerk, dPos;
    private final YoDouble[] a;
    private final YoInteger numberOfCoefficients;
-   private final DenseMatrix64F constraintMatrix;
-   private final DenseMatrix64F constraintVector;
-   private final DenseMatrix64F coefficientVector;
+   private final DMatrixRMaj constraintMatrix;
+   private final DMatrixRMaj constraintVector;
+   private final DMatrixRMaj coefficientVector;
    private final double[] xPowers;
 
    // Stores the (n-th order) derivative of the xPowers vector
-   private final DenseMatrix64F xPowersDerivativeVector;
+   private final DMatrixRMaj xPowersDerivativeVector;
 
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
-   public YoPolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.maximumNumberOfCoefficients = maximumNumberOfCoefficients;
 
-      solver = LinearSolverFactory.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      solver = LinearSolverFactory_DDRM.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
       a = new YoDouble[maximumNumberOfCoefficients];
-      constraintMatrix = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
-      coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      constraintMatrix = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      constraintVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
+      coefficientVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
 
-      xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      xPowersDerivativeVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
 
@@ -57,14 +57,14 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
 
       maximumNumberOfCoefficients = coefficients.length;
 
-      solver = LinearSolverFactory.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      solver = LinearSolverFactory_DDRM.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
-      constraintMatrix = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
-      coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      constraintMatrix = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      constraintVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
+      coefficientVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
 
-      xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      xPowersDerivativeVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
    }
 
    @Override
@@ -81,6 +81,11 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    public double getAcceleration()
    {
       return acc;
+   }
+
+   public double getJerk()
+   {
+      return jerk;
    }
 
    public double getCoefficient(int i)
@@ -101,7 +106,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       return ret;
    }
 
-   public DenseMatrix64F getCoefficientsVector()
+   public DMatrixRMaj getCoefficientsVector()
    {
       return coefficientVector;
    }
@@ -563,7 +568,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       solver.solve(constraintVector, coefficientVector);
    }
 
-   public void setDirectly(DenseMatrix64F coefficients)
+   public void setDirectly(DMatrixRMaj coefficients)
    {
       reshape(coefficients.getNumRows());
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -627,7 +632,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    {
       setXPowers(xPowers, x);
 
-      pos = vel = acc = 0.0;
+      pos = vel = acc = jerk = 0.0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          pos += a[i].getDoubleValue() * xPowers[i];
@@ -641,6 +646,11 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       for (int i = 2; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          acc += (i - 1) * i * a[i].getDoubleValue() * xPowers[i - 2];
+      }
+
+      for (int i = 3; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         jerk += (i - 2) * (i - 1) * i * a[i].getDoubleValue() * xPowers[i - 3];
       }
    }
 
@@ -690,7 +700,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
     * @param x
     * @return
     */
-   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   public DMatrixRMaj getXPowersDerivativeVector(int order, double x)
    {
       setXPowers(xPowers, x);
       xPowersDerivativeVector.zero();

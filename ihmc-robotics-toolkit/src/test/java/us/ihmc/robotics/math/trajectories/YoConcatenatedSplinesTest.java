@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoConcatenatedSplinesTest
 {
@@ -37,7 +37,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);
@@ -66,7 +66,7 @@ public class YoConcatenatedSplinesTest
 	@Test
    public void testSimpleCubicQuinticCubicTroublesome()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+      YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
       
       FramePoint3D p0 = new FramePoint3D(worldFrame, 3.6468620919827135, -4.5527029914004205, -2.7826785633396045);
       FramePoint3D p1 = new FramePoint3D(worldFrame, 1.873647248784934, 4.8291937131106835, 3.1811710040983314);
@@ -108,7 +108,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);
@@ -146,7 +146,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);

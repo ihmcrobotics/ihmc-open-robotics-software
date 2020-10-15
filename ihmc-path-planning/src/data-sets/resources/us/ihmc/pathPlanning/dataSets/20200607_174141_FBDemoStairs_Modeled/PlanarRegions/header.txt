@@ -1,0 +1,6 @@
+regionId: 0, index: 1, origin: 0.0, 0.0, 0.15, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 1, index: 1, origin: 1.1396999245620407, 0.0, 0.32144990741705, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 2, index: 1, origin: 1.4190997736861222, 0.0, 0.49289981483409995, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 3, index: 1, origin: 1.6984996228102036, 0.0, 0.66434972225115, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 4, index: 1, origin: 1.977899471934285, 0.0, 0.8357996296682, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 5, index: 1, origin: 2.617599396496326, 0.0, 1.00724953708525, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]

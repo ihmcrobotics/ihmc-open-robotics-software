@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RateLimitedYoFramePose implements FixedFramePose3DBasics
@@ -15,36 +15,36 @@ public class RateLimitedYoFramePose implements FixedFramePose3DBasics
    private final RateLimitedYoFramePoint position;
    private final RateLimitedYoFrameQuaternion orientation;
 
-   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                  FramePose3DReadOnly rawPose)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPose, rawPose.getReferenceFrame());
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                  ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, FramePose3DReadOnly rawPose)
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt, FramePose3DReadOnly rawPose)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawPose, rawPose.getReferenceFrame());
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   private RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                   FramePose3DReadOnly rawPose, ReferenceFrame referenceFrame)
    {
       if (rawPose != null)

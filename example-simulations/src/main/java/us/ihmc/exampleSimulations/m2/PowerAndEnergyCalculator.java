@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.m2;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -14,7 +14,7 @@ public class PowerAndEnergyCalculator implements RobotController
    private final double GEAR_RATIO = 50.0;    // [Nm/A]
    private final double MOTOR_RESISTANCE = 0.611;    // 100219 pdn set from RB- 02111 [ohms]
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("PowerCalculator");
+   private final YoRegistry registry = new YoRegistry("PowerCalculator");
 
    private final M2Robot m2Robot;
 
@@ -76,8 +76,8 @@ public class PowerAndEnergyCalculator implements RobotController
       this.m2Robot = m2Robot;
 
 
-      xPosition = (YoDouble)m2Robot.getVariable("q_x");
-      yPosition = (YoDouble)m2Robot.getVariable("q_y");
+      xPosition = (YoDouble)m2Robot.findVariable("q_x");
+      yPosition = (YoDouble)m2Robot.findVariable("q_y");
 
       harmonicDriveEfficiencyCalculator = new M2HarmonicDriveEfficiencyCalculator();
 
@@ -142,8 +142,8 @@ public class PowerAndEnergyCalculator implements RobotController
          for (int j = 0; j < listOfJointNames.length; j++)
          {
             String prefixedJointName = prefixes[i] + listOfJointNames[j];
-            jointTorques[counter] = (YoDouble)m2Robot.getVariable("tau_" + prefixedJointName);
-            jointVelocities[counter] = (YoDouble)m2Robot.getVariable("qd_" + prefixedJointName);
+            jointTorques[counter] = (YoDouble)m2Robot.findVariable("tau_" + prefixedJointName);
+            jointVelocities[counter] = (YoDouble)m2Robot.findVariable("qd_" + prefixedJointName);
             currents[counter] = new YoDouble("i_" + prefixedJointName, "Instantaneous current motors [A]", registry);
             gearboxEfficiencies[counter] = new YoDouble(prefixedJointName + "_gear_eff", "Gearbox efficiency", registry);
             jointPowers[counter] = new YoDouble(prefixedJointName + "_power", "Joint power [W]", registry);
@@ -309,7 +309,7 @@ public class PowerAndEnergyCalculator implements RobotController
 
 
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,8 +1,8 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
-   id("us.ihmc.ihmc-ci") version "5.3"
+   id("us.ihmc.ihmc-build") version "0.22.0"
+   id("us.ihmc.ihmc-ci") version "6.4"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.4.2"
+   id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
 ihmc {
@@ -18,7 +18,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("org.boofcv:geo:0.24.1")
+   api("org.boofcv:boofcv-geo:0.36")
    api("org.reflections:reflections:0.9.10")
    api("org.ros.rosjava_core:rosjava:0.2.1") {
       exclude(group = "junit", module = "junit")
@@ -38,7 +38,7 @@ mainDependencies {
    api("org.ros.rosjava_messages:tf2_msgs:0.5.9")
    api("org.ros.rosjava_messages:tf:1.10.8")
 
-   api("us.ihmc:euclid:0.14.1")
+   api("us.ihmc:euclid:0.15.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")

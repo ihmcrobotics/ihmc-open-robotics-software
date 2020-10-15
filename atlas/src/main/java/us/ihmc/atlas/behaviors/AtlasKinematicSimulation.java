@@ -64,7 +64,7 @@ public class AtlasKinematicSimulation
       @Override
       public double getNullspaceProjectionAlpha()
       {
-         return 0.001;
+         return 0.1;
       }
    }
 

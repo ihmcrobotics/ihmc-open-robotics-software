@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,22 +33,22 @@ public class BetaFilteredYoVariable extends YoDouble
 
    private final YoBoolean hasBeenCalled;
 
-   public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta)
+   public BetaFilteredYoVariable(String name, YoRegistry registry, int beta)
    {
       this(name, "", registry, beta, null);
    }
 
-   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta)
+   public BetaFilteredYoVariable(String name, String description, YoRegistry registry, int beta)
    {
       this(name, description, registry, beta, null);
    }
 
-   public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta, YoDouble positionVariable)
+   public BetaFilteredYoVariable(String name, YoRegistry registry, int beta, YoDouble positionVariable)
    {
       this(name, "", registry, beta, positionVariable);
    }
 
-   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta, YoDouble positionVariable)
+   public BetaFilteredYoVariable(String name, String description, YoRegistry registry, int beta, YoDouble positionVariable)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);

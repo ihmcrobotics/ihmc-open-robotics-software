@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -7,11 +10,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CornerPointViewer
 {
@@ -27,7 +27,7 @@ public class CornerPointViewer
 
    private static final String name = "Corner Points";
 
-   public CornerPointViewer(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CornerPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (int i = 0; i < maxPoints; i++)
       {

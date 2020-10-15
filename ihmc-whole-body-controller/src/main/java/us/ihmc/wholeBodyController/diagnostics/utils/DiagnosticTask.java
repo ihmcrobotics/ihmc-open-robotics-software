@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DiagnosticTask
@@ -18,7 +18,7 @@ public abstract class DiagnosticTask
    public abstract boolean isDone();
    public abstract boolean abortRequested();
    public abstract String getName();
-   public abstract void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry);
+   public abstract void attachParentYoVariableRegistry(YoRegistry parentRegistry);
 
    void setYoTimeInCurrentTask(YoDouble timeInCurrentTask)
    {

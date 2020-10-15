@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -31,7 +30,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -68,17 +67,17 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private boolean assumeFlatGround = false;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
+   public PlanPathToLocationBehavior(String robotName, ROS2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, footPlanStatusQueue::put);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
 
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlanningToolboxSubGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlannerInputTopic);
       goalFootstepToUIVisualization = createBehaviorOutputPublisher(FootstepDataListMessage.class);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
@@ -165,8 +164,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
             FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                                        0.0,
-                                                                                                                                       0.0,
-                                                                                                                                       ExecutionMode.OVERRIDE);
+                                                                                                                                       0.0);
 
             goalFootstepToUIVisualization.publish(footstepDataGoalStepForVisualization);
 
@@ -183,7 +181,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
             request.setGenerateLog(true);
-            FootstepPlannerLogger.deleteOldLogs(10);
+            FootstepPlannerLogger.deleteOldLogs(30);
 
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 

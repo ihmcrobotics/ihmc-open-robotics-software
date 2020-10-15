@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -11,9 +10,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieHandStateCommunicator implements RobotController
 {
@@ -22,9 +21,9 @@ public class ValkyrieHandStateCommunicator implements RobotController
    private final HandJointAnglePacket packet;
    private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
 
-   public ValkyrieHandStateCommunicator(String robotName, FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, RealtimeRos2Node realtimeRos2Node)
+   public ValkyrieHandStateCommunicator(String robotName, FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, RealtimeROS2Node realtimeROS2Node)
    {
-      publisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+      publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class, ROS2Tools.getControllerOutputTopic(robotName));
 
       for (RobotSide robotside : RobotSide.values)
       {
@@ -73,7 +72,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return null;
    }

@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -22,19 +21,19 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class SCSRobotExternalWrenchReader implements ExternalWrenchReader
 {
-   private int movingAverageLength = 10;
+   private int movingAverageLength = 3;
    private final List<ExtendedContactPointBundle> contactPointBundles = new ArrayList<>();
 
    public SCSRobotExternalWrenchReader()
    {
    }
 
-   public void addRobot(RigidBodyBasics rootBody, Robot scsRobot)
+   public void addRobot(RigidBodyReadOnly rootBody, Robot scsRobot)
    {
-      ArrayList<ArrayList<GroundContactPoint>> allGroundContactPointsGroupedByJoint = scsRobot.getAllGroundContactPointsGroupedByJoint();
+      List<List<GroundContactPoint>> allGroundContactPointsGroupedByJoint = scsRobot.getAllGroundContactPointsGroupedByJoint();
       JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
 
-      for (ArrayList<GroundContactPoint> groundContactPointBundle : allGroundContactPointsGroupedByJoint)
+      for (List<GroundContactPoint> groundContactPointBundle : allGroundContactPointsGroupedByJoint)
       {
          if (groundContactPointBundle.isEmpty())
             continue;

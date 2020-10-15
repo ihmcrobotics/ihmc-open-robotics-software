@@ -17,7 +17,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public class CirclePositionTrajectoryGeneratorTest
@@ -126,7 +126,7 @@ public class CirclePositionTrajectoryGeneratorTest
    {
       PositionProvider initialPositionProvider = new ConstantPositionProvider(offset);
       DoubleProvider desiredRotationAngleProvider = new ConstantDoubleProvider(rotationAngle);
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("CirclePositionTrajectoryGeneratorTest");
+      YoRegistry parentRegistry = new YoRegistry("CirclePositionTrajectoryGeneratorTest");
 
       return new CirclePositionTrajectoryGenerator("", referenceFrame, new ConstantDoubleProvider(trajectoryTime), initialPositionProvider, parentRegistry,
               desiredRotationAngleProvider);

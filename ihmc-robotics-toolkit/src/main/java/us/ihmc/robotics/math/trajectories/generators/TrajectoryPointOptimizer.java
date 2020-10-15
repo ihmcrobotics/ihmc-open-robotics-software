@@ -3,14 +3,14 @@ package us.ihmc.robotics.math.trajectories.generators;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -51,7 +51,7 @@ public class TrajectoryPointOptimizer
 
    public static final int coefficients = 4;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoInteger dimensions;
    private final YoInteger nWaypoints;
@@ -60,42 +60,42 @@ public class TrajectoryPointOptimizer
    private final YoInteger iteration;
 
    private final TDoubleArrayList x0, x1, xd0, xd1;
-   private final ArrayList<DenseMatrix64F> waypoints = new ArrayList<>();
+   private final ArrayList<DMatrixRMaj> waypoints = new ArrayList<>();
 
-   private final DenseMatrix64F intervalTimes = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj intervalTimes = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj saveIntervalTimes = new DMatrixRMaj(1, 1);
    private final TDoubleArrayList costs = new TDoubleArrayList(maxIterations + 1);
 
-   private final RecyclingArrayList<DenseMatrix64F> x = new RecyclingArrayList<>(0, () -> new DenseMatrix64F(1, 1));
+   private final RecyclingArrayList<DMatrixRMaj> x = new RecyclingArrayList<>(0, () -> new DMatrixRMaj(1, 1));
 
-   private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F f = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F A = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F ATranspose = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F b = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj H = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj f = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj A = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj ATranspose = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj b = new DMatrixRMaj(1, 1);
 
-   private final DenseMatrix64F E = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F d = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj E = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj d = new DMatrixRMaj(1, 1);
 
-   private final DenseMatrix64F hBlock = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F AdLine = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj hBlock = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj AdLine = new DMatrixRMaj(1, 1);
 
-   private final DenseMatrix64F timeGradient = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj timeGradient = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj timeUpdate = new DMatrixRMaj(1, 1);
    private final YoDouble timeGain;
 
    private final ExecutionTimer computeTimer;
    private final ExecutionTimer timeUpdateTimer;
 
-   private final DenseMatrix64F tempCoeffs = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F tempLine = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj tempCoeffs = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempLine = new DMatrixRMaj(1, 1);
 
-   public TrajectoryPointOptimizer(int dimensions, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry)
    {
       this("", dimensions, parentRegistry);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry)
    {
       this(namePrefix, dimensions);
       parentRegistry.addChild(registry);
@@ -108,7 +108,7 @@ public class TrajectoryPointOptimizer
 
    public TrajectoryPointOptimizer(String namePrefix, int dimensions)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.dimensions = new YoInteger(namePrefix + "Dimensions", registry);
       this.nWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
       this.intervals = new YoInteger(namePrefix + "NumberOfIntervals", registry);
@@ -137,7 +137,7 @@ public class TrajectoryPointOptimizer
 
       for (int i = 0; i < maxWaypoints; i++)
       {
-         waypoints.add(new DenseMatrix64F(dimensions, 1));
+         waypoints.add(new DMatrixRMaj(dimensions, 1));
       }
 
       tempCoeffs.reshape(coefficients, 1);
@@ -213,7 +213,7 @@ public class TrajectoryPointOptimizer
    {
       intervals.set(nWaypoints.getIntegerValue() + 1);
       intervalTimes.reshape(intervals.getValue(), 1);
-      CommonOps.fill(intervalTimes, 1.0 / intervals.getValue());
+      CommonOps_DDRM.fill(intervalTimes, 1.0 / intervals.getValue());
       computeInternal(maxIterations);
    }
 
@@ -331,8 +331,8 @@ public class TrajectoryPointOptimizer
          intervalTimes.set(saveIntervalTimes);
       }
 
-      double length = CommonOps.elementSum(timeGradient);
-      CommonOps.add(timeGradient, -length / intervals);
+      double length = CommonOps_DDRM.elementSum(timeGradient);
+      CommonOps_DDRM.add(timeGradient, -length / intervals);
 
       for (int i = 0; i < 10; i++)
       {
@@ -358,13 +358,13 @@ public class TrajectoryPointOptimizer
    private double applyTimeUpdate()
    {
       timeUpdate.set(timeGradient);
-      CommonOps.scale(-timeGain.getDoubleValue(), timeUpdate);
+      CommonOps_DDRM.scale(-timeGain.getDoubleValue(), timeUpdate);
 
-      double maxUpdate = CommonOps.elementMaxAbs(timeUpdate);
-      double minIntervalTime = CommonOps.elementMin(intervalTimes);
+      double maxUpdate = CommonOps_DDRM.elementMaxAbs(timeUpdate);
+      double minIntervalTime = CommonOps_DDRM.elementMin(intervalTimes);
       if (maxUpdate > 0.4 * minIntervalTime)
       {
-         CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeUpdate);
+         CommonOps_DDRM.scale(0.4 * minIntervalTime / maxUpdate, timeUpdate);
       }
 
       for (int i = 0; i < intervals.getIntegerValue(); i++)
@@ -386,7 +386,7 @@ public class TrajectoryPointOptimizer
       return cost;
    }
 
-   private double solveDimension(int dimension, DenseMatrix64F solutionToPack)
+   private double solveDimension(int dimension, DMatrixRMaj solutionToPack)
    {
       buildCostMatrixForDimension(dimension, H);
       buildConstraintMatrixForDimension(dimension, A, b);
@@ -395,7 +395,7 @@ public class TrajectoryPointOptimizer
       int constraints = 4 + 3 * nWaypoints.getValue();
 
       f.reshape(subProblemSize, 1);
-      CommonOps.fill(f, regularizationWeight);
+      CommonOps_DDRM.fill(f, regularizationWeight);
 
       // min 0.5*x'*H*x + f'*x
       // s.t. A*x == b
@@ -403,15 +403,15 @@ public class TrajectoryPointOptimizer
       E.reshape(size, size);
       d.reshape(size, 1);
 
-      CommonOps.fill(E, 0.0);
-      CommonOps.insert(H, E, 0, 0);
-      CommonOps.insert(A, E, subProblemSize, 0);
+      CommonOps_DDRM.fill(E, 0.0);
+      CommonOps_DDRM.insert(H, E, 0, 0);
+      CommonOps_DDRM.insert(A, E, subProblemSize, 0);
       ATranspose.reshape(A.getNumCols(), A.getNumRows());
-      CommonOps.transpose(A, ATranspose);
-      CommonOps.insert(ATranspose, E, 0, subProblemSize);
-      CommonOps.scale(-1.0, f);
-      CommonOps.insert(f, d, 0, 0);
-      CommonOps.insert(b, d, subProblemSize, 0);
+      CommonOps_DDRM.transpose(A, ATranspose);
+      CommonOps_DDRM.insert(ATranspose, E, 0, subProblemSize);
+      CommonOps_DDRM.scale(-1.0, f);
+      CommonOps_DDRM.insert(f, d, 0, 0);
+      CommonOps_DDRM.insert(b, d, subProblemSize, 0);
 
       NativeCommonOps.solve(E, d, solutionToPack);
       solutionToPack.reshape(subProblemSize, 1);
@@ -420,23 +420,23 @@ public class TrajectoryPointOptimizer
       return 0.5 * b.get(0, 0);
    }
 
-   private void buildConstraintMatrixForDimension(int dimension, DenseMatrix64F A, DenseMatrix64F b)
+   private void buildConstraintMatrixForDimension(int dimension, DMatrixRMaj A, DMatrixRMaj b)
    {
       int constraints = 4 + 3 * nWaypoints.getValue();
       int subProblemSize = coefficients * intervals.getValue();
       A.reshape(constraints, subProblemSize);
       b.reshape(constraints, 1);
-      CommonOps.fill(A, 0.0);
+      CommonOps_DDRM.fill(A, 0.0);
 
       int line = 0;
 
       // add initial condition
       getPositionLine(0.0, AdLine);
-      CommonOps.insert(AdLine, A, line, 0);
+      CommonOps_DDRM.insert(AdLine, A, line, 0);
       b.set(line, x0.get(dimension));
       line++;
       getVelocityLine(0.0, AdLine);
-      CommonOps.insert(AdLine, A, line, 0);
+      CommonOps_DDRM.insert(AdLine, A, line, 0);
       b.set(line, xd0.get(dimension));
       line++;
 
@@ -445,39 +445,39 @@ public class TrajectoryPointOptimizer
       {
          t += intervalTimes.get(w);
          int colOffset = w * coefficients;
-         DenseMatrix64F waypoint = waypoints.get(w);
+         DMatrixRMaj waypoint = waypoints.get(w);
 
          getPositionLine(t, AdLine);
-         CommonOps.insert(AdLine, A, line, colOffset);
+         CommonOps_DDRM.insert(AdLine, A, line, colOffset);
          b.set(line, waypoint.get(dimension));
          line++;
-         CommonOps.insert(AdLine, A, line, colOffset + coefficients);
+         CommonOps_DDRM.insert(AdLine, A, line, colOffset + coefficients);
          b.set(line, waypoint.get(dimension));
          line++;
 
          getVelocityLine(t, AdLine);
-         CommonOps.insert(AdLine, A, line, colOffset);
-         CommonOps.scale(-1.0, AdLine);
-         CommonOps.insert(AdLine, A, line, colOffset + coefficients);
+         CommonOps_DDRM.insert(AdLine, A, line, colOffset);
+         CommonOps_DDRM.scale(-1.0, AdLine);
+         CommonOps_DDRM.insert(AdLine, A, line, colOffset + coefficients);
          b.set(line, 0.0);
          line++;
       }
 
       // add final condition
       getPositionLine(1.0, AdLine);
-      CommonOps.insert(AdLine, A, line, subProblemSize - coefficients);
+      CommonOps_DDRM.insert(AdLine, A, line, subProblemSize - coefficients);
       b.set(line, x1.get(dimension));
       line++;
       getVelocityLine(1.0, AdLine);
-      CommonOps.insert(AdLine, A, line, subProblemSize - coefficients);
+      CommonOps_DDRM.insert(AdLine, A, line, subProblemSize - coefficients);
       b.set(line, xd1.get(dimension));
    }
 
-   private void buildCostMatrixForDimension(int dimension, DenseMatrix64F H)
+   private void buildCostMatrixForDimension(int dimension, DMatrixRMaj H)
    {
       int size = coefficients * intervals.getIntegerValue();
       H.reshape(size, size);
-      CommonOps.fill(H, 0.0);
+      CommonOps_DDRM.fill(H, 0.0);
 
       double t0 = 0.0;
       double t1 = 0.0;
@@ -487,7 +487,7 @@ public class TrajectoryPointOptimizer
          t1 = t1 + intervalTimes.get(i);
          getHBlock(t0, t1, hBlock);
          int offset = i * coefficients;
-         CommonOps.insert(hBlock, H, offset, offset);
+         CommonOps_DDRM.insert(hBlock, H, offset, offset);
       }
    }
 
@@ -547,11 +547,11 @@ public class TrajectoryPointOptimizer
       if (dimension > dimensions.getIntegerValue() - 1 || dimension < 0)
          throw new RuntimeException("Unknown Dimension");
 
-      DenseMatrix64F xDim = x.get(dimension);
+      DMatrixRMaj xDim = x.get(dimension);
       for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
          int index = i * coefficients;
-         CommonOps.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
+         CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          coefficientsToPack.get(i).reset();
          coefficientsToPack.get(i).add(tempCoeffs.getData());
       }
@@ -571,14 +571,14 @@ public class TrajectoryPointOptimizer
       velocityToPack.reset();
       for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
       {
-         DenseMatrix64F xDim = x.get(dimension);
+         DMatrixRMaj xDim = x.get(dimension);
          int index = waypointIndex * coefficients;
-         CommonOps.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
-         velocityToPack.add(CommonOps.dot(tempCoeffs, tempLine));
+         CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
+         velocityToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
       }
    }
 
-   private static void getPositionLine(double t, DenseMatrix64F lineToPack)
+   private static void getPositionLine(double t, DMatrixRMaj lineToPack)
    {
       lineToPack.reshape(1, coefficients);
       lineToPack.set(0, 3, 1.0);
@@ -590,7 +590,7 @@ public class TrajectoryPointOptimizer
       lineToPack.set(0, 0, tpow);
    }
 
-   private static void getVelocityLine(double t, DenseMatrix64F lineToPack)
+   private static void getVelocityLine(double t, DMatrixRMaj lineToPack)
    {
       lineToPack.reshape(1, coefficients);
       lineToPack.set(0, 3, 0.0);
@@ -601,7 +601,7 @@ public class TrajectoryPointOptimizer
       lineToPack.set(0, 0, 3.0 * tpow);
    }
 
-   private static void getHBlock(double t0, double t1, DenseMatrix64F hBlockToPack)
+   private static void getHBlock(double t0, double t1, DMatrixRMaj hBlockToPack)
    {
       hBlockToPack.reshape(2, 2);
       double t0pow = t0;

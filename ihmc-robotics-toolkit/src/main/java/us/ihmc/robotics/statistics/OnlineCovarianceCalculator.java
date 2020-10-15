@@ -1,6 +1,6 @@
 package us.ihmc.robotics.statistics;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /** Uses a combination of the Welford's algorithm for calculating
@@ -16,7 +16,7 @@ public class OnlineCovarianceCalculator
    private final OnlineStandardDeviationCalculator xCalculator;
    private final OnlineStandardDeviationCalculator yCalculator;
 
-   public OnlineCovarianceCalculator(String prefix, YoVariableRegistry registry)
+   public OnlineCovarianceCalculator(String prefix, YoRegistry registry)
    {
       coMoment = new YoDouble(prefix + "_CoMoment", registry);
       covariance = new YoDouble(prefix + "_Covariance", registry);

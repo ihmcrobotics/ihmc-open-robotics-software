@@ -13,7 +13,7 @@ import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
 import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
 import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,7 +25,7 @@ public class CoMHeightTimeDerivativesSmoother
 
    //   private final double maximumAcceleration = 10.0;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FramePoint3D centerOfMassHeightPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
@@ -63,7 +63,7 @@ public class CoMHeightTimeDerivativesSmoother
    private PDGainsReadOnly gains;
    private DoubleProvider maximumVelocity;
 
-   public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
+   public CoMHeightTimeDerivativesSmoother(double dt, YoRegistry parentRegistry)
    {
       this.dt = dt;
 
@@ -127,7 +127,7 @@ public class CoMHeightTimeDerivativesSmoother
       }
    }
 
-   public void smooth(CoMHeightTimeDerivativesData heightZDataOutputToPack, CoMHeightTimeDerivativesData heightZDataInput)
+   public void smooth(YoCoMHeightTimeDerivativesData heightZDataOutputToPack, YoCoMHeightTimeDerivativesData heightZDataInput)
    {
       if (!hasBeenInitialized.getBooleanValue())
          initialize(heightZDataInput);
@@ -178,7 +178,7 @@ public class CoMHeightTimeDerivativesSmoother
       heightZDataOutputToPack.setComHeightJerk(smoothComHeightJerk.getDoubleValue());
    }
 
-   public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
+   public void initialize(YoCoMHeightTimeDerivativesData comHeightDataIn)
    {
       comHeightDataIn.getComHeight(centerOfMassHeightPoint);
 

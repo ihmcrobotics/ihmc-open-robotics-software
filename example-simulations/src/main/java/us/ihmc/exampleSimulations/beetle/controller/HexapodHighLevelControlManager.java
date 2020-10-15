@@ -14,13 +14,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HexapodHighLevelControlManager
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final ControllerCoreCommand controllerCoreCommandList;
@@ -34,7 +34,7 @@ public class HexapodHighLevelControlManager
    private final HexapodControllerParameters idParameters;
 
    public HexapodHighLevelControlManager(FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters,
-         ArrayList<String> jointsToControl, HexapodControllerParameters idParameters, HexapodControllerParameters vmcParameters, YoGraphicsListRegistry yoGraphicsListRegistry, double controllerDt, YoVariableRegistry parentRegistry)
+         ArrayList<String> jointsToControl, HexapodControllerParameters idParameters, HexapodControllerParameters vmcParameters, YoGraphicsListRegistry yoGraphicsListRegistry, double controllerDt, YoRegistry parentRegistry)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.idParameters = idParameters;

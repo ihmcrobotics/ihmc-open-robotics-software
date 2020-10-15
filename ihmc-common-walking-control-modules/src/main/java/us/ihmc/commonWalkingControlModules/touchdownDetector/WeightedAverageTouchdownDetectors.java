@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.robotics.math.filters.WeightedAverageYoBoolean;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class WeightedAverageTouchdownDetectors implements TouchdownDetector
 
    private final String prefix;
 
-   public WeightedAverageTouchdownDetectors(PairList<DoubleProvider, TouchdownDetector> touchdownDetectors, String prefix, YoVariableRegistry registry)
+   public WeightedAverageTouchdownDetectors(PairList<DoubleProvider, TouchdownDetector> touchdownDetectors, String prefix, YoRegistry registry)
    {
       this.prefix = prefix;
 

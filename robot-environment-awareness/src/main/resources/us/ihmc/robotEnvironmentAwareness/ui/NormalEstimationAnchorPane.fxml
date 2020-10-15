@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="181.0" prefWidth="989.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController">
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="181.0" prefWidth="989.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController">
    <children>
       <HBox layoutX="14.0" layoutY="14.0" spacing="15.0">
          <children>
@@ -39,6 +39,7 @@
                   <Label text="Max distance from Plane (cm): " GridPane.rowIndex="1" />
                   <Slider fx:id="searchRadiusSlider" blockIncrement="0.01" majorTickUnit="0.02" max="0.15" min="0.01" prefHeight="38.0" prefWidth="194.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.08" GridPane.columnIndex="1" />
                   <Slider fx:id="maxDistanceFromPlaneSlider" blockIncrement="0.01" majorTickUnit="0.02" max="0.15" min="0.01" prefHeight="38.0" prefWidth="194.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.03" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
                   <Label text="Min consensus ratio: " GridPane.columnIndex="2" />
                   <Label text="Max average deviation ratio: " GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   <Slider fx:id="minConsensusRatioSlider" blockIncrement="0.05" majorTickUnit="0.1" max="1.0" minorTickCount="9" prefHeight="38.0" prefWidth="194.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.5" GridPane.columnIndex="3" />
@@ -49,5 +50,6 @@
             </GridPane>
          </children>
       </HBox>
+      <ToggleButton fx:id="weightNumberOfHits" layoutX="138.0" layoutY="141.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Weight Number Of Hits" />
    </children>
 </AnchorPane>

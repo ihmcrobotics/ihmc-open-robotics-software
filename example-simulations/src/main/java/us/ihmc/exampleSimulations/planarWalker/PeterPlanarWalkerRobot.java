@@ -87,7 +87,7 @@ public class PeterPlanarWalkerRobot extends Robot
       double groundBxy = 1e2;
       double groundKz = 125.0;
       double groundBz = 300.0;
-      LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoVariableRegistry());
+      LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoRegistry());
 
       this.setGroundContactModel(ground);
 

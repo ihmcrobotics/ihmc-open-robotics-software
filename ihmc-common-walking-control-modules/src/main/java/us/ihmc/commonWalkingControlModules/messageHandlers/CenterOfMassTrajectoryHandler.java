@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CenterOfMassTrajectoryHandler extends EuclideanTrajectoryHandler
@@ -17,7 +17,7 @@ public class CenterOfMassTrajectoryHandler extends EuclideanTrajectoryHandler
 
    private final FrameVector3D offset = new FrameVector3D();
 
-   public CenterOfMassTrajectoryHandler(YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public CenterOfMassTrajectoryHandler(YoDouble yoTime, YoRegistry parentRegistry)
    {
       super("CenterOfMass", yoTime, parentRegistry);
    }

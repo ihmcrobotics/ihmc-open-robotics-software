@@ -27,42 +27,61 @@ import georegression.struct.shapes.Cylinder3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
 
 /**
- * Euclidean distance from a {@link georegression.struct.shapes.Cylinder3D_F64} for use with {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.
+ * Euclidean distance from a {@link georegression.struct.shapes.Cylinder3D_F64} for use with
+ * {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.
  * <p/>
  * TODO comment
  *
  * @author Peter Abeles
  */
-public class DistanceCylinderToPointVectorNN implements DistanceFromModel<Cylinder3D_F64, PointVectorNN> {
+public class DistanceCylinderToPointVectorNN implements DistanceFromModel<Cylinder3D_F64, PointVectorNN>
+{
 
-	Cylinder3D_F64 model;
-	// tolerance cos(angle) for vector normals
-	private double tolAngleCosine;
+   Cylinder3D_F64 model;
+   // tolerance cos(angle) for vector normals
+   private double tolAngleCosine;
 
-	public DistanceCylinderToPointVectorNN(double tolAngle) {
-		this.tolAngleCosine = Math.cos(Math.PI / 2.0 - tolAngle);
-	}
+   public DistanceCylinderToPointVectorNN(double tolAngle)
+   {
+      this.tolAngleCosine = Math.cos(Math.PI / 2.0 - tolAngle);
+   }
 
-	@Override
-	public void setModel(Cylinder3D_F64 model) {
-		this.model = model;
-	}
+   @Override
+   public void setModel(Cylinder3D_F64 model)
+   {
+      this.model = model;
+   }
 
-	@Override
-	public double computeDistance(PointVectorNN pv) {
+   @Override
+   public double computeDistance(PointVectorNN pv)
+   {
 
-		double acute = model.line.slope.dot(pv.normal);
+      double acute = model.line.slope.dot(pv.normal);
 
-		if (Math.abs(acute) > tolAngleCosine)
-			return Double.MAX_VALUE;
+      if (Math.abs(acute) > tolAngleCosine)
+         return Double.MAX_VALUE;
 
-		return Math.abs(Distance3D_F64.distance(model, pv.p));
-	}
+      return Math.abs(Distance3D_F64.distance(model, pv.p));
+   }
 
-	@Override
-	public void computeDistance(List<PointVectorNN> points, double[] distance) {
-		for (int i = 0; i < points.size(); i++) {
-			distance[i] = computeDistance(points.get(i));
-		}
-	}
+   @Override
+   public void computeDistance(List<PointVectorNN> points, double[] distance)
+   {
+      for (int i = 0; i < points.size(); i++)
+      {
+         distance[i] = computeDistance(points.get(i));
+      }
+   }
+
+   @Override
+   public Class<PointVectorNN> getPointType()
+   {
+      return PointVectorNN.class;
+   }
+
+   @Override
+   public Class<Cylinder3D_F64> getModelType()
+   {
+      return Cylinder3D_F64.class;
+   }
 }

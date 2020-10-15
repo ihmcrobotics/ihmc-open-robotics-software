@@ -36,28 +36,16 @@ public interface ConstraintParametersReadOnly
    double getCoefficientOfRestitution();
 
    /**
-    * Returns the value of the constraint force mixing parameter.
+    * Returns the velocity minimum threshold to enable restitution.
     * <p>
-    * This parameter is inspired on the homonym in the Open Dynamics Engine, see
-    * <a href="https://ode.org/ode-latest-userguide.html#sec_3_8"> ODE user guide</a>.
-    * </p>
-    * <p>
-    * The constraint force mixing, or CFM, essentially reduces the effectiveness of the impulse for
-    * resolving a constraint, which in turns allows violation of the constraint. It is recommended to
-    * use values in [0, 1]:
-    * <ul>
-    * <li>CFM = 0: constraints are resolved but the resulting impulses are completely cancelled making
-    * it appear that constraints are not resolved.
-    * <li>CFM = 1 (recommended): constraints are resolved and the computed impulses are applied at
-    * 100%, observed violation of the constraints should be minimum to none.
-    * <li>CFM = [0, 1]: constraints are resolved and only a part of the impulses are applied. The
-    * constraints are violated.
-    * </ul>
+    * The threshold on the pre-impulse velocity, if it's magnitude is above the threshold, then the
+    * coefficient of restitution is used to resolve the impact, if it is below a coefficient of
+    * restitution of zero is used.
     * </p>
     * 
-    * @return the constraint force mixing parameter.
+    * @return the restitution threshold on the pre-impulse velocity magnitude.
     */
-   double getConstraintForceMixing();
+   double getRestitutionThreshold();
 
    /**
     * Returns the value of the error reduction parameter.

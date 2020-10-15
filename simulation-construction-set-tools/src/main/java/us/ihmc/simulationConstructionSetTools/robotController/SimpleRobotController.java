@@ -1,12 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class SimpleRobotController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final YoRegistry registry = new YoRegistry(name);
 
    @Override
    public void initialize()
@@ -14,7 +14,7 @@ public abstract class SimpleRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

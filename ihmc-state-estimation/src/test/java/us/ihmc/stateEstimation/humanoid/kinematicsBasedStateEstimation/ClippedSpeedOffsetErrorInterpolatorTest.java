@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
@@ -49,7 +49,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       }
    };
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double dt = 0.001;
 
@@ -71,7 +71,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       boolean visualize = false;
 
       double dt = 0.001;
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
 
       ReferenceFrame referenceFrameToBeCorrected = new ReferenceFrame("referenceFrameToBeCorrected", worldFrame)
@@ -137,7 +137,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          Robot robot = new Robot(getClass().getSimpleName());
          scs = new SimulationConstructionSet(robot, parameters);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
       
@@ -222,7 +222,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       boolean visualize = false;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
 
       int numberOfTicks = 10000;
       double dt = 0.001;
@@ -241,7 +241,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          parameters.setDataBufferSize(12000);
          Robot robot = new Robot(getClass().getSimpleName());
          scs = new SimulationConstructionSet(robot, parameters);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
 

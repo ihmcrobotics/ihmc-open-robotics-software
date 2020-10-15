@@ -7,7 +7,7 @@ import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointControlBlender
@@ -21,12 +21,12 @@ public class JointControlBlender
 
    private final OneDoFJointBasics oneDoFJoint;
 
-   public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoVariableRegistry parentRegistry)
+   public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoRegistry parentRegistry)
    {
       this.oneDoFJoint = oneDoFJoint;
       String namePrefix = oneDoFJoint.getName();
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "JointControlBlender");
+      YoRegistry registry = new YoRegistry(namePrefix + nameSuffix + "JointControlBlender");
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
       this.velocityStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "VelocityStepSizeLimiter", registry, 1.5);

@@ -1,9 +1,8 @@
 package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
-import us.ihmc.euclid.tools.EuclidHashCodeTools;
 
 public class CollisionResult
 {
@@ -12,10 +11,8 @@ public class CollisionResult
    private Collidable collidableA;
    private Collidable collidableB;
 
-   private FramePoint3D pointOnARootFrame = new FramePoint3D();
-   private FramePoint3D pointOnBRootFrame = new FramePoint3D();
-
-   private FrameVector3D accumulatedSlipForA;
+   private final FramePoint3D pointOnARootFrame = new FramePoint3D();
+   private final FramePoint3D pointOnBRootFrame = new FramePoint3D();
 
    /**
     * The collision direction (normalized) for the shape A:
@@ -24,7 +21,7 @@ public class CollisionResult
     *  collisionAxisForA &equiv; normalOnB
     * </pre>
     */
-   private final FrameVector3D collisionAxisForA = new FrameVector3D();
+   private final FrameUnitVector3D collisionAxisForA = new FrameUnitVector3D();
 
    private int collisionID = 0;
 
@@ -51,7 +48,7 @@ public class CollisionResult
 
    public void updateCollisionID()
    {
-      collisionID = computeCollisionHashCode(collidableA, collidableB);
+      collisionID = PhysicsEngineTools.computeCollisionHashCode(collidableA, collidableB);
    }
 
    public void setCollidableA(Collidable collidableA)
@@ -62,11 +59,6 @@ public class CollisionResult
    public void setCollidableB(Collidable collidableB)
    {
       this.collidableB = collidableB;
-   }
-
-   public void setAccumulatedSlipForA(FrameVector3D accumulatedSlipForA)
-   {
-      this.accumulatedSlipForA = accumulatedSlipForA;
    }
 
    public void swapCollidables()
@@ -106,17 +98,12 @@ public class CollisionResult
     * <pre>
     *  collisionAxisForA &equiv; normalOnB
     *  collisionAxisForA &equiv; -normalOnA
-    *  collisionAxisForA &equiv; pointOnA - pointOnB
+    *  collisionAxisForA &equiv; (pointOnA - pointOnB)/|pointOnA - pointOnB|
     * </pre>
     */
-   public FrameVector3D getCollisionAxisForA()
+   public FrameUnitVector3D getCollisionAxisForA()
    {
       return collisionAxisForA;
-   }
-
-   public FrameVector3D getAccumulatedSlipForA()
-   {
-      return accumulatedSlipForA;
    }
 
    @Override
@@ -131,21 +118,7 @@ public class CollisionResult
    public String toString()
    {
       String prefix = collisionData.areShapesColliding() ? "Colliding" : "Non-colliding";
-      return prefix + ", collidableA: " + collidableSimpleName(collidableA) + ", collidableB: " + collidableSimpleName(collidableB);
-   }
-
-   private String collidableSimpleName(Collidable collidable)
-   {
-      return collidable.getRigidBody() != null ? collidable.getRigidBody().getName() : "static";
-   }
-
-   public static int computeCollisionHashCode(Collidable collidableA, Collidable collidableB)
-   {
-      int collidableAID = collidableA.hashCode();
-      int collidableBID = collidableB.hashCode();
-      if (collidableAID > collidableBID)
-         return EuclidHashCodeTools.toIntHashCode(EuclidHashCodeTools.combineHashCode(collidableAID, collidableBID));
-      else
-         return EuclidHashCodeTools.toIntHashCode(EuclidHashCodeTools.combineHashCode(collidableBID, collidableAID));
+      return prefix + ", collidableA: " + PhysicsEngineTools.collidableSimpleName(collidableA) + ", collidableB: "
+            + PhysicsEngineTools.collidableSimpleName(collidableB);
    }
 }
