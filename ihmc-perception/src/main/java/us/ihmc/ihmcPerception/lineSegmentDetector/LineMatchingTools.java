@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
+import org.bytedeco.opencv.opencv_imgproc.Vec4iVector;
 import org.opencv.core.Mat;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -11,17 +12,17 @@ import static java.lang.StrictMath.pow;
 
 public class LineMatchingTools
 {
-   public static ArrayList<LineMatch> matchFLDLines(Mat prevFLDLines, Mat FLDlines)
+   public static ArrayList<LineMatch> matchFLDLines(Vec4iVector prevFLDLines, Vec4iVector FLDlines)
    {
       ArrayList<LineMatch> corresp = new ArrayList<>();
       double angleCost, midPointCost, lengthCost = 0;
       double angleThreshold = 50, midPointThreshold = 100, lengthThreshold = 1200;
-      for (int i = 0; i < prevFLDLines.rows(); i++)
+      for (int i = 0; i < prevFLDLines.size(); i++)
       {
-         double[] pl = prevFLDLines.get(i, 0);
-         for (int j = 0; j < FLDlines.rows(); j++)
+         double[] pl = new double[] {prevFLDLines.get(i).get(0), prevFLDLines.get(i).get(1), prevFLDLines.get(i).get(2), prevFLDLines.get(i).get(3)};
+         for (int j = 0; j < FLDlines.size(); j++)
          {
-            double[] cl = FLDlines.get(j, 0);
+            double[] cl = new double[] {FLDlines.get(j).get(0), FLDlines.get(j).get(1), FLDlines.get(j).get(2), FLDlines.get(j).get(3)};
             angleCost = calcAngleCost(pl, cl);
             midPointCost = calcMidPointCost(pl, cl);
             lengthCost = calcLengthCost(pl, cl);

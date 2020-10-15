@@ -4,9 +4,6 @@ import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import javafx.scene.shape.Sphere;
-import org.opencv.core.*;
-import org.opencv.highgui.HighGui;
-import org.opencv.imgproc.Imgproc;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -15,8 +12,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineDetectionTools;
@@ -36,16 +31,24 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_imgproc.*;
+
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.opencv.highgui.HighGui.createJFrame;
 import static us.ihmc.ihmcPerception.lineSegmentDetector.LineMatchingTools.matchFLDLines;
 
 public class AtlasLineSegmentEstimator
@@ -68,8 +71,8 @@ public class AtlasLineSegmentEstimator
 
    private Mat currentImage;
    private Mat previousImage;
-   private Mat currentLines;
-   private Mat previousLines;
+   private Vec4iVector currentLines;
+   private Vec4iVector previousLines;
    private ArrayList<LineMatch> correspondingLines;
 
 
@@ -194,15 +197,15 @@ public class AtlasLineSegmentEstimator
 
    private void processBufferedImagesAndPlanarRegions(BufferedImage latestBufferedImage, BufferedImage previousBufferedImage)
    {
-      currentImage = new Mat(latestBufferedImage.getHeight(), latestBufferedImage.getWidth(), CvType.CV_8UC3);
+      currentImage = new Mat(latestBufferedImage.getHeight(), latestBufferedImage.getWidth(), CV_8UC3);
       byte[] data = ((DataBufferByte) latestBufferedImage.getRaster().getDataBuffer()).getData();
-      currentImage.put(0, 0, data);
+      currentImage.data().put(data);
 
-      previousImage = new Mat(previousBufferedImage.getHeight(), previousBufferedImage.getWidth(), CvType.CV_8UC3);
+      previousImage = new Mat(previousBufferedImage.getHeight(), previousBufferedImage.getWidth(), CV_8UC3);
       byte[] previousData = ((DataBufferByte) previousBufferedImage.getRaster().getDataBuffer()).getData();
-      previousImage.put(0, 0, previousData);
+      previousImage.data().put(previousData);
 
-      previousLines = LineDetectionTools.getFLDLinesFromImage(previousImage);
+      previousLines = LineDetectionTools.getCannyHoughLinesFromImage(previousImage);
 
 
       syncedRobot.update();
@@ -217,15 +220,15 @@ public class AtlasLineSegmentEstimator
       System.out.println("Processing Images");
 
       Mat dispImage = new Mat();
-      this.currentLines = LineDetectionTools.getFLDLinesFromImage(this.currentImage);
-      lineRegionAssociator.setCurLines(this.currentLines);
+      this.currentLines = LineDetectionTools.getCannyHoughLinesFromImage(this.currentImage);
+      lineRegionAssociator.setCurrentLines(this.currentLines);
 
       this.correspondingLines = matchFLDLines(this.previousLines, this.currentLines);
 
-      for (int i = 0; i < currentLines.rows(); i++)
+      for (int i = 0; i < currentLines.size(); i++)
       {
-         double[] val = currentLines.get(i, 0);
-         Imgproc.line(this.currentImage, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 255, 255), 2);
+         Scalar4i val = currentLines.get(i);
+         line(this.currentImage, new Point(val.get(0), val.get(1)), new Point(val.get(2), val.get(3)), new Scalar(0, 255, 255, 0), 2, LINE_8, 0);
       }
 
       // displayLineMatches(prevImg, curImg, dispImage, correspLines);
@@ -240,7 +243,7 @@ public class AtlasLineSegmentEstimator
 
          for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
          {
-            ArrayList<Point> pointList = new ArrayList<>();
+            ArrayList<Point> pointList;
             Point2D regionMidPoint = new Point2D(0, 0);
 
             if (region.getConvexHull().getArea() * 1000 > 50)
@@ -252,23 +255,23 @@ public class AtlasLineSegmentEstimator
          }
       }
 
-      List<Mat> src = Arrays.asList(curImgLeft, currentImage);
-      Core.hconcat(src, dispImage);
+      MatVector src = new MatVector(curImgLeft, currentImage);
+      hconcat(src, dispImage);
 
       float endTime = System.nanoTime();
       // System.out.println("Time:" + (int) ((endTime - startTime) * (1e-6)) + " ms\tCorresponding Lines:" + correspLines.size());
-      Imgproc.resize(dispImage, dispImage, new Size(2400, 1000));
-      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
-      HighGui.imshow("LineEstimator", dispImage);
-      HighGui.waitKey(1);
+      resize(dispImage, dispImage, new Size(2400, 1000));
+      namedWindow("LineEstimator", WINDOW_AUTOSIZE);
+      imshow("LineEstimator", dispImage);
+      waitKey(1);
 
       previousLines = currentLines;
    }
 
    public static void main(String[] args)
    {
-      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
-      HighGui.createJFrame("Hello", 0);
+      namedWindow("LineEstimator", WINDOW_AUTOSIZE);
+      createJFrame("Hello", 0);
       new AtlasLineSegmentEstimator();
    }
 }
