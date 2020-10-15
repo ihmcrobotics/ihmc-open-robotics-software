@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -15,12 +15,12 @@ public class WeightedAverageYoBoolean extends YoBoolean
 
    private final boolean biasToPositive;
 
-   public WeightedAverageYoBoolean(String name, YoVariableRegistry registry)
+   public WeightedAverageYoBoolean(String name, YoRegistry registry)
    {
       this(name, registry, false);
    }
 
-   public WeightedAverageYoBoolean(String name, YoVariableRegistry registry, boolean biasToPositive)
+   public WeightedAverageYoBoolean(String name, YoRegistry registry, boolean biasToPositive)
    {
       super(name, "WeightedAverageYoBoolean", registry);
 

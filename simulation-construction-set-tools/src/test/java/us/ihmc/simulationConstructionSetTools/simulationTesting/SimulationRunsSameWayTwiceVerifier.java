@@ -2,14 +2,14 @@ package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoVariableList;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableList;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -72,8 +72,8 @@ public class SimulationRunsSameWayTwiceVerifier
       YoVariableList listOne = new YoVariableList("SimOneList");
       YoVariableList listTwo = new YoVariableList("SimTwoList");
 
-      listOne.addVariables(scsOne.getAllVariables());
-      listTwo.addVariables(scsTwo.getAllVariables());
+      listOne.addAll(scsOne.getVariables());
+      listTwo.addAll(scsTwo.getVariables());
 
       ArrayList<VariableDifference> variableDifferences = StateFileComparer.compareVarLists(listOne, listTwo, maxPercentDifference, true, stringsToIgnore);
       if(variableDifferences.isEmpty())
@@ -94,7 +94,7 @@ public class SimulationRunsSameWayTwiceVerifier
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
 
    {
-      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
       if(walk != null)
       {
          walk.set(false);

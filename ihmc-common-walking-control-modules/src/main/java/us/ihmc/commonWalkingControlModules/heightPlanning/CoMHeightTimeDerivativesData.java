@@ -1,70 +1,61 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 
-public class CoMHeightTimeDerivativesData
+public class CoMHeightTimeDerivativesData implements CoMHeightTimeDerivativesDataBasics
 {
    private ReferenceFrame frameOfCenterOfMassHeight;
-   private final YoDouble comHeight, comHeightVelocity, comHeightAcceleration, comHeightJerk;
+   private double comHeight, comHeightVelocity, comHeightAcceleration, comHeightJerk;
 
-   public CoMHeightTimeDerivativesData(String namePrefix, YoVariableRegistry registry)
+   public ReferenceFrame getReferenceFrame()
    {
-      comHeight = new YoDouble(namePrefix + "CoMHeight", registry);
-      comHeightVelocity = new YoDouble(namePrefix + "comHeightVelocity", registry);
-      comHeightAcceleration = new YoDouble(namePrefix + "comHeightAcceleration", registry);
-      comHeightJerk = new YoDouble(namePrefix + "comHeightJerk", registry);
+      return frameOfCenterOfMassHeight;
    }
 
-   public void getComHeight(FramePoint3D framePointToPack)
+   public double getComHeightInFrame()
    {
-      framePointToPack.setIncludingFrame(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight.getValue());
+      return comHeight;
+   }
+
+   public void getComHeight(FramePoint3DBasics framePointToPack)
+   {
+      framePointToPack.setIncludingFrame(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight);
    }
 
    public void setComHeight(ReferenceFrame referenceFrame, double comHeight)
    {
       this.frameOfCenterOfMassHeight = referenceFrame;
-      this.comHeight.set(comHeight);
+      this.comHeight = comHeight;
    }
 
    public double getComHeightVelocity()
    {
-      return comHeightVelocity.getValue();
+      return comHeightVelocity;
    }
 
    public void setComHeightVelocity(double comHeightVelocity)
    {
-      this.comHeightVelocity.set(comHeightVelocity);
+      this.comHeightVelocity = comHeightVelocity;
    }
 
    public double getComHeightAcceleration()
    {
-      return comHeightAcceleration.getDoubleValue();
+      return comHeightAcceleration;
    }
 
    public void setComHeightAcceleration(double comHeightAcceleration)
    {
-      this.comHeightAcceleration.set(comHeightAcceleration);
+      this.comHeightAcceleration = comHeightAcceleration;
    }
 
    public double getComHeightJerk()
    {
-      return comHeightJerk.getDoubleValue();
+      return comHeightJerk;
    }
 
    public void setComHeightJerk(double comHeightJerk)
    {
-      this.comHeightJerk.set(comHeightJerk);
+      this.comHeightJerk = comHeightJerk;
    }
-
-   public void set(CoMHeightTimeDerivativesData heightZData)
-   {
-      setComHeight(heightZData.frameOfCenterOfMassHeight, heightZData.comHeight.getDoubleValue());
-      setComHeightVelocity(heightZData.getComHeightVelocity());
-      setComHeightAcceleration(heightZData.getComHeightAcceleration());
-      setComHeightJerk(heightZData.getComHeightJerk());
-   }
-
 }

@@ -1,9 +1,13 @@
 package us.ihmc.robotics.physics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,9 +30,9 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
    private final Twist twist = new Twist();
    private final FrameVector3D linearVelocity = new FrameVector3D();
    private boolean isImpulseZero = true;
-   private final DenseMatrix64F impulse = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj impulse = new DMatrixRMaj(6, 1);
    private final List<RigidBodyBasics> rigidBodies = new ArrayList<>();
-   private final Map<RigidBodyBasics, DenseMatrix64F> apparentInertiaMatrixInverseMap = new HashMap<>();
+   private final Map<RigidBodyBasics, DMatrixRMaj> apparentInertiaMatrixInverseMap = new HashMap<>();
 
    public ImpulseBasedRigidBodyTwistProvider(ReferenceFrame inertialFrame, RigidBodyBasics rootBody)
    {
@@ -60,7 +64,7 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
          return;
 
       rigidBodies.add(rigidBody);
-      apparentInertiaMatrixInverseMap.put(rigidBody, new DenseMatrix64F(Twist.SIZE, impulseDimension));
+      apparentInertiaMatrixInverseMap.put(rigidBody, new DMatrixRMaj(Twist.SIZE, impulseDimension));
    }
 
    public List<RigidBodyBasics> getRigidBodies()
@@ -68,7 +72,7 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
       return rigidBodies;
    }
 
-   public DenseMatrix64F getApparentInertiaMatrixInverse(RigidBodyBasics rigidBody)
+   public DMatrixRMaj getApparentInertiaMatrixInverse(RigidBodyBasics rigidBody)
    {
       return apparentInertiaMatrixInverseMap.get(rigidBody);
    }
@@ -85,7 +89,7 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
       this.impulse.set(0, impulse);
    }
 
-   public void setImpulse(DenseMatrix64F impulse)
+   public void setImpulse(DMatrixRMaj impulse)
    {
       isImpulseZero = false;
       this.impulse.set(impulse);
@@ -97,18 +101,25 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
       impulse.get(this.impulse);
    }
 
-   private final DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+   public void setImpulse(Vector3DReadOnly impulseLinear, double impulseAngular)
+   {
+      isImpulseZero = false;
+      impulseLinear.get(this.impulse);
+      this.impulse.set(3, 0, impulseAngular);
+   }
+
+   private final DMatrixRMaj twistMatrix = new DMatrixRMaj(Twist.SIZE, 1);
 
    @Override
    public TwistReadOnly getTwistOfBody(RigidBodyReadOnly body)
    {
       if (isImpulseZero)
          return null;
-      DenseMatrix64F apparentInertiaMatrixInverse = apparentInertiaMatrixInverseMap.get(body);
+      DMatrixRMaj apparentInertiaMatrixInverse = apparentInertiaMatrixInverseMap.get(body);
       if (apparentInertiaMatrixInverse == null)
          return null;
 
-      CommonOps.mult(apparentInertiaMatrixInverse, impulse, twistMatrix);
+      CommonOps_DDRM.mult(apparentInertiaMatrixInverse, impulse, twistMatrix);
       twist.setIncludingFrame(body.getBodyFixedFrame(), inertialFrame, body.getBodyFixedFrame(), twistMatrix);
 
       return twist;

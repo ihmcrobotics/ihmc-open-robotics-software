@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.utilities.screwTheory;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -132,13 +132,13 @@ public class CentroidalMomentumMatrixSCSTest
 
    public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)
    {
-      DenseMatrix64F mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+      DMatrixRMaj mat = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
       JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(elevator);
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
+      DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
       MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocities);
 
-      DenseMatrix64F comMomentumMatrix = MatrixTools.mult(mat, jointVelocities);
+      DMatrixRMaj comMomentumMatrix = MatrixTools.mult(mat, jointVelocities);
 
       Momentum comMomentum = new Momentum(centerOfMassFrame, comMomentumMatrix);
 

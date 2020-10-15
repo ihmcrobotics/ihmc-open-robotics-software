@@ -4,18 +4,18 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class TextToSpeechNetworkModule implements CloseableAndDisposable
 {
    private final TextToSpeechClient ttsClient = new TextToSpeechClient();
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    public TextToSpeechNetworkModule(PubSubImplementation pubSubImplementation)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_text_to_speech_node");
-      ROS2Tools.createCallbackSubscription(ros2Node, TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_text_to_speech_node");
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
    }
 
    public void receivedPacket(TextToSpeechPacket packet)

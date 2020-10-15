@@ -10,6 +10,9 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
+import us.ihmc.log.LogTools;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
 
 public class FootstepPlannerParametersUIController
 {
@@ -27,6 +30,8 @@ public class FootstepPlannerParametersUIController
    private Rectangle swingFootShape;
    @FXML
    private Rectangle clearanceBox;
+   @FXML
+   private CheckBox autoReplan;
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
@@ -44,21 +49,33 @@ public class FootstepPlannerParametersUIController
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.planningParameters = parameters;
-      this.javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       stepShapeManager.update();
    }
 
    public void bindControls()
    {
       tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
-      tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters));
+      tableViewWrapper.setTableUpdatedCallback(() ->
+      {
+         if (autoReplan.isSelected())
+         {
+            LogTools.info("Auto replan active. Replanning...");
+            messager.submitMessage(ComputePath, true);
+         }
+
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
+      });
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
-         planningParameters.set(parameters);
-         javaFXStoredPropertyMap.copyStoredToJavaFX();
-         stepShapeManager.update();
+         if (!parameters.equals(planningParameters)) // stop feedback loop
+         {
+            planningParameters.set(parameters);
+            javaFXStoredPropertyMap.copyStoredToJavaFX();
+            stepShapeManager.update();
+         }
       });
 
       // these dimensions work best for valkyrie
@@ -81,6 +98,13 @@ public class FootstepPlannerParametersUIController
    public void saveToFile()
    {
       planningParameters.save();
+   }
+
+   @FXML
+   public void loadFile()
+   {
+      tableViewWrapper.loadNewFile();
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 
    private class StepShapeManager
@@ -118,31 +142,32 @@ public class FootstepPlannerParametersUIController
 
       void setStepShape()
       {
-         double minXClearance = planningParameters.getMinXClearanceFromStance();
-         double minYClearance = planningParameters.getMinYClearanceFromStance();
+         // TODO update for new clearance param
 
-         double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
-         double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
-
-         double furthestIn = Math.max(minStepWidth, minYClearance) * metersToPixel;
-
-         double width = maxStepWidth - minStepWidth;
-         double height = maxStepLength - minStepLength;
-         double xCenterInPanel = footCenterX + metersToPixel * minStepWidth;
-         double yCenterInPanel = footCenterY - metersToPixel * maxStepLength;
-
-         stepShape.setLayoutX(xCenterInPanel);
-         stepShape.setWidth(metersToPixel * width);
-         stepShape.setLayoutY(yCenterInPanel);
-         stepShape.setHeight(metersToPixel * height);
-
-         swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
-         swingFootShape.setRotate(Math.toDegrees(worstYaw));
-
-         clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance) * metersToPixel);
-         clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance) * metersToPixel);
-         clearanceBox.setWidth(metersToPixel * (minYClearance * 2.0));
-         clearanceBox.setHeight(metersToPixel * (minXClearance * 2.0));
+//         double minClearance = planningParameters.getMinClearanceFromStance();
+//
+//         double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
+//         double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
+//
+//         double furthestIn = Math.max(minStepWidth, minYClearance) * metersToPixel;
+//
+//         double width = maxStepWidth - minStepWidth;
+//         double height = maxStepLength - minStepLength;
+//         double xCenterInPanel = footCenterX + metersToPixel * minStepWidth;
+//         double yCenterInPanel = footCenterY - metersToPixel * maxStepLength;
+//
+//         stepShape.setLayoutX(xCenterInPanel);
+//         stepShape.setWidth(metersToPixel * width);
+//         stepShape.setLayoutY(yCenterInPanel);
+//         stepShape.setHeight(metersToPixel * height);
+//
+//         swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
+//         swingFootShape.setRotate(Math.toDegrees(worstYaw));
+//
+//         clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance) * metersToPixel);
+//         clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance) * metersToPixel);
+//         clearanceBox.setWidth(metersToPixel * (minYClearance * 2.0));
+//         clearanceBox.setHeight(metersToPixel * (minXClearance * 2.0));
       }
    }
 }

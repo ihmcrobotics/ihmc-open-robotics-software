@@ -8,16 +8,16 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameSO3Waypoint implements FrameSO3WaypointBasics
 {
    private final FrameQuaternionBasics orientation;
    private final FrameVector3DBasics angularVelocity;
 
-   public YoFrameSO3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoFrameSO3Waypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       orientation = new YoMutableFrameQuaternion(namePrefix + "Orientation", nameSuffix, registry);
       angularVelocity = new YoMutableFrameVector3D(namePrefix + "AngularVelocity", nameSuffix, registry);

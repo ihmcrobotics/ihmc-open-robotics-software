@@ -2,7 +2,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface
@@ -152,7 +152,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3D minLocationCorruption = new Vector3D(0.0, 0.0, 0.0);
-      Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.05);
+      Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.04);
       double maxRotationCorruption = getMaxRotationCorruption();
       FootstepDataListCorruptor footstepDataListCorruptor = new FootstepDataListCorruptor(minLocationCorruption, maxLocationCorruption, maxRotationCorruption);
 
@@ -198,7 +198,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-     YoEnum<HighLevelControllerName> localRequestedControllerState = new YoEnum<>("test", new YoVariableRegistry("Dummy"), HighLevelControllerName.class, true);
+     YoEnum<HighLevelControllerName> localRequestedControllerState = new YoEnum<>("test", new YoRegistry("Dummy"), HighLevelControllerName.class, true);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.registerHighLevelControllerState(new StandPrepControllerStateFactory());
@@ -243,7 +243,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2);
 
-      ArrayList<GroundContactPoint> allGCPs = drcSimulationTestHelper.getRobot().getAllGroundContactPoints();
+      List<GroundContactPoint> allGCPs = drcSimulationTestHelper.getRobot().getAllGroundContactPoints();
 
       int count = 0;
       int maxIteration = 100;

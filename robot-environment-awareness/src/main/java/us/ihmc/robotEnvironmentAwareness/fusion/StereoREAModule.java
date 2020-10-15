@@ -1,8 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
-
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,10 +19,8 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
 
 public class StereoREAModule implements Runnable
 {
@@ -37,22 +32,20 @@ public class StereoREAModule implements Runnable
    private final LidarImageFusionDataBuffer lidarImageFusionDataBuffer;
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
-   private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
+   private final REANetworkProvider networkProvider;
 
    private final AtomicReference<StereoVisionPointCloudMessage> loadedStereoVisionPointCloudMessage;
    private final AtomicReference<Image32> loadedImage32Message;
 
-   public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
+   public StereoREAModule(REANetworkProvider networkProvider, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
+      this.networkProvider = networkProvider;
       this.messager = messager;
       this.reaMessager = reaMessager;
       lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
-
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
-                                                                             subscriberTopicNameGenerator);
 
       loadedStereoVisionPointCloudMessage = reaMessager.createInput(REAModuleAPI.StereoVisionPointCloudState);
       loadedImage32Message = messager.createInput(LidarImageFusionAPI.ImageState);
@@ -68,11 +61,6 @@ public class StereoREAModule implements Runnable
       reaMessager.submitMessage(REAModuleAPI.LidarMinRange, Double.NEGATIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, Double.POSITIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, new BoundingBoxParametersMessage());
-   }
-
-   public void registerCustomPlanarRegion(PlanarRegion planarRegion)
-   {
-      planarRegionFeatureUpdater.registerCustomPlanarRegion(planarRegion);
    }
 
    public void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
@@ -145,8 +133,8 @@ public class StereoREAModule implements Runnable
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
 
-         planarRegionNetworkProvider.update(true);
-         planarRegionNetworkProvider.publishCurrentState();
+         networkProvider.update(planarRegionFeatureUpdater, true);
+         networkProvider.publishCurrentState();
       }
    }
 }

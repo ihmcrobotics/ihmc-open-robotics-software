@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
@@ -42,6 +43,10 @@ public class FootstepPlannerParametersTest
       parameters.setIdealFootstepLength(idealFootstepLength);
       assertEquals(idealFootstepLength, parameters.getIdealFootstepLength(), epsilon);
 
+      double idealStepLengthAtMaxStepZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setIdealStepLengthAtMaxStepZ(idealStepLengthAtMaxStepZ);
+      assertEquals(idealStepLengthAtMaxStepZ, parameters.getIdealStepLengthAtMaxStepZ(), epsilon);
+
       double maxStepReach = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepReach(maxStepReach);
       assertEquals(maxStepReach, parameters.getMaximumStepReach(), epsilon);
@@ -64,7 +69,15 @@ public class FootstepPlannerParametersTest
 
       double maxStepZ = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepZ(maxStepZ);
-      assertEquals(maxStepZ, parameters.getMaximumStepZ(), epsilon);
+      assertEquals(maxStepZ, parameters.getMaxStepZ(), epsilon);
+
+      double maxSwingZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSwingZ(maxSwingZ);
+      assertEquals(maxSwingZ, parameters.getMaxSwingZ(), epsilon);
+
+      double maxSwingReach = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSwingReach(maxSwingReach);
+      assertEquals(maxSwingReach, parameters.getMaxSwingReach(), epsilon);
 
       double maxStepXWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);
@@ -74,9 +87,13 @@ public class FootstepPlannerParametersTest
       parameters.setMaximumStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
       assertEquals(maxStepZWhenForwardAndDown, parameters.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      double wiggleInsideDelta = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setWiggleInsideDelta(wiggleInsideDelta);
-      assertEquals(wiggleInsideDelta, parameters.getWiggleInsideDelta(), epsilon);
+      double wiggleInsideDeltaTarget = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaTarget(wiggleInsideDeltaTarget);
+      assertEquals(wiggleInsideDeltaTarget, parameters.getWiggleInsideDeltaTarget(), epsilon);
+
+      double wiggleInsideDeltaMinimum = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaMinimum(wiggleInsideDeltaMinimum);
+      assertEquals(wiggleInsideDeltaMinimum, parameters.getWiggleInsideDeltaMinimum(), epsilon);
 
       double maximumStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
       parameters.setMaximumStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
@@ -122,13 +139,9 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
       assertEquals(minimumDistanceFromCliff, parameters.getMinimumDistanceFromCliffBottoms(), epsilon);
 
-      double minXClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinXClearanceFromStance(minXClearanceFromStance);
-      assertEquals(minXClearanceFromStance, parameters.getMinXClearanceFromStance(), epsilon);
-
-      double minYClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinYClearanceFromStance(minYClearanceFromStance);
-      assertEquals(minYClearanceFromStance, parameters.getMinYClearanceFromStance(), epsilon);
+      double minClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMinClearanceFromStance(minClearanceFromStance);
+      assertEquals(minClearanceFromStance, parameters.getMinClearanceFromStance(), epsilon);
 
       double bodyBoxWidth = RandomNumbers.nextDouble(random, 10.0);
       parameters.setBodyBoxWidth(bodyBoxWidth);
@@ -217,5 +230,25 @@ public class FootstepPlannerParametersTest
       double deltaYawFromReferenceTolerance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDeltaYawFromReferenceTolerance(deltaYawFromReferenceTolerance);
       assertEquals(deltaYawFromReferenceTolerance, parameters.getDeltaYawFromReferenceTolerance(), epsilon);
+
+      boolean enableShinCollision = random.nextBoolean();
+      parameters.setEnableShinCollisionCheck(enableShinCollision);
+      assertEquals(enableShinCollision, parameters.getEnableShinCollisionCheck());
+
+      double shinToeClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinToeClearance(shinToeClearance);
+      assertEquals(shinToeClearance, parameters.getShinToeClearance());
+
+      double shinHeelClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeelClearance(shinHeelClearance);
+      assertEquals(shinHeelClearance, parameters.getShinHeelClearance());
+
+      double shinLength = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinLength(shinLength);
+      assertEquals(shinLength, parameters.getShinLength());
+
+      double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeightOffset(shinHeightOffset);
+      assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
    }
 }

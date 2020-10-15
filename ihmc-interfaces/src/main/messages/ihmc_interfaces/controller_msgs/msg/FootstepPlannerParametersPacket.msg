@@ -1,6 +1,8 @@
 # This message is part of the IHMC footstep planning module.
 
 float64 DEFAULT_NO_VALUE = -11.1
+byte ROBOT_SIDE_LEFT = 0
+byte ROBOT_SIDE_RIGHT = 1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -22,19 +24,20 @@ float64 ideal_footstep_length -11.1
 # Returns the ideal step side step width when "shuffling" sideways.
 float64 ideal_side_step_width -11.1
 
-# Returns the ideal length when walking backwards. This value is negative.
+# Returns the ideal length when walking backwards. This value is positive.
 float64 ideal_back_step_length -11.1
 
-# If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-# regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-# edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-# to allowing footsteps that partially intersect planar regions.
-#
-# If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-# choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-#    The smallest acceptable distance to the edge of a cliff
-#    The maximum error between desired and actual foot placement
-float64 wiggle_inside_delta 0.0
+# Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+float64 ideal_step_length_at_max_step_z -11.1
+
+# The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+# to the edge. A negative value means the footstep can overhang a region.
+float64 wiggle_inside_delta_target -11.1
+
+# This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+# it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+float64 wiggle_inside_delta_minimum -11.1
+
 # Maximum xy-distance the planner will consider for candidate steps.
 # Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
 # where the parent is the last footstep taken on the other foot.
@@ -156,19 +159,17 @@ float64 maximum_step_y_when_forward_and_down -11.1
 # it's very close to hitting it's ankle pitch joint limit.
 float64 maximum_step_z_when_forward_and_down -11.1
 
-# Scale factor for checking 2D step limitations when changing height from the grandparent node.
-# This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-# {@link #getMaximumStepZWhenForwardAndDown()}.
-#
-# If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-# up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-float64 translation_scale_from_grandparent_node -11.1
-
 # Maximum vertical distance between consecutive footsteps
 #
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
 float64 maximum_step_z -11.1
+
+# Maximum vertical distance between start-of-swing and touchdown
+float64 maximum_swing_z -11.1
+
+# Maximum xy distance between start-of-swing and touchdown
+float64 maximum_swing_reach -11.1
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 #
@@ -207,15 +208,12 @@ float64 minimum_surface_incline_radians -11.1
 # If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
 bool wiggle_while_planning false
 
+# If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+bool reject_if_wiggle_not_satisfied false
+
 # There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
 # this toggles between them.
 bool enable_concave_hull_wiggler false
-
-# If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-# This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-# {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-# candidate footstep will be rejected if this method returns {@code true}.
-bool reject_if_cannot_fully_wiggle_inside false
 
 # When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
 # distance the planner will use
@@ -312,12 +310,7 @@ float64 maximum_snap_height -11.1
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.
-float64 min_x_clearance_from_stance -11.1
-
-# Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-# Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-# this parameter.
-float64 min_y_clearance_from_stance -11.1
+float64 min_clearance_from_stance -11.1
 
 # Radius around the goal inside which the planner should start to turn to match the goal's orientation
 float64 final_turn_proximity -11.1
@@ -385,3 +378,19 @@ int32 maximum_branch_factor -1
 
 # If true, enables a mask that reduces the number of calculated steps away from the ideal step
 bool enable_expansion_mask true
+
+# If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+# Enable concave hull wiggler must be true in order for the shin collision checker to run.
+bool enable_shin_collision_check
+
+# How far the shin collision cylinder extends from the toe
+float64 shin_toe_clearance -11.1
+
+# How far the shin collision cylinder extends from the heel
+float64 shin_heel_clearance -11.1
+
+# Length of the shin collidable cylinder
+float64 shin_length -11.1
+
+# Height offset of shin collidable cylinder
+float64 shin_height_offet -11.1

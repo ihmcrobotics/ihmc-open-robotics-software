@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__QuixStartupStateMessage__idl__
 #define __controller_msgs__msg__QuixStartupStateMessage__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,92 +7,41 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet INITIALIZING =
-
+      const octet INITIALIZING =
       0;
 
-
-
-   
-   const octet WAIT_FOR_USER =
-
+      const octet WAIT_FOR_USER =
       1;
 
-
-
-   
-   const octet RECOVERABLE_FAULT =
-
+      const octet RECOVERABLE_FAULT =
       2;
 
-
-
-   
-   const octet FATAL_FAULT =
-
+      const octet FATAL_FAULT =
       3;
 
-
-
-   
-   const octet LIMP =
-
+      const octet LIMP =
       4;
 
-
-
-   
-   const octet WIGGLE =
-
+      const octet WIGGLE =
       5;
 
-
-
-   
-   const octet HOLD_ALL_READY =
-
+      const octet HOLD_ALL_READY =
       6;
 
-
-
-   
-   const octet HOLD_SOME_LOCKED =
-
+      const octet HOLD_SOME_LOCKED =
       7;
 
-
-
-   
-   const octet CALL_BEHAVIOR =
-
+      const octet CALL_BEHAVIOR =
       8;
 
 
-
-   
-   @TypeCode(type="controller_msgs::msg::dds_::QuixStartupStateMessage_")
+      @TypeCode(type="controller_msgs::msg::dds_::QuixStartupStateMessage_")
       struct QuixStartupStateMessage
       {
-
-
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet startup_state_name;
-
-
-
       };
-
     };
   };
 };

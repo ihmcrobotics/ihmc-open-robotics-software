@@ -14,7 +14,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.CollisionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //February 17, 1996: Ann Torres and Jerry Pratt.  Agile Hexapod created using MIT Leg Laboratory Creature Library.
@@ -175,11 +175,11 @@ public class AgileHexapodRobot extends Robot
 
       // Set controller and ground contact model:
       
-      YoVariableRegistry groundRegistry = new YoVariableRegistry("Ground");
+      YoRegistry groundRegistry = new YoRegistry("Ground");
       
       // GroundContactModel groundModel = new LinearGroundContactModel(this, 2000.0, 100.0, 50.0, 50.0, groundRegistry);
       GroundContactModel groundModel = new CollisionGroundContactModel(this, 0.2, 0.7, groundRegistry);
-      this.addYoVariableRegistry(groundRegistry);
+      this.addYoRegistry(groundRegistry);
       
       GroundProfile3D profile = null;
 

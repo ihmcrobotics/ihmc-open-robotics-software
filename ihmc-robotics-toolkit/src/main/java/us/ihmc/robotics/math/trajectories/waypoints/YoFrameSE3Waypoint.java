@@ -7,14 +7,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameSE3Waypoint implements FrameSE3WaypointBasics
 {
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoFrameSO3Waypoint so3Waypoint;
 
-   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
       so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);

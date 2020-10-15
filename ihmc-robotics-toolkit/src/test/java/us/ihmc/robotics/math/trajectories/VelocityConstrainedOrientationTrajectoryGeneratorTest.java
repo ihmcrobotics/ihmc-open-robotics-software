@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
@@ -52,7 +52,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       FrameVector3D angularVelocityFromIntegration = new FrameVector3D();
       Vector3D integratedAngularAcceleration = new Vector3D();
 
-      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
+      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoRegistry("null"));
       traj.setTrajectoryTime(trajectoryTime);
 
       for (int i = 0; i < 5; i++)
@@ -97,7 +97,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
-      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
+      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoRegistry("null"));
       double trajectoryTime = 3.0;
       traj.setTrajectoryTime(trajectoryTime);
 
@@ -158,7 +158,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
-      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
+      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoRegistry("null"));
       double trajectoryTime = 10.0;
 
       double maxVelocityRecorded = 0.0;
@@ -259,7 +259,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
-      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
+      VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoRegistry("null"));
       double trajectoryTime = 1.0;
 
       double maxVelocityRecorded = 0.0;

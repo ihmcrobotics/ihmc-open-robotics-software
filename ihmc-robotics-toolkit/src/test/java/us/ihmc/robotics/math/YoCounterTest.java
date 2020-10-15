@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoCounterTest
 {
    @Test
    public void testCounter()
    {
-      YoCounter counter = new YoCounter("numberOfThings", new YoVariableRegistry("countReg"));
+      YoCounter counter = new YoCounter("numberOfThings", new YoRegistry("countReg"));
       counter.setMaxCount(5);
       
       assertFalse(counter.maxCountReached());

@@ -6,8 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -54,7 +54,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
     * The output of this algorithm: the effort matrix for all the joints to consider resulting from
     * Coriolis, centrifugal, and external wrenches.
     */
-   private final DenseMatrix64F jointTauMatrix;
+   private final DMatrixRMaj jointTauMatrix;
 
    /** Whether the effort resulting from the Coriolis and centrifugal forces should be considered. */
    private final boolean considerCoriolisAndCentrifugalForces;
@@ -176,7 +176,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
+      jointTauMatrix = new DMatrixRMaj(nDoFs, 1);
 
       coriolisAccelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(body -> rigidBodyToRecursionStepMap.get(body).rigidBodyAcceleration,
                                                                                                    input.getInertialFrame(),
@@ -342,7 +342,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
     * 
     * @return this calculator output: the joint efforts.
     */
-   public DenseMatrix64F getJointTauMatrix()
+   public DMatrixRMaj getJointTauMatrix()
    {
       return jointTauMatrix;
    }
@@ -369,7 +369,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
     * @param joint the query. Not modify.
     * @return the tau matrix.
     */
-   public DenseMatrix64F getComputedJointTau(JointReadOnly joint)
+   public DMatrixRMaj getComputedJointTau(JointReadOnly joint)
    {
       RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
 
@@ -486,15 +486,15 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
        * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
        * the number of DoFs of the joint.
        */
-      private final DenseMatrix64F S;
+      private final DMatrixRMaj S;
       /**
        * Computed joint effort.
        */
-      private final DenseMatrix64F tau;
+      private final DMatrixRMaj tau;
       /**
        * Computed joint wrench, before projection onto the joint motion subspace.
        */
-      private final DenseMatrix64F jointWrenchMatrix;
+      private final DMatrixRMaj jointWrenchMatrix;
       /**
        * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
        */
@@ -524,9 +524,9 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jointWrench = new Wrench();
             externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
-            S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            tau = new DenseMatrix64F(nDoFs, 1);
-            jointWrenchMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+            tau = new DMatrixRMaj(nDoFs, 1);
+            jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             getJoint().getMotionSubspace(S);
          }
       }
@@ -616,7 +616,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          }
 
          jointWrench.get(jointWrenchMatrix);
-         CommonOps.multTransA(S, jointWrenchMatrix, tau);
+         CommonOps_DDRM.multTransA(S, jointWrenchMatrix, tau);
 
          for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
          {

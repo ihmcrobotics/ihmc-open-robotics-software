@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 
 public enum MultisenseInformation
 {
@@ -18,9 +18,9 @@ public enum MultisenseInformation
       return null;
    }
 
-   public IntrinsicParameters getIntrinsicParameters()
+   public CameraPinholeBrown getIntrinsicParameters()
    {
-      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
       switch (this)
       {
       case CART:

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -27,26 +28,29 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WholeBodyControlCoreToolbox
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double controlDT;
    private final double gravityZ;
    private final FloatingJointBasics rootJoint;
    private final MultiBodySystemBasics multiBodySystemInput;
+   private final List<KinematicLoopFunction> kinematicLoopFunctions = new ArrayList<>();
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
@@ -140,12 +144,11 @@ public class WholeBodyControlCoreToolbox
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
-      this.centerOfMassFrame = centerOfMassFrame;
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -158,6 +161,10 @@ public class WholeBodyControlCoreToolbox
       }
 
       multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
+      if (centerOfMassFrame == null)
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", multiBodySystemInput.getInertialFrame(), multiBodySystemInput.getRootBody());
+      this.centerOfMassFrame = centerOfMassFrame;
+
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
       inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
@@ -165,6 +172,16 @@ public class WholeBodyControlCoreToolbox
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
       parentRegistry.addChild(registry);
+   }
+
+   /**
+    * Registers an new function for handling a kinematic loop in the multi-body system.
+    * 
+    * @param function the constraint function for one kinematic loop.
+    */
+   public void addKinematicLoopFunction(KinematicLoopFunction function)
+   {
+      kinematicLoopFunctions.add(function);
    }
 
    /**
@@ -292,6 +309,11 @@ public class WholeBodyControlCoreToolbox
    public MultiBodySystemBasics getMultiBodySystemInput()
    {
       return multiBodySystemInput;
+   }
+
+   public List<KinematicLoopFunction> getKinematicLoopFunctions()
+   {
+      return kinematicLoopFunctions;
    }
 
    public MotionQPInputCalculator getMotionQPInputCalculator()

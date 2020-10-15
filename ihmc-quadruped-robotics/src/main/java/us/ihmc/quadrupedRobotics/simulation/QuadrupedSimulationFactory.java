@@ -20,7 +20,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchFactory;
@@ -47,7 +46,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -70,7 +69,7 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedSimulationFactory
 {
@@ -118,7 +117,7 @@ public class QuadrupedSimulationFactory
 
 
    // TO CONSTRUCT
-   private YoVariableRegistry factoryRegistry;
+   private YoRegistry factoryRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
@@ -129,7 +128,7 @@ public class QuadrupedSimulationFactory
    private QuadrantDependentList<FootSwitchInterface> stateEstimatorFootSwitches;
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
-   private RealtimeRos2Node realtimeRos2Node;
+   private RealtimeROS2Node realtimeROS2Node;
    private QuadrupedControllerManager controllerManager;
    private RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private GroundProfile3D groundProfile3D;
@@ -142,7 +141,7 @@ public class QuadrupedSimulationFactory
 
    private void setupYoRegistries()
    {
-      factoryRegistry = new YoVariableRegistry("factoryRegistry");
+      factoryRegistry = new YoRegistry("factoryRegistry");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
    }
@@ -274,7 +273,7 @@ public class QuadrupedSimulationFactory
                                                                                                                                                 () -> simulationRobot.getRootJoint()
                                                                                                                                                                      .getJointTransform3D());
          controllerManager.registerHighLevelStateChangedListener(reinilizator);
-         factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
+         factoryRegistry.addChild(stateEstimator.getYoRegistry());
       }
       else
       {
@@ -290,9 +289,9 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createRealtimeRos2Node()
+   private void createRealtimeROS2Node()
    {
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation.get(), "ihmc_quadruped_simulation");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation.get(), "ihmc_quadruped_simulation");
    }
 
    public void createControllerManager()
@@ -300,7 +299,7 @@ public class QuadrupedSimulationFactory
       robotMotionStatusFromController = new RobotMotionStatusHolder();
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
-                                                                                       sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
+                                                                                       sdfRobot.get().getRobotsYoRegistry(), yoGraphicsListRegistry,
                                                                                        contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
                                                                                        controllerFootSwitches, stateEstimatorFootSwitches, gravity.get(),
                                                                                        highLevelControllerParameters.get(), dcmPlannerParameters.get(),
@@ -318,14 +317,14 @@ public class QuadrupedSimulationFactory
       factory.setDefinitionsToPublish(fullRobotModel.get());
       factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
       factory.setRobotMotionStatusHolder(controllerManager.getMotionStatusHolder());
-      factory.setROS2Info(realtimeRos2Node, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName()));
+      factory.setROS2Info(realtimeROS2Node, ROS2Tools.getQuadrupedControllerOutputTopic(sdfRobot.get().getName()));
 
       robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
    }
 
    private void createControllerNetworkSubscriber()
    {
-      controllerManager.createControllerNetworkSubscriber(sdfRobot.get().getName(), realtimeRos2Node); // TODO Verify that it is the right name to use.
+      controllerManager.createControllerNetworkSubscriber(sdfRobot.get().getName(), realtimeROS2Node); // TODO Verify that it is the right name to use.
    }
 
    private void createGroundContactModel()
@@ -369,7 +368,7 @@ public class QuadrupedSimulationFactory
          groundProfile3D = providedGroundProfile3D.get();
       }
 
-      groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoVariableRegistry());
+      groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoRegistry());
       groundContactModel.setZStiffness(groundContactParameters.get().getZStiffness());
       groundContactModel.setZDamping(groundContactParameters.get().getZDamping());
       groundContactModel.setXYStiffness(groundContactParameters.get().getXYStiffness());
@@ -381,7 +380,7 @@ public class QuadrupedSimulationFactory
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
                                                                robotConfigurationDataPublisher, yoVariableServer);
-      simulationController.getYoVariableRegistry().addChild(factoryRegistry);
+      simulationController.getYoRegistry().addChild(factoryRegistry);
    }
 
    private void setupSDFRobot()
@@ -477,7 +476,7 @@ public class QuadrupedSimulationFactory
       createFootSwitches();
       createStateEstimatorFootSwitches();
       createSensorReader();
-      createRealtimeRos2Node();
+      createRealtimeROS2Node();
       createControllerManager();
       createStateEstimator();
       createControllerNetworkSubscriber();
@@ -490,17 +489,13 @@ public class QuadrupedSimulationFactory
       setupJointFriction();
       setupCameras();
 
-      realtimeRos2Node.spin();
+      realtimeROS2Node.spin();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
 
       if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
       {
          scs.setGroundVisible(false);
-      }
-      if (scsBufferSize.hasValue())
-      {
-         scs.setMaxBufferSize(scsBufferSize.get());
       }
 
       if (providedTerrainObject3D.hasValue())
@@ -536,8 +531,8 @@ public class QuadrupedSimulationFactory
       }
 
       InputStream parameterFile = modelFactory.get().getParameterInputStream();
-      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
-      scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoRegistry(), true);
+      scs.setParameterRootPath(simulationController.getYoRegistry().getParent());
 
       if (yoVariableServer != null)
       {
@@ -768,9 +763,9 @@ public class QuadrupedSimulationFactory
 
    public void close()
    {
-      if(realtimeRos2Node != null)
+      if(realtimeROS2Node != null)
       {
-         realtimeRos2Node.destroy();
+         realtimeROS2Node.destroy();
       }
    }
 

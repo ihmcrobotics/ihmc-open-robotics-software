@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.fail;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoOptimizedPolynomialTest
 {
-   private static double EPSILON = 1e-4;
+   private static double EPSILON = 1e-3;
 
    String namePrefix = "YoPolynomialTest";
 
@@ -19,7 +19,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointManual()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -71,7 +71,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointAndSlope()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -121,7 +121,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointAutomated()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -143,7 +143,7 @@ public class YoOptimizedPolynomialTest
    public void testCubicDerivativePointAutomated()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -176,7 +176,7 @@ public class YoOptimizedPolynomialTest
    public void testXPowersDerivativeVectorCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -218,7 +218,7 @@ public class YoOptimizedPolynomialTest
    public void testDerivativeCoefficients()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 8;
       YoOptimizedPolynomial septic = new YoOptimizedPolynomial(namePrefix + "Septic", numberOfCoefficients, registry);
 
@@ -274,7 +274,7 @@ public class YoOptimizedPolynomialTest
    public void testDerivativeVersionsCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -314,7 +314,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianLinear()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 2, registry);
 
       double x0 = 0.5, xf = 2.5;
@@ -323,9 +323,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(2, 2);
-      DenseMatrix64F a = new DenseMatrix64F(2, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(2, 2);
+      DMatrixRMaj a = new DMatrixRMaj(2, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       a.set(0, a0);
@@ -375,7 +375,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianQuadratic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 3, registry);
 
       double x0 = 0.5, xm = 1.3, xf = 2.5;
@@ -385,9 +385,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(3, 3);
-      DenseMatrix64F a = new DenseMatrix64F(3, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(3, 3);
+      DMatrixRMaj a = new DMatrixRMaj(3, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       double a2 = function.getCoefficient(2);
@@ -494,7 +494,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianCubic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 4, registry);
 
       double x0 = 0.5, xm1 = 1.3, xm2 = 2.0, xf = 2.5;
@@ -505,9 +505,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(4, 4);
-      DenseMatrix64F a = new DenseMatrix64F(4, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(4, 4);
+      DMatrixRMaj a = new DMatrixRMaj(4, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       double a2 = function.getCoefficient(2);
@@ -691,9 +691,9 @@ public class YoOptimizedPolynomialTest
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)
       {
-         DenseMatrix64F generalizedDYPoly = new DenseMatrix64F(polynomial.getNumberOfCoefficients(), 1);
+         DMatrixRMaj generalizedDYPoly = new DMatrixRMaj(polynomial.getNumberOfCoefficients(), 1);
          polynomial.getXPowersDerivativeVector(i, x, generalizedDYPoly);
-         DenseMatrix64F generalizedDYHand = new DenseMatrix64F(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
+         DMatrixRMaj generalizedDYHand = new DMatrixRMaj(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
          if(i < coefficients.length)
          {
             for(int j = i; j < coefficients.length; j++)
@@ -718,7 +718,7 @@ public class YoOptimizedPolynomialTest
          double generalizedDYPolyScalar = polynomial.getDerivative(i, x);
          double generalizedDYHandScalar = 0.0;
 
-         DenseMatrix64F generalizedDYPolyVector = new DenseMatrix64F(polynomial.getNumberOfCoefficients(), 1);
+         DMatrixRMaj generalizedDYPolyVector = new DMatrixRMaj(polynomial.getNumberOfCoefficients(), 1);
          polynomial.getXPowersDerivativeVector(i, x, generalizedDYPolyVector);
          for(int j = 0; j < generalizedDYPolyVector.numRows; j++)
          {

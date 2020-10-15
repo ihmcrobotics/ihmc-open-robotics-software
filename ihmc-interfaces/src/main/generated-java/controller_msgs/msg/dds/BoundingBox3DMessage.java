@@ -8,26 +8,17 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implements Settable<BoundingBox3DMessage>, EpsilonComparable<BoundingBox3DMessage>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public us.ihmc.euclid.tuple3D.Point3D min_point_;
-
    public us.ihmc.euclid.tuple3D.Point3D max_point_;
 
    public BoundingBox3DMessage()
    {
-
-
       min_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-
       max_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-
    }
 
    public BoundingBox3DMessage(BoundingBox3DMessage other)
@@ -38,42 +29,32 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
 
    public void set(BoundingBox3DMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.min_point_, min_point_);
-
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.max_point_, max_point_);
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
 
-
    public us.ihmc.euclid.tuple3D.Point3D getMinPoint()
    {
       return min_point_;
    }
-
 
 
    public us.ihmc.euclid.tuple3D.Point3D getMaxPoint()
@@ -99,12 +80,9 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!this.min_point_.epsilonEquals(other.min_point_, epsilon)) return false;
-
       if (!this.max_point_.epsilonEquals(other.max_point_, epsilon)) return false;
 
       return true;
@@ -119,12 +97,9 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
 
       BoundingBox3DMessage otherMyClass = (BoundingBox3DMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.min_point_.equals(otherMyClass.min_point_)) return false;
-
       if (!this.max_point_.equals(otherMyClass.max_point_)) return false;
 
       return true;
@@ -136,13 +111,10 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("BoundingBox3DMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("min_point=");
       builder.append(this.min_point_);      builder.append(", ");
-
       builder.append("max_point=");
       builder.append(this.max_point_);
       builder.append("}");

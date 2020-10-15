@@ -29,7 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class ICPControllerTest
    @Test
    public void testStandingWithPerfectTracking() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -124,7 +124,7 @@ public class ICPControllerTest
    @Test
    public void testTransferWithPerfectTracking() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -194,7 +194,7 @@ public class ICPControllerTest
    @Test
    public void testStandingConstrained() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -276,7 +276,7 @@ public class ICPControllerTest
    @Test
    public void testStandingUnconstrained() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -361,7 +361,7 @@ public class ICPControllerTest
    @Test
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -467,7 +467,7 @@ public class ICPControllerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry)
    {
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.algorithms.MultiBodyResponseCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -11,11 +11,11 @@ public interface JointStateProvider
 {
    JointStateType getState();
 
-   DenseMatrix64F getJointState(JointReadOnly joint);
+   DMatrixRMaj getJointState(JointReadOnly joint);
 
    default double getJointState(OneDoFJointReadOnly joint)
    {
-      DenseMatrix64F state = getJointState((JointReadOnly) joint);
+      DMatrixRMaj state = getJointState((JointReadOnly) joint);
       if (state == null)
          return Double.NaN;
       else
@@ -33,7 +33,7 @@ public interface JointStateProvider
          }
 
          @Override
-         public DenseMatrix64F getJointState(JointReadOnly joint)
+         public DMatrixRMaj getJointState(JointReadOnly joint)
          {
             return calculator.getJointTwistChange(joint);
          }

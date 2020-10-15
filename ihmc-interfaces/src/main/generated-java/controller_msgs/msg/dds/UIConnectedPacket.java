@@ -7,24 +7,17 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
-   
- */
+       * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
+       */
 public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Settable<UIConnectedPacket>, EpsilonComparable<UIConnectedPacket>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public UIConnectedPacket()
    {
-
-
    }
 
    public UIConnectedPacket(UIConnectedPacket other)
@@ -35,26 +28,20 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
    public void set(UIConnectedPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -78,9 +65,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       return true;
    }
@@ -94,7 +79,6 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
       UIConnectedPacket otherMyClass = (UIConnectedPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
@@ -107,7 +91,6 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("UIConnectedPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);
       builder.append("}");

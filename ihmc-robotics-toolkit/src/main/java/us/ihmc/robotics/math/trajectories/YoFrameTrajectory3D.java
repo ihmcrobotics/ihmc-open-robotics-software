@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis3D;
@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder
 {
@@ -25,7 +25,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    private final FrameVector3D frameVelocity = new FrameVector3D();
    private final FrameVector3D frameAcceleration = new FrameVector3D();
 
-   public YoFrameTrajectory3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   public YoFrameTrajectory3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       super(name, maximumNumberOfCoefficients, registry);
       this.referenceFrame = referenceFrame;
@@ -541,7 +541,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                                     zddIntermediate, zFinal, zdFinal);
    }
    
-   public void setDirectly(Axis3D axis, DenseMatrix64F coefficients)
+   public void setDirectly(Axis3D axis, DMatrixRMaj coefficients)
    {
       getYoTrajectory(axis).setDirectly(coefficients);
    }

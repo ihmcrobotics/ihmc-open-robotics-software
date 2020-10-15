@@ -2,7 +2,7 @@ package us.ihmc.robotics.kinematics;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -20,7 +20,7 @@ public class RandomRestartInverseKinematicsCalculator implements InverseKinemati
    private final double restartTolerance; 
    
    private double bestErrorScalar;
-   private final DenseMatrix64F best = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj best = new DMatrixRMaj(1, 1);
 
    public RandomRestartInverseKinematicsCalculator(int maxRestarts, double restartTolerance, GeometricJacobian jacobian, NumericalInverseKinematicsCalculator inverseKinematicsCalculator)
    {

@@ -22,7 +22,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @author twan
@@ -33,7 +33,7 @@ public class CirclePoseTrajectoryGeneratorTest
    private static final double EPSILON = 1e-12;
    private ReferenceFrame worldFrame;
    private Random random = new Random(12525L);
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private OrientationProvider initialOrientationProvider;
    private DoubleProvider trajectoryTimeProvider;
    private CirclePoseTrajectoryGenerator trajectoryGenerator;
@@ -42,7 +42,7 @@ public class CirclePoseTrajectoryGeneratorTest
    public void setUp()
    {
       worldFrame = ReferenceFrame.getWorldFrame();
-      registry = new YoVariableRegistry("reg");
+      registry = new YoRegistry("reg");
 
       FramePose3D initialPose = EuclidFrameRandomTools.nextFramePose3D(random, worldFrame, 1.0, 1.0, 1.0);
       FrameQuaternion initialOrientation = new FrameQuaternion(initialPose.getOrientation());

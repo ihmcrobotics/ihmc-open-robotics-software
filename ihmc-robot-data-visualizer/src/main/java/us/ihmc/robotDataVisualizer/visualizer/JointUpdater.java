@@ -17,7 +17,7 @@ public abstract class JointUpdater
 
    public abstract void update();
    
-   public static void getJointUpdaterList(ArrayList<Joint> rootJoints, List<JointState> jointStates, ArrayList<JointUpdater> jointUpdatersToPack)
+   public static void getJointUpdaterList(List<Joint> rootJoints, List<JointState> jointStates, List<JointUpdater> jointUpdatersToPack)
    {
       HashMap<String, Joint> joints = new HashMap<String, Joint>();
       for (Joint joint : rootJoints)

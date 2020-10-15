@@ -15,13 +15,14 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -46,12 +47,6 @@ public class MultiContactImpulseCalculatorTest
    private static final double SINGLE_CONTACT_GAMMA = 1.0e-10;
    private static final double EPSILON = 2.0e-12;
    private static final double POST_IMPULSE_VELOCITY_EPSILON = 5.0e-8;
-
-   @BeforeAll
-   public static void disableStackTrace()
-   {
-      YoVariable.SAVE_STACK_TRACE = false;
-   }
 
    @Test
    public void testTwoFloatingBodies() throws Throwable
@@ -89,7 +84,7 @@ public class MultiContactImpulseCalculatorTest
 
          MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
          multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
-         multiContactImpulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         multiContactImpulseCalculator.setContactParameters(ContactParameters.defaultIneslasticContactParameters(false));
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          try
@@ -133,7 +128,7 @@ public class MultiContactImpulseCalculatorTest
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null, null);
+         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null);
          physicsEngineRobotData.getForwardDynamicsPlugin().doScience(0.0, dt, gravity);
          map.put(rootBody, physicsEngineRobotData);
       }
@@ -157,24 +152,24 @@ public class MultiContactImpulseCalculatorTest
    static void updateVelocities(double dt, MultiContactImpulseCalculator multiContactImpulseCalculator,
                                 Map<RigidBodyBasics, ForwardDynamicsCalculator> calculatorMap)
    {
-      Map<RigidBodyBasics, DenseMatrix64F> jointVelocityMatrixMap = new HashMap<>();
+      Map<RigidBodyBasics, DMatrixRMaj> jointVelocityMatrixMap = new HashMap<>();
 
       for (SingleContactImpulseCalculator impulseCalculator : multiContactImpulseCalculator.getImpulseCalculators())
       {
          RigidBodyBasics bodyA = impulseCalculator.getContactingBodyA();
          RigidBodyBasics rootA = MultiBodySystemTools.getRootBody(bodyA);
 
-         DenseMatrix64F jointVelocityMatrix = jointVelocityMatrixMap.get(rootA);
+         DMatrixRMaj jointVelocityMatrix = jointVelocityMatrixMap.get(rootA);
          if (jointVelocityMatrix == null)
          {
             List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootA));
-            jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+            jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
             MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-            CommonOps.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootA).getJointAccelerationMatrix());
+            CommonOps_DDRM.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootA).getJointAccelerationMatrix());
             jointVelocityMatrixMap.put(rootA, jointVelocityMatrix);
          }
          if (impulseCalculator.isConstraintActive())
-            CommonOps.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeA());
+            CommonOps_DDRM.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeA());
 
          RigidBodyBasics bodyB = impulseCalculator.getContactingBodyB();
 
@@ -186,17 +181,17 @@ public class MultiContactImpulseCalculatorTest
             if (jointVelocityMatrix == null)
             {
                List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootB));
-               jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+               jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
                MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-               CommonOps.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootB).getJointAccelerationMatrix());
+               CommonOps_DDRM.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootB).getJointAccelerationMatrix());
                jointVelocityMatrixMap.put(rootB, jointVelocityMatrix);
             }
             if (impulseCalculator.isConstraintActive())
-               CommonOps.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeB());
+               CommonOps_DDRM.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeB());
          }
       }
 
-      for (Entry<RigidBodyBasics, DenseMatrix64F> entry : jointVelocityMatrixMap.entrySet())
+      for (Entry<RigidBodyBasics, DMatrixRMaj> entry : jointVelocityMatrixMap.entrySet())
       {
          RigidBodyBasics root = entry.getKey();
          List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(root));
@@ -215,7 +210,7 @@ public class MultiContactImpulseCalculatorTest
       CollisionResult collisionResult = new CollisionResult();
       Collidable collidableA = nextCollidable(random, contactingBodyA);
       collisionResult.setCollidableA(collidableA);
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       FramePoint3D pointInBodyFrameA = collisionResult.getCollisionData().getPointOnA();
       FramePoint3D pointInBodyFrameB = collisionResult.getCollisionData().getPointOnB();
       FramePoint3D pointOnARootFrame = collisionResult.getPointOnARootFrame();

@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * {@code YoPolynomial3D} is the simplest 3D wrapper around the 1D {@link YoPolynomial}.
@@ -32,7 +32,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
    private final FrameVector3D frameVelocity = new FrameVector3D();
    private final FrameVector3D frameAcceleration = new FrameVector3D();
 
-   public YoFramePolynomial3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   public YoFramePolynomial3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       super(name, maximumNumberOfCoefficients, registry);
       this.referenceFrame = referenceFrame;

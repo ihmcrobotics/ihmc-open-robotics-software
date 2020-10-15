@@ -1,20 +1,20 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.*;
+import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
 
 import java.util.EnumMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FilteredVelocityYoFrameVector localVelocityFromFD;
 
@@ -26,9 +26,9 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    private final YoDouble dummyAlpha;
 
    public PositionVelocity3DConsistencyChecker(String namePrefix, YoFramePoint3D position, YoFrameVector3D angularVelocityToCheck, double updateDT,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + "PositionVelocity3DCheck");
+      registry = new YoRegistry(namePrefix + "PositionVelocity3DCheck");
       dummyAlpha = new YoDouble("dummyAlpha", registry);
       localVelocityFromFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
             position);

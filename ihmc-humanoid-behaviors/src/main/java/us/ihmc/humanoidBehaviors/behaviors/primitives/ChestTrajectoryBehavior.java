@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -24,7 +24,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<ChestTrajectoryMessage> publisher;
 
-   public ChestTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public ChestTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
 

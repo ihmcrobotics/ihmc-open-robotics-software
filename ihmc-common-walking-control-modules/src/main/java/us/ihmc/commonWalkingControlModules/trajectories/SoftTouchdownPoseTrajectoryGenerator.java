@@ -11,13 +11,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
    private final YoSpline3D positionTouchdownTrajectory;
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -34,9 +34,9 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final FrameVector3D constantAngularVelocity = new FrameVector3D();
    private final FrameVector3D constantAngularAcceleration = new FrameVector3D();
    
-   public SoftTouchdownPoseTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   public SoftTouchdownPoseTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       
       positionTouchdownTrajectory = new YoSpline3D(3, 3, worldFrame, registry, namePrefix + "Trajectory");

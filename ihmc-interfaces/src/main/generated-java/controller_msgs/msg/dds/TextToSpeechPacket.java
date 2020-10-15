@@ -7,58 +7,37 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Use this message for the robot to speak.
-   
- */
+       * Use this message for the robot to speak.
+       */
 public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Settable<TextToSpeechPacket>, EpsilonComparable<TextToSpeechPacket>
 {
-
    public static final String FOOTSTEP_COMPLETED = "Finished Taking Footstep";
-
 
    public static final String FINISHED_WALKING = "Finished walking";
 
-
    public static final String WALKING_ABORTED = "walking aborted";
-
 
    public static final String STARTING_CONTROLLER = "starting controller";
 
-
    public static final String WALKING = "walking";
-
 
    public static final String MOVING_LEFT_ARM = "moving the left arm";
 
-
    public static final String MOVING_RIGHT_ARM = "moving the right arm";
-
 
    public static final String NETWORKPROCESSOR_ONLINE = "Reestablished Connection To The Network Processor";
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public boolean speak_packet_;
-
    public boolean beep_ = true;
-
    public java.lang.StringBuilder text_to_speak_;
 
    public TextToSpeechPacket()
    {
-
-
-
-
       text_to_speak_ = new java.lang.StringBuilder(255);
-
    }
 
    public TextToSpeechPacket(TextToSpeechPacket other)
@@ -69,41 +48,31 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
 
    public void set(TextToSpeechPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       speak_packet_ = other.speak_packet_;
 
-
       beep_ = other.beep_;
-
 
       text_to_speak_.setLength(0);
       text_to_speak_.append(other.text_to_speak_);
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
-
 
    public void setSpeakPacket(boolean speak_packet)
    {
@@ -114,7 +83,6 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       return speak_packet_;
    }
 
-
    public void setBeep(boolean beep)
    {
       beep_ = beep;
@@ -123,7 +91,6 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
    {
       return beep_;
    }
-
 
    public void setTextToSpeak(java.lang.String text_to_speak)
    {
@@ -158,15 +125,11 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.speak_packet_, other.speak_packet_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.beep_, other.beep_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.text_to_speak_, other.text_to_speak_, epsilon)) return false;
 
@@ -183,15 +146,11 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
 
       TextToSpeechPacket otherMyClass = (TextToSpeechPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.speak_packet_ != otherMyClass.speak_packet_) return false;
 
-
       if(this.beep_ != otherMyClass.beep_) return false;
-
 
       if (!us.ihmc.idl.IDLTools.equals(this.text_to_speak_, otherMyClass.text_to_speak_)) return false;
 
@@ -205,16 +164,12 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("TextToSpeechPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("speak_packet=");
       builder.append(this.speak_packet_);      builder.append(", ");
-
       builder.append("beep=");
       builder.append(this.beep_);      builder.append(", ");
-
       builder.append("text_to_speak=");
       builder.append(this.text_to_speak_);
       builder.append("}");

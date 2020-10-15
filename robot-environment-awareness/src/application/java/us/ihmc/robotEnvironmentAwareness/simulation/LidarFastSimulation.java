@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -22,7 +22,7 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.util.RealtimeTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -38,7 +38,7 @@ public class LidarFastSimulation
    public static final boolean VISUALIZE_GPU_LIDAR = false;
    private static final GroundType DEFAULT_GROUND = GroundType.OBSTACLE_COURSE;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    public LidarFastSimulation() throws IOException
    {
@@ -84,20 +84,20 @@ public class LidarFastSimulation
       environmentsGraphics.put(GroundType.BLOCKS2, createBlocks2());
       environmentsGraphics.put(GroundType.L_SHAPE, createLShapedGround());
 
-      VariableChangedListener listener = new VariableChangedListener()
+      YoVariableChangedListener listener = new YoVariableChangedListener()
       {
          private Graphics3DNode groundGraphicsNode = null;
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (groundGraphicsNode != null)
                scs.removeGraphics3dNode(groundGraphicsNode);
             groundGraphicsNode = scs.addStaticLinkGraphics(environmentsGraphics.get(groundType.getEnumValue()));
          }
       };
-      groundType.addVariableChangedListener(listener);
-      listener.notifyOfVariableChange(null);
+      groundType.addListener(listener);
+      listener.changed(null);
    }
 
    private Graphics3DObject createLShapedGround()

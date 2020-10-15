@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,6 +25,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.CollidableVisualizer;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.*;
@@ -135,7 +137,7 @@ public class AtlasSDFViewer
       }
    }
 
-   private static HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private static HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint joint : joints)
       {
@@ -220,6 +222,11 @@ public class AtlasSDFViewer
          PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
          graphics.translate(pointShape);
          graphics.addSphere(0.01, appearance);
+      }
+      else if (shape instanceof ConvexPolytope3DReadOnly)
+      {
+         ConvexPolytope3DReadOnly convexPolytope = (ConvexPolytope3DReadOnly) shape;
+         graphics.addMeshData(CollidableVisualizer.newConvexPolytope3DMesh(convexPolytope), appearance);
       }
       else
       {

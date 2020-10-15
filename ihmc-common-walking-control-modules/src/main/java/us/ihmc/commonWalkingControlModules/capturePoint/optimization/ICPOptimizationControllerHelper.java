@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import org.ejml.data.D1Matrix64F;
-import org.ejml.data.RowD1Matrix64F;
+import org.ejml.data.DMatrix1Row;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -25,13 +23,13 @@ public class ICPOptimizationControllerHelper
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
 
-   public double transformGainsFromDynamicsFrame(RowD1Matrix64F feedbackGainsToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelGain,
+   public double transformGainsFromDynamicsFrame(DMatrix1Row feedbackGainsToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelGain,
                                                double orthogonalGain)
    {
       return transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
    }
 
-   public double transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
+   public double transformFromDynamicsFrame(DMatrix1Row valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
                                             double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
@@ -77,12 +75,12 @@ public class ICPOptimizationControllerHelper
       }
    }
 
-   public void transformToWorldFrame(D1Matrix64F weightsToPack, double xValue, double yValue, ReferenceFrame frame)
+   public void transformToWorldFrame(DMatrix1Row weightsToPack, double xValue, double yValue, ReferenceFrame frame)
    {
       transformValues(weightsToPack, xValue, yValue, frame, worldFrame);
    }
 
-   private void transformValues(D1Matrix64F valuesToPack, double xValue, double yValue, ReferenceFrame currentFrame, ReferenceFrame desiredFrame)
+   private void transformValues(DMatrix1Row valuesToPack, double xValue, double yValue, ReferenceFrame currentFrame, ReferenceFrame desiredFrame)
    {
       frameMatrix3D.setToZero(currentFrame);
       frameMatrix3D.setM00(xValue);

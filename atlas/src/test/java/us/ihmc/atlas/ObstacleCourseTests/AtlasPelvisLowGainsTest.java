@@ -53,6 +53,6 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
 
-      return (YoDouble) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
+      return (YoDouble) scs.findVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
    }
 }

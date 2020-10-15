@@ -248,7 +248,7 @@ public abstract class SDFRobotWriter
       
       List<SDFVisual> sdfVisuals = new ArrayList<>();
 
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = scsLink.getLinkGraphics().getGraphics3DInstructions();
+      List<Graphics3DPrimitiveInstruction> graphics3dInstructions = scsLink.getLinkGraphics().getGraphics3DInstructions();
 
       RigidBodyTransform parentJointTransformToWorld = new RigidBodyTransform();
       Joint parentJoint = scsLink.getParentJoint();
@@ -264,7 +264,7 @@ public abstract class SDFRobotWriter
       return sdfVisuals;
    }
 
-   private SDFVisual createSDFVisual(RigidBodyTransform parentJointTransformToWorld, ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions)
+   private SDFVisual createSDFVisual(RigidBodyTransform parentJointTransformToWorld, List<Graphics3DPrimitiveInstruction> graphics3dInstructions)
    {
       SDFVisual sdfVisual = new SDFVisual();
       RigidBodyTransform visualPose = new RigidBodyTransform();

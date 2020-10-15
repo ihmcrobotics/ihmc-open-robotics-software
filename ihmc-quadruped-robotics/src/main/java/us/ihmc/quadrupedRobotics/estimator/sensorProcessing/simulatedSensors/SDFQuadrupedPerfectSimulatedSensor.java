@@ -56,7 +56,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
 
       //FootSwitches
-      ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
 
       for (RobotQuadrant quadrant : quadrants)
       {
@@ -68,12 +68,12 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
             if (groundContactPoint.getParentJoint().getName().equals(jointBeforeFoot.getName()))
             {
                footSwitches.set(quadrant,
-                                new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, super.getYoVariableRegistry()));
+                                new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, super.getYoRegistry()));
             }
          }
       }
 
-      enableDrives = new YoBoolean("enableDrives", getYoVariableRegistry());
+      enableDrives = new YoBoolean("enableDrives", getYoRegistry());
       enableDrives.set(true);
    }
 

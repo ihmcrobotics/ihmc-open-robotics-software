@@ -21,13 +21,13 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemotePlannerMessageConverter
 {
    private static final boolean verbose = false;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final Messager messager;
    private final String robotName;
@@ -54,11 +54,11 @@ public class RemotePlannerMessageConverter
 
    public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 
-   public RemotePlannerMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public RemotePlannerMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -80,20 +80,20 @@ public class RemotePlannerMessageConverter
       ros2Node.destroy();
    }
 
-   private void registerPubSubs(RealtimeRos2Node ros2Node)
+   private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* subscribers */
       // we want to listen to the incoming request
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class,
-                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
+                                                    FootstepPlannerCommunicationProperties.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
-      outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                        FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
+      outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                                                 FootstepPlannerCommunicationProperties.outputTopic(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());

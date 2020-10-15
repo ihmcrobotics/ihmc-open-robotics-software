@@ -44,6 +44,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -58,7 +59,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -68,7 +69,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static final boolean VISUALIZE = false;
    private static final String robotName = "testBot";
 
-   private RealtimeRos2Node localNode = null;
+   private RealtimeROS2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
    private SharedMemoryMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
@@ -103,7 +104,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
@@ -215,8 +216,9 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlanningRequestPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
@@ -290,8 +292,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(localNode, FootstepPlanningRequestPacket.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT));
+            .createPublisherTypeNamed(localNode, FootstepPlanningRequestPacket.class,
+                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -371,18 +373,21 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlannerParametersPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(localNode, VisibilityGraphsParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, VisibilityGraphsParametersPacket.class,
+                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                              .withInput(),
                                            s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+         FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
+
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
@@ -441,8 +446,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
-            .createPublisher(localNode, FootstepPlanningToolboxOutputStatus.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+            .createPublisherTypeNamed(localNode, FootstepPlanningToolboxOutputStatus.class,
+                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput());
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
@@ -698,7 +703,11 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
-      assertEquals("Wiggle inside deltas aren't equal.", parameters.getWiggleInsideDelta(), packet.getWiggleInsideDelta(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealSideStepWidth(), packet.getIdealSideStepWidth(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealBackStepLength(), packet.getIdealBackStepLength(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealStepLengthAtMaxStepZ(), packet.getIdealStepLengthAtMaxStepZ(), epsilon);
+      assertEquals("Wiggle inside delta targets aren't equal.", parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon);
+      assertEquals("Wiggle inside delta minimums aren't equal.", parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon);
       assertEquals("Maximum step reaches aren't equal.", parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon);
       assertEquals("Maximum step yaws aren't equal.", parameters.getMaximumStepYaw(), packet.getMaximumStepYaw(), epsilon);
       assertEquals("Minimum step widths aren't equal.", parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon);
@@ -709,7 +718,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max X forward and down aren't equal", parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals("Max Z forward and down aren't equal", parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      assertEquals("Max step z isn't equal.", parameters.getMaximumStepZ(), packet.getMaximumStepZ(), epsilon);
+      assertEquals("Max step z isn't equal.", parameters.getMaxStepZ(), packet.getMaximumStepZ(), epsilon);
+      assertEquals("Max swing z isn't equal.", parameters.getMaxSwingZ(), packet.getMaximumSwingZ(), epsilon);
+      assertEquals("Max swing reach isn't equal.", parameters.getMaxSwingReach(), packet.getMaximumSwingReach(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
       assertEquals("Wiggle while planning isn't equal.", parameters.getWiggleWhilePlanning(), packet.getWiggleWhilePlanning());
@@ -732,8 +743,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Body box base Y isn't equal.", parameters.getBodyBoxBaseY(), packet.getBodyBoxBaseY(), epsilon);
       assertEquals("Body box base Z isn't equal.", parameters.getBodyBoxBaseZ(), packet.getBodyBoxBaseZ(), epsilon);
       assertEquals("Maximum snap height isn't equal", parameters.getMaximumSnapHeight(), packet.getMaximumSnapHeight(), epsilon);
-      assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
-      assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
+      assertEquals("Min clearance from stance isn't equal.", parameters.getMinClearanceFromStance(), packet.getMinClearanceFromStance(), epsilon);
 
       assertEquals("A star heuristics weights aren't equal.", parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon);
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);

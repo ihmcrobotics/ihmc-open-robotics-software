@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
@@ -7,11 +9,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.awt.*;
 
 public class EdgeVisualizer
 {
@@ -25,7 +25,7 @@ public class EdgeVisualizer
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
 
-   public EdgeVisualizer(String prefix, Color color, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public EdgeVisualizer(String prefix, Color color, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       visualize = new YoBoolean(prefix + "_Visualize", registry);
       linePointA = new YoFramePoint2D(prefix + "_FootRotationPointA", worldFrame, registry);

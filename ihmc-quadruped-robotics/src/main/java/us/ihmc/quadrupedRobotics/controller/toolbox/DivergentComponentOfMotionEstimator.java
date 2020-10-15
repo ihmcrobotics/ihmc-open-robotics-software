@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,18 +12,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DivergentComponentOfMotionEstimator
 {
    private final ReferenceFrame comZUpFrame;
    private final LinearInvertedPendulumModel lipModel;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoFramePoint3D yoDcmPositionEstimate = new YoFramePoint3D("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoIcpPositionEstimate = new YoFramePoint3D("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
@@ -28,13 +28,13 @@ public class DivergentComponentOfMotionEstimator
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry,
+   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoRegistry parentRegistry,
                                               YoGraphicsListRegistry graphicsListRegistry)
    {
       this(comZUpFrame, lipModel, "", parentRegistry, graphicsListRegistry);
    }
 
-   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, String nameSuffix, YoVariableRegistry parentRegistry,
+   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, String nameSuffix, YoRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.comZUpFrame = comZUpFrame;

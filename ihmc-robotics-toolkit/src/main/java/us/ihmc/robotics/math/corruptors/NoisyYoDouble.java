@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.corruptors;
 import java.util.Random;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -72,7 +72,7 @@ public class NoisyYoDouble extends YoDouble
    private final YoDouble perfect;
 
 // Simple constructor
-   public NoisyYoDouble(String name, YoVariableRegistry registry)
+   public NoisyYoDouble(String name, YoRegistry registry)
    {
       super(name, registry);
       this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
@@ -99,7 +99,7 @@ public class NoisyYoDouble extends YoDouble
    }
 
 // Simple constructor, given existing YoDouble
-   public NoisyYoDouble(String name, YoVariableRegistry registry, YoDouble perfect)
+   public NoisyYoDouble(String name, YoRegistry registry, YoDouble perfect)
    {
       super(name, registry);
       this.isNoisy = new YoBoolean(name + "_IsNoisy", registry);
@@ -126,7 +126,7 @@ public class NoisyYoDouble extends YoDouble
    }
 
 // Full constructor
-   public NoisyYoDouble(String name, YoVariableRegistry registry, boolean isNoisy, double randomBound, boolean useBias, double bias, double biasMax,
+   public NoisyYoDouble(String name, YoRegistry registry, boolean isNoisy, double randomBound, boolean useBias, double bias, double biasMax,
                                 double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);
@@ -154,7 +154,7 @@ public class NoisyYoDouble extends YoDouble
    }
 
 // Full constructor, given existing YoDouble
-   public NoisyYoDouble(String name, YoVariableRegistry registry, YoDouble perfect, boolean isNoisy, double randomBound, boolean useBias,
+   public NoisyYoDouble(String name, YoRegistry registry, YoDouble perfect, boolean isNoisy, double randomBound, boolean useBias,
                                 double bias, double biasMax, double biasMin, double biasDelta, NoiseType noiseType, double standardDeviation)
    {
       super(name, registry);

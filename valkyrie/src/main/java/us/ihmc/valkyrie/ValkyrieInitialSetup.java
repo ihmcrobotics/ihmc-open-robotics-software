@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.util.List;
 
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,12 +38,21 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       setInitialYaw(initialYaw);
    }
 
+   public List<Double> getInitialJointAngles() // Implement for kinematics sim & start pose
+   {
+      return null;
+   }
+
+   public Pose3DReadOnly getInitialPelvisPose() // Implement for kinematics sim & start pose
+   {
+      return null;
+   }
+
    @Override
    public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       setActuatorPositions(robot, jointMap);
       positionRobotInWorld(robot);
-      LogTools.error("Robot position " + robot.getRootJoint().getQz());
    }
 
    private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
@@ -110,7 +120,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       {
          for (GroundContactPoint gc : contactPoints)
          {
-            height = Math.min(height, gc.getPositionPoint().getZ());
+            height = Math.min(height, gc.getPositionCopy().getZ());
          }
       }
 

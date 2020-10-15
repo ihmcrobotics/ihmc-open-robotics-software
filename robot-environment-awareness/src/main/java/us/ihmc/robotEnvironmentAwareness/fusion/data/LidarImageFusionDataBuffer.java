@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,7 +25,7 @@ public class LidarImageFusionDataBuffer
 
    private final AtomicReference<Point3D> latestCameraPosition;
    private final AtomicReference<Quaternion> latestCameraOrientation;
-   private final AtomicReference<IntrinsicParameters> latestCameraIntrinsicParameters;
+   private final AtomicReference<CameraPinholeBrown> latestCameraIntrinsicParameters;
 
    private final AtomicReference<Integer> bufferSize;
 
@@ -33,7 +33,7 @@ public class LidarImageFusionDataBuffer
    private final AtomicReference<ImageSegmentationParameters> latestImageSegmentationParaeters;
    private final AtomicReference<LidarImageFusionData> newBuffer = new AtomicReference<>(null);
 
-   public LidarImageFusionDataBuffer(Messager messager, IntrinsicParameters intrinsic)
+   public LidarImageFusionDataBuffer(Messager messager, CameraPinholeBrown intrinsic)
    {
       //intrinsicParameters = intrinsic;
       bufferSize = messager.createInput(LidarImageFusionAPI.StereoBufferSize, 50000);

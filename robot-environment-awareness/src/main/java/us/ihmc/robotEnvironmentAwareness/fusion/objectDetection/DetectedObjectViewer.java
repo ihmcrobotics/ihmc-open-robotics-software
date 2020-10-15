@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class DetectedObjectViewer
 {
@@ -31,10 +31,9 @@ public class DetectedObjectViewer
    private static final Color doorEdgeColor = Color.PINK;
    private static final Color doorHingeColor = Color.GREEN;
 
-   public DetectedObjectViewer(Ros2Node ros2Node)
+   public DetectedObjectViewer(ROS2Node ros2Node)
    {
-      String doorParameterPacketTopicName = ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(DoorParameterPacket.class);
-      ROS2Tools.createCallbackSubscription(ros2Node, DoorParameterPacket.class, doorParameterPacketTopicName, this::renderDoor);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getDoorParameterTopic(), this::renderDoor);
    }
 
    public void renderDoor(Subscriber<DoorParameterPacket> subscriber)

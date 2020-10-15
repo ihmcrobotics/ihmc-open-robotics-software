@@ -98,7 +98,7 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   private HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint j : joints)
       {

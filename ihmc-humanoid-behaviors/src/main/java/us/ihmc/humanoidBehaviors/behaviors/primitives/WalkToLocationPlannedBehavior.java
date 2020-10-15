@@ -18,7 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLocationStates>
@@ -47,7 +47,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private boolean performAStarSearch = false;
    private boolean assumeFlatGround = true;
 
-   public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   public WalkToLocationPlannedBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
                                         WalkingControllerParameters walkingControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                                         YoDouble yoTime)
    {
@@ -76,13 +76,13 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    private void createSubscribers()
    {
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
 
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                                 packet.getPosition(),
                                                                                 packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
    }
 
    public void setTarget(FramePose3D targetPoseInWorld)

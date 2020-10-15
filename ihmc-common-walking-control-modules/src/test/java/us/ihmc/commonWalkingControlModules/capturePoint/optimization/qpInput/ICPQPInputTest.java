@@ -2,14 +2,12 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.Assert;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.robotics.Assert;
 public class ICPQPInputTest
 {
    @Test
@@ -70,19 +68,19 @@ public class ICPQPInputTest
          int size = RandomNumbers.nextInt(random, 1, 200);
          ICPQPInput icpqpInput = new ICPQPInput(size);
 
-         CommonOps.fill(icpqpInput.quadraticTerm, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
-         CommonOps.fill(icpqpInput.linearTerm, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
-         CommonOps.fill(icpqpInput.residualCost, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps_DDRM.fill(icpqpInput.quadraticTerm, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps_DDRM.fill(icpqpInput.linearTerm, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps_DDRM.fill(icpqpInput.residualCost, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
 
-         Assert.assertNotEquals(CommonOps.elementSum(icpqpInput.quadraticTerm), 0.0, 1e-7);
-         Assert.assertNotEquals(CommonOps.elementSum(icpqpInput.linearTerm), 0.0, 1e-7);
-         Assert.assertNotEquals(CommonOps.elementSum(icpqpInput.residualCost), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps_DDRM.elementSum(icpqpInput.quadraticTerm), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps_DDRM.elementSum(icpqpInput.linearTerm), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps_DDRM.elementSum(icpqpInput.residualCost), 0.0, 1e-7);
 
          icpqpInput.reset();
 
-         Assert.assertEquals(CommonOps.elementSum(icpqpInput.quadraticTerm), 0.0, 1e-7);
-         Assert.assertEquals(CommonOps.elementSum(icpqpInput.linearTerm), 0.0, 1e-7);
-         Assert.assertEquals(CommonOps.elementSum(icpqpInput.residualCost), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps_DDRM.elementSum(icpqpInput.quadraticTerm), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps_DDRM.elementSum(icpqpInput.linearTerm), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps_DDRM.elementSum(icpqpInput.residualCost), 0.0, 1e-7);
       }
    }
 
@@ -91,9 +89,9 @@ public class ICPQPInputTest
    {
       Random random = new Random(10L);
       int size = RandomNumbers.nextInt(random, 1, 100);
-      DenseMatrix64F quadratic = new DenseMatrix64F(size, size);
-      DenseMatrix64F linear = new DenseMatrix64F(size, 1);
-      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+      DMatrixRMaj quadratic = new DMatrixRMaj(size, size);
+      DMatrixRMaj linear = new DMatrixRMaj(size, 1);
+      DMatrixRMaj scalar = new DMatrixRMaj(1, 1);
 
       ICPQPInput icpqpInput = new ICPQPInput(size);
       ICPQPInput other = new ICPQPInput(size);
@@ -136,11 +134,11 @@ public class ICPQPInputTest
    @Test
    public void testComputeCost()
    {
-      DenseMatrix64F quadratic = new DenseMatrix64F(2, 2);
-      DenseMatrix64F linear = new DenseMatrix64F(2, 1);
-      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+      DMatrixRMaj quadratic = new DMatrixRMaj(2, 2);
+      DMatrixRMaj linear = new DMatrixRMaj(2, 1);
+      DMatrixRMaj scalar = new DMatrixRMaj(1, 1);
 
-      DenseMatrix64F solution = new DenseMatrix64F(2, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(2, 1);
 
       ICPQPInput icpqpInput = new ICPQPInput(2);
 

@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
@@ -36,9 +36,13 @@ public class FootstepPlanGraphic extends Group
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;
    private Material material;
+   private SideDependentList<Color> footstepColors = new SideDependentList<>();
 
    public FootstepPlanGraphic(DRCRobotModel robotModel)
    {
+      footstepColors.set(RobotSide.LEFT, Color.RED);
+      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
+
       for(RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
@@ -50,6 +54,12 @@ public class FootstepPlanGraphic extends Group
       getChildren().addAll(meshView);
 
       animationTimer.start();
+   }
+
+   public void setTransparency(double opacity)
+   {
+      footstepColors.set(RobotSide.LEFT, new Color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue(), opacity));
+      footstepColors.set(RobotSide.RIGHT, new Color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), opacity));
    }
 
    /**
@@ -76,22 +86,21 @@ public class FootstepPlanGraphic extends Group
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         plan.getFootstep(i).setFoothold(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
-      }
+         PlannedFootstep footstep = plan.getFootstep(i);
+         Color regionColor = footstepColors.get(footstep.getRobotSide());
 
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
-      {
-         SimpleFootstep footstep = plan.getFootstep(i);
-         Color regionColor = footstep.getRobotSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
-
-         footstep.getSoleFramePose(footPose);
+         footstep.getFootstepPose(footPose);
          footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if (footstep.hasFoothold())
-            footstep.getFoothold(foothold);
+         {
+            foothold.set(footstep.getFoothold());
+         }
          else
+         {
             foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+         }
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)

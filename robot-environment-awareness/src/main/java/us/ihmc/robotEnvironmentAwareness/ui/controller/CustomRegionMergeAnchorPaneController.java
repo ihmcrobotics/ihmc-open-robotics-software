@@ -4,7 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.StringConverterTools;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.CustomRegionMergeParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.PlanarRegionSegmentationParametersProperty;
 
@@ -33,28 +35,53 @@ public class CustomRegionMergeAnchorPaneController extends REABasicUIController
       maxAngleFromPlaneSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
    }
 
+   private Topic<Boolean> customRegionsMergingEnableTopic = REAModuleAPI.CustomRegionsMergingEnable;
+   private Topic<Boolean> customRegionsClearTopic = REAModuleAPI.CustomRegionsClear;
+   private Topic<Boolean> saveRegionUpdaterConfigurationTopic = REAModuleAPI.SaveRegionUpdaterConfiguration;
+   private Topic<CustomRegionMergeParameters> customRegionsMergingParametersTopic = REAModuleAPI.CustomRegionsMergingParameters;
+
+   public void setCustomRegionsMergingEnableTopic(Topic<Boolean> customRegionsMergingEnableTopic)
+   {
+      this.customRegionsMergingEnableTopic = customRegionsMergingEnableTopic;
+   }
+
+   public void setCustomRegionsClearTopic(Topic<Boolean> customRegionsClearTopic)
+   {
+      this.customRegionsClearTopic = customRegionsClearTopic;
+   }
+
+   public void setSaveRegionUpdaterConfigurationTopic(Topic<Boolean> saveRegionUpdaterConfigurationTopic)
+   {
+      this.saveRegionUpdaterConfigurationTopic = saveRegionUpdaterConfigurationTopic;
+   }
+
+   public void setCustomRegionsMergingParametersTopic(Topic<CustomRegionMergeParameters> customRegionsMergingParametersTopic)
+   {
+      this.customRegionsMergingParametersTopic = customRegionsMergingParametersTopic;
+   }
+
    @Override
    public void bindControls()
    {
       setupControls();
 
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.CustomRegionsMergingEnable, enableMergeButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(customRegionsMergingEnableTopic, enableMergeButton.selectedProperty());
 
       customRegionMergingParametersProperty.bindBidirectionalSearchRadius(maxDistanceInPlaneSlider.valueProperty());
       customRegionMergingParametersProperty.bindBidirectionalMaxDistanceFromPlane(maxDistanceFromPlaneSlider.valueProperty());
       customRegionMergingParametersProperty.bindBidirectionalMaxAngleFromPlane(maxAngleFromPlaneSlider.valueProperty());
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.CustomRegionsMergingParameters, customRegionMergingParametersProperty);
+      uiMessager.bindBidirectionalGlobal(customRegionsMergingParametersTopic, customRegionMergingParametersProperty);
    }
 
    @FXML
    public void save()
    {
-      uiMessager.submitStateRequestToModule(REAModuleAPI.SaveRegionUpdaterConfiguration);
+      uiMessager.submitStateRequestToModule(saveRegionUpdaterConfigurationTopic);
    }
 
    @FXML
    public void clear()
    {
-      uiMessager.submitMessageToModule(REAModuleAPI.CustomRegionsClear, true);
+      uiMessager.submitMessageToModule(customRegionsClearTopic, true);
    }
 }

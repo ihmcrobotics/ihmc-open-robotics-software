@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +19,7 @@ public class PointJacobian
 {
    private GeometricJacobian geometricJacobian;
    private final FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final DenseMatrix64F jacobianMatrix = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(1, 1);
 
    // temp stuff
    private final Vector3D tempJacobianColumn = new Vector3D();
@@ -49,7 +49,7 @@ public class PointJacobian
 
       for (int i = 0; i < geometricJacobian.getNumberOfColumns(); i++)
       {
-         DenseMatrix64F geometricJacobianMatrix = geometricJacobian.getJacobianMatrix();
+         DMatrixRMaj geometricJacobianMatrix = geometricJacobian.getJacobianMatrix();
 
          // angular part:
          tempVector.set(angularPartStartRow, i, geometricJacobianMatrix);
@@ -67,7 +67,7 @@ public class PointJacobian
       return geometricJacobian.getBaseFrame();
    }
 
-   public DenseMatrix64F getJacobianMatrix()
+   public DMatrixRMaj getJacobianMatrix()
    {
       return jacobianMatrix;
    }

@@ -23,7 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneCo
 import us.ihmc.robotEnvironmentAwareness.ui.controller.DataImporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class LidarImageFusionProcessorUI
 {
@@ -50,7 +50,7 @@ public class LidarImageFusionProcessorUI
 
    @FXML private DataImporterAnchorPaneController dataImporterAnchorPaneController;
 
-   private LidarImageFusionProcessorUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
+   private LidarImageFusionProcessorUI(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
    {
       this.messager = messager;
       this.primaryStage = primaryStage;
@@ -82,7 +82,7 @@ public class LidarImageFusionProcessorUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   public static LidarImageFusionProcessorUI creatIntraprocessUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, Stage primaryStage) throws Exception
+   public static LidarImageFusionProcessorUI creatIntraprocessUI(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager, Stage primaryStage) throws Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());

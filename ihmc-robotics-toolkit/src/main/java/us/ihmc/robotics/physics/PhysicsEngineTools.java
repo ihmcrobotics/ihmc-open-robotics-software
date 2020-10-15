@@ -30,6 +30,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 
 public class PhysicsEngineTools
 {
@@ -234,5 +235,20 @@ public class PhysicsEngineTools
                                                   EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       new FrameExpandingPolytopeAlgorithm().evaluateCollision(shapeA, shapeB, resultToPack);
+   }
+
+   public static int computeCollisionHashCode(Collidable collidableA, Collidable collidableB)
+   {
+      int collidableAID = collidableA.hashCode();
+      int collidableBID = collidableB.hashCode();
+      if (collidableAID > collidableBID)
+         return EuclidHashCodeTools.toIntHashCode(EuclidHashCodeTools.combineHashCode(collidableAID, collidableBID));
+      else
+         return EuclidHashCodeTools.toIntHashCode(EuclidHashCodeTools.combineHashCode(collidableBID, collidableAID));
+   }
+
+   public static String collidableSimpleName(Collidable collidable)
+   {
+      return collidable.getRigidBody() != null ? collidable.getRigidBody().getName() : "static";
    }
 }

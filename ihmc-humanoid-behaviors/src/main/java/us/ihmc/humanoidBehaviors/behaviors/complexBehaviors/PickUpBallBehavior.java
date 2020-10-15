@@ -43,7 +43,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -80,7 +80,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ReferenceFrame chestCoMFrame;
    private final ReferenceFrame pelvisZUpFrame;
 
-   public PickUpBallBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+   public PickUpBallBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
                              HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
                              FullHumanoidRobotModelFactory robotModelFactory)
    {
@@ -142,7 +142,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       for (AbstractBehavior behavior : behaviors)
       {
-         registry.addChild(behavior.getYoVariableRegistry());
+         registry.addChild(behavior.getYoRegistry());
       }
    }
 

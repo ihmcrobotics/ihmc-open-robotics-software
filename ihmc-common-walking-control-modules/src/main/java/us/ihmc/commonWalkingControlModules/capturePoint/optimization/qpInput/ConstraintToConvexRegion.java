@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class ConstraintToConvexRegion extends ICPInequalityInput
 {
    /** position offset of the constrained variable. */
-   public final DenseMatrix64F positionOffset;
+   public final DMatrixRMaj positionOffset;
 
    /** distance inside the convex region required for the constrained variable. */
    private double deltaInside = 0.0;
@@ -49,7 +49,7 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
       super(maximumNumberOfVertices, maximumNumberOfVertices);
-      positionOffset = new DenseMatrix64F(2, 1);
+      positionOffset = new DMatrixRMaj(2, 1);
    }
 
    /**
@@ -144,7 +144,7 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
     * modification.
     * @param offset offset from the constrained variable.
     */
-   public void setPositionOffset(DenseMatrix64F offset)
+   public void setPositionOffset(DMatrixRMaj offset)
    {
       MatrixTools.setMatrixBlock(positionOffset, 0, 0, offset, 0, 0, 2, 1, 1.0);
    }
@@ -168,7 +168,7 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
    {
       scaler.scaleConvexPolygon(convexPolygon, deltaInside, scaledConvexPolygon);
       PolygonWiggler.convertToInequalityConstraints(scaledConvexPolygon, Aineq, bineq, 0.0);
-      CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
+      CommonOps_DDRM.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 
    /**

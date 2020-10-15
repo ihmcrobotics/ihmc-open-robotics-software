@@ -46,4 +46,11 @@ public class VisibilityGraphsParametersUIController
    {
       planningParameters.save();
    }
+
+   @FXML
+   public void loadFile()
+   {
+      tableViewWrapper.loadNewFile();
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, planningParameters);
+   }
 }

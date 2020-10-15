@@ -1,8 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 
@@ -22,20 +22,20 @@ public class LyapunovSolverTest
       for (int iter = 0; iter < iters; iter++)
       {
          int size = RandomNumbers.nextInt(random, 1, 10);
-         DenseMatrix64F A = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
-         DenseMatrix64F Q = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
-         DenseMatrix64F AOriginal = new DenseMatrix64F(A);
-         DenseMatrix64F QOriginal = new DenseMatrix64F(Q);
+         DMatrixRMaj A = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
+         DMatrixRMaj Q = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
+         DMatrixRMaj AOriginal = new DMatrixRMaj(A);
+         DMatrixRMaj QOriginal = new DMatrixRMaj(Q);
 
          solver.setMatrices(A, Q);
          solver.solve();
 
-         DenseMatrix64F X = solver.getX();
+         DMatrixRMaj X = solver.getX();
 
-         DenseMatrix64F constructedQ = new DenseMatrix64F(size, size);
-         CommonOps.multTransA(A, X, constructedQ);
-         CommonOps.multAdd(X, A, constructedQ);
-         CommonOps.scale(-1.0, constructedQ);
+         DMatrixRMaj constructedQ = new DMatrixRMaj(size, size);
+         CommonOps_DDRM.multTransA(A, X, constructedQ);
+         CommonOps_DDRM.multAdd(X, A, constructedQ);
+         CommonOps_DDRM.scale(-1.0, constructedQ);
 
          EjmlUnitTests.assertEquals(AOriginal, A, epsilon);
          EjmlUnitTests.assertEquals(QOriginal, Q, epsilon);

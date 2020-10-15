@@ -8,13 +8,13 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProvider
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrupedWaypointBasedBodyPathProvider waypointBasedPath;
    private final QuadrupedConstantVelocityBodyPathProvider joystickBasedPath;
@@ -23,7 +23,7 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
 
    public QuadrupedBodyPathMultiplexer(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
                                        QuadrupedXGaitSettingsReadOnly xGaitSettings, DoubleProvider firstStepDelay,
-                                       YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                       YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
       joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, firstStepDelay, timestamp, registry, graphicsListRegistry);

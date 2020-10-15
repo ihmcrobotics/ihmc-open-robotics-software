@@ -4,16 +4,20 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.valkyrie.ValkyrieCollisionBasedSelectionModel;
 import us.ihmc.wholeBodyController.UIParameters;
 
 public class ValkyrieUIParameters implements UIParameters
 {
    private final ValkyriePhysicalProperties physicalProperties;
+   private final ValkyrieJointMap jointMap;
 
-   public ValkyrieUIParameters(ValkyriePhysicalProperties physicalProperties)
+   public ValkyrieUIParameters(ValkyriePhysicalProperties physicalProperties, ValkyrieJointMap jointMap)
    {
       this.physicalProperties = physicalProperties;
+      this.jointMap = jointMap;
    }
 
    @Override
@@ -90,5 +94,11 @@ public class ValkyrieUIParameters implements UIParameters
 
       Quaternion centerOfHandToWristRotation = new Quaternion(angles);
       return new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation);
+   }
+
+   @Override
+   public RobotCollisionModel getSelectionModel()
+   {
+      return new ValkyrieCollisionBasedSelectionModel(jointMap);
    }
 }

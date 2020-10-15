@@ -3,8 +3,8 @@ package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.NormOps_DDRM;
 
 import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
@@ -23,7 +23,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxHelper
@@ -107,14 +106,14 @@ public class WholeBodyTrajectoryToolboxHelper
 
       FramePoint3D positionError = new FramePoint3D(ReferenceFrame.getWorldFrame(), expected.getPosition());
       positionError.changeFrame(solutionRigidBodyFrame);
-      DenseMatrix64F positionErrorQ = new DenseMatrix64F(3, 1);
+      DMatrixRMaj positionErrorQ = new DMatrixRMaj(3, 1);
       positionError.get(positionErrorQ);
 
       FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
       RotationVectorConversion.convertQuaternionToRotationVector(orientationError, rotationError);
-      DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationErrorQ = new DMatrixRMaj(3, 1);
       rotationError.get(rotationErrorQ);
 
       if (explorationMessage != null)
@@ -142,7 +141,7 @@ public class WholeBodyTrajectoryToolboxHelper
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
          rotationErrorQ.zero();
 
-      return NormOps.normP2(positionErrorQ);
+      return NormOps_DDRM.normP2(positionErrorQ);
    }
 
    public static double computeTrajectoryOrientationError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage,
@@ -153,14 +152,14 @@ public class WholeBodyTrajectoryToolboxHelper
 
       FramePoint3D positionError = new FramePoint3D(ReferenceFrame.getWorldFrame(), expected.getPosition());
       positionError.changeFrame(solutionRigidBodyFrame);
-      DenseMatrix64F positionErrorQ = new DenseMatrix64F(3, 1);
+      DMatrixRMaj positionErrorQ = new DMatrixRMaj(3, 1);
       positionError.get(positionErrorQ);
 
       FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
       RotationVectorConversion.convertQuaternionToRotationVector(orientationError, rotationError);
-      DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationErrorQ = new DMatrixRMaj(3, 1);
       rotationError.get(rotationErrorQ);
 
       if (explorationMessage != null)
@@ -188,6 +187,6 @@ public class WholeBodyTrajectoryToolboxHelper
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
          rotationErrorQ.zero();
 
-      return NormOps.normP2(rotationErrorQ);
+      return NormOps_DDRM.normP2(rotationErrorQ);
    }
 }

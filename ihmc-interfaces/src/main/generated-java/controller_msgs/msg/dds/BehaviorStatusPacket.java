@@ -7,33 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC humanoid behavior module.
-   
- */
+       * This message is part of the IHMC humanoid behavior module.
+       */
 public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implements Settable<BehaviorStatusPacket>, EpsilonComparable<BehaviorStatusPacket>
 {
-
    public static final byte NO_BEHAVIOR_RUNNING = (byte) 0;
-
    public static final byte BEHAVIOS_RUNNING = (byte) 1;
-
    public static final byte BEHAVIOR_PAUSED = (byte) 2;
-
+   public static final byte BEHAVIOR_FINISHED_FAILED = (byte) 3;
+   public static final byte BEHAVIOR_FINISHED_SUCCESS = (byte) 4;
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public byte current_behavior_status_ = (byte) 255;
+   /**
+            * Field default value 255
+            */
+   public byte humanoid_behavior_type_;
 
    public BehaviorStatusPacket()
    {
-
-
-
    }
 
    public BehaviorStatusPacket(BehaviorStatusPacket other)
@@ -44,34 +38,28 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
 
    public void set(BehaviorStatusPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       current_behavior_status_ = other.current_behavior_status_;
 
+      humanoid_behavior_type_ = other.humanoid_behavior_type_;
+
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
-
 
    public void setCurrentBehaviorStatus(byte current_behavior_status)
    {
@@ -80,6 +68,21 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
    public byte getCurrentBehaviorStatus()
    {
       return current_behavior_status_;
+   }
+
+   /**
+            * Field default value 255
+            */
+   public void setHumanoidBehaviorType(byte humanoid_behavior_type)
+   {
+      humanoid_behavior_type_ = humanoid_behavior_type;
+   }
+   /**
+            * Field default value 255
+            */
+   public byte getHumanoidBehaviorType()
+   {
+      return humanoid_behavior_type_;
    }
 
 
@@ -100,11 +103,11 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_behavior_status_, other.current_behavior_status_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_behavior_type_, other.humanoid_behavior_type_, epsilon)) return false;
 
 
       return true;
@@ -119,11 +122,11 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
 
       BehaviorStatusPacket otherMyClass = (BehaviorStatusPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.current_behavior_status_ != otherMyClass.current_behavior_status_) return false;
+
+      if(this.humanoid_behavior_type_ != otherMyClass.humanoid_behavior_type_) return false;
 
 
       return true;
@@ -135,12 +138,12 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorStatusPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("current_behavior_status=");
-      builder.append(this.current_behavior_status_);
+      builder.append(this.current_behavior_status_);      builder.append(", ");
+      builder.append("humanoid_behavior_type=");
+      builder.append(this.humanoid_behavior_type_);
       builder.append("}");
       return builder.toString();
    }

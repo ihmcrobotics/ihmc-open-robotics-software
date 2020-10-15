@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,12 +23,12 @@ public class AccelerationLimitedYoVariable extends YoDouble
 
    private final DoubleProvider inputVariable;
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration, double dt)
+   public AccelerationLimitedYoVariable(String name, YoRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration, double dt)
    {
       this(name, registry, maxRate, maxAcceleration, null, dt);
    }
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration,
+   public AccelerationLimitedYoVariable(String name, YoRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration,
                                         DoubleProvider inputVariable, double dt)
    {
       super(name, registry);

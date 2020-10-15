@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -14,14 +16,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DivergentComponentOfMotionController
 {
@@ -30,7 +30,7 @@ public class DivergentComponentOfMotionController
    private final double controlDT;
    private final FixedFramePoint3DBasics vrpPositionSetpoint;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final Vector2dZUpFrame dcmVelocityDirectionFrame = new Vector2dZUpFrame("dcmVelocityDirectionFrame", worldFrame);
    private final DoubleProvider maxVRPDistanceFromSupport = new DoubleParameter("maxVRPDistanceFromSupport", registry, Double.POSITIVE_INFINITY);
@@ -59,7 +59,7 @@ public class DivergentComponentOfMotionController
    private final FrameConvexPolygon2DReadOnly supportPolygonInMidZUpFrame;
    private final FrameConvexPolygon2D scaledPolygon;
 
-   public DivergentComponentOfMotionController(QuadrupedSupportPolygons supportPolygons, ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry)
+   public DivergentComponentOfMotionController(QuadrupedSupportPolygons supportPolygons, ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel, YoRegistry parentRegistry)
    {
       this.comZUpFrame = comZUpFrame;
       this.controlDT = controlDT;

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.Alph
 
 public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ReferenceFrame referenceFrame;
    private final YoDouble time;
    private final YoDouble maxVel;
@@ -19,9 +19,9 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
 
 
    public StraightLineCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double maxVel, double maxAccel, YoDouble time,
-           YoVariableRegistry parentRegistry)
+           YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + "StraightLineCartesianTrajectoryGenerator");
+      this.registry = new YoRegistry(namePrefix + "StraightLineCartesianTrajectoryGenerator");
       this.maxVel =  new YoDouble("straightLineTrajMaxVel", registry);
       this.maxAccel = new YoDouble("straightLineTrajMaxAccel", registry);
       

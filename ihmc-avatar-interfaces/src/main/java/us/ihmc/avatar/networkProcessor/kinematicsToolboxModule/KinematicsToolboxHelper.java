@@ -2,12 +2,10 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
@@ -20,8 +18,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -56,7 +54,7 @@ public class KinematicsToolboxHelper
    }
 
    static void consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains,
-                                                  CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
+                                          CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setGains(gains);
       feedbackControlCommandToPack.setWeightsForSolver(command.getWeightVector());
@@ -91,9 +89,10 @@ public class KinematicsToolboxHelper
       feedbackControlCommandToPack.setControlFrameFixedInEndEffector(command.getControlFramePose());
    }
 
-   public static void consumeJointCommand(KinematicsToolboxOneDoFJointCommand command, OneDoFJointBasics joint, PIDGainsReadOnly gains, OneDoFJointFeedbackControlCommand feedbackControlCommandToPack)
+   public static void consumeJointCommand(KinematicsToolboxOneDoFJointCommand command, PIDGainsReadOnly gains,
+                                          OneDoFJointFeedbackControlCommand feedbackControlCommandToPack)
    {
-      feedbackControlCommandToPack.setJoint(joint);
+      feedbackControlCommandToPack.setJoint(command.getJoint());
       feedbackControlCommandToPack.setGains(gains);
       feedbackControlCommandToPack.setWeightForSolver(command.getWeight());
       feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), 0.0);
@@ -166,7 +165,7 @@ public class KinematicsToolboxHelper
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-         rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          rootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -184,7 +183,7 @@ public class KinematicsToolboxHelper
       if (desiredRootJoint != null)
       {
          desiredRootJoint.getJointPose().set(pelvisPose);
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -192,7 +191,7 @@ public class KinematicsToolboxHelper
 
    /**
     * Convenience method that updates the robot configuration from the privileged configuration
-    * contained in the {@link KinematicsToolboxConfigurationCommand} provided by the user.
+    * contained in the {@link KinematicsToolboxPrivilegedConfigurationCommand} provided by the user.
     * <p>
     * This method performs the update only if the given command has a privileged configuration.
     * </p>
@@ -203,22 +202,21 @@ public class KinematicsToolboxHelper
     * @param commandWithPrivilegedConfiguration command possibly holding a privileged configuration
     *                                           from which the robot configuration is to be extracted.
     *                                           Not modified.
-    * @param rootJoint                          the floating joint to update. Modified.
-    * @param oneDoFJoints                       the one degree-of-freedom joints to update. Modified.
+    * @param desiredRootJoint                   the floating joint to update. Modified.
     */
-   static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                            FloatingJointBasics desiredRootJoint, TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap)
+   static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxPrivilegedConfigurationCommand commandWithPrivilegedConfiguration,
+                                                            FloatingJointBasics desiredRootJoint)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
       if (hasPrivilegedJointAngles)
       {
-         TIntArrayList jointHashCodes = commandWithPrivilegedConfiguration.getJointHashCodes();
+         List<OneDoFJointBasics> joints = commandWithPrivilegedConfiguration.getJoints();
          TFloatArrayList privilegedJointAngles = commandWithPrivilegedConfiguration.getPrivilegedJointAngles();
 
          for (int i = 0; i < privilegedJointAngles.size(); i++)
          {
-            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCodes.get(i));
+            OneDoFJointBasics joint = joints.get(i);
             joint.setQ(privilegedJointAngles.get(i));
             joint.setQd(0.0);
          }
@@ -229,7 +227,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointPosition)
       {
          desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       }
 
       boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
@@ -237,7 +235,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointOrientation)
       {
          desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       }
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();

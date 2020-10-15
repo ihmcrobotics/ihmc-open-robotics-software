@@ -7,35 +7,23 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * The controller will send this message when detecting a fall.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * The controller will send this message when detecting a fall.
+       */
 public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage> implements Settable<WalkingControllerFailureStatusMessage>, EpsilonComparable<WalkingControllerFailureStatusMessage>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    /**
-       
-    * Specifies the estimated falling direction in 2D
-       
-    */
+            * Specifies the estimated falling direction in 2D
+            */
    public us.ihmc.euclid.tuple3D.Vector3D falling_direction_;
 
    public WalkingControllerFailureStatusMessage()
    {
-
-
       falling_direction_ = new us.ihmc.euclid.tuple3D.Vector3D();
-
    }
 
    public WalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage other)
@@ -46,40 +34,30 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
    public void set(WalkingControllerFailureStatusMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.falling_direction_, falling_direction_);
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
 
-
    /**
-       
-    * Specifies the estimated falling direction in 2D
-       
-    */
+            * Specifies the estimated falling direction in 2D
+            */
    public us.ihmc.euclid.tuple3D.Vector3D getFallingDirection()
    {
       return falling_direction_;
@@ -103,9 +81,7 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!this.falling_direction_.epsilonEquals(other.falling_direction_, epsilon)) return false;
 
@@ -121,9 +97,7 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
       WalkingControllerFailureStatusMessage otherMyClass = (WalkingControllerFailureStatusMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if (!this.falling_direction_.equals(otherMyClass.falling_direction_)) return false;
 
@@ -136,10 +110,8 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkingControllerFailureStatusMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("falling_direction=");
       builder.append(this.falling_direction_);
       builder.append("}");

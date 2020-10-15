@@ -34,6 +34,7 @@ public class JointAccelerationIntegrationCommand
       implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>, VirtualModelControlCommand<JointAccelerationIntegrationCommand>
 {
    private static final int initialCapacity = 15;
+   private int commandId;
    private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                        JointAccelerationIntegrationParameters.class);
@@ -55,6 +56,7 @@ public class JointAccelerationIntegrationCommand
     */
    public void clear()
    {
+      commandId = 0;
       jointsToComputeDesiredPositionFor.clear();
       jointParameters.clear();
    }
@@ -147,6 +149,7 @@ public class JointAccelerationIntegrationCommand
    public void set(JointAccelerationIntegrationCommand other)
    {
       clear();
+      commandId = other.commandId;
       for (int i = 0; i < other.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
          jointsToComputeDesiredPositionFor.add(other.jointsToComputeDesiredPositionFor.get(i));
@@ -176,6 +179,18 @@ public class JointAccelerationIntegrationCommand
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -186,6 +201,8 @@ public class JointAccelerationIntegrationCommand
       {
          JointAccelerationIntegrationCommand other = (JointAccelerationIntegrationCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJointsToComputeDesiredPositionFor() != other.getNumberOfJointsToComputeDesiredPositionFor())
             return false;
 

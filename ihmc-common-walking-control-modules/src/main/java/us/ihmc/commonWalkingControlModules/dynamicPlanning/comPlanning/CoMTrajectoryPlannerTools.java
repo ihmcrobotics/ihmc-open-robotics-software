@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -125,8 +125,8 @@ public class CoMTrajectoryPlannerTools
     * @param centerOfMassLocationForConstraint x<sub>d</sub> in the above equations
     */
    public static void addCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint, double omega, double time, int sequenceId, int rowStart,
-                                               DenseMatrix64F constraintMatrixToPack, DenseMatrix64F xObjectiveMatrixToPack,
-                                               DenseMatrix64F yObjectiveMatrixToPack, DenseMatrix64F zObjectiveMatrixToPack)
+                                               DMatrixRMaj constraintMatrixToPack, DMatrixRMaj xObjectiveMatrixToPack,
+                                               DMatrixRMaj yObjectiveMatrixToPack, DMatrixRMaj zObjectiveMatrixToPack)
    {
       centerOfMassLocationForConstraint.checkReferenceFrameMatch(worldFrame);
 
@@ -169,8 +169,8 @@ public class CoMTrajectoryPlannerTools
     * @param desiredDCMPosition desired DCM location. &xi;<sub>d</sub> in the above equations.
     */
    public static void addDCMPositionConstraint(int sequenceId, int rowStart, double time, double omega, FramePoint3DReadOnly desiredDCMPosition,
-                                               DenseMatrix64F constraintMatrixToPack, DenseMatrix64F xObjectiveMatrixToPack,
-                                               DenseMatrix64F yObjectiveMatrixToPack, DenseMatrix64F zObjectiveMatrixToPack)
+                                               DMatrixRMaj constraintMatrixToPack, DMatrixRMaj xObjectiveMatrixToPack,
+                                               DMatrixRMaj yObjectiveMatrixToPack, DMatrixRMaj zObjectiveMatrixToPack)
    {
       desiredDCMPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -206,9 +206,9 @@ public class CoMTrajectoryPlannerTools
     * @param desiredVRPPosition reference VRP position, v<sub>r</sub> in the above equations.
     */
    public static void addVRPPositionConstraint(int sequenceId, int constraintNumber, int vrpWaypointPositionIndex, double time, double omega,
-                                               FramePoint3DReadOnly desiredVRPPosition, DenseMatrix64F constraintMatrixToPack,
-                                               DenseMatrix64F xObjectiveMatrixToPack, DenseMatrix64F yObjectiveMatrixToPack,
-                                               DenseMatrix64F zObjectiveMatrixToPack, DenseMatrix64F vrpWaypointJacobianToPack)
+                                               FramePoint3DReadOnly desiredVRPPosition, DMatrixRMaj constraintMatrixToPack,
+                                               DMatrixRMaj xObjectiveMatrixToPack, DMatrixRMaj yObjectiveMatrixToPack,
+                                               DMatrixRMaj zObjectiveMatrixToPack, DMatrixRMaj vrpWaypointJacobianToPack)
    {
       int startIndex = 6 * sequenceId;
 
@@ -245,9 +245,9 @@ public class CoMTrajectoryPlannerTools
     * @param desiredVRPVelocity reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
     */
    public static void addVRPVelocityConstraint(int sequenceId, int constraintRow, int vrpWaypointVelocityIndex, double omega, double time,
-                                               FrameVector3DReadOnly desiredVRPVelocity, DenseMatrix64F constraintMatrixToPack,
-                                               DenseMatrix64F xObjectiveMatrixToPack, DenseMatrix64F yObjectiveMatrixToPack,
-                                               DenseMatrix64F zObjectiveMatrixToPack, DenseMatrix64F vrpWaypointJacobianToPack)
+                                               FrameVector3DReadOnly desiredVRPVelocity, DMatrixRMaj constraintMatrixToPack,
+                                               DMatrixRMaj xObjectiveMatrixToPack, DMatrixRMaj yObjectiveMatrixToPack,
+                                               DMatrixRMaj zObjectiveMatrixToPack, DMatrixRMaj vrpWaypointJacobianToPack)
    {
       int startIndex = 6 * sequenceId;
 
@@ -283,7 +283,7 @@ public class CoMTrajectoryPlannerTools
     * @param nextSequence i in the above equations.
     */
    public static void addCoMPositionContinuityConstraint(int previousSequence, int nextSequence, int constraintRow, double omega, double previousDuration,
-                                                         DenseMatrix64F constraintMatrixToPack)
+                                                         DMatrixRMaj constraintMatrixToPack)
    {
       // move next sequence coefficients to the left hand side
       int previousStartIndex = 6 * previousSequence;
@@ -321,7 +321,7 @@ public class CoMTrajectoryPlannerTools
     * @param nextSequence i in the above equations.
     */
    public static void addCoMVelocityContinuityConstraint(int previousSequence, int nextSequence, int constraintRow, double omega, double previousDuration,
-                                                         DenseMatrix64F constraintMatrixToPack)
+                                                         DMatrixRMaj constraintMatrixToPack)
    {
       // move next sequence coefficients to the left hand side
       int previousStartIndex = 6 * previousSequence;
@@ -355,7 +355,7 @@ public class CoMTrajectoryPlannerTools
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
    public static void constrainCoMAccelerationToGravity(int sequenceId, int constraintRow, double omega, double time, double gravityZ,
-                                                        DenseMatrix64F constraintMatrixToPack, DenseMatrix64F zObjectiveMatrixToPack)
+                                                        DMatrixRMaj constraintMatrixToPack, DMatrixRMaj zObjectiveMatrixToPack)
    {
       int startIndex = 6 * sequenceId;
 
@@ -382,7 +382,7 @@ public class CoMTrajectoryPlannerTools
     * @param sequenceId segment of interest, i in the above equations.
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
-   public static void constrainCoMJerkToZero(double time, double omega, int sequenceId, int rowStart, DenseMatrix64F matrixToPack)
+   public static void constrainCoMJerkToZero(double time, double omega, int sequenceId, int rowStart, DMatrixRMaj matrixToPack)
    {
       time = Math.min(time, sufficientlyLongTime);
 

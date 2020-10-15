@@ -3,6 +3,7 @@ package us.ihmc.simulationToolkit.visualizers;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -18,16 +19,9 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurningThenStraightFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.*;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,14 +30,16 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FootstepVisualizer
 {
    private static boolean AUTO_CLOSE_SCS_FOR_TESTING = false;
    final static boolean DEBUG = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FootstepVisualizer");
+   private final YoRegistry registry = new YoRegistry("FootstepVisualizer");
    private final SimulationConstructionSet scs;
    private final Robot nullRobot;
    
@@ -68,7 +64,7 @@ public class FootstepVisualizer
       
       if (groundProfile != null)
       {
-         GroundContactModel gcModel = new LinearGroundContactModel(nullRobot, nullRobot.getRobotsYoVariableRegistry());
+         GroundContactModel gcModel = new LinearGroundContactModel(nullRobot, nullRobot.getRobotsYoRegistry());
          gcModel.setGroundProfile3D(groundProfile);
          nullRobot.setGroundContactModel(gcModel);
       }
@@ -95,7 +91,7 @@ public class FootstepVisualizer
    {
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setupGraphGroup("step times", new String[][]
       {
          {"t"}
@@ -151,7 +147,7 @@ public class FootstepVisualizer
    private static void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
    {
       scs.gotoInPointNow();
-      scs.tick(1);
+      scs.tickAndReadFromBuffer(1);
       scs.setInPoint();
       scs.cropBuffer();
       scs.gotoOutPointNow();

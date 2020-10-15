@@ -26,8 +26,7 @@ public class PlannerParametersUIController
    @FXML private Spinner<Double> minStepWidth;
    @FXML private Spinner<Double> minStepYaw;
    @FXML private Spinner<Double> minSurfaceIncline;
-   @FXML private Spinner<Double> minXClearance;
-   @FXML private Spinner<Double> minYClearance;
+   @FXML private Spinner<Double> minClearance;
    @FXML private Spinner<Double> wiggleInsideDelta;
    @FXML private Spinner<Double> stepUpHeight      ;
    @FXML private Spinner<Double> stepDownHeight    ;
@@ -54,7 +53,7 @@ public class PlannerParametersUIController
       maxStepLength       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReach()                , 0.05   ));
       maxStepWidth        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepWidth()                , 0.05   ));
       maxStepYaw          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepYaw()                  , 0.05   ));
-      maxStepZ            .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZ()                    , 0.05   ));
+      maxStepZ            .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaxStepZ()                        , 0.05   ));
       maxXYWiggle         .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumXYWiggleDistance()         , 0.05   ));
       maxYawWiggle        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumYawWiggle()                , 0.05   ));
       minFootholdPercent  .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumFootholdPercent()          , 0.05   ));
@@ -62,9 +61,8 @@ public class PlannerParametersUIController
       minStepWidth        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumStepWidth()                , 0.05   ));
       minStepYaw          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumStepYaw()                  , 0.05   ));
       minSurfaceIncline   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumSurfaceInclineRadians()    , 0.05   ));
-      minXClearance       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinXClearanceFromStance()         , 0.05   ));
-      minYClearance       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinYClearanceFromStance()         , 0.05   ));
-      wiggleInsideDelta   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getWiggleInsideDelta()               , 0.05   ));
+      minClearance        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinClearanceFromStance()          , 0.05   ));
+      wiggleInsideDelta   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   , 10.0   , footstepPlannerParameters.getWiggleInsideDeltaTarget()               , 0.05   ));
       stepUpHeight        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenSteppingUp()      , 0.05   ));
       stepDownHeight      .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenForwardAndDown()  , 0.05   ));
       maxStepUpX          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReachWhenSteppingUp()  , 0.05   ));
@@ -90,8 +88,7 @@ public class PlannerParametersUIController
       minStepWidth.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       minStepYaw.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       minSurfaceIncline.getValueFactory().valueProperty().addListener(observable -> publishParameters());
-      minXClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
-      minYClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       wiggleInsideDelta.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       stepUpHeight  .getValueFactory().valueProperty().addListener(observable -> publishParameters());
       stepDownHeight.getValueFactory().valueProperty().addListener(observable -> publishParameters());
@@ -121,8 +118,7 @@ public class PlannerParametersUIController
       tunedFootstepPlannerParameters.setMinStepWidth                     ( minStepWidth         .getValue());
       tunedFootstepPlannerParameters.setMinStepYaw                       ( minStepYaw           .getValue());
       tunedFootstepPlannerParameters.setMinSurfaceIncline                ( minSurfaceIncline    .getValue());
-      tunedFootstepPlannerParameters.setMinXClearance                    ( minXClearance        .getValue());
-      tunedFootstepPlannerParameters.setMinYClearance                    ( minYClearance        .getValue());
+      tunedFootstepPlannerParameters.setMinClearance                     ( minClearance         .getValue());
       tunedFootstepPlannerParameters.setWiggleInsideDelta                ( wiggleInsideDelta    .getValue());
       tunedFootstepPlannerParameters.setStepUpHeight                     ( stepUpHeight         .getValue());
       tunedFootstepPlannerParameters.setStepDownHeight                   ( stepDownHeight       .getValue());

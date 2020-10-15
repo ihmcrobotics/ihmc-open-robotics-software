@@ -14,6 +14,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -160,7 +162,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    private final Point3D intersectionToIgnore = new Point3D();
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       checkIfInside(x, y, heightAt, intersectionToIgnore, normalToPack);
@@ -248,7 +250,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    //   private void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersectionToPack, Vector3d normalToPack)
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       // FIXME It doesn't work if one of the face have Area = 0
       Point3D pointToCheck = new Point3D(x, y, z);

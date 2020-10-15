@@ -3,16 +3,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -27,7 +26,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -94,7 +92,9 @@ public class WalkingControllerState extends HighLevelControllerState
       {
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
       }
-      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
+      FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
+      // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
+      template.setAllowDynamicControllerConstruction(false);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
@@ -113,7 +113,7 @@ public class WalkingControllerState extends HighLevelControllerState
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry);
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
-      linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionStepConstraintHandler());
+      linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }

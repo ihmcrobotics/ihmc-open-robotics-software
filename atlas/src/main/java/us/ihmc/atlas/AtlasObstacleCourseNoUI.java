@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -11,7 +11,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAva
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class AtlasObstacleCourseNoUI
@@ -53,11 +53,11 @@ public class AtlasObstacleCourseNoUI
    private void printOutAllYoVariables(DRCSimulationStarter simulationStarter)
    {
       SimulationConstructionSet simulationConstructionSet = simulationStarter.getSimulationConstructionSet();
-      YoVariableRegistry rootRegistry = simulationConstructionSet.getRootRegistry();
+      YoRegistry rootRegistry = simulationConstructionSet.getRootRegistry();
 
-      ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.collectSubtreeVariables();
       System.out.println("Size = " + allVariablesIncludingDescendants.size());
-      for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
+      for (YoVariable yoVariable : allVariablesIncludingDescendants)
       {
          System.out.println(yoVariable.getName());
       }

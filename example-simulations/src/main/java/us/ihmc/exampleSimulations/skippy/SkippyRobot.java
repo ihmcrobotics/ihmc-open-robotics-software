@@ -116,7 +116,7 @@ public class SkippyRobot extends Robot
 
    private final KinematicPoint bodyPoint;
 
-   private final YoDouble yaw = new YoDouble("yaw", this.getRobotsYoVariableRegistry());
+   private final YoDouble yaw = new YoDouble("yaw", this.getRobotsYoRegistry());
 
    public static final double LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0 / 4.0) * LEG_MASS * Math.pow(LEG_LENGTH, 2), // Leg
          TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0 / 4.0) * TORSO_MASS * Math.pow(TORSO_LENGTH, 2), // Torso
@@ -135,7 +135,7 @@ public class SkippyRobot extends Robot
       super("Skippy");
       robotType = typeOfRobot;
 
-      t = (YoDouble)getVariable("t");
+      t = (YoDouble)findVariable("t");
 
       this.setGravity(0.0, 0.0, -9.81); // m/s^2
 
@@ -256,7 +256,7 @@ public class SkippyRobot extends Robot
 
       bodyZUpFrame = new TransformReferenceFrame("bodyFrame", ReferenceFrame.getWorldFrame());
 
-      GroundContactModel ground = new LinearGroundContactModel(this, 10000.0, 5000.0, 50.0, 5000.0, this.getRobotsYoVariableRegistry());//50.0, 5000.0, this.getRobotsYoVariableRegistry());
+      GroundContactModel ground = new LinearGroundContactModel(this, 10000.0, 5000.0, 50.0, 5000.0, this.getRobotsYoRegistry());//50.0, 5000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
       ground.setGroundProfile3D(profile);
       this.setGroundContactModel(ground);
@@ -466,7 +466,7 @@ public class SkippyRobot extends Robot
 
    public Point3D computeFootLocation()
    {
-      return footGroundContactPoint.getPositionPoint();
+      return footGroundContactPoint.getPositionCopy();
    }
 
    public void computeFootContactForce(Vector3DBasics tempForce){
@@ -479,7 +479,7 @@ public class SkippyRobot extends Robot
    {
       if (robotType == RobotType.TIPPY)
       {
-         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionPoint()));
+         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionCopy()));
       }
 
       else if (robotType == RobotType.SKIPPY)

@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.interpolators;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -25,28 +25,28 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    private final int maximumNumberOfPoints;
    private final int numberOfSplines;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoBoolean initialized;
    private final YoDouble currentTime;
 
    // Matrices used internally to calculate constants
-   private DenseMatrix64F h;
-   private DenseMatrix64F D;
-   private DenseMatrix64F C;
-   private DenseMatrix64F Cblock;
-   private DenseMatrix64F A;
-   private final LinearSolver<DenseMatrix64F> solver;
+   private DMatrixRMaj h;
+   private DMatrixRMaj D;
+   private DMatrixRMaj C;
+   private DMatrixRMaj Cblock;
+   private DMatrixRMaj A;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
-   private DenseMatrix64F sol;
-   private DenseMatrix64F s;
-   private DenseMatrix64F yd;
+   private DMatrixRMaj sol;
+   private DMatrixRMaj s;
+   private DMatrixRMaj yd;
 
-   private DenseMatrix64F a;
-   private DenseMatrix64F b;
-   private DenseMatrix64F c;
-   private DenseMatrix64F d;
-   private DenseMatrix64F e;
-   private DenseMatrix64F f;
+   private DMatrixRMaj a;
+   private DMatrixRMaj b;
+   private DMatrixRMaj c;
+   private DMatrixRMaj d;
+   private DMatrixRMaj e;
+   private DMatrixRMaj f;
 
    // Constants
    private final double[] x;
@@ -63,40 +63,40 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    /**
     * Create a new QuinticSplineInterpolator
     * 
-    * @param name                  Name of the YoVariableRegistry
+    * @param name                  Name of the YoRegistry
     * @param maximumNumberOfPoints Maximum number of points the spline can interpolate (>= 2)
     * @param numberOfSplines       Number of splines it creates that have the same x coordinates for
     *                              the points to interpolate. This allows re-use of memory and saves
     *                              some computational time.
     */
-   public QuinticSplineInterpolator(String name, int maximumNumberOfPoints, int numberOfSplines, YoVariableRegistry parentRegistry)
+   public QuinticSplineInterpolator(String name, int maximumNumberOfPoints, int numberOfSplines, YoRegistry parentRegistry)
    {
       this.maximumNumberOfPoints = maximumNumberOfPoints;
       this.numberOfSplines = numberOfSplines;
 
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       initialized = new YoBoolean(name + "_initialized", registry);
       initialized.set(false);
       numberOfPoints = new YoInteger(name + "_numberOfPoints", registry);
       currentTime = new YoDouble(name + "_currentTime", registry);
 
-      h = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      D = new DenseMatrix64F(maximumNumberOfPoints - 1, maximumNumberOfPoints + 2);
-      C = new DenseMatrix64F(maximumNumberOfPoints, maximumNumberOfPoints + 2);
-      Cblock = new DenseMatrix64F(maximumNumberOfPoints - 1, maximumNumberOfPoints + 2);
-      A = new DenseMatrix64F(maximumNumberOfPoints + 2, maximumNumberOfPoints + 2);
-      solver = LinearSolverFactory.linear(maximumNumberOfPoints + 2);
+      h = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      D = new DMatrixRMaj(maximumNumberOfPoints - 1, maximumNumberOfPoints + 2);
+      C = new DMatrixRMaj(maximumNumberOfPoints, maximumNumberOfPoints + 2);
+      Cblock = new DMatrixRMaj(maximumNumberOfPoints - 1, maximumNumberOfPoints + 2);
+      A = new DMatrixRMaj(maximumNumberOfPoints + 2, maximumNumberOfPoints + 2);
+      solver = LinearSolverFactory_DDRM.linear(maximumNumberOfPoints + 2);
 
-      s = new DenseMatrix64F(maximumNumberOfPoints + 2, 1);
-      sol = new DenseMatrix64F(maximumNumberOfPoints + 2, 1);
-      yd = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
+      s = new DMatrixRMaj(maximumNumberOfPoints + 2, 1);
+      sol = new DMatrixRMaj(maximumNumberOfPoints + 2, 1);
+      yd = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
 
-      a = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      b = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      c = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      d = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      e = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
-      f = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
+      a = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      b = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      c = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      d = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      e = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
+      f = new DMatrixRMaj(maximumNumberOfPoints - 1, 1);
 
       x = new double[maximumNumberOfPoints];
 
@@ -108,7 +108,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       splines = new QuinticSpline[numberOfSplines];
       for (int i = 0; i < numberOfSplines; i++)
       {
-         String eName = name + "[" + i + "]";
+         String eName = name + "-" + i;
          splines[i] = new QuinticSpline(eName, maximumNumberOfPoints, registry);
 
          position[i] = new YoDouble(eName + "_position", registry);
@@ -168,7 +168,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       MatrixTools.diff(timeIn, h);
 
-      // Build D DenseMatrix64F
+      // Build D DMatrixRMaj
       MatrixTools.setToZero(D);
       D.unsafe_set(0, 1, 1.0);
       for (int i = 1; i < numberOfPoints.getValue() - 1; i++)
@@ -178,7 +178,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          MatrixTools.addMatrixBlock(D, i, 0, D, i - 1, 0, 1, numberOfPoints.getValue() + 2, 1.0);
       }
 
-      // Build C DenseMatrix64F
+      // Build C DMatrixRMaj
       MatrixTools.setToZero(C);
       C.unsafe_set(0, 0, 1.0);
       for (int i = 1; i < numberOfPoints.getValue(); i++)
@@ -190,7 +190,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       }
       MatrixTools.setMatrixBlock(Cblock, 0, 0, C, 0, 0, numberOfPoints.getValue() - 1, numberOfPoints.getValue() + 2, 1.0);
 
-      // Build A DenseMatrix64F
+      // Build A DMatrixRMaj
       MatrixTools.setToZero(A);
       for (int i = 0; i < numberOfPoints.getValue() - 2; i++)
       {
@@ -300,14 +300,14 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       solver.solve(s, sol);
 
-      CommonOps.mult(Cblock, sol, c);
-      CommonOps.mult(D, sol, d);
+      CommonOps_DDRM.mult(Cblock, sol, c);
+      CommonOps_DDRM.mult(D, sol, d);
 
       MatrixTools.setMatrixBlock(e, 0, 0, sol, 2, 0, numberOfPoints.getValue() - 1, 1, 1.0);
 
       MatrixTools.diff(sol, 2, numberOfPoints.getValue(), f);
-      CommonOps.scale(1.0 / 5.0, f);
-      CommonOps.elementDiv(f, h);
+      CommonOps_DDRM.scale(1.0 / 5.0, f);
+      CommonOps_DDRM.elementDiv(f, h);
 
       for (int i = 0; i < numberOfPoints.getValue() - 1; i++)
       {
@@ -402,7 +402,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    private class QuinticSpline
    {
       private final int segments;
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
 
       private final double[] a;
       private final double[] b;
@@ -413,10 +413,10 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       private final YoBoolean coefficientsSet;
 
-      public QuinticSpline(String name, int pointsToInterpolate, YoVariableRegistry parentRegistry)
+      public QuinticSpline(String name, int pointsToInterpolate, YoRegistry parentRegistry)
       {
          this.segments = pointsToInterpolate - 1;
-         this.registry = new YoVariableRegistry(name);
+         this.registry = new YoRegistry(name);
          parentRegistry.addChild(this.registry);
          a = new double[segments];
          b = new double[segments];
@@ -429,7 +429,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          coefficientsSet.set(false);
       }
 
-      private void set(double[] var, DenseMatrix64F value)
+      private void set(double[] var, DMatrixRMaj value)
       {
          for (int i = 0; i < segments; i++)
          {
@@ -437,32 +437,32 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          }
       }
 
-      protected void seta(DenseMatrix64F value)
+      protected void seta(DMatrixRMaj value)
       {
          set(a, value);
       }
 
-      protected void setb(DenseMatrix64F value)
+      protected void setb(DMatrixRMaj value)
       {
          set(b, value);
       }
 
-      protected void setc(DenseMatrix64F value)
+      protected void setc(DMatrixRMaj value)
       {
          set(c, value);
       }
 
-      protected void setd(DenseMatrix64F value)
+      protected void setd(DMatrixRMaj value)
       {
          set(d, value);
       }
 
-      protected void sete(DenseMatrix64F value)
+      protected void sete(DMatrixRMaj value)
       {
          set(e, value);
       }
 
-      protected void setf(DenseMatrix64F value)
+      protected void setf(DMatrixRMaj value)
       {
          set(f, value);
       }

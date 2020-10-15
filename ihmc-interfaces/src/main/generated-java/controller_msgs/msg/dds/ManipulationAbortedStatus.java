@@ -7,26 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message is sent by the controller to notify the user that the current manipulation task has been aborted.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message is sent by the controller to notify the user that the current manipulation task has been aborted.
+       */
 public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus> implements Settable<ManipulationAbortedStatus>, EpsilonComparable<ManipulationAbortedStatus>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public ManipulationAbortedStatus()
    {
-
-
    }
 
    public ManipulationAbortedStatus(ManipulationAbortedStatus other)
@@ -37,26 +29,20 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
 
    public void set(ManipulationAbortedStatus other)
    {
-
       sequence_id_ = other.sequence_id_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -80,9 +66,7 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       return true;
    }
@@ -96,7 +80,6 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
 
       ManipulationAbortedStatus otherMyClass = (ManipulationAbortedStatus) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
@@ -109,7 +92,6 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ManipulationAbortedStatus {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);
       builder.append("}");

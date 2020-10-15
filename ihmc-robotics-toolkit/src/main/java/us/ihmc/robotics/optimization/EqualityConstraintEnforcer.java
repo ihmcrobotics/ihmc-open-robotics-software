@@ -1,9 +1,9 @@
 package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 /**
  * See IHMCUtilities/technicalDocuments/Equality Constrained Least Squares.lyx
@@ -12,26 +12,26 @@ import org.ejml.ops.MatrixFeatures;
  */
 public class EqualityConstraintEnforcer
 {
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
    // results
-   private final DenseMatrix64F q = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jPlusp = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F x = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj q = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj jPlusp = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj x = new DMatrixRMaj(1, 1);
 
    // temp stuff
-   private final DenseMatrix64F jPlus = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F aCopy = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F j = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F p = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F check = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj jPlus = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj aCopy = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj j = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj p = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj check = new DMatrixRMaj(1, 1);
 
-   public EqualityConstraintEnforcer(LinearSolver<DenseMatrix64F> solver)
+   public EqualityConstraintEnforcer(LinearSolverDense<DMatrixRMaj> solver)
    {
       this.solver = solver;
    }
 
-   public void setConstraint(DenseMatrix64F j, DenseMatrix64F p)
+   public void setConstraint(DMatrixRMaj j, DMatrixRMaj p)
    {
       this.j.set(j);
       this.p.set(p);
@@ -45,62 +45,62 @@ public class EqualityConstraintEnforcer
 
          // J^{+} * p
          jPlusp.reshape(jPlus.getNumRows(), p.getNumCols());
-         CommonOps.mult(jPlus, p, jPlusp);
+         CommonOps_DDRM.mult(jPlus, p, jPlusp);
 
          // Q
          q.reshape(jPlus.getNumRows(), j.getNumCols());
-         CommonOps.setIdentity(q);
-         CommonOps.multAdd(-1.0, jPlus, j, q);
+         CommonOps_DDRM.setIdentity(q);
+         CommonOps_DDRM.multAdd(-1.0, jPlus, j, q);
       }
       else
       {
          jPlus.reshape(j.getNumCols(), 0);
          q.reshape(j.getNumCols(), j.getNumCols());
-         CommonOps.setIdentity(q);
+         CommonOps_DDRM.setIdentity(q);
          jPlusp.reshape(j.getNumCols(), 1);
          jPlusp.zero();
       }
    }
    
-   public DenseMatrix64F checkJQEqualsZeroAfterSetConstraint()
+   public DMatrixRMaj checkJQEqualsZeroAfterSetConstraint()
    {
-      DenseMatrix64F checkJQEqualsZero = new DenseMatrix64F(this.j.getNumRows(), q.getNumCols());
-      CommonOps.mult(this.j, q, checkJQEqualsZero);
+      DMatrixRMaj checkJQEqualsZero = new DMatrixRMaj(this.j.getNumRows(), q.getNumCols());
+      CommonOps_DDRM.mult(this.j, q, checkJQEqualsZero);
       return checkJQEqualsZero;
    }
 
-   public void constrainEquation(DenseMatrix64F a, DenseMatrix64F b)
+   public void constrainEquation(DMatrixRMaj a, DMatrixRMaj b)
    {
       aCopy.set(a);
-      CommonOps.mult(aCopy, q, a);
+      CommonOps_DDRM.mult(aCopy, q, a);
 
-      CommonOps.multAdd(-1.0, aCopy, jPlusp, b);
+      CommonOps_DDRM.multAdd(-1.0, aCopy, jPlusp, b);
    }
 
-   public DenseMatrix64F constrainResult(DenseMatrix64F xBar)
+   public DMatrixRMaj constrainResult(DMatrixRMaj xBar)
    {
       x.reshape(xBar.getNumRows(), 1);
-      CommonOps.mult(q, xBar, x);
-      CommonOps.addEquals(x, jPlusp);
+      CommonOps_DDRM.mult(q, xBar, x);
+      CommonOps_DDRM.addEquals(x, jPlusp);
 
       return x;
    }
 
-   public DenseMatrix64F getConstraintPseudoInverse()
+   public DMatrixRMaj getConstraintPseudoInverse()
    {
       return jPlus;
    }
 
-   public boolean areConstraintsEnforcedSuccesfully(DenseMatrix64F x, DenseMatrix64F j, DenseMatrix64F p, double epsilon)
+   public boolean areConstraintsEnforcedSuccesfully(DMatrixRMaj x, DMatrixRMaj j, DMatrixRMaj p, double epsilon)
    {
       // This check is only valid if you use an 'exact' solver, not if you're using the damped least squares 'pseudoinverse'
 
       if (j.getNumRows() > 0)
       {
          check.reshape(p.getNumRows(), 1);
-         CommonOps.mult(j, x, check);
-         CommonOps.subtractEquals(check, p);
-         return MatrixFeatures.isConstantVal(check, 0.0, epsilon);
+         CommonOps_DDRM.mult(j, x, check);
+         CommonOps_DDRM.subtractEquals(check, p);
+         return MatrixFeatures_DDRM.isConstantVal(check, 0.0, epsilon);
       }
       return true;
    }

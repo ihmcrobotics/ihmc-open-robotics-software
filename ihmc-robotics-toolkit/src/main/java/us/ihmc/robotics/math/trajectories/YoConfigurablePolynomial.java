@@ -1,13 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import us.ihmc.commons.MathTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
-import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -15,7 +8,7 @@ public class YoConfigurablePolynomial extends YoPolynomial
 {
    private int numberOfConstraints = 0;
 
-   public YoConfigurablePolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoConfigurablePolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       super(name, maximumNumberOfCoefficients, registry);
    }

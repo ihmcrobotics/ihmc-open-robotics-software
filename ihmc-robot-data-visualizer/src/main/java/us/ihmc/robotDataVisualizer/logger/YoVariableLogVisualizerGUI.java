@@ -12,7 +12,7 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -97,7 +97,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
 
             if (multiPlayer != null)
-               multiPlayer.notifyOfIndexChange(0);
+               multiPlayer.indexChanged(0);
 
          }
 
@@ -214,14 +214,14 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
       for (YoGraph graph : gui.getGraphArrayPanel().getGraphsOnThisPanel())
       {
-         graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+         graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getVariableFullNameString()));
       }
 
       for (GraphArrayWindow graphArrayWindow : gui.getGraphArrayWindows())
       {
          for (YoGraph graph : graphArrayWindow.getGraphArrayPanel().getGraphsOnThisPanel())
          {
-            graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+            graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getVariableFullNameString()));
          }
       }
 
@@ -382,10 +382,10 @@ public class YoVariableLogVisualizerGUI extends JPanel
          }
       });
 
-      robot.addCurrentRecordTickListener(new VariableChangedListener()
+      robot.addCurrentRecordTickListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             synchronized (seekLock)
             {

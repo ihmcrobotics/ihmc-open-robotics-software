@@ -13,7 +13,7 @@ import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -64,10 +64,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final YoDouble weightForSolver;
 
    public OneDoFJointFeedbackController(OneDoFJointBasics joint, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       String jointName = joint.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(jointName + shortName);
+      YoRegistry registry = new YoRegistry(jointName + shortName);
 
       this.joint = joint;
       isEnabled = new YoBoolean("control_enabled_" + jointName, registry);

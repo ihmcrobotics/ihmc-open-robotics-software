@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__AtlasLowLevelControlModeMessage__idl__
 #define __controller_msgs__msg__AtlasLowLevelControlModeMessage__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,55 +7,26 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP =
-
+      const octet ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP =
       0;
 
-
-
-   
-   const octet ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE =
-
+      const octet ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE =
       1;
 
 
-
-   
-   /**
-   
-    * Atlas specific message.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::AtlasLowLevelControlModeMessage_")
+      /**
+       * Atlas specific message.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AtlasLowLevelControlModeMessage_")
       struct AtlasLowLevelControlModeMessage
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet requested_atlas_low_level_control_mode;
-
-
-
       };
-
     };
   };
 };

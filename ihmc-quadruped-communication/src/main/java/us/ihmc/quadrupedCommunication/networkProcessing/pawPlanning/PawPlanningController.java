@@ -1,6 +1,25 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.PawStepPlannerParametersPacket;
+import controller_msgs.msg.dds.PawStepPlanningRequestPacket;
+import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -12,37 +31,36 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.BodyPathAndPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStatus;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.VisibilityGraphWithAStarPawPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.YoPawStepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PawPlanningController extends QuadrupedToolboxController
 {
@@ -67,7 +85,7 @@ public class PawPlanningController extends QuadrupedToolboxController
    public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParametersBasics defaultVisibilityGraphParameters,
                                 PawStepPlannerParametersBasics pawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
-                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
+                                YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
@@ -96,7 +114,7 @@ public class PawPlanningController extends QuadrupedToolboxController
    }
 
 
-   public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   public void processGroundPlaneMessage(GroundPlaneMessage message)
    {
       for (PawStepPlannerType plannerKey : plannerMap.keySet())
       {

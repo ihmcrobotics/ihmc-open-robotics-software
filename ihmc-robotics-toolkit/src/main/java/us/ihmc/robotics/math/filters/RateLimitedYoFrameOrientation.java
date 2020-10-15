@@ -5,11 +5,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
 {
@@ -20,39 +20,39 @@ public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
    private final YoBoolean hasBeenCalled;
    private final double dt;
 
-   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                         YoFrameYawPitchRoll rawOrientation)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawOrientation, rawOrientation.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                         ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                         YoFrameYawPitchRoll rawOrientation)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawOrientation,
            rawOrientation.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                         ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   private RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                          YoFrameYawPitchRoll rawOrientation, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

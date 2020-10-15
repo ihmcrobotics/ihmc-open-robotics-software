@@ -1,19 +1,17 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -84,7 +82,7 @@ public abstract class MassMatrixCalculatorTest
       return ret;
    }
 
-   protected double computeKineticEnergy(ArrayList<RevoluteJoint> joints, DenseMatrix64F massMatrix)
+   protected double computeKineticEnergy(ArrayList<RevoluteJoint> joints, DMatrixRMaj massMatrix)
    {
       SimpleMatrix jointVelocities = new SimpleMatrix(joints.size(), 1);
       for (int i = 0; i < joints.size(); i++)
@@ -111,13 +109,13 @@ public abstract class MassMatrixCalculatorTest
          CompositeRigidBodyMassMatrixCalculator crbmmc = new CompositeRigidBodyMassMatrixCalculator(elevator);
 
          @Override
-         public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+         public void getMassMatrix(DMatrixRMaj massMatrixToPack)
          {
             massMatrixToPack.set(getMassMatrix());
          }
 
          @Override
-         public DenseMatrix64F getMassMatrix()
+         public DMatrixRMaj getMassMatrix()
          {
             return crbmmc.getMassMatrix();
          }
@@ -134,13 +132,13 @@ public abstract class MassMatrixCalculatorTest
             crbmmc.reset();
          }
       });
-      ArrayList<DenseMatrix64F> massMatrices = new ArrayList<DenseMatrix64F>();
+      ArrayList<DMatrixRMaj> massMatrices = new ArrayList<DMatrixRMaj>();
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       for (int i = 0; i < massMatrixCalculators.size(); i++)
       {
-         massMatrices.add(new DenseMatrix64F(nDoFs, nDoFs));
+         massMatrices.add(new DMatrixRMaj(nDoFs, nDoFs));
       }
-      DenseMatrix64F diffMassMatrix = new DenseMatrix64F(nDoFs, nDoFs);
+      DMatrixRMaj diffMassMatrix = new DMatrixRMaj(nDoFs, nDoFs);
 
       int nIterations = 10000;
       for (int i = 0; i < nIterations; i++)
@@ -157,7 +155,7 @@ public abstract class MassMatrixCalculatorTest
 
             if (j > 0)
             {
-               CommonOps.subtract(massMatrices.get(j), massMatrices.get(j - 1), diffMassMatrix);
+               CommonOps_DDRM.subtract(massMatrices.get(j), massMatrices.get(j - 1), diffMassMatrix);
 
                double[] data = diffMassMatrix.getData();
                for (int k = 0; k < data.length; k++)

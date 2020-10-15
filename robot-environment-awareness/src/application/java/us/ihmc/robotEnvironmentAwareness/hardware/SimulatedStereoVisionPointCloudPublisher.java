@@ -15,18 +15,17 @@ import javafx.stage.Stage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
+import us.ihmc.ros2.ROS2Node;
 
 public class SimulatedStereoVisionPointCloudPublisher extends Application
 {
    private static long DEFAULT_PUBLISHING_PERIOD_MS = 250;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
-   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                                    StereoVisionPointCloudMessage.class,
-                                                                                                                    ROS2Tools.getDefaultTopicNameGenerator());
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD);
 
    private int indexToPublish = 0;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();

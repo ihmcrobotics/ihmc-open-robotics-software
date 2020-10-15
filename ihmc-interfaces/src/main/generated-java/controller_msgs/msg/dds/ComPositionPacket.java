@@ -7,20 +7,15 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC quadruped controller API.
-   
- */
+       * This message is part of the IHMC quadruped controller API.
+       */
 public class ComPositionPacket extends Packet<ComPositionPacket> implements Settable<ComPositionPacket>, EpsilonComparable<ComPositionPacket>
 {
-
    public us.ihmc.euclid.tuple3D.Point3D position_;
 
    public ComPositionPacket()
    {
-
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
-
    }
 
    public ComPositionPacket(ComPositionPacket other)
@@ -31,10 +26,7 @@ public class ComPositionPacket extends Packet<ComPositionPacket> implements Sett
 
    public void set(ComPositionPacket other)
    {
-
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
-   }
-
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);   }
 
 
    public us.ihmc.euclid.tuple3D.Point3D getPosition()
@@ -60,7 +52,6 @@ public class ComPositionPacket extends Packet<ComPositionPacket> implements Sett
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
 
       return true;
@@ -75,7 +66,6 @@ public class ComPositionPacket extends Packet<ComPositionPacket> implements Sett
 
       ComPositionPacket otherMyClass = (ComPositionPacket) other;
 
-
       if (!this.position_.equals(otherMyClass.position_)) return false;
 
       return true;
@@ -87,7 +77,6 @@ public class ComPositionPacket extends Packet<ComPositionPacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("ComPositionPacket {");
-
       builder.append("position=");
       builder.append(this.position_);
       builder.append("}");

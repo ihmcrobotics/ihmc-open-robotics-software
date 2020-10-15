@@ -7,31 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       */
 public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> implements Settable<StateEstimatorModePacket>, EpsilonComparable<StateEstimatorModePacket>
 {
-
    public static final byte NORMAL = (byte) 0;
-
    public static final byte FROZEN = (byte) 1;
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public byte requested_state_estimator_mode_ = (byte) 255;
 
    public StateEstimatorModePacket()
    {
-
-
-
    }
 
    public StateEstimatorModePacket(StateEstimatorModePacket other)
@@ -42,34 +31,26 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
 
    public void set(StateEstimatorModePacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       requested_state_estimator_mode_ = other.requested_state_estimator_mode_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
-
 
    public void setRequestedStateEstimatorMode(byte requested_state_estimator_mode)
    {
@@ -98,9 +79,7 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_state_estimator_mode_, other.requested_state_estimator_mode_, epsilon)) return false;
 
@@ -117,9 +96,7 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
 
       StateEstimatorModePacket otherMyClass = (StateEstimatorModePacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.requested_state_estimator_mode_ != otherMyClass.requested_state_estimator_mode_) return false;
 
@@ -133,10 +110,8 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("StateEstimatorModePacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("requested_state_estimator_mode=");
       builder.append(this.requested_state_estimator_mode_);
       builder.append("}");

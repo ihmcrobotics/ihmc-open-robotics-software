@@ -14,11 +14,11 @@ import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * Time-based script to generate desired forward, lateral, and turning velocities for the
@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
  */
 public class HeadingAndVelocityEvaluationScript implements Updatable
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector2D desiredVelocity = new YoFrameVector2D("scriptedDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final RateLimitedYoFrameVector2d desiredVelocityRateLimited;
    private final YoDouble desiredTurningVelocity = new YoDouble("scriptedDesiredTurningVelocity", registry);
@@ -86,7 +86,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
     * @param parentRegistry registry to attach this script {@code YoVariable}s
     */
    public HeadingAndVelocityEvaluationScript(double controlDT, DoubleProvider timeProvider, HeadingAndVelocityEvaluationScriptParameters parameters,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 

@@ -2,6 +2,7 @@ package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.FrameBoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -52,6 +53,8 @@ public class Collidable
    private final RigidBodyBasics rootBody;
 
    private int collidableID = 0;
+
+   private FrameShapePosePredictor predictor;
 
    /**
     * Creates a new collidable that represents entirely or partially the geometry of the given
@@ -119,6 +122,11 @@ public class Collidable
       return true;
    }
 
+   public void setFrameShapePosePredictor(FrameShapePosePredictor predictor)
+   {
+      this.predictor = predictor;
+   }
+
    /**
     * Performs a collision evaluation between this collidable and {@code other} in order to calculate
     * their closest point, separating/penetration distance, etc.
@@ -145,6 +153,32 @@ public class Collidable
       PhysicsEngineTools.evaluateShape3DShape3DCollision(shape, other.shape, resultToPack.getCollisionData());
       resultToPack.setCollidableA(this);
       resultToPack.setCollidableB(other);
+   }
+
+   /**
+    * Performs a collision evaluation between this collidable and {@code other} in order to calculate
+    * their closest point, separating/penetration distance, etc.
+    * <p>
+    * Note that this method uses the predicted poses for each collidable one {@code dt} in the future.
+    * </p>
+    * 
+    * @param dt           the integration period to use when predicting the pose of each collidable.
+    * @param other        the query. Not modified.
+    * @param resultToPack where the result of the evaluation is stored. Modified.
+    */
+   public void evaluateCollision(double dt, Collidable other, CollisionResult resultToPack)
+   {
+      PhysicsEngineTools.evaluateShape3DShape3DCollision(predictShape(dt), other.predictShape(dt), resultToPack.getCollisionData());
+      resultToPack.setCollidableA(this);
+      resultToPack.setCollidableB(other);
+   }
+
+   private FrameShape3DReadOnly predictShape(double dt)
+   {
+      if (predictor == null)
+         return shape;
+
+      return predictor.predictShape(shape, rigidBody, dt);
    }
 
    /**
@@ -188,9 +222,19 @@ public class Collidable
       return shape;
    }
 
+   public FrameBoundingBox3DReadOnly getBoundingBox()
+   {
+      return boundingBox;
+   }
+
    public RigidBodyBasics getRootBody()
    {
       return rootBody;
+   }
+
+   public boolean isEnvironment()
+   {
+      return rigidBody == null;
    }
 
    @Override

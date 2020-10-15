@@ -8,24 +8,16 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  ids_;
-
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  positions_;
 
    public DetectedFacesPacket()
    {
-
-
       ids_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (100, "type_d");
-
       positions_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
@@ -38,42 +30,32 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
 
    public void set(DetectedFacesPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       ids_.set(other.ids_);
-
       positions_.set(other.positions_);
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
 
-
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getIds()
    {
       return ids_;
    }
-
 
 
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getPositions()
@@ -99,12 +81,9 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.ids_, other.ids_, epsilon)) return false;
-
 
       if (this.positions_.size() != other.positions_.size()) { return false; }
       else
@@ -126,12 +105,9 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
 
       DetectedFacesPacket otherMyClass = (DetectedFacesPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.ids_.equals(otherMyClass.ids_)) return false;
-
       if (!this.positions_.equals(otherMyClass.positions_)) return false;
 
       return true;
@@ -143,13 +119,10 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("DetectedFacesPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("ids=");
       builder.append(this.ids_);      builder.append(", ");
-
       builder.append("positions=");
       builder.append(this.positions_);
       builder.append("}");

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -15,15 +17,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.awt.*;
 
 /**
  * This class can detect if the foot is on partial support. The idea is to keep track of where the
@@ -59,9 +58,9 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final YoBoolean footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix, ContactablePlaneBody contactableFoot, ExplorationParameters explorationParameters,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                          YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       soleFrame = contactableFoot.getSoleFrame();

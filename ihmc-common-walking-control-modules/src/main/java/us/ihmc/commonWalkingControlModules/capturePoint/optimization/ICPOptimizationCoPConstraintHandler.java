@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPOptimizationCoPConstraintHandler
@@ -23,7 +23,7 @@ public class ICPOptimizationCoPConstraintHandler
                                               ICPControlPolygons icpControlPolygons,
                                               BooleanProvider useICPControlPolygons,
                                               boolean hasICPControlPolygons,
-                                              YoVariableRegistry parentRegistry)
+                                              YoRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.icpControlPolygons = icpControlPolygons;

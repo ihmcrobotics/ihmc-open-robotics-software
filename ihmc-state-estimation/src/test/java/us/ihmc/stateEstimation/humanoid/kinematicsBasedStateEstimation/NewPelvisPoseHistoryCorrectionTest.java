@@ -1,18 +1,17 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,14 +31,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class NewPelvisPoseHistoryCorrectionTest
 {
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
 
    SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -76,7 +75,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       setupRobot();
-      registry = robot.getRobotsYoVariableRegistry();
+      registry = robot.getRobotsYoRegistry();
       setupSim();
       setupCorrector();
       simulationConstructionSet.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -255,11 +254,11 @@ public class NewPelvisPoseHistoryCorrectionTest
    @Test
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
-      isRotationCorrectionEnabled = (YoBoolean) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
+      isRotationCorrectionEnabled = (YoBoolean) registry.findVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
       isRotationCorrectionEnabled.set(false);
-      maximumErrorTranslation = (YoDouble) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorTranslation");
+      maximumErrorTranslation = (YoDouble) registry.findVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorTranslation");
       maximumErrorTranslation.set(Double.MAX_VALUE);
-      maximumErrorAngleInDegrees = (YoDouble) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorAngleInDegrees");
+      maximumErrorAngleInDegrees = (YoDouble) registry.findVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorAngleInDegrees");
       maximumErrorAngleInDegrees.set(Double.MAX_VALUE);
 
       generatePelvisWayPoints();

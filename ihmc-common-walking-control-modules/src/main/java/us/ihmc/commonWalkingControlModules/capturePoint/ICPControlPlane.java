@@ -2,23 +2,24 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
 public class ICPControlPlane
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble controlPlaneHeight;
    private final ReferenceFrame centerOfMassFrame;
@@ -45,7 +46,7 @@ public class ICPControlPlane
 
    private final double gravityZ;
 
-   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
+   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.gravityZ = gravityZ;
@@ -100,6 +101,29 @@ public class ICPControlPlane
                                                             FramePoint3D projectionToPack,
                                                             PlanarRegion planarRegion)
    {
+      planarRegion.getOrigin(planeOrigin);
+      planarRegion.getNormal(planeNormal);
+
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoConstraintRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                StepConstraintRegion stepConstraintRegion)
+   {
+      stepConstraintRegion.getNormal(planeNormal);
+      stepConstraintRegion.getRegionOriginInWorld(planeOrigin);
+
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                Point3DReadOnly regionOrigin,
+                                                                FrameVector3DReadOnly regionNormal)
+   {
       tempFramePoint.setIncludingFrame(pointToProject, 0.0);
       tempFramePoint.changeFrame(centerOfMassFrame);
       tempFramePoint.setZ(controlPlaneHeight.getDoubleValue());
@@ -113,18 +137,14 @@ public class ICPControlPlane
 
       projectionToPack.setToZero(worldFrame);
 
-      planarRegion.getOrigin(planeOrigin);
-      planarRegion.getNormal(planeNormal);
-
-      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planeOrigin, planeNormal, centerOfMassPosition, rayDirection, projectionToPack);
+      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(regionOrigin, regionNormal, centerOfMassPosition, rayDirection, projectionToPack);
 
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-
-      projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+      projectVerticesOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
    public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion heightProvider,
@@ -146,8 +166,8 @@ public class ICPControlPlane
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void projectConvexHullOntoControlPlane(ConvexPolygon2DReadOnly convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
-                                                 ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
+   public void projectVerticesOntoControlPlane(Vertex2DSupplier convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
+                                               ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
       vertexInWorldProvider.clear();
       for (int i = 0; i < convexHullInLocal.getNumberOfVertices(); i++)

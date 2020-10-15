@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
@@ -20,7 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationconstructionset.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -29,21 +29,21 @@ import java.util.function.Consumer;
 {
    private static double controlDT = 5.0e-5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private Robot robot;
    private OneDoFJointBasics[] joints;
    private ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", registry);
    private final Vector3D externalForcePointOffset = new Vector3D();
 
-   private BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
+   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
 
    public ExternalForceEstimationSimulation()
    {
 //      robot = setupFixedBaseArmRobot();
       robot = setupMovingBaseRobotArm();
 
-      Consumer<DenseMatrix64F> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
@@ -61,7 +61,7 @@ import java.util.function.Consumer;
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
 
       scs.setFastSimulate(true, 15);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setDT(controlDT, 10);
       scs.setGroundVisible(false);

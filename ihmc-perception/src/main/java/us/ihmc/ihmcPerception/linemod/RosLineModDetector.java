@@ -69,7 +69,7 @@ public class RosLineModDetector extends LineModDetector
          int heightOffset = frame.getHeight() - frame.getContentPane().getHeight();
          int widthOffset = frame.getWidth() - frame.getContentPane().getWidth();
          frame.setSize(image.getWidth() + widthOffset, image.getHeight() + heightOffset);
-         imagePanel.setBufferedImageSafe(image);
+         imagePanel.setImageUI(image);
       }
    }
 

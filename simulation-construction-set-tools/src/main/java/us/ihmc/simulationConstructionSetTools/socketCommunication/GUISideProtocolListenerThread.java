@@ -7,7 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.simulationconstructionset.NewDataListener;
 
@@ -30,7 +30,7 @@ public class GUISideProtocolListenerThread implements Runnable
       this(socket, commandListener, null);
    }
 
-   public GUISideProtocolListenerThread(Socket socket, GUISideAbstractCommandListener commandListener, ArrayList<NewDataListener> newDataListeners)
+   public GUISideProtocolListenerThread(Socket socket, GUISideAbstractCommandListener commandListener, List<NewDataListener> newDataListeners)
    {
       try
       {
@@ -60,7 +60,7 @@ public class GUISideProtocolListenerThread implements Runnable
          guiSideProtocolListener = new GUISideProtocolListener(dataIn, commandListener, newDataListeners);
 
          System.out.println("Creating and Starting RobotProtocolListenerThread");
-         anim = new Thread(this);
+         anim = new Thread(this, getClass().getSimpleName());
 
          // anim.setPriority(anim.getPriority()+1);
          anim.start();

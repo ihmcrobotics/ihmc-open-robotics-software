@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -11,14 +13,12 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-
-import java.awt.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
@@ -42,7 +42,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
                                          MovingReferenceFrame soleFrame,
                                          FootholdRotationParameters rotationParameters,
                                          double dt,
-                                         YoVariableRegistry parentRegistry,
+                                         YoRegistry parentRegistry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this(side,
@@ -63,13 +63,13 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
                                          DoubleProvider stableRotationPositionThreshold,
                                          IntegerProvider stableEdgeWindowSize,
                                          double dt,
-                                         YoVariableRegistry parentRegistry,
+                                         YoRegistry parentRegistry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
       String namePrefix = side.getLowerCaseName() + "Velocity";
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
       pointOfRotation = new YoFramePoint2D(namePrefix + "PointOfRotation", soleFrame, registry);
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);

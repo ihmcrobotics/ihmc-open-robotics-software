@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -80,7 +80,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
                                                    IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher,
                                                    IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher,
                                                    FootstepPlannerParametersBasics plannerParameters,
-                                                   YoVariableRegistry parentRegistry)
+                                                   YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 

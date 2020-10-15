@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -16,17 +16,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * <p>
@@ -57,28 +53,28 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final DenseMatrix64F coefficientMultipliers = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F coefficientMultipliersInv = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj coefficientMultipliers = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj coefficientMultipliersInv = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F xEquivalents = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F yEquivalents = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F zEquivalents = new DenseMatrix64F(0, 1);
+   private final DMatrixRMaj xEquivalents = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj yEquivalents = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj zEquivalents = new DMatrixRMaj(0, 1);
 
-   private final DenseMatrix64F xConstants = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F yConstants = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F zConstants = new DenseMatrix64F(0, 1);
+   private final DMatrixRMaj xConstants = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj yConstants = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj zConstants = new DMatrixRMaj(0, 1);
 
-   private final DenseMatrix64F vrpWaypointJacobian = new DenseMatrix64F(0, 1);
+   private final DMatrixRMaj vrpWaypointJacobian = new DMatrixRMaj(0, 1);
 
-   private final DenseMatrix64F vrpXWaypoints = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F vrpYWaypoints = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F vrpZWaypoints = new DenseMatrix64F(0, 1);
+   private final DMatrixRMaj vrpXWaypoints = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj vrpYWaypoints = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj vrpZWaypoints = new DMatrixRMaj(0, 1);
 
-   final DenseMatrix64F xCoefficientVector = new DenseMatrix64F(0, 1);
-   final DenseMatrix64F yCoefficientVector = new DenseMatrix64F(0, 1);
-   final DenseMatrix64F zCoefficientVector = new DenseMatrix64F(0, 1);
+   final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
 
    private final YoDouble omega = new YoDouble("omegaForPlanning", registry);
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
@@ -122,11 +118,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private CornerPointViewer viewer = null;
 
-   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
 
-      comHeight.addVariableChangedListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
+      comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
 
       parentRegistry.addChild(registry);
@@ -171,13 +167,13 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       yEquivalents.set(yConstants);
       zEquivalents.set(zConstants);
 
-      CommonOps.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
-      CommonOps.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
-      CommonOps.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
 
-      CommonOps.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
-      CommonOps.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
-      CommonOps.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
+      CommonOps_DDRM.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
+      CommonOps_DDRM.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
+      CommonOps_DDRM.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
 
       // update coefficient holders
       int firstCoefficientIndex = 0;

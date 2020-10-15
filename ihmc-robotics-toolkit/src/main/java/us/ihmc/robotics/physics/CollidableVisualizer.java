@@ -1,22 +1,30 @@
 package us.ihmc.robotics.physics;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePointShape3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollidableVisualizer
 {
@@ -25,7 +33,7 @@ public class CollidableVisualizer
    private final Collidable collidable;
    private final Shape3DGraphicUpdater shape3DGraphicUpdater;
 
-   public CollidableVisualizer(String name, String groupName, Collidable collidable, AppearanceDefinition appearanceDefinition, YoVariableRegistry registry,
+   public CollidableVisualizer(String name, String groupName, Collidable collidable, AppearanceDefinition appearanceDefinition, YoRegistry registry,
                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.collidable = collidable;
@@ -42,15 +50,27 @@ public class CollidableVisualizer
       {
          shape3DGraphicUpdater = new Capsule3DGraphicUpdater(name, (FrameCapsule3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
+      else if (collidable.getShape() instanceof FrameCylinder3DReadOnly)
+      {
+         shape3DGraphicUpdater = new Cylinder3DGraphicUpdater(name, (FrameCylinder3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
+      }
       else if (collidable.getShape() instanceof FramePointShape3DReadOnly)
       {
          shape3DGraphicUpdater = new Point3DGraphicUpdater(name, (FramePointShape3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
+      }
+      else if (collidable.getShape() instanceof FrameConvexPolytope3DReadOnly)
+      {
+         shape3DGraphicUpdater = new ConvexPolytope3DGraphicUpdater(name,
+                                                                    (FrameConvexPolytope3DReadOnly) collidable.getShape(),
+                                                                    registry,
+                                                                    appearanceDefinition);
       }
       else
       {
          throw new UnsupportedOperationException("Unsupported type of shape: " + collidable.getShape().getClass().getSimpleName());
       }
 
+      hide();
       yoGraphicsListRegistry.registerYoGraphic(groupName, shape3DGraphicUpdater.getYoGraphic());
    }
 
@@ -84,7 +104,7 @@ public class CollidableVisualizer
       private final YoGraphicPosition graphicSphere;
       private final FrameSphere3DReadOnly shape;
 
-      public Sphere3DGraphicUpdater(String name, FrameSphere3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Sphere3DGraphicUpdater(String name, FrameSphere3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          position = new YoFramePoint3D(name, worldFrame, registry);
@@ -120,7 +140,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicBox;
       private final FrameBox3DReadOnly shape;
 
-      public Box3DGraphicUpdater(String name, FrameBox3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Box3DGraphicUpdater(String name, FrameBox3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
@@ -154,10 +174,10 @@ public class CollidableVisualizer
    private static class Capsule3DGraphicUpdater implements Shape3DGraphicUpdater
    {
       private final YoFramePoseUsingYawPitchRoll pose;
-      private final YoGraphicShape graphicBox;
+      private final YoGraphicShape graphicCapsule;
       private final FrameCapsule3DReadOnly shape;
 
-      public Capsule3DGraphicUpdater(String name, FrameCapsule3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Capsule3DGraphicUpdater(String name, FrameCapsule3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
@@ -165,7 +185,7 @@ public class CollidableVisualizer
          double radius = shape.getRadius();
          double length = shape.getLength();
          capsuleGraphicDefinition.addCapsule(radius, length + 2.0 * radius, appearanceDefinition);
-         graphicBox = new YoGraphicShape(name, capsuleGraphicDefinition, pose, 1.0);
+         graphicCapsule = new YoGraphicShape(name, capsuleGraphicDefinition, pose, 1.0);
       }
 
       @Override
@@ -188,7 +208,49 @@ public class CollidableVisualizer
       @Override
       public YoGraphic getYoGraphic()
       {
-         return graphicBox;
+         return graphicCapsule;
+      }
+   }
+
+   private static class Cylinder3DGraphicUpdater implements Shape3DGraphicUpdater
+   {
+      private final YoFramePoseUsingYawPitchRoll pose;
+      private final YoGraphicShape graphicCylinder;
+      private final FrameCylinder3DReadOnly shape;
+
+      public Cylinder3DGraphicUpdater(String name, FrameCylinder3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
+      {
+         this.shape = shape;
+         pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
+         Graphics3DObject cylinderGraphicDefinition = new Graphics3DObject();
+         double radius = shape.getRadius();
+         double length = shape.getLength();
+         cylinderGraphicDefinition.translate(0.0, 0.0, -0.5 * length);
+         cylinderGraphicDefinition.addCylinder(length, radius, appearanceDefinition);
+         graphicCylinder = new YoGraphicShape(name, cylinderGraphicDefinition, pose, 1.0);
+      }
+
+      @Override
+      public void hide()
+      {
+         pose.setToNaN();
+      }
+
+      private final FramePose3D tempPose = new FramePose3D();
+
+      @Override
+      public void update()
+      {
+         tempPose.setReferenceFrame(shape.getReferenceFrame());
+         tempPose.getPosition().set(shape.getPosition());
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(shape.getAxis(), tempPose.getOrientation());
+         pose.setMatchingFrame(tempPose);
+      }
+
+      @Override
+      public YoGraphic getYoGraphic()
+      {
+         return graphicCylinder;
       }
    }
 
@@ -198,7 +260,7 @@ public class CollidableVisualizer
       private final YoGraphicPosition graphicSphere;
       private final FramePointShape3DReadOnly shape;
 
-      public Point3DGraphicUpdater(String name, FramePointShape3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Point3DGraphicUpdater(String name, FramePointShape3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          position = new YoFramePoint3D(name, worldFrame, registry);
@@ -222,5 +284,54 @@ public class CollidableVisualizer
       {
          return graphicSphere;
       }
+   }
+
+   private static class ConvexPolytope3DGraphicUpdater implements Shape3DGraphicUpdater
+   {
+      private final YoFramePoseUsingYawPitchRoll pose;
+      private final YoGraphicShape graphicConvexPolytope;
+      private final FrameConvexPolytope3DReadOnly shape;
+
+      public ConvexPolytope3DGraphicUpdater(String name, FrameConvexPolytope3DReadOnly shape, YoRegistry registry,
+                                            AppearanceDefinition appearanceDefinition)
+      {
+         this.shape = shape;
+         pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
+         Graphics3DObject convexPolytopeGraphicDefinition = new Graphics3DObject();
+         convexPolytopeGraphicDefinition.addMeshData(newConvexPolytope3DMesh(shape), appearanceDefinition);
+         graphicConvexPolytope = new YoGraphicShape(name, convexPolytopeGraphicDefinition, pose, 1.0);
+      }
+
+      @Override
+      public void hide()
+      {
+         pose.setToNaN();
+      }
+
+      @Override
+      public void update()
+      {
+         pose.setFromReferenceFrame(shape.getReferenceFrame());
+      }
+
+      @Override
+      public YoGraphic getYoGraphic()
+      {
+         return graphicConvexPolytope;
+      }
+   }
+
+   public static MeshDataHolder newConvexPolytope3DMesh(ConvexPolytope3DReadOnly convexPolytope3D)
+   {
+      MeshDataBuilder meshBuilder = new MeshDataBuilder();
+
+      for (Face3DReadOnly face : convexPolytope3D.getFaces())
+      {
+         List<Point3D> ccwFaceVertices = face.getVertices().stream().map(Point3D::new).collect(Collectors.toList());
+         Collections.reverse(ccwFaceVertices);
+         meshBuilder.addMesh(MeshDataGenerator.Polygon(ccwFaceVertices));
+      }
+
+      return meshBuilder.generateMeshDataHolder();
    }
 }

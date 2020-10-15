@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -20,7 +20,7 @@ public class ZeroableYoPDGains implements PDGainsReadOnly
    private final YoDouble maximumFeedbackRate;
    private final YoDouble positionDeadband;
 
-   public ZeroableYoPDGains(String suffix, YoVariableRegistry registry)
+   public ZeroableYoPDGains(String suffix, YoRegistry registry)
    {
       kp = new YoDouble("kp" + suffix, registry);
       kd = new YoDouble("kd" + suffix, registry);

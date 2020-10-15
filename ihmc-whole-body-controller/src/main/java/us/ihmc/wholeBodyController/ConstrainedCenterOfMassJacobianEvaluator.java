@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import com.google.common.primitives.Doubles;
 
@@ -28,9 +28,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)
@@ -40,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
  */
 public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ConstrainedCenterOfMassJacobianCalculator constrainedCenterOfMassJacobianCalculator;
    private final ConstrainedCentroidalMomentumMatrixCalculator constrainedCentroidalMomentumMatrixCalculator;
    private final ReferenceFrame centerOfMassFrame;
@@ -58,9 +58,9 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final YoDouble constrainedCMMSigmaMin = new YoDouble("constrCMMSigmaMin", registry);
 
    private final JointBasics[] allJoints;
-   private final DenseMatrix64F v;
-   private final DenseMatrix64F vActuated;
-   private final DenseMatrix64F tempCoMVelocityMatrix = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj v;
+   private final DMatrixRMaj vActuated;
+   private final DMatrixRMaj tempCoMVelocityMatrix = new DMatrixRMaj(3, 1);
    private final Vector3D tempCoMVelocity = new Vector3D();
    private final List<JointBasics> actuatedJoints;
    private final ColumnSpaceProjector projector;
@@ -70,19 +70,19 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
    private final YoFrameVector3D centroidalLinearMomentumPlus;
    private final YoFrameVector3D centroidalAngularMomentumPlus;
-   private final DenseMatrix64F momentumSelectionMatrix;
+   private final DMatrixRMaj momentumSelectionMatrix;
 
    public ConstrainedCenterOfMassJacobianEvaluator(FullHumanoidRobotModel fullRobotModel)
    {
       constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint());
 
-      momentumSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
+      momentumSelectionMatrix = new DMatrixRMaj(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       momentumSelectionMatrix.set(0, 3, 1.0);
       momentumSelectionMatrix.set(1, 4, 1.0);
       momentumSelectionMatrix.set(2, 5, 1.0);
 
-//      DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-//      CommonOps.setIdentity(momentumSelectionMatrix);
+//      DMatrixRMaj momentumSelectionMatrix = new DMatrixRMaj(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+//      CommonOps_DDRM.setIdentity(momentumSelectionMatrix);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("CoM", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       constrainedCentroidalMomentumMatrixCalculator = new ConstrainedCentroidalMomentumMatrixCalculator(fullRobotModel.getRootJoint(), centerOfMassFrame,
@@ -91,16 +91,16 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
-         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
-         CommonOps.setIdentity(selectionMatrix);
+         DMatrixRMaj selectionMatrix = new DMatrixRMaj(SpatialVector.SIZE, SpatialVector.SIZE);
+         CommonOps_DDRM.setIdentity(selectionMatrix);
          constrainedCenterOfMassJacobianCalculator.addConstraint(foot, selectionMatrix);
          constrainedCentroidalMomentumMatrixCalculator.addConstraint(foot, selectionMatrix);
       }
 
       allJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      v = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(allJoints), 1);
+      v = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(allJoints), 1);
 
-      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE / 2, SpatialVector.SIZE);
+      DMatrixRMaj orientationSelectionMatrix = new DMatrixRMaj(SpatialVector.SIZE / 2, SpatialVector.SIZE);
       orientationSelectionMatrix.set(0, 0, 1.0);
       orientationSelectionMatrix.set(1, 1, 1.0);
       orientationSelectionMatrix.set(2, 2, 1.0);
@@ -125,11 +125,11 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       }
 
       int nActuatedDoFs = MultiBodySystemTools.computeDegreesOfFreedom(actuatedJoints);
-      vActuated = new DenseMatrix64F(nActuatedDoFs, 1);
+      vActuated = new DMatrixRMaj(nActuatedDoFs, 1);
 
       DampedLeastSquaresSolver columnSpaceProjectorSolver = new DampedLeastSquaresSolver(momentumSelectionMatrix.getNumRows());
       columnSpaceProjectorSolver.setAlpha(0.02);
-//      LinearSolver<DenseMatrix64F> columnSpaceProjectorSolver = LinearSolverFactory.pseudoInverse(true);
+//      LinearSolverDense<DMatrixRMaj> columnSpaceProjectorSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       projector = new ColumnSpaceProjector(columnSpaceProjectorSolver, momentumSelectionMatrix.getNumRows(), nActuatedDoFs);
 
       centroidalLinearMomentum = new YoFrameVector3D("centroidalLinearMomentum", centerOfMassFrame, registry);
@@ -146,42 +146,42 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       centerOfMassFrame.update();
 
       constrainedCenterOfMassJacobianCalculator.compute();
-      DenseMatrix64F centerOfMassJacobian = constrainedCenterOfMassJacobianCalculator.getCenterOfMassJacobian();
-      DenseMatrix64F constrainedCenterOfMassJacobian = constrainedCenterOfMassJacobianCalculator.getConstrainedCenterOfMassJacobian();
+      DMatrixRMaj centerOfMassJacobian = constrainedCenterOfMassJacobianCalculator.getCenterOfMassJacobian();
+      DMatrixRMaj constrainedCenterOfMassJacobian = constrainedCenterOfMassJacobianCalculator.getConstrainedCenterOfMassJacobian();
 
-      this.comJacobianConditionNumber.set(NormOps.conditionP2(centerOfMassJacobian));
+      this.comJacobianConditionNumber.set(NormOps_DDRM.conditionP2(centerOfMassJacobian));
       this.comJacobianSigmaMin.set(computeSmallestSingularValue(centerOfMassJacobian));
-      this.constrainedComJacobianConditionNumber.set(NormOps.conditionP2(constrainedCenterOfMassJacobian));
+      this.constrainedComJacobianConditionNumber.set(NormOps_DDRM.conditionP2(constrainedCenterOfMassJacobian));
       this.constrainedComJacobianSigmaMin.set(computeSmallestSingularValue(constrainedCenterOfMassJacobian));
 
       MultiBodySystemTools.extractJointsState(allJoints, JointStateType.VELOCITY, v);
-      CommonOps.mult(centerOfMassJacobian, v, tempCoMVelocityMatrix);
+      CommonOps_DDRM.mult(centerOfMassJacobian, v, tempCoMVelocityMatrix);
       tempCoMVelocity.set(tempCoMVelocityMatrix);
       comVelocity.set(tempCoMVelocity);
 
       MultiBodySystemTools.extractJointsState(actuatedJoints, JointStateType.VELOCITY, vActuated);
 
-//    CommonOps.mult(constrainedCenterOfMassJacobian, vActuated, tempCoMVelocityMatrix);
+//    CommonOps_DDRM.mult(constrainedCenterOfMassJacobian, vActuated, tempCoMVelocityMatrix);
 //    MatrixTools.denseMatrixToVector3d(tempCoMVelocityMatrix, tempCoMVelocity, 0, 0);
 //    constrainedComVelocity.set(tempCoMVelocity);
 
       constrainedCentroidalMomentumMatrixCalculator.compute();
-      DenseMatrix64F centroidalMomentumMatrix = constrainedCentroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix();
-      DenseMatrix64F constrainedCentroidalMomentumMatrix = constrainedCentroidalMomentumMatrixCalculator.getConstrainedCentroidalMomentumMatrix();
+      DMatrixRMaj centroidalMomentumMatrix = constrainedCentroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix();
+      DMatrixRMaj constrainedCentroidalMomentumMatrix = constrainedCentroidalMomentumMatrixCalculator.getConstrainedCentroidalMomentumMatrix();
 
-      this.cmmConditionNumber.set(NormOps.conditionP2(centroidalMomentumMatrix));
+      this.cmmConditionNumber.set(NormOps_DDRM.conditionP2(centroidalMomentumMatrix));
       this.cmmSigmaMin.set(computeSmallestSingularValue(centroidalMomentumMatrix));
-      this.constrainedCMMConditionNumber.set(NormOps.conditionP2(constrainedCentroidalMomentumMatrix));
+      this.constrainedCMMConditionNumber.set(NormOps_DDRM.conditionP2(constrainedCentroidalMomentumMatrix));
       this.constrainedCMMSigmaMin.set(computeSmallestSingularValue(constrainedCentroidalMomentumMatrix));
 
       projector.setA(constrainedCentroidalMomentumMatrix);
-      DenseMatrix64F centroidalMomentumPlusDenseMatrix = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
+      DMatrixRMaj centroidalMomentumPlusDenseMatrix = new DMatrixRMaj(momentumSelectionMatrix.getNumRows(), 1);
       Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalAngularMomentum,
                                        centroidalLinearMomentum);
-      DenseMatrix64F centroidalMomentumSelection = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
-      DenseMatrix64F centroidalMomentumMatrix2 = new DenseMatrix64F(6, 1);
+      DMatrixRMaj centroidalMomentumSelection = new DMatrixRMaj(momentumSelectionMatrix.getNumRows(), 1);
+      DMatrixRMaj centroidalMomentumMatrix2 = new DMatrixRMaj(6, 1);
       centroidalMomentum.get(centroidalMomentumMatrix2);
-      CommonOps.mult(momentumSelectionMatrix, centroidalMomentumMatrix2, centroidalMomentumSelection);
+      CommonOps_DDRM.mult(momentumSelectionMatrix, centroidalMomentumMatrix2, centroidalMomentumSelection);
       projector.project(centroidalMomentumSelection, centroidalMomentumPlusDenseMatrix);
 
 
@@ -200,7 +200,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       // empty
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -215,9 +215,9 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       return getName();
    }
 
-   private static double computeSmallestSingularValue(DenseMatrix64F A)
+   private static double computeSmallestSingularValue(DMatrixRMaj A)
    {
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(A.numRows, A.numCols, false, false, true);
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(A.numRows, A.numCols, false, false, true);
       svd.decompose(A);
       double[] singularValues = svd.getSingularValues();
 

@@ -36,13 +36,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
@@ -59,11 +54,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class SmoothCMPBasedICPPlannerTest
 {
@@ -136,7 +132,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final ICPPlannerData icpPlannerData2 = new ICPPlannerData();
    private final FramePose3D swingFootPose = new FramePose3D();
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoDouble yoTime;
    private YoBoolean inDoubleSupport;
    private SmoothCMPBasedICPPlanner planner;
@@ -185,7 +181,7 @@ public class SmoothCMPBasedICPPlannerTest
    public void setupTest()
    {
       this.newTestStartDiscontinuity = true;
-      this.registry = new YoVariableRegistry(testClassName);
+      this.registry = new YoRegistry(testClassName);
       if (visualize)
          setupVisualization();
       this.yoTime = new YoDouble("TestTime", registry);
@@ -241,6 +237,8 @@ public class SmoothCMPBasedICPPlannerTest
             midFeetZUpFrame.update();
          }
       });
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    private void setupVisualization()
@@ -265,7 +263,7 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void startSCS()
    {
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -408,12 +406,12 @@ public class SmoothCMPBasedICPPlannerTest
       numberOfFootstepsForTest = 10;
 
       boolean isAMOn = false;
-      SmoothCMPBasedICPPlanner planner1 = createPlanner(isAMOn, false, new YoVariableRegistry("TestRegistry1"));
-      SmoothCMPBasedICPPlanner planner2 = createPlanner(isAMOn, true, new YoVariableRegistry("TestRegistry2"));
+      SmoothCMPBasedICPPlanner planner1 = createPlanner(isAMOn, false, new YoRegistry("TestRegistry1"));
+      SmoothCMPBasedICPPlanner planner2 = createPlanner(isAMOn, true, new YoRegistry("TestRegistry2"));
       simulateAndAssertSamePlan(planner1, planner2);
    }
 
-   private SmoothCMPBasedICPPlanner createPlanner(boolean isAMOn, boolean doContinuousReplanning, YoVariableRegistry parentRegistry)
+   private SmoothCMPBasedICPPlanner createPlanner(boolean isAMOn, boolean doContinuousReplanning, YoRegistry parentRegistry)
    {
       plannerParameters = new SmoothCMPPlannerParameters()
       {
@@ -448,11 +446,15 @@ public class SmoothCMPBasedICPPlannerTest
          }
       };
 
-      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, feet, null, null, parentRegistry,
+      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames,
+                                                                      soleZUpFrames, feet, null, null, parentRegistry,
                                                                       graphicsListRegistry, gravity, plannerParameters);
       planner.setFinalTransferDuration(defaultFinalTransferTime);
       planner.setOmega0(omega);
       planner.ensureContinuityEnteringEachTransfer(true);
+
+      new DefaultParameterReader().readParametersInRegistry(parentRegistry);
+
       return planner;
    }
 

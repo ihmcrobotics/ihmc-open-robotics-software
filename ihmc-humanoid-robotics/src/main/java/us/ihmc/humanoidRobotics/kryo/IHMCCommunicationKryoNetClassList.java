@@ -3,12 +3,12 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusArrayPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusPubSubType;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import builtin_interfaces.msg.dds.DurationPubSubType;
 import builtin_interfaces.msg.dds.TimePubSubType;
 import controller_msgs.msg.dds.*;
@@ -312,7 +312,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(MultisenseParameterPacketPubSubType.class);
       registerPacketField(PoseArrayPubSubType.class);
       registerPacketField(WeightMatrix3DMessagePubSubType.class);
-      registerPacketField(FootstepPlanRequestPacketPubSubType.class);
       registerPacketField(ReachingManifoldMessagePubSubType.class);
       registerPacketField(PolygonPubSubType.class);
       registerPacketField(ParameterDescriptorPubSubType.class);
@@ -407,7 +406,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);
-      registerPacketField(FootstepPathPlanPacketPubSubType.class);
       registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(BytePubSubType.class);
       registerPacketField(DiagnosticArrayPubSubType.class);
@@ -672,8 +670,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(RobotConfigurationData.class);
       registerPacketClass(AtlasAuxiliaryRobotData.class);
       registerPacketFields(double[].class, Vector3D.class);
-      registerPacketFields(DenseMatrix64F.class);
-      registerPacketFields(DenseMatrix64F[].class);
+      registerPacketFields(DMatrixRMaj.class);
+      registerPacketFields(DMatrixRMaj[].class);
       registerPacketField(SpatialVectorMessage.class);
       registerPacketField(SpatialVectorMessage[].class);
 
@@ -748,7 +746,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BDIBehaviorStatusPacket.class);
 
       // Camera information related
-      registerPacketField(IntrinsicParameters.class);
+      registerPacketField(CameraPinholeBrown.class);
 
       registerPacketClass(FisheyePacket.class);
 
@@ -768,7 +766,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(WalkToGoalBehaviorPacket.class);
       registerPacketField(WalkToGoalAction.class);
-      registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepDataMessage[].class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
@@ -781,9 +778,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(CurrentBehaviorStatus.class);
 
       registerPacketClass(CapturabilityBasedStatus.class);
-
-      // Planning
-      registerPacketClass(FootstepPathPlanPacket.class);
 
       // Localization
       registerPacketClass(LocalizationPacket.class);

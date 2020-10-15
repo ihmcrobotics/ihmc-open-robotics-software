@@ -9,7 +9,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -17,7 +18,7 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class QuadrupedJavaFXROS2VideoView extends ImageView
 {
@@ -38,7 +39,7 @@ public class QuadrupedJavaFXROS2VideoView extends ImageView
       writableImageBuffer = new ConcurrentRingBuffer<>(() -> new WritableImage(width, height), 4);
    }
 
-   public void start(Ros2Node ros2Node)
+   public void start(ROS2Node ros2Node)
    {
       if (running)
       {
@@ -47,7 +48,7 @@ public class QuadrupedJavaFXROS2VideoView extends ImageView
       }
 
       running = true;
-      new ROS2Callback<>(ros2Node, VideoPacket.class, null, null, null, this::acceptVideo);
+      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::acceptVideo);
       animationTimer.start();
    }
 

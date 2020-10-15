@@ -40,9 +40,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -59,9 +57,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -73,9 +69,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
 
    public static void write(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_9(data.getQuadrupedSteppingRequestedEvent());
 
@@ -83,10 +77,8 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
 
    public static void read(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setQuadrupedSteppingRequestedEvent(cdr.read_type_9());
       	
 
@@ -95,18 +87,14 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_9("quadruped_stepping_requested_event", data.getQuadrupedSteppingRequestedEvent());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setQuadrupedSteppingRequestedEvent(ser.read_type_9("quadruped_stepping_requested_event"));
    }
 

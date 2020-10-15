@@ -50,4 +50,10 @@ public class ModelFitter_P_to_PVNN<Model> implements ModelFitter<Model, PointVec
 
 		return model.fitModel(points, initial, found);
 	}
+
+   @Override
+   public double getFitScore()
+   {
+      return 0;
+   }
 }

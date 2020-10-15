@@ -10,15 +10,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoKinematicsToolboxOutputStatus
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    public enum Status
    {
@@ -51,9 +51,9 @@ public class YoKinematicsToolboxOutputStatus
    private final YoFramePose3D desiredRootJointPose;
    private final YoFixedFrameSpatialVector desiredRootJointVelocity;
 
-   public YoKinematicsToolboxOutputStatus(String namePrefix, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoVariableRegistry parentRegistry)
+   public YoKinematicsToolboxOutputStatus(String namePrefix, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       currentToolboxState = new YoEnum<>(namePrefix + "CurrentToolboxState", registry, Status.class, true);

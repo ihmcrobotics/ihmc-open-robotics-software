@@ -12,7 +12,7 @@ import javax.swing.JToggleButton;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -20,7 +20,7 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
 {
    ArrayList<ScsMocapRigidBody> listOfRbs = new ArrayList<>();
    private MocapDataClient mocapDataClient;
-   YoVariableRegistry registry = new YoVariableRegistry("mainRegistry");
+   YoRegistry registry = new YoRegistry("mainRegistry");
    SimulationConstructionSet scs;
    boolean pause = false;
 
@@ -41,13 +41,12 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
          public void actionPerformed(ActionEvent e)
          {
             Robot robot = new Robot("Mocap_Robot");
-            robot.addYoVariableRegistry(registry);
+            robot.addYoRegistry(registry);
 
             mocapDataClient = new MocapDataClient();
             mocapDataClient.registerRigidBodiesListener(Example_Mocap_SCS.this);
 
             scs = new SimulationConstructionSet(robot);
-            scs.setMaxBufferSize(64000);
             //            scs.setDT(0.0001, 75);
             JToggleButton pauseButton = new JToggleButton("Pause");
             scs.addButton(pauseButton);

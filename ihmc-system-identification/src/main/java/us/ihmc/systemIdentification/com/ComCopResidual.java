@@ -1,38 +1,36 @@
 /**
- * This is a residual function built on top of DataBuffer and Associate Robot object in from SCS instance
- * 
- *  residual =  (model predicted CenterOfMass point) - (measured Center-of-pressure) 
- * 
- *  When the robot is static, the projection of CoM on the flatground should be equal to CoP
- *  
+ * This is a residual function built on top of DataBuffer and Associate Robot object in from SCS
+ * instance residual = (model predicted CenterOfMass point) - (measured Center-of-pressure) When the
+ * robot is static, the projection of CoM on the flatground should be equal to CoP
  */
 package us.ihmc.systemIdentification.com;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 
-/** Todo
+/**
+ * Todo
  * 
- * @author tingfan
- *
- * Ideally this class should cache all the values once loaded from dataBuffer (or some other constructors)
- * Or there should be an independent class independent from dataBuffer, so we can unittest it;
- * But the fact Robot model is tie with dataBuffer make it really confusing to do so. 
+ * @author tingfan Ideally this class should cache all the values once loaded from dataBuffer (or
+ *         some other constructors) Or there should be an independent class independent from
+ *         dataBuffer, so we can unittest it; But the fact Robot model is tie with dataBuffer make
+ *         it really confusing to do so.
  */
 
 public class ComCopResidual implements FunctionNtoM
@@ -40,17 +38,16 @@ public class ComCopResidual implements FunctionNtoM
    static boolean lockComY = false;
    private Robot robot;
    private Link targetLink;
-   private DataBuffer dataBuffer;
+   private YoBuffer dataBuffer;
    private int[] selectedFrames;
 
    /**
-    * 
-    * @param robot - the robot model
-    * @param linkName - the link to be ID'ed
-    * @param dataBuffer - scs.getDataBuffer();
+    * @param robot                     - the robot model
+    * @param linkName                  - the link to be ID'ed
+    * @param dataBuffer                - scs.getDataBuffer();
     * @param numSubsampleBetweenInOut: <0 (use keyPoints) >0 (equally spaced between in/out points);
     */
-   public ComCopResidual(Robot robot, String linkName, DataBuffer dataBuffer, int numSubsampleBetweenInOut)
+   public ComCopResidual(Robot robot, String linkName, YoBuffer dataBuffer, int numSubsampleBetweenInOut)
    {
       this.dataBuffer = dataBuffer;
 
@@ -65,7 +62,7 @@ public class ComCopResidual implements FunctionNtoM
       System.out.println("target link " + targetLink.getName() + "mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
 
       //select subframes
-      ArrayList<Integer> keyPoints = dataBuffer.getKeyPoints();
+      List<Integer> keyPoints = dataBuffer.getKeyPointsHandler().getKeyPoints();
       if (numSubsampleBetweenInOut < 0)
       {
          System.out.println("Using key frames");
@@ -104,7 +101,6 @@ public class ComCopResidual implements FunctionNtoM
       outCop.clear();
       for (int i = 0; i < selectedFrames.length; i++)
       {
-         dataBuffer.setIndexButDoNotNotifySimulationRewoundListeners(selectedFrames[i]);
          // model predicted CoM
          robot.update(); //this pull data from dataBuffer magically through YoVariables
          Point3D modelCoM = new Point3D();
@@ -112,8 +108,9 @@ public class ComCopResidual implements FunctionNtoM
          outCom.add(modelCoM);
 
          // sensedCoP
-         Point3D sensedCoP = new Point3D(dataBuffer.getVariable("sensedCoPX").getValueAsDouble(), dataBuffer.getVariable("sensedCoPY").getValueAsDouble(),
-               dataBuffer.getVariable("sensedCoPZ").getValueAsDouble());
+         Point3D sensedCoP = new Point3D(dataBuffer.findVariableEntry("sensedCoPX").readBufferAt(selectedFrames[i]),
+                                         dataBuffer.findVariableEntry("sensedCoPY").readBufferAt(selectedFrames[i]),
+                                         dataBuffer.findVariableEntry("sensedCoPZ").readBufferAt(selectedFrames[i]));
          outCop.add(sensedCoP);
       }
    }

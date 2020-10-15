@@ -12,10 +12,8 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -24,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
@@ -95,33 +93,33 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Topic getOutputTopic()
    {
-      return getPublisherTopicNameGenerator(robotName);
+      return getOutputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX, ROS2TopicQualifier.OUTPUT);
-   }
-
-   @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
-   {
-      return getSubscriberTopicNameGenerator(robotName);
-   }
-
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
-   {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public ROS2Topic getInputTopic()
    {
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      return getInputTopic(robotName);
+   }
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+   public static ROS2Topic getInputTopic(String robotName)
+   {
+      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   {
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
          if (wholeBodyTrajectoryToolboxController != null)
             wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
       });

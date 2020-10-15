@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ComparePushRodTransmissionsTest
@@ -36,7 +36,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
@@ -58,7 +58,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
@@ -80,7 +80,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
@@ -103,7 +103,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
@@ -126,7 +126,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
@@ -148,7 +148,7 @@ public class ComparePushRodTransmissionsTest
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom, true);
@@ -158,10 +158,10 @@ public class ComparePushRodTransmissionsTest
    }
    
    private void compareTwoPushRodTransmissionForce(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-           PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+           PushRodTransmissionInterface pushrodTransmissionB, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       Robot robot = new Robot("comparePushrodTransmission");
-      robot.getRobotsYoVariableRegistry().addChild(registry);
+      robot.getRobotsYoRegistry().addChild(registry);
 
       YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
       YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);
@@ -217,7 +217,7 @@ public class ComparePushRodTransmissionsTest
       if (VISUALIZE)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -346,10 +346,10 @@ public class ComparePushRodTransmissionsTest
    }
 
    private void compareTwoPushRodTransmissionVelocity(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-           PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+           PushRodTransmissionInterface pushrodTransmissionB, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       Robot robot = new Robot("comparePushrodTransmission");
-      robot.getRobotsYoVariableRegistry().addChild(registry);
+      robot.getRobotsYoRegistry().addChild(registry);
 
       YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
       YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);
@@ -393,7 +393,7 @@ public class ComparePushRodTransmissionsTest
       if (VISUALIZE)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -463,10 +463,10 @@ public class ComparePushRodTransmissionsTest
 
    @SuppressWarnings("unused")
    private void testTimingTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-         PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         PushRodTransmissionInterface pushrodTransmissionB, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       Robot robot = new Robot("testTimingPushrodTransmission");
-      robot.getRobotsYoVariableRegistry().addChild(registry);
+      robot.getRobotsYoRegistry().addChild(registry);
 
       YoDouble topJointAngle = new YoDouble("topJointAngle", registry);
       YoDouble bottomJointAngle = new YoDouble("bottomJointAngle", registry);

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -30,14 +30,14 @@ public class MidiSliderBoardTest
    public void testWeirdCase()
    {
       MidiSliderBoard midiSliderBoard = new MidiSliderBoard(null, true);
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
 
       //need one of these for each DOF
       YoDouble yoVariable = new YoDouble("test", registry);
       midiSliderBoard.setSlider(3, yoVariable, 1.5, 2.5); //set scale
-      yoVariable.addVariableChangedListener(new VariableChangedListener()
+      yoVariable.addListener(new YoVariableChangedListener()
       {
-         @Override public void notifyOfVariableChange(YoVariable<?> v)
+         @Override public void changed(YoVariable v)
          {
             System.out.println(v.getValueAsDouble());
          }

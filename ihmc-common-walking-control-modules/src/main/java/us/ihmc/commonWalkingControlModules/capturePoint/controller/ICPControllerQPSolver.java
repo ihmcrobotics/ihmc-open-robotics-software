@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -45,19 +45,19 @@ public class ICPControllerQPSolver
     * Has the form 0.5 x<sup>T</sup> H x + h x
     */
    /** Total quadratic cost matrix for the quadratic program. */
-   private final DenseMatrix64F solverInput_H;
+   private final DMatrixRMaj solverInput_H;
    /** Total linear cost vector for the quadratic program. */
-   private final DenseMatrix64F solverInput_h;
+   private final DMatrixRMaj solverInput_h;
    /** Total scalar cost for the quadratic program. */
-   private final DenseMatrix64F solverInputResidualCost;
+   private final DMatrixRMaj solverInputResidualCost;
 
    /**
     * Has the form A<sub>ineq</sub> x >= b<sub>ineq</sub>
     */
    /** Total linear inequality constraint matrix for the quadratic program. */
-   private final DenseMatrix64F solverInput_Aineq;
+   private final DMatrixRMaj solverInput_Aineq;
    /** Total linear inequality constraint objective vector for the quadratic program. */
-   private final DenseMatrix64F solverInput_bineq;
+   private final DMatrixRMaj solverInput_bineq;
 
    /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
    private final ICPQPInput copFeedbackMinimizationTask;
@@ -82,40 +82,40 @@ public class ICPControllerQPSolver
    /** Constraint on the CMP location to the bounds. */
    private final ConstraintToConvexRegion cmpLocationConstraint;
 
-   private final DenseMatrix64F desiredCoP = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F desiredCMP = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F desiredCMPOffset = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj desiredCoP = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj desiredCMP = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj desiredCMPOffset = new DMatrixRMaj(2, 1);
    /** Current ICP Error location. */
-   private final DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj currentICPError = new DMatrixRMaj(2, 1);
 
    /** Weight minimizing the CoP feedback action. */
-   private final DenseMatrix64F copFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj copFeedbackWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the feedback rate. */
-   private final DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj feedbackRateWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the CoP and CMP feedback rate. */
-   private final DenseMatrix64F copCMPFeedbackRateWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj copCMPFeedbackRateWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the CMP feedback action. */
-   private final DenseMatrix64F cmpFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj cmpFeedbackWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
-   private final DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj dynamicsWeight = new DMatrixRMaj(2, 2);
    /** Proportional gain on the ICP feedback controller. */
-   private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj feedbackGain = new DMatrixRMaj(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
    private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
-   private final DenseMatrix64F solution;
+   private final DMatrixRMaj solution;
    /** CoP Feedback action solution to the quadratic program. */
-   private final DenseMatrix64F copDeltaSolution;
+   private final DMatrixRMaj copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */
-   private final DenseMatrix64F cmpDeltaSolution;
-   private final DenseMatrix64F residualDynamicsError;
+   private final DMatrixRMaj cmpDeltaSolution;
+   private final DMatrixRMaj residualDynamicsError;
 
    /** Previous solution for the feedback action, used in the feedback rate objective. */
-   private final DenseMatrix64F previousFeedbackDeltaSolution;
-   private final DenseMatrix64F previousCMPFeedbackDeltaSolution;
-   private final DenseMatrix64F previousCoPFeedbackDeltaSolution;
+   private final DMatrixRMaj previousFeedbackDeltaSolution;
+   private final DMatrixRMaj previousCMPFeedbackDeltaSolution;
+   private final DMatrixRMaj previousCoPFeedbackDeltaSolution;
 
    /** Number of iterations required for the active set solver to find a solution. */
    private int numberOfIterations;
@@ -146,7 +146,7 @@ public class ICPControllerQPSolver
       this(maximumNumberOfCMPVertices, true, null);
    }
 
-   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean autoSetPreviousSolution, YoVariableRegistry registry)
+   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean autoSetPreviousSolution, YoRegistry registry)
    {
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
@@ -158,9 +158,9 @@ public class ICPControllerQPSolver
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
 
-      solverInput_H = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfFreeVariables);
-      solverInput_h = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
-      solverInputResidualCost = new DenseMatrix64F(1, 1);
+      solverInput_H = new DMatrixRMaj(maximumNumberOfFreeVariables, maximumNumberOfFreeVariables);
+      solverInput_h = new DMatrixRMaj(maximumNumberOfFreeVariables, 1);
+      solverInputResidualCost = new DMatrixRMaj(1, 1);
 
       copFeedbackMinimizationTask = new ICPQPInput(2);
       cmpFeedbackMinimizationTask = new ICPQPInput(2);
@@ -181,17 +181,17 @@ public class ICPControllerQPSolver
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
 
-      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices, maximumNumberOfCMPVertices);
-      solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices, 1);
+      solverInput_Aineq = new DMatrixRMaj(maximumNumberOfCMPVertices, maximumNumberOfCMPVertices);
+      solverInput_bineq = new DMatrixRMaj(maximumNumberOfCMPVertices, 1);
 
-      solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      copDeltaSolution = new DenseMatrix64F(2, 1);
-      cmpDeltaSolution = new DenseMatrix64F(2, 1);
-      residualDynamicsError = new DenseMatrix64F(2, 1);
+      solution = new DMatrixRMaj(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
+      copDeltaSolution = new DMatrixRMaj(2, 1);
+      cmpDeltaSolution = new DMatrixRMaj(2, 1);
+      residualDynamicsError = new DMatrixRMaj(2, 1);
 
-      previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
+      previousCoPFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
+      previousCMPFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
 
       //      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -412,8 +412,8 @@ public class ICPControllerQPSolver
       this.setFeedbackConditions(copFeedbackWeight, copFeedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
    }
 
-   private final DenseMatrix64F tempCoPFeedbackWeight = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F tempFeedbackGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj tempCoPFeedbackWeight = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj tempFeedbackGains = new DMatrixRMaj(2, 2);
 
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
@@ -446,7 +446,7 @@ public class ICPControllerQPSolver
     * @param feedbackGains ICP controller proportional gain in the world frame.
     * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(DenseMatrix64F copFeedbackWeights, DenseMatrix64F feedbackGains, double dynamicsWeight)
+   public void setFeedbackConditions(DMatrixRMaj copFeedbackWeights, DMatrixRMaj feedbackGains, double dynamicsWeight)
    {
       this.copFeedbackWeight.set(copFeedbackWeights);
       this.feedbackGain.set(feedbackGains);
@@ -508,7 +508,7 @@ public class ICPControllerQPSolver
       currentICPError.get(this.currentICPError);
       desiredCoP.get(this.desiredCoP);
       desiredCMPOffset.get(this.desiredCMPOffset);
-      CommonOps.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
+      CommonOps_DDRM.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
 
       addCoPFeedbackTask();
 
@@ -769,14 +769,14 @@ public class ICPControllerQPSolver
     * @param solutionToPack solution of the QP.
     * @return whether a solution was found.
     */
-   private boolean solve(DenseMatrix64F solutionToPack)
+   private boolean solve(DMatrixRMaj solutionToPack)
    {
-      CommonOps.scale(-1.0, solverInput_h);
+      CommonOps_DDRM.scale(-1.0, solverInput_h);
 
       solver.clear();
 
       if (useWarmStart && pollResetActiveSet() || previousTickFailed)
-         solver.resetActiveConstraints();
+         solver.resetActiveSet();
 
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
@@ -800,7 +800,7 @@ public class ICPControllerQPSolver
     *
     * @param copFeedbackSolutionToPack 2d feedback solution. Modified.
     */
-   private void extractCoPFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolutionToPack)
+   private void extractCoPFeedbackDeltaSolution(DMatrixRMaj copFeedbackSolutionToPack)
    {
       MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, copFeedbackIndex, 0, 2, 1, 1.0);
    }
@@ -810,7 +810,7 @@ public class ICPControllerQPSolver
     *
     * @param cmpDeltaSolutionToPack difference between the CMP and CoP. Modified.
     */
-   private void extractCMPFeedbackDeltaSolution(DenseMatrix64F cmpDeltaSolutionToPack)
+   private void extractCMPFeedbackDeltaSolution(DMatrixRMaj cmpDeltaSolutionToPack)
    {
       if (useAngularMomentum.getBooleanValue())
          MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, cmpFeedbackIndex, 0, 2, 1, 1.0);
@@ -823,11 +823,11 @@ public class ICPControllerQPSolver
     *
     * @param copFeedbackSolution amount of CoP feedback.
     */
-   private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
+   private void setPreviousFeedbackDeltaSolution(DMatrixRMaj copFeedbackSolution, DMatrixRMaj cmpFeedbackSolution)
    {
       previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
       previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
-      CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
+      CommonOps_DDRM.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
    /**

@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -37,16 +38,18 @@ public class StepInPlaceBehavior implements BehaviorInterface
    private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
    private final AtomicLong footstepID = new AtomicLong();
    private final PausablePeriodicThread mainThread;
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteHumanoidRobotInterface robotInterface;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    public StepInPlaceBehavior(BehaviorHelper helper)
    {
       LogTools.debug("Initializing step in place behavior");
 
       this.helper = helper;
-      robot = helper.getOrCreateRobotInterface();
+      robotInterface = helper.getOrCreateRobotInterface();
+      syncedRobot = robotInterface.newSyncedRobot();
 
-      robot.createFootstepStatusCallback(this::consumeFootstepStatus);
+      robotInterface.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = helper.createBooleanActivationReference(API.Stepping);
       helper.createUICallback(API.Abort, this::doOnAbort);
 
@@ -97,9 +100,9 @@ public class StepInPlaceBehavior implements BehaviorInterface
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = robot.pollFullRobotModel();
-            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
-            robot.requestWalk(footstepList);
+            syncedRobot.update();
+            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(syncedRobot.getFullRobotModel());
+            robotInterface.requestWalk(footstepList);
          }
       }
       else if (stepping.hasChanged())

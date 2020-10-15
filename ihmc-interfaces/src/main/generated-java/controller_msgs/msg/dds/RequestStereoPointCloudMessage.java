@@ -7,24 +7,17 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Use this message to request a new point cloud from the stereo camera.
-   
- */
+       * Use this message to request a new point cloud from the stereo camera.
+       */
 public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointCloudMessage> implements Settable<RequestStereoPointCloudMessage>, EpsilonComparable<RequestStereoPointCloudMessage>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public RequestStereoPointCloudMessage()
    {
-
-
    }
 
    public RequestStereoPointCloudMessage(RequestStereoPointCloudMessage other)
@@ -35,26 +28,20 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
 
    public void set(RequestStereoPointCloudMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -78,9 +65,7 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       return true;
    }
@@ -94,7 +79,6 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
 
       RequestStereoPointCloudMessage otherMyClass = (RequestStereoPointCloudMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
@@ -107,7 +91,6 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
       StringBuilder builder = new StringBuilder();
 
       builder.append("RequestStereoPointCloudMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);
       builder.append("}");

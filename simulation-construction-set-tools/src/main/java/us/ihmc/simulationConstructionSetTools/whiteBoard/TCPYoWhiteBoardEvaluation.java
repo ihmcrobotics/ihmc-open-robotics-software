@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.commons.thread.ThreadTools;
@@ -63,8 +63,8 @@ public class TCPYoWhiteBoardEvaluation
 
       ThreadTools.startAThread((Runnable) whiteBoard, "TCPYoWhiteBoardEvaluationThread");
 
-      ArrayList<YoVariable<?>> variablesToReadLeftWriteRight = generateSomeDoubleYoVariables("readLeftWriteRight", numberVariablesToReadLeftWriteRight);
-      ArrayList<YoVariable<?>> variablesToWriteLeftReadRight = generateSomeDoubleYoVariables("writeLeftReadRight", numberVariablesToWriteLeftReadRight);
+      ArrayList<YoVariable> variablesToReadLeftWriteRight = generateSomeDoubleYoVariables("readLeftWriteRight", numberVariablesToReadLeftWriteRight);
+      ArrayList<YoVariable> variablesToWriteLeftReadRight = generateSomeDoubleYoVariables("writeLeftReadRight", numberVariablesToWriteLeftReadRight);
 
       if (leftSide)
       {
@@ -189,19 +189,19 @@ public class TCPYoWhiteBoardEvaluation
    }
 
 
-   private void randomizeVariables(ArrayList<YoVariable<?>> variablesToWrite)
+   private void randomizeVariables(ArrayList<YoVariable> variablesToWrite)
    {
-      for (YoVariable<?> variable : variablesToWrite)
+      for (YoVariable variable : variablesToWrite)
       {
          variable.setValueFromDouble(Math.random());
       }
    }
 
-   public ArrayList<YoVariable<?>> generateSomeDoubleYoVariables(String name, int numberOfVariables)
+   public ArrayList<YoVariable> generateSomeDoubleYoVariables(String name, int numberOfVariables)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("root");
+      YoRegistry registry = new YoRegistry("root");
 
-      ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> ret = new ArrayList<YoVariable>();
 
       for (int i = 0; i < numberOfVariables; i++)
       {

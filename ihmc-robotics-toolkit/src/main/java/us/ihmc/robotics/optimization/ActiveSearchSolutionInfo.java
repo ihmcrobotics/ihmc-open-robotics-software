@@ -3,7 +3,7 @@ package us.ihmc.robotics.optimization;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
 * @author twan
@@ -11,7 +11,7 @@ import org.ejml.data.DenseMatrix64F;
 */
 class ActiveSearchSolutionInfo
 {
-   private final DenseMatrix64F solution = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj solution = new DMatrixRMaj(1, 1);
    private boolean converged;
    private int iterations;
    private final Set<Integer> activeSet = new LinkedHashSet<Integer>();
@@ -24,7 +24,7 @@ class ActiveSearchSolutionInfo
       activeSet.clear();
    }
 
-   public void setSolution(DenseMatrix64F solution)
+   public void setSolution(DMatrixRMaj solution)
    {
       this.solution.set(solution);
    }
@@ -34,7 +34,7 @@ class ActiveSearchSolutionInfo
       this.activeSet.clear();
    }
 
-   public DenseMatrix64F getSolution()
+   public DMatrixRMaj getSolution()
    {
       return solution;
    }

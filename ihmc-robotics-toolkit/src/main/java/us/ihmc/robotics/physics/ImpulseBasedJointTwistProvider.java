@@ -1,9 +1,13 @@
 package us.ihmc.robotics.physics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -18,9 +22,9 @@ public class ImpulseBasedJointTwistProvider implements JointStateProvider
    private int impulseDimension;
 
    private boolean isImpulseZero = true;
-   private final DenseMatrix64F impulse = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj impulse = new DMatrixRMaj(6, 1);
    private final List<JointBasics> joints = new ArrayList<>();
-   private final Map<JointBasics, DenseMatrix64F> apparentInertiaMatrixInverseMap = new HashMap<>();
+   private final Map<JointBasics, DMatrixRMaj> apparentInertiaMatrixInverseMap = new HashMap<>();
 
    public ImpulseBasedJointTwistProvider(RigidBodyBasics rootBody)
    {
@@ -51,7 +55,7 @@ public class ImpulseBasedJointTwistProvider implements JointStateProvider
          return;
 
       joints.add(joint);
-      apparentInertiaMatrixInverseMap.put(joint, new DenseMatrix64F(joint.getDegreesOfFreedom(), impulseDimension));
+      apparentInertiaMatrixInverseMap.put(joint, new DMatrixRMaj(joint.getDegreesOfFreedom(), impulseDimension));
    }
 
    public List<JointBasics> getJoints()
@@ -59,7 +63,7 @@ public class ImpulseBasedJointTwistProvider implements JointStateProvider
       return joints;
    }
 
-   public DenseMatrix64F getApparentInertiaMatrixInverse(JointBasics joint)
+   public DMatrixRMaj getApparentInertiaMatrixInverse(JointBasics joint)
    {
       return apparentInertiaMatrixInverseMap.get(joint);
    }
@@ -76,7 +80,7 @@ public class ImpulseBasedJointTwistProvider implements JointStateProvider
       this.impulse.set(0, impulse);
    }
 
-   public void setImpulse(DenseMatrix64F impulse)
+   public void setImpulse(DMatrixRMaj impulse)
    {
       isImpulseZero = false;
       this.impulse.set(impulse);
@@ -88,27 +92,34 @@ public class ImpulseBasedJointTwistProvider implements JointStateProvider
       impulse.get(this.impulse);
    }
 
+   public void setImpulse(Vector3DReadOnly impulseLinear, double impulseAngular)
+   {
+      isImpulseZero = false;
+      impulseLinear.get(this.impulse);
+      this.impulse.set(3, 0, impulseAngular);
+   }
+
    @Override
    public JointStateType getState()
    {
       return JointStateType.VELOCITY;
    }
 
-   private final DenseMatrix64F jointTwist = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj jointTwist = new DMatrixRMaj(6, 1);
 
    @Override
-   public DenseMatrix64F getJointState(JointReadOnly joint)
+   public DMatrixRMaj getJointState(JointReadOnly joint)
    {
       if (isImpulseZero)
          return null;
 
-      DenseMatrix64F apparentInertiaMatrixInverse = apparentInertiaMatrixInverseMap.get(joint);
+      DMatrixRMaj apparentInertiaMatrixInverse = apparentInertiaMatrixInverseMap.get(joint);
 
       if (apparentInertiaMatrixInverse == null)
          return null;
 
       jointTwist.reshape(joint.getDegreesOfFreedom(), 1);
-      CommonOps.mult(apparentInertiaMatrixInverse, impulse, jointTwist);
+      CommonOps_DDRM.mult(apparentInertiaMatrixInverse, impulse, jointTwist);
 
       return jointTwist;
    }
