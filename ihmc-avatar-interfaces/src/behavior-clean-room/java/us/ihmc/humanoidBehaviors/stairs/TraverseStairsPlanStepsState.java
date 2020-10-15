@@ -113,9 +113,6 @@ public class TraverseStairsPlanStepsState implements State
          solePoses.put(robotSide, new Pose3D(solePose));
       }
 
-      RobotSide steppingSide = planningModule.getFootstepPlannerParameters().getStepOnlyWithRequestedSide();
-      request.setRequestedInitialStanceSide(steppingSide.getOppositeSide());
-
       request.setStartFootPoses(solePoses.get(RobotSide.LEFT), solePoses.get(RobotSide.RIGHT));
       request.setSwingPlannerType(SwingPlannerType.PROPORTION);
       request.setTimeout(parameters.get(TraverseStairsBehaviorParameters.planningTimeout));
