@@ -26,8 +26,8 @@ import java.util.PriorityQueue;
 public class LineSegmentToPlanarRegionAssociator
 {
    private CameraPinholeBrown camIntrinsics;
-   private final PoseReferenceFrame regionFrame;
-   private final PoseReferenceFrame cameraFrame;
+   private PoseReferenceFrame regionFrame;
+   private PoseReferenceFrame cameraFrame;
 
    public LineSegmentToPlanarRegionAssociator(ReferenceFrame sensorFrame)
    {
@@ -57,6 +57,8 @@ public class LineSegmentToPlanarRegionAssociator
       {
          FramePoint3D vertex = new FramePoint3D(regionFrame, concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
          vertex.changeFrame(cameraFrame);
+
+         System.out.println(vertex);
 
          if (vertex.getZ() >= 0)
          {
