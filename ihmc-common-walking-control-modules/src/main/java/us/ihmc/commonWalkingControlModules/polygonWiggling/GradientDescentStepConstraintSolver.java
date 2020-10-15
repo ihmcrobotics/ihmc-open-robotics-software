@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
-import java.awt.Color;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -19,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
@@ -26,6 +25,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.awt.*;
 
 public class GradientDescentStepConstraintSolver
 {
@@ -52,6 +53,7 @@ public class GradientDescentStepConstraintSolver
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
    private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(5, Vector2D::new);
    private final RigidBodyTransform transformedSoleToRegionFrame = new RigidBodyTransform();
+   private final ConvexPolygon2D transformedPolygon = new ConvexPolygon2D();
 
    private final TickAndUpdatable tickAndUpdatable;
    private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
@@ -234,13 +236,10 @@ public class GradientDescentStepConstraintSolver
          transformedSoleToRegionFrame.getTranslation().add(gradient.getX(), gradient.getY(), 0.0);
          transformedSoleToRegionFrame.getRotation().appendYawRotation(gradient.getZ());
 
-         if (iterations > 0)
-         {
-            if (gradient.lengthSquared() < MathTools.square(gradientMagnitudeToTerminate))
-            {
-               break;
-            }
-         }
+         if (isGradientWithinTolerance(iterations))
+            break;
+         if (terminateDueToStanceFootProximity(input))
+            break;
 
          previousGradient.set(gradient);
          iterations++;
@@ -257,6 +256,43 @@ public class GradientDescentStepConstraintSolver
       }
 
       return transform;
+   }
+
+   private boolean isGradientWithinTolerance(int iterations)
+   {
+      if (iterations > 0)
+      {
+         if (gradient.lengthSquared() < MathTools.square(gradientMagnitudeToTerminate))
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private boolean terminateDueToStanceFootProximity(GradientDescentStepConstraintInput input)
+   {
+      if (!input.containsInputForStanceFootCheck())
+      {
+         return false;
+      }
+
+      transformedPolygon.clear();
+      for (int i = 0; i < transformedVertices.size(); i++)
+      {
+         transformedPolygon.addVertex(transformedVertices.get(i));
+      }
+
+      if (ConvexPolygonTools.arePolygonsIntersecting(transformedPolygon, input.getStanceFootPolygon()))
+      {
+         return true;
+      }
+      else
+      {
+         double distance = ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(transformedPolygon, input.getStanceFootPolygon());
+         return distance <= input.getMinimumClearanceFromStanceFoot();
+      }
    }
 
    private Constraint computeActiveConstraint(GradientDescentStepConstraintInput input)

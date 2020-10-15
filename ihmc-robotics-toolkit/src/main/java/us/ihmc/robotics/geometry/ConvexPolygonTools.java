@@ -1849,6 +1849,81 @@ public class ConvexPolygonTools
       return true;
    }
 
+   /**
+    * Performs brute force intersection check. This is O(n^2) and slower than {@link #computeIntersectionOfPolygons} but provides a simpler
+    * alternative if debugging is required.
+    */
+   public static boolean arePolygonsIntersecting(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   {
+      // in case one polygon is completely contained in the other
+      if (polygonA.isPointInside(polygonB.getVertex(0)) || polygonB.isPointInside(polygonA.getVertex(0)))
+      {
+         return true;
+      }
+
+      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vA1 = polygonA.getVertex(i);
+         Point2DReadOnly vA2 = polygonA.getNextVertex(i);
+
+         for (int j = 0; j < polygonB.getNumberOfVertices(); j++)
+         {
+            Point2DReadOnly vB1 = polygonB.getVertex(j);
+            Point2DReadOnly vB2 = polygonB.getNextVertex(j);
+
+            if (polygonA.isPointInside(vB1))
+            {
+               return true;
+            }
+
+            double vA1x = vA1.getX();
+            double vA1y = vA1.getY();
+            double vA2x = vA2.getX();
+            double vA2y = vA2.getY();
+            double vB1x = vB1.getX();
+            double vB1y = vB1.getY();
+            double vB2x = vB2.getX();
+            double vB2y = vB2.getY();
+            boolean intersection = EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(vA1x, vA1y, vA2x, vA2y, vB1x, vB1y, vB2x, vB2y, null);
+            if (intersection)
+            {
+               return true;
+            }
+         }
+      }
+
+      return false;
+   }
+
+   /**
+    * Precondition: polygons aren't intersecting.
+    *
+    * This is brute force and O(n^2), it is slower than {@link ConvexPolygonTools#computeMinimumDistancePoints}, but provides a simpler
+    * alternative is debugging is required
+    */
+   public static double distanceBetweenNonIntersectingPolygons(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   {
+      double minDistance = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
+      {
+         for (int j = 0; j < polygonB.getNumberOfVertices(); j++)
+         {
+            double vA1x = polygonA.getVertex(i).getX();
+            double vA1y = polygonA.getVertex(i).getY();
+            double vA2x = polygonA.getNextVertex(i).getX();
+            double vA2y = polygonA.getNextVertex(i).getY();
+            double vB1x = polygonB.getVertex(j).getX();
+            double vB1y = polygonB.getVertex(j).getY();
+            double vB2x = polygonB.getNextVertex(j).getX();
+            double vB2y = polygonB.getNextVertex(j).getY();
+            double distance = EuclidGeometryTools.closestPoint2DsBetweenTwoLineSegment2Ds(vA1x, vA1y, vA2x, vA2y, vB1x, vB1y, vB2x, vB2y, null, null);
+            minDistance = Math.min(minDistance, distance);
+         }
+      }
+
+      return minDistance;
+   }
+
    private transient final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
 
    //TODO do something smarter here

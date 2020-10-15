@@ -51,6 +51,10 @@ public class GradientDescentStepConstraintInput
     */
    private PlanarRegionsList planarRegionsList = null;
 
+   /**
+    * Will terminate if closer than this amount to stance foot
+    */
+   private double minimumClearanceFromStanceFoot = 0.0;
 
    public GradientDescentStepConstraintInput()
    {
@@ -72,7 +76,7 @@ public class GradientDescentStepConstraintInput
       this.wiggleParameters.set(wiggleParameters);
    }
 
-   public void setStanceFootPolygon(ConvexPolygon2D stanceFootPolygon)
+   public void setStanceFootPolygon(ConvexPolygon2DReadOnly stanceFootPolygon)
    {
       this.stanceFootPolygon.set(stanceFootPolygon);
    }
@@ -96,6 +100,11 @@ public class GradientDescentStepConstraintInput
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
+   }
+
+   public void setMinimumClearanceFromStanceFoot(double minimumClearanceFromStanceFoot)
+   {
+      this.minimumClearanceFromStanceFoot = minimumClearanceFromStanceFoot;
    }
 
    public ConvexPolygon2D getInitialStepPolygon()
@@ -133,6 +142,11 @@ public class GradientDescentStepConstraintInput
       return planarRegionsList;
    }
 
+   public double getMinimumClearanceFromStanceFoot()
+   {
+      return minimumClearanceFromStanceFoot;
+   }
+
    public void clear()
    {
       initialStepPolygon.clear();
@@ -141,6 +155,7 @@ public class GradientDescentStepConstraintInput
       footstepInRegionFrame.setToNaN();
       localToWorld.setToNaN();
       planarRegionsList = null;
+      minimumClearanceFromStanceFoot = 0.0;
    }
 
    void checkInputs()

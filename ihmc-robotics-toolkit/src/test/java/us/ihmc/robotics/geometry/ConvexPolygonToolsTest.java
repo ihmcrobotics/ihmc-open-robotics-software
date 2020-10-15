@@ -1,21 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertNotNull;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -38,6 +26,17 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNotNull;
+import static us.ihmc.robotics.Assert.fail;
 
 public class ConvexPolygonToolsTest
 {
@@ -1367,6 +1366,77 @@ public class ConvexPolygonToolsTest
          fail("Doubles are not equal in either order.");
       }
    }
+
+
+   @Test
+   public void testBruteForceIntersectionCheck1()
+   {
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(-0.5, -0.5);
+      unitSquare.addVertex(-0.5, 0.5);
+      unitSquare.addVertex(0.5, 0.5);
+      unitSquare.addVertex(0.5, -0.5);
+      unitSquare.update();
+
+      ConvexPolygon2D testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(-0.5, -0.5);
+      Assertions.assertTrue(ConvexPolygonTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(0.0, 1.0);
+      Assertions.assertTrue(ConvexPolygonTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(1.0, 0.0);
+      Assertions.assertTrue(ConvexPolygonTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(0.0, -1.0);
+      Assertions.assertTrue(ConvexPolygonTools.arePolygonsIntersecting(unitSquare, testPolygon));
+   }
+
+   @Test
+   public void testBruteForceIntersectionCheck2()
+   {
+      int numTests = 10000;
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      Random random = new Random(439204);
+
+      for (int i = 0; i < numTests; i++)
+      {
+         ConvexPolygon2D polygon1 = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 2.0, 4);
+         ConvexPolygon2D polygon2 = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 2.0, 4);
+
+         double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(polygon1, polygon2);
+         boolean intersectionDetected = ConvexPolygonTools.arePolygonsIntersecting(polygon1, polygon2);
+
+         Assertions.assertEquals(intersectionDetected, intersectionArea > 1e-8);
+      }
+   }
+
+   @Test
+   public void testBruteForceDistanceCheck1()
+   {
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(-0.5, -0.5);
+      unitSquare.addVertex(-0.5, 0.5);
+      unitSquare.addVertex(0.5, 0.5);
+      unitSquare.addVertex(0.5, -0.5);
+      unitSquare.update();
+
+      double distanceToCheck = 0.15;
+
+      ConvexPolygon2D testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(-1.0 - distanceToCheck, 0.0);
+      Assertions.assertTrue(Math.abs(ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(1.0 + distanceToCheck, 0.0);
+      Assertions.assertTrue(Math.abs(ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(0.0, 1.0 + distanceToCheck);
+      Assertions.assertTrue(Math.abs(ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(0.0, -1.0 - distanceToCheck);
+      Assertions.assertTrue(Math.abs(ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+   }
+
 
    private void assertEqualsInEitherOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly actual0, Point2DReadOnly actual1)
    {

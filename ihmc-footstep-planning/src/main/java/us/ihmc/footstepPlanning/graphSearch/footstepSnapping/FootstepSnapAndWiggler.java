@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
@@ -178,6 +179,12 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          planarRegionToPack.set(planarRegionsList.getPlanarRegion(regionIndex));
       }
 
+      FootstepSnapData stanceStepSnapData = null;
+      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      {
+         stanceStepSnapData = snapDataHolder.get(stanceStep);
+      }
+
       DiscreteFootstepTools.getFootPolygon(footstepToWiggle, footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide()), footPolygon);
       tempTransform.set(snapData.getSnapTransform());
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
@@ -215,6 +222,20 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
             gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
          }
 
+         if (stanceStepSnapData != null && regionIndex == stanceStepSnapData.getRegionIndex())
+         {
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+            tempTransform.set(stanceStepSnapData.getSnapTransform());
+            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+            ConvexPolygon2D stancePolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+            gradientDescentStepConstraintInput.setStanceFootPolygon(stancePolygonInRegionFrame);
+
+            if (parameters.getMinClearanceFromStance() > 0.0)
+            {
+               gradientDescentStepConstraintInput.setMinimumClearanceFromStanceFoot(parameters.getMinClearanceFromStance());
+            }
+         }
+
          wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
       }
       else
@@ -245,10 +266,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
 
-      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (stanceStepSnapData != null)
       {
-         FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
-
          // check for overlap
          boolean overlapDetected = stepsAreTooClose(footstepToWiggle, snapData, stanceStep, stanceStepSnapData);
          if (overlapDetected)
@@ -290,13 +309,13 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       polyon1.applyTransform(transform1, false);
       polyon2.applyTransform(transform2, false);
 
-      boolean intersection = DiscreteFootstepTools.arePolygonsIntersecting(polyon1, polyon2);
+      boolean intersection = ConvexPolygonTools.arePolygonsIntersecting(polyon1, polyon2);
       if (intersection)
       {
          return true;
       }
 
-      double distance = DiscreteFootstepTools.distanceBetweenPolygons(polyon1, polyon2);
+      double distance = ConvexPolygonTools.distanceBetweenNonIntersectingPolygons(polyon1, polyon2);
       return distance < parameters.getMinClearanceFromStance();
    }
 
