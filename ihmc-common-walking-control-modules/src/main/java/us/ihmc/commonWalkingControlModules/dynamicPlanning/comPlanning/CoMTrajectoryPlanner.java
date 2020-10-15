@@ -182,11 +182,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
          throw new IllegalArgumentException("The contact sequence is not valid.");
 
-      if (maintainInitialCoMVelocityContinuity)
-      {
-         insertKnotForContinuity(contactSequence);
-         contactSequence = contactSequenceInternal;
-      }
+//      if (maintainInitialCoMVelocityContinuity)
+//      {
+//         insertKnotForContinuity(contactSequence);
+//         contactSequence = contactSequenceInternal;
+//      }
 
       indexHandler.update(contactSequence);
 
@@ -319,7 +319,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       int transition = 0;
       // add a moveable waypoint for the center of mass velocity constraint
-      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing())
+      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing() && contactSequence.size() > 2)
       {
          setCoMVelocityConstraint(currentCoMVelocity);
          setCoMPositionContinuity(contactSequence, 0, 1);
