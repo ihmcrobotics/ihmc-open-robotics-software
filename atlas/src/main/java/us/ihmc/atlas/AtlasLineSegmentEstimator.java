@@ -92,7 +92,7 @@ public class AtlasLineSegmentEstimator
    public AtlasLineSegmentEstimator()
    {
       // System.out.println(System.getProperty("java.library.path"));
-      System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//      System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
       // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
       new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, this::planarRegionsListCallback);
