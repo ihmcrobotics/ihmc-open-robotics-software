@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LineDetectionTools
 {
-   public static Vec4iVector getFLDLinesFromImage(Mat image)
+   public static Vec4iVector getCannyHoughLinesFromImage(Mat image)
    {
       Vec4iVector lines = new Vec4iVector();
       Mat gray = new Mat();
