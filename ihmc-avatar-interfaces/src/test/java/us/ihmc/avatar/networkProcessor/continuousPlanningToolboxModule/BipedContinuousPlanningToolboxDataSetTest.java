@@ -62,7 +62,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -765,7 +765,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       {
          Point3DReadOnly pointReached = outputFromPlannerReference.get().getGoalPose().getPosition();
          Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
-         if (pointReached.distanceXY(goalPosition) > LatticeNode.gridSizeXY)
+         if (pointReached.distanceXY(goalPosition) > LatticePoint.gridSizeXY)
          {
             message += "Final goal pose was not correct, meaning it did not reach the goal.\n";
             message += "Reached ( " + numberFormat.format(pointReached.getX()) + ", " + numberFormat.format(pointReached.getY()) + ", " +
@@ -879,11 +879,11 @@ public class BipedContinuousPlanningToolboxDataSetTest
       Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
       double goalYaw = dataSet.getPlannerInput().getGoalYaw();
 
-      if (goalPosition.distanceXY(actualGoal.getPosition()) > 3.0 * LatticeNode.gridSizeXY)
+      if (goalPosition.distanceXY(actualGoal.getPosition()) > 3.0 * LatticePoint.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + actualGoal.getPosition() + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
       {
-         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, actualGoal.getOrientation().getYaw()) > LatticeNode.gridSizeYaw)
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, actualGoal.getOrientation().getYaw()) > LatticePoint.gridSizeYaw)
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + actualGoal.getOrientation().getYaw() + ", trying to get to " + goalYaw;
       }
 
