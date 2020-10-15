@@ -87,7 +87,7 @@ public class AStarFootstepPlanner
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
       this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
-      this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics);
+      this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics, snapper);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new FootstepPlannerEdgeData(allVariables.size());
@@ -314,8 +314,6 @@ public class AStarFootstepPlanner
       iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
    }
 
-   private final Pose2D endNodePose = new Pose2D();
-
    public boolean checkCustomTerminationConditions()
    {
       if (customTerminationConditions.isEmpty())
@@ -323,13 +321,15 @@ public class AStarFootstepPlanner
          return false;
       }
 
-      FootstepGraphNode endNode = completionChecker.getEndNode();
-      endNodePose.set(endNode.getSecondStep().getX(), endNode.getSecondStep().getY(), endNode.getSecondStep().getYaw());
       int endNodePathSize = completionChecker.getEndNodePathSize();
-
       for (int i = 0; i < customTerminationConditions.size(); i++)
       {
-         boolean terminatePlanner = customTerminationConditions.get(i).terminatePlanner(stopwatch.totalElapsed(), iterations, endNodePose, endNodePathSize);
+         boolean terminatePlanner = customTerminationConditions.get(i)
+                                                               .terminatePlanner(stopwatch.totalElapsed(),
+                                                                                 iterations,
+                                                                                 completionChecker.getEndNodeEndStepTransform(),
+                                                                                 completionChecker.getEndNodeStartStepTransform(),
+                                                                                 endNodePathSize);
          if (terminatePlanner)
          {
             return true;

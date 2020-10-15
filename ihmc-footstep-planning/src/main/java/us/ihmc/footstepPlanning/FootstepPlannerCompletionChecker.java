@@ -2,7 +2,10 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -25,19 +28,26 @@ public class FootstepPlannerCompletionChecker
    private double goalYawProximity;
 
    private FootstepGraphNode startNode, endNode;
+   private final RigidBodyTransform endNodeEndStepTransform, endNodeStartStepTransform;
    private int endNodePathSize;
    private SideDependentList<DiscreteFootstep> goalNodes;
    private double endNodeCost;
+   private final FootstepSnapperReadOnly snapper;
 
    private final SquaredUpStepComparator squaredUpStepComparator = new SquaredUpStepComparator();
 
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
                                            AStarFootstepPlannerIterationConductor iterationConductor,
-                                           FootstepPlannerHeuristicCalculator heuristics)
+                                           FootstepPlannerHeuristicCalculator heuristics,
+                                           FootstepSnapperReadOnly snapper)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.iterationConductor = iterationConductor;
       this.heuristics = heuristics;
+      this.snapper = snapper;
+
+      endNodeEndStepTransform = new RigidBodyTransform();
+      endNodeStartStepTransform = new RigidBodyTransform();
    }
 
    public void initialize(FootstepGraphNode startNode, SideDependentList<DiscreteFootstep> goalNodes, double goalDistanceProximity, double goalYawProximity)
@@ -105,6 +115,9 @@ public class FootstepPlannerCompletionChecker
             endNode = childNode;
             endNodeCost = cost;
             endNodePathSize = iterationConductor.getGraph().getPathLengthFromStart(endNode);
+
+            endNodeEndStepTransform.set(snapper.snapFootstep(endNode.getSecondStep()).getSnappedStepTransform(endNode.getSecondStep()));
+            endNodeStartStepTransform.set(snapper.snapFootstep(endNode.getFirstStep()).getSnappedStepTransform(endNode.getFirstStep()));
          }
       }
 
@@ -124,6 +137,16 @@ public class FootstepPlannerCompletionChecker
    public int getEndNodePathSize()
    {
       return endNodePathSize;
+   }
+
+   public RigidBodyTransform getEndNodeStartStepTransform()
+   {
+      return endNodeStartStepTransform;
+   }
+
+   public RigidBodyTransform getEndNodeEndStepTransform()
+   {
+      return endNodeEndStepTransform;
    }
 
    private static class SquaredUpStepComparator implements Comparator<FootstepGraphNode>

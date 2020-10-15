@@ -45,6 +45,8 @@ public class TraverseStairsExecuteStepsState implements State
    @Override
    public void onEntry()
    {
+      clearWalkingCompleteFlag();
+
       FootstepPlannerOutput footstepPlannerOutput = this.footstepPlannerOutput.get();
       if (footstepPlannerOutput == null)
       {
@@ -53,7 +55,6 @@ public class TraverseStairsExecuteStepsState implements State
 
       FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0);
-      walkingComplete.set(false);
       robotInterface.requestWalk(footstepDataListMessage);
    }
 
@@ -67,6 +68,11 @@ public class TraverseStairsExecuteStepsState implements State
    public boolean isDone(double timeInState)
    {
       return walkingIsComplete() && !planEndsAtGoal();
+   }
+
+   public void clearWalkingCompleteFlag()
+   {
+      walkingComplete.set(false);
    }
 
    boolean planEndsAtGoal()
