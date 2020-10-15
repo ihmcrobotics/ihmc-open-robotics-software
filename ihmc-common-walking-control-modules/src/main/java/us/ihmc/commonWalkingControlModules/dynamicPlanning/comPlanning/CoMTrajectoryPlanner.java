@@ -241,16 +241,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final SettableContactStateProvider startContactSequenceForContinuity = new SettableContactStateProvider();
    private final SettableContactStateProvider nextContactSequenceForContinuity = new SettableContactStateProvider();
-   private static final double defaultContinuitySegmentDuration = 0.15;
+   private static final double defaultContinuitySegmentDuration = 0.2;
    private final FramePoint3D fakeContinuityPosition = new FramePoint3D();
 
    private void insertKnotForContinuity(List<? extends ContactStateProvider> contactSequence)
    {
-      double initialSegmentDuration = contactSequence.get(0).getTimeInterval().getDuration();
-      boolean isInitialSegmentLongEnough = true;
-      double continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * initialSegmentDuration);
-      if (defaultContinuitySegmentDuration > 0.5 * initialSegmentDuration)
-         isInitialSegmentLongEnough = false;
 
       if (contactSequence.size() < 3)
       {
@@ -258,6 +253,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          double endTime = contactSequence.get(0).getTimeInterval().getEndTime();
          FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
          FramePoint3DReadOnly endPosition = contactSequence.get(0).getCopEndPosition();
+         double initialSegmentDuration = contactSequence.get(0).getTimeInterval().getDuration();
+         double continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * initialSegmentDuration);
 
          fakeContinuityPosition.interpolate(startPosition, endPosition, continuitySegmentDuration / initialSegmentDuration);
          startContactSequenceForContinuity.setStartCopPosition(startPosition);
@@ -281,7 +278,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          double duration = nextEndTime - startTime;
          double minDuration = Math.min(0.01, 0.25 * duration);
          double maxAdjustmentDuration = nextEndTime - minDuration;
-         double adjustmentDuration = Math.min(0.2, maxAdjustmentDuration);
+         double adjustmentDuration = Math.min(0.2, Math.min(0.25 * duration, maxAdjustmentDuration));
 //         continuitySegmentDuration = Math.min(defaultContinuitySegmentDuration, 0.5 * (nextEndTime - startTime));
 //         FramePoint3DReadOnly startPosition = contactSequence.get(0).getCopStartPosition();
 //         FramePoint3DReadOnly endPosition = contactSequence.get(1).getCopEndPosition();

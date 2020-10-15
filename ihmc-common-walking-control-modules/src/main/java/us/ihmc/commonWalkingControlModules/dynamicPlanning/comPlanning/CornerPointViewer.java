@@ -17,7 +17,7 @@ public class CornerPointViewer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double size = 0.002;
+   private static final double size = 0.005;
    private static final int maxPoints = 20;
 
    private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
