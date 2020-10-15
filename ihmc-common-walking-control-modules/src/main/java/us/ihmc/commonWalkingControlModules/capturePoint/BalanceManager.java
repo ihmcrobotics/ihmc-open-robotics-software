@@ -153,7 +153,7 @@ public class BalanceManager
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
-   private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
+   private final CoMTrajectoryPlanner comTrajectoryPlanner;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                          WalkingControllerParameters walkingControllerParameters,
@@ -208,7 +208,6 @@ public class BalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      ((CoMTrajectoryPlanner) comTrajectoryPlanner).setMaintainInitialCoMVelocityContinuity(true);
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, defaultSupportPolygon, registry);
@@ -222,7 +221,7 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
+         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
 //         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -576,6 +575,8 @@ public class BalanceManager
       inFinalTransfer.set(false);
       currentStateDuration.set(Double.NaN);
 
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
+
       initializeForStanding = true;
 
       endTick();
@@ -595,6 +596,7 @@ public class BalanceManager
       timeInSupportSequence.set(currentTiming.getTransferTime());
       currentStateDuration.set(currentTiming.getStepTime());
 
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       initializeForSingleSupport = true;
       icpPlannerDone.set(false);
    }
@@ -617,6 +619,7 @@ public class BalanceManager
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
       initializeForStanding = true;
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
       icpPlannerDone.set(false);
    }
@@ -638,6 +641,7 @@ public class BalanceManager
       inSingleSupport.set(false);
       inFinalTransfer.set(true);
       initializeForStanding = true;
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
       icpPlannerDone.set(false);
    }
@@ -660,6 +664,7 @@ public class BalanceManager
 
       inFinalTransfer.set(false);
       inSingleSupport.set(false);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
       initializeForTransfer = true;
       icpPlannerDone.set(false);
