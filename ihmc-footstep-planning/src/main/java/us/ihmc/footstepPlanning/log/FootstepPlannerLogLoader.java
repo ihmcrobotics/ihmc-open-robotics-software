@@ -477,9 +477,9 @@ public class FootstepPlannerLogLoader
    private static FootstepGraphNode readNode(String dataFileString)
    {
       int[] csv = getIntCSV(true, dataFileString);
-      DiscreteFootstep startStep = new DiscreteFootstep(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
-      DiscreteFootstep endStep = new DiscreteFootstep(csv[4], csv[5], csv[6], RobotSide.values[csv[7]]);
-      return new FootstepGraphNode(endStep, startStep);
+      DiscreteFootstep firstStep = new DiscreteFootstep(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
+      DiscreteFootstep secondStep = new DiscreteFootstep(csv[4], csv[5], csv[6], RobotSide.values[csv[7]]);
+      return new FootstepGraphNode(firstStep, secondStep);
    }
 
    private static RigidBodyTransform readTransform(String dataFileLine)

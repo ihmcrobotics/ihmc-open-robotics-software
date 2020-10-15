@@ -82,8 +82,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
-      idealStepHeuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(idealStep, stanceStep)));
-      heuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(candidateStep, stanceStep)));
+      idealStepHeuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(stanceStep, idealStep)));
+      heuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(stanceStep, candidateStep)));
       double deltaHeuristics = idealStepHeuristicCost.getDoubleValue() - heuristicCost.getDoubleValue();
 
       if(deltaHeuristics > 0.0)

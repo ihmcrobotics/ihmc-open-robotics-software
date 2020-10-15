@@ -130,15 +130,15 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    public void doFullExpansion(FootstepGraphNode nodeToExpand, List<FootstepGraphNode> fullExpansionToPack)
    {
       fullExpansionToPack.clear();
-      RobotSide stepSide = nodeToExpand.getStartSide();
+      RobotSide stepSide = nodeToExpand.getFirstStepSide();
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
          double stepLength = xOffsets.get(i);
          double stepWidth = stepSide.negateIfRightSide(yOffsets.get(i));
          double stepYaw = stepSide.negateIfRightSide(yawOffsets.get(i));
-         DiscreteFootstep childStep = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, nodeToExpand.getEndStep());
-         FootstepGraphNode childNode = new FootstepGraphNode(childStep, nodeToExpand.getEndStep());
+         DiscreteFootstep childStep = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, nodeToExpand.getSecondStep());
+         FootstepGraphNode childNode = new FootstepGraphNode(nodeToExpand.getSecondStep(), childStep);
 
          if (!fullExpansionToPack.contains(childNode))
             fullExpansionToPack.add(childNode);
@@ -158,20 +158,20 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)
    {
-      DiscreteFootstep idealStep = idealStepCalculator.computeIdealStep(stanceNode.getEndStep(), stanceNode.getStartStep());
+      DiscreteFootstep idealStep = idealStepCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
 
       int minXYManhattanDistance = computeMinXYManhattanDistance(listToFilter, idealStep);
       int minYawDistance = computeMinYawDistance(listToFilter, idealStep);
 
       listToFilter.removeIf(node ->
                             {
-                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node.getEndStep()) - minXYManhattanDistance;
+                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node.getSecondStep()) - minXYManhattanDistance;
                                if (!xyExpansionMask.contains(xyManhattanDistance))
                                {
                                   return true;
                                }
 
-                               int yawDistance = idealStep.computeYawIndexDistance(node.getEndStep()) - minYawDistance;
+                               int yawDistance = idealStep.computeYawIndexDistance(node.getSecondStep()) - minYawDistance;
                                return !yawExpansionMask.contains(yawDistance);
                             });
    }
@@ -181,7 +181,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       int minYawDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getEndStep());
+         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getSecondStep());
          if (yawDistance < minYawDistance)
             minYawDistance = yawDistance;
       }
@@ -193,7 +193,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       int minXYManhattanDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i).getEndStep());
+         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i).getSecondStep());
          if (xyManhattanDistance < minXYManhattanDistance)
             minXYManhattanDistance = xyManhattanDistance;
       }
@@ -206,7 +206,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
 
       void update(FootstepGraphNode stanceNode, IdealStepCalculatorInterface idealStepCalculator)
       {
-         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getEndStep(), stanceNode.getStartStep());
+         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
       }
 
       @Override
@@ -214,8 +214,8 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       {
          Objects.requireNonNull(idealStep);
 
-         double d1 = calculateStepProximity(node1.getEndStep(), idealStep);
-         double d2 = calculateStepProximity(node2.getEndStep(), idealStep);
+         double d1 = calculateStepProximity(node1.getSecondStep(), idealStep);
+         double d2 = calculateStepProximity(node2.getSecondStep(), idealStep);
          return Double.compare(d1, d2);
       }
 

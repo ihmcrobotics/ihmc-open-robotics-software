@@ -33,24 +33,24 @@ public class FootstepGraphNodeTest
          assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
 
-         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing + 0.5, ySwing, yawSwing, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xSwing + 0.5, ySwing, yawSwing, stanceSide.getOppositeSide()), new DiscreteFootstep(xStance, yStance, yawStance, stanceSide));
          assertFalse(nodeA.equals(nodeB));
-         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing + 0.5, yawSwing, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xSwing, ySwing + 0.5, yawSwing, stanceSide.getOppositeSide()), new DiscreteFootstep(xStance, yStance, yawStance, stanceSide));
          assertFalse(nodeA.equals(nodeB));
-         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide.getOppositeSide()), new DiscreteFootstep(xStance, yStance, yawStance, stanceSide));
          assertFalse(nodeA.equals(nodeB));
 
          // assert exception thrown
          try
          {
-            nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide));
+            nodeB = new FootstepGraphNode(new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide), new DiscreteFootstep(xStance, yStance, yawStance, stanceSide));
             fail();
          }
          catch (Exception e)
          {
          }
 
-         nodeB = new FootstepGraphNode(nodeA.getStartStep(), nodeA.getEndStep());
+         nodeB = new FootstepGraphNode(nodeA.getSecondStep(), nodeA.getFirstStep());
          assertFalse(nodeA.equals(nodeB));
       }
    }

@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
@@ -66,7 +65,7 @@ public class FootstepPlannerCompletionChecker
    {
       if (isProximityModeEnabled() && iterationData.getParentNode() != null)
       {
-         DiscreteFootstep stanceStep = iterationData.getParentNode().getEndStep();
+         DiscreteFootstep stanceStep = iterationData.getParentNode().getSecondStep();
          squaredUpStepComparator.setIdealSquaredUpStep(stanceStep, footstepPlannerParameters.getIdealFootstepWidth());
          iterationData.getValidChildNodes().sort(squaredUpStepComparator);
          FootstepGraphNode candidateStepInProximity = iterationData.getValidChildNodes().get(0);
@@ -86,9 +85,10 @@ public class FootstepPlannerCompletionChecker
          for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
          {
             FootstepGraphNode childNode = iterationData.getValidChildNodes().get(i);
-            if (childNode.getEndStep().equals(goalNodes.get(childNode.getEndSide())))
+            if (childNode.getSecondStep().equals(goalNodes.get(childNode.getSecondStepSide())))
             {
-               endNode = new FootstepGraphNode(goalNodes.get(childNode.getStartSide()), goalNodes.get(childNode.getEndSide()));
+               RobotSide achievedGoalSide = childNode.getSecondStepSide();
+               endNode = new FootstepGraphNode(goalNodes.get(achievedGoalSide), goalNodes.get(achievedGoalSide.getOppositeSide()));
                iterationConductor.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
                return childNode;
             }
@@ -132,8 +132,8 @@ public class FootstepPlannerCompletionChecker
 
       public int compare(FootstepGraphNode nodeA, FootstepGraphNode nodeB)
       {
-         double positionDistanceA = EuclidCoreTools.norm(nodeA.getEndStep().getX() - squaredUpStep.getX(), nodeA.getEndStep().getY() - squaredUpStep.getY());
-         double positionDistanceB = EuclidCoreTools.norm(nodeB.getEndStep().getX() - squaredUpStep.getX(), nodeB.getEndStep().getY() - squaredUpStep.getY());
+         double positionDistanceA = EuclidCoreTools.norm(nodeA.getSecondStep().getX() - squaredUpStep.getX(), nodeA.getSecondStep().getY() - squaredUpStep.getY());
+         double positionDistanceB = EuclidCoreTools.norm(nodeB.getSecondStep().getX() - squaredUpStep.getX(), nodeB.getSecondStep().getY() - squaredUpStep.getY());
 
          double yawScalar = 3.0;
          double yawDistanceA = yawScalar * nodeA.getStanceAngle();

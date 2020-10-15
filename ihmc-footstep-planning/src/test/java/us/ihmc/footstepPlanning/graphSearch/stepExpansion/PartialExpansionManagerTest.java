@@ -24,12 +24,12 @@ public class PartialExpansionManagerTest
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 
       List<FootstepGraphNode> allNodes = new ArrayList<>();
-      DiscreteFootstep swingNode = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
+      DiscreteFootstep startOfSwingStep = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
       for (int i = 0; i < maxBranchFactor; i++)
       {
          for (int j = 0; j < numberOfPartialExpansions; j++)
          {
-            allNodes.add(new FootstepGraphNode(new DiscreteFootstep(i, j, 0, RobotSide.LEFT), swingNode));
+            allNodes.add(new FootstepGraphNode(startOfSwingStep, new DiscreteFootstep(i, j, 0, RobotSide.LEFT)));
          }
       }
 
@@ -57,10 +57,10 @@ public class PartialExpansionManagerTest
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 
       List<FootstepGraphNode> allNodes = new ArrayList<>();
-      DiscreteFootstep swingNode = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
+      DiscreteFootstep startOfSwingStep = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
       for (int i = 0; i < numberOfNodes; i++)
       {
-         allNodes.add(new FootstepGraphNode(new DiscreteFootstep(i, 0, 0, RobotSide.LEFT), swingNode));
+         allNodes.add(new FootstepGraphNode(startOfSwingStep, new DiscreteFootstep(i, 0, 0, RobotSide.LEFT)));
       }
 
       partialExpansionManager.initialize(allNodes);

@@ -100,7 +100,7 @@ public class AStarFootstepPlanner
 
                                                               edgeData.setParentNode(edge.getStartNode());
                                                               edgeData.setChildNode(edge.getEndNode());
-                                                              edgeData.getEndStepSnapData().set(snapper.snapFootstep(edge.getEndNode().getEndStep()));
+                                                              edgeData.getEndStepSnapData().set(snapper.snapFootstep(edge.getEndNode().getSecondStep()));
 
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                               stepCostCalculator.resetLoggedVariables();
@@ -246,9 +246,9 @@ public class AStarFootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          FootstepGraphNode footstepNode = path.get(i);
-         FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getEndStep(), footstepNode.getStartStep(), true);
-         PlannedFootstep footstep = new PlannedFootstep(footstepNode.getEndSide());
-         footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getEndStep()));
+         FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
+         PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
+         footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
@@ -302,11 +302,11 @@ public class AStarFootstepPlanner
       {
          loggedData = new FootstepPlannerIterationData();
          loggedData.setParentNode(iterationData.getParentNode());
-         DiscreteFootstep idealFootstep = idealStepCalculator.computeIdealStep(iterationData.getParentNode().getEndStep(),
-                                                                                  iterationData.getParentNode().getStartStep());
-         loggedData.setIdealChildNode(new FootstepGraphNode(idealFootstep, iterationData.getParentNode().getEndStep()));
-         loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getEndStep()));
-         loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getStartStep()));
+         DiscreteFootstep idealFootstep = idealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
+                                                                                  iterationData.getParentNode().getFirstStep());
+         loggedData.setIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), idealFootstep));
+         loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getSecondStep()));
+         loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getFirstStep()));
          this.iterationData.add(loggedData);
       }
 
@@ -324,7 +324,7 @@ public class AStarFootstepPlanner
       }
 
       FootstepGraphNode endNode = completionChecker.getEndNode();
-      endNodePose.set(endNode.getEndStep().getX(), endNode.getEndStep().getY(), endNode.getEndStep().getYaw());
+      endNodePose.set(endNode.getSecondStep().getX(), endNode.getSecondStep().getY(), endNode.getSecondStep().getYaw());
       int endNodePathSize = completionChecker.getEndNodePathSize();
 
       for (int i = 0; i < customTerminationConditions.size(); i++)
@@ -415,7 +415,7 @@ public class AStarFootstepPlanner
 
       DiscreteFootstep initialStanceStep = new DiscreteFootstep(initialStancePose.getX(), initialStancePose.getY(), initialStancePose.getYaw(), initialStanceSide);
       DiscreteFootstep initialStartOfSwing = new DiscreteFootstep(initialSwingPose.getX(), initialSwingPose.getY(), initialSwingPose.getYaw(), initialStanceSide.getOppositeSide());
-      return new FootstepGraphNode(initialStanceStep, initialStartOfSwing);
+      return new FootstepGraphNode(initialStartOfSwing, initialStanceStep);
    }
 
    private static SideDependentList<DiscreteFootstep> createGoalSteps(Function<RobotSide, Pose3D> poses)

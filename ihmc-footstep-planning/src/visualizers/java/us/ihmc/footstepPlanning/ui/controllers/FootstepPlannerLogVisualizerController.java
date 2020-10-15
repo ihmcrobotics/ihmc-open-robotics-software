@@ -474,8 +474,8 @@ public class FootstepPlannerLogVisualizerController
       childTable.getSortOrder().add(expandedColumn);
       childTable.sort();
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOfSwingStepToVisualize, Pair.of(stepProperty.parentNode.getStartStep(), stepProperty.startStepSnapData));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StanceStepToVisualize, Pair.of(stepProperty.parentNode.getEndStep(), stepProperty.endStepSnapData));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOfSwingStepToVisualize, Pair.of(stepProperty.parentNode.getFirstStep(), stepProperty.startStepSnapData));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StanceStepToVisualize, Pair.of(stepProperty.parentNode.getSecondStep(), stepProperty.endStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
 
       childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
@@ -555,7 +555,7 @@ public class FootstepPlannerLogVisualizerController
       {
          if (newValue != null)
          {
-            messager.submitMessage(FootstepPlannerMessagerAPI.TouchdownStepToVisualize, Pair.of(newValue.graphNode.getEndStep(), newValue.edgeData.getEndStepSnapData()));
+            messager.submitMessage(FootstepPlannerMessagerAPI.TouchdownStepToVisualize, Pair.of(newValue.graphNode.getSecondStep(), newValue.edgeData.getEndStepSnapData()));
             selectedRow.set(newValue);
          }
       };
@@ -647,10 +647,10 @@ public class FootstepPlannerLogVisualizerController
          this.parentNode = iterationData.getParentNode();
          this.endStepSnapData = iterationData.getParentEndSnapData();
          this.startStepSnapData = iterationData.getParentStartSnapData();
-         endStepTransform.set(endStepSnapData.getSnappedStepTransform(parentNode.getEndStep()));
-         startStepTransform.set(startStepSnapData.getSnappedStepTransform(parentNode.getStartStep()));
+         endStepTransform.set(endStepSnapData.getSnappedStepTransform(parentNode.getSecondStep()));
+         startStepTransform.set(startStepSnapData.getSnappedStepTransform(parentNode.getFirstStep()));
 
-         DiscreteFootstep idealStep = iterationData.getIdealChildNode().getEndStep();
+         DiscreteFootstep idealStep = iterationData.getIdealChildNode().getSecondStep();
          FootstepSnapData idealStepSnapData = snapper.snapFootstep(idealStep);
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
@@ -675,22 +675,22 @@ public class FootstepPlannerLogVisualizerController
 
       public String getXIndex()
       {
-         return Integer.toString(parentNode.getEndStep().getXIndex());
+         return Integer.toString(parentNode.getSecondStep().getXIndex());
       }
 
       public String getYIndex()
       {
-         return Integer.toString(parentNode.getEndStep().getYIndex());
+         return Integer.toString(parentNode.getSecondStep().getYIndex());
       }
 
       public String getYawIndex()
       {
-         return Integer.toString(parentNode.getEndStep().getYawIndex());
+         return Integer.toString(parentNode.getSecondStep().getYawIndex());
       }
 
       public String getSide()
       {
-         return parentNode.getEndStep().getRobotSide().toString();
+         return parentNode.getSecondStep().getRobotSide().toString();
       }
    }
 
@@ -719,8 +719,8 @@ public class FootstepPlannerLogVisualizerController
          }
          else
          {
-            DiscreteFootstepTools.getSnappedStepTransform(graphNode.getEndStep(), snapData.getSnapTransform(), snappedEndStepTransform);
-            snapAndWiggledEndStepTransform.set(snapData.getSnappedStepTransform(graphNode.getEndStep()));
+            DiscreteFootstepTools.getSnappedStepTransform(graphNode.getSecondStep(), snapData.getSnapTransform(), snappedEndStepTransform);
+            snapAndWiggledEndStepTransform.set(snapData.getSnappedStepTransform(graphNode.getSecondStep()));
          }
       }
 
@@ -736,22 +736,22 @@ public class FootstepPlannerLogVisualizerController
 
       public String getXIndex()
       {
-         return Integer.toString(graphNode.getEndStep().getXIndex());
+         return Integer.toString(graphNode.getSecondStep().getXIndex());
       }
 
       public String getYIndex()
       {
-         return Integer.toString(graphNode.getEndStep().getYIndex());
+         return Integer.toString(graphNode.getSecondStep().getYIndex());
       }
 
       public String getYawIndex()
       {
-         return Integer.toString(graphNode.getEndStep().getYawIndex());
+         return Integer.toString(graphNode.getSecondStep().getYawIndex());
       }
 
       public String getSide()
       {
-         return graphNode.getEndStep().getRobotSide().toString();
+         return graphNode.getSecondStep().getRobotSide().toString();
       }
    }
 

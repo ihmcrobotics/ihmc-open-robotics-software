@@ -20,13 +20,13 @@ public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarItera
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
          FootstepGraphNode node = iterationData.getValidChildNodes().get(i);
-         occupancyMap.addOccupiedCell(new PlannerCell(node.getEndStep().getXIndex(), node.getEndStep().getYIndex()));
+         occupancyMap.addOccupiedCell(new PlannerCell(node.getSecondStep().getXIndex(), node.getSecondStep().getYIndex()));
       }
 
       for (int i = 0; i < iterationData.getInvalidChildNodes().size(); i++)
       {
          FootstepGraphNode node = iterationData.getInvalidChildNodes().get(i);
-         occupancyMap.addOccupiedCell(new PlannerCell(node.getEndStep().getXIndex(), node.getEndStep().getYIndex()));
+         occupancyMap.addOccupiedCell(new PlannerCell(node.getSecondStep().getXIndex(), node.getSecondStep().getYIndex()));
       }
    }
 

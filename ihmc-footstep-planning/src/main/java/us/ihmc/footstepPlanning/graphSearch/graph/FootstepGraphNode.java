@@ -5,40 +5,53 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+/**
+ * This object represents a node on the graph search by the footstep planner.
+ * A node is a robot "stance", i.e. a left footstep and right footstep.
+ * An edge represents a step, i.e. a transition between two stances.
+ */
 public class FootstepGraphNode
 {
-   private final DiscreteFootstep endStep;
-   private final DiscreteFootstep startStep;
-   private Pose2D midFootPose = null;
+   /**
+    * This is the start-of-swing step when stepping at this node. "First" refers to the step's sequencing
+    * Note that this node's parent's secondStep will also be this step
+    */
+   private final DiscreteFootstep firstStep;
+   /**
+    * This is the stance step when stepping at this node. "Second" refers to the step's sequencing
+    * Note that this node's children's firstStep will also be this step
+    */
+   private final DiscreteFootstep secondStep;
 
+   private Pose2D midFootPose = null;
    private final int hashCode;
 
-   public FootstepGraphNode(DiscreteFootstep endStep, DiscreteFootstep startStep)
+   public FootstepGraphNode(DiscreteFootstep firstStep, DiscreteFootstep secondStep)
    {
-      checkDifferentSides(endStep, startStep);
-      this.endStep = endStep;
-      this.startStep = startStep;
+      checkDifferentSides(firstStep, secondStep);
+      this.firstStep = firstStep;
+      this.secondStep = secondStep;
       this.hashCode = computeHashCode(this);
    }
 
-   public DiscreteFootstep getEndStep()
+   public DiscreteFootstep getFirstStep()
    {
-      return endStep;
+      return firstStep;
    }
 
-   public DiscreteFootstep getStartStep()
+   public DiscreteFootstep getSecondStep()
    {
-      return startStep;
+      return secondStep;
    }
 
-   public RobotSide getEndSide()
+   public RobotSide getFirstStepSide()
    {
-      return endStep.getRobotSide();
+      return firstStep.getRobotSide();
    }
 
-   public RobotSide getStartSide()
+   public RobotSide getSecondStepSide()
    {
-      return startStep.getRobotSide();
+      return secondStep.getRobotSide();
    }
 
    public Pose2D getOrComputeMidFootPose()
@@ -46,9 +59,9 @@ public class FootstepGraphNode
       if (midFootPose == null)
       {
          midFootPose = new Pose2D();
-         midFootPose.setX(EuclidCoreTools.interpolate(endStep.getX(), startStep.getX(), 0.5));
-         midFootPose.setY(EuclidCoreTools.interpolate(endStep.getY(), startStep.getY(), 0.5));
-         midFootPose.setYaw(AngleTools.interpolateAngle(endStep.getYaw(), startStep.getYaw(), 0.5));
+         midFootPose.setX(EuclidCoreTools.interpolate(secondStep.getX(), firstStep.getX(), 0.5));
+         midFootPose.setY(EuclidCoreTools.interpolate(secondStep.getY(), firstStep.getY(), 0.5));
+         midFootPose.setYaw(AngleTools.interpolateAngle(secondStep.getYaw(), firstStep.getYaw(), 0.5));
       }
 
       return midFootPose;
@@ -56,7 +69,7 @@ public class FootstepGraphNode
 
    public double getStanceAngle()
    {
-      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endStep.getYaw(), startStep.getYaw()));
+      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(firstStep.getYaw(), secondStep.getYaw()));
    }
 
    @Override
@@ -75,9 +88,9 @@ public class FootstepGraphNode
       if (getClass() != obj.getClass())
          return false;
       FootstepGraphNode other = (FootstepGraphNode) obj;
-      if(!endStep.equals(other.endStep))
+      if(!firstStep.equals(other.firstStep))
          return false;
-      if(!startStep.equals(other.startStep))
+      if(!secondStep.equals(other.secondStep))
          return false;
       return true;
    }
@@ -86,20 +99,20 @@ public class FootstepGraphNode
    {
       final int prime = 31;
       int result = 1;
-      result = prime * result + node.endStep.hashCode();
-      result = prime * result + node.startStep.hashCode();
+      result = prime * result + node.firstStep.hashCode();
+      result = prime * result + node.secondStep.hashCode();
       return result;
    }
 
    @Override
    public String toString()
    {
-      return "Footstep graph node:\n\t End " + endStep.toString() + "\n\t Start" + startStep.toString();
+      return "Footstep graph node:\n\t First " + firstStep.toString() + "\n\t Second" + secondStep.toString();
    }
 
-   private static void checkDifferentSides(DiscreteFootstep endStep, DiscreteFootstep startStep)
+   private static void checkDifferentSides(DiscreteFootstep firstStep, DiscreteFootstep secondStep)
    {
-      if (endStep.getRobotSide() == startStep.getRobotSide())
+      if (firstStep.getRobotSide() == secondStep.getRobotSide())
          throw new RuntimeException("Footstep graph node given two steps on the same side!");
    }
 }

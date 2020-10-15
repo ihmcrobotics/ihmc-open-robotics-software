@@ -2,13 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -70,7 +65,7 @@ public class FootstepPlannerHeuristicCalculator
          walkDistance = xyDistanceToGoal;
 
          /** TODO remove when {@link FootstepPlannerParametersReadOnly#getStepOnlyWithRequestedSide()} is removed */
-         if (node.getEndSide() == parameters.getStepOnlyWithRequestedSide())
+         if (node.getSecondStepSide() == parameters.getStepOnlyWithRequestedSide())
          {
             walkDistance += 0.5 * parameters.getIdealFootstepLength();
          }

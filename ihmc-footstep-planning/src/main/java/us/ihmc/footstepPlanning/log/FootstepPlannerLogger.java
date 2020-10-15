@@ -393,17 +393,17 @@ public class FootstepPlannerLogger
       }
       else
       {
-         DiscreteFootstep startStep = node.getStartStep();
-         DiscreteFootstep endStep = node.getEndStep();
+         DiscreteFootstep firstStep = node.getFirstStep();
+         DiscreteFootstep secondStep = node.getSecondStep();
          writeLine(numTabs, name + ":" +
-                   startStep.getXIndex() + "," +
-                   startStep.getYIndex() + "," +
-                   startStep.getYawIndex() + "," +
-                   startStep.getRobotSide().ordinal() + "," +
-                   endStep.getXIndex() + "," +
-                   endStep.getYIndex() + "," +
-                   endStep.getYawIndex() + "," +
-                   endStep.getRobotSide().ordinal());
+                   firstStep.getXIndex() + "," +
+                   firstStep.getYIndex() + "," +
+                   firstStep.getYawIndex() + "," +
+                   firstStep.getRobotSide().ordinal() + "," +
+                   secondStep.getXIndex() + "," +
+                   secondStep.getYIndex() + "," +
+                   secondStep.getYawIndex() + "," +
+                   secondStep.getRobotSide().ordinal());
       }
    }
 

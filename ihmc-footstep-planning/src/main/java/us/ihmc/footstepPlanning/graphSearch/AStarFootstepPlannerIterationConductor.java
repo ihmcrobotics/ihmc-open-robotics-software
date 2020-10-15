@@ -87,9 +87,9 @@ public class AStarFootstepPlannerIterationConductor
 
       for(FootstepGraphNode neighbor : neighbors)
       {
-         if(edgeChecker.isStepValid(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStep()))
+         if(edgeChecker.isStepValid(neighbor.getSecondStep(), nodeToExpand.getSecondStep(), nodeToExpand.getFirstStep()))
          {
-            double edgeCost = edgeCostCalculator.computeCost(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStep());
+            double edgeCost = edgeCostCalculator.computeCost(neighbor.getSecondStep(), nodeToExpand.getSecondStep(), nodeToExpand.getFirstStep());
             graph.checkAndSetEdge(nodeToExpand, neighbor, edgeCost);
             iterationData.getValidChildNodes().add(neighbor);
             stack.add(neighbor);
