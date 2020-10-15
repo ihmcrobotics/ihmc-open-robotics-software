@@ -63,12 +63,12 @@ public class FootstepPoseCheckerTest
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.15, 0.0, RobotSide.LEFT);
       DiscreteFootstep childNode = new DiscreteFootstep(0.3, -0.15, 0.0, RobotSide.RIGHT);
 
-      BipedalFootstepPlannerNodeRejectionReason rejectionReason = checker.checkStepValidity(childNode, stanceNode);
+      BipedalFootstepPlannerNodeRejectionReason rejectionReason = checker.checkStepValidity(childNode, stanceNode, null);
       assertNull(rejectionReason);
 
       snapper.setPlanarRegions(angledGround);
 
-      rejectionReason = checker.checkStepValidity(childNode, stanceNode);
+      rejectionReason = checker.checkStepValidity(childNode, stanceNode, null);
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED, rejectionReason);
 
       // TODO check that this doesn't cause the other rejection reasons to fail if the pitch is flat.
@@ -101,13 +101,13 @@ public class FootstepPoseCheckerTest
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(0.0, parameters.getIdealFootstepWidth(), snapDownToYaw(maxValue), RobotSide.LEFT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(0.0, parameters.getIdealFootstepWidth(), snapUpToYaw(minValue), RobotSide.LEFT);
 
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode));
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, parameters.getIdealFootstepWidth(), maxYaw, RobotSide.LEFT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, parameters.getIdealFootstepWidth(), maxYaw, RobotSide.LEFT), parentNode, null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, parameters.getIdealFootstepWidth(), minYaw, RobotSide.LEFT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, parameters.getIdealFootstepWidth(), minYaw, RobotSide.LEFT), parentNode, null));
    }
 
    @Test
@@ -137,13 +137,13 @@ public class FootstepPoseCheckerTest
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(0.0, -parameters.getIdealFootstepWidth(), -snapDownToYaw(maxValue), RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(0.0, -parameters.getIdealFootstepWidth(), -snapUpToYaw(minValue), RobotSide.RIGHT);
 
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode));
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, -parameters.getIdealFootstepWidth(), -maxYaw, RobotSide.RIGHT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, -parameters.getIdealFootstepWidth(), -maxYaw, RobotSide.RIGHT), parentNode, null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, -parameters.getIdealFootstepWidth(), -minYaw, RobotSide.RIGHT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(0.05, -parameters.getIdealFootstepWidth(), -minYaw, RobotSide.RIGHT), parentNode, null));
    }
 
    @Test
@@ -182,13 +182,13 @@ public class FootstepPoseCheckerTest
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapDownToYaw(maxValue), RobotSide.LEFT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapUpToYaw(minValue), RobotSide.LEFT);
 
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode));
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT), parentNode, null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT), parentNode, null));
    }
 
    @Test
@@ -227,13 +227,13 @@ public class FootstepPoseCheckerTest
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapDownToYaw(maxValue), RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapUpToYaw(minValue), RobotSide.RIGHT);
 
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode));
-      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
+      assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT), parentNode, null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT), parentNode));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT), parentNode, null));
    }
 
    @Test
@@ -271,7 +271,7 @@ public class FootstepPoseCheckerTest
 
       snapper.setPlanarRegions(planarRegionsList);
 
-      assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode));
+      assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
    }
 
 

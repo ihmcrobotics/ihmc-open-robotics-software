@@ -10,8 +10,7 @@ public class TunedFootstepPlannerParameters
    private double maxStepLength     ;
    private double maxStepWidth      ;
    private double maxStepYaw        ;
-   private double maxLeftStepZ      ;
-   private double maxRightStepZ     ;
+   private double maxStepZ          ;
    private double maxXYWiggle       ;
    private double maxYawWiggle      ;
    private double minFootholdPercent;
@@ -38,8 +37,7 @@ public class TunedFootstepPlannerParameters
       maxStepLength       = footstepPlannerParameters.getMaximumStepReach()               ;
       maxStepWidth        = footstepPlannerParameters.getMaximumStepWidth()               ;
       maxStepYaw          = footstepPlannerParameters.getMaximumStepYaw()                 ;
-      maxLeftStepZ        = footstepPlannerParameters.getMaximumLeftStepZ()               ;
-      maxRightStepZ        = footstepPlannerParameters.getMaximumRightStepZ()             ;
+      maxStepZ            = footstepPlannerParameters.getMaxStepZ()                       ;
       maxXYWiggle         = footstepPlannerParameters.getMaximumXYWiggleDistance()        ;
       maxYawWiggle        = footstepPlannerParameters.getMaximumYawWiggle()               ;
       minFootholdPercent  = footstepPlannerParameters.getMinimumFootholdPercent()         ;
@@ -62,8 +60,7 @@ public class TunedFootstepPlannerParameters
       footstepPlannerParameters.setMaximumStepReach(                      maxStepLength       );
       footstepPlannerParameters.setMaximumStepWidth(                      maxStepWidth        );
       footstepPlannerParameters.setMaximumStepYaw(                        maxStepYaw          );
-      footstepPlannerParameters.setMaximumLeftStepZ(                      maxLeftStepZ        );
-      footstepPlannerParameters.setMaximumRightStepZ(                     maxRightStepZ       );
+      footstepPlannerParameters.setMaximumStepZ(                          maxStepZ            );
       footstepPlannerParameters.setMaximumXYWiggleDistance(               maxXYWiggle         );
       footstepPlannerParameters.setMaximumYawWiggle(                      maxYawWiggle        );
       footstepPlannerParameters.setMinimumFootholdPercent(                minFootholdPercent  );
@@ -129,29 +126,14 @@ public class TunedFootstepPlannerParameters
       this.maxStepYaw = maxStepYaw;
    }
 
-   public double getMaxLeftStepZ()
+   public double getMaxStepZ()
    {
-      return maxLeftStepZ;
+      return maxStepZ;
    }
 
-   public void setMaxLeftStepZ(double maxStepZ)
+   public void setMaxStepZ(double maxStepZ)
    {
-      this.maxLeftStepZ = maxStepZ;
-   }
-
-   public double getMaxRightStepZ()
-   {
-      return maxRightStepZ;
-   }
-
-   public void setMaxRightStepZ(double maxStepZ)
-   {
-      this.maxRightStepZ = maxStepZ;
-   }
-
-   public double getMaxXYWiggle()
-   {
-      return maxXYWiggle;
+      this.maxStepZ = maxStepZ;
    }
 
    public void setMaxXYWiggle(double maxXYWiggle)

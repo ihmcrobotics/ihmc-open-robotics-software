@@ -43,6 +43,8 @@ public class FootstepPoseChecker
    private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
    private final YoDouble stepReachXY = new YoDouble("stepReachXY", registry);
    private final YoDouble stepYaw = new YoDouble("stepYaw", registry);
+   private final YoDouble swingHeight = new YoDouble("swingHeight", registry);
+   private final YoDouble swingReach = new YoDouble("swingReach", registry);
 
    private final YoBoolean stepIsPitchedBack = new YoBoolean("stepIsPitchedBack", registry);
    private final YoBoolean stepTooLow = new YoBoolean("stepTooLow", registry);
@@ -57,7 +59,7 @@ public class FootstepPoseChecker
       parentRegistry.addChild(registry);
    }
 
-   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
+   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwingStep)
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 
@@ -80,7 +82,7 @@ public class FootstepPoseChecker
       stepWidth.set(stepSide.negateIfRightSide(candidateFootPose.getY()));
       stepReachXY.set(EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth.getValue() - parameters.getIdealFootstepWidth())));
       stepHeight.set(candidateFootPose.getZ());
-      double maximumStepZ = stepSide == RobotSide.LEFT ? parameters.getMaximumLeftStepZ() : parameters.getMaximumRightStepZ();
+      double maximumStepZ = parameters.getMaxStepZ();
 
       if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {
@@ -163,28 +165,27 @@ public class FootstepPoseChecker
          return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
       }
 
-      // TODO
-//      // Check reach from start of swing
-//      FootstepNode grandParentNode;
-//      FootstepNodeSnapData grandparentNodeSnapData;
-//      double alphaSoS = parameters.getTranslationScaleFromGrandparentNode();
-//      if (alphaSoS > 0.0 && parentNodeSupplier != null && (grandParentNode = parentNodeSupplier.apply(stanceStep)) != null
-//          && (grandparentNodeSnapData = snapper.snapFootstepNode(grandParentNode)) != null)
-//      {
-//         startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getSnappedNodeTransform(grandParentNode));
-//         startOfSwingZUpFrame.update();
-//         candidateFootPose.changeFrame(startOfSwingZUpFrame);
-//         double swingHeight = candidateFootPose.getZ();
-//         double swingReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(candidateFootPose.getY()));
-//
-//         if (swingHeight > parameters.getMaximumStepZWhenSteppingUp())
-//         {
-//            if (swingReach > alphaSoS * parameters.getMaximumStepReachWhenSteppingUp())
-//            {
-//               return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-//            }
-//         }
-//      }
+      if (startOfSwingStep == null)
+      {
+         return null;
+      }
+
+      FootstepSnapData startOfSwingSnapData = snapper.snapFootstep(startOfSwingStep);
+      startOfSwingFrame.setTransformAndUpdate(startOfSwingSnapData.getSnappedStepTransform(startOfSwingStep));
+      startOfSwingZUpFrame.update();
+      candidateFootPose.changeFrame(startOfSwingZUpFrame);
+      swingHeight.set(candidateFootPose.getZ());
+      swingReach.set(EuclidCoreTools.norm(candidateFootPose.getX(), candidateFootPose.getY()));
+
+      if (Math.abs(swingHeight.getValue()) > parameters.getMaxSwingZ())
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.SWING_HEIGHT_TOO_LARGE;
+      }
+
+      if (swingReach.getValue() > parameters.getMaxSwingReach())
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.SWING_REACH_TOO_LARGE;
+      }
 
       return null;
    }

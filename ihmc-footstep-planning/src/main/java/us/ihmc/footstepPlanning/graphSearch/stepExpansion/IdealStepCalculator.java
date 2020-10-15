@@ -178,23 +178,14 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
    private DiscreteFootstep computeIdealStanceInternal(DiscreteFootstep stanceStep)
    {
-      boolean attemptSquareUp = attemptSquareUp(stanceStep);
-
       // If goal node is reachable, it's the ideal step
       DiscreteFootstep goalStep = goalSteps.get(stanceStep.getRobotSide().getOppositeSide());
-      if (!flatGroundMode() && nodeChecker.isStepValid(goalStep, stanceStep, null) && !attemptSquareUp)
+      if (!flatGroundMode() && nodeChecker.isStepValid(goalStep, stanceStep, null))
       {
          return goalStep;
       }
 
-      // Square up if requested
       Point2D midFootPoint = stanceStep.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-      if (attemptSquareUp)
-      {
-         double turnYaw = 0.0;
-         return turnInPlaceStep(stanceStep, midFootPoint, stanceStep.getRobotSide(), 0.5 * parameters.getIdealFootstepWidth(), turnYaw);
-      }
-
       RobotSide stanceSide = stanceStep.getRobotSide();
       double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
       int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
@@ -269,12 +260,6 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
          return new DiscreteFootstep(idealStep.getX(), idealStep.getY(), idealStep.getYaw(), stanceStep.getRobotSide().getOppositeSide());
       }
-   }
-
-   private boolean attemptSquareUp(DiscreteFootstep stanceStep)
-   {
-      RobotSide requestedStepSide = parameters.getStepOnlyWithRequestedSide();
-      return requestedStepSide != null && requestedStepSide != stanceStep.getRobotSide().getOppositeSide();
    }
 
    private static DiscreteFootstep turnInPlaceStep(DiscreteFootstep startStep, Point2DBasics midFootPoint, RobotSide stanceSide, double idealFootstepWidth, double turnYaw)

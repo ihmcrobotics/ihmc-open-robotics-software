@@ -27,6 +27,9 @@ float64 ideal_side_step_width -11.1
 # Returns the ideal length when walking backwards. This value is positive.
 float64 ideal_back_step_length -11.1
 
+# Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+float64 ideal_step_length_at_max_step_z -11.1
+
 # The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
 # to the edge. A negative value means the footstep can overhang a region.
 float64 wiggle_inside_delta_target -11.1
@@ -156,25 +159,17 @@ float64 maximum_step_y_when_forward_and_down -11.1
 # it's very close to hitting it's ankle pitch joint limit.
 float64 maximum_step_z_when_forward_and_down -11.1
 
-# Scale factor for checking 2D step limitations when changing height from the grandparent node.
-# This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-# {@link #getMaximumStepZWhenForwardAndDown()}.
-#
-# If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-# up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-float64 translation_scale_from_grandparent_node -11.1
-
 # Maximum vertical distance between consecutive footsteps
 #
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
-float64 maximum_left_step_z -11.1
+float64 maximum_step_z -11.1
 
-# Maximum vertical distance between consecutive footsteps
-#
-# A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-# z-up sole frame.
-float64 maximum_right_step_z -11.1
+# Maximum vertical distance between start-of-swing and touchdown
+float64 maximum_swing_z -11.1
+
+# Maximum xy distance between start-of-swing and touchdown
+float64 maximum_swing_reach -11.1
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 #
@@ -399,9 +394,3 @@ float64 shin_length -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1
-
-# If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
-# The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
-# so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
-# encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
-byte step_only_with_requested_side 255

@@ -143,7 +143,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateStep, stanceStep);
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
       if (poseRejectionReason != null)
       {
          rejectionReason.set(poseRejectionReason);
