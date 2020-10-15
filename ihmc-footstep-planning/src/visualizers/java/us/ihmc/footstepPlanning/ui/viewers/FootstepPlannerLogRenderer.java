@@ -159,7 +159,12 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          // Render snap and wiggled footstep
          meshBuilder.clear();
          RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
-         snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
+
+         if (!snapData.getSnapTransform().containsNaN())
+         {
+            snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
+         }
+
          DiscreteFootstepTools.getSnappedStepTransform(touchdownStep, snapAndWiggleTransform, stepPose);
 
          ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
