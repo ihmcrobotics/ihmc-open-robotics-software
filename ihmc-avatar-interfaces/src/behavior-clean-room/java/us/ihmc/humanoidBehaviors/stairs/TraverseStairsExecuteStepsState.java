@@ -65,6 +65,12 @@ public class TraverseStairsExecuteStepsState implements State
    }
 
    @Override
+   public void onExit(double timeInState)
+   {
+      clearWalkingCompleteFlag();
+   }
+
+   @Override
    public boolean isDone(double timeInState)
    {
       return walkingIsComplete() && !planEndsAtGoal();
