@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
 <BorderPane xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController">
 
     <left>
@@ -47,9 +48,11 @@
                         <Region prefHeight="10"/>
                     </VBox>
 
-                    <Separator orientation="HORIZONTAL" prefHeight="20"/>
+                    <Separator orientation="HORIZONTAL" prefHeight="15"/>
 
                     <VBox>
+                        <CheckBox fx:id="showStartOfSwingStep" selected="true" text="Show start of swing step"/>
+                        <Region prefHeight="5"/>
                         <CheckBox fx:id="showStanceStep" selected="true" text="Show stance step"/>
                         <Region prefHeight="5"/>
                         <CheckBox fx:id="showUnsnappedStep" selected="true" text="Show unsnapped step"/>
@@ -60,6 +63,14 @@
                         <Region prefHeight="5"/>
                         <CheckBox fx:id="showIdealStep" selected="true" text="Show ideal step"/>
                         <padding><Insets left="20"/></padding>
+                    </VBox>
+
+                    <Separator orientation="HORIZONTAL" prefHeight="15"/>
+
+                    <VBox>
+                        <Text text="Load specific iteration"/>
+                        <Text fx:id="iterationRange" text="No log loaded"/>
+                        <Spinner fx:id="iterationLoadSpinner" editable="true"/>
                     </VBox>
                 </VBox>
 

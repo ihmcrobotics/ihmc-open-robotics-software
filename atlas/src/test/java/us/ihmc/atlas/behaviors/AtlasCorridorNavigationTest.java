@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.*;
@@ -303,7 +303,7 @@ public class AtlasCorridorNavigationTest
 
          boolean useFastFlatInvalidFootsteps = true;
          footstepPlannerParameters.setMaximumStepYaw(1.5);
-         FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
+         FootstepPlannerBodyCollisionDetector collisionDetector = new FootstepPlannerBodyCollisionDetector(footstepPlannerParameters);
 
          LogTools.info("Creating planner");
          LogTools.info("Running footstep planner");
