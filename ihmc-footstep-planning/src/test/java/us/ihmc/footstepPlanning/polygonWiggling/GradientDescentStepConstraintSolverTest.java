@@ -25,6 +25,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class GradientDescentStepConstraintSolverTest
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
       initialFootTransform.getTranslation().set(0.055, 0.25, 0.0);
 
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
    }
 
    @Test
@@ -105,7 +106,7 @@ public class GradientDescentStepConstraintSolverTest
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
       initialFootTransform.getTranslation().set(-0.1, -0.3, 0.0);
 
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
    }
 
    @Test
@@ -127,7 +128,7 @@ public class GradientDescentStepConstraintSolverTest
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(10.0));
       initialFootTransform.getTranslation().set(0.6, 0.3, 0.0);
 
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
    }
 
    @Test
@@ -139,7 +140,7 @@ public class GradientDescentStepConstraintSolverTest
       initialFootTransform.getTranslation().set(0.0, 0.4, 0.0);
       initialFootTransform.getRotation().setToYawOrientation(Math.toRadians(-110.0));
 
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
    }
 
    @Test
@@ -154,23 +155,23 @@ public class GradientDescentStepConstraintSolverTest
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
       initialFootTransform.getTranslation().set(-1.0, 0.5, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
 
       // foot position 2
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(80.0));
       initialFootTransform.getTranslation().set(-0.3, 0.8, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
 
       // foot position 3
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
       initialFootTransform.getTranslation().set(0.8, 0.15, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
 
       // foot position 4
       gradientDescentStepConstraintSolver.setAlpha(0.25);
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
       initialFootTransform.getTranslation().set(0.3, -0.8, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      runTests(polygon, initialFootTransform, 0.0, null, -0.01, 0.0, 0.01);
    }
 
    private static Vertex2DSupplier getCrazyPolygon1()
@@ -233,16 +234,21 @@ public class GradientDescentStepConstraintSolverTest
       return Vertex2DSupplier.asVertex2DSupplier(concaveHull);
    }
 
-   private void runTests(Vertex2DSupplier polygon, RigidBodyTransform initialFootTransform, double... insideDeltas)
+   private void runTests(Vertex2DSupplier polygon, RigidBodyTransform initialFootTransform, double clearanceFromStanceFoot, ConvexPolygon2D stancePolyon, double... insideDeltas)
    {
       for (int i = 0; i < insideDeltas.length; i++)
       {
          wiggleParameters.deltaInside = insideDeltas[i];
-         runTest(polygon, initialFootTransform);
+         runTest(polygon, initialFootTransform, clearanceFromStanceFoot, stancePolyon);
+      }
+
+      if (visualize)
+      {
+         scs.cropBuffer();
       }
    }
 
-   private void runTest(Vertex2DSupplier polygon, RigidBodyTransform initialFootTransform)
+   private void runTest(Vertex2DSupplier polygon, RigidBodyTransform initialFootTransform, double clearanceFromStanceFoot, ConvexPolygon2D stancePolyon)
    {
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       initialFoot.applyTransform(initialFootTransform, false);
@@ -251,6 +257,14 @@ public class GradientDescentStepConstraintSolverTest
       input.setInitialStepPolygon(initialFoot);
       input.setPolygonToWiggleInto(polygon);
       input.setWiggleParameters(wiggleParameters);
+      input.getFootstepInRegionFrame().set(initialFootTransform);
+      input.getLocalToWorld().setIdentity();
+
+      if (stancePolyon != null)
+      {
+         input.setMinimumClearanceFromStanceFoot(clearanceFromStanceFoot);
+         input.setStanceFootPolygon(stancePolyon);
+      }
 
       RigidBodyTransform transform = gradientDescentStepConstraintSolver.wigglePolygon(input);
 

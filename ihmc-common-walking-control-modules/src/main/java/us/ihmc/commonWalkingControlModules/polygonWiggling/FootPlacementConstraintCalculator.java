@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -16,7 +18,7 @@ public class FootPlacementConstraintCalculator
    private final Point2D closestPerimeterPoint = new Point2D();
    private final Vector2D directionToClosestPoint = new Vector2D();
 
-   void calculateFootAreaGradient(List<? extends Point2DReadOnly> polygonToWiggle,
+   void calculateFootAreaGradient(ConvexPolygon2DReadOnly polygonToWiggle,
                                   List<? extends Vector2DReadOnly> rotationVectors,
                                   Vertex2DSupplier concavePolygonToWiggleInto,
                                   WiggleParameters wiggleParameters,
@@ -24,9 +26,9 @@ public class FootPlacementConstraintCalculator
    {
       gradientToPack.setToZero();
 
-      for (int i = 0; i < polygonToWiggle.size(); i++)
+      for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = polygonToWiggle.get(i);
+         Point2DReadOnly vertex = polygonToWiggle.getVertex(i);
 
          boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
          double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex, closestPerimeterPoint);
