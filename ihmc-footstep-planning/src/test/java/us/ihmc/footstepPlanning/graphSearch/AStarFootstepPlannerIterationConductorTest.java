@@ -19,11 +19,11 @@ public class AStarFootstepPlannerIterationConductorTest
 
       DiscreteFootstep leftStartStep = new DiscreteFootstep(0, 1, 0, RobotSide.LEFT);
       DiscreteFootstep rightStartStep = new DiscreteFootstep(0, -1, 0, RobotSide.RIGHT);
-      FootstepGraphNode startNode = new FootstepGraphNode(leftStartStep, rightStartStep);
+      FootstepGraphNode startNode = new FootstepGraphNode(rightStartStep, leftStartStep);
 
       DiscreteFootstep leftGoalStep = new DiscreteFootstep(3, 1, 0, RobotSide.LEFT);
       DiscreteFootstep rightGoalStep = new DiscreteFootstep(3, -1, 0, RobotSide.RIGHT);
-      FootstepGraphNode goalNode = new FootstepGraphNode(leftGoalStep, rightGoalStep);
+      FootstepGraphNode goalNode = new FootstepGraphNode(rightGoalStep, leftGoalStep);
 
       distanceCalculator.setGoalNode(new SideDependentList<>(leftGoalStep, rightGoalStep));
       planner.initialize(startNode);
@@ -31,8 +31,8 @@ public class AStarFootstepPlannerIterationConductorTest
       for (int i = 0; i < 4; i++)
       {
          AStarIterationData<FootstepGraphNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
-         Assertions.assertEquals(iterationData.getParentNode().getEndStep().getXIndex(), i);
-         Assertions.assertEquals(iterationData.getParentNode().getEndStep().getYIndex(), iterationData.getParentNode().getEndSide() == RobotSide.LEFT ? 1 : -1);
+         Assertions.assertEquals(iterationData.getParentNode().getSecondStep().getXIndex(), i);
+         Assertions.assertEquals(iterationData.getParentNode().getSecondStep().getYIndex(), iterationData.getParentNode().getSecondStepSide() == RobotSide.LEFT ? 1 : -1);
          Assertions.assertEquals(iterationData.getValidChildNodes().size(), 3);
          Assertions.assertTrue(iterationData.getInvalidChildNodes().isEmpty());
 
@@ -61,7 +61,7 @@ public class AStarFootstepPlannerIterationConductorTest
 
       double getManhattanDistance(FootstepGraphNode other)
       {
-         return goalSteps.get(other.getEndSide()).computeXYManhattanDistance(other.getEndStep()) + goalSteps.get(other.getStartSide()).computeXYManhattanDistance(other.getStartStep());
+         return goalSteps.get(other.getSecondStepSide()).computeXYManhattanDistance(other.getSecondStep()) + goalSteps.get(other.getFirstStepSide()).computeXYManhattanDistance(other.getFirstStep());
       }
    }
 
@@ -69,13 +69,13 @@ public class AStarFootstepPlannerIterationConductorTest
    {
       expansionToPack.clear();
 
-      int nextStepY = node.getStartStep().getYIndex();
-      int nextStepYaw = node.getStartStep().getYawIndex();
-      int stanceNodeX = node.getEndStep().getXIndex();
+      int nextStepY = node.getFirstStep().getYIndex();
+      int nextStepYaw = node.getFirstStep().getYawIndex();
+      int stanceNodeX = node.getSecondStep().getXIndex();
 
-      expansionToPack.add(new FootstepGraphNode(new DiscreteFootstep(stanceNodeX - 1, nextStepY, nextStepYaw, node.getStartSide()), node.getEndStep()));
-      expansionToPack.add(new FootstepGraphNode(new DiscreteFootstep(stanceNodeX + 0, nextStepY, nextStepYaw, node.getStartSide()), node.getEndStep()));
-      expansionToPack.add(new FootstepGraphNode(new DiscreteFootstep(stanceNodeX + 1, nextStepY, nextStepYaw, node.getStartSide()), node.getEndStep()));
+      expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX - 1, nextStepY, nextStepYaw, node.getFirstStepSide())));
+      expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX + 0, nextStepY, nextStepYaw, node.getFirstStepSide())));
+      expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX + 1, nextStepY, nextStepYaw, node.getFirstStepSide())));
    }
 }
 

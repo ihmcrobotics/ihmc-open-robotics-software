@@ -14,7 +14,6 @@ import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -101,7 +100,7 @@ public class GradientDescentStepConstraintSolverVisualizer
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          // from FootstepNodeSnapAndWiggler#computeWiggleTransform
-         DiscreteFootstepTools.getFootPolygon(footstepNode.getEndStep(), footPolygons.get(footstepNode.getEndSide()), footPolygon);
+         DiscreteFootstepTools.getFootPolygon(footstepNode.getSecondStep(), footPolygons.get(footstepNode.getSecondStepSide()), footPolygon);
          tempTransform.set(snapData.getSnapTransform());
          tempTransform.preMultiply(planarRegion.getTransformToLocal());
          ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
@@ -112,7 +111,7 @@ public class GradientDescentStepConstraintSolverVisualizer
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegion);
          gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
 
-         RigidBodyTransform snappedNodeTransform = snapData.getSnappedStepTransform(footstepNode.getEndStep());
+         RigidBodyTransform snappedNodeTransform = snapData.getSnappedStepTransform(footstepNode.getSecondStep());
          tempTransform.set(snappedNodeTransform);
          tempTransform.preMultiply(planarRegion.getTransformToLocal());
          gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
