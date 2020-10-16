@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -26,17 +27,25 @@ import java.util.PriorityQueue;
 public class LineSegmentToPlanarRegionAssociator
 {
    private CameraPinholeBrown camIntrinsics;
+   private Quaternion cameraOrientation;
+   private Point3D cameraPosition;
+
    private PoseReferenceFrame regionFrame;
    private PoseReferenceFrame cameraFrame;
+
+   private Mat curLines;
 
    public LineSegmentToPlanarRegionAssociator(ReferenceFrame sensorFrame)
    {
       regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
       cameraFrame = new PoseReferenceFrame("CameraFrame", sensorFrame);
-      cameraFrame.setOrientationAndUpdate(new RotationMatrix(0, -1, 0, 0, 0, -1, 1, 0, 0));
+//      cameraFrame.setOrientationAndUpdate(new RotationMatrix(0, -1, 0, 0, 0, -1, 1, 0, 0));
    }
 
-   private Mat curLines;
+   public LineSegmentToPlanarRegionAssociator()
+   {
+
+   }
 
    public void loadParams(CameraPinholeBrown intrinsics)
    {
@@ -53,23 +62,59 @@ public class LineSegmentToPlanarRegionAssociator
 
       int regionSize = 0;
 
+      LogTools.info(camIntrinsics);
+      LogTools.info(cameraFrame.getTransformToParent());
       for (int i = 0; i < concaveHull.size(); i++)
       {
          FramePoint3D vertex = new FramePoint3D(regionFrame, concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
          vertex.changeFrame(cameraFrame);
 
-         System.out.println(vertex);
 
-         if (vertex.getZ() >= 0)
+         // (-Y, -Z, X)
+         Point3D tfdP3d = new Point3D(-vertex.getY(), -vertex.getZ(), vertex.getX());
+         LogTools.info("Point3D CamFrame: {} {} {}", tfdP3d.getX32(), tfdP3d.getY32(), tfdP3d.getZ32());
+
+         if (tfdP3d.getZ() >= 0)
          {
-            double px = camIntrinsics.cx + camIntrinsics.fx * vertex.getX() / vertex.getZ();
-            double py = camIntrinsics.cy + camIntrinsics.fy * vertex.getY() / vertex.getZ();
+            double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
+            double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
+            regionMidPoint.add(px, py);
+            regionSize += 1;
+            pointList.add(new Point(px, py));
+            LogTools.info("Image Points: {} {} {}", regionSize, px, py);
+         }
+      }
+      regionMidPoint.scale(1 / (double) regionSize);
+      return pointList;
+   }
+
+   public ArrayList<Point> projectPlanarRegion(PlanarRegion region, Point2D regionMidPoint) {
+
+      RigidBodyTransform tfLocalToWorld = new RigidBodyTransform();
+      region.getTransformToWorld(tfLocalToWorld);
+
+      QuaternionBasedTransform tfWorldToCamera = new QuaternionBasedTransform(cameraOrientation, cameraPosition);
+
+      List<Point2D> concaveHull = region.getConcaveHull();
+
+      ArrayList<Point> pointList = new ArrayList<>();
+
+      int regionSize = 0;
+
+      for (int i = 0; i < concaveHull.size(); i++) {
+         Point3D p3d = new Point3D(concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
+         p3d.applyTransform(tfLocalToWorld);
+         p3d.applyInverseTransform(tfWorldToCamera);
+         Point3D tfdP3d = new Point3D(-p3d.getY(), -p3d.getZ(), p3d.getX());
+         if (tfdP3d.getZ() >= 0) {
+            double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
+            double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
             regionMidPoint.add(px, py);
             regionSize += 1;
             pointList.add(new Point(px, py));
          }
       }
-      regionMidPoint.scale(1 / (double) regionSize);
+      regionMidPoint.scale(1/(double)regionSize);
       return pointList;
    }
 
@@ -154,13 +199,13 @@ public class LineSegmentToPlanarRegionAssociator
          }
       }
 
-      System.out.println("Queue Size:" + queue.size());
+      LogTools.info("Queue Size:" + queue.size());
 
       ArrayList<Line2D> polygon = new ArrayList<Line2D>();
 
       for (LineSegment2D ls : queue)
       {
-         System.out.println("Distance:" + ls.distance(centroid));
+         LogTools.info("Distance:" + ls.distance(centroid));
 
          segments.add(new Point(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
          segments.add(new Point(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
@@ -184,7 +229,7 @@ public class LineSegmentToPlanarRegionAssociator
 
       // if(polygon.size() >= 4){
       //     for(int i = 0; i<polygon.size()-1; i++){
-      //         System.out.println( (i+1) % polygon.size());
+      //         LogTools.info( (i+1) % polygon.size());
       //         Point2D corner = (Point2D) polygon.get(i).intersectionWith(polygon.get( i+1 ));
       //         segments.add(corner);
       //     }

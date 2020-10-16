@@ -82,10 +82,11 @@ public class AtlasLineSegmentEstimator
 
    private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private ScheduledExecutorService executorService
-         = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+         = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private TransformReferenceFrame realsenseSensorFrame;
    private TransformReferenceFrame multisenseSensorFrame;
+   private MovingReferenceFrame neckFrame;
 
    private RemoteSyncedRobotModel syncedRobot;
 
@@ -95,7 +96,12 @@ public class AtlasLineSegmentEstimator
       System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
       // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
-      new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, this::planarRegionsListCallback);
+
+
+
+
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback); // (AtlasObstacleCourseNoUI)
+//      new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, this::planarRegionsListCallback); // (AtlasLookAndStepBehaviorDemo)
 
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
@@ -117,17 +123,21 @@ public class AtlasLineSegmentEstimator
       }
       else
       {
-         new ROS2Callback<>(ros2Node, ROS2Tools.VIDEO, message ->
+         // VideoPacket.class, ROS2Tools.IHMC_ROOT (For All)
+         // ROS2Tools.VIDEO (AtlasLookAndStepBehaviorDemo)
+         lineRegionAssociator = new LineSegmentToPlanarRegionAssociator();
+         new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, message ->
          {
+            LogTools.info("Message Received: ", message);
             videoPacketsRos2.addLast(message);
             cameraIntrinsics = HumanoidMessageTools.toIntrinsicParameters(message.intrinsic_parameters_);
+
          });
 
-         MovingReferenceFrame neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-//         multisenseSensorFrame = new TransformReferenceFrame("Multisense", neckFrame, AtlasSensorInformation);
+         neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
+         //         multisenseSensorFrame = new TransformReferenceFrame("Multisense", neckFrame, AtlasSensorInformation);
 
          executorService.scheduleAtFixedRate(this::mainUpdateUsingROS2Topics, 0, 32, TimeUnit.MILLISECONDS);
-         lineRegionAssociator = new LineSegmentToPlanarRegionAssociator(neckFrame);
       }
 
    }
@@ -144,10 +154,11 @@ public class AtlasLineSegmentEstimator
 
    public void mainUpdateUsingROS1Topics()
    {
-      LogTools.info(StringTools.format("{} {} {} {}", currentPlanarRegionsListMessage != null,
-                                       syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
-                                       cameraInfo != null,
-                                       compressedImagesRos1.size() > 1));
+//      LogTools.info(StringTools.format("{} {} {} {}", currentPlanarRegionsListMessage != null,
+//                                       syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
+//                                       cameraInfo != null,
+//                                       compressedImagesRos1.size() > 1));
+
       if (currentPlanarRegionsListMessage != null && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0) && cameraInfo != null
           && compressedImagesRos1.size() > 1)
       {
@@ -174,6 +185,7 @@ public class AtlasLineSegmentEstimator
                                        syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
                                        cameraIntrinsics != null,
                                        videoPacketsRos2.size() > 1));
+
       if (currentPlanarRegionsListMessage != null && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0) && cameraIntrinsics != null
           && videoPacketsRos2.size() > 1)
       {
@@ -182,11 +194,16 @@ public class AtlasLineSegmentEstimator
             videoPacketsRos2.removeFirst();
          }
 
+         neckFrame.update();
+         LogTools.info("NeckFrame: {}", neckFrame.getTransformToWorldFrame());
+
          VideoPacket latest = videoPacketsRos2.removeFirst();
          VideoPacket previous = videoPacketsRos2.getFirst();
 
          BufferedImage latestBufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(latest.getData().toArray());
          BufferedImage previousBufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(previous.getData().toArray());
+
+         lineRegionAssociator.loadParams(cameraIntrinsics);
 
          processBufferedImagesAndPlanarRegions(latestBufferedImage, previousBufferedImage);
       }
@@ -214,7 +231,6 @@ public class AtlasLineSegmentEstimator
    {
       float startTime = System.nanoTime();
 
-      System.out.println("Processing Images");
 
       Mat dispImage = new Mat();
       this.currentLines = LineDetectionTools.getFLDLinesFromImage(this.currentImage);
@@ -267,8 +283,7 @@ public class AtlasLineSegmentEstimator
 
    public static void main(String[] args)
    {
-      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
-      HighGui.createJFrame("Hello", 0);
+      new AtlasLineDetectionDemo().execFootstepPlan();
       new AtlasLineSegmentEstimator();
    }
 }
