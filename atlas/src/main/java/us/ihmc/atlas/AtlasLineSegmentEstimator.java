@@ -40,6 +40,7 @@ import static org.bytedeco.opencv.global.opencv_highgui.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -69,7 +70,7 @@ public class AtlasLineSegmentEstimator
 
    private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private ScheduledExecutorService executorService
-         = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+         = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private TransformReferenceFrame realsenseSensorFrame;
    private TransformReferenceFrame multisenseSensorFrame;
@@ -181,9 +182,13 @@ public class AtlasLineSegmentEstimator
       float startTime = System.nanoTime();
       System.out.println("Processing Images");
 
-      Mat currentImage = Java2DFrameUtils.toMat(latestBufferedImage);
-      Mat previousImage = Java2DFrameUtils.toMat(previousBufferedImage);
+      Mat currentImage = new Mat(latestBufferedImage.getHeight(), latestBufferedImage.getWidth(), CV_8UC3);
+      currentImage.data().put(((DataBufferByte) latestBufferedImage.getRaster().getDataBuffer()).getData());
+      Mat previousImage = new Mat(previousBufferedImage.getHeight(), previousBufferedImage.getWidth(), CV_8UC3);
+      previousImage.data().put(((DataBufferByte) previousBufferedImage.getRaster().getDataBuffer()).getData());
 
+      imshow("Image", currentImage);
+      waitKey(1);
       Vec4iVector previousLineSegments = LineDetectionTools.getCannyHoughLinesFromImage(previousImage);
       Vec4iVector currentLineSegments = LineDetectionTools.getCannyHoughLinesFromImage(currentImage);
 
@@ -203,7 +208,7 @@ public class AtlasLineSegmentEstimator
               0);
       }
 
-      // displayLineMatches(prevImg, curImg, dispImage, correspLines);
+      // displayLineMatches(prevImg, curImg, disparityImage, correspLines);
       Mat currentImageLeft = currentImage.clone();
 
       PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
@@ -222,21 +227,21 @@ public class AtlasLineSegmentEstimator
       }
 
       MatVector src = new MatVector(currentImageLeft, currentImage);
-      Mat dispImage = new Mat();
-      hconcat(src, dispImage);
+      Mat disparityImage = new Mat();
+      hconcat(src, disparityImage);
 
       float endTime = System.nanoTime();
       System.out.println("Time:" + (int) ((endTime - startTime) * (1e-6)) + " ms\tCorresponding Lines:" + correspondingLineSegments.size());
-      resize(dispImage, dispImage, new Size(2400, 1000));
+      resize(disparityImage, disparityImage, new Size(2400, 1000));
       namedWindow("LineEstimator", WINDOW_AUTOSIZE);
-      imshow("LineEstimator", dispImage);
+      imshow("LineEstimator", disparityImage);
       waitKey(1);
    }
 
    public static void main(String[] args)
    {
-      namedWindow("LineEstimator", WINDOW_AUTOSIZE);
-      createJFrame("Hello", 0);
+//      namedWindow("LineEstimator", WINDOW_AUTOSIZE);
+//      createJFrame("Hello", 0);
       new AtlasLineSegmentEstimator();
    }
 }

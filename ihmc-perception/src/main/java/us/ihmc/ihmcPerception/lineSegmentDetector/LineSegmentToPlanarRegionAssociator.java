@@ -57,7 +57,7 @@ public class LineSegmentToPlanarRegionAssociator
          FramePoint3D vertex = new FramePoint3D(regionFrame, concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
          vertex.changeFrame(cameraFrame);
 
-         System.out.println(vertex);
+//         System.out.println(vertex);
 
          if (vertex.getZ() >= 0)
          {
@@ -76,12 +76,7 @@ public class LineSegmentToPlanarRegionAssociator
    {
       if (pointList.size() > 2)
       {
-         int[] pointCoordinates = new int[pointList.size() * 2];
-         for (int i = 0; i < pointCoordinates.length; i++)
-         {
-            pointCoordinates[i] = pointList.get(i / 2).get(i % 2);
-         }
-         PointerPointer<Pointer> points = new PointerPointer<>(pointCoordinates);
+         PointerPointer<Point> points = new PointerPointer<>(pointList.toArray(new Point[0]));
          IntPointer numberOfPoints = new IntPointer(pointList.size());
 
          Scalar polygonColor = new Scalar(id * 123 % 255, id * 321 % 255, id * 135 % 255, 0);
@@ -92,12 +87,13 @@ public class LineSegmentToPlanarRegionAssociator
       }
    }
 
-   public void drawLineRegionAssociation(Mat img, ArrayList<Point> pointList, Point2D regionMidPoint, int id)
+   public void drawLineRegionAssociation(Mat image, ArrayList<Point> pointList, Point2D regionMidPoint, int id)
    {
       if (pointList.size() > 2)
       {
-
-         if (regionMidPoint.getX() < cameraIntrinsics.getWidth() && regionMidPoint.getY() < cameraIntrinsics.getHeight() && regionMidPoint.getX() >= 0
+         if (regionMidPoint.getX() < cameraIntrinsics.getWidth()
+             && regionMidPoint.getY() < cameraIntrinsics.getHeight()
+             && regionMidPoint.getX() >= 0
              && regionMidPoint.getY() >= 0)
          {
             // Mat mask = Mat.zeros(curImg.rows() + 2, curImg.cols() + 2, CvType.CV_8U);
@@ -114,9 +110,9 @@ public class LineSegmentToPlanarRegionAssociator
             //     //         new Scalar(255, 100, 10), 2);
             //     Imgproc.circle(img, new Point(segment.getX(), segment.getY()), 8, new Scalar(255, 0, 255), -1);
             // }
-            drawPolygonOnImage(img, regionSegment, regionMidPoint, id);
+            drawPolygonOnImage(image, regionSegment, regionMidPoint, id);
          }
-         circle(img, new Point((int) regionMidPoint.getX(), (int) regionMidPoint.getY()), 3, new Scalar(255, 140, 255, 0), -1, LINE_8, 0);
+         circle(image, new Point((int) regionMidPoint.getX(), (int) regionMidPoint.getY()), 3, new Scalar(255, 140, 255, 0), -1, LINE_8, 0);
       }
    }
 
