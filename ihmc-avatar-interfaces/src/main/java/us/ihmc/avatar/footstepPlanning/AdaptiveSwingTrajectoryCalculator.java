@@ -3,152 +3,243 @@ package us.ihmc.avatar.footstepPlanning;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Calculates suggested swing time, swing height and waypoint proportions
  */
 public class AdaptiveSwingTrajectoryCalculator
 {
-   private static final double boxHeight = 0.5;
+   private static final double boxHeight = 0.25;
    private static final double boxGroundClearance = 0.04;
 
-   private final AdaptiveSwingParameters adaptiveSwingParameters;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoGraphicCoordinateSystem startOfSwingPoseGraphic;
+   private final YoGraphicCoordinateSystem endOfSwingPoseGraphic;
+   private final YoGraphicPolygon footstepGraphic;
+   private final YoGraphicShape startOfSwingToeCollisionGraphic;
+   private final YoGraphicShape endOfSwingHeelCollisionGraphic;
+   private final TickAndUpdatable tickAndUpdatable;
+
+   private final AdaptiveSwingParameters swingPlannerParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
    private PlanarRegionsList planarRegionsList;
 
-   public AdaptiveSwingTrajectoryCalculator(AdaptiveSwingParameters adaptiveSwingParameters, WalkingControllerParameters walkingControllerParameters)
+   private final FramePose3D startOfSwingPose = new FramePose3D();
+   private final FramePose3D endOfSwingPose = new FramePose3D();
+
+   private final Box3D startOfSwingToeCollisionBox = new Box3D();
+   private final Box3D endOfSwingHeelCollisionBox = new Box3D();
+
+   public AdaptiveSwingTrajectoryCalculator(AdaptiveSwingParameters swingPlannerParameters,
+                                            FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                            WalkingControllerParameters walkingControllerParameters)
    {
-      this.adaptiveSwingParameters = adaptiveSwingParameters;
+      this(swingPlannerParameters, footstepPlannerParameters, walkingControllerParameters, null, null, null);
+   }
+
+   public AdaptiveSwingTrajectoryCalculator(AdaptiveSwingParameters swingPlannerParameters,
+                                            FootstepPlannerParametersReadOnly footstpePlannerParameters,
+                                            WalkingControllerParameters walkingControllerParameters,
+                                            TickAndUpdatable tickAndUpdatable,
+                                            YoGraphicsListRegistry graphicsListRegistry,
+                                            YoVariableRegistry parentRegistry)
+   {
+      this.swingPlannerParameters = swingPlannerParameters;
+      this.footstepPlannerParameters = footstpePlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
+
+      if (tickAndUpdatable != null)
+      {
+         this.tickAndUpdatable = tickAndUpdatable;
+         parentRegistry.addChild(registry);
+
+         String listName = getClass().getSimpleName();
+
+         startOfSwingPoseGraphic = new YoGraphicCoordinateSystem("startOfSwing", "SwingCalc", registry, false, 0.1);
+         endOfSwingPoseGraphic = new YoGraphicCoordinateSystem("endOfSwing", "SwingCalc", registry, false, 0.1);
+         footstepGraphic = new YoGraphicPolygon("footstep", 4, registry, false, 1.0, YoAppearance.Red());
+
+         Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
+         collisionBoxGraphic.addCube(swingPlannerParameters.getFootStubClearance(), walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight, true, YoAppearance.Orange());
+
+         startOfSwingToeCollisionGraphic = new YoGraphicShape("startOfSwingToe", collisionBoxGraphic, "startOfSwingToe", "", registry, 1.0, YoAppearance.Orange());
+         endOfSwingHeelCollisionGraphic = new YoGraphicShape("endOfSwingHeel", collisionBoxGraphic, "endOfSwingHeel", "", registry, 1.0, YoAppearance.Orange());
+
+         graphicsListRegistry.registerYoGraphic(listName, startOfSwingPoseGraphic);
+         graphicsListRegistry.registerYoGraphic(listName, endOfSwingPoseGraphic);
+         graphicsListRegistry.registerYoGraphic(listName, footstepGraphic);
+         graphicsListRegistry.registerYoGraphic(listName, startOfSwingToeCollisionGraphic);
+         graphicsListRegistry.registerYoGraphic(listName, endOfSwingHeelCollisionGraphic);
+      }
+      else
+      {
+         this.tickAndUpdatable = null;
+         startOfSwingPoseGraphic = null;
+         endOfSwingPoseGraphic = null;
+         footstepGraphic = null;
+         startOfSwingToeCollisionGraphic = null;
+         endOfSwingHeelCollisionGraphic = null;
+      }
    }
 
    public double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
-      double horizontalDistance = startPosition.distanceXY(endPosition);
-      double maximumTranslationForMinimumSwingTime = adaptiveSwingParameters.getMaximumStepTranslationForMinimumSwingTime();
-      double minimumTranslationForMaximumSwingTime = adaptiveSwingParameters.getMinimumStepTranslationForMaximumSwingTime();
-      double alphaHorizontal = (horizontalDistance - maximumTranslationForMinimumSwingTime) / (minimumTranslationForMaximumSwingTime - maximumTranslationForMinimumSwingTime);
+      double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
 
-      double verticalDistance = Math.abs(startPosition.getZ() - endPosition.getZ());
-      double maximumStepHeightForMinimumSwingTime = adaptiveSwingParameters.getMaximumStepHeightForMinimumSwingTime();
-      double minimumStepHeightForMaximumSwingTime = adaptiveSwingParameters.getMinimumStepHeightForMaximumSwingTime();
-      double alphaVertical = (verticalDistance - maximumStepHeightForMinimumSwingTime) / (minimumStepHeightForMaximumSwingTime - maximumStepHeightForMinimumSwingTime);
-      
-      double alpha = EuclidCoreTools.clamp(alphaHorizontal + alphaVertical, 0.0, 1.0);
-      return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingTime(), adaptiveSwingParameters.getMaximumSwingTime(), alpha);
+      double maxStepZ = footstepPlannerParameters.getMaximumStepZ();
+      double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
+
+      double stepDistance = startPosition.distance(endPosition);
+      double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);
+      return swingPlannerParameters.getMinimumSwingTime() + alpha * (swingPlannerParameters.getMaximumSwingTime() - swingPlannerParameters.getMinimumSwingTime());
    }
 
-   public double calculateSwingHeight(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
+   public void checkForFootCollision(Pose3DReadOnly startPose, FootstepDataMessage footstep)
    {
-      double verticalDistance = Math.abs(startPosition.getZ() - endPosition.getZ());
-      double maximumStepHeightForMinimumSwingHeight = adaptiveSwingParameters.getMaximumStepHeightForMinimumSwingHeight();
-      double minimumStepHeightForMaximumSwingHeight = adaptiveSwingParameters.getMinimumStepHeightForMaximumSwingHeight();
-      double alpha = (verticalDistance - maximumStepHeightForMinimumSwingHeight) / (minimumStepHeightForMaximumSwingHeight - maximumStepHeightForMinimumSwingHeight);
-      alpha = EuclidCoreTools.clamp(alpha, 0.0, 1.0);
-      
-      return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingHeight(), adaptiveSwingParameters.getMaximumSwingHeight(), alpha);
-   }
-
-   public boolean checkForFootCollision(Pose3DReadOnly startPose, FootstepDataMessage step)
-   {      
       if(planarRegionsList == null)
       {
-         return false;
+         return;
       }
 
-      double[] waypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();      
-      Pose3D endPose = new Pose3D(step.getLocation(), step.getOrientation());
-      
-      boolean toeIsClose = checkForToeOrHeelStub(startPose, true);
-      boolean heelIsClose = checkForToeOrHeelStub(endPose, false);
-            
-      if(toeIsClose)
+      double[] waypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
+      Pose3D endPose = new Pose3D(footstep.getLocation(), footstep.getOrientation());
+
+      setBoxPose(startOfSwingToeCollisionBox, startPose, true);
+      setBoxPose(endOfSwingHeelCollisionBox, endPose, false);
+
+      boolean startOfSwingToeCollision = collisionDetected(startOfSwingToeCollisionBox);
+      boolean endOfSwingHeelCollision = collisionDetected(endOfSwingHeelCollisionBox);
+
+      if (startOfSwingToeCollision)
       {
-         waypointProportions[0] = waypointProportions[0] - adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
+         waypointProportions[0] = waypointProportions[0] - swingPlannerParameters.getWaypointProportionShiftForStubAvoidance();
       }
 
-      if(heelIsClose)
+      if (endOfSwingHeelCollision)
       {
-         waypointProportions[1] = waypointProportions[1] + adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
+         waypointProportions[1] = waypointProportions[1] + swingPlannerParameters.getWaypointProportionShiftForStubAvoidance();
       }
 
-      if(toeIsClose || heelIsClose)
+      boolean collisionDetected = startOfSwingToeCollision || endOfSwingHeelCollision;
+      if (collisionDetected)
       {
-         step.setSwingHeight(adaptiveSwingParameters.getMaximumSwingHeight());
-         step.getCustomWaypointProportions().add(waypointProportions);
-      }
+         footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
+         footstep.setSwingHeight(swingPlannerParameters.getMaximumSwingHeight());
 
-      return toeIsClose || heelIsClose;
+         footstep.getCustomWaypointProportions().clear();
+         footstep.getCustomWaypointProportions().add(waypointProportions[0]);
+         footstep.getCustomWaypointProportions().add(waypointProportions[1]);
+      }
    }
 
-   private boolean checkForToeOrHeelStub(Pose3DReadOnly stepAtRiskOfToeStubbing, boolean checkToeStub)
+   private void setBoxPose(Box3D collisionBox, Pose3DReadOnly footstepPose, boolean shiftForward)
    {
-      Box3D footStubBox = new Box3D();
-      double stubClearance = adaptiveSwingParameters.getFootStubClearance();
-      footStubBox.setSize(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
+      collisionBox.getSize().set(swingPlannerParameters.getFootStubClearance(), walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
 
-      Pose3D boxCenter = new Pose3D(stepAtRiskOfToeStubbing);
+      double footHalfLength = 0.5 * walkingControllerParameters.getSteppingParameters().getFootLength();
+      double xOffset = (shiftForward ? 1.0 : -1.0) * (swingPlannerParameters.getFootStubClearance() + 0.5 * footHalfLength);
+      double zOffset = boxGroundClearance + 0.5 * boxHeight;
+      collisionBox.getPose().set(footstepPose);
+      collisionBox.getPose().appendTranslation(xOffset, 0.0, zOffset);
+   }
 
-      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      double xDirection = checkToeStub ? 1.0 : -1.0;
-      boxCenter.appendTranslation(xDirection * 0.5 * (footLength + stubClearance), 0.0, boxGroundClearance + 0.5 * boxHeight);
-      footStubBox.getPose().set(boxCenter);
-
+   private boolean collisionDetected(Box3DReadOnly collisionBox)
+   {
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
-         if(collisionDetector.evaluateCollision(footStubBox, planarRegionsList.getPlanarRegion(i)).areShapesColliding())
+         if(collisionDetector.evaluateCollision(collisionBox, planarRegionsList.getPlanarRegion(i)).areShapesColliding())
+         {
             return true;
+         }
       }
 
       return false;
    }
-   
+
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
    }
 
-   public void setSwingParameters(Pose3DReadOnly initialStanceFootPose, FootstepDataListMessage footstepDataListMessage)
+   public void setSwingParameters(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepDataListMessage footstepDataListMessage)
    {
       IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
       for (int i = 0; i < footstepDataList.size(); i++)
       {
-         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
-         Pose3D startPose = new Pose3D();
-         Pose3D endPose = new Pose3D();
-
-         endPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+         FootstepDataMessage footstep = footstepDataList.get(i);
+         endOfSwingPose.set(footstep.getLocation(), footstep.getOrientation());
 
          if(i < 2)
          {
-            startPose.set(initialStanceFootPose);
+            startOfSwingPose.set(initialStanceFootPoses.get(RobotSide.fromByte(footstep.getRobotSide())));
          }
          else
          {
             FootstepDataMessage previousStep = footstepDataList.get(i - 2);
-            startPose.set(previousStep.getLocation(), previousStep.getOrientation());
+            startOfSwingPose.set(previousStep.getLocation(), previousStep.getOrientation());
          }
 
-         if(!checkForFootCollision(startPose, footstepDataMessage))
+         // Checks collision boxes at toe of start of swing and heel of end of swing.
+         // Sets waypoint proportions and swing heights based on the collision results
+         checkForFootCollision(startOfSwingPose, footstep);
+
+         // Calculates swing duration based on step translation
+         footstep.setSwingDuration(calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition()));
+
+         if (tickAndUpdatable != null)
          {
-            footstepDataMessage.setSwingHeight(calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
+            updateGraphics(footstep);
          }
-
-         footstepDataMessage.setSwingDuration(calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
       }
+   }
+
+   private void updateGraphics(FootstepDataMessage footstep)
+   {
+      startOfSwingPoseGraphic.setPose(startOfSwingPose);
+      endOfSwingPoseGraphic.setPose(endOfSwingPose);
+
+      footstepGraphic.setPose(endOfSwingPose);
+
+      IDLSequence.Object<Point3D> predictedContactPoints2d = footstep.getPredictedContactPoints2d();
+      ConvexPolygon2D foothold = new ConvexPolygon2D();
+      for (int i = 0; i < predictedContactPoints2d.size(); i++)
+      {
+         foothold.addVertex(predictedContactPoints2d.get(i).getX(), predictedContactPoints2d.get(i).getY());
+      }
+      footstepGraphic.updateConvexPolygon2d(foothold);
+
+      startOfSwingToeCollisionGraphic.setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), startOfSwingToeCollisionBox.getPosition(), startOfSwingToeCollisionBox.getOrientation()));
+      endOfSwingHeelCollisionGraphic.setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), endOfSwingHeelCollisionBox.getPosition(), endOfSwingHeelCollisionBox.getOrientation()));
+
+      tickAndUpdatable.tickAndUpdate();
    }
 }
