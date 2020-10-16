@@ -85,6 +85,6 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
    @Override 
    public double getWaypointProportionShiftForStubAvoidance()
    {
-      return 0.13;
+      return 0.15;
    }
 }
