@@ -131,7 +131,9 @@ public class AtlasLineSegmentEstimator
             LogTools.info("Message Received: ", message);
             videoPacketsRos2.addLast(message);
             cameraIntrinsics = HumanoidMessageTools.toIntrinsicParameters(message.intrinsic_parameters_);
-
+            lineRegionAssociator.setIntrinsics(cameraIntrinsics);
+            lineRegionAssociator.setCameraOrientation(message.orientation_);
+            lineRegionAssociator.setCameraPosition(message.position_);
          });
 
          neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
@@ -203,8 +205,6 @@ public class AtlasLineSegmentEstimator
          BufferedImage latestBufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(latest.getData().toArray());
          BufferedImage previousBufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(previous.getData().toArray());
 
-         lineRegionAssociator.loadParams(cameraIntrinsics);
-
          processBufferedImagesAndPlanarRegions(latestBufferedImage, previousBufferedImage);
       }
    }
@@ -251,8 +251,6 @@ public class AtlasLineSegmentEstimator
       if (this.currentPlanarRegionsListMessage != null)
       {
          PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(this.currentPlanarRegionsListMessage);
-         lineRegionAssociator.loadParams(cameraIntrinsics);
-
 
          for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
          {
@@ -261,7 +259,7 @@ public class AtlasLineSegmentEstimator
 
             if (region.getConvexHull().getArea() * 1000 > 50)
             {
-               pointList = lineRegionAssociator.projectPlanarRegion(region, regionMidPoint);
+               pointList = lineRegionAssociator.projectPlanarRegionUsingCameraPose(region, regionMidPoint);
                lineRegionAssociator.drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
                lineRegionAssociator.drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
             }
@@ -283,7 +281,7 @@ public class AtlasLineSegmentEstimator
 
    public static void main(String[] args)
    {
-      new AtlasLineDetectionDemo().execFootstepPlan();
+//      new AtlasLineDetectionDemo().execFootstepPlan();
       new AtlasLineSegmentEstimator();
    }
 }

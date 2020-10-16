@@ -5,8 +5,6 @@ import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -16,11 +14,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -47,9 +43,19 @@ public class LineSegmentToPlanarRegionAssociator
 
    }
 
-   public void loadParams(CameraPinholeBrown intrinsics)
+   public void setIntrinsics(CameraPinholeBrown intrinsics)
    {
       this.camIntrinsics = intrinsics;
+   }
+
+   public void setCameraOrientation(Quaternion cameraOrientation)
+   {
+      this.cameraOrientation = cameraOrientation;
+   }
+
+   public void setCameraPosition(Point3D cameraPosition)
+   {
+      this.cameraPosition = cameraPosition;
    }
 
    public ArrayList<Point> projectPlanarRegion(PlanarRegion region, Point2D regionMidPoint)
@@ -88,7 +94,8 @@ public class LineSegmentToPlanarRegionAssociator
       return pointList;
    }
 
-   public ArrayList<Point> projectPlanarRegion(PlanarRegion region, Point2D regionMidPoint) {
+   public ArrayList<Point> projectPlanarRegionUsingCameraPose(PlanarRegion region, Point2D regionMidPoint)
+   {
 
       RigidBodyTransform tfLocalToWorld = new RigidBodyTransform();
       region.getTransformToWorld(tfLocalToWorld);
