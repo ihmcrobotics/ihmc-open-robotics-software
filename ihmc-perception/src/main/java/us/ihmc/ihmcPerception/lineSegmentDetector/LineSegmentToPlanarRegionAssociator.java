@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_imgproc.Vec4iVector;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -131,22 +130,25 @@ public class LineSegmentToPlanarRegionAssociator
       return 0;
    }
 
-   public ArrayList<Point> getSegmentFromLines(Vec4iVector curLines, Point2D centroid)
+   public ArrayList<Point> getSegmentFromLines(Vec4iVector currentLineSegments, Point2D centroid)
    {
       ArrayList<Point> segments = new ArrayList<>();
       PriorityQueue<LineSegment2D> queue = new PriorityQueue<>(10, (a, b) -> compare(a, b, centroid));
-      for (int i = 0; i < curLines.size(); i++)
+      for (int i = 0; i < currentLineSegments.size(); i++)
       {
-         LineSegment2D ls = new LineSegment2D(curLines.get(0).get(), curLines.get(1).get(), curLines.get(2).get(), curLines.get(3).get());
-         if (ls.distanceSquared(centroid) < 8000 && ls.length() > 30)
+         LineSegment2D lineSegment = new LineSegment2D(currentLineSegments.get(i).get(0),
+                                                       currentLineSegments.get(i).get(1),
+                                                       currentLineSegments.get(i).get(2),
+                                                       currentLineSegments.get(i).get(3));
+         if (lineSegment.distanceSquared(centroid) < 8000 && lineSegment.length() > 30)
          {
-            queue.add(ls);
+            queue.add(lineSegment);
          }
       }
 
       System.out.println("Queue Size:" + queue.size());
 
-      ArrayList<Line2D> polygon = new ArrayList<Line2D>();
+//      ArrayList<Line2D> polygon = new ArrayList<>();
 
       for (LineSegment2D ls : queue)
       {
@@ -187,7 +189,7 @@ public class LineSegmentToPlanarRegionAssociator
       this.cameraIntrinsics = cameraIntrinsics;
    }
 
-   public void setCurrentLines(Vec4iVector currentLines)
+   public void setCurrentLineSegments(Vec4iVector currentLines)
    {
       this.currentLines = currentLines;
    }

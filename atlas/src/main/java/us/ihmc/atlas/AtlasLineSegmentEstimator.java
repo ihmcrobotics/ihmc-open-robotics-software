@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.VideoPacket;
-import javafx.scene.shape.Sphere;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -15,7 +15,7 @@ import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineDetectionTools;
-import us.ihmc.ihmcPerception.lineSegmentDetector.LineMatch;
+import us.ihmc.ihmcPerception.lineSegmentDetector.LineSegmentMatch;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineSegmentToPlanarRegionAssociator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -37,11 +37,9 @@ import org.bytedeco.opencv.opencv_imgproc.*;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_highgui.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -49,16 +47,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static org.opencv.highgui.HighGui.createJFrame;
-import static us.ihmc.ihmcPerception.lineSegmentDetector.LineMatchingTools.matchFLDLines;
+import static us.ihmc.ihmcPerception.lineSegmentDetector.LineSegmentMatchingTools.matchLineSegments;
 
 public class AtlasLineSegmentEstimator
 {
-
    private boolean USE_ROS1_PERCEPTION_TOPICS = false;
 
    private final AtlasRobotModel robotModel;
-   private boolean prevImgFilled = false;
-   private int code = 0;
 
    private ConcurrentLinkedDeque<CompressedImage> compressedImagesRos1 = new ConcurrentLinkedDeque<>();
    private ConcurrentLinkedDeque<VideoPacket> videoPacketsRos2 = new ConcurrentLinkedDeque<>();
@@ -67,18 +62,7 @@ public class AtlasLineSegmentEstimator
    private volatile PlanarRegionsListMessage currentPlanarRegionsListMessage = null;
    private volatile CameraPinholeBrown cameraIntrinsics;
 
-   private Sphere sensorNode;
-
-   private Mat currentImage;
-   private Mat previousImage;
-   private Vec4iVector currentLines;
-   private Vec4iVector previousLines;
-   private ArrayList<LineMatch> correspondingLines;
-
-
    private LineSegmentToPlanarRegionAssociator lineRegionAssociator;
-
-   // private JavaFXPlanarRegionsViewer planarRegionsViewer;
 
    private RosMainNode ros1Node;
    private ROS2Node ros2Node;
@@ -133,11 +117,6 @@ public class AtlasLineSegmentEstimator
          lineRegionAssociator = new LineSegmentToPlanarRegionAssociator(neckFrame);
       }
 
-   }
-
-   public void setSensorNode(Sphere sensorNode)
-   {
-      this.sensorNode = sensorNode;
    }
 
    public void planarRegionsListCallback(PlanarRegionsListMessage message)
@@ -197,75 +176,61 @@ public class AtlasLineSegmentEstimator
 
    private void processBufferedImagesAndPlanarRegions(BufferedImage latestBufferedImage, BufferedImage previousBufferedImage)
    {
-      currentImage = new Mat(latestBufferedImage.getHeight(), latestBufferedImage.getWidth(), CV_8UC3);
-      byte[] data = ((DataBufferByte) latestBufferedImage.getRaster().getDataBuffer()).getData();
-      currentImage.data().put(data);
-
-      previousImage = new Mat(previousBufferedImage.getHeight(), previousBufferedImage.getWidth(), CV_8UC3);
-      byte[] previousData = ((DataBufferByte) previousBufferedImage.getRaster().getDataBuffer()).getData();
-      previousImage.data().put(previousData);
-
-      previousLines = LineDetectionTools.getCannyHoughLinesFromImage(previousImage);
-
-
       syncedRobot.update();
 
-      processImages();
-   }
-
-   public void processImages()
-   {
       float startTime = System.nanoTime();
-
       System.out.println("Processing Images");
 
-      Mat dispImage = new Mat();
-      this.currentLines = LineDetectionTools.getCannyHoughLinesFromImage(this.currentImage);
-      lineRegionAssociator.setCurrentLines(this.currentLines);
+      Mat currentImage = Java2DFrameUtils.toMat(latestBufferedImage);
+      Mat previousImage = Java2DFrameUtils.toMat(previousBufferedImage);
 
-      this.correspondingLines = matchFLDLines(this.previousLines, this.currentLines);
+      Vec4iVector previousLineSegments = LineDetectionTools.getCannyHoughLinesFromImage(previousImage);
+      Vec4iVector currentLineSegments = LineDetectionTools.getCannyHoughLinesFromImage(currentImage);
 
-      for (int i = 0; i < currentLines.size(); i++)
+      lineRegionAssociator.setCurrentLineSegments(currentLineSegments);
+
+      ArrayList<LineSegmentMatch> correspondingLineSegments = matchLineSegments(previousLineSegments, currentLineSegments);
+
+      for (int i = 0; i < currentLineSegments.size(); i++)
       {
-         Scalar4i val = currentLines.get(i);
-         line(this.currentImage, new Point(val.get(0), val.get(1)), new Point(val.get(2), val.get(3)), new Scalar(0, 255, 255, 0), 2, LINE_8, 0);
+         Scalar4i currentLineSegment = currentLineSegments.get(i);
+         line(currentImage,
+              new Point(currentLineSegment.get(0), currentLineSegment.get(1)),
+              new Point(currentLineSegment.get(2), currentLineSegment.get(3)),
+              Scalar.YELLOW,
+              2,
+              LINE_8,
+              0);
       }
 
       // displayLineMatches(prevImg, curImg, dispImage, correspLines);
-      Mat curImgLeft = new Mat();
-      currentImage.copyTo(curImgLeft);
+      Mat currentImageLeft = currentImage.clone();
 
-      if (this.currentPlanarRegionsListMessage != null)
+      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
+      lineRegionAssociator.loadParams(cameraIntrinsics);
+
+      for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
       {
-         PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(this.currentPlanarRegionsListMessage);
-         lineRegionAssociator.loadParams(cameraIntrinsics);
+         Point2D regionMidPoint = new Point2D(0, 0);
 
-
-         for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
+         if (region.getConvexHull().getArea() * 1000 > 50)
          {
-            ArrayList<Point> pointList;
-            Point2D regionMidPoint = new Point2D(0, 0);
-
-            if (region.getConvexHull().getArea() * 1000 > 50)
-            {
-               pointList = lineRegionAssociator.projectPlanarRegion(region, regionMidPoint);
-               lineRegionAssociator.drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
-               lineRegionAssociator.drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
-            }
+            ArrayList<Point> pointList = lineRegionAssociator.projectPlanarRegion(region, regionMidPoint);
+            lineRegionAssociator.drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
+            lineRegionAssociator.drawLineRegionAssociation(currentImageLeft, pointList, regionMidPoint, region.getRegionId());
          }
       }
 
-      MatVector src = new MatVector(curImgLeft, currentImage);
+      MatVector src = new MatVector(currentImageLeft, currentImage);
+      Mat dispImage = new Mat();
       hconcat(src, dispImage);
 
       float endTime = System.nanoTime();
-      // System.out.println("Time:" + (int) ((endTime - startTime) * (1e-6)) + " ms\tCorresponding Lines:" + correspLines.size());
+      System.out.println("Time:" + (int) ((endTime - startTime) * (1e-6)) + " ms\tCorresponding Lines:" + correspondingLineSegments.size());
       resize(dispImage, dispImage, new Size(2400, 1000));
       namedWindow("LineEstimator", WINDOW_AUTOSIZE);
       imshow("LineEstimator", dispImage);
       waitKey(1);
-
-      previousLines = currentLines;
    }
 
    public static void main(String[] args)

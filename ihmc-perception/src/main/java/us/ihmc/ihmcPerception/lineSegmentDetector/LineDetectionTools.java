@@ -1,38 +1,24 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.javacv.*;
-import org.bytedeco.javacpp.*;
-import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_imgproc.*;
-import org.bytedeco.opencv.opencv_calib3d.*;
-import org.bytedeco.opencv.opencv_objdetect.*;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class LineDetectionTools
 {
    public static Vec4iVector getCannyHoughLinesFromImage(Mat image)
    {
-      Vec4iVector lines = new Vec4iVector();
-      Mat gray = new Mat();
+      Mat gray = new Mat(image); // start avoiding extra allocation here
       cvtColor(image, gray, COLOR_BGR2GRAY);
-
-      Mat cannyEdges = new Mat();
-
-      cannyEdges = getCannyEdges(gray);
-
-      lines = getHoughLinesFromEdges(cannyEdges);
-
-
+      Mat edges = new Mat(gray);
+      Canny(gray, edges, 60, 60 * 3, 3, true);
+      Vec4iVector lines = new Vec4iVector();
+      HoughLinesP(edges, lines, 1, Math.PI / 180, 70, 30, 10);
       return lines;
    }
 
@@ -55,9 +41,9 @@ public class LineDetectionTools
 
    public static Mat getCannyEdges(Mat gray)
    {
-      Mat edges = new Mat();
+      Mat edges = gray.clone();
       Canny(gray, edges, 60, 60 * 3, 3, true);
-      Mat cannyColor = new Mat();
+      Mat cannyColor = edges.clone();
       cvtColor(edges, cannyColor, COLOR_GRAY2BGR);
       return edges;
    }
@@ -69,22 +55,22 @@ public class LineDetectionTools
       return lines;
    }
 
-   public static void displayLineMatches(Mat prevImg, Mat curImg, Mat dispImage, ArrayList<LineMatch> correspLines)
+   public static void displayLineMatches(Mat prevImg, Mat curImg, Mat dispImage, ArrayList<LineSegmentMatch> correspLines)
    {
       MatVector src = new MatVector(prevImg, curImg);
       hconcat(src, dispImage);
-      for (LineMatch lm : correspLines)
+      for (LineSegmentMatch lm : correspLines)
       {
-         line(dispImage,
-                      new Point((int)lm.prevLine[0], (int)lm.prevLine[1]),
-                      new Point((int)lm.curLine[0] + prevImg.cols(), (int)lm.curLine[1]),
-                      Scalar.YELLOW,
-                      2,LINE_8, 0);
-         line(dispImage,
-                      new Point((int)lm.prevLine[2], (int)lm.prevLine[3]),
-                      new Point((int)lm.curLine[2] + prevImg.cols(), (int)lm.curLine[3]),
-                      Scalar.YELLOW,
-                      2, LINE_8, 0);
+//         line(dispImage,
+//                      new Point((int)lm.previousLineSegment[0], (int)lm.previousLineSegment[1]),
+//                      new Point((int)lm.currentLineSegment[0] + prevImg.cols(), (int)lm.currentLineSegment[1]),
+//                      Scalar.YELLOW,
+//                      2,LINE_8, 0);
+//         line(dispImage,
+//                      new Point((int)lm.previousLineSegment[2], (int)lm.previousLineSegment[3]),
+//                      new Point((int)lm.currentLineSegment[2] + prevImg.cols(), (int)lm.currentLineSegment[3]),
+//                      Scalar.YELLOW,
+//                      2, LINE_8, 0);
       }
    }
 
