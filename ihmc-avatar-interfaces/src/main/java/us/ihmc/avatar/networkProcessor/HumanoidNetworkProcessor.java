@@ -81,7 +81,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(null);
+         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(robotModel.getFootstepPlannerParameters().getAdaptiveSwingParameters());
       if (parameters.isUseFootstepPostProcessingToolboxModule())
          humanoidNetworkProcessor.setupFootstepPostProcessingToolboxModule(parameters.isVisualizeFootstepPostProcessingToolboxModule());
       if (parameters.isUseMocapModule())

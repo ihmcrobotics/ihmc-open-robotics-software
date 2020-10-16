@@ -7,6 +7,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -86,7 +88,7 @@ public class FootstepPlanningModuleLauncher
                                                                                                          publisherTopicNameGenerator);
 
       AdaptiveSwingTrajectoryCalculator swingParameterCalculator =
-            swingParameters == null ? null : new AdaptiveSwingTrajectoryCalculator(swingParameters, robotModel.getWalkingControllerParameters());
+            swingParameters == null ? null : new AdaptiveSwingTrajectoryCalculator(swingParameters, robotModel.getFootstepPlannerParameters(), robotModel.getWalkingControllerParameters());
       footstepPlanningModule.addStatusCallback(output ->
                                                {
                                                   FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
@@ -94,8 +96,19 @@ public class FootstepPlanningModuleLauncher
                                                   if (swingParameterCalculator != null)
                                                   {
                                                      swingParameterCalculator.setPlanarRegionsList(footstepPlanningModule.getRequest().getPlanarRegionsList());
-                                                     swingParameterCalculator.setSwingParameters(footstepPlanningModule.getRequest().getStanceFootPose(),
-                                                                                                 outputStatus.getFootstepDataList());
+                                                     FootstepPlannerRequest request = footstepPlanningModule.getRequest();
+
+                                                     SideDependentList<Pose3D> initialStepPoses = new SideDependentList<>();
+                                                     RobotSide initialStanceSide = request.getInitialStanceSide();
+                                                     Pose3D stanceFootPose = request.getStanceFootPose();
+                                                     initialStepPoses.put(initialStanceSide, stanceFootPose);
+
+                                                     double stanceWidth = footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth();
+                                                     Pose3D initialSwingPose = new Pose3D(stanceFootPose);
+                                                     initialSwingPose.appendTranslation(0.0, initialStanceSide.negateIfLeftSide(stanceWidth), 0.0);
+                                                     initialStepPoses.put(initialStanceSide.getOppositeSide(), initialSwingPose);
+
+                                                     swingParameterCalculator.setSwingParameters(initialStepPoses, outputStatus.getFootstepDataList());
                                                   }
                                                   resultPublisher.publish(outputStatus);
                                                });

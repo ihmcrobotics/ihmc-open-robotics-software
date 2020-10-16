@@ -101,7 +101,7 @@ public class ValkyrieAStarFootstepPlanner
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapAndWiggler  = new FootstepNodeSnapAndWiggler(footPolygons, () -> true, parameters::getWiggleInsideDelta, parameters::getMaximumXYWiggle, parameters::getMaximumYawWiggle, () -> Double.POSITIVE_INFINITY);
-      swingParameterCalculator = new AdaptiveSwingTrajectoryCalculator(new ValkyrieAdaptiveSwingParameters(), robotModel.getWalkingControllerParameters());
+      swingParameterCalculator = new AdaptiveSwingTrajectoryCalculator(new ValkyrieAdaptiveSwingParameters(), robotModel.getFootstepPlannerParameters(), robotModel.getWalkingControllerParameters());
 
       ParameterBasedNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters::getMinimumFootstepLength,
                                                                                   parameters::getMaximumStepReach,
@@ -311,10 +311,10 @@ public class ValkyrieAStarFootstepPlanner
             startPose.set(previousStep.getLocation(), previousStep.getOrientation());
          }
 
-         if(!swingParameterCalculator.checkForFootCollision(startPose, footstepDataMessage))
-         {
-            footstepDataMessage.setSwingHeight(swingParameterCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));            
-         }
+//         if(!swingParameterCalculator.checkForFootCollision(startPose, footstepDataMessage))
+//         {
+//            footstepDataMessage.setSwingHeight(swingParameterCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
+//         }
          
          footstepDataMessage.setSwingDuration(swingParameterCalculator.calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
       }
