@@ -23,6 +23,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -119,7 +120,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
 
    private int numberOfConstraints = 0;
-   private boolean maintainInitialCoMVelocityContinuity = false;
+   private final YoBoolean maintainInitialCoMVelocityContinuity = new YoBoolean("maintainInitialComVelocityContinuity", registry);
 
    private CornerPointViewer viewer = null;
 
@@ -134,6 +135,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       comHeight.set(nominalCoMHeight);
 
       this.omega = omega;
+      maintainInitialCoMVelocityContinuity.set(false);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -147,13 +149,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       omega.addListener(v -> comHeight.set(gravityZ / MathTools.square(omega.getValue())));
       omega.notifyListeners();
 
+      maintainInitialCoMVelocityContinuity.set(false);
+
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
    }
 
    public void setMaintainInitialCoMVelocityContinuity(boolean maintainInitialCoMVelocityContinuity)
    {
-      this.maintainInitialCoMVelocityContinuity = maintainInitialCoMVelocityContinuity;
+      this.maintainInitialCoMVelocityContinuity.set(maintainInitialCoMVelocityContinuity);
    }
 
    public void setCornerPointViewer(CornerPointViewer viewer)
@@ -196,7 +200,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       solveForCoefficientConstraintMatrix(contactSequence);
 
-      if (maintainInitialCoMVelocityContinuity && comContinuityCalculator != null)
+      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null)
       {
          int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
          double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
