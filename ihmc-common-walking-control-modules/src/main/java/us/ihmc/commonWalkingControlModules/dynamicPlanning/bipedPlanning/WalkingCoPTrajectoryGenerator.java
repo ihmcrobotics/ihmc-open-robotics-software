@@ -68,6 +68,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final YoSplitFractionCalculatorParameters splitFractionParameters;
 
+   private double continuityDuration = 0.2;
+
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
 
@@ -121,6 +123,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       parentRegistry.addChild(registry);
       clear();
+   }
+
+   public double getDurationForContinuityMaintenanceSegment()
+   {
+      return continuityDuration;
    }
 
    @Override
@@ -401,7 +408,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactState.setDuration(segmentDuration);
    }
 
-   private double continuityDuration = 0.2;
 
    private void computeCoPPointsForFootstepTransfer(double duration,
                                                     double splitFraction,
