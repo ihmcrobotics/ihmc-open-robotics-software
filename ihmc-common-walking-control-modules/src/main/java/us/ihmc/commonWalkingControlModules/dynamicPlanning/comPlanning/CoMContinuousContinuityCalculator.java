@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.ejml.data.DGrowArray;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
-import org.ejml.data.IGrowArray;
+import org.ejml.data.*;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
@@ -14,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoMContinuousContinuityCalculator
+public class CoMContinuousContinuityCalculator implements CoMContinuityCalculator
 {
    private final FramePoint3D initialCoMPosition = new FramePoint3D();
    private final FrameVector3D initialCoMVelocity = new FrameVector3D();
@@ -160,7 +160,6 @@ public class CoMContinuousContinuityCalculator
 
       sparseSolver.setA(coefficientMultipliersSparse);
 
-      // TODO make an add equals method. Also don't pass in null, as that apparently makes garbage.
       CommonOps_DSCC.mult(vrpWaypointJacobian, vrpXWaypoints, tempSparse);
       CommonOps_DSCC.add(1.0, tempSparse, 1.0, xConstants, xEquivalents, gw, gx);
 
@@ -175,6 +174,29 @@ public class CoMContinuousContinuityCalculator
       sparseSolver.solveSparse(zEquivalents, zCoefficientVector);
 
       return true;
+   }
+
+   public int getDepthForCalculation()
+   {
+      return segmentContinuityDepth;
+   }
+
+   public void getXCoefficientOverrides(DMatrix xCoefficientVectorToPack)
+   {
+      int size = xCoefficientVector.getNumRows();
+      MatrixMissingTools.setMatrixBlock(xCoefficientVectorToPack, 0, 0, xCoefficientVector, 0, 0, size, 1, 1.0);
+   }
+
+   public void getYCoefficientOverrides(DMatrix yCoefficientVectorToPack)
+   {
+      int size = yCoefficientVector.getNumRows();
+      MatrixMissingTools.setMatrixBlock(yCoefficientVectorToPack, 0, 0, yCoefficientVector, 0, 0, size, 1, 1.0);
+   }
+
+   public void getZCoefficientOverrides(DMatrix zCoefficientVectorToPack)
+   {
+      int size = zCoefficientVector.getNumRows();
+      MatrixMissingTools.setMatrixBlock(zCoefficientVectorToPack, 0, 0, zCoefficientVector, 0, 0, size, 1, 1.0);
    }
 
    private void resetMatrices()

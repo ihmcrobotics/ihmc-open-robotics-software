@@ -123,6 +123,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private CornerPointViewer viewer = null;
 
+   private CoMContinuityCalculator comContinuityCalculator = null;
+
    public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
@@ -159,6 +161,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.viewer = viewer;
    }
 
+   public void setComContinuityCalculator(CoMContinuityCalculator comContinuityCalculator)
+   {
+      this.comContinuityCalculator = comContinuityCalculator;
+   }
+
    /** {@inheritDoc} */
    @Override
    public void setNominalCoMHeight(double nominalCoMHeight)
@@ -172,8 +179,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    {
       return comHeight.getDoubleValue();
    }
-
-   private final List<ContactStateProvider> contactSequenceInternal = new ArrayList<>();
 
    /** {@inheritDoc} */
    @Override
@@ -190,6 +195,25 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                                                     endVRPPositions, false);
 
       solveForCoefficientConstraintMatrix(contactSequence);
+
+      if (maintainInitialCoMVelocityContinuity && comContinuityCalculator != null)
+      {
+         int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
+         double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
+         compute(segmentId, time, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+
+         comContinuityCalculator.setInitialCoMPosition(currentCoMPosition);
+         comContinuityCalculator.setInitialCoMVelocity(currentCoMVelocity);
+         comContinuityCalculator.setFinalICPToAchieve(dcmPositionToThrowAway);
+
+         if (comContinuityCalculator.solve(contactSequence))
+         {
+            comContinuityCalculator.getXCoefficientOverrides(xCoefficientVector);
+            comContinuityCalculator.getYCoefficientOverrides(yCoefficientVector);
+            comContinuityCalculator.getZCoefficientOverrides(zCoefficientVector);
+         }
+      }
 
       // update coefficient holders
       int firstCoefficientIndex = 0;
@@ -250,15 +274,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       int transition = 0;
       // add a moveable waypoint for the center of mass velocity constraint
-      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing() && contactSequence.size() > 2)
-      {
-         setCoMVelocityConstraint(currentCoMVelocity);
-         setCoMPositionContinuity(contactSequence, 0, 1);
-         setCoMVelocityContinuity(contactSequence, 0, 1);
-
-         setDynamicsContinuityConstraint(contactSequence, 0, 1);
-         transition++;
-      }
+//      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing() && contactSequence.size() > 2)
+//      {
+//         setCoMVelocityConstraint(currentCoMVelocity);
+//         setCoMPositionContinuity(contactSequence, 0, 1);
+//         setCoMVelocityContinuity(contactSequence, 0, 1);
+//
+//         setDynamicsContinuityConstraint(contactSequence, 0, 1);
+//         transition++;
+//      }
 
 
       // add transition continuity constraints
