@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import org.ejml.data.DGrowArray;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
+import org.ejml.data.IGrowArray;
 import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
@@ -56,12 +58,16 @@ public class CoMContinuousContinuityCalculator
    final DMatrixSparseCSC yCoefficientVector = new DMatrixSparseCSC(0, 1);
    final DMatrixSparseCSC zCoefficientVector = new DMatrixSparseCSC(0, 1);
 
+   private final CoMTrajectoryPlannerIndexHandler indexHandler = new CoMTrajectoryPlannerIndexHandler();
+
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
+
+   private int numberOfConstraints = 0;
 
    public CoMContinuousContinuityCalculator(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
@@ -102,6 +108,9 @@ public class CoMContinuousContinuityCalculator
       this.finalICPToAchieve.setMatchingFrame(finalICPToAchieve);
    }
 
+   private final IGrowArray gw = new IGrowArray();
+   private final DGrowArray gx = new DGrowArray();
+
    public boolean solve(List<? extends ContactStateProvider> contactSequence)
    {
       if (contactSequence.size() < 3)
@@ -116,6 +125,10 @@ public class CoMContinuousContinuityCalculator
       for (int i = 0; i < segmentContinuityDepth; i++)
          contactSequenceInternal.add(contactSequence.get(i));
 
+      indexHandler.update(contactSequenceInternal);
+
+      resetMatrices();
+
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
                                                     gravityZ,
                                                     omega.getValue(),
@@ -125,27 +138,25 @@ public class CoMContinuousContinuityCalculator
                                                     endVRPPositions,
                                                     false);
 
-      int numberOfPhases = contactSequenceInternal.size();
-      int numberOfTransitions = numberOfPhases - 1;
-
       numberOfConstraints = 0;
 
       // set initial constraint
+      double firstSegmentDuration = contactSequenceInternal.get(0).getTimeInterval().getDuration();
+      double secondSegmentDuration = contactSequenceInternal.get(1).getTimeInterval().getDuration();
+
       setCoMPositionConstraint(initialCoMPosition);
       setCoMVelocityConstraint(initialCoMVelocity);
-      setDynamicsInitialConstraint(contactSequenceInternal, 0);
+      setDynamicsInitialConstraint(firstSegmentDuration);
 
       // add a moveable waypoint for the center of mass velocity constraint
-      setCoMPositionContinuity(contactSequenceInternal, 0, 1);
-      setCoMVelocityContinuity(contactSequenceInternal, 0, 1);
+      setCoMPositionContinuity(firstSegmentDuration);
+      setCoMVelocityContinuity(firstSegmentDuration);
 
-      setDynamicsContinuityConstraint(contactSequenceInternal, 0, 1);
+      setDynamicsContinuityConstraint(firstSegmentDuration, secondSegmentDuration);
 
       // set terminal constraint
-      ContactStateProvider lastContactPhase = contactSequenceInternal.get(numberOfPhases - 1);
-      double finalDuration = lastContactPhase.getTimeInterval().getDuration();
-      setDCMPositionConstraint(numberOfPhases - 1, finalDuration, finalICPToAchieve);
-      setDynamicsFinalConstraint(contactSequenceInternal, numberOfPhases - 1);
+      setFinalDCMPositionConstraint(secondSegmentDuration, finalICPToAchieve);
+      setDynamicsFinalConstraint(secondSegmentDuration);
 
       sparseSolver.setA(coefficientMultipliersSparse);
 
@@ -162,6 +173,8 @@ public class CoMContinuousContinuityCalculator
       sparseSolver.solveSparse(xEquivalents, xCoefficientVector);
       sparseSolver.solveSparse(yEquivalents, yCoefficientVector);
       sparseSolver.solveSparse(zEquivalents, zCoefficientVector);
+
+      return true;
    }
 
    private void resetMatrices()
@@ -211,88 +224,71 @@ public class CoMContinuousContinuityCalculator
                                                          omega.getValue(),
                                                          0.0,
                                                          0,
-                                                         numberOfConstraints,
+                                                         numberOfConstraints++,
                                                          coefficientMultipliersSparse,
                                                          xConstants,
                                                          yConstants,
                                                          zConstants);
-      numberOfConstraints++;
    }
 
-   private void setCoMPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setCoMPositionContinuity(double previousDuration)
    {
-      double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityConstraint(previousSequence,
-                                                                   nextSequence,
-                                                                   numberOfConstraints,
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityConstraint(0,
+                                                                   1,
+                                                                   numberOfConstraints++,
                                                                    omega.getValue(),
                                                                    previousDuration,
                                                                    coefficientMultipliersSparse);
-      numberOfConstraints++;
    }
 
-   private void setCoMVelocityContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setCoMVelocityContinuity(double previousDuration)
    {
-      double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addCoMVelocityContinuityConstraint(previousSequence,
-                                                                   nextSequence,
-                                                                   numberOfConstraints,
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityConstraint(0,
+                                                                   1,
+                                                                   numberOfConstraints++,
                                                                    omega.getValue(),
                                                                    previousDuration,
                                                                    coefficientMultipliersSparse);
-      numberOfConstraints++;
    }
 
    private final FrameVector3D desiredVelocity = new FrameVector3D();
 
-   private void setDynamicsInitialConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
+   private void setDynamicsInitialConstraint(double duration)
    {
-      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
-      double duration = contactStateProvider.getTimeInterval().getDuration();
-      desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
+      desiredVelocity.sub(endVRPPositions.get(0), startVRPPositions.get(0));
       desiredVelocity.scale(1.0 / duration);
-      constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
-      constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, desiredVelocity);
+      constrainVRPPosition(0, indexHandler.getVRPWaypointStartPositionIndex(0), 0.0, startVRPPositions.get(0));
+      constrainVRPVelocity(0, indexHandler.getVRPWaypointStartVelocityIndex(0), 0.0, desiredVelocity);
    }
 
-   private void setDynamicsFinalConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
+   private void setDynamicsFinalConstraint(double segmentDuration)
    {
-      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
-      double duration = contactStateProvider.getTimeInterval().getDuration();
-
-      desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
-      desiredVelocity.scale(1.0 / duration);
-      constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
-      constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, desiredVelocity);
+      desiredVelocity.sub(endVRPPositions.get(1), startVRPPositions.get(1));
+      desiredVelocity.scale(1.0 / segmentDuration);
+      constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), segmentDuration, endVRPPositions.get(1));
+      constrainVRPVelocity(1, indexHandler.getVRPWaypointFinalVelocityIndex(1), segmentDuration, desiredVelocity);
    }
 
-   private void setDynamicsContinuityConstraint(List<? extends ContactStateProvider> contactSequence, int previousSequenceId, int nextSequenceId)
+   private void setDynamicsContinuityConstraint(double previousDuration, double nextDuration)
    {
-      ContactStateProvider previousSequence = contactSequence.get(previousSequenceId);
-      ContactStateProvider nextSequence = contactSequence.get(nextSequenceId);
-      if (previousSequence.getContactState().isLoadBearing() != nextSequence.getContactState().isLoadBearing())
-         throw new IllegalArgumentException("Cannot constrain two sequences of different types to have equivalent dynamics.");
+      setVRPPositionContinuity(previousDuration);
 
-      setVRPPositionContinuity(contactSequence, previousSequenceId, nextSequenceId);
-
-      double previousDuration = previousSequence.getTimeInterval().getDuration();
-      double nextDuration = nextSequence.getTimeInterval().getDuration();
-      addImplicitVRPVelocityConstraint(previousSequenceId,
-                                       indexHandler.getVRPWaypointStartPositionIndex(previousSequenceId),
+      addImplicitVRPVelocityConstraint(0,
+                                       indexHandler.getVRPWaypointStartPositionIndex(0),
                                        previousDuration,
                                        0.0,
-                                       startVRPPositions.get(previousSequenceId));
-      addImplicitVRPVelocityConstraint(nextSequenceId,
-                                       indexHandler.getVRPWaypointFinalPositionIndex(nextSequenceId),
+                                       startVRPPositions.get(0));
+      addImplicitVRPVelocityConstraint(1,
+                                       indexHandler.getVRPWaypointFinalPositionIndex(1),
                                        0.0,
                                        nextDuration,
-                                       endVRPPositions.get(nextSequenceId));
+                                       endVRPPositions.get(1));
    }
 
    private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addVRPPositionConstraint(sequenceId,
-                                                         numberOfConstraints,
+                                                         numberOfConstraints++,
                                                          vrpWaypointPositionIndex,
                                                          time,
                                                          omega.getValue(),
@@ -302,13 +298,12 @@ public class CoMContinuousContinuityCalculator
                                                          vrpYWaypoints,
                                                          vrpZWaypoints,
                                                          vrpWaypointJacobian);
-      numberOfConstraints++;
    }
 
    private void constrainVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
    {
       CoMTrajectoryPlannerTools.addVRPVelocityConstraint(sequenceId,
-                                                         numberOfConstraints,
+                                                         numberOfConstraints++,
                                                          vrpWaypointVelocityIndex,
                                                          omega.getValue(),
                                                          time,
@@ -318,19 +313,16 @@ public class CoMContinuousContinuityCalculator
                                                          vrpYWaypoints,
                                                          vrpZWaypoints,
                                                          vrpWaypointJacobian);
-      numberOfConstraints++;
    }
 
-   private void setVRPPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setVRPPositionContinuity(double previousDuration)
    {
-      double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addVRPPositionContinuityConstraint(previousSequence,
-                                                                   nextSequence,
-                                                                   numberOfConstraints,
+      CoMTrajectoryPlannerTools.addVRPPositionContinuityConstraint(0,
+                                                                   1,
+                                                                   numberOfConstraints++,
                                                                    omega.getValue(),
                                                                    previousDuration,
                                                                    coefficientMultipliersSparse);
-      numberOfConstraints++;
    }
 
    private void addImplicitVRPVelocityConstraint(int sequenceId,
@@ -340,7 +332,7 @@ public class CoMContinuousContinuityCalculator
                                                  FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId,
-                                                                 numberOfConstraints,
+                                                                 numberOfConstraints++,
                                                                  vrpWaypointPositionIndex,
                                                                  time,
                                                                  timeAtWaypoint,
@@ -351,6 +343,12 @@ public class CoMContinuousContinuityCalculator
                                                                  vrpYWaypoints,
                                                                  vrpZWaypoints,
                                                                  vrpWaypointJacobian);
+   }
+
+   private void setFinalDCMPositionConstraint(double time, FramePoint3DReadOnly desiredDCMPosition)
+   {
+      CoMTrajectoryPlannerTools.addDCMPositionConstraint(1, numberOfConstraints, time, omega.getValue(), desiredDCMPosition, coefficientMultipliersSparse,
+                                                         xConstants, yConstants, zConstants);
       numberOfConstraints++;
    }
 }
