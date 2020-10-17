@@ -21,9 +21,9 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class CoPTrajectoryGeneratorTest
+public class WalkingCoPTrajectoryGeneratorTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    @BeforeEach
    public void setup()
@@ -95,9 +95,9 @@ public class CoPTrajectoryGeneratorTest
       // check the timings
       double time = 0.0;
       assertEquals(time, contactStateProviders.get(0).getTimeInterval().getStartTime(), epsilon);
-      time += transferSplitFraction * transferTime;
+      time += Math.min(transferSplitFraction * transferTime, copTrajectory.getDurationForContinuityMaintenanceSegment());
       assertEquals(time, contactStateProviders.get(0).getTimeInterval().getEndTime(), epsilon);
-      time += (1.0 - transferSplitFraction) * transferTime;
+      time += transferTime -  Math.min(transferSplitFraction * transferTime, copTrajectory.getDurationForContinuityMaintenanceSegment());
       assertEquals(time, contactStateProviders.get(1).getTimeInterval().getEndTime(), epsilon);
       time += swingShiftFraction * swingSplitFraction * swingTime;
       assertEquals(time, contactStateProviders.get(2).getTimeInterval().getEndTime(), epsilon);
