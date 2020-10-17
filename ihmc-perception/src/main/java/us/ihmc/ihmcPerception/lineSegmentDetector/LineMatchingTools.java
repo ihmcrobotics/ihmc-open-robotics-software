@@ -14,6 +14,9 @@ public class LineMatchingTools
    public static ArrayList<LineMatch> matchFLDLines(Mat prevFLDLines, Mat FLDlines)
    {
       ArrayList<LineMatch> corresp = new ArrayList<>();
+
+      if(prevFLDLines == null || FLDlines == null) return corresp;
+
       double angleCost, midPointCost, lengthCost = 0;
       double angleThreshold = 50, midPointThreshold = 100, lengthThreshold = 1200;
       for (int i = 0; i < prevFLDLines.rows(); i++)

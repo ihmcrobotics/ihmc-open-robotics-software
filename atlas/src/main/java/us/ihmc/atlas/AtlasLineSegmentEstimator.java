@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineDetectionTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineMatch;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineSegmentToPlanarRegionAssociator;
+import us.ihmc.ihmcPerception.lineSegmentDetector.LineTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
@@ -75,14 +76,13 @@ public class AtlasLineSegmentEstimator
 
    private LineSegmentToPlanarRegionAssociator lineRegionAssociator;
 
-   // private JavaFXPlanarRegionsViewer planarRegionsViewer;
-
    private RosMainNode ros1Node;
    private ROS2Node ros2Node;
 
    private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
-   private ScheduledExecutorService executorService
-         = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                  getClass(),
+                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private TransformReferenceFrame realsenseSensorFrame;
    private TransformReferenceFrame multisenseSensorFrame;
@@ -92,13 +92,20 @@ public class AtlasLineSegmentEstimator
 
    public AtlasLineSegmentEstimator()
    {
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "line_detection");
+
+            new AtlasLineDetectionDemo(ros2Node).execFootstepPlan();
+
       // System.out.println(System.getProperty("java.library.path"));
       System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
       // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
 
 
-
+      /*
+         Use tf for the head-world. Hold a buffer of camera poses. Do a linear interpolation to find nearest timestamp.
+          RobotConfigurationDataBuffer subscription. Use LidarScanPublisher as reference
+          The useTimeStamps only applies to simulation robot model updates
+       */
 
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback); // (AtlasObstacleCourseNoUI)
 //      new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, this::planarRegionsListCallback); // (AtlasLookAndStepBehaviorDemo)
@@ -123,9 +130,9 @@ public class AtlasLineSegmentEstimator
       }
       else
       {
+         lineRegionAssociator = new LineSegmentToPlanarRegionAssociator();
          // VideoPacket.class, ROS2Tools.IHMC_ROOT (For All)
          // ROS2Tools.VIDEO (AtlasLookAndStepBehaviorDemo)
-         lineRegionAssociator = new LineSegmentToPlanarRegionAssociator();
          new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, message ->
          {
             LogTools.info("Message Received: ", message);
@@ -146,7 +153,7 @@ public class AtlasLineSegmentEstimator
 
    public void setSensorNode(Sphere sensorNode)
    {
-      this.sensorNode = sensorNode;
+      sensorNode = sensorNode;
    }
 
    public void planarRegionsListCallback(PlanarRegionsListMessage message)
@@ -219,9 +226,6 @@ public class AtlasLineSegmentEstimator
       byte[] previousData = ((DataBufferByte) previousBufferedImage.getRaster().getDataBuffer()).getData();
       previousImage.put(0, 0, previousData);
 
-      previousLines = LineDetectionTools.getFLDLinesFromImage(previousImage);
-
-
       syncedRobot.update();
 
       processImages();
@@ -229,48 +233,23 @@ public class AtlasLineSegmentEstimator
 
    public void processImages()
    {
-      float startTime = System.nanoTime();
-
-
       Mat dispImage = new Mat();
-      this.currentLines = LineDetectionTools.getFLDLinesFromImage(this.currentImage);
-      lineRegionAssociator.setCurLines(this.currentLines);
 
-      this.correspondingLines = matchFLDLines(this.previousLines, this.currentLines);
+      currentLines = LineDetectionTools.getFLDLinesFromImage(currentImage);
 
-      for (int i = 0; i < currentLines.rows(); i++)
-      {
-         double[] val = currentLines.get(i, 0);
-         Imgproc.line(this.currentImage, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 255, 255), 2);
-      }
+      lineRegionAssociator.setCurLines(currentLines);
+      correspondingLines = matchFLDLines(previousLines, currentLines);
 
+      LineTools.drawLines(currentImage, currentLines); // Visualize Lines on Right Image
       // displayLineMatches(prevImg, curImg, dispImage, correspLines);
       Mat curImgLeft = new Mat();
       currentImage.copyTo(curImgLeft);
 
-      if (this.currentPlanarRegionsListMessage != null)
-      {
-         PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(this.currentPlanarRegionsListMessage);
-
-         for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
-         {
-            ArrayList<Point> pointList = new ArrayList<>();
-            Point2D regionMidPoint = new Point2D(0, 0);
-
-            if (region.getConvexHull().getArea() * 1000 > 50)
-            {
-               pointList = lineRegionAssociator.projectPlanarRegionUsingCameraPose(region, regionMidPoint);
-               lineRegionAssociator.drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
-               lineRegionAssociator.drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
-            }
-         }
-      }
+      lineRegionAssociator.associateInImageSpace(currentPlanarRegionsListMessage, currentImage, curImgLeft);
 
       List<Mat> src = Arrays.asList(curImgLeft, currentImage);
       Core.hconcat(src, dispImage);
 
-      float endTime = System.nanoTime();
-      // System.out.println("Time:" + (int) ((endTime - startTime) * (1e-6)) + " ms\tCorresponding Lines:" + correspLines.size());
       Imgproc.resize(dispImage, dispImage, new Size(2400, 1000));
       HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
       HighGui.imshow("LineEstimator", dispImage);
@@ -281,7 +260,7 @@ public class AtlasLineSegmentEstimator
 
    public static void main(String[] args)
    {
-//      new AtlasLineDetectionDemo().execFootstepPlan();
+
       new AtlasLineSegmentEstimator();
    }
 }

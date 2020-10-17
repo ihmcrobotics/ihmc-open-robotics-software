@@ -1,8 +1,10 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
@@ -56,6 +59,25 @@ public class LineSegmentToPlanarRegionAssociator
    public void setCameraPosition(Point3D cameraPosition)
    {
       this.cameraPosition = cameraPosition;
+   }
+
+   public void associateInImageSpace(PlanarRegionsListMessage currentPlanarRegionsListMessage, Mat currentImage, Mat curImgLeft){
+
+      PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
+
+      for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
+      {
+         ArrayList<Point> pointList = new ArrayList<>();
+         Point2D regionMidPoint = new Point2D(0, 0);
+
+         if (region.getConvexHull().getArea() * 1000 > 50)
+         {
+            pointList = projectPlanarRegionUsingCameraPose(region, regionMidPoint);
+            drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
+            drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
+         }
+      }
+
    }
 
    public ArrayList<Point> projectPlanarRegion(PlanarRegion region, Point2D regionMidPoint)
