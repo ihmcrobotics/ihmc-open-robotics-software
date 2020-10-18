@@ -621,7 +621,7 @@ public class BalanceManager
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
       initializeForStanding = true;
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
       icpPlannerDone.set(false);
    }
