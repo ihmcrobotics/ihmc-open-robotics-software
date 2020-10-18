@@ -15,8 +15,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -329,20 +330,21 @@ public class FootstepPlannerLogger
          {
             FootstepPlannerIterationData iterationData = iterationDataList.get(i);
             fileWriter.write("Iteration " + i + newLine);
-            writeNode(1, "stanceNode", iterationData.getStanceNode());
-            writeNode(1, "idealStep", iterationData.getIdealStep());
+            writeNode(1, "parentNode", iterationData.getParentNode());
+            writeNode(1, "idealStep", iterationData.getIdealChildNode());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
-            writeSnapData(1, iterationData.getStanceNodeSnapData());
+            writeSnapData(1, iterationData.getParentStartSnapData());
+            writeSnapData(1, iterationData.getParentEndSnapData());
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
-               FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap().get(new GraphEdge<>(iterationData.getStanceNode(), iterationData.getChildNodes().get(j)));
+               FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
 
                // indicate start of data
                writeLine(1, "Edge:");
-               writeNode(2, "candidateNode", edgeData.getCandidateNode());
+               writeNode(2, "candidateNode", edgeData.getChildNode());
                writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
-               writeSnapData(2, edgeData.getCandidateNodeSnapData());
+               writeSnapData(2, edgeData.getEndStepSnapData());
 
                // write additional data as doubles
                fileWriter.write(tab + tab + "data:");
@@ -384,15 +386,29 @@ public class FootstepPlannerLogger
       printStream.close();
    }
 
-   private void writeNode(int numTabs, String name, FootstepNode node) throws IOException
+   private void writeNode(int numTabs, String name, FootstepGraphNode node) throws IOException
    {
       if (node == null)
+      {
          writeLine(numTabs, name + ":null");
+      }
       else
-         writeLine(numTabs, name + ":" + node.getXIndex() + "," + node.getYIndex() + "," + node.getYawIndex() + "," + node.getRobotSide().ordinal());
+      {
+         DiscreteFootstep firstStep = node.getFirstStep();
+         DiscreteFootstep secondStep = node.getSecondStep();
+         writeLine(numTabs, name + ":" +
+                   firstStep.getXIndex() + "," +
+                   firstStep.getYIndex() + "," +
+                   firstStep.getYawIndex() + "," +
+                   firstStep.getRobotSide().ordinal() + "," +
+                   secondStep.getXIndex() + "," +
+                   secondStep.getYIndex() + "," +
+                   secondStep.getYawIndex() + "," +
+                   secondStep.getRobotSide().ordinal());
+      }
    }
 
-   private void writeSnapData(int numTabs, FootstepNodeSnapData snapData) throws IOException
+   private void writeSnapData(int numTabs, FootstepSnapData snapData) throws IOException
    {
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       writeTransform(numTabs, "snapTransform: ", new Quaternion(snapTransform.getRotation()), snapTransform.getTranslation());

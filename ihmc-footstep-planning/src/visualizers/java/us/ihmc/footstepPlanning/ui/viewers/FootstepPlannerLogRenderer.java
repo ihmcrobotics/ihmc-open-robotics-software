@@ -4,15 +4,17 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -41,14 +43,16 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final Group root = new Group();
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette());
 
-   private final MeshHolder loggedStanceStepGraphic = new MeshHolder(root);
+   private final MeshHolder startOfSwingStepGraphic = new MeshHolder(root);
+   private final MeshHolder stanceStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedUnsnappedCandidateStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedSnappedCandidateStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedWiggledCandidateStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedIealStepGraphic = new MeshHolder(root);
 
-   private final AtomicReference<Pair<FootstepNode, FootstepNodeSnapData>> stanceStep;
-   private final AtomicReference<FootstepPlannerEdgeData> candidateStep;
+   private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> startOfSwingStepToVisualize;
+   private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> stanceStepToVisualize;
+   private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> touchdownStepToVisualize;
    private final AtomicReference<RigidBodyTransform> idealStep;
 
    public FootstepPlannerLogRenderer(SideDependentList<List<Point2D>> defaultContactPoints, Messager messager)
@@ -69,12 +73,14 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          defaultFootPoints.add(new Point2D(defaultFootPolygon.getVertex(i)));
       }
 
-      stanceStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedStanceStepToVisualize);
-      candidateStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedCandidateStepToVisualize);
+      startOfSwingStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.StartOfSwingStepToVisualize);
+      stanceStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.StanceStepToVisualize);
+      touchdownStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.TouchdownStepToVisualize);
       idealStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedIdealStep);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, loggedStanceStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, startOfSwingStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, stanceStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
@@ -99,65 +105,44 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
 
    private void handleInteral()
    {
-      // Render stance step
-      Pair<FootstepNode, FootstepNodeSnapData> stanceStepData = this.stanceStep.getAndSet(null);
-      if (stanceStepData != null)
+      Pair<DiscreteFootstep, FootstepSnapData> startOfSwingStepData = this.startOfSwingStepToVisualize.getAndSet(null);
+      if (startOfSwingStepData != null)
       {
-         meshBuilder.clear();
-
-         FootstepNode stanceNode = stanceStepData.getKey();
-         FootstepNodeSnapData footstepNodeSnapData = stanceStepData.getValue();
-
-         RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
-         RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
-         footstepNodeSnapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
-         FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapAndWiggleTransform, snappedNodeTransform);
-
-         List<Point2D> footPoints = footstepNodeSnapData.getCroppedFoothold().getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList());
-         Color stanceStepColor = stanceNode.getRobotSide() == RobotSide.LEFT ? leftFootColor : rightFootColor;
-
-         if (footPoints.isEmpty())
-         {
-            addFootstep(snappedNodeTransform.getTranslation(), snappedNodeTransform.getRotation(), defaultFootPoints, defaultFootPolygon, stanceStepColor);
-         }
-         else
-         {
-            addFootstep(snappedNodeTransform.getTranslation(),
-                        snappedNodeTransform.getRotation(),
-                        footPoints,
-                        footstepNodeSnapData.getCroppedFoothold(),
-                        stanceStepColor);
-         }
-
-         this.loggedStanceStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
-         loggedStanceStepGraphic.update();
+         generateFootstepMesh(startOfSwingStepData, startOfSwingStepGraphic);
       }
 
-      FootstepPlannerEdgeData candidateStepData = this.candidateStep.getAndSet(null);
-      if (candidateStepData != null)
+      Pair<DiscreteFootstep, FootstepSnapData> stanceStepData = this.stanceStepToVisualize.getAndSet(null);
+      if (stanceStepData != null)
       {
-         FootstepNode candidateNode = candidateStepData.getCandidateNode();
+         generateFootstepMesh(stanceStepData, stanceStepGraphic);
+      }
 
-         RigidBodyTransform projectedFootPose = new RigidBodyTransform();
-         RigidBodyTransform snapTransform = candidateStepData.getCandidateNodeSnapData().getSnapTransform();
-         RigidBodyTransform wiggleTransformInWorld = candidateStepData.getCandidateNodeSnapData().getWiggleTransformInWorld();
+      Pair<DiscreteFootstep, FootstepSnapData> touchdownStepData = this.touchdownStepToVisualize.getAndSet(null);
+      if (touchdownStepData != null)
+      {
+         DiscreteFootstep touchdownStep = touchdownStepData.getLeft();
+         FootstepSnapData snapData = touchdownStepData.getRight();
+
+         RigidBodyTransform stepPose = new RigidBodyTransform();
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+         RigidBodyTransform wiggleTransformInWorld = snapData.getWiggleTransformInWorld();
 
          if (snapTransform.containsNaN())
          {
-            projectedFootPose.setTranslationAndIdentityRotation(candidateNode.getX(), candidateNode.getY(), 0.1);
-            projectedFootPose.getRotation().setYawPitchRoll(candidateNode.getYaw(), 0.0, 0.0);
+            stepPose.setTranslationAndIdentityRotation(touchdownStep.getX(), touchdownStep.getY(), 0.1);
+            stepPose.getRotation().setYawPitchRoll(touchdownStep.getYaw(), 0.0, 0.0);
          }
          else
          {
-            FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapTransform, projectedFootPose);
-            double yaw = projectedFootPose.getRotation().getYaw();
-            projectedFootPose.getRotation().setYawPitchRoll(yaw, 0.0, 0.0);
-            projectedFootPose.appendTranslation(0.0, 0.0, 0.1);
+            DiscreteFootstepTools.getSnappedStepTransform(touchdownStep, snapTransform, stepPose);
+            double yaw = stepPose.getRotation().getYaw();
+            stepPose.getRotation().setYawPitchRoll(yaw, 0.0, 0.0);
+            stepPose.appendTranslation(0.0, 0.0, 0.1);
          }
 
          // Render unsnapped footstep
          meshBuilder.clear();
-         addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), defaultFootPoints, defaultFootPolygon, unsnappedFootholdColor);
+         addFootstep(stepPose.getTranslation(), stepPose.getRotation(), defaultFootPoints, defaultFootPolygon, unsnappedFootholdColor);
          loggedUnsnappedCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedUnsnappedCandidateStepGraphic.update();
 
@@ -165,8 +150,8 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          if (!wiggleTransformInWorld.containsNaN() && !wiggleTransformInWorld.epsilonEquals(new RigidBodyTransform(), 1e-6))
          {
             meshBuilder.clear();
-            FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapTransform, projectedFootPose);
-            addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), defaultFootPoints, defaultFootPolygon, snappedFootholdColor);
+            DiscreteFootstepTools.getSnappedStepTransform(touchdownStep, snapTransform, stepPose);
+            addFootstep(stepPose.getTranslation(), stepPose.getRotation(), defaultFootPoints, defaultFootPolygon, snappedFootholdColor);
             loggedSnappedCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
             loggedSnappedCandidateStepGraphic.update();
          }
@@ -174,20 +159,25 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          // Render snap and wiggled footstep
          meshBuilder.clear();
          RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
-         candidateStepData.getCandidateNodeSnapData().packSnapAndWiggleTransform(snapAndWiggleTransform);
-         FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapAndWiggleTransform, projectedFootPose);
 
-         ConvexPolygon2D croppedFoothold = candidateStepData.getCandidateNodeSnapData().getCroppedFoothold();
+         if (!snapData.getSnapTransform().containsNaN())
+         {
+            snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
+         }
+
+         DiscreteFootstepTools.getSnappedStepTransform(touchdownStep, snapAndWiggleTransform, stepPose);
+
+         ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
          List<Point2D> footPolygon = croppedFoothold.getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList());
-         Color candidateStepColor = candidateStepData.getCandidateNode().getRobotSide() == RobotSide.LEFT ? leftFootColor : rightFootColor;
+         Color candidateStepColor = touchdownStep.getRobotSide() == RobotSide.LEFT ? leftFootColor : rightFootColor;
 
          if (footPolygon.isEmpty() || croppedFoothold.containsNaN())
          {
-            addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), defaultFootPoints, defaultFootPolygon, candidateStepColor);
+            addFootstep(stepPose.getTranslation(), stepPose.getRotation(), defaultFootPoints, defaultFootPolygon, candidateStepColor);
          }
          else
          {
-            addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), footPolygon, croppedFoothold, candidateStepColor);
+            addFootstep(stepPose.getTranslation(), stepPose.getRotation(), footPolygon, croppedFoothold, candidateStepColor);
          }
 
          this.loggedWiggledCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
@@ -211,6 +201,37 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       transform.appendTranslation(0.0, 0.0, 0.0025);
       meshBuilder.addMultiLine(transform, footPoints, 0.01, color, true);
       meshBuilder.addPolygon(transform, footPolygon, color);
+   }
+
+   private void generateFootstepMesh(Pair<DiscreteFootstep, FootstepSnapData> footstepData, MeshHolder meshHolder)
+   {
+      meshBuilder.clear();
+      DiscreteFootstep footstep = footstepData.getLeft();
+      FootstepSnapData footstepSnapData = footstepData.getRight();
+
+      RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
+      RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
+      footstepSnapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
+      DiscreteFootstepTools.getSnappedStepTransform(footstep, snapAndWiggleTransform, snappedNodeTransform);
+
+      List<Point2D> footPoints = footstepSnapData.getCroppedFoothold().getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList());
+      Color stanceStepColor = footstep.getRobotSide() == RobotSide.LEFT ? leftFootColor : rightFootColor;
+
+      if (footPoints.isEmpty())
+      {
+         addFootstep(snappedNodeTransform.getTranslation(), snappedNodeTransform.getRotation(), defaultFootPoints, defaultFootPolygon, stanceStepColor);
+      }
+      else
+      {
+         addFootstep(snappedNodeTransform.getTranslation(),
+                     snappedNodeTransform.getRotation(),
+                     footPoints,
+                     footstepSnapData.getCroppedFoothold(),
+                     stanceStepColor);
+      }
+
+      meshHolder.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+      meshHolder.update();
    }
 
    public Group getRoot()

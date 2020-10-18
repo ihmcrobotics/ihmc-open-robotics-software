@@ -25,7 +25,7 @@ public class TraverseStairsPauseState implements State
    @Override
    public void onEntry()
    {
-      LogTools.debug("Entering " + getClass().getSimpleName());
+      LogTools.info("Entering " + getClass().getSimpleName());
    }
 
    @Override
@@ -41,16 +41,16 @@ public class TraverseStairsPauseState implements State
 
       if (minimumPauseTimeElapsed && receivedAnyRegions)
       {
-         LogTools.debug(getClass().getSimpleName() + " is done");
+         LogTools.info(getClass().getSimpleName() + " is done");
          return true;
       }
       else if (!minimumPauseTimeElapsed)
       {
-         LogTools.debug(getClass().getSimpleName() + ": " + timeInState + "/" + parameters.get(TraverseStairsBehaviorParameters.pauseTime));
+         LogTools.info(getClass().getSimpleName() + ": " + timeInState + "/" + parameters.get(TraverseStairsBehaviorParameters.pauseTime));
       }
       else if (!receivedAnyRegions)
       {
-         LogTools.debug(getClass().getSimpleName() + ": waiting for regions");
+         LogTools.info(getClass().getSimpleName() + ": waiting for regions");
       }
 
       return false;

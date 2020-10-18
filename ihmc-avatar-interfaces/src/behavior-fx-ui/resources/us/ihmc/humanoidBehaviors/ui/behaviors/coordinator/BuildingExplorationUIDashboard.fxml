@@ -16,6 +16,7 @@
     <ComboBox fx:id="requestedState" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
     <Button onAction="#requestStart" text="Start" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <Button onAction="#requestStop" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <Button onAction="#placeGoal" text="Place goal" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
     <Label text="Goal X" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
     <Label text="Goal Y" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
