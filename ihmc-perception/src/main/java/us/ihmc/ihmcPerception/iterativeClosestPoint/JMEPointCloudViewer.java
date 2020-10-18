@@ -217,7 +217,8 @@ public class JMEPointCloudViewer extends SimpleApplication
    public static void main(String[] args) throws URISyntaxException
    {
 
-      System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+      System.loadLibrary("opencv_java440"); // TODO: Change based on system agnostic parameter [System.loadLibrary(Core.NATIVE_LIBRARY_NAME);]
+
       Mat m = new Mat(4, 10, CvType.CV_8UC1, new Scalar(0));
       // System.out.println("Hello OpenCV" + m.dump());
 
