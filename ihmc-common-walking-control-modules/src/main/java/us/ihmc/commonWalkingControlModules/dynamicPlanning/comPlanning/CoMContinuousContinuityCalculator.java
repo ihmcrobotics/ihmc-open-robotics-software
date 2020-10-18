@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -113,7 +114,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
    public boolean solve(List<? extends ContactStateProvider> contactSequence)
    {
-      if (contactSequence.size() < 3)
+      if (contactSequence.size() < 2)
          return false;
       for (int i = 0; i < segmentContinuityDepth; i++)
       {
@@ -142,7 +143,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
       // set initial constraint
       double firstSegmentDuration = contactSequenceInternal.get(0).getTimeInterval().getDuration();
-      double secondSegmentDuration = contactSequenceInternal.get(1).getTimeInterval().getDuration();
+      double secondSegmentDuration = Math.min(contactSequenceInternal.get(1).getTimeInterval().getDuration(), 2.0);
 
       setCoMPositionConstraint(initialCoMPosition);
       setCoMVelocityConstraint(initialCoMVelocity);
