@@ -368,6 +368,12 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setDuration(state.getFinalTransferDuration() - segmentDuration);
+
+      previousContactState = contactState;
+      contactState = contactStateProviders.add();
+      contactState.setStartFromEnd(previousContactState);
+      contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(Double.POSITIVE_INFINITY);
    }
 
