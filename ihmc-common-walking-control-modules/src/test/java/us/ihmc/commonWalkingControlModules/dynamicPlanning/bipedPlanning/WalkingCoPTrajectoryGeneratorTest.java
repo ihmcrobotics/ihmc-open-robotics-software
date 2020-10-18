@@ -95,9 +95,9 @@ public class WalkingCoPTrajectoryGeneratorTest
       // check the timings
       double time = 0.0;
       assertEquals(time, contactStateProviders.get(0).getTimeInterval().getStartTime(), epsilon);
-      time += Math.min(transferSplitFraction * transferTime, copTrajectory.getDurationForContinuityMaintenanceSegment());
+      time += Math.min(transferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
       assertEquals(time, contactStateProviders.get(0).getTimeInterval().getEndTime(), epsilon);
-      time += transferTime -  Math.min(transferSplitFraction * transferTime, copTrajectory.getDurationForContinuityMaintenanceSegment());
+      time += transferTime -  Math.min(transferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
       assertEquals(time, contactStateProviders.get(1).getTimeInterval().getEndTime(), epsilon);
       time += swingShiftFraction * swingSplitFraction * swingTime;
       assertEquals(time, contactStateProviders.get(2).getTimeInterval().getEndTime(), epsilon);

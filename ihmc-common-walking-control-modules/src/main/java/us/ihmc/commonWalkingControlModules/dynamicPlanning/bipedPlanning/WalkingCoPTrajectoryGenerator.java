@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
@@ -23,7 +22,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.saveableModule.SaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,8 +35,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry;
-   private final YoDouble safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
-   private final YoDouble exitCoPForwardSafetyMarginOnToes;
 
    private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
@@ -68,8 +64,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final YoSplitFractionCalculatorParameters splitFractionParameters;
 
-   private double continuityDuration = 0.2;
-
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
 
@@ -93,8 +87,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       this.defaultSupportPolygon.set(defaultSupportPolygon);
 
       registry = new YoRegistry(getClass().getSimpleName());
-      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble("SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
-      exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
       splitFractionParameters = new YoSplitFractionCalculatorParameters(defaultSplitFractionParameters, registry);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -123,11 +115,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       parentRegistry.addChild(registry);
       clear();
-   }
-
-   public double getDurationForContinuityMaintenanceSegment()
-   {
-      return continuityDuration;
    }
 
    @Override
@@ -432,7 +419,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       double firstSegmentDuration = splitFraction * duration;
       if (setupForContinuityMaintaining)
-         firstSegmentDuration = Math.min(firstSegmentDuration, continuityDuration);
+         firstSegmentDuration = Math.min(firstSegmentDuration, parameters.getDurationForContinuityMaintenanceSegment());
       previousContactState.setDuration(firstSegmentDuration);
       previousContactState.setEndCopPosition(midfootCoP);
 
@@ -571,9 +558,9 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       else if (parameters.getPlanForToeOffCalculator().shouldPutCMPOnToes(supportToSwingStepLength, supportToSwingStepHeight))
       {
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid());
-         framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
+         framePointToPack.add(supportFootPolygon.getMaxX() - parameters.getExitCoPForwardSafetyMarginOnToes(),
                               supportSide.negateIfRightSide(parameters.getExitCMPOffset().getY()));
-         constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());
+         constrainToPolygon(framePointToPack, supportFootPolygon, parameters.getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown());
          framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
       }
