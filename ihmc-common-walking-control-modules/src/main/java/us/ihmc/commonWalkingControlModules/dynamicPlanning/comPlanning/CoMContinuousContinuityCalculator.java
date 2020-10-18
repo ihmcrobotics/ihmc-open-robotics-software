@@ -143,7 +143,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
       // set initial constraint
       double firstSegmentDuration = contactSequenceInternal.get(0).getTimeInterval().getDuration();
-      double secondSegmentDuration = Math.min(contactSequenceInternal.get(1).getTimeInterval().getDuration(), 2.0);
+      double secondSegmentDuration = contactSequenceInternal.get(1).getTimeInterval().getDuration();
 
       setCoMPositionConstraint(initialCoMPosition);
       setCoMVelocityConstraint(initialCoMVelocity);
@@ -153,7 +153,18 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       setCoMPositionContinuity(firstSegmentDuration);
       setCoMVelocityContinuity(firstSegmentDuration);
 
-      setDynamicsContinuityConstraint(firstSegmentDuration, secondSegmentDuration);
+      setVRPPositionContinuity(firstSegmentDuration);
+
+      addImplicitVRPVelocityConstraint(0,
+                                       indexHandler.getVRPWaypointStartPositionIndex(0),
+                                       firstSegmentDuration,
+                                       0.0,
+                                       startVRPPositions.get(0));
+      addImplicitVRPVelocityConstraint(1,
+                                       indexHandler.getVRPWaypointFinalPositionIndex(1),
+                                       0.0,
+                                       Math.min(secondSegmentDuration, CoMTrajectoryPlannerTools.sufficientlyLarge),
+                                       endVRPPositions.get(1));
 
       // set terminal constraint
       setFinalDCMPositionConstraint(secondSegmentDuration, finalICPToAchieve);
@@ -290,22 +301,6 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       desiredVelocity.scale(1.0 / segmentDuration);
       constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), segmentDuration, endVRPPositions.get(1));
       constrainVRPVelocity(1, indexHandler.getVRPWaypointFinalVelocityIndex(1), segmentDuration, desiredVelocity);
-   }
-
-   private void setDynamicsContinuityConstraint(double previousDuration, double nextDuration)
-   {
-      setVRPPositionContinuity(previousDuration);
-
-      addImplicitVRPVelocityConstraint(0,
-                                       indexHandler.getVRPWaypointStartPositionIndex(0),
-                                       previousDuration,
-                                       0.0,
-                                       startVRPPositions.get(0));
-      addImplicitVRPVelocityConstraint(1,
-                                       indexHandler.getVRPWaypointFinalPositionIndex(1),
-                                       0.0,
-                                       nextDuration,
-                                       endVRPPositions.get(1));
    }
 
    private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
