@@ -80,11 +80,11 @@ public class JMEPointCloudViewer extends SimpleApplication
    {
       super();
 
-      // setupKDTreeTester();
+       setupKDTreeTester();
 
       // setupROS1PointCloudReceiver();
 
-      setupICPTester();
+//      setupICPTester();
    }
 
    public void setupKDTreeTester()
@@ -95,11 +95,11 @@ public class JMEPointCloudViewer extends SimpleApplication
 
       pointCloud1.add(new Point3D(1, 1, 1));
       pointCloud1.add(new Point3D(-1, -1, 1));
-      pointCloud1.add(new Point3D(-1, 1, -1));
+      pointCloud1.add(new Point3D(-1, 1, 1));
 
-      KDTree.insertRandomBall(tree, pointCloud1.get(0), pointCloud1, 1000, 0.1f);
-      KDTree.insertRandomBall(tree, pointCloud1.get(1), pointCloud1, 1000, 0.1f);
-      KDTree.insertRandomBall(tree, pointCloud1.get(2), pointCloud1, 1000, 0.1f);
+//      KDTree.insertRandomBall(tree, pointCloud1.get(0), pointCloud1, 1000, 0.1f);
+//      KDTree.insertRandomBall(tree, pointCloud1.get(1), pointCloud1, 1000, 0.1f);
+//      KDTree.insertRandomBall(tree, pointCloud1.get(2), pointCloud1, 1000, 0.1f);
 
       Point3D floatPoint = new Point3D(pointCloud1.get(0));
       floatPoint.interpolate(pointCloud1.get(1), 0.6);

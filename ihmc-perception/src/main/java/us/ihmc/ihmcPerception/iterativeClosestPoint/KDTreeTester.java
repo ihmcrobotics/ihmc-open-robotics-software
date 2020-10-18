@@ -8,10 +8,8 @@ import java.util.Random;
 public class KDTreeTester
 {
 
-   public static void main(String[] args)
+   public KDTreeTester(KDTree tree)
    {
-
-      KDTree tree = new KDTree();
 
       // tree.insert(tree.root, new KDNode(0.1f,0.2f,0.3f, 0));
       // tree.insert(tree.root, new KDNode(-0.2f,0.1f,-0.3f, 0));
@@ -28,4 +26,10 @@ public class KDTreeTester
       KDTree.insertRandomBall(tree, second, null, 100, 0.1f);
       KDTree.insertRandomBall(tree, third, null, 100, 0.1f);
    }
+
+   public static void main(String[] args){
+      KDTree tree = new KDTree();
+      new KDTreeTester(tree);
+   }
+
 }
