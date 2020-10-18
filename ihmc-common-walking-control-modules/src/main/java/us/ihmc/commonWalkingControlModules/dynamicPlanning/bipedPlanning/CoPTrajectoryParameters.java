@@ -36,6 +36,10 @@ public class CoPTrajectoryParameters extends SaveableModuleState
    private static final double defaultExitCMPMinX = 0.0;
    private static final double defaultExitCMPMaxX = 0.08;
 
+   private static final double defaultDurationForContinuityMaintenanceSegment = 0.2;
+   private static final double defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown = 0.0;
+   private static final double defaultExitCoPForwardSafetyMarginOnToes = 1.6e-2;
+
    private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, -0.005);
    private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.01);
    private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.025);
@@ -74,6 +78,10 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
    protected final IntegerParameter numberOfStepsToConsider;
 
+   private final DoubleParameter durationForContinuityMaintenanceSegment;
+   private final DoubleParameter safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
+   private final DoubleParameter exitCoPForwardSafetyMarginOnToes;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    public CoPTrajectoryParameters()
@@ -106,6 +114,10 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
       numberOfStepsToConsider = new IntegerParameter("numberOfStepsToConsider", registry, defaultNumberOfStepsToConsider);
 
+      durationForContinuityMaintenanceSegment = new DoubleParameter("durationForContinuityMaintenanceSegment", registry, defaultDurationForContinuityMaintenanceSegment);
+      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new DoubleParameter("safeDistanceFromCoPToSupportEdgesWhenSteppingDown", registry, defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown);
+      exitCoPForwardSafetyMarginOnToes = new DoubleParameter("exitCoPForwardSafetyMarginOnToes", registry, defaultExitCoPForwardSafetyMarginOnToes);
+
       registerVariableToSave(minimumDistanceInsidePolygon);
       registerVariableToSave(stepLengthToPutExitCoPOnToes);
       registerVariableToSave(stepHeightToPutExitCoPOnToesSteppingDown);
@@ -128,6 +140,9 @@ public class CoPTrajectoryParameters extends SaveableModuleState
       registerVariableToSave(ballCMPLengthOffsetFactor);
       registerVariableToSave(exitCMPLengthOffsetFactor);
       registerVariableToSave(numberOfStepsToConsider);
+      registerVariableToSave(durationForContinuityMaintenanceSegment);
+      registerVariableToSave(safeDistanceFromCoPToSupportEdgesWhenSteppingDown);
+      registerVariableToSave(exitCoPForwardSafetyMarginOnToes);
    }
 
    public YoRegistry getRegistry()
@@ -247,6 +262,21 @@ public class CoPTrajectoryParameters extends SaveableModuleState
    public int getNumberOfStepsToConsider()
    {
       return numberOfStepsToConsider.getValue();
+   }
+
+   public double getDurationForContinuityMaintenanceSegment()
+   {
+      return durationForContinuityMaintenanceSegment.getValue();
+   }
+
+   public double getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown()
+   {
+      return safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getValue();
+   }
+
+   public double getExitCoPForwardSafetyMarginOnToes()
+   {
+      return exitCoPForwardSafetyMarginOnToes.getValue();
    }
 
    public PlanForToeOffCalculator getPlanForToeOffCalculator()
