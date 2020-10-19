@@ -17,6 +17,7 @@ ihmc {
    loadProductProperties("../product.properties")
    
    configureDependencyResolution()
+   repository("https://oss.sonatype.org/content/repositories/snapshots")
    configurePublications()
 }
 
@@ -69,7 +70,9 @@ bytedecoDependencies {
 }
 
 javacvDependencies {
-   api("org.bytedeco:javacv-platform:1.5.4")
+   api("org.bytedeco:javacv-platform:1.5.5-SNAPSHOT") {
+      exclude("org.bytedeco:librealsense2")
+   }
 }
 
 testDependencies {
