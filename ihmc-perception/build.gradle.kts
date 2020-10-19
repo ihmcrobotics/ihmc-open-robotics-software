@@ -21,7 +21,8 @@ ihmc {
 }
 
 mainDependencies {
-   api(ihmc.sourceSetProject("javacv"))
+//   api(ihmc.sourceSetProject("javacv"))
+   api(files("/usr/local/share/java/opencv4/opencv-450.jar"))
 
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
