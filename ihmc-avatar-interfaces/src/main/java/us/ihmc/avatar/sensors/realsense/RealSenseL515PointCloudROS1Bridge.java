@@ -41,7 +41,7 @@ public class RealSenseL515PointCloudROS1Bridge
    public RealSenseL515PointCloudROS1Bridge(RosMainNode rosMainNode, ROS2Node ros2Node) throws URISyntaxException
    {
       // stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.IHMC_ROOT);
-      ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.D435_POINT_CLOUD;
+      ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD;
       stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
 
       new RealSensePointCloudSubscriber(rosMainNode, l515PointCloudTopic)
