@@ -4,13 +4,13 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.utilities.ros.RosMainNode;
 
-public abstract class RealSenseL515PointCloudROS1Subscriber extends AbstractRosTopicSubscriber<PointCloud2>
+public abstract class RealSensePointCloudSubscriber extends AbstractRosTopicSubscriber<PointCloud2>
 {
 
    private PointCloud2 latestPointCloud2;
    private Point3D32[] points;
 
-   public RealSenseL515PointCloudROS1Subscriber(RosMainNode rosMainNode, String l515PointCloudTopic)
+   public RealSensePointCloudSubscriber(RosMainNode rosMainNode, String l515PointCloudTopic)
    {
       super(PointCloud2._TYPE);
       rosMainNode.attachSubscriber(l515PointCloudTopic, this);

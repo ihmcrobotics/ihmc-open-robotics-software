@@ -18,7 +18,7 @@ import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.RealSenseL515PointCloudROS1Subscriber;
+import us.ihmc.utilities.ros.subscriber.RealSensePointCloudSubscriber;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,7 +44,7 @@ public class RealSenseL515PointCloudROS1Bridge
       ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.D435_POINT_CLOUD;
       stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
 
-      new RealSenseL515PointCloudROS1Subscriber(rosMainNode, l515PointCloudTopic)
+      new RealSensePointCloudSubscriber(rosMainNode, l515PointCloudTopic)
       {
          @Override
          protected void cloudReceived(PointCloud2 cloud)
