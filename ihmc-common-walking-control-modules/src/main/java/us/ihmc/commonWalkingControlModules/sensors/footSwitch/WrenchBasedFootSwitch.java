@@ -175,7 +175,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       if (secondContactThresholdForce != null)
       {
-         isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.length() > secondContactThresholdForce.getValue());
+         isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getValue());
       }
       else
       {
