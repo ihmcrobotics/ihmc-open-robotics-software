@@ -205,16 +205,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       }
    }
 
-   public void set(Point2DReadOnly constantCop)
-   {
-      clear();
-
-      SettableContactStateProvider contactState = contactStateProviders.add();
-      contactState.getTimeInterval().setInterval(0.0, Double.POSITIVE_INFINITY);
-      contactState.setStartCopPosition(constantCop);
-      contactState.setEndCopPosition(constantCop);
-   }
-
    private final FrameConvexPolygon2DBasics nextPolygon = new FrameConvexPolygon2D();
 
    public void compute(CoPTrajectoryGeneratorState state)
@@ -284,7 +274,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          }
          computeCoPPointsForFinalTransfer(state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide(),
                                           state.getFinalTransferDuration(),
-                                          finalTransferSplitFraction.getDoubleValue(),
                                           finalTransferWeightDistribution.getDoubleValue());
 
          RobotSide lastStepSide = state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide().getOppositeSide();
@@ -353,33 +342,17 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private void computeCoPPointsForStanding(CoPTrajectoryGeneratorState state)
    {
-      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(RobotSide.LEFT).getCentroid());
-      tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
-      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(RobotSide.RIGHT).getCentroid());
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-      tempPointForCoPCalculation.interpolate(tempFramePoint2D, state.getPercentageStandingWeightDistributionOnLeftFoot());
+      computeCoPPointsForFinalTransfer(RobotSide.LEFT, state.getFinalTransferDuration(), state.getPercentageStandingWeightDistributionOnLeftFoot());
 
-      double segmentDuration = finalTransferSplitFraction.getDoubleValue() * state.getFinalTransferDuration();
-      SettableContactStateProvider contactState = contactStateProviders.getLast();
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(segmentDuration);
-
-      SettableContactStateProvider previousContactState = contactState;
-      contactState = contactStateProviders.add();
+      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
+      SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(state.getFinalTransferDuration() - segmentDuration);
-
-      previousContactState = contactState;
-      contactState = contactStateProviders.add();
-      contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndCopPosition(previousContactState.getCopStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
    }
 
    private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
                                                  double finalTransferDuration,
-                                                 double finalTransferSplitFraction,
                                                  double finalTransferWeightDistribution)
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
@@ -390,11 +363,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
       tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
 
-      double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
+      double segmentDuration = finalTransferSplitFraction.getDoubleValue() * finalTransferDuration;
       previousContactState.setEndCopPosition(tempPointForCoPCalculation);
       previousContactState.setDuration(segmentDuration);
 
-      segmentDuration = (1.0 - finalTransferSplitFraction) * finalTransferDuration;
+      segmentDuration = (1.0 - finalTransferSplitFraction.getValue()) * finalTransferDuration;
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
