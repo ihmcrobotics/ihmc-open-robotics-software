@@ -15,6 +15,7 @@ import us.ihmc.pubsub.participant.Participant;
 public class ROS2Debugger
 {
    private Participant participant;
+   private long numberOfParticipants = 0;
 
    public ROS2Debugger()
    {
@@ -36,10 +37,12 @@ public class ROS2Debugger
          {
             if (info.getStatus() == DiscoveryStatus.DISCOVERED_RTPSPARTICIPANT)
             {
+               ++numberOfParticipants;
                LogTools.info("Discovered participant: {}", info.getName());
             }
             else if (info.getStatus() == DiscoveryStatus.REMOVED_RTPSPARTICIPANT)
             {
+               --numberOfParticipants;
                LogTools.info("Participant removed: {}", info.getName());
             }
          }
@@ -57,6 +60,11 @@ public class ROS2Debugger
       }));
 
       ThreadTools.sleepForever();
+   }
+
+   public long getNumberOfParticipants()
+   {
+      return numberOfParticipants;
    }
 
    public static void main(String[] args)
