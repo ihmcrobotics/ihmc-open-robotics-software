@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -25,7 +26,12 @@ import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.modelFileLoaders.SdfLoader.*;
+import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -45,7 +51,18 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.*;
+import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieSmoothCMPPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -59,6 +76,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
+
+   private double controllerDT;
+   private double estimatorDT;
+   private double simulateDT;
 
    private double modelSizeScale = 1.0;
    private double modelMassScale = 1.0;
@@ -85,6 +106,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
 
+   private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
+
    private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
    public ValkyrieRobotModel(RobotTarget target)
@@ -96,6 +119,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       this.target = target;
       this.robotVersion = robotVersion;
+
+      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      estimatorDT = 0.002;
+      simulateDT = estimatorDT / 3.0;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -122,6 +149,36 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (jointMap == null)
          jointMap = new ValkyrieJointMap(getRobotPhysicalProperties(), robotVersion);
       return jointMap;
+   }
+
+   /**
+    * Sets the period of a controller tick in second.
+    * 
+    * @param controllerDT the period of the controller thread in second.
+    */
+   public void setControllerDT(double controllerDT)
+   {
+      this.controllerDT = controllerDT;
+   }
+
+   /**
+    * Sets the period of a estimator tick in second.
+    * 
+    * @param estimatorDT the period of the estimator thread in second.
+    */
+   public void setEstimatorDT(double estimatorDT)
+   {
+      this.estimatorDT = estimatorDT;
+   }
+
+   /**
+    * Sets the period of a simulation tick in second.
+    * 
+    * @param simulationDT the period of the simulation thread in second.
+    */
+   public void setSimulateDT(double simulateDT)
+   {
+      this.simulateDT = simulateDT;
    }
 
    /**
@@ -387,22 +444,19 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getSimulateDT()
    {
-      return getEstimatorDT() / 3.0;
+      return simulateDT;
    }
 
    @Override
    public double getEstimatorDT()
    {
-      return 0.002;
+      return estimatorDT;
    }
 
    @Override
    public double getControllerDT()
    {
-      if (target == RobotTarget.SCS)
-         return 0.004;
-      else
-         return 0.006;
+      return controllerDT;
    }
 
    @Override
@@ -589,6 +643,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.contactPointParameters = contactPointParameters;
    }
 
+   public void setHighLevelControllerParameters(HighLevelControllerParameters highLevelControllerParameters)
+   {
+      this.highLevelControllerParameters = highLevelControllerParameters;
+   }
+
+   public void setSimulationLowLevelControllerFactory(SimulationLowLevelControllerFactory simulationLowLevelControllerFactory)
+   {
+      if (this.simulationLowLevelControllerFactory != null)
+         throw new IllegalArgumentException("Cannot set low-level controller factory once simulation has been setup.");
+      this.simulationLowLevelControllerFactory = simulationLowLevelControllerFactory;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
@@ -617,6 +683,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
+   }
+
+   @Override
+   public SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
+   {
+      if (simulationLowLevelControllerFactory == null)
+         simulationLowLevelControllerFactory = DRCRobotModel.super.getSimulationLowLevelControllerFactory();
+      return simulationLowLevelControllerFactory;
    }
 
    @Override
