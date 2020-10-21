@@ -149,7 +149,6 @@ public class BalanceManager
    private final List<FootstepShiftFractions> footstepShiftFractions = new ArrayList<>();
 
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
-   private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
@@ -443,12 +442,7 @@ public class BalanceManager
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
 
-      if (inFinalTransfer.getValue())
-         icpPlannerDone.set(timeInSupportSequence.getValue() >= copTrajectoryState.getFinalTransferDuration());
-      else if (footstepTimings.isEmpty())
-         icpPlannerDone.set(true);
-      else
-         icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+      icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
       plannerTimer.stopMeasurement();
    }
@@ -577,7 +571,6 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
-      inFinalTransfer.set(false);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
 
@@ -594,7 +587,6 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       inSingleSupport.set(true);
-      inFinalTransfer.set(false);
       currentTiming.set(footstepTimings.get(0));
 
       timeInSupportSequence.set(currentTiming.getTransferTime());
@@ -623,7 +615,6 @@ public class BalanceManager
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
       inSingleSupport.set(false);
-      inFinalTransfer.set(false);
       initializeForStanding = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
@@ -642,11 +633,10 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       timeInSupportSequence.set(0.0);
-      currentStateDuration.set(currentTiming.getTransferTime());
-      totalStateDuration.set(currentTiming.getTransferTime());
+      currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
+      totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
       inSingleSupport.set(false);
-      inFinalTransfer.set(true);
       initializeForStanding = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
@@ -670,7 +660,6 @@ public class BalanceManager
       currentStateDuration.set(currentTiming.getTransferTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
-      inFinalTransfer.set(false);
       inSingleSupport.set(false);
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
