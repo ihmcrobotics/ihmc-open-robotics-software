@@ -309,10 +309,6 @@ public class BalanceManager
       this.transferToSide = robotSide != null ? robotSide.getOppositeSide() : null;
    }
 
-   public void endTick()
-   {
-   }
-
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
@@ -588,8 +584,6 @@ public class BalanceManager
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
       initializeForStanding = true;
-
-      endTick();
    }
 
    public void prepareForDoubleSupportPushRecovery()
