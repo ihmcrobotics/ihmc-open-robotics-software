@@ -39,6 +39,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -125,6 +126,7 @@ public class BalanceManager
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
+   private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
 
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
@@ -149,6 +151,7 @@ public class BalanceManager
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
    private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
+   private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
    private final CoPTrajectoryGeneratorState copTrajectoryState;
@@ -416,6 +419,8 @@ public class BalanceManager
 
    private void computeICPPlanInternal(CoPTrajectoryGenerator copTrajectory)
    {
+      plannerTimer.startMeasurement();
+
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -425,7 +430,7 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());
-      comTrajectoryPlanner.compute(currentStateDuration.getDoubleValue());
+      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
@@ -448,6 +453,8 @@ public class BalanceManager
          icpPlannerDone.set(true);
       else
          icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+
+      plannerTimer.stopMeasurement();
    }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
@@ -576,6 +583,7 @@ public class BalanceManager
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
       currentStateDuration.set(Double.NaN);
+      totalStateDuration.set(Double.NaN);
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
@@ -597,6 +605,7 @@ public class BalanceManager
 
       timeInSupportSequence.set(currentTiming.getTransferTime());
       currentStateDuration.set(currentTiming.getStepTime());
+      totalStateDuration.set(currentTiming.getStepTime());
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       initializeForSingleSupport = true;
@@ -617,6 +626,7 @@ public class BalanceManager
 
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
+      totalStateDuration.set(Double.POSITIVE_INFINITY);
 
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
@@ -639,6 +649,7 @@ public class BalanceManager
 
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(currentTiming.getTransferTime());
+      totalStateDuration.set(currentTiming.getTransferTime());
 
       inSingleSupport.set(false);
       inFinalTransfer.set(true);
@@ -663,6 +674,7 @@ public class BalanceManager
       currentTiming.set(footstepTimings.get(0));
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(currentTiming.getTransferTime());
+      totalStateDuration.set(currentTiming.getStepTime());
 
       inFinalTransfer.set(false);
       inSingleSupport.set(false);
