@@ -269,28 +269,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
-
       numberOfConstraints = 0;
 
       // set initial constraint
       setCoMPositionConstraint(currentCoMPosition);
       setDynamicsInitialConstraint(contactSequence, 0);
 
-      int transition = 0;
-      // add a moveable waypoint for the center of mass velocity constraint
-//      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing() && contactSequence.size() > 2)
-//      {
-//         setCoMVelocityConstraint(currentCoMVelocity);
-//         setCoMPositionContinuity(contactSequence, 0, 1);
-//         setCoMVelocityContinuity(contactSequence, 0, 1);
-//
-//         setDynamicsContinuityConstraint(contactSequence, 0, 1);
-//         transition++;
-//      }
-
-
       // add transition continuity constraints
-      for (; transition < numberOfTransitions; transition++)
+      for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int previousSequence = transition;
          int nextSequence = transition + 1;
@@ -562,33 +548,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
    /**
-    * <p> Sets the continuity constraint on the initial CoM velocity.
-    * <p> This constraint should be used for the initial velocity of the center of mass to properly initialize the trajectory. </p>
-    * <p> Recall that the equation for the center of mass is defined by </p>
-    * <p>
-    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
-    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
-    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
-    * </p>
-    * <p>
-    *    This constraint defines
-    * </p>
-    * <p>
-    *    x<sub>0</sub>(0) = x<sub>d</sub>,
-    * </p>
-    * <p>
-    *    substituting in the coefficients into the constraint matrix.
-    * </p>
-    * @param centerOfMassVelocityForConstraint x<sub>d</sub> in the above equations
-    */
-   private void setCoMVelocityConstraint(FrameVector3DReadOnly centerOfMassVelocityForConstraint)
-   {
-      CoMTrajectoryPlannerTools.addCoMVelocityConstraint(centerOfMassVelocityForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
-                                                         coefficientMultipliersSparse, xConstants, yConstants, zConstants);
-      numberOfConstraints++;
-   }
-
-   /**
     * <p> Sets a constraint on the desired DCM position. This constraint is useful for constraining the terminal location of the DCM trajectory. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
@@ -725,21 +684,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       }
    }
 
-   private void setDynamicsContinuityConstraint(List<? extends ContactStateProvider> contactSequence, int previousSequenceId, int nextSequenceId)
-   {
-      ContactStateProvider previousSequence = contactSequence.get(previousSequenceId);
-      ContactStateProvider nextSequence = contactSequence.get(nextSequenceId);
-      if (previousSequence.getContactState().isLoadBearing() != nextSequence.getContactState().isLoadBearing())
-         throw new IllegalArgumentException("Cannot constrain two sequences of different types to have equivalent dynamics.");
-
-      setVRPPositionContinuity(contactSequence, previousSequenceId, nextSequenceId);
-
-      double previousDuration = previousSequence.getTimeInterval().getDuration();
-      double nextDuration = nextSequence.getTimeInterval().getDuration();
-      addImplicitVRPVelocityConstraint(previousSequenceId, indexHandler.getVRPWaypointStartPositionIndex(previousSequenceId), previousDuration, 0.0, startVRPPositions.get(previousSequenceId));
-      addImplicitVRPVelocityConstraint(nextSequenceId, indexHandler.getVRPWaypointFinalPositionIndex(nextSequenceId), 0.0, nextDuration, endVRPPositions.get(nextSequenceId));
-   }
-
    /**
     * <p> Adds a constraint for the desired VRP position.</p>
     * <p> Recall that the VRP is defined as </p>
@@ -820,25 +764,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private void constrainCoMJerkToZero(int sequenceId, double time)
    {
       CoMTrajectoryPlannerTools.constrainCoMJerkToZero(time, omega.getValue(), sequenceId, numberOfConstraints, coefficientMultipliersSparse);
-      numberOfConstraints++;
-   }
-
-   private void setVRPPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
-   {
-      double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addVRPPositionContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
-                                                                   coefficientMultipliersSparse);
-      numberOfConstraints++;
-   }
-
-   private void addImplicitVRPVelocityConstraint(int sequenceId,
-                                                 int vrpWaypointPositionIndex,
-                                                 double time,
-                                                 double timeAtWaypoint,
-                                                 FramePoint3DReadOnly desiredVRPPosition)
-   {
-      CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, time, timeAtWaypoint, omega.getValue(),
-                                                                 desiredVRPPosition, coefficientMultipliersSparse, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
       numberOfConstraints++;
    }
 
