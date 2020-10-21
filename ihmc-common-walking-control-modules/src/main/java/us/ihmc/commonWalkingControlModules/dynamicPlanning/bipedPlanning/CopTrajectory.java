@@ -75,7 +75,7 @@ public class CopTrajectory
       update(supportPolygons, supportTimes, finalTransferDuration);
    }
 
-   public void update(ContactSupplier supportSeqence, double finalTransferDuration)
+   public void update(SupportSequence supportSeqence, double finalTransferDuration)
    {
       update(supportSeqence.getSupportPolygons(), supportSeqence.getSupportTimes(), finalTransferDuration);
    }
