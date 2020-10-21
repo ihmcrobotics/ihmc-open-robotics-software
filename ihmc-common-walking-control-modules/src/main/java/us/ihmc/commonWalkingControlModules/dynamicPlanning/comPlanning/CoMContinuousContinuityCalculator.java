@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.*;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
@@ -36,6 +38,8 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DMatrixSparseCSC coefficientMultipliersSparse = new DMatrixSparseCSC(0, 0);
+   private final DMatrixRMaj coefficientMultipliersDense = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj coefficientMultipliersDenseInv = new DMatrixRMaj(0, 0);
 
    private final DMatrixSparseCSC tempSparse = new DMatrixSparseCSC(0, 1);
    private final DMatrixSparseCSC xEquivalents = new DMatrixSparseCSC(0, 1);
@@ -54,6 +58,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
    // FIXME fill reducing?
    private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
+   private final LinearSolverDense<DMatrixRMaj> denseSolver = LinearSolverFactory_DDRM.lu(0);
 
    final DMatrixSparseCSC xCoefficientVector = new DMatrixSparseCSC(0, 1);
    final DMatrixSparseCSC yCoefficientVector = new DMatrixSparseCSC(0, 1);
@@ -143,32 +148,43 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
       // set initial constraint
       double firstSegmentDuration = contactSequenceInternal.get(0).getTimeInterval().getDuration();
-      double secondSegmentDuration = contactSequenceInternal.get(1).getTimeInterval().getDuration();
+      double secondSegmentDuration = Math.min(contactSequenceInternal.get(1).getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLarge);
 
+      FramePoint3DReadOnly startVRPPosition = startVRPPositions.get(0);
+      FramePoint3DReadOnly endVRPPosition = endVRPPositions.get(0);
+
+      // set the initial CoM state
       setCoMPositionConstraint(initialCoMPosition);
       setCoMVelocityConstraint(initialCoMVelocity);
-      setDynamicsInitialConstraint(firstSegmentDuration);
 
-      // add a moveable waypoint for the center of mass velocity constraint
+      // set the initial VRP position
+      constrainVRPPosition(0, indexHandler.getVRPWaypointStartPositionIndex(0), 0.0, startVRPPosition);
+      // set the initial VRP velocity
+      addImplicitVRPVelocityConstraint(0, indexHandler.getVRPWaypointStartPositionIndex(0),0.0, 0.0, startVRPPosition);
+
+      // set the continuity for the knot
       setCoMPositionContinuity(firstSegmentDuration);
       setCoMVelocityContinuity(firstSegmentDuration);
-
       setVRPPositionContinuity(firstSegmentDuration);
 
-      addImplicitVRPVelocityConstraint(0,
-                                       indexHandler.getVRPWaypointStartPositionIndex(0),
-                                       firstSegmentDuration,
-                                       0.0,
-                                       startVRPPositions.get(0));
-      addImplicitVRPVelocityConstraint(1,
-                                       indexHandler.getVRPWaypointFinalPositionIndex(1),
-                                       0.0,
-                                       Math.min(secondSegmentDuration, CoMTrajectoryPlannerTools.sufficientlyLarge),
-                                       endVRPPositions.get(1));
+      // set the VRP velocity at the end of the first segment
+      addImplicitVRPVelocityConstraint(0, indexHandler.getVRPWaypointStartPositionIndex(0), firstSegmentDuration, 0.0, startVRPPosition);
+      // set the VRP velocity at the beginning of the second segment
+      addImplicitVRPVelocityConstraint(1, indexHandler.getVRPWaypointFinalPositionIndex(1), 0.0, secondSegmentDuration, endVRPPosition);
 
-      // set terminal constraint
+
+      // set the final VRP position
+      constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), secondSegmentDuration, endVRPPosition);
+      // set the final VRP velocity
+      addImplicitVRPVelocityConstraint(1, indexHandler.getVRPWaypointFinalPositionIndex(1), secondSegmentDuration, secondSegmentDuration, endVRPPosition);
+      // set terminal DCM constraint
       setFinalDCMPositionConstraint(secondSegmentDuration, finalICPToAchieve);
-      setDynamicsFinalConstraint(secondSegmentDuration);
+
+      coefficientMultipliersDense.set(coefficientMultipliersSparse);
+      coefficientMultipliersDenseInv.reshape(coefficientMultipliersDense.numRows, coefficientMultipliersDense.numCols);
+
+      denseSolver.setA(coefficientMultipliersDense);
+      denseSolver.invert(coefficientMultipliersDenseInv);
 
       sparseSolver.setA(coefficientMultipliersSparse);
 
@@ -285,24 +301,6 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
                                                                    coefficientMultipliersSparse);
    }
 
-   private final FrameVector3D desiredVelocity = new FrameVector3D();
-
-   private void setDynamicsInitialConstraint(double duration)
-   {
-      desiredVelocity.sub(endVRPPositions.get(0), startVRPPositions.get(0));
-      desiredVelocity.scale(1.0 / duration);
-      constrainVRPPosition(0, indexHandler.getVRPWaypointStartPositionIndex(0), 0.0, startVRPPositions.get(0));
-      constrainVRPVelocity(0, indexHandler.getVRPWaypointStartVelocityIndex(0), 0.0, desiredVelocity);
-   }
-
-   private void setDynamicsFinalConstraint(double segmentDuration)
-   {
-      desiredVelocity.sub(endVRPPositions.get(1), startVRPPositions.get(1));
-      desiredVelocity.scale(1.0 / segmentDuration);
-      constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), segmentDuration, endVRPPositions.get(1));
-      constrainVRPVelocity(1, indexHandler.getVRPWaypointFinalVelocityIndex(1), segmentDuration, desiredVelocity);
-   }
-
    private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addVRPPositionConstraint(sequenceId,
@@ -311,21 +309,6 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
                                                          time,
                                                          omega.getValue(),
                                                          desiredVRPPosition,
-                                                         coefficientMultipliersSparse,
-                                                         vrpXWaypoints,
-                                                         vrpYWaypoints,
-                                                         vrpZWaypoints,
-                                                         vrpWaypointJacobian);
-   }
-
-   private void constrainVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
-   {
-      CoMTrajectoryPlannerTools.addVRPVelocityConstraint(sequenceId,
-                                                         numberOfConstraints++,
-                                                         vrpWaypointVelocityIndex,
-                                                         omega.getValue(),
-                                                         time,
-                                                         desiredVRPVelocity,
                                                          coefficientMultipliersSparse,
                                                          vrpXWaypoints,
                                                          vrpYWaypoints,
@@ -345,14 +328,14 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
    private void addImplicitVRPVelocityConstraint(int sequenceId,
                                                  int vrpWaypointPositionIndex,
-                                                 double time,
+                                                 double timeInSegment,
                                                  double timeAtWaypoint,
                                                  FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId,
                                                                  numberOfConstraints++,
                                                                  vrpWaypointPositionIndex,
-                                                                 time,
+                                                                 timeInSegment,
                                                                  timeAtWaypoint,
                                                                  omega.getValue(),
                                                                  desiredVRPPosition,
@@ -363,10 +346,10 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
                                                                  vrpWaypointJacobian);
    }
 
-   private void setFinalDCMPositionConstraint(double time, FramePoint3DReadOnly desiredDCMPosition)
+   private void setFinalDCMPositionConstraint(double timeInSegment, FramePoint3DReadOnly desiredDCMPosition)
    {
-      CoMTrajectoryPlannerTools.addDCMPositionConstraint(1, numberOfConstraints, time, omega.getValue(), desiredDCMPosition, coefficientMultipliersSparse,
-                                                         xConstants, yConstants, zConstants);
+      CoMTrajectoryPlannerTools.addDCMPositionConstraint(1, numberOfConstraints, timeInSegment, omega.getValue(), desiredDCMPosition,
+                                                         coefficientMultipliersSparse, xConstants, yConstants, zConstants);
       numberOfConstraints++;
    }
 }
