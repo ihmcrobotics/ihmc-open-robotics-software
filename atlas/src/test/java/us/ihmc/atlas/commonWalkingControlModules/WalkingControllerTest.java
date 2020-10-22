@@ -444,7 +444,6 @@ public class WalkingControllerTest
    private void createWalkingControllerAndSetUpManagerFactory()
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
@@ -497,9 +496,9 @@ public class WalkingControllerTest
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
+      double defaultSwingDurationShiftFraction = copTrajectoryParameters.getDefaultSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = copTrajectoryParameters.getDefaultSwingSplitFraction();
+      double defaultTransferSplitFraction = copTrajectoryParameters.getDefaultTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
                                                                               defaultInitialTransferTime,
@@ -517,7 +516,6 @@ public class WalkingControllerTest
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager,

@@ -96,7 +96,6 @@ public class DRCFlatGroundWalkingTrack
 
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = model.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -120,7 +119,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters,
                                                                                                     copTrajectoryParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);

@@ -100,7 +100,6 @@ public class AtlasDynamicsSimulation
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),
-                                                                                                    robotModel.getCapturePointPlannerParameters(),
                                                                                                     copTrajectoryParameters);
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
