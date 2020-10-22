@@ -79,7 +79,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = model.getCoPTrajectoryParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
@@ -91,7 +90,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters,
                                                                                                     copTrajectoryParameters);
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();

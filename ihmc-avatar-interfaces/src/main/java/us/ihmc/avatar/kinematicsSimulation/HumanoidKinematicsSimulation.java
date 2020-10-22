@@ -191,16 +191,15 @@ public class HumanoidKinematicsSimulation
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
                                                                               walkingControllerParameters.getDefaultSwingTime(),
                                                                               walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                               walkingControllerParameters.getDefaultFinalTransferTime(),
-                                                                              capturePointPlannerParameters.getSwingDurationShiftFraction(),
-                                                                              capturePointPlannerParameters.getSwingSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
+                                                                              copTrajectoryParameters.getDefaultSwingDurationShiftFraction(),
+                                                                              copTrajectoryParameters.getDefaultSwingSplitFraction(),
+                                                                              copTrajectoryParameters.getDefaultTransferSplitFraction(),
+                                                                              copTrajectoryParameters.getDefaultTransferSplitFraction(),
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
@@ -220,7 +219,6 @@ public class HumanoidKinematicsSimulation
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
