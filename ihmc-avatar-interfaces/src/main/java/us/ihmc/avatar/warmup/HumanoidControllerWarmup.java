@@ -228,7 +228,6 @@ public abstract class HumanoidControllerWarmup
    private void createWalkingControllerAndSetUpManagerFactory(YoRegistry managerFactoryParent)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
@@ -270,9 +269,9 @@ public abstract class HumanoidControllerWarmup
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
+      double defaultSwingDurationShiftFraction = copTrajectoryParameters.getDefaultSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = copTrajectoryParameters.getDefaultSwingSplitFraction();
+      double defaultTransferSplitFraction = copTrajectoryParameters.getDefaultTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
                                                                               defaultFinalTransferTime, defaultSwingDurationShiftFraction,
                                                                               defaultSwingSplitFraction, defaultTransferSplitFraction,
@@ -283,7 +282,6 @@ public abstract class HumanoidControllerWarmup
       managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
 
 
