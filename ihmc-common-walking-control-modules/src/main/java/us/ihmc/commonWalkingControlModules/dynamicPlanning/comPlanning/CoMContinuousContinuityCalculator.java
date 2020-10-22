@@ -37,14 +37,12 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final DMatrixSparseCSC coefficientMultipliersSparse = new DMatrixSparseCSC(0, 0);
-   private final DMatrixRMaj coefficientMultipliersDense = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj coefficientMultipliersDenseInv = new DMatrixRMaj(0, 0);
+   final DMatrixSparseCSC coefficientMultipliersSparse = new DMatrixSparseCSC(0, 0);
 
    private final DMatrixSparseCSC tempSparse = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC xEquivalents = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC yEquivalents = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC zEquivalents = new DMatrixSparseCSC(0, 1);
+   final DMatrixSparseCSC xEquivalents = new DMatrixSparseCSC(0, 1);
+   final DMatrixSparseCSC yEquivalents = new DMatrixSparseCSC(0, 1);
+   final DMatrixSparseCSC zEquivalents = new DMatrixSparseCSC(0, 1);
 
    private final DMatrixSparseCSC xConstants = new DMatrixSparseCSC(0, 1);
    private final DMatrixSparseCSC yConstants = new DMatrixSparseCSC(0, 1);
@@ -58,7 +56,6 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
    // FIXME fill reducing?
    private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
-   private final LinearSolverDense<DMatrixRMaj> denseSolver = LinearSolverFactory_DDRM.lu(0);
 
    final DMatrixSparseCSC xCoefficientVector = new DMatrixSparseCSC(0, 1);
    final DMatrixSparseCSC yCoefficientVector = new DMatrixSparseCSC(0, 1);
@@ -151,7 +148,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       double secondSegmentDuration = Math.min(contactSequenceInternal.get(1).getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLarge);
 
       FramePoint3DReadOnly startVRPPosition = startVRPPositions.get(0);
-      FramePoint3DReadOnly endVRPPosition = endVRPPositions.get(0);
+      FramePoint3DReadOnly endVRPPosition = endVRPPositions.get(1);
 
       // set the initial CoM state
       setCoMPositionConstraint(initialCoMPosition);
@@ -159,7 +156,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
       // set the initial VRP position
       constrainVRPPosition(0, indexHandler.getVRPWaypointStartPositionIndex(0), 0.0, startVRPPosition);
-      // set the initial VRP velocity
+      // set the initial VRP velocity to be equivalent to the velocity at the end of the first segment
       addLinearVRPFunctionConstraint(0, firstSegmentDuration, omega.getValue());
 
       // set the continuity for the knot
@@ -172,19 +169,12 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       // set the VRP velocity at the beginning of the second segment
       addImplicitVRPVelocityConstraint(1, indexHandler.getVRPWaypointFinalPositionIndex(1), 0.0, secondSegmentDuration, endVRPPosition);
 
-
       // set the final VRP position
       constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), secondSegmentDuration, endVRPPosition);
-      // set the final VRP velocity
+      // set the final VRP velocity to be equivalent to the velocity at the beginning of the second segment
       addLinearVRPFunctionConstraint(1, secondSegmentDuration, omega.getValue());
       // set terminal DCM constraint
       setFinalDCMPositionConstraint(secondSegmentDuration, finalICPToAchieve);
-
-      coefficientMultipliersDense.set(coefficientMultipliersSparse);
-      coefficientMultipliersDenseInv.reshape(coefficientMultipliersDense.numRows, coefficientMultipliersDense.numCols);
-
-      denseSolver.setA(coefficientMultipliersDense);
-      denseSolver.invert(coefficientMultipliersDenseInv);
 
       sparseSolver.setA(coefficientMultipliersSparse);
 

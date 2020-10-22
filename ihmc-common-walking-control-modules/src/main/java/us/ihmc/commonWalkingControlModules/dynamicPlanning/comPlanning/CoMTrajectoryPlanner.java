@@ -95,6 +95,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
+   private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
@@ -417,6 +418,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
                                       sixthCoefficient, timeInPhase, omega);
 
+      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(desiredVRPVelocity, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+                                                            sixthCoefficient, timeInPhase, omega);
+
       CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
       CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
@@ -473,6 +477,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
+   }
+
+   public FrameVector3DReadOnly getDesiredVRPVelocity()
+   {
+      return desiredVRPVelocity;
    }
 
    /** {@inheritDoc} */

@@ -473,18 +473,46 @@ public class CoMTrajectoryPlannerTools
       timeOfConstraint1 = Math.min(timeOfConstraint1, sufficientlyLongTime);
       timeOfConstraint2 = Math.min(timeOfConstraint2, sufficientlyLongTime);
 
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 0, CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 0, -CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 1, CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 1, -CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 2, CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfConstraint1));
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 2, -CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfConstraint2));
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 3, CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfConstraint1));
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 3, -CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfConstraint2));
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 4, CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 4, -CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex1 + 5, CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintNumber, startIndex2 + 5, -CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 0,
+                                 CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber,
+                                                                                                                                     startIndex1 + 0));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 0,
+                                 - CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber,
+                                                                                                                                       startIndex2 + 0));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 1,
+                                 CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber,
+                                                                                                                                      startIndex1 + 1));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 1,
+                                 -CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber,
+                                                                                                                                       startIndex2 + 1));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 2,
+                                 CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfConstraint1) + constraintMatrixToPack.get(constraintNumber, startIndex1 + 2));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 2,
+                                 -CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfConstraint2) + constraintMatrixToPack.get(constraintNumber, startIndex2 + 2));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 3,
+                                 CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfConstraint1) + constraintMatrixToPack.get(constraintNumber, startIndex1 + 3));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 3,
+                                 -CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfConstraint2) + constraintMatrixToPack.get(constraintNumber, startIndex2 + 3));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 4,
+                                 CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber, startIndex1 + 4));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 4,
+                                 -CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber, startIndex2 + 4));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex1 + 5,
+                                 CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber, startIndex1 + 5));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex2 + 5,
+                                 -CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction() + constraintMatrixToPack.get(constraintNumber, startIndex2 + 5));
 
       xObjectiveMatrixToPack.set(constraintNumber, 0, 0.0);
       yObjectiveMatrixToPack.set(constraintNumber, 0, 0.0);
@@ -523,11 +551,11 @@ public class CoMTrajectoryPlannerTools
       constraintMatrixToPack.set(constraintNumber,
                                  startIndex + 2,
                                  CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, timeInSegment)
-                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeInSegment));
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, timeOfRelativePosition));
       constraintMatrixToPack.set(constraintNumber,
                                  startIndex + 3,
                                  CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, timeInSegment)
-                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeInSegment));
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(timeOfRelativePosition));
       constraintMatrixToPack.set(constraintNumber,
                                  startIndex + 4,
                                  CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(timeInSegment)
