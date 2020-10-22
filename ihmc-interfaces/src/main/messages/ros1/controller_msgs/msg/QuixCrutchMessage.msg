@@ -21,4 +21,6 @@ controller_msgs/QuixStairsStepTypeMessage stairs_step_type
 
 controller_msgs/QuixSideStepDirectionMessage side_step_direction
 
+bool cancel_requested_behavior
+
 
