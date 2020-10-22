@@ -160,7 +160,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       // set the initial VRP position
       constrainVRPPosition(0, indexHandler.getVRPWaypointStartPositionIndex(0), 0.0, startVRPPosition);
       // set the initial VRP velocity
-      addImplicitVRPVelocityConstraint(0, indexHandler.getVRPWaypointStartPositionIndex(0),0.0, 0.0, startVRPPosition);
+      addLinearVRPFunctionConstraint(0, firstSegmentDuration, omega.getValue());
 
       // set the continuity for the knot
       setCoMPositionContinuity(firstSegmentDuration);
@@ -176,7 +176,7 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
       // set the final VRP position
       constrainVRPPosition(1, indexHandler.getVRPWaypointFinalPositionIndex(1), secondSegmentDuration, endVRPPosition);
       // set the final VRP velocity
-      addImplicitVRPVelocityConstraint(1, indexHandler.getVRPWaypointFinalPositionIndex(1), secondSegmentDuration, secondSegmentDuration, endVRPPosition);
+      addLinearVRPFunctionConstraint(1, secondSegmentDuration, omega.getValue());
       // set terminal DCM constraint
       setFinalDCMPositionConstraint(secondSegmentDuration, finalICPToAchieve);
 
@@ -326,6 +326,11 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
                                                                    coefficientMultipliersSparse);
    }
 
+   private void addLinearVRPFunctionConstraint(int segmentId, double duration, double omega)
+   {
+      CoMTrajectoryPlannerTools.addEquivalentVRPVelocityConstraint(segmentId, segmentId, numberOfConstraints++, 0.0, duration, omega,
+                                                                   coefficientMultipliersSparse, xConstants, yConstants, zConstants);
+   }
    private void addImplicitVRPVelocityConstraint(int sequenceId,
                                                  int vrpWaypointPositionIndex,
                                                  double timeInSegment,
