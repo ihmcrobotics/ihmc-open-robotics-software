@@ -81,6 +81,7 @@ public class BalanceManager
 
    /** CoP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
+   private final YoFrameVector2D yoPerfectCoPVelocity = new YoFrameVector2D("perfectCoPVelocity", worldFrame, registry);
    /** CMP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
 
@@ -251,6 +252,7 @@ public class BalanceManager
       yoFinalDesiredICP.setToNaN();
       yoPerfectCMP.setToNaN();
       yoPerfectCoP.setToNaN();
+      yoPerfectCoPVelocity.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -352,6 +354,7 @@ public class BalanceManager
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoDesiredCoMPosition.set(desiredCoM2d);
       yoPerfectCoP.set(perfectCoP2d);
+      yoPerfectCoPVelocity.set(comTrajectoryPlanner.getDesiredVRPVelocity());
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
 
