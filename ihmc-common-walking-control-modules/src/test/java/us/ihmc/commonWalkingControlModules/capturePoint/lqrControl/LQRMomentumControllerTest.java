@@ -1593,7 +1593,7 @@ public class LQRMomentumControllerTest
 
       controller.setVRPTrajectory(planner.getVRPTrajectories());
 
-      double dt = 5e-7;
+      double dt = 1e-4;
       FramePoint3D comPosition = new FramePoint3D(planner.getDesiredCoMPosition());
       FrameVector3D comVelocity = new FrameVector3D(planner.getDesiredCoMVelocity());
       FrameVector3D previousVelocity = new FrameVector3D();
@@ -1630,6 +1630,6 @@ public class LQRMomentumControllerTest
       FramePoint3D icpPosition = new FramePoint3D();
       icpPosition.scaleAdd(1.0 / omega, comVelocity, comPosition);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalPosition, icpPosition, 1e-5);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalPosition, icpPosition, 1e-3);
    }
 }
