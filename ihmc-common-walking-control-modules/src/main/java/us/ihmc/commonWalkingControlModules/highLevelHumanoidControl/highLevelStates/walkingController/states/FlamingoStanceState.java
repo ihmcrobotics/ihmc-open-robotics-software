@@ -38,7 +38,6 @@ public class FlamingoStanceState extends SingleSupportState
    private final LegConfigurationManager legConfigurationManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFractions = new FootstepShiftFractions();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -140,21 +139,11 @@ public class FlamingoStanceState extends SingleSupportState
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
-      double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
-      double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
-      double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
-      footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
-      footstepShiftFractions.setTransferWeightDistribution(0.5);
-
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.initializeICPPlanForSingleSupport();
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
@@ -205,17 +194,8 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
-      double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
-      double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
-      footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
-
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
 

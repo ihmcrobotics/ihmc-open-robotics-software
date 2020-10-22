@@ -47,8 +47,6 @@ public class CoPTrajectoryGeneratorStateTest
          FootstepTiming randomTiming0 = CoPTrajectoryGeneratorTestTools.getRandomTiming(random);
          FootstepTiming randomTiming1 = CoPTrajectoryGeneratorTestTools.getRandomTiming(random);
 
-         FootstepShiftFractions randomShiftFractions0 = CoPTrajectoryGeneratorTestTools.getRandomShiftFractions(random);
-         FootstepShiftFractions randomShiftFractions1 = CoPTrajectoryGeneratorTestTools.getRandomShiftFractions(random);
          Footstep randomFootstep0 = CoPTrajectoryGeneratorTestTools.getRandomFootstep(random);
          Footstep randomFootstep1 = CoPTrajectoryGeneratorTestTools.getRandomFootstep(random);
 
@@ -64,8 +62,6 @@ public class CoPTrajectoryGeneratorStateTest
          stateA.setInitialCoP(randomInitialCoP);
          stateA.addFootstepTiming(randomTiming0);
          stateA.addFootstepTiming(randomTiming1);
-         stateA.addFootstepShiftFractions(randomShiftFractions0);
-         stateA.addFootstepShiftFractions(randomShiftFractions1);
          stateA.addFootstep(randomFootstep0);
          stateA.addFootstep(randomFootstep1);
 
@@ -77,8 +73,6 @@ public class CoPTrajectoryGeneratorStateTest
          EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming0, stateB.getTiming(0), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming1, stateB.getTiming(1), epsilon);
-         CoPTrajectoryGeneratorTestTools.assertShiftFractionsEqual(randomShiftFractions0, stateB.getShiftFraction(0), epsilon);
-         CoPTrajectoryGeneratorTestTools.assertShiftFractionsEqual(randomShiftFractions1, stateB.getShiftFraction(1), epsilon);
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep0, stateB.getFootstep(0), epsilon);
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep1, stateB.getFootstep(1), epsilon);
 
