@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -43,13 +44,11 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFraction = new FootstepShiftFractions();
    private double swingTime;
 
    private static final int additionalFootstepsToConsider = 2;
    private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
-   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
@@ -157,7 +156,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       swingTime = walkingMessageHandler.getNextSwingTime();
-      walkingMessageHandler.poll(nextFootstep, footstepTiming, footstepShiftFraction);
+      walkingMessageHandler.poll(nextFootstep, footstepTiming);
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
       feetManager.setContactStateForSwing(swingSide);
@@ -165,7 +164,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       updateFootstepParameters();
 
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
+      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       boolean isLastStep = stepsToAdd == 0;
@@ -173,8 +172,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
-         walkingMessageHandler.peekShiftFraction(i, footstepShiftFractions[i]);
-         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i], footstepShiftFractions[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
       balanceManager.setICPPlanSupportSide(supportSide);
@@ -232,7 +230,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
