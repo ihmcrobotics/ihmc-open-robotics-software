@@ -189,8 +189,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       for (RobotSide robotSide : RobotSide.values)
          stepFrames.get(robotSide).clear();
 
-      finalTransferSplitFraction.set(state.getFinalTransferSplitFraction());
-      finalTransferWeightDistribution.set(state.getFinalTransferWeightDistribution());
+      finalTransferSplitFraction.set(parameters.getDefaultFinalTransferSplitFraction());
+      finalTransferWeightDistribution.set(parameters.getDefaultFinalTransferWeightDistribution());
       for (int i = 0; i < transferSplitFractions.size(); i++)
       {
          transferSplitFractions.get(i).setToNaN();
@@ -200,8 +200,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       transferWeightDistributions.clear();
       for (int i = 0; i < state.getNumberOfFootstep(); i++)
       {
-         transferSplitFractions.add().set(state.getShiftFraction(i).getTransferSplitFraction());
-         transferWeightDistributions.add().set(state.getShiftFraction(i).getTransferWeightDistribution());
+         transferSplitFractions.add().set(parameters.getDefaultTransferSplitFraction());
+         transferWeightDistributions.add().set(parameters.getDefaultTransferWeightDistribution());
       }
    }
 
@@ -246,7 +246,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          {
             DynamicPlanningFootstep footstep = state.getFootstep(footstepIndex);
             PlanningTiming timings = state.getTiming(footstepIndex);
-            PlanningShiftFraction shiftFraction = state.getShiftFraction(footstepIndex);
             RobotSide swingSide = footstep.getRobotSide();
             RobotSide supportSide = swingSide.getOppositeSide();
 
@@ -264,8 +263,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                 supportSide,
                                                 footstepIndex == 0);
             computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
-                                             shiftFraction.getSwingDurationShiftFraction(),
-                                             shiftFraction.getSwingSplitFraction(),
+                                             parameters.getDefaultSwingDurationShiftFraction(),
+                                             parameters.getDefaultSwingSplitFraction(),
                                              currentPolygon,
                                              nextPolygon,
                                              supportSide);

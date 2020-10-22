@@ -461,6 +461,36 @@ public class WalkingMessageHandler
     * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
     * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
     */
+   public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
+   {
+      if (getStepsBeforePause() == 0)
+      {
+         throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
+      }
+
+      footstepToPack.set(upcomingFootsteps.get(0));
+      timingToPack.set(upcomingFootstepTimings.get(0));
+      lastTimingExecuted.set(upcomingFootstepTimings.get(0));
+
+      updateVisualization();
+      currentNumberOfFootsteps.decrement();
+      currentFootstepIndex.increment();
+
+      upcomingFootstepTimings.remove(0);
+      upcomingFootstepShiftFractions.remove(0);
+      pauseDurationAfterStep.remove(0);
+      upcomingFootsteps.remove(0);
+   }
+
+   /**
+    * This method will pack the provided footstep and timing with the next upcoming
+    * step. It will then remove that footstep from the list of upcoming footsteps.
+    * Use this method if you wish to remove the next upcoming step because the execution
+    * has started. If there is no upcoming step this method will throw a {@link RuntimeException}.
+    *
+    * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
+    * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
+    */
    public void poll(Footstep footstepToPack, FootstepTiming timingToPack, FootstepShiftFractions shiftFractions)
    {
       if (getStepsBeforePause() == 0)

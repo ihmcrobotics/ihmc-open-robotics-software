@@ -40,13 +40,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFraction = new FootstepShiftFractions();
    private double swingTime;
 
    private static final int additionalFootstepsToConsider = 2;
    private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
-   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
@@ -151,14 +149,9 @@ public class WalkingSingleSupportState extends SingleSupportState
             walkingMessageHandler.clearFootsteps();
 
             double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-            double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-            double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
 
-//            balanceManager.clearICPPlan();
             balanceManager.setFinalTransferTime(finalTransferTime);
-            balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-            balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
+            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport();
 
@@ -238,10 +231,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          swingTime = defaultSwingTime;
          footstepTiming.setTimings(swingTime, defaultTransferTime);
-         footstepShiftFraction.setShiftFractions(walkingMessageHandler.getDefaultSwingDurationShiftFraction(),
-                                                 walkingMessageHandler.getDefaultSwingSplitFraction(),
-                                                 walkingMessageHandler.getDefaultTransferSplitFraction());
-         footstepShiftFraction.setTransferWeightDistribution(0.5);
          balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
@@ -250,7 +239,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       else
       {
          swingTime = walkingMessageHandler.getNextSwingTime();
-         walkingMessageHandler.poll(nextFootstep, footstepTiming, footstepShiftFraction);
+         walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
@@ -260,9 +249,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
+      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       boolean isLastStep = stepsToAdd == 0;
@@ -270,8 +257,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
-         walkingMessageHandler.peekShiftFraction(i, footstepShiftFractions[i]);
-         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i], footstepShiftFractions[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
       balanceManager.setICPPlanSupportSide(supportSide);
