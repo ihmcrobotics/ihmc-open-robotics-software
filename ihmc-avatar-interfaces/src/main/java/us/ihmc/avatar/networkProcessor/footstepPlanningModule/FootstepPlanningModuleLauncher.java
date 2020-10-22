@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -50,7 +49,6 @@ public class FootstepPlanningModuleLauncher
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      SplitFractionCalculatorParametersBasics splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
@@ -59,7 +57,6 @@ public class FootstepPlanningModuleLauncher
                                         visibilityGraphsParameters,
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
-                                        splitFractionParameters,
                                         walkingControllerParameters,
                                         footPolygons);
    }
@@ -115,11 +112,6 @@ public class FootstepPlanningModuleLauncher
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getSwingPlannerParameters().set(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SplitFractionCalculatorParametersPacket.class, inputTopic, s ->
-      {
-         if (!footstepPlanningModule.isPlanning())
-            footstepPlanningModule.getSplitFractionParameters().set(s.takeNextData());
-      });
    }
 
    private static void createRequestCallback(ROS2Node ros2Node,
@@ -133,14 +125,7 @@ public class FootstepPlanningModuleLauncher
          FootstepPlanningRequestPacket requestPacket = s.takeNextData();
          request.setFromPacket(requestPacket);
          generateLog.set(requestPacket.getGenerateLog());
-         new Thread(() ->
-                    {
-                       footstepPlanningModule.getSplitFractionParameters().
-                             setCalculateSplitFractionsFromArea(request.performAreaBasedSplitFractionCalculation());
-                       footstepPlanningModule.getSplitFractionParameters().
-                             setCalculateSplitFractionsFromPositions(request.performPositionBasedSplitFractionCalculation());
-                       footstepPlanningModule.handleRequest(request);
-                    }, "FootstepPlanningRequestHandler").start();
+         new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
    }
 

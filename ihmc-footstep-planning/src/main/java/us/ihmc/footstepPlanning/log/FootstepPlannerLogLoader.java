@@ -40,7 +40,6 @@ public class FootstepPlannerLogLoader
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer  = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    private FootstepPlannerLog log = null;
@@ -182,16 +181,6 @@ public class FootstepPlannerLogLoader
             jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
             log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
             swingParametersPacketInputStream.close();
-         }
-
-         // load split fraction parameters packet
-         File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
-         if (splitFractionParametersFile.exists())
-         {
-            InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
-            jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
-            log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
-            splitFractionParametersInputStream.close();
          }
 
          // load status packet
