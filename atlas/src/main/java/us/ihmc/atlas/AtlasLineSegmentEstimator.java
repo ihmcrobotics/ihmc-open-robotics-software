@@ -104,7 +104,8 @@ public class AtlasLineSegmentEstimator
           The useTimeStamps only applies to simulation robot model updates
        */
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback); // (AtlasObstacleCourseNoUI)
+      new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_REA, this::planarRegionsListCallback);
+//      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback); // (AtlasObstacleCourseNoUI)
       //      new ROS2Callback<>(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, this::planarRegionsListCallback); // (AtlasLookAndStepBehaviorDemo)
 
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
@@ -128,7 +129,7 @@ public class AtlasLineSegmentEstimator
          lineRegionAssociator = new LineSegmentToPlanarRegionAssociator();
          // VideoPacket.class, ROS2Tools.IHMC_ROOT (For All)
          // ROS2Tools.VIDEO (AtlasLookAndStepBehaviorDemo)
-         new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, message ->
+         new ROS2Callback<>(ros2Node, ROS2Tools.VIDEO, message ->
          {
             LogTools.info("Message Received: ", message);
             videoPacketsRos2.addLast(message);
@@ -186,11 +187,13 @@ public class AtlasLineSegmentEstimator
    {
       LogTools.info(StringTools.format("{} {} {} {}",
                                        currentPlanarRegionsListMessage != null,
-                                       syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
-                                       cameraIntrinsics != null,
+//                                       syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
+//                                       cameraIntrinsics != null,
                                        videoPacketsRos2.size() > 1));
 
-      if (currentPlanarRegionsListMessage != null && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0) && cameraIntrinsics != null
+      if (currentPlanarRegionsListMessage != null
+//          && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0)
+//          && cameraIntrinsics != null
           && videoPacketsRos2.size() > 1)
       {
          while (videoPacketsRos2.size() > 2)
@@ -221,7 +224,7 @@ public class AtlasLineSegmentEstimator
       byte[] previousData = ((DataBufferByte) previousBufferedImage.getRaster().getDataBuffer()).getData();
       previousImage.put(0, 0, previousData);
 
-      syncedRobot.update();
+//      syncedRobot.update();
 
       processImages();
    }

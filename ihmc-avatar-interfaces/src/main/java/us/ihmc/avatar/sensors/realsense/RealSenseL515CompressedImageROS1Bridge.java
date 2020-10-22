@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 
 public class RealSenseL515CompressedImageROS1Bridge
 {
-   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(16);
+   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(4);
 
    private String l515CompressedImageTopic = "/camera/color/image_raw/compressed";
    private String l515CameraInfoTopic = "/camera/color/camera_info";
@@ -52,7 +52,6 @@ public class RealSenseL515CompressedImageROS1Bridge
 
       new RealSenseCompressedImageSubscriber(rosNode, l515CompressedImageTopic)
       {
-
          @Override
          protected void compressedImageReceived(CompressedImage image)
          {
@@ -71,6 +70,8 @@ public class RealSenseL515CompressedImageROS1Bridge
    {
       throttleTimer.sleepUntilExpiration(MIN_PUBLISH_PERIOD);
       throttleTimer.reset();
+
+      LogTools.info("Message Received: " + image);
 
       try
       {

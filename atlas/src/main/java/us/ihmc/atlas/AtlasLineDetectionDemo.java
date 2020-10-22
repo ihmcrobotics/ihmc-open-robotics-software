@@ -20,6 +20,9 @@ public class AtlasLineDetectionDemo
 
    public AtlasLineDetectionDemo(ROS2Node ros2Node){
       footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopic(ROBOT_NAME));
+
+
+
       execFootstepPlan();
    }
 
