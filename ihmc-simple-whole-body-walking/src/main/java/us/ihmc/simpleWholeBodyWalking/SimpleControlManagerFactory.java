@@ -61,7 +61,6 @@ public class SimpleControlManagerFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -119,12 +118,6 @@ public class SimpleControlManagerFactory
       walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, walkingControllerParameters.getMaximumVelocityCoMHeight());
    }
 
-   // TODO this needs to be called
-   public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
-   {
-      this.capturePointPlannerParameters = capturePointPlannerParameters;
-   }
-
    public SimpleBalanceManager getOrCreateBalanceManager()
    {
       if (balanceManager != null)
@@ -134,12 +127,10 @@ public class SimpleControlManagerFactory
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
-      if (!hasCapturePointPlannerParameters(BalanceManager.class))
-         return null;
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new SimpleBalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, registry);
+      balanceManager = new SimpleBalanceManager(controllerToolbox, walkingControllerParameters, registry);
       return balanceManager;
    }
 
@@ -270,14 +261,6 @@ public class SimpleControlManagerFactory
       if (walkingControllerParameters != null)
          return true;
       missingObjectWarning(WalkingControllerParameters.class, managerClass);
-      return false;
-   }
-
-   private boolean hasCapturePointPlannerParameters(Class<?> managerClass)
-   {
-      if (capturePointPlannerParameters != null)
-         return true;
-      missingObjectWarning(ICPTrajectoryPlannerParameters.class, managerClass);
       return false;
    }
 
