@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
-import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface SplitFractionCalculatorParametersReadOnly
 {
