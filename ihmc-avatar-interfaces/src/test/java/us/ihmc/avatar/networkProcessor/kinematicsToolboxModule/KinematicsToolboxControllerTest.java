@@ -1,18 +1,24 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -40,6 +46,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -246,6 +253,55 @@ public final class KinematicsToolboxControllerTest
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
          assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
+      }
+   }
+
+   @Test
+   public void testRandomJointPositionWithInputcollection() throws Exception
+   {
+      SevenDoFArm robotDescription = new SevenDoFArm();
+      setup(robotDescription, new SevenDoFArm());
+
+      if (VERBOSE)
+         LogTools.info("Entering: testRandomJointPositionWithInputcollection");
+      Random random = new Random(2135);
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
+      Map<Integer, OneDoFJointBasics> hashCodeToSolverJointMap = Stream.of(toolboxController.getDesiredOneDoFJoint())
+                                                                       .collect(Collectors.toMap(JointReadOnly::hashCode, Function.identity()));
+
+      for (int i = 0; i < 10; i++)
+      {
+         RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(randomizedFullRobotModel);
+         int jointIndex = random.nextInt(randomizedFullRobotModel.getRight().length);
+         OneDoFJointBasics joint = randomizedFullRobotModel.getRight()[jointIndex];
+         joint.setQ(EuclidCoreRandomTools.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
+
+         int jointHashCode = joint.hashCode();
+         double desiredPosition = joint.getQ();
+         KinematicsToolboxInputCollectionMessage inputCollectionMessage = new KinematicsToolboxInputCollectionMessage();
+         KinematicsToolboxOneDoFJointMessage jointMessage = new KinematicsToolboxOneDoFJointMessage();
+         jointMessage.setJointHashCode(jointHashCode);
+         jointMessage.setWeight(1.0);
+         jointMessage.setDesiredPosition(desiredPosition);
+         inputCollectionMessage.getJointInputs().add().set(jointMessage);
+
+         commandInputManager.submitMessage(inputCollectionMessage);
+
+         snapGhostToFullRobotModel(randomizedFullRobotModel);
+         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+
+         int numberOfIterations = 100;
+
+         runKinematicsToolboxController(numberOfIterations);
+
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
+         double solutionQuality = toolboxController.getSolution().getSolutionQuality();
+         if (VERBOSE)
+            LogTools.info("Solution quality: " + solutionQuality);
+         assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
+
+         OneDoFJointBasics solverJoint = hashCodeToSolverJointMap.get(joint.hashCode());
+         assertEquals(joint.getQ(), solverJoint.getQ(), 1.0e-7, "Error too large for: " + joint.getName());
       }
    }
 
