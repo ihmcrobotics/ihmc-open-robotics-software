@@ -269,13 +269,8 @@ public abstract class HumanoidControllerWarmup
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = copTrajectoryParameters.getDefaultSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = copTrajectoryParameters.getDefaultSwingSplitFraction();
-      double defaultTransferSplitFraction = copTrajectoryParameters.getDefaultTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction, feet, statusOutputManager,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager,
                                                                               yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
