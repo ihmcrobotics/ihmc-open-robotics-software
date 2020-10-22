@@ -76,9 +76,6 @@ public class AtlasLineSegmentEstimator
 
    private LineSegmentToPlanarRegionAssociator lineRegionAssociator;
 
-   private RosMainNode ros1Node;
-   private ROS2Node ros2Node;
-
    private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                   getClass(),
@@ -90,11 +87,11 @@ public class AtlasLineSegmentEstimator
 
    private RemoteSyncedRobotModel syncedRobot;
 
-   public AtlasLineSegmentEstimator()
+   public AtlasLineSegmentEstimator(RosMainNode ros1Node, ROS2Node ros2Node)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "line_detection");
 
-      new AtlasLineDetectionDemo(ros2Node).execFootstepPlan();
+
+
 
       // System.out.println(System.getProperty("java.library.path"));
       System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -115,9 +112,7 @@ public class AtlasLineSegmentEstimator
 
       if (USE_ROS1_PERCEPTION_TOPICS)
       {
-         URI masterURI = NetworkParameters.getROSURI();
-         LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
-         RosMainNode ros1Node = new RosMainNode(masterURI, "video_viewer", true);
+
          ros1Node.attachSubscriber(RosTools.D435_VIDEO, CompressedImage.class, message -> compressedImagesRos1.addLast(message));
          ros1Node.attachSubscriber(RosTools.D435_CAMERA_INFO, CameraInfo.class, info -> cameraInfo = info);
          ros1Node.execute();
@@ -250,8 +245,8 @@ public class AtlasLineSegmentEstimator
       List<Mat> src = Arrays.asList(curImgLeft, currentImage);
       Core.hconcat(src, dispImage);
 
-      Imgcodecs imgcodecs = new Imgcodecs();
-      imgcodecs.imwrite("~/.ihmc/logs/IMG_" + videoPacketsRos2.peekFirst().getTimestamp(), currentImage);
+//      Imgcodecs imgcodecs = new Imgcodecs();
+//      imgcodecs.imwrite("~/.ihmc/logs/IMG_" + videoPacketsRos2.peekFirst().getTimestamp(), currentImage);
 
       Imgproc.resize(dispImage, dispImage, new Size(1200, 500));
       HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
@@ -263,7 +258,11 @@ public class AtlasLineSegmentEstimator
 
    public static void main(String[] args)
    {
-
-      new AtlasLineSegmentEstimator();
+      URI masterURI = NetworkParameters.getROSURI();
+      LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
+      RosMainNode ros1Node = new RosMainNode(masterURI, "video_viewer", true);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "line_detection");
+      new AtlasLineDetectionDemo(ros2Node).execFootstepPlan();
+      new AtlasLineSegmentEstimator(ros1Node, ros2Node);
    }
 }
