@@ -210,7 +210,7 @@ public class SimpleBalanceManager
       parentRegistry.addChild(registry);
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
