@@ -147,7 +147,6 @@ public class BalanceManager
 
    private final List<Footstep> footsteps = new ArrayList<>();
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
-   private final List<FootstepShiftFractions> footstepShiftFractions = new ArrayList<>();
 
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
@@ -262,14 +261,12 @@ public class BalanceManager
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       copTrajectoryState.addFootstep(footstep);
       copTrajectoryState.addFootstepTiming(timing);
-      copTrajectoryState.addFootstepShiftFractions(shiftFractions);
       footsteps.add(footstep);
       footstepTimings.add(timing);
-      footstepShiftFractions.add(shiftFractions);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -292,7 +289,6 @@ public class BalanceManager
       copTrajectoryState.clear();
       footsteps.clear();
       footstepTimings.clear();
-      footstepShiftFractions.clear();
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
@@ -774,16 +770,6 @@ public class BalanceManager
 
       // This tricks it to the current value.
       copTrajectoryState.setInitialCoP(centerOfMassPosition);
-   }
-
-   public void setFinalTransferWeightDistribution(double weightDistribution)
-   {
-      copTrajectoryState.setFinalTransferWeightDistribution(weightDistribution);
-   }
-
-   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
-   {
-      copTrajectoryState.setFinalTransferSplitFraction(finalTransferSplitFraction);
    }
 
    public void setFinalTransferTime(double finalTransferDuration)

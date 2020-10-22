@@ -33,7 +33,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private static final int numberOfFootstepsToConsider = 3;
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
-   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(numberOfFootstepsToConsider);
 
    private final DoubleProvider minimumTransferTime;
 
@@ -92,12 +91,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)
@@ -108,10 +103,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
-         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
-         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
          if (i == 0)
          {
@@ -119,7 +112,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
-         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
+         balanceManager.addFootstepToPlan(footstep, timing);
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);
