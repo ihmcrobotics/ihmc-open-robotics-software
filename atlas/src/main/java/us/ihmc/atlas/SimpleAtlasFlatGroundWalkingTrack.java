@@ -70,7 +70,7 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
                                     walkingScriptParameters,
-                                    new SimpleWalkingControllerStateFactory(new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties(), RobotTarget.SCS)));
+                                    new SimpleWalkingControllerStateFactory());
    }
 
 }

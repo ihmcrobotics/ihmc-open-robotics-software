@@ -140,7 +140,6 @@ public class SimpleBalanceManager
                                                                                                             new PlaneContactStateCommand());
 
    public SimpleBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                               ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
                                YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -171,7 +170,7 @@ public class SimpleBalanceManager
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
                                                        nominalHeightAboveGround, 
                                                        controllerToolbox.getOmega0Provider(),registry, yoGraphicsListRegistry,
-                                                       yoTime, icpPlannerParameters, bipedSupportPolygons);
+                                                       yoTime, bipedSupportPolygons);
       comPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
           
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
