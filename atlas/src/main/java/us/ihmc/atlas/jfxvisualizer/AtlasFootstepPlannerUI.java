@@ -62,7 +62,6 @@ public class AtlasFootstepPlannerUI extends Application
                                               drcRobotModel.getVisibilityGraphsParameters(),
                                               drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getSwingPlannerParameters(),
-                                              drcRobotModel.getSplitFractionCalculatorParameters(),
                                               drcRobotModel,
                                               previewModel,
                                               drcRobotModel.getJointMap(),

@@ -121,10 +121,7 @@ public class LookAndStepSteppingTask
       footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
                                                       shortenedFootstepPlan,
                                                       footstepPlanEtc.getStartFootPoses(),
-                                                      footstepPlanEtc.getStartFootholds(),
-                                                      footstepPlanEtc.getSwingPlannerType(),
-                                                      true,
-                                                      true);
+                                                      footstepPlanEtc.getSwingPlannerType());
 
       // TODO: Clean this up.
       // Extract swing time calculation from the proportion swing planner

@@ -13,8 +13,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
-import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
 
 import java.util.ArrayList;
 

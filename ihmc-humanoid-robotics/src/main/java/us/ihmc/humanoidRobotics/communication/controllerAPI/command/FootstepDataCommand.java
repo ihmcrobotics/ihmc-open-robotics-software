@@ -42,12 +42,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
 
-   private double swingSplitFraction = Double.NaN;
-   private double swingDurationShiftFraction = Double.NaN;
-   private double transferSplitFraction = Double.NaN;
-
-   private double transferWeightDistribution = Double.NaN;
-
    private double liftoffDuration = Double.NaN;
    private double touchdownDuration = Double.NaN;
 
@@ -79,12 +73,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
-
-      swingSplitFraction = Double.NaN;
-      swingDurationShiftFraction = Double.NaN;
-      transferSplitFraction = Double.NaN;
-
-      transferWeightDistribution = Double.NaN;
 
       touchdownDuration = Double.NaN;
       liftoffDuration = Double.NaN;
@@ -144,12 +132,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
 
-      swingSplitFraction = message.getSwingSplitFraction();
-      swingDurationShiftFraction = message.getSwingDurationShiftFraction();
-      transferSplitFraction = message.getTransferSplitFraction();
-
-      transferWeightDistribution = message.getTransferWeightDistribution();
-
       touchdownDuration = message.getTouchdownDuration();
       liftoffDuration = message.getLiftoffDuration();
 
@@ -189,12 +171,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
-
-      swingSplitFraction = other.getSwingSplitFraction();
-      swingDurationShiftFraction = other.getSwingDurationShiftFraction();
-      transferSplitFraction = other.getTransferSplitFraction();
-
-      transferWeightDistribution = other.getTransferWeightDistribution();
 
       touchdownDuration = other.touchdownDuration;
       liftoffDuration = other.liftoffDuration;
@@ -303,26 +279,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getTransferDuration()
    {
       return transferDuration;
-   }
-
-   public double getSwingSplitFraction()
-   {
-      return swingSplitFraction;
-   }
-
-   public double getSwingDurationShiftFraction()
-   {
-      return swingDurationShiftFraction;
-   }
-
-   public double getTransferSplitFraction()
-   {
-      return transferSplitFraction;
-   }
-
-   public double getTransferWeightDistribution()
-   {
-      return transferWeightDistribution;
    }
 
    public double getTouchdownDuration()
