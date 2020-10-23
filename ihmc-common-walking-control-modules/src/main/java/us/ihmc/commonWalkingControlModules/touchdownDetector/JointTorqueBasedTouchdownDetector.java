@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -19,7 +19,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private double signum;
    private double forSureSignum;
 
-   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, YoRegistry registry)
    {
       this(suffix, joint, false, registry);
    }
@@ -30,7 +30,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
     *                                          false-positive touchdown signals given by simulated torques at joint limits
     * @param registry
     */
-   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, boolean dontDetectTouchdownIfAtJointLimit, YoRegistry registry)
    {
       this.joint = joint;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;

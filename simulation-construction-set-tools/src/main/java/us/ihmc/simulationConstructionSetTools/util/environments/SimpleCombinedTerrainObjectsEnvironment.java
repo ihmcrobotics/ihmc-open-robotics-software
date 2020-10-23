@@ -20,7 +20,7 @@ public class SimpleCombinedTerrainObjectsEnvironment extends CombinedTerrainObje
       // Rotated Table 1
       RigidBodyTransform configuration = new RigidBodyTransform();
       configuration.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.toRadians(45.0));
-      configuration.setTranslation(new Vector3D(4.0, 4.0, 0.7));
+      configuration.getTranslation().set(new Vector3D(4.0, 4.0, 0.7));
       this.addRotatableTable(configuration, 4.0, 2.0, 1.6, 0.1);
 
       // Table 2
@@ -41,7 +41,7 @@ public class SimpleCombinedTerrainObjectsEnvironment extends CombinedTerrainObje
 
       // Rotated Box
       configuration.setRotationEulerAndZeroTranslation(new Vector3D(0.0, Math.toRadians(45.0), Math.toRadians(45.0)));
-      configuration.setTranslation(new Vector3D(0.0, 3.5, 0.7));
+      configuration.getTranslation().set(new Vector3D(0.0, 3.5, 0.7));
       this.addRotatableBox(configuration, 4.0, 2.0, 1.6, appearance);
 
       // Ramp 1

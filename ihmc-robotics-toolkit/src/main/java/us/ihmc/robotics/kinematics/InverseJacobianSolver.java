@@ -1,28 +1,28 @@
 package us.ihmc.robotics.kinematics;
 
-import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 public class InverseJacobianSolver
 {
-   private final LinearSolver<DenseMatrix64F> linearAlgebraSolver;
+   private final LinearSolverDense<DMatrixRMaj> linearAlgebraSolver;
 
-   private final DenseMatrix64F selectionMatrix;
-   private final DenseMatrix64F subspaceJacobianMatrix;
-   private final DenseMatrix64F subspaceSpatialVelocity;
-   private final DenseMatrix64F jacobianMatrixTransposed;
-   private final DenseMatrix64F jacobianTimesJacobianTransposedMatrix;
-   private final DenseMatrix64F lamdaSquaredMatrix;
-   private final DenseMatrix64F jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix;
-   private final DenseMatrix64F jacobianTimesSpatialVelocity;
-   private final DenseMatrix64F jacobianTransposedTimesJacobianMatrix;
+   private final DMatrixRMaj selectionMatrix;
+   private final DMatrixRMaj subspaceJacobianMatrix;
+   private final DMatrixRMaj subspaceSpatialVelocity;
+   private final DMatrixRMaj jacobianMatrixTransposed;
+   private final DMatrixRMaj jacobianTimesJacobianTransposedMatrix;
+   private final DMatrixRMaj lamdaSquaredMatrix;
+   private final DMatrixRMaj jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix;
+   private final DMatrixRMaj jacobianTimesSpatialVelocity;
+   private final DMatrixRMaj jacobianTransposedTimesJacobianMatrix;
 
-   private final DenseMatrix64F intermediateSubspaceSpatialVelocity;
-   private final DenseMatrix64F intermediateResultInTaskspace;
-   private final DenseMatrix64F jointspaceVelocity;
+   private final DMatrixRMaj intermediateSubspaceSpatialVelocity;
+   private final DMatrixRMaj intermediateResultInTaskspace;
+   private final DMatrixRMaj jointspaceVelocity;
 
    private final int maximumNumberOfConstraints;
    private int numberOfConstraints;
@@ -30,45 +30,45 @@ public class InverseJacobianSolver
 
    public static InverseJacobianSolver createInverseJacobianSolver(int maximumNumberOfConstraints, int numberOfDoF, boolean useSVD)
    {
-      LinearSolver<DenseMatrix64F> solver;
+      LinearSolverDense<DMatrixRMaj> solver;
       if (useSVD)
       {
-         solver = new SolvePseudoInverseSvd(maximumNumberOfConstraints, maximumNumberOfConstraints);
+         solver = new SolvePseudoInverseSvd_DDRM(maximumNumberOfConstraints, maximumNumberOfConstraints);
       }
       else
       {
-         solver = LinearSolverFactory.leastSquares(maximumNumberOfConstraints, maximumNumberOfConstraints);
+         solver = LinearSolverFactory_DDRM.leastSquares(maximumNumberOfConstraints, maximumNumberOfConstraints);
       }
       return new InverseJacobianSolver(maximumNumberOfConstraints, numberOfDoF, solver);
    }
 
-   public InverseJacobianSolver(int maximumNumberOfConstraints, int numberOfDoF, LinearSolver<DenseMatrix64F> solver)
+   public InverseJacobianSolver(int maximumNumberOfConstraints, int numberOfDoF, LinearSolverDense<DMatrixRMaj> solver)
    {
-      selectionMatrix = CommonOps.identity(maximumNumberOfConstraints);
+      selectionMatrix = CommonOps_DDRM.identity(maximumNumberOfConstraints);
 
       this.numberOfDoF = numberOfDoF;
       this.maximumNumberOfConstraints = maximumNumberOfConstraints;
       this.numberOfConstraints = maximumNumberOfConstraints;
 
-      subspaceJacobianMatrix = new DenseMatrix64F(maximumNumberOfConstraints, numberOfDoF);
-      subspaceSpatialVelocity = new DenseMatrix64F(maximumNumberOfConstraints, 1);
-      jacobianMatrixTransposed = new DenseMatrix64F(numberOfDoF, maximumNumberOfConstraints);
-      jacobianTimesJacobianTransposedMatrix = new DenseMatrix64F(maximumNumberOfConstraints, maximumNumberOfConstraints);
+      subspaceJacobianMatrix = new DMatrixRMaj(maximumNumberOfConstraints, numberOfDoF);
+      subspaceSpatialVelocity = new DMatrixRMaj(maximumNumberOfConstraints, 1);
+      jacobianMatrixTransposed = new DMatrixRMaj(numberOfDoF, maximumNumberOfConstraints);
+      jacobianTimesJacobianTransposedMatrix = new DMatrixRMaj(maximumNumberOfConstraints, maximumNumberOfConstraints);
 
-      jacobianTimesSpatialVelocity = new DenseMatrix64F(numberOfDoF, 1);
-      jacobianTransposedTimesJacobianMatrix = new DenseMatrix64F(numberOfDoF, numberOfDoF);
+      jacobianTimesSpatialVelocity = new DMatrixRMaj(numberOfDoF, 1);
+      jacobianTransposedTimesJacobianMatrix = new DMatrixRMaj(numberOfDoF, numberOfDoF);
 
-      lamdaSquaredMatrix = new DenseMatrix64F(numberOfDoF, numberOfDoF);
-      jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix = new DenseMatrix64F(numberOfDoF, numberOfDoF);
+      lamdaSquaredMatrix = new DMatrixRMaj(numberOfDoF, numberOfDoF);
+      jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix = new DMatrixRMaj(numberOfDoF, numberOfDoF);
 
       linearAlgebraSolver = solver;
 
-      intermediateSubspaceSpatialVelocity = new DenseMatrix64F(maximumNumberOfConstraints, 1);
-      intermediateResultInTaskspace = new DenseMatrix64F(maximumNumberOfConstraints, 1);
-      jointspaceVelocity = new DenseMatrix64F(numberOfDoF, 1);
+      intermediateSubspaceSpatialVelocity = new DMatrixRMaj(maximumNumberOfConstraints, 1);
+      intermediateResultInTaskspace = new DMatrixRMaj(maximumNumberOfConstraints, 1);
+      jointspaceVelocity = new DMatrixRMaj(numberOfDoF, 1);
    }
 
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(DMatrixRMaj selectionMatrix)
    {
       numberOfConstraints = selectionMatrix.getNumRows();
       this.selectionMatrix.reshape(numberOfConstraints, selectionMatrix.getNumCols());
@@ -79,20 +79,20 @@ public class InverseJacobianSolver
    {
       numberOfConstraints = maximumNumberOfConstraints;
       this.selectionMatrix.reshape(numberOfConstraints, numberOfConstraints);
-      CommonOps.setIdentity(selectionMatrix);
+      CommonOps_DDRM.setIdentity(selectionMatrix);
    }
 
-   public DenseMatrix64F getJointspaceVelocity()
+   public DMatrixRMaj getJointspaceVelocity()
    {
       return jointspaceVelocity;
    }
 
-   public DenseMatrix64F getSubspaceSpatialVelocity()
+   public DMatrixRMaj getSubspaceSpatialVelocity()
    {
       return subspaceSpatialVelocity;
    }
 
-   public boolean solveUsingJacobianInverse(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix)
+   public boolean solveUsingJacobianInverse(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix)
    {
       computeSubspaceJacobian(subspaceJacobianMatrix, jacobianMatrix);
       computeSubspaceSpatialVelocity(subspaceSpatialVelocity, spatialVelocity);
@@ -104,7 +104,7 @@ public class InverseJacobianSolver
       return success;
    }
 
-   public boolean solveUsingJacobianPseudoInverseOne(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix)
+   public boolean solveUsingJacobianPseudoInverseOne(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix)
    {
       computeSubspaceJacobian(subspaceJacobianMatrix, jacobianMatrix);
       computeSubspaceSpatialVelocity(subspaceSpatialVelocity, spatialVelocity);
@@ -117,7 +117,7 @@ public class InverseJacobianSolver
 
       // J^T*deltaX
       jacobianTimesSpatialVelocity.reshape(numberOfDoF, 1);
-      CommonOps.mult(jacobianMatrixTransposed, subspaceSpatialVelocity, jacobianTimesSpatialVelocity);
+      CommonOps_DDRM.mult(jacobianMatrixTransposed, subspaceSpatialVelocity, jacobianTimesSpatialVelocity);
 
       boolean success = linearAlgebraSolver.setA(jacobianTransposedTimesJacobianMatrix);
       // Solve J^T*J delta q = J^T * deltaX
@@ -127,7 +127,7 @@ public class InverseJacobianSolver
       return success;
    }
 
-   public boolean solveUsingJacobianPseudoInverseTwo(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix)
+   public boolean solveUsingJacobianPseudoInverseTwo(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix)
    {
       computeSubspaceJacobian(subspaceJacobianMatrix, jacobianMatrix);
       computeSubspaceSpatialVelocity(subspaceSpatialVelocity, spatialVelocity);
@@ -145,12 +145,12 @@ public class InverseJacobianSolver
       // Solve J*J^T deltaX = f
       if (success)
          linearAlgebraSolver.solve(subspaceSpatialVelocity, intermediateResultInTaskspace);
-      CommonOps.mult(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
+      CommonOps_DDRM.mult(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
 
       return success;
    }
 
-   public boolean solveUsingDampedLeastSquares(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix, double lambdaLeastSquares)
+   public boolean solveUsingDampedLeastSquares(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix, double lambdaLeastSquares)
    {
       // J
       computeSubspaceJacobian(subspaceJacobianMatrix, jacobianMatrix);
@@ -171,19 +171,19 @@ public class InverseJacobianSolver
 
       jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJacobianTransposedMatrix);
-      CommonOps.add(jacobianTimesJacobianTransposedMatrix, lamdaSquaredMatrix, jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix);
+      CommonOps_DDRM.add(jacobianTimesJacobianTransposedMatrix, lamdaSquaredMatrix, jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix);
 
       boolean success = linearAlgebraSolver.setA(jacobianTimesJacobianTransposedPlusLamdaSquaredMatrix);
 
       // Solve J*J^T deltaX = f
       if (success)
          linearAlgebraSolver.solve(subspaceSpatialVelocity, intermediateResultInTaskspace);
-      CommonOps.mult(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
+      CommonOps_DDRM.mult(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
 
       return success;
    }
 
-   public boolean solveUsingNullspaceMethod(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix, DenseMatrix64F privilegedJointVelocities)
+   public boolean solveUsingNullspaceMethod(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix, DMatrixRMaj privilegedJointVelocities)
    {
       computeSubspaceJacobian(subspaceJacobianMatrix, jacobianMatrix);
       computeSubspaceSpatialVelocity(subspaceSpatialVelocity, spatialVelocity);
@@ -191,7 +191,7 @@ public class InverseJacobianSolver
       intermediateSubspaceSpatialVelocity.reshape(numberOfConstraints, 1);
       intermediateSubspaceSpatialVelocity.set(subspaceSpatialVelocity);
       // xDot - J qDot0
-      CommonOps.multAdd(-1.0, subspaceJacobianMatrix, privilegedJointVelocities, intermediateSubspaceSpatialVelocity);
+      CommonOps_DDRM.multAdd(-1.0, subspaceJacobianMatrix, privilegedJointVelocities, intermediateSubspaceSpatialVelocity);
 
       // J^T
       computeJacobianTransposed(jacobianMatrixTransposed, subspaceJacobianMatrix);
@@ -208,12 +208,12 @@ public class InverseJacobianSolver
          linearAlgebraSolver.solve(intermediateSubspaceSpatialVelocity, intermediateResultInTaskspace);
       // qDot = J^T f + qDot0
       jointspaceVelocity.set(privilegedJointVelocities);
-      CommonOps.multAdd(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
+      CommonOps_DDRM.multAdd(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
 
       return success;
    }
 
-   public boolean solveUsingNullspaceMethodWithoutSelectionMatrix(DenseMatrix64F spatialVelocity, DenseMatrix64F jacobianMatrix, DenseMatrix64F privilegedJointVelocities)
+   public boolean solveUsingNullspaceMethodWithoutSelectionMatrix(DMatrixRMaj spatialVelocity, DMatrixRMaj jacobianMatrix, DMatrixRMaj privilegedJointVelocities)
    {
       int numberOfConstraints = jacobianMatrix.getNumRows();
       subspaceJacobianMatrix.reshape(numberOfConstraints, jacobianMatrix.getNumCols());
@@ -224,15 +224,15 @@ public class InverseJacobianSolver
       intermediateSubspaceSpatialVelocity.reshape(numberOfConstraints, 1);
       intermediateSubspaceSpatialVelocity.set(subspaceSpatialVelocity);
       // xDot - J qDot0
-      CommonOps.multAdd(-1.0, subspaceJacobianMatrix, privilegedJointVelocities, intermediateSubspaceSpatialVelocity);
+      CommonOps_DDRM.multAdd(-1.0, subspaceJacobianMatrix, privilegedJointVelocities, intermediateSubspaceSpatialVelocity);
 
       // J^T
       jacobianMatrixTransposed.reshape(numberOfDoF, numberOfConstraints);
-      CommonOps.transpose(subspaceJacobianMatrix, jacobianMatrixTransposed);
+      CommonOps_DDRM.transpose(subspaceJacobianMatrix, jacobianMatrixTransposed);
 
       // J J^T
       jacobianTimesJacobianTransposedMatrix.reshape(numberOfConstraints, numberOfConstraints);
-      CommonOps.multOuter(subspaceJacobianMatrix, jacobianTimesJacobianTransposedMatrix);
+      CommonOps_DDRM.multOuter(subspaceJacobianMatrix, jacobianTimesJacobianTransposedMatrix);
 
       intermediateResultInTaskspace.reshape(numberOfConstraints, 1);
 
@@ -243,39 +243,39 @@ public class InverseJacobianSolver
          linearAlgebraSolver.solve(intermediateSubspaceSpatialVelocity, intermediateResultInTaskspace);
       // qDot = J^T f + qDot0
       jointspaceVelocity.set(privilegedJointVelocities);
-      CommonOps.multAdd(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
+      CommonOps_DDRM.multAdd(jacobianMatrixTransposed, intermediateResultInTaskspace, jointspaceVelocity);
 
       return success;
    }
 
-   private void computeJacobianTransposedTimesJacobian(DenseMatrix64F resultToPack, DenseMatrix64F jacobian)
+   private void computeJacobianTransposedTimesJacobian(DMatrixRMaj resultToPack, DMatrixRMaj jacobian)
    {
       resultToPack.reshape(numberOfDoF, numberOfDoF);
-      CommonOps.multInner(jacobian, resultToPack);
+      CommonOps_DDRM.multInner(jacobian, resultToPack);
    }
 
-   private void computeJacobianTimesJacobianTransposed(DenseMatrix64F resultToPack, DenseMatrix64F jacobian)
+   private void computeJacobianTimesJacobianTransposed(DMatrixRMaj resultToPack, DMatrixRMaj jacobian)
    {
       resultToPack.reshape(numberOfConstraints, numberOfConstraints);
-      CommonOps.multOuter(jacobian, resultToPack);
+      CommonOps_DDRM.multOuter(jacobian, resultToPack);
    }
 
-   private void computeJacobianTransposed(DenseMatrix64F jacobianTransposedToPack, DenseMatrix64F jacobian)
+   private void computeJacobianTransposed(DMatrixRMaj jacobianTransposedToPack, DMatrixRMaj jacobian)
    {
       jacobianTransposedToPack.reshape(numberOfDoF, numberOfConstraints);
-      CommonOps.transpose(jacobian, jacobianTransposedToPack);
+      CommonOps_DDRM.transpose(jacobian, jacobianTransposedToPack);
    }
 
-   private void computeSubspaceJacobian(DenseMatrix64F subspaceJacobianMatrixToPack, DenseMatrix64F jacobianMatrix)
+   private void computeSubspaceJacobian(DMatrixRMaj subspaceJacobianMatrixToPack, DMatrixRMaj jacobianMatrix)
    {
       subspaceJacobianMatrixToPack.reshape(numberOfConstraints, numberOfDoF);
-      CommonOps.mult(selectionMatrix, jacobianMatrix, subspaceJacobianMatrixToPack);
+      CommonOps_DDRM.mult(selectionMatrix, jacobianMatrix, subspaceJacobianMatrixToPack);
    }
 
-   private void computeSubspaceSpatialVelocity(DenseMatrix64F subspaceSpatialVelocityToPack, DenseMatrix64F spatialVelocity)
+   private void computeSubspaceSpatialVelocity(DMatrixRMaj subspaceSpatialVelocityToPack, DMatrixRMaj spatialVelocity)
    {
       subspaceSpatialVelocityToPack.reshape(numberOfConstraints, 1);
-      CommonOps.mult(selectionMatrix, spatialVelocity, subspaceSpatialVelocityToPack);
+      CommonOps_DDRM.mult(selectionMatrix, spatialVelocity, subspaceSpatialVelocityToPack);
    }
 
    public int getNumberOfConstraints()
@@ -283,19 +283,19 @@ public class InverseJacobianSolver
       return numberOfConstraints;
    }
 
-   public double computeDeterminant(DenseMatrix64F jacobianMatrix)
+   public double computeDeterminant(DMatrixRMaj jacobianMatrix)
    {
       computeJacobianTimesJacobianTransposed(jacobianTimesJacobianTransposedMatrix, jacobianMatrix);
-      return CommonOps.det(jacobianTimesJacobianTransposedMatrix);
+      return CommonOps_DDRM.det(jacobianTimesJacobianTransposedMatrix);
    }
 
    public double getLastComputedDeterminant()
    {
-      double det = CommonOps.det(jacobianTimesJacobianTransposedMatrix);
+      double det = CommonOps_DDRM.det(jacobianTimesJacobianTransposedMatrix);
       return det;
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   public DMatrixRMaj getSelectionMatrix()
    {
       return selectionMatrix;
    }

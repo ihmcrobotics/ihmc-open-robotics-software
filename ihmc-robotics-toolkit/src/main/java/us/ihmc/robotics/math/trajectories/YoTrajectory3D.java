@@ -5,13 +5,13 @@ import java.util.List;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoTrajectory3D
 {
@@ -19,7 +19,7 @@ public class YoTrajectory3D
    protected final YoTrajectory yTrajectory;
    protected final YoTrajectory zTrajectory;
 
-   public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       xTrajectory = new YoTrajectory(name + "X", maximumNumberOfCoefficients, registry);
       yTrajectory = new YoTrajectory(name + "Y", maximumNumberOfCoefficients, registry);
@@ -235,7 +235,7 @@ public class YoTrajectory3D
       return integralResult;
    }
 
-   public YoTrajectory getYoTrajectory(Axis axis)
+   public YoTrajectory getYoTrajectory(Axis3D axis)
    {
       return getYoTrajectory(axis.ordinal());
    }
@@ -312,7 +312,7 @@ public class YoTrajectory3D
       }
    }
 
-   public double getInitialTime(Axis dir)
+   public double getInitialTime(Axis3D dir)
    {
       return getYoTrajectory(dir).getInitialTime();
    }
@@ -322,7 +322,7 @@ public class YoTrajectory3D
       return getYoTrajectory(index).getInitialTime();
    }
 
-   public double getFinalTime(Axis dir)
+   public double getFinalTime(Axis3D dir)
    {
       return getYoTrajectory(dir).getFinalTime();
    }
@@ -356,7 +356,7 @@ public class YoTrajectory3D
          return -1;
    }
 
-   public int getNumberOfCoefficients(Axis dir)
+   public int getNumberOfCoefficients(Axis3D dir)
    {
       return getYoTrajectory(dir).getNumberOfCoefficients();
    }

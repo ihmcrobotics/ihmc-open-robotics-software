@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -13,8 +13,8 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 public class MomentumModuleSolution
 {
    private JointBasics[] jointsToOptimizeFor;
-   private DenseMatrix64F jointAccelerations;
-   private DenseMatrix64F rhoSolution;
+   private DMatrixRMaj jointAccelerations;
+   private DMatrixRMaj rhoSolution;
    private SpatialForceReadOnly centroidalMomentumRateSolution;
    private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
    private List<RigidBodyBasics> rigidBodiesWithExternalWrench;
@@ -24,11 +24,11 @@ public class MomentumModuleSolution
       this.jointsToOptimizeFor = jointsToOptimizeFor;
    }
 
-   public void setJointAccelerations(DenseMatrix64F jointAccelerations)
+   public void setJointAccelerations(DMatrixRMaj jointAccelerations)
    {
       this.jointAccelerations = jointAccelerations;
    }
-   public void setRhoSolution(DenseMatrix64F rhoSolution)
+   public void setRhoSolution(DMatrixRMaj rhoSolution)
    {
       this.rhoSolution = rhoSolution;
    }
@@ -68,12 +68,12 @@ public class MomentumModuleSolution
       return jointsToOptimizeFor;
    }
 
-   public DenseMatrix64F getJointAccelerations()
+   public DMatrixRMaj getJointAccelerations()
    {
       return jointAccelerations;
    }
 
-   public DenseMatrix64F getRhoSolution()
+   public DMatrixRMaj getRhoSolution()
    {
       return rhoSolution;
    }

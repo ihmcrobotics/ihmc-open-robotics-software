@@ -1,27 +1,28 @@
 package us.ihmc.sensorProcessing.imu;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class FusedIMUSensor implements IMUSensorReadOnly
 {
@@ -33,7 +34,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final IMUSensorReadOnly firstIMU;
    private final IMUSensorReadOnly secondIMU;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFrameQuaternion quaternion;
    private final YoFrameYawPitchRoll orientation;
    private final YoFrameVector3D angularVelocity;
@@ -72,10 +73,10 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final FrameVector3D firstFrameVector = new FrameVector3D();
    private final FrameVector3D secondFrameVector = new FrameVector3D();
 
-   private final double[] tempYawPitchRoll = new double[3];
+   private final YawPitchRoll tempYawPitchRoll = new YawPitchRoll();
 
    public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT,
-                         YoVariableRegistry parentRegistry)
+                         YoRegistry parentRegistry)
    {
       this.firstIMU = firstIMU;
       this.secondIMU = secondIMU;
@@ -91,7 +92,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
       fusedMeasurementFrame = createFusedMeasurementFrame();
 
-      registry = new YoVariableRegistry(sensorName);
+      registry = new YoRegistry(sensorName);
       quaternion = new YoFrameQuaternion(sensorName, fusedMeasurementFrame, registry);
       orientation = new YoFrameYawPitchRoll(sensorName, fusedMeasurementFrame, registry);
       angularVelocity = new YoFrameVector3D("qd_w", sensorName, fusedMeasurementFrame, registry);
@@ -163,34 +164,31 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       RigidBodyTransform firstTransform = firstMeasurementFrame.getTransformToParent();
       RigidBodyTransform secondTransform = secondMeasurementFrame.getTransformToParent();
 
-      double[] firstYawPitchRoll = new double[3];
-      firstTransform.getRotationYawPitchRoll(firstYawPitchRoll);
-      double[] secondYawPitchRoll = new double[3];
-      secondTransform.getRotationYawPitchRoll(secondYawPitchRoll);
+      YawPitchRoll firstYawPitchRoll = new YawPitchRoll();
+      firstYawPitchRoll.set(firstTransform.getRotation());
+      YawPitchRoll secondYawPitchRoll = new YawPitchRoll();
+      secondYawPitchRoll.set(secondTransform.getRotation());
 
       Vector3D firstOffset = new Vector3D();
-      firstTransform.getTranslation(firstOffset);
+      firstOffset.set(firstTransform.getTranslation());
       Vector3D secondOffset = new Vector3D();
-      secondTransform.getTranslation(secondOffset);
+      secondOffset.set(secondTransform.getTranslation());
 
       Vector3D fusedOffset = new Vector3D();
       fusedOffset.add(firstOffset, secondOffset);
       fusedOffset.scale(0.5);
 
-      double[] fusedYawPitchRoll = new double[3];
+      YawPitchRoll fusedYawPitchRoll = new YawPitchRoll();
       for (int i = 0; i < 3; i++)
       {
-         fusedYawPitchRoll[i] = firstYawPitchRoll[i] + secondYawPitchRoll[i];
-         fusedYawPitchRoll[i] *= 0.5;
+         fusedYawPitchRoll.setElement(i, 0.5 * (firstYawPitchRoll.getElement(i) + secondYawPitchRoll.getElement(i)));
       }
 
       Quaternion fusedQuaternion = new Quaternion();
-      fusedQuaternion.setYawPitchRoll(fusedYawPitchRoll);
+      fusedQuaternion.set(fusedYawPitchRoll);
 
       RigidBodyTransform fusedTransform = new RigidBodyTransform(fusedQuaternion, fusedOffset);
-      ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensorName + "Frame",
-                                                                                                              firstMeasurementFrame.getParent(),
-                                                                                                              fusedTransform);
+      ReferenceFrame fusedMeasurementFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", firstMeasurementFrame.getParent(), fusedTransform);
 
       return fusedMeasurementFrame;
    }
@@ -238,15 +236,15 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       firstIMUYawPrevValue.set(firstIMUYaw.getDoubleValue());
       secondIMUYawPrevValue.set(secondIMUYaw.getDoubleValue());
 
-      firstFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
-      tempYawPitchRoll[0] -= firstDriftYaw.getDoubleValue();
-      tempYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll[0]);
-      firstFrameOrientation.setYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll.set(firstFrameOrientation);
+      tempYawPitchRoll.setYaw(tempYawPitchRoll.getYaw() - firstDriftYaw.getDoubleValue());
+      tempYawPitchRoll.setYaw(AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll.getYaw()));
+      firstFrameOrientation.set(tempYawPitchRoll);
 
-      secondFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
-      tempYawPitchRoll[0] -= secondDriftYaw.getDoubleValue();
-      tempYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll[0]);
-      secondFrameOrientation.setYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll.set(secondFrameOrientation);
+      tempYawPitchRoll.setYaw(tempYawPitchRoll.getYaw() - secondDriftYaw.getDoubleValue());
+      tempYawPitchRoll.setYaw(AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll.getYaw()));
+      secondFrameOrientation.set(tempYawPitchRoll);
    }
 
    private void measureOrientationInFusedFrame(FrameQuaternion orientationToPack, IMUSensorReadOnly imu)
@@ -261,7 +259,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       // R_{Fused IMU}^{world} = R_{IMU}^{world} * R_{Fused IMU}^{IMU}
       transformFromFusedIMUToWorld.set(transformFromIMUToWorld);
       transformFromFusedIMUToWorld.multiply(transformFromFusedIMUToIMU);
-      transformFromFusedIMUToWorld.getRotation(rotationFromFusedIMUToWorld);
+      rotationFromFusedIMUToWorld.set(transformFromFusedIMUToWorld.getRotation());
 
       orientationToPack.setIncludingFrame(fusedMeasurementFrame, rotationFromFusedIMUToWorld);
    }
@@ -333,35 +331,35 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getOrientationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);

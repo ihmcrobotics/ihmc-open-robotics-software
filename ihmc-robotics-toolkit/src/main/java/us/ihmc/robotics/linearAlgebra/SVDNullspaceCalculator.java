@@ -1,9 +1,9 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
@@ -12,16 +12,16 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
 {
    private final ConfigurableSolvePseudoInverseSVD iMinusNNTSolver;
 
-   private final SingularValueDecomposition<DenseMatrix64F> decomposer;
-   private final DenseMatrix64F sigma;
-   private final DenseMatrix64F v;
+   private final SingularValueDecomposition_F64<DMatrixRMaj> decomposer;
+   private final DMatrixRMaj sigma;
+   private final DMatrixRMaj v;
 
-   private final DenseMatrix64F nullspace;
-   private final DenseMatrix64F Q;
-   private final DenseMatrix64F iMinusNNT;
+   private final DMatrixRMaj nullspace;
+   private final DMatrixRMaj Q;
+   private final DMatrixRMaj iMinusNNT;
    
-   private final DenseMatrix64F nullspaceProjector;
-   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+   private final DMatrixRMaj nullspaceProjector;
+   private final DMatrixRMaj tempMatrixForProjectionInPlace;
 
    private final boolean makeLargestComponentPositive;
 
@@ -29,18 +29,18 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
    {
       MathTools.checkIntervalContains(matrixSize, 1, Integer.MAX_VALUE);
 
-      iMinusNNT = new DenseMatrix64F(matrixSize, matrixSize);
+      iMinusNNT = new DMatrixRMaj(matrixSize, matrixSize);
       double singularValueLimit = 0.5; // because the singular values of I - N * N^T will be either 0 or 1.
       iMinusNNTSolver = new ConfigurableSolvePseudoInverseSVD(matrixSize, matrixSize, singularValueLimit);
 
-      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
-      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
+      nullspaceProjector = new DMatrixRMaj(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DMatrixRMaj(matrixSize, matrixSize);
 
-      decomposer = DecompositionFactory.svd(matrixSize, matrixSize, false, true, false);
-      sigma = new DenseMatrix64F(matrixSize, matrixSize);
-      v = new DenseMatrix64F(matrixSize, matrixSize);
-      nullspace = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
-      Q = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
+      decomposer = DecompositionFactory_DDRM.svd(matrixSize, matrixSize, false, true, false);
+      sigma = new DMatrixRMaj(matrixSize, matrixSize);
+      v = new DMatrixRMaj(matrixSize, matrixSize);
+      nullspace = new DMatrixRMaj(matrixSize, matrixSize);    // oversized, using reshape later
+      Q = new DMatrixRMaj(matrixSize, matrixSize);    // oversized, using reshape later
       this.makeLargestComponentPositive = makeLargestComponentPositive;
    }
 
@@ -56,7 +56,7 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf)
    {
       tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
       projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
@@ -75,10 +75,10 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
     * @param projectedMatrixToPack matrix to store the resulting projection, C in the equation. Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj projectedMatrixToPack)
    {
       computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
-      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
+      CommonOps_DDRM.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }
 
    /**
@@ -92,25 +92,25 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
     * @param nullspaceProjectorToPack matrix to store the resulting nullspace matrix. Modified.
     */
    @Override
-   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   public void computeNullspaceProjector(DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj nullspaceProjectorToPack)
    {
       int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
       setMatrix(matrixToComputeNullspaceOf, nullity);
 
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-      CommonOps.multOuter(nullspace, nullspaceProjectorToPack);
+      CommonOps_DDRM.multOuter(nullspace, nullspaceProjectorToPack);
    }
 
-   public void setMatrix(DenseMatrix64F matrix, int nullity)
+   public void setMatrix(DMatrixRMaj matrix, int nullity)
    {
       computeNullspace(nullspace, matrix, nullity);
    }
 
-   public void removeNullspaceComponent(DenseMatrix64F vectorToHaveNullspaceRemoved, DenseMatrix64F vectorWithNullspaceRemovedToPack)
+   public void removeNullspaceComponent(DMatrixRMaj vectorToHaveNullspaceRemoved, DMatrixRMaj vectorWithNullspaceRemovedToPack)
    {
       iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
-      CommonOps.multOuter(nullspace, iMinusNNT);
-      CommonOps.scale(-1.0, iMinusNNT);
+      CommonOps_DDRM.multOuter(nullspace, iMinusNNT);
+      CommonOps_DDRM.scale(-1.0, iMinusNNT);
       MatrixTools.addDiagonal(iMinusNNT, 1.0);
 
       /*
@@ -121,23 +121,23 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
       iMinusNNTSolver.solve(vectorToHaveNullspaceRemoved, vectorWithNullspaceRemovedToPack);
    }
 
-   public void removeNullspaceComponent(DenseMatrix64F vectorToHaveNullspaceRemoved)
+   public void removeNullspaceComponent(DMatrixRMaj vectorToHaveNullspaceRemoved)
    {
       tempMatrixForProjectionInPlace.set(vectorToHaveNullspaceRemoved);
       removeNullspaceComponent(tempMatrixForProjectionInPlace, vectorToHaveNullspaceRemoved);
    }
 
-   public void addNullspaceComponent(DenseMatrix64F x, DenseMatrix64F nullspaceMultipliers)
+   public void addNullspaceComponent(DMatrixRMaj x, DMatrixRMaj nullspaceMultipliers)
    {
-      CommonOps.multAdd(nullspace, nullspaceMultipliers, x);
+      CommonOps_DDRM.multAdd(nullspace, nullspaceMultipliers, x);
    }
 
-   public DenseMatrix64F getNullspace()
+   public DMatrixRMaj getNullspace()
    {
       return nullspace;
    }
 
-   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
+   private void computeNullspace(DMatrixRMaj nullspaceToPack, DMatrixRMaj matrixToComputeNullspaceOf, int nullity)
    {
       nullspaceToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), nullity);
       Q.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols() - nullity);
@@ -149,8 +149,8 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
       boolean transposed = false;
       decomposer.getV(v, transposed);
 
-      CommonOps.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, Q, 0, 0);
-      CommonOps.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
+      CommonOps_DDRM.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, Q, 0, 0);
+      CommonOps_DDRM.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
 
       if (makeLargestComponentPositive)
       {
@@ -158,7 +158,7 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
       }
    }
 
-   public static void makeLargestComponentInEachRowPositive(DenseMatrix64F nullspace)
+   public static void makeLargestComponentInEachRowPositive(DMatrixRMaj nullspace)
    {
       for (int column = 0; column < nullspace.getNumCols(); column++)
       {
@@ -184,7 +184,7 @@ public class SVDNullspaceCalculator implements NullspaceCalculator
       }
    }
    
-   public static void makeLargestComponentInEachColumnPositive(DenseMatrix64F nullspaceTranspose)
+   public static void makeLargestComponentInEachColumnPositive(DMatrixRMaj nullspaceTranspose)
    {
       for (int row = 0; row < nullspaceTranspose.getNumRows(); row++)
       {

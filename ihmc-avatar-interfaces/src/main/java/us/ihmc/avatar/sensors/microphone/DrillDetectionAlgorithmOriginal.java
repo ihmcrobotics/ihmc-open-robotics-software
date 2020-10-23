@@ -1,7 +1,7 @@
 package us.ihmc.avatar.sensors.microphone;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
@@ -28,7 +28,7 @@ public class DrillDetectionAlgorithmOriginal extends DrillDetectionAlgorithm
    private static final double relevantFrequencyBandLowerBound = 1000; //Hz
    private static final double relevantFrequencyBandUpperBound = 4900; //Hz
 
-   private YoVariableRegistry registry = new YoVariableRegistry("DrillRegistry");
+   private YoRegistry registry = new YoRegistry("DrillRegistry");
    private AlphaFilteredYoVariable filteredRelevantMagnitude = new AlphaFilteredYoVariable("FilteredRelevantMagnitude", registry, 0.9);
    private AlphaFilteredYoVariable filteredDominantMagnitude = new AlphaFilteredYoVariable("FilteredDominantMagnitude", registry, 0.9);
 

@@ -6,21 +6,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -29,24 +19,25 @@ import org.reflections.Reflections;
 
 import com.google.common.base.CaseFormat;
 
+import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.IDLSequence;
 
 public class PacketCodeQualityTest
@@ -63,7 +54,7 @@ public class PacketCodeQualityTest
    public void testFrameInformationDefaultValues()
    {
       FrameInformation frameInformation = new FrameInformation();
-      assertEquals(NameBasedHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
+      assertEquals(EuclidHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
       assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
       assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
    }
@@ -622,7 +613,6 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
-      fieldsToIngore.add(FootstepNodeDataMessage.class.getField("bipedal_footstep_planner_node_rejection_reason_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {

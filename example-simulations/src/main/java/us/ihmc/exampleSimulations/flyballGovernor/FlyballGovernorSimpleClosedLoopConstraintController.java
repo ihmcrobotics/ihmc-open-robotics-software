@@ -3,12 +3,12 @@ package us.ihmc.exampleSimulations.flyballGovernor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FlyballGovernorSimpleClosedLoopConstraintController implements RobotController
 {
@@ -18,7 +18,7 @@ public class FlyballGovernorSimpleClosedLoopConstraintController implements Robo
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble constraintGain = new YoDouble("constraintGain", registry);
    private final YoDouble constraintDamp = new YoDouble("constraintDamp", registry);
    private final YoDouble positionErrorMagnitude1 = new YoDouble("positionErrorMagnitude1", registry);
@@ -94,7 +94,7 @@ public class FlyballGovernorSimpleClosedLoopConstraintController implements Robo
       forceB.set(newForceB);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

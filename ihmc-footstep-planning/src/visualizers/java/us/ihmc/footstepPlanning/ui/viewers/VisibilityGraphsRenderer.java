@@ -25,7 +25,6 @@ public class VisibilityGraphsRenderer
    private final Group root = new Group();
 
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
-   private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
    private final ClusterMeshViewer clusterMeshViewer;
@@ -37,8 +36,7 @@ public class VisibilityGraphsRenderer
    public VisibilityGraphsRenderer(Messager messager)
    {
       planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
@@ -66,7 +64,6 @@ public class VisibilityGraphsRenderer
    public void clear()
    {
       planarRegionsReference.set(null);
-      startPositionReference.set(null);
       goalPositionReference.set(null);
    }
 

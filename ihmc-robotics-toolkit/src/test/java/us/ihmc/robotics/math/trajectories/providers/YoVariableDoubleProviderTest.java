@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoVariableDoubleProviderTest
 {
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoDouble yoValue;
    private static double value1 = Math.random();
    private static double value2 = Math.random();
@@ -21,7 +21,7 @@ public class YoVariableDoubleProviderTest
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       yoValue = new YoDouble("value", "a YoDouble in paradise", registry);
       yoValue.set(value1);
    }

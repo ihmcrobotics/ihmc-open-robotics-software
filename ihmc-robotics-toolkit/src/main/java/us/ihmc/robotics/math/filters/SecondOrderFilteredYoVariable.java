@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -44,24 +44,24 @@ public class SecondOrderFilteredYoVariable extends YoDouble implements Processin
    private final double a[];
    private final double b[];
 
-   public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyInHz, double dampingRatio,
+   public SecondOrderFilteredYoVariable(String name, YoRegistry registry, double dt, double naturalFrequencyInHz, double dampingRatio,
          SecondOrderFilterType filterType)
    {
       this(name, registry, dt, new SecondOrderFilteredYoVariableParameters(name, registry, naturalFrequencyInHz, dampingRatio, filterType), null);
    }
 
-   public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, SecondOrderFilteredYoVariableParameters parameters)
+   public SecondOrderFilteredYoVariable(String name, YoRegistry registry, double dt, SecondOrderFilteredYoVariableParameters parameters)
    {
       this(name, registry, dt, parameters, null);
    }
 
-   public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyInHz, double dampingRatio,
+   public SecondOrderFilteredYoVariable(String name, YoRegistry registry, double dt, double naturalFrequencyInHz, double dampingRatio,
          SecondOrderFilterType filterType, YoDouble inputVariable)
    {
       this(name, registry, dt, new SecondOrderFilteredYoVariableParameters(name, registry, naturalFrequencyInHz, dampingRatio, filterType), inputVariable);
    }
 
-   public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, SecondOrderFilteredYoVariableParameters parameters,
+   public SecondOrderFilteredYoVariable(String name, YoRegistry registry, double dt, SecondOrderFilteredYoVariableParameters parameters,
          YoDouble inputVariable)
    {
       super(name, registry);

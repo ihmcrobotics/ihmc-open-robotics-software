@@ -37,8 +37,8 @@ public class EstimatorTask extends HumanoidRobotControlTask
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       String prefix = "Estimator";
-      timer = new ThreadTimer(prefix, schedulerDt * divisor, estimatorThread.getYoVariableRegistry());
-      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", estimatorThread.getYoVariableRegistry());
+      timer = new ThreadTimer(prefix, schedulerDt * divisor, estimatorThread.getYoRegistry());
+      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", estimatorThread.getYoRegistry());
    }
 
    @Override

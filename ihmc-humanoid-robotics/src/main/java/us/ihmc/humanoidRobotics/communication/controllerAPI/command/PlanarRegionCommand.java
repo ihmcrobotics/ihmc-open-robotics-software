@@ -98,7 +98,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       regionId = id;
       regionOrigin.set(origin);
       regionNormal.set(normal);
-      EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal, regionOrientation);
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(regionNormal, regionOrientation);
 
       fromLocalToWorldTransform.set(regionOrientation, regionOrigin);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);

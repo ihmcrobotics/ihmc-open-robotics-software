@@ -1,5 +1,7 @@
 package us.ihmc.atlas.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -9,10 +11,14 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
 {
    private final double scale;
    private final AtlasPhysicalProperties atlasPhysicalProperties;
+   private final boolean isRunningOnRealRobot;
 
-   public AtlasSmoothCMPPlannerParameters(AtlasPhysicalProperties atlasPhysicalProperties)
+   public AtlasSmoothCMPPlannerParameters(AtlasPhysicalProperties atlasPhysicalProperties, RobotTarget robotTarget)
    {
       super(atlasPhysicalProperties.getModelScale());
+
+      isRunningOnRealRobot = robotTarget == RobotTarget.REAL_ROBOT;
+
       scale = atlasPhysicalProperties.getModelScale();
       this.atlasPhysicalProperties = atlasPhysicalProperties;
       endCoPName = CoPPointName.MIDFEET_COP;
@@ -47,6 +53,18 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    }
 
    @Override
+   public boolean getDoTimeFreezing()
+   {
+      return isRunningOnRealRobot ? true : false;
+   }
+
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return 0.05;
+   }
+
+   @Override
    public boolean planSwingAngularMomentum()
    {
       return true;
@@ -57,6 +75,13 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return true;
    }
+
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
+   }
+
 
    /** {@inheritDoc} */
    @Override
@@ -148,5 +173,17 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    public boolean useExitCoPOnToesForSteppingDown()
    {
       return true;
+   }
+
+   @Override
+   public double getExitCoPForwardSafetyMarginOnToes()
+   {
+      return modelScale * (isRunningOnRealRobot ? 1.2e-2 : 1.6e-2);
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new AtlasICPSplitFractionCalculatorParameters();
    }
 }

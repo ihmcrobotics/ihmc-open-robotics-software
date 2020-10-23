@@ -5,14 +5,11 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -34,25 +31,23 @@ public class AtlasStepInPlaceBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-
       LogTools.info("Creating behavior module");
-      BehaviorModule.createForTest(robotModel, messager);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(StepInPlaceBehavior.DEFINITION), robotModel);
+      Messager messager = behaviorModule.getMessager();
 
       LogTools.info("Creating behavior messager");
 
       LogTools.info("Set stepping true");
       messager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
 
-      AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, 4, 6.0);
 
       messager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
       messager.submitMessage(StepInPlaceBehavior.API.Abort, true);
 
-      AtlasTestScripts.wait(conductor, variables, 3.0);
+      AtlasTestScripts.awaitDuration(conductor, variables, 3.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    @AfterEach
@@ -68,12 +63,12 @@ public class AtlasStepInPlaceBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      SimulationConstructionSet scs = AtlasBehaviorSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment());
+      SimulationConstructionSet scs = AtlasDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
       variables = new AtlasBehaviorTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

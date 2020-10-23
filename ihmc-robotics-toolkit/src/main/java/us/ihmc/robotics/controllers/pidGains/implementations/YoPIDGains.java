@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoPIDGains extends YoPDGains implements PIDGainsReadOnly
@@ -11,7 +11,7 @@ public class YoPIDGains extends YoPDGains implements PIDGainsReadOnly
    private final YoDouble maxIntegralError;
    private final YoDouble integralLeakRatio;
 
-   public YoPIDGains(String suffix, YoVariableRegistry registry)
+   public YoPIDGains(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 

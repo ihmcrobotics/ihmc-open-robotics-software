@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -37,7 +38,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -54,7 +55,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    
    PacketCommunicator mocapVizPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.MOCAP_MODULE_VIZ, new IHMCCommunicationKryoNetClassList());
    
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
    private final MocapPlanarRegionsListManager planarRegionsListManager;
@@ -67,8 +68,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
-         transformToParent.setTranslation(pelvisTranslationFromRobotConfigurationData);
-         transformToParent.setRotation(pelvisOrientationFromRobotConfigurationData);
+         transformToParent.getTranslation().set(pelvisTranslationFromRobotConfigurationData);
+         transformToParent.getRotation().set(pelvisOrientationFromRobotConfigurationData);
       }
    };
    
@@ -199,21 +200,21 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private void setPelvisYoVariables(RigidBodyTransform pelvisTransform)
    {
       Vector3D pelvisTranslation = new Vector3D();
-      double[] yawPitchRoll = new double[3];
+      YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
-      pelvisTransform.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisTransform.getTranslation());
 
       Quaternion pelvisRotation = new Quaternion();
-      pelvisTransform.getRotation(pelvisRotation);
+      pelvisRotation.set(pelvisTransform.getRotation());
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
 
       computedPelvisPositionX.set(pelvisTranslation.getX());
       computedPelvisPositionY.set(pelvisTranslation.getY());
       computedPelvisPositionZ.set(pelvisTranslation.getZ());
 
-      computedPelvisYaw.set(yawPitchRoll[0]);
-      computedPelvisPitch.set(yawPitchRoll[1]);
-      computedPelvisRoll.set(yawPitchRoll[2]);
+      computedPelvisYaw.set(yawPitchRoll.getYaw());
+      computedPelvisPitch.set(yawPitchRoll.getPitch());
+      computedPelvisRoll.set(yawPitchRoll.getRoll());
    }
 
    private void sendPelvisTransformToController(MocapRigidBody pelvisRigidBody)
@@ -257,7 +258,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
       pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
-      rootJoint.getJointPose().setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
+      rootJoint.getJointPose().getPosition().set(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
       rootJoint.getJointPose().getOrientation().setQuaternion(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
       
       computeDriftTransform();
@@ -274,20 +275,20 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisFrameFromMocap.getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
       
       Vector3D driftTranslation = new Vector3D();
-      driftTransform.getTranslation(driftTranslation);
+      driftTranslation.set(driftTransform.getTranslation());
       
       Quaternion driftRotation = new Quaternion();
-      driftTransform.getRotation(driftRotation);
-      double[] driftRotationYPR = new double[3];
+      driftRotation.set(driftTransform.getRotation());
+      YawPitchRoll driftRotationYPR = new YawPitchRoll();
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
       
       mocapWorldToRobotWorldTransformX.set(driftTranslation.getX());
       mocapWorldToRobotWorldTransformY.set(driftTranslation.getY());
       mocapWorldToRobotWorldTransformZ.set(driftTranslation.getZ());
       
-      mocapWorldToRobotWorldTransformYaw.set(driftRotationYPR[0]);
-      mocapWorldToRobotWorldTransformPitch.set(driftRotationYPR[1]);
-      mocapWorldToRobotWorldTransformRoll.set(driftRotationYPR[2]);      
+      mocapWorldToRobotWorldTransformYaw.set(driftRotationYPR.getYaw());
+      mocapWorldToRobotWorldTransformPitch.set(driftRotationYPR.getPitch());
+      mocapWorldToRobotWorldTransformRoll.set(driftRotationYPR.getRoll());      
    }
    
    public void startWalking()

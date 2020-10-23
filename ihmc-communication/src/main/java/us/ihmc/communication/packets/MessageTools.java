@@ -10,14 +10,16 @@ import controller_msgs.msg.dds.DetectedFacesPacket;
 import controller_msgs.msg.dds.HeatMapPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanParametersMessage;
 import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
@@ -29,13 +31,13 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -47,8 +49,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -305,8 +307,8 @@ public class MessageTools
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
       return message;
    }
 
@@ -664,7 +666,7 @@ public class MessageTools
       }
       catch (ArrayIndexOutOfBoundsException e)
       {
-         PrintTools.error("Caught exception while copying data from array of length: " + source.length);
+         LogTools.error("Caught exception while copying data from array of length: " + source.length);
          throw e;
       }
    }
@@ -760,7 +762,7 @@ public class MessageTools
    public static long toFrameId(ReferenceFrame referenceFrame)
    {
       if (referenceFrame == null)
-         return NameBasedHashCodeTools.NULL_HASHCODE;
+         return EuclidHashCodeTools.NULL_HASHCODE;
       else
          return referenceFrame.hashCode();
    }
@@ -1020,13 +1022,12 @@ public class MessageTools
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *                                  are different.
     */
-   public static void packPrivilegedRobotConfiguration(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage,
-                                                       Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, int[] jointHashCodes,
-                                                       float[] jointAngles)
+   public static void packPrivilegedRobotConfiguration(KinematicsToolboxPrivilegedConfigurationMessage message, Tuple3DReadOnly rootJointPosition,
+                                                       QuaternionReadOnly rootJointOrientation, int[] jointHashCodes, float[] jointAngles)
    {
-      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointPosition().set(rootJointPosition);
-      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointOrientation().set(rootJointOrientation);
-      MessageTools.packPrivilegedJointAngles(kinematicsToolboxConfigurationMessage, jointHashCodes, jointAngles);
+      message.getPrivilegedRootJointPosition().set(rootJointPosition);
+      message.getPrivilegedRootJointOrientation().set(rootJointOrientation);
+      MessageTools.packPrivilegedJointAngles(message, jointHashCodes, jointAngles);
    }
 
    /**
@@ -1048,16 +1049,15 @@ public class MessageTools
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *                                  are different.
     */
-   public static void packPrivilegedJointAngles(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage, int[] jointHashCodes,
-                                                float[] jointAngles)
+   public static void packPrivilegedJointAngles(KinematicsToolboxPrivilegedConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
    {
       if (jointHashCodes.length != jointAngles.length)
          throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
 
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().reset();
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().add(jointHashCodes);
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().reset();
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().add(jointAngles);
+      message.getPrivilegedJointHashCodes().reset();
+      message.getPrivilegedJointHashCodes().add(jointHashCodes);
+      message.getPrivilegedJointAngles().reset();
+      message.getPrivilegedJointAngles().add(jointAngles);
    }
 
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
@@ -1092,5 +1092,27 @@ public class MessageTools
          scanPoints[index] = scanPoint;
       }
       return scanPoints;
+   }
+
+   public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
+   {
+      return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
+   }
+
+   /*
+    * Set the sequence ID for a RobotConfigurationData object and propagate it to all sensor values.
+    */
+   public static void setRobotConfigurationDataSequenceId(RobotConfigurationData robotConfigurationData, long sequenceId)
+   {
+      robotConfigurationData.setSequenceId(sequenceId);
+      // update the sequence ID for the sensor data as well
+      for (int i = 0; i < robotConfigurationData.getImuSensorData().size(); i++)
+      {
+         robotConfigurationData.getImuSensorData().get(i).setSequenceId(sequenceId);
+      }
+      for (int i = 0; i < robotConfigurationData.getForceSensorData().size(); i++)
+      {
+         robotConfigurationData.getForceSensorData().get(i).setSequenceId(sequenceId);
+      }
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public abstract class ThreadedBehaviorService extends BehaviorService
 {   
@@ -9,7 +9,7 @@ public abstract class ThreadedBehaviorService extends BehaviorService
    private boolean paused = false;
    private final String threadName;
    
-   public ThreadedBehaviorService(String robotName, String threadName, Ros2Node ros2Node)
+   public ThreadedBehaviorService(String robotName, String threadName, ROS2Node ros2Node)
    {
       super(robotName, threadName, ros2Node);
       

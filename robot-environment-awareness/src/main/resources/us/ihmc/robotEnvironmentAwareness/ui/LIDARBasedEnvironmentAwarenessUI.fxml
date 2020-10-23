@@ -10,11 +10,11 @@
 		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="568.0" prefWidth="945.0" BorderPane.alignment="CENTER" />
 	</center>
    <bottom>
-      <TabPane prefHeight="204.0" prefWidth="893.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
          <tabs>
             <Tab text="PointCloud">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="pointCloudAnchorPane" source="PointCloudAnchorPane.fxml" />
                      </children>
@@ -23,16 +23,25 @@
             </Tab>
             <Tab text="OcTree">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="ocTreeBasicsAnchorPane" source="OcTreeBasicsAnchorPane.fxml" />
                      </children>
                   </AnchorPane>
                </content>
             </Tab>
-            <Tab text="LIDAR Filter">
+            <Tab text="NormalFilter">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <fx:include fx:id="surfaceNormalFilterAnchorPane" source="SurfaceNormalFilterAnchorPane.fxml" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="LIDAR Filter">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="lidarFilterAnchorPane" source="LIDARFilterAnchorPane.fxml" />
                      </children>
@@ -41,7 +50,7 @@
             </Tab>
             <Tab text="NormalEstimation">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="normalEstimationAnchorPane" source="NormalEstimationAnchorPane.fxml" />
                      </children>
@@ -50,7 +59,7 @@
             </Tab>
             <Tab text="RegionSegmentation">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="regionSegmentationAnchorPane" source="RegionSegmentationAnchorPane.fxml" />
                      </children>
@@ -59,7 +68,7 @@
             </Tab>
             <Tab text="CustomRegionMerge">
               <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="customRegionMergeAnchorPane" source="CustomRegionMergeAnchorPane.fxml" />
                      </children>
@@ -68,7 +77,7 @@
             </Tab>
             <Tab text="Polygonizer">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="polygonizerAnchorPane" source="PolygonizerAnchorPane.fxml" />
                      </children>
@@ -77,13 +86,13 @@
             </Tab>
             <Tab text="DataExporter">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
                         <fx:include fx:id="dataExporterAnchorPane" source="DataExporterAnchorPane.fxml" />
                      </children>
                   </AnchorPane>
                </content>
-            </Tab>
+            </Tab>            
          </tabs>
       </TabPane>
    </bottom>

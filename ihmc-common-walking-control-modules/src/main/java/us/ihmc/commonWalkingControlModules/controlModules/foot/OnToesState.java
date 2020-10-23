@@ -9,13 +9,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint2D;
@@ -23,7 +19,7 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +35,7 @@ public class OnToesState extends AbstractFootControlState
    private final Twist footTwist = new Twist();
 
    private final FrameQuaternion startOrientation = new FrameQuaternion();
-   private final double[] tempYawPitchRoll = new double[3];
+   private final YawPitchRoll tempYawPitchRoll = new YawPitchRoll();
 
    private final FramePoint3D contactPointPosition = new FramePoint3D();
 
@@ -63,7 +59,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
 
@@ -87,8 +83,12 @@ public class OnToesState extends AbstractFootControlState
       maxContactPointRate = new DoubleParameter("maxContactPointRate", registry, Double.POSITIVE_INFINITY);
       for (YoContactPoint contactPoint : contactPoints)
       {
-         contactPointLocations.add(new RateLimitedYoFramePoint2D(contactPoint.getYoPosition().getNamePrefix(), contactPoint.getYoPosition().getNameSuffix() + "Limited",
-                                                               registry, maxContactPointRate, controllerToolbox.getControlDT(), contactPoint.getReferenceFrame()));
+         contactPointLocations.add(new RateLimitedYoFramePoint2D(contactPoint.getNamePrefix(),
+                                                                 contactPoint.getNameSuffix() + "Limited",
+                                                                 registry,
+                                                                 maxContactPointRate,
+                                                                 controllerToolbox.getControlDT(),
+                                                                 contactPoint.getReferenceFrame()));
       }
 
       toeOffDesiredPitchAngle.set(Double.NaN);
@@ -151,7 +151,11 @@ public class OnToesState extends AbstractFootControlState
       desiredLinearVelocity.setToZero(worldFrame);
       desiredLinearAcceleration.setToZero(worldFrame);
 
-      feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration,
+      feedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                desiredPosition,
+                                                desiredAngularVelocity,
+                                                desiredLinearVelocity,
+                                                desiredAngularAcceleration,
                                                 desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
@@ -173,12 +177,12 @@ public class OnToesState extends AbstractFootControlState
    {
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(soleZUpFrame);
-      desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll.set(desiredOrientation);
       // the current pitch can become NaN when it approaches pi/2
-      double currentPitch = tempYawPitchRoll[1];
+      double currentPitch = tempYawPitchRoll.getPitch();
       if (!Double.isNaN(currentPitch))
       {
-         toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
+         toeOffCurrentPitchAngle.set(tempYawPitchRoll.getPitch());
       }
       contactableFoot.getFrameAfterParentJoint().getTwistOfFrame(footTwist);
       toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
@@ -202,18 +206,19 @@ public class OnToesState extends AbstractFootControlState
       for (int i = 0; i < contactPoints.size(); i++)
       {
          contactPointLocations.get(i).update(toeOffContactPoint2d);
-         contactPoints.get(i).setPosition(contactPointLocations.get(i));
+         contactPoints.get(i).set(contactPointLocations.get(i));
       }
    }
 
    private final FramePoint2D tmpCurrentLocation = new FramePoint2D();
+
    private void setupContactLine()
    {
       for (int i = 0; i < contactPoints.size(); i++)
       {
          YoContactPoint contactPointInContact = contactPoints.get(i);
          RateLimitedYoFramePoint2D contactPointLocation = contactPointLocations.get(i);
-         contactPointInContact.getPosition2d(tmpCurrentLocation);
+         tmpCurrentLocation.setIncludingFrame(contactPointInContact);
 
          if (toeOffContactLine2d.getFirstEndpoint().distance(tmpCurrentLocation) < toeOffContactLine2d.getSecondEndpoint().distance(tmpCurrentLocation))
          {
@@ -223,7 +228,7 @@ public class OnToesState extends AbstractFootControlState
          {
             contactPointLocation.update(toeOffContactLine2d.getSecondEndpoint());
          }
-         contactPointInContact.setPosition(contactPointLocation);
+         contactPointInContact.set(contactPointLocation);
       }
    }
 
@@ -261,7 +266,7 @@ public class OnToesState extends AbstractFootControlState
 
       for (int contactIndex = 0; contactIndex < contactPoints.size(); contactIndex++)
       {
-         contactPointLocations.get(contactIndex).setAndUpdate(contactPoints.get(contactIndex).getPosition());
+         contactPointLocations.get(contactIndex).setAndUpdate(contactPoints.get(contactIndex));
       }
 
       if (usePointContact.getBooleanValue())

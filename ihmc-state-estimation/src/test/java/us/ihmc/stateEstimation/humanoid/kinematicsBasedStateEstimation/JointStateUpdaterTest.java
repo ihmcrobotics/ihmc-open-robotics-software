@@ -22,7 +22,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JointStateUpdaterTest
 {
@@ -36,7 +36,7 @@ public class JointStateUpdaterTest
 	@Test
    public void testConstructorNormalCase()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
       
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -62,7 +62,7 @@ public class JointStateUpdaterTest
 	@Test
    public void testInitializingAndReading()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
       
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -135,7 +135,7 @@ public class JointStateUpdaterTest
       }
    }
 
-   private static SensorProcessing createJointSensorDataSource(YoVariableRegistry registry, ArrayList<RevoluteJoint> jointsWithPositionSensor,
+   private static SensorProcessing createJointSensorDataSource(YoRegistry registry, ArrayList<RevoluteJoint> jointsWithPositionSensor,
          ArrayList<RevoluteJoint> jointsWithVelocitySensor)
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = createSensorDefinitions(jointsWithPositionSensor, jointsWithVelocitySensor);

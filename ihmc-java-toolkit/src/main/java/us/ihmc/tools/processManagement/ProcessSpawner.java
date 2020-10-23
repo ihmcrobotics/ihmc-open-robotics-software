@@ -13,14 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 
 /**
  * @author Igor Kalkov <a href="mailto:ikalkov@ihmc.us">(ikalkov@ihmc.us)</a>
  */
 public abstract class ProcessSpawner
 {
-   private static final boolean DEBUG = false;
-
    private final boolean killChildProcessesOnShutdown;
    private final List<ProcessStreamGobbler> streamGobblers;
 
@@ -44,129 +44,141 @@ public abstract class ProcessSpawner
 
    private void setupShutdownHook()
    {
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            shutdown();
-         }
-      }, "IHMC-ProcessSpawnerShutdown"));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "IHMC-ProcessSpawnerShutdown"));
    }
 
-   private void redirectProcessOutput(String commandString, Process p, boolean shouldGobbleOutput, boolean shouldGobbleError)
+   protected Process spawn(String name,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           File outputFile,
+                           File errorFile,
+                           ExitListener exitListener)
    {
-      if (shouldGobbleOutput)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, p.getInputStream(), System.out);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
-      }
-
-      if (shouldGobbleError)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, p.getErrorStream(), System.err);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
-      }
+      return spawn(name, spawnString, builder, outputFile, errorFile, null, null, defaultPrintingPrefix(name), exitListener);
    }
 
-   private void asyncWaitForExit(final ImmutablePair<Process, String> pair)
+   protected Process spawn(String name,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           PrintStream outputStream,
+                           PrintStream errorStream,
+                           ExitListener exitListener)
    {
-      new Thread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            try
-            {
-               Process process = pair.getLeft();
-               process.waitFor();
-               processes.remove(pair);
-
-               ExitListener exitListener = exitListeners.get(process);
-               if (exitListener != null)
-               {
-                  int exitValue = process.exitValue();
-                  exitListener.exited(exitValue);
-                  exitListeners.remove(process);
-               }
-            }
-            catch (InterruptedException e)
-            {
-               e.printStackTrace();
-            }
-
-         }
-      }, "ProcessExitListener" + pair.getRight()).start();
+      return spawn(name, spawnString, builder, null, null, outputStream, errorStream, defaultPrintingPrefix(name), exitListener);
    }
 
-   private void printSpawnStringInfo(String[] spawnString)
+   protected Process spawn(String name,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           File outputFile,
+                           File errorFile,
+                           PrintStream outputStream,
+                           PrintStream errorStream,
+                           String processPrintingPrefix,
+                           ExitListener exitListener)
    {
-      System.out.print("[Process Spawner]: Forking process:" + System.getProperty("line.separator") + "\t");
-      System.out.print(Arrays.toString(spawnString));
-   }
-
-   protected Process spawn(String commandString, String[] spawnString, ProcessBuilder builder, File outputLog, File errorLog, ExitListener exitListener)
-   {
-      Process process = null;
-      boolean shouldGobbleOutput = true;
-      boolean shouldGobbleError = true;
-
-      if (DEBUG)
+      if (outputFile != null)
       {
-         printSpawnStringInfo(spawnString);
+         builder.redirectOutput(outputFile);
       }
 
-      if (outputLog != null)
+      if (errorFile != null)
       {
-         builder.redirectOutput(outputLog);
-         shouldGobbleOutput = false;
-      }
-
-      if (errorLog != null)
-      {
-         builder.redirectError(errorLog);
-         shouldGobbleError = false;
+         builder.redirectError(errorFile);
       }
 
       try
       {
-         process = builder.start();
-         ImmutablePair<Process, String> newPair = new ImmutablePair<>(process, commandString);
+         LogTools.trace("Forking process: {}{}", System.getProperty("line.separator"), Arrays.toString(spawnString));
+         Process process = builder.start();
+         ImmutablePair<Process, String> newPair = new ImmutablePair<>(process, name);
          processes.add(newPair);
 
          setProcessExitListener(process, exitListener);
-         redirectProcessOutput(commandString, process, shouldGobbleOutput, shouldGobbleError);
+
+         if (outputFile == null)
+         {
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(name,
+                                                                                 process,
+                                                                                 process.getInputStream(),
+                                                                                 outputStream == null ? System.out : outputStream,
+                                                                                 processPrintingPrefix);
+            streamGobblers.add(processStreamGobbler);
+            processStreamGobbler.start();
+         }
+
+         if (errorFile == null)
+         {
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(name,
+                                                                                 process,
+                                                                                 process.getErrorStream(),
+                                                                                 errorStream == null ? System.err : errorStream,
+                                                                                 processPrintingPrefix);
+            streamGobblers.add(processStreamGobbler);
+            processStreamGobbler.start();
+         }
+
          asyncWaitForExit(newPair);
          return process;
       }
       catch (IOException e)
       {
-         reportProcessSpawnException(errorLog, e);
+         reportProcessSpawnException(errorFile, errorStream, e);
          return null;
       }
    }
 
-   private void reportProcessSpawnException(File errorLog, IOException exception)
+   private void asyncWaitForExit(final ImmutablePair<Process, String> pair)
    {
-      if (errorLog == null)
+      ThreadTools.startAThread(() ->
       {
-         exception.printStackTrace();
-         return;
+         try
+         {
+            Process process = pair.getLeft();
+            process.waitFor();
+            processes.remove(pair);
+
+            ExitListener exitListener = exitListeners.get(process);
+            if (exitListener != null)
+            {
+               int exitValue = process.exitValue();
+               exitListener.exited(exitValue);
+               exitListeners.remove(process);
+            }
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }, "ProcessExitListener" + pair.getRight());
+   }
+
+   private void reportProcessSpawnException(File errorFile, PrintStream errorStream, IOException exception)
+   {
+      if (errorStream != null)
+      {
+         exception.printStackTrace(errorStream);
       }
 
-      try
+      if (errorFile != null)
       {
-         PrintStream ps = new PrintStream(errorLog);
-         exception.printStackTrace(ps);
-         ps.flush();
-         ps.close();
+         try
+         {
+            PrintStream ps = new PrintStream(errorFile);
+            exception.printStackTrace(ps);
+            ps.flush();
+            ps.close();
+         }
+         catch (FileNotFoundException e)
+         {
+            e.printStackTrace();
+         }
       }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
-      }
+   }
+
+   public static String defaultPrintingPrefix(String commandString)
+   {
+      return "[Process: " + commandString + "] ";
    }
 
    public void setProcessExitListener(Process process, ExitListener exitListener)

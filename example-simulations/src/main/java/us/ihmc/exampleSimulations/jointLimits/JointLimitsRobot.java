@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.jointLimits;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -40,11 +40,11 @@ public class JointLimitsRobot extends Robot
       // --- id robot ---
       elevator = new RigidBody("elevator", worldFrame);
       idJoint = new RevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis3D.Z);
       RigidBodyBasics arm = new RigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
 
       // --- scs robot ---
-      joint = new PinJoint("joint", new Vector3D(), this, Axis.Y);
+      joint = new PinJoint("joint", new Vector3D(), this, Axis3D.Y);
       joint.setLimitStops(lowerLimit, upperLimit, 1000.0, 10.0);
       joint.setDamping(0.5);
       joint.setLink(makeLink());

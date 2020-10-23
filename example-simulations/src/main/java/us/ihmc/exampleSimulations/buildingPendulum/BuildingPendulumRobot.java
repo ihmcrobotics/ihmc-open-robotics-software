@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -38,8 +38,8 @@ public class BuildingPendulumRobot extends Robot
       ceiling.setLinkGraphics(linkGraphics);
       rootJoint.setLink(ceiling);
 
-      PinJoint pendulumJoint1 = new PinJoint("jointLeft", new Vector3D(-distance/2.0, 0.0, 0.0), this, Axis.Y);
-      PinJoint pendulumJoint2 = new PinJoint("jointRight", new Vector3D(distance/2.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint pendulumJoint1 = new PinJoint("jointLeft", new Vector3D(-distance/2.0, 0.0, 0.0), this, Axis3D.Y);
+      PinJoint pendulumJoint2 = new PinJoint("jointRight", new Vector3D(distance/2.0, 0.0, 0.0), this, Axis3D.Y);
 
       pendulumJoint1.setLink(createLink("pendulum1"));
       rootJoint.addJoint(pendulumJoint1);

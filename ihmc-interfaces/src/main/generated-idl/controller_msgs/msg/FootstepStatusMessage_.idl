@@ -63,6 +63,10 @@ module controller_msgs
          * Specifies the orientation of where the foot actually landed.
          */
         geometry_msgs::msg::dds::Quaternion actual_foot_orientation_in_world;
+        /**
+         * This is the swing duration of the step.
+         */
+        double swing_duration;
       };
     };
   };

@@ -165,7 +165,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    {
       String numberOfWaypointsVarName = bodyName + "NumberOfWaypoints";
       String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-      return ((YoInteger) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.findVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static void assertSingleWaypointExecuted(QuaternionReadOnly desiredOrientation, String bodyName, SimulationConstructionSet scs)

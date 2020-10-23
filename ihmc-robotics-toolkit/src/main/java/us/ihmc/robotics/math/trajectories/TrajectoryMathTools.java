@@ -8,7 +8,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
@@ -949,21 +949,21 @@ public class TrajectoryMathTools
 
          for (int order = 0; order < currentNumberOfInitialBounds; order++)
          {
-            for (Axis axis : Axis.values)
+            for (Axis3D axis : Axis3D.values)
             {
                initialBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), currentTrajectory.getDerivative(axis.ordinal(), order, startTime));
             }
          }
          for (int order = 0; order < Math.max(currentNumberOfFinalBounds, nextNumberOfInitialBounds); order++)
          {
-            for (Axis axis : Axis.values)
+            for (Axis3D axis : Axis3D.values)
             {
                midpointBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), trajectoryAtTime.getDerivative(axis.ordinal(), order, timeToResampleTo));
             }
          }
          for (int order = 0; order < nextNumberOfFinalBounds; order++)
          {
-            for (Axis axis : Axis.values)
+            for (Axis3D axis : Axis3D.values)
             {
                finalBounds.getAndGrowIfNeeded(order).setElement(axis.ordinal(), nextTrajectory.getDerivative(axis.ordinal(), order, endTime));
             }

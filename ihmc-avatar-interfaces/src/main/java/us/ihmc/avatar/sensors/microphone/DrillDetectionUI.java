@@ -27,7 +27,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 
@@ -54,7 +54,7 @@ public class DrillDetectionUI
    private Plotter boolPlotter = null;
    private int dataSize = 0;
    private int numBands;
-   YoVariableRegistry registry = new YoVariableRegistry("registry");
+   YoRegistry registry = new YoRegistry("registry");
    ArrayList<YoDouble> bandValues = new ArrayList<>();
    boolean shouldZero = true;
    double[] zeroValues;

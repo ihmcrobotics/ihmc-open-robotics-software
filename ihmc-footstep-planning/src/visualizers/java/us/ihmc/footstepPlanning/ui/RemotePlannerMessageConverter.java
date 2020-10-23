@@ -13,9 +13,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -24,13 +21,13 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemotePlannerMessageConverter
 {
    private static final boolean verbose = false;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final Messager messager;
    private final String robotName;
@@ -57,17 +54,17 @@ public class RemotePlannerMessageConverter
 
    public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 
-   public RemotePlannerMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public RemotePlannerMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      resultReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
       receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId, 0);
@@ -83,22 +80,22 @@ public class RemotePlannerMessageConverter
       ros2Node.destroy();
    }
 
-   private void registerPubSubs(RealtimeRos2Node ros2Node)
+   private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* subscribers */
       // we want to listen to the incoming request
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class,
-                                           FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
+                                                    FootstepPlannerCommunicationProperties.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
-      outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                        FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
+      outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                                                 FootstepPlannerCommunicationProperties.outputTopic(robotName));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanningResult, request -> checkAndPublishIfInvalidResult());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());
    }
 
@@ -118,30 +115,26 @@ public class RemotePlannerMessageConverter
          this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
-      Point3D goalPosition = packet.getGoalPositionInWorld();
-      Quaternion goalOrientation = packet.getGoalOrientationInWorld();
-      Point3D startPosition = packet.getStanceFootPositionInWorld();
-      Quaternion startOrientation = packet.getStanceFootOrientationInWorld();
-      FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
-      RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
+      RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
-      double bestEffortTimeout = packet.getBestEffortTimeout();
       double horizonLength = packet.getHorizonLength();
 
       this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, regions));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, packet.getGoalRightFootPose());
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);
+      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, packet.getMaxIterations());
+      messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, packet.getSnapGoalSteps());
+      messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, packet.getAbortIfGoalStepSnappingFails());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
 

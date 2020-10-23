@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -91,7 +91,7 @@ public class SingleBallRobotDescription
       {
          double stripePercent = 0.05;
          linkGraphics.addArcTorus(0.0, 2.0 * Math.PI, (1.01 - stripePercent) * radius, radius * stripePercent, stripeAppearance);
-         linkGraphics.rotate(Math.PI/2.0, Axis.X);
+         linkGraphics.rotate(Math.PI/2.0, Axis3D.X);
          linkGraphics.addArcTorus(0.0, 2.0 * Math.PI, (1.01 - stripePercent) * radius, radius * stripePercent, stripeAppearance);
       }
 

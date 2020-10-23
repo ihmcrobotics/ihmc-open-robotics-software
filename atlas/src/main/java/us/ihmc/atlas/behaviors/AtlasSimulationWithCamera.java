@@ -18,7 +18,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -68,9 +68,9 @@ public class AtlasSimulationWithCamera
                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
       }
 
-      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "humanoid_simulation_controller");
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "humanoid_simulation_controller");
 
-      scsCameraPublisher = ROS2Tools.createPublisher(realtimeRos2Node, VideoPacket.class, "/ihmc/video");
+      scsCameraPublisher = ROS2Tools.createPublisher(realtimeROS2Node, VideoPacket.class, "/ihmc/video");
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
@@ -88,7 +88,7 @@ public class AtlasSimulationWithCamera
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, DO_NOTHING_BEHAVIOR);
       controllerFactory.addControllerFailureTransition(WALKING, DO_NOTHING_BEHAVIOR);
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
-      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
@@ -98,13 +98,13 @@ public class AtlasSimulationWithCamera
       avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(0.0, 0.0));
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       avatarSimulation.start();
-      realtimeRos2Node.spin();  // TODO Should probably happen in start()
+      realtimeROS2Node.spin();  // TODO Should probably happen in start()
 
       // TODO set up some useful graphs
 

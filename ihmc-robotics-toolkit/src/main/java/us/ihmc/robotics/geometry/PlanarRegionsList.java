@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +15,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
+
+   public PlanarRegionsList()
+   {
+      regions = new ArrayList<>();
+   }
 
    public PlanarRegionsList(PlanarRegion... planarRegions)
    {
@@ -280,6 +286,19 @@ public class PlanarRegionsList
       return findClosestPlanarRegionToPointByProjectionOntoXYPlane(point.getX(), point.getY());
    }
 
+   public PlanarRegion getRegionWithId(int id)
+   {
+      for (int i = 0; i < regions.size(); i++)
+      {
+         if (regions.get(i).getRegionId() == id)
+         {
+            return regions.get(i);
+         }
+      }
+
+      return null;
+   }
+
    /**
     * Find the closest planar region to the given point. The algorithm is equivalent to
     * projecting all the regions onto the XY-plane and then finding the closest one to the point.
@@ -380,19 +399,11 @@ public class PlanarRegionsList
     *
     * @param rigidBodyTransform transform from current frame to desired frame
     */
-   public void transform(RigidBodyTransform rigidBodyTransform)
+   public void applyTransform(RigidBodyTransform rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)
       {
-         regions.get(i).transform(rigidBodyTransform);
-      }
-   }
-
-   public void transformByPreMultiply(RigidBodyTransform rigidBodyTransform)
-   {
-      for (int i = 0; i < regions.size(); i++)
-      {
-         regions.get(i).transformByPreMultiply(rigidBodyTransform);
+         regions.get(i).applyTransform(rigidBodyTransform);
       }
    }
 
@@ -428,5 +439,23 @@ public class PlanarRegionsList
       convexPolygon.update();
       PlanarRegion groundPlane = new PlanarRegion(transform, convexPolygon);
       return new PlanarRegionsList(groundPlane);
+   }
+
+   public void checkNoDuplicateIdsExist()
+   {
+      HashSet<Integer> ids = new HashSet<>();
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion region = regions.get(i);
+         int id = region.getRegionId();
+         if (ids.contains(id))
+         {
+            throw new RuntimeException("Duplicate ID " + id + " at index " + i);
+         }
+         else
+         {
+            ids.add(id);
+         }
+      }
    }
 }

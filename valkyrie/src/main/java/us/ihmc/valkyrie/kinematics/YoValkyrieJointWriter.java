@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoValkyrieJointWriter implements ValkyrieJointInterface
@@ -17,7 +17,7 @@ public class YoValkyrieJointWriter implements ValkyrieJointInterface
    private final YoDouble qd_d;
    private final YoDouble f_d;
 
-   public YoValkyrieJointWriter(String name, YoVariableRegistry registry)
+   public YoValkyrieJointWriter(String name, YoRegistry registry)
    {
       this.name = name;
 

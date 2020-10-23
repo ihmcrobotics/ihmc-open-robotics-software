@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 
 
 public class AverageSampleYoFrameVector extends YoFrameVector3D
@@ -21,32 +21,32 @@ public class AverageSampleYoFrameVector extends YoFrameVector3D
       this.z = z;
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoRegistry registry, ReferenceFrame referenceFrame)
    {
       return createAverageSampleYoFrameVector(namePrefix, "", registry, referenceFrame);
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, ReferenceFrame referenceFrame)
    {
-      AverageSampleYoDouble x = new AverageSampleYoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
-      AverageSampleYoDouble y = new AverageSampleYoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
-      AverageSampleYoDouble z = new AverageSampleYoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble x = new AverageSampleYoDouble(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble y = new AverageSampleYoDouble(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble z = new AverageSampleYoDouble(YoGeometryNameTools.createZName(namePrefix, nameSuffix), registry);
       
       AverageSampleYoFrameVector ret = new AverageSampleYoFrameVector(x, y, z, referenceFrame);
       
       return ret;
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoVariableRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, YoRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
    {
       return createAverageSampleYoFrameVector(namePrefix, "", registry, dataSource, referenceFrame);
    }
 
-   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
+   public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, YoFrameVector3D dataSource, ReferenceFrame referenceFrame)
    {
-      AverageSampleYoDouble x = new AverageSampleYoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), dataSource.getYoX(), registry);
-      AverageSampleYoDouble y = new AverageSampleYoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), dataSource.getYoY(), registry);
-      AverageSampleYoDouble z = new AverageSampleYoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), dataSource.getYoZ(), registry);
+      AverageSampleYoDouble x = new AverageSampleYoDouble(YoGeometryNameTools.createXName(namePrefix, nameSuffix), dataSource.getYoX(), registry);
+      AverageSampleYoDouble y = new AverageSampleYoDouble(YoGeometryNameTools.createYName(namePrefix, nameSuffix), dataSource.getYoY(), registry);
+      AverageSampleYoDouble z = new AverageSampleYoDouble(YoGeometryNameTools.createZName(namePrefix, nameSuffix), dataSource.getYoZ(), registry);
       
       AverageSampleYoFrameVector ret = new AverageSampleYoFrameVector(x, y, z, referenceFrame);
       

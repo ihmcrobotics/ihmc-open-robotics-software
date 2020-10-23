@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -15,7 +15,7 @@ public class DeltaLimitedYoVariable extends YoDouble
    private final YoDouble desired;
    private final YoBoolean isLimitingActive;
 
-   public DeltaLimitedYoVariable(String name, YoVariableRegistry registry, double maxDelta)
+   public DeltaLimitedYoVariable(String name, YoRegistry registry, double maxDelta)
    {
       super(name, registry);
 

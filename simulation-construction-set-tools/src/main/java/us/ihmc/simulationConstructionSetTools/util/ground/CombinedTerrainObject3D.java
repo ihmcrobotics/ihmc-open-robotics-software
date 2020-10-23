@@ -9,6 +9,8 @@ import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -179,7 +181,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    private final Vector3D localNormal = new Vector3D();
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
       boolean isInside = false;
@@ -319,7 +321,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
       double heightAt = Double.NEGATIVE_INFINITY;
 

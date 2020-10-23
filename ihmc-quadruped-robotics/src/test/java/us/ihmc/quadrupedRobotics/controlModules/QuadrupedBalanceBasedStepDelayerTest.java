@@ -1,12 +1,18 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import static us.ihmc.robotics.Assert.*;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointBasics;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -19,17 +25,10 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class QuadrupedBalanceBasedStepDelayerTest
 {
@@ -38,7 +37,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
    private DoubleProvider omega;
    private QuadrantDependentList<DummyContactState> contactStates;
    private static final double controlDt = 0.01;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
@@ -54,14 +53,14 @@ public class QuadrupedBalanceBasedStepDelayerTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(0.5 * robotQuadrant.getEnd().negateIfHindEnd(stanceLength) , 0.5 * robotQuadrant.getSide().negateIfRightSide(stanceWidth), 0.0);
+         transform.getTranslation().set(0.5 * robotQuadrant.getEnd().negateIfHindEnd(stanceLength), 0.5 * robotQuadrant.getSide().negateIfRightSide(stanceWidth), 0.0);
          MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(robotQuadrant.getShortName() + "SoleFrame", ReferenceFrame.getWorldFrame(), transform);
 
          soleFrames.put(robotQuadrant, soleFrame);
          contactStates.put(robotQuadrant, new DummyContactState());
       }
       omega = () -> 3.0;
-      registry = new YoVariableRegistry("testRegistry");
+      registry = new YoRegistry("testRegistry");
       stepDelayer = new QuadrupedBalanceBasedStepDelayer(soleFrames, midFeetZUpFrame, omega, contactStates, controlDt, registry, null);
 
       DefaultParameterReader reader = new DefaultParameterReader();
@@ -467,9 +466,9 @@ public class QuadrupedBalanceBasedStepDelayerTest
       }
    }
 
-   private YoParameter<?> getParameter(String name)
+   private YoParameter getParameter(String name)
    {
-      for (YoParameter<?> parameter : registry.getAllParameters())
+      for (YoParameter parameter : registry.collectSubtreeParameters())
       {
          if (parameter.getName().equals(name))
             return parameter;
@@ -574,7 +573,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
       }
 
       @Override
-      public List<? extends ContactPointInterface> getContactPoints()
+      public List<? extends ContactPointBasics> getContactPoints()
       {
          return null;
       }

@@ -2,14 +2,14 @@ package us.ihmc.avatar;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 {
@@ -32,7 +32,7 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 
       for (int i = 0; i < lowLevelDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         OneDoFJointBasics revoluteJoint = lowLevelDataHolder.getOneDoFJoint(i);
+         OneDoFJointReadOnly revoluteJoint = lowLevelDataHolder.getOneDoFJoint(i);
          JointDesiredOutputReadOnly data = lowLevelDataHolder.getJointDesiredOutput(i);
 
          String name = revoluteJoint.getName();
@@ -88,7 +88,7 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return null;
    }

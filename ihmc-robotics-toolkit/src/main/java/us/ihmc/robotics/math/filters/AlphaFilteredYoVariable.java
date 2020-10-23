@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -35,39 +35,39 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
    private final YoDouble position;
    protected final YoBoolean hasBeenCalled;
 
-   public static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoVariableRegistry registry)
+   public static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "AlphaVariable", registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
+   public AlphaFilteredYoVariable(String name, YoRegistry registry, double alpha)
    {
       this(name, registry, alpha, null);
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, YoRegistry registry, double alpha, YoDouble positionVariable)
    {
       this(name, "", registry, createAlphaYoDouble(name, alpha, registry), positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable)
+   public AlphaFilteredYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, "", registry, alphaVariable, null);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, description, registry, alphaVariable, null);
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       this(name, "", registry, alphaVariable, positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", description, registry);

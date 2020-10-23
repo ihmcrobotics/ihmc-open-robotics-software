@@ -1,21 +1,23 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -27,24 +29,20 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
+import us.ihmc.yoVariables.variable.*;
 
 public class EndToEndTestTools
 {
@@ -63,7 +61,8 @@ public class EndToEndTestTools
    public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, int expectedNumberOfPoints,
                                                                      YoVariableHolder yoVariableHolder)
    {
-      assertEquals(expectedNumberOfPoints, findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder),
+      assertEquals(expectedNumberOfPoints,
+                   findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder),
                    "Unexpected number of waypoints:");
    }
 
@@ -88,9 +87,15 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedWaypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon,
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
+                                                              expectedWaypoint.getOrientation(),
+                                                              actualWaypoint.getOrientationCopy(),
+                                                              epsilon,
                                                               FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocityCopy(), epsilon,
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
+                                              expectedWaypoint.getAngularVelocity(),
+                                              actualWaypoint.getAngularVelocityCopy(),
+                                              epsilon,
                                               FORMAT);
    }
 
@@ -99,7 +104,10 @@ public class EndToEndTestTools
    {
       for (int jointIndex = 0; jointIndex < jointNames.length; jointIndex++)
       {
-         assertOneDoFJointFeedbackControllerDesireds(jointNames[jointIndex], desiredJointPositions[jointIndex], desiredJointVelocities[jointIndex], epsilon,
+         assertOneDoFJointFeedbackControllerDesireds(jointNames[jointIndex],
+                                                     desiredJointPositions[jointIndex],
+                                                     desiredJointVelocities[jointIndex],
+                                                     epsilon,
                                                      yoVariableHolder);
       }
    }
@@ -185,8 +193,15 @@ public class EndToEndTestTools
                                                       Pose3DReadOnly expectedDesiredPose, String endEffectorName,
                                                       TaskspaceTrajectoryStatusMessage statusMessage, double epsilon, double controllerDT)
    {
-      assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, expectedDesiredPose.getPosition(),
-                                      expectedDesiredPose.getOrientation(), endEffectorName, statusMessage, epsilon, controllerDT);
+      assertTaskspaceTrajectoryStatus(expectedSequenceID,
+                                      expectedStatus,
+                                      expectedTimestamp,
+                                      expectedDesiredPose.getPosition(),
+                                      expectedDesiredPose.getOrientation(),
+                                      endEffectorName,
+                                      statusMessage,
+                                      epsilon,
+                                      controllerDT);
    }
 
    public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
@@ -255,7 +270,8 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation), statusMessage.getDesiredEndEffectorOrientation(),
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
+                                                                 statusMessage.getDesiredEndEffectorOrientation(),
                                                                  epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
@@ -281,7 +297,7 @@ public class EndToEndTestTools
    public static RigidBodyControlMode findRigidBodyControlManagerState(String bodyName, YoVariableHolder yoVariableHolder)
    {
       String managerName = bodyName + "Manager";
-      return ((YoEnum<RigidBodyControlMode>) yoVariableHolder.getVariable(managerName, managerName + "CurrentState")).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) yoVariableHolder.findVariable(managerName, managerName + "CurrentState")).getEnumValue();
    }
 
    public static SO3TrajectoryPoint findSO3TrajectoryPoint(String bodyName, int trajectoryPointIndex, YoVariableHolder yoVariableHolder)
@@ -292,7 +308,7 @@ public class EndToEndTestTools
       String orientationName = bodyName + "Orientation";
       String angularVelocityName = bodyName + "AngularVelocity";
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
-      simpleSO3TrajectoryPoint.setTime(yoVariableHolder.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSO3TrajectoryPoint.setTime(yoVariableHolder.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSO3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSO3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSO3TrajectoryPoint;
@@ -312,7 +328,7 @@ public class EndToEndTestTools
       String angularVelocityName = bodyName + "AngularVelocity";
 
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
-      simpleSE3TrajectoryPoint.setTime(yoVariableHolder.getVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSE3TrajectoryPoint.setTime(yoVariableHolder.findVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSE3TrajectoryPoint.setPosition(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.setLinearVelocity(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
@@ -342,7 +358,7 @@ public class EndToEndTestTools
    public static int findTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
    {
       String variableName = bodyName + postfix + "TaskspaceNumberOfPoints";
-      return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
+      return (int) yoVariableHolder.findVariable(variableName).getValueAsLongBits();
    }
 
    public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, YoVariableHolder yoVariableHolder)
@@ -353,7 +369,7 @@ public class EndToEndTestTools
    public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
    {
       String variableName = bodyName + postfix + "TaskspaceNumberOfPointsInGenerator";
-      return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
+      return (int) yoVariableHolder.findVariable(variableName).getValueAsLongBits();
    }
 
    /**
@@ -364,14 +380,14 @@ public class EndToEndTestTools
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPoints";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
    }
 
    public static int findNumberOfWaypointsInJointspaceManagerGenerator(String bodyName, String jointName, YoVariableHolder yoVariableHolder)
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPointsInGenerator";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
 
    }
 
@@ -379,13 +395,14 @@ public class EndToEndTestTools
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPointsInQueue";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
 
    }
 
    public static Point3DReadOnly findFeedbackControllerDesiredPosition(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.POSITION.getName(),
+      return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                bodyName + Type.DESIRED.getName() + SpaceData3D.POSITION.getName(),
                                 yoVariableHolder);
    }
 
@@ -394,153 +411,156 @@ public class EndToEndTestTools
     */
    public static QuaternionReadOnly findFeedbackControllerDesiredOrientation(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(),
+      return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(),
+                                   bodyName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName(),
                                    yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredLinearVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(),
+      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                 bodyName + Type.DESIRED.getName() + SpaceData3D.LINEAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredAngularVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ANGULAR_VELOCITY.getName(),
+      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                 bodyName + Type.DESIRED.getName() + SpaceData3D.ANGULAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredPosition(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String nameSpace = jointName + OneDoFJointFeedbackController.shortName;
+      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "q_d_" + jointName;
-      return findYoDouble(nameSpace, variable, yoVariableHolder);
+      return findYoDouble(namespace, variable, yoVariableHolder);
    }
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredVelocity(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String nameSpace = jointName + OneDoFJointFeedbackController.shortName;
+      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "qd_d_" + jointName;
-      return findYoDouble(nameSpace, variable, yoVariableHolder);
+      return findYoDouble(namespace, variable, yoVariableHolder);
    }
 
    /**
     * Finds the quaternion associated with the given namespace and name in scs.
     */
-   public static Quaternion findQuaternion(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Quaternion findQuaternion(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findQuaternion(nameSpace, varname, "", yoVariableHolder);
+      return findQuaternion(namespace, varname, "", yoVariableHolder);
    }
 
    /**
     * Finds the quaternion associated with the given namespace, prefix and suffix in scs.
     */
-   public static Quaternion findQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static Quaternion findQuaternion(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      return new Quaternion(findYoFrameQuaternion(nameSpace, prefix, suffix, yoVariableHolder));
+      return new Quaternion(findYoFrameQuaternion(namespace, prefix, suffix, yoVariableHolder));
    }
 
-   public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameQuaternion findYoFrameQuaternion(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameQuaternion(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameQuaternion(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameQuaternion findYoFrameQuaternion(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble qx = findYoDouble(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix), yoVariableHolder);
-      YoDouble qy = findYoDouble(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix), yoVariableHolder);
-      YoDouble qz = findYoDouble(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix), yoVariableHolder);
-      YoDouble qs = findYoDouble(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix), yoVariableHolder);
+      YoDouble qx = findYoDouble(namespace, YoGeometryNameTools.createQxName(prefix, suffix), yoVariableHolder);
+      YoDouble qy = findYoDouble(namespace, YoGeometryNameTools.createQyName(prefix, suffix), yoVariableHolder);
+      YoDouble qz = findYoDouble(namespace, YoGeometryNameTools.createQzName(prefix, suffix), yoVariableHolder);
+      YoDouble qs = findYoDouble(namespace, YoGeometryNameTools.createQsName(prefix, suffix), yoVariableHolder);
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
    }
 
-   public static Vector2D findVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Vector2D findVector2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findVector2D(nameSpace, varname, "", yoVariableHolder);
+      return findVector2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Vector2D findVector2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Vector2D findVector2D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Vector2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Vector2D(findYoFramePoint2D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Point2D findPoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Point2D findPoint2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findPoint2D(nameSpace, varname, "", yoVariableHolder);
+      return findPoint2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Point2D findPoint2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Point2D findPoint2D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Point2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Point2D(findYoFramePoint2D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Vector3D findVector3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Vector3D findVector3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findVector3D(nameSpace, varname, "", yoVariableHolder);
+      return findVector3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Vector3D findVector3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Vector3D findVector3D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Vector3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Vector3D(findYoFramePoint3D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Point3D findPoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Point3D findPoint3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findPoint3D(nameSpace, varname, "", yoVariableHolder);
+      return findPoint3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Point3D findPoint3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Point3D findPoint3D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Point3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Point3D(findYoFramePoint3D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint2D findYoFramePoint2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint2D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFramePoint2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint2D findYoFramePoint2D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector2D findYoFrameVector2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector2D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameVector2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector2D findYoFrameVector2D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint3D findYoFramePoint3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint3D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFramePoint3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint3D findYoFramePoint3D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(namespace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFrameVector3D findYoFrameVector3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector3D findYoFrameVector3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameVector3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameVector3D findYoFrameVector3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector3D findYoFrameVector3D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(namespace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 
@@ -559,13 +579,32 @@ public class EndToEndTestTools
       return findYoVariable(namespace, name, YoBoolean.class, yoVariableHolder);
    }
 
-   public static <T extends YoVariable<T>> T findYoVariable(String namespace, String name, Class<T> clazz, YoVariableHolder yoVariableHolder)
+   public static <T extends YoVariable> T findYoVariable(String namespace, String name, Class<T> clazz, YoVariableHolder yoVariableHolder)
    {
-      YoVariable<?> uncheckedVariable = yoVariableHolder.getVariable(namespace, name);
+      YoVariable uncheckedVariable = yoVariableHolder.findVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))
          throw new RuntimeException("YoVariable " + name + " is not of type " + clazz.getSimpleName());
       return clazz.cast(uncheckedVariable);
+   }
+
+   public static FootstepDataListMessage generateStepsInPlace(FullHumanoidRobotModel fullRobotModel, int numberOfSteps)
+   {
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      SideDependentList<FramePose3D> stepPositions = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      stepPositions.forEach((side, position) -> position.setFromReferenceFrame(fullRobotModel.getSoleFrame(side)));
+
+      RobotSide side = RobotSide.LEFT;
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, stepPositions.get(side));
+         footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
+         side = side.getOppositeSide();
+      }
+
+      return footstepDataListMessage;
    }
 }

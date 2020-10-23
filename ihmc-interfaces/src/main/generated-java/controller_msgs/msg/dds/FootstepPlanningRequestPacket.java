@@ -13,57 +13,87 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = (byte) 0;
-   /**
-          * The recommended planner type
-          */
-   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 1;
-   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 2;
+   public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
+   public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
    /**
-            * Initial stance foot side
+            * Starting left foot pose
             */
-   public byte initial_stance_robot_side_ = (byte) 255;
+   public us.ihmc.euclid.geometry.Pose3D start_left_foot_pose_;
    /**
-            * Stance foot sole frame z up position, z must be correct
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
+   public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
    /**
-            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
             */
-   public us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_left_contact_points_2d_;
    /**
-            * Goal mid feet z up position
+            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
             */
-   public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_right_contact_points_2d_;
    /**
-            * Goal mid feet z up orientation, only the "yaw" is considered
+            * Goal left foot pose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
+   public us.ihmc.euclid.geometry.Pose3D goal_left_foot_pose_;
    /**
-            * Footstep planner type, see above
+            * Goal right foot pose
             */
-   public byte requested_footstep_planner_type_ = (byte) 255;
+   public us.ihmc.euclid.geometry.Pose3D goal_right_foot_pose_;
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * Requested initial stance side. If not specified the planner will choose
+            */
+   public byte requested_initial_stance_side_ = (byte) 255;
+   /**
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public boolean snap_goal_steps_ = true;
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public boolean abort_if_goal_step_snapping_fails_;
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean abort_if_body_path_planner_fails_;
+   /**
+            * If true, will plan a body path. If false, will follow a straight-line path to the goal
+            */
+   public boolean plan_body_path_;
+   /**
+            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            */
+   public boolean perform_a_star_search_ = true;
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
+   /**
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public double goal_distance_proximity_ = -1.0;
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public double goal_yaw_proximity_ = -1.0;
    /**
-            * Timeout in seconds
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public double timeout_;
+   public double requested_path_heading_;
    /**
-            * Best effort timeout in seconds
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
-   public double best_effort_timeout_;
+   public double timeout_ = 5.0;
+   /**
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+            */
+   public int max_iterations_ = -1;
    /**
             * Max body path length if using body path
             */
@@ -81,18 +111,37 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public int planner_request_id_ = -1;
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
+   public double status_publish_period_ = 1.0;
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte requested_swing_planner_;
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean perform_position_based_split_fraction_calculation_;
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean perform_area_based_split_fraction_calculation_;
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean generate_log_;
 
    public FootstepPlanningRequestPacket()
    {
-      stance_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      stance_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+      start_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      start_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      initial_left_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      initial_right_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
+      planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
 
    }
 
@@ -106,21 +155,34 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       sequence_id_ = other.sequence_id_;
 
-      initial_stance_robot_side_ = other.initial_stance_robot_side_;
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_left_foot_pose_, start_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_right_foot_pose_, start_right_foot_pose_);
+      initial_left_contact_points_2d_.set(other.initial_left_contact_points_2d_);
+      initial_right_contact_points_2d_.set(other.initial_right_contact_points_2d_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_left_foot_pose_, goal_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
+      requested_initial_stance_side_ = other.requested_initial_stance_side_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.stance_foot_position_in_world_, stance_foot_position_in_world_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.stance_foot_orientation_in_world_, stance_foot_orientation_in_world_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_position_in_world_, goal_position_in_world_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
-      requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
+      snap_goal_steps_ = other.snap_goal_steps_;
 
+      abort_if_goal_step_snapping_fails_ = other.abort_if_goal_step_snapping_fails_;
+
+      abort_if_body_path_planner_fails_ = other.abort_if_body_path_planner_fails_;
+
+      plan_body_path_ = other.plan_body_path_;
+
+      perform_a_star_search_ = other.perform_a_star_search_;
+
+      body_path_waypoints_.set(other.body_path_waypoints_);
       goal_distance_proximity_ = other.goal_distance_proximity_;
 
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
 
+      requested_path_heading_ = other.requested_path_heading_;
+
       timeout_ = other.timeout_;
 
-      best_effort_timeout_ = other.best_effort_timeout_;
+      max_iterations_ = other.max_iterations_;
 
       horizon_length_ = other.horizon_length_;
 
@@ -129,7 +191,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       planner_request_id_ = other.planner_request_id_;
 
-      body_path_waypoints_.set(other.body_path_waypoints_);
+      status_publish_period_ = other.status_publish_period_;
+
+      requested_swing_planner_ = other.requested_swing_planner_;
+
+      perform_position_based_split_fraction_calculation_ = other.perform_position_based_split_fraction_calculation_;
+
+      perform_area_based_split_fraction_calculation_ = other.perform_area_based_split_fraction_calculation_;
+
+      generate_log_ = other.generate_log_;
+
    }
 
    /**
@@ -147,81 +218,168 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return sequence_id_;
    }
 
+
    /**
-            * Initial stance foot side
+            * Starting left foot pose
             */
-   public void setInitialStanceRobotSide(byte initial_stance_robot_side)
+   public us.ihmc.euclid.geometry.Pose3D getStartLeftFootPose()
    {
-      initial_stance_robot_side_ = initial_stance_robot_side;
-   }
-   /**
-            * Initial stance foot side
-            */
-   public byte getInitialStanceRobotSide()
-   {
-      return initial_stance_robot_side_;
+      return start_left_foot_pose_;
    }
 
 
    /**
-            * Stance foot sole frame z up position, z must be correct
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D getStanceFootPositionInWorld()
+   public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
-      return stance_foot_position_in_world_;
+      return start_right_foot_pose_;
    }
 
 
    /**
-            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getStanceFootOrientationInWorld()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialLeftContactPoints2d()
    {
-      return stance_foot_orientation_in_world_;
+      return initial_left_contact_points_2d_;
    }
 
 
    /**
-            * Goal mid feet z up position
+            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalPositionInWorld()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialRightContactPoints2d()
    {
-      return goal_position_in_world_;
+      return initial_right_contact_points_2d_;
    }
 
 
    /**
-            * Goal mid feet z up orientation, only the "yaw" is considered
+            * Goal left foot pose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getGoalOrientationInWorld()
+   public us.ihmc.euclid.geometry.Pose3D getGoalLeftFootPose()
    {
-      return goal_orientation_in_world_;
+      return goal_left_foot_pose_;
+   }
+
+
+   /**
+            * Goal right foot pose
+            */
+   public us.ihmc.euclid.geometry.Pose3D getGoalRightFootPose()
+   {
+      return goal_right_foot_pose_;
    }
 
    /**
-            * Footstep planner type, see above
+            * Requested initial stance side. If not specified the planner will choose
             */
-   public void setRequestedFootstepPlannerType(byte requested_footstep_planner_type)
+   public void setRequestedInitialStanceSide(byte requested_initial_stance_side)
    {
-      requested_footstep_planner_type_ = requested_footstep_planner_type;
+      requested_initial_stance_side_ = requested_initial_stance_side;
    }
    /**
-            * Footstep planner type, see above
+            * Requested initial stance side. If not specified the planner will choose
             */
-   public byte getRequestedFootstepPlannerType()
+   public byte getRequestedInitialStanceSide()
    {
-      return requested_footstep_planner_type_;
+      return requested_initial_stance_side_;
    }
 
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public void setSnapGoalSteps(boolean snap_goal_steps)
+   {
+      snap_goal_steps_ = snap_goal_steps;
+   }
+   /**
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public boolean getSnapGoalSteps()
+   {
+      return snap_goal_steps_;
+   }
+
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public void setAbortIfGoalStepSnappingFails(boolean abort_if_goal_step_snapping_fails)
+   {
+      abort_if_goal_step_snapping_fails_ = abort_if_goal_step_snapping_fails;
+   }
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public boolean getAbortIfGoalStepSnappingFails()
+   {
+      return abort_if_goal_step_snapping_fails_;
+   }
+
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public void setAbortIfBodyPathPlannerFails(boolean abort_if_body_path_planner_fails)
+   {
+      abort_if_body_path_planner_fails_ = abort_if_body_path_planner_fails;
+   }
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abort_if_body_path_planner_fails_;
+   }
+
+   /**
+            * If true, will plan a body path. If false, will follow a straight-line path to the goal
+            */
+   public void setPlanBodyPath(boolean plan_body_path)
+   {
+      plan_body_path_ = plan_body_path;
+   }
+   /**
+            * If true, will plan a body path. If false, will follow a straight-line path to the goal
+            */
+   public boolean getPlanBodyPath()
+   {
+      return plan_body_path_;
+   }
+
+   /**
+            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            */
+   public void setPerformAStarSearch(boolean perform_a_star_search)
+   {
+      perform_a_star_search_ = perform_a_star_search;
+   }
+   /**
+            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            */
+   public boolean getPerformAStarSearch()
+   {
+      return perform_a_star_search_;
+   }
+
+
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
+   {
+      return body_path_waypoints_;
+   }
+
+   /**
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public void setGoalDistanceProximity(double goal_distance_proximity)
    {
       goal_distance_proximity_ = goal_distance_proximity;
    }
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public double getGoalDistanceProximity()
    {
@@ -229,14 +387,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public void setGoalYawProximity(double goal_yaw_proximity)
    {
       goal_yaw_proximity_ = goal_yaw_proximity;
    }
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public double getGoalYawProximity()
    {
@@ -244,14 +402,31 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Timeout in seconds
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            */
+   public void setRequestedPathHeading(double requested_path_heading)
+   {
+      requested_path_heading_ = requested_path_heading;
+   }
+   /**
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            */
+   public double getRequestedPathHeading()
+   {
+      return requested_path_heading_;
+   }
+
+   /**
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
    public void setTimeout(double timeout)
    {
       timeout_ = timeout;
    }
    /**
-            * Timeout in seconds
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
    public double getTimeout()
    {
@@ -259,18 +434,18 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Best effort timeout in seconds
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
             */
-   public void setBestEffortTimeout(double best_effort_timeout)
+   public void setMaxIterations(int max_iterations)
    {
-      best_effort_timeout_ = best_effort_timeout;
+      max_iterations_ = max_iterations;
    }
    /**
-            * Best effort timeout in seconds
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
             */
-   public double getBestEffortTimeout()
+   public int getMaxIterations()
    {
-      return best_effort_timeout_;
+      return max_iterations_;
    }
 
    /**
@@ -327,13 +502,81 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return planner_request_id_;
    }
 
+   /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public void setStatusPublishPeriod(double status_publish_period)
+   {
+      status_publish_period_ = status_publish_period;
+   }
+   /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public double getStatusPublishPeriod()
+   {
+      return status_publish_period_;
+   }
 
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            * Specifies swing planner to use. See the above enumeration
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
+   public void setRequestedSwingPlanner(byte requested_swing_planner)
    {
-      return body_path_waypoints_;
+      requested_swing_planner_ = requested_swing_planner;
+   }
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte getRequestedSwingPlanner()
+   {
+      return requested_swing_planner_;
+   }
+
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public void setPerformPositionBasedSplitFractionCalculation(boolean perform_position_based_split_fraction_calculation)
+   {
+      perform_position_based_split_fraction_calculation_ = perform_position_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean getPerformPositionBasedSplitFractionCalculation()
+   {
+      return perform_position_based_split_fraction_calculation_;
+   }
+
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public void setPerformAreaBasedSplitFractionCalculation(boolean perform_area_based_split_fraction_calculation)
+   {
+      perform_area_based_split_fraction_calculation_ = perform_area_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean getPerformAreaBasedSplitFractionCalculation()
+   {
+      return perform_area_based_split_fraction_calculation_;
+   }
+
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public void setGenerateLog(boolean generate_log)
+   {
+      generate_log_ = generate_log;
+   }
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean getGenerateLog()
+   {
+      return generate_log_;
    }
 
 
@@ -356,21 +599,52 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_stance_robot_side_, other.initial_stance_robot_side_, epsilon)) return false;
+      if (!this.start_left_foot_pose_.epsilonEquals(other.start_left_foot_pose_, epsilon)) return false;
+      if (!this.start_right_foot_pose_.epsilonEquals(other.start_right_foot_pose_, epsilon)) return false;
+      if (this.initial_left_contact_points_2d_.size() != other.initial_left_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.initial_left_contact_points_2d_.size(); i++)
+         {  if (!this.initial_left_contact_points_2d_.get(i).epsilonEquals(other.initial_left_contact_points_2d_.get(i), epsilon)) return false; }
+      }
 
-      if (!this.stance_foot_position_in_world_.epsilonEquals(other.stance_foot_position_in_world_, epsilon)) return false;
-      if (!this.stance_foot_orientation_in_world_.epsilonEquals(other.stance_foot_orientation_in_world_, epsilon)) return false;
-      if (!this.goal_position_in_world_.epsilonEquals(other.goal_position_in_world_, epsilon)) return false;
-      if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
+      if (this.initial_right_contact_points_2d_.size() != other.initial_right_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.initial_right_contact_points_2d_.size(); i++)
+         {  if (!this.initial_right_contact_points_2d_.get(i).epsilonEquals(other.initial_right_contact_points_2d_.get(i), epsilon)) return false; }
+      }
+
+      if (!this.goal_left_foot_pose_.epsilonEquals(other.goal_left_foot_pose_, epsilon)) return false;
+      if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_initial_stance_side_, other.requested_initial_stance_side_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snap_goal_steps_, other.snap_goal_steps_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_goal_step_snapping_fails_, other.abort_if_goal_step_snapping_fails_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_body_path_planner_fails_, other.abort_if_body_path_planner_fails_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
+
+      if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.body_path_waypoints_.size(); i++)
+         {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
+      }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_path_heading_, other.requested_path_heading_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.best_effort_timeout_, other.best_effort_timeout_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_iterations_, other.max_iterations_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
@@ -379,12 +653,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
-      if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.body_path_waypoints_.size(); i++)
-         {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
-      }
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.status_publish_period_, other.status_publish_period_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_position_based_split_fraction_calculation_, other.perform_position_based_split_fraction_calculation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_area_based_split_fraction_calculation_, other.perform_area_based_split_fraction_calculation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
       return true;
@@ -401,21 +678,34 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.initial_stance_robot_side_ != otherMyClass.initial_stance_robot_side_) return false;
+      if (!this.start_left_foot_pose_.equals(otherMyClass.start_left_foot_pose_)) return false;
+      if (!this.start_right_foot_pose_.equals(otherMyClass.start_right_foot_pose_)) return false;
+      if (!this.initial_left_contact_points_2d_.equals(otherMyClass.initial_left_contact_points_2d_)) return false;
+      if (!this.initial_right_contact_points_2d_.equals(otherMyClass.initial_right_contact_points_2d_)) return false;
+      if (!this.goal_left_foot_pose_.equals(otherMyClass.goal_left_foot_pose_)) return false;
+      if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
+      if(this.requested_initial_stance_side_ != otherMyClass.requested_initial_stance_side_) return false;
 
-      if (!this.stance_foot_position_in_world_.equals(otherMyClass.stance_foot_position_in_world_)) return false;
-      if (!this.stance_foot_orientation_in_world_.equals(otherMyClass.stance_foot_orientation_in_world_)) return false;
-      if (!this.goal_position_in_world_.equals(otherMyClass.goal_position_in_world_)) return false;
-      if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
-      if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
+      if(this.snap_goal_steps_ != otherMyClass.snap_goal_steps_) return false;
 
+      if(this.abort_if_goal_step_snapping_fails_ != otherMyClass.abort_if_goal_step_snapping_fails_) return false;
+
+      if(this.abort_if_body_path_planner_fails_ != otherMyClass.abort_if_body_path_planner_fails_) return false;
+
+      if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
+
+      if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
+
+      if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
 
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
 
+      if(this.requested_path_heading_ != otherMyClass.requested_path_heading_) return false;
+
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
-      if(this.best_effort_timeout_ != otherMyClass.best_effort_timeout_) return false;
+      if(this.max_iterations_ != otherMyClass.max_iterations_) return false;
 
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
@@ -424,7 +714,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
-      if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
+      if(this.status_publish_period_ != otherMyClass.status_publish_period_) return false;
+
+      if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
+
+      if(this.perform_position_based_split_fraction_calculation_ != otherMyClass.perform_position_based_split_fraction_calculation_) return false;
+
+      if(this.perform_area_based_split_fraction_calculation_ != otherMyClass.perform_area_based_split_fraction_calculation_) return false;
+
+      if(this.generate_log_ != otherMyClass.generate_log_) return false;
+
 
       return true;
    }
@@ -437,26 +736,42 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("FootstepPlanningRequestPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("initial_stance_robot_side=");
-      builder.append(this.initial_stance_robot_side_);      builder.append(", ");
-      builder.append("stance_foot_position_in_world=");
-      builder.append(this.stance_foot_position_in_world_);      builder.append(", ");
-      builder.append("stance_foot_orientation_in_world=");
-      builder.append(this.stance_foot_orientation_in_world_);      builder.append(", ");
-      builder.append("goal_position_in_world=");
-      builder.append(this.goal_position_in_world_);      builder.append(", ");
-      builder.append("goal_orientation_in_world=");
-      builder.append(this.goal_orientation_in_world_);      builder.append(", ");
-      builder.append("requested_footstep_planner_type=");
-      builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
+      builder.append("start_left_foot_pose=");
+      builder.append(this.start_left_foot_pose_);      builder.append(", ");
+      builder.append("start_right_foot_pose=");
+      builder.append(this.start_right_foot_pose_);      builder.append(", ");
+      builder.append("initial_left_contact_points_2d=");
+      builder.append(this.initial_left_contact_points_2d_);      builder.append(", ");
+      builder.append("initial_right_contact_points_2d=");
+      builder.append(this.initial_right_contact_points_2d_);      builder.append(", ");
+      builder.append("goal_left_foot_pose=");
+      builder.append(this.goal_left_foot_pose_);      builder.append(", ");
+      builder.append("goal_right_foot_pose=");
+      builder.append(this.goal_right_foot_pose_);      builder.append(", ");
+      builder.append("requested_initial_stance_side=");
+      builder.append(this.requested_initial_stance_side_);      builder.append(", ");
+      builder.append("snap_goal_steps=");
+      builder.append(this.snap_goal_steps_);      builder.append(", ");
+      builder.append("abort_if_goal_step_snapping_fails=");
+      builder.append(this.abort_if_goal_step_snapping_fails_);      builder.append(", ");
+      builder.append("abort_if_body_path_planner_fails=");
+      builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
+      builder.append("plan_body_path=");
+      builder.append(this.plan_body_path_);      builder.append(", ");
+      builder.append("perform_a_star_search=");
+      builder.append(this.perform_a_star_search_);      builder.append(", ");
+      builder.append("body_path_waypoints=");
+      builder.append(this.body_path_waypoints_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
       builder.append(this.goal_distance_proximity_);      builder.append(", ");
       builder.append("goal_yaw_proximity=");
       builder.append(this.goal_yaw_proximity_);      builder.append(", ");
+      builder.append("requested_path_heading=");
+      builder.append(this.requested_path_heading_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
-      builder.append("best_effort_timeout=");
-      builder.append(this.best_effort_timeout_);      builder.append(", ");
+      builder.append("max_iterations=");
+      builder.append(this.max_iterations_);      builder.append(", ");
       builder.append("horizon_length=");
       builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("planar_regions_list_message=");
@@ -465,8 +780,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
-      builder.append("body_path_waypoints=");
-      builder.append(this.body_path_waypoints_);
+      builder.append("status_publish_period=");
+      builder.append(this.status_publish_period_);      builder.append(", ");
+      builder.append("requested_swing_planner=");
+      builder.append(this.requested_swing_planner_);      builder.append(", ");
+      builder.append("perform_position_based_split_fraction_calculation=");
+      builder.append(this.perform_position_based_split_fraction_calculation_);      builder.append(", ");
+      builder.append("perform_area_based_split_fraction_calculation=");
+      builder.append(this.perform_area_based_split_fraction_calculation_);      builder.append(", ");
+      builder.append("generate_log=");
+      builder.append(this.generate_log_);
       builder.append("}");
       return builder.toString();
    }

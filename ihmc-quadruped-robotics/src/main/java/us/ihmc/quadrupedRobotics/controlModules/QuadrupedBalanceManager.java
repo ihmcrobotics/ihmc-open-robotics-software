@@ -1,11 +1,23 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType.BALL_WITH_CROSS;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.mutable.MutableInt;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -21,9 +33,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ContinuousDCMPlanner;
@@ -32,21 +44,15 @@ import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
-import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType.BALL_WITH_CROSS;
 
 public class QuadrupedBalanceManager
 {
@@ -54,7 +60,7 @@ public class QuadrupedBalanceManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble robotTimestamp;
 
@@ -119,7 +125,7 @@ public class QuadrupedBalanceManager
    private final DoubleProvider durationToAllowEarlyTouchdown = new DoubleParameter("durationToAllowEarlyTouchdown", registry, 5.0e-2);
 
    public QuadrupedBalanceManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
-                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                  YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 

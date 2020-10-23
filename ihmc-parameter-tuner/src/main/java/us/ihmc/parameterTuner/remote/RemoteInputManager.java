@@ -25,6 +25,7 @@ import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
 public class RemoteInputManager implements ParameterGuiInterface
 {
@@ -40,31 +41,49 @@ public class RemoteInputManager implements ParameterGuiInterface
 
    private ChangeCollector changeCollector = new ChangeCollector();
 
-   public RemoteInputManager()
+   public RemoteInputManager(boolean enableAutoDiscovery) throws IOException
    {
-      this(null);
+      this(null, null, enableAutoDiscovery);
    }
 
-   public RemoteInputManager(String serverAddress)
+   public RemoteInputManager(String serverAddress) throws IOException
+   {
+      this(null, serverAddress, false);
+   }
+
+   public RemoteInputManager(HTTPDataServerConnection connection) throws IOException
+   {
+      this(connection, null, false);
+   }
+
+   private RemoteInputManager(HTTPDataServerConnection connection, String serverAddress, boolean enableAutoDiscovery) throws IOException
    {
       updateListener = new ParameterUpdateListener();
-      updateListener.addConnectionListener(connected -> {
+      updateListener.addConnectionListener(connected ->
+      {
          this.connected.set(connected);
          Platform.runLater(() -> reconnect.setDisable(connected));
       });
 
       YoVariableClient client = new YoVariableClient(updateListener);
-      if (serverAddress == null)
+
+      if (connection != null)
       {
-         client.startWithHostSelector();
+         client.start(YoVariableClient.DEFAULT_TIMEOUT, connection);
       }
-      else
+      else if (serverAddress != null)
       {
          client.start(serverAddress, DataServerSettings.DEFAULT_PORT);
       }
+      else
+      {
+         client.startWithHostSelector(enableAutoDiscovery);
+      }
+
       waitForConnection();
 
-      reconnect.setOnAction(event -> {
+      reconnect.setOnAction(event ->
+      {
          if (connected.get())
          {
             return;
@@ -125,12 +144,14 @@ public class RemoteInputManager implements ParameterGuiInterface
       parameterMap.clear();
       List<GuiRegistry> localRegistries = new ArrayList<>();
       List<GuiParameter> allParameters = new ArrayList<>();
-      guiRegistries.stream().forEach(fullGuiRegistry -> {
+      guiRegistries.stream().forEach(fullGuiRegistry ->
+      {
          GuiRegistry localRegistry = fullGuiRegistry.createFullCopy();
          allParameters.addAll(localRegistry.getAllParameters());
          localRegistries.add(localRegistry);
       });
-      allParameters.stream().forEach(parameter -> {
+      allParameters.stream().forEach(parameter ->
+      {
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
       savingNode.setRegistries(localRegistries);
@@ -144,7 +165,8 @@ public class RemoteInputManager implements ParameterGuiInterface
    public void submitChangedParameters(List<GuiParameter> changedParameters)
    {
       // For changes from the GUI set all properties of the parameter.
-      changedParameters.stream().forEach(parameter -> {
+      changedParameters.stream().forEach(parameter ->
+      {
          parameterMap.get(parameter.getUniqueName()).set(parameter);
          changeCollector.changed(parameter);
       });
@@ -158,7 +180,8 @@ public class RemoteInputManager implements ParameterGuiInterface
       List<GuiParameter> changedParameters = updateListener.getChangedParametersAndClear();
 
       // For changes from the server only update if the value changes to avoid loosing the status.
-      changedParameters.stream().forEach(externalParameter -> {
+      changedParameters.stream().forEach(externalParameter ->
+      {
          GuiParameter localParameter = parameterMap.get(externalParameter.getUniqueName());
 
          String uniqueName = externalParameter.getUniqueName();

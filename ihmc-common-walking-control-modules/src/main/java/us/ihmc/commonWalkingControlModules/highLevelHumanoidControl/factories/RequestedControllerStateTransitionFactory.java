@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implements ControllerStateTransitionFactory<E>
@@ -34,7 +34,7 @@ public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implem
    /** {@inheritDoc} */
    @Override
    public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends State> stateMap,
-                                                        HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
+                                                        HighLevelControllerFactoryHelper controllerFactoryHelper, YoRegistry parentRegistry)
    {
       if (stateTransition == null)
       {

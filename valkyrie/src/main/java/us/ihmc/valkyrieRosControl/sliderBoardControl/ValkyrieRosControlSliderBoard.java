@@ -22,8 +22,8 @@ import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -61,7 +61,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
 
    /* package private */ final YoDouble masterScaleFactor = new YoDouble("masterScaleFactor", registry);
@@ -147,10 +147,10 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       secondaryJoint = new YoEnum<>("secondaryJoint", "", registry, true, jointNameArray);
       secondaryJoint.set(YoEnum.NULL_VALUE);
 
-      selectedJoint.addVariableChangedListener(new VariableChangedListener()
+      selectedJoint.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             ValkyrieSliderBoardJointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
             qDesiredSelected.set(selected.q_d.getDoubleValue());
@@ -198,7 +198,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       });
 
       loadStandPrepSetPoints();
-      selectedJoint.notifyVariableChangedListeners();
+      selectedJoint.notifyListeners();
       
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
       yoVariableServer.start();

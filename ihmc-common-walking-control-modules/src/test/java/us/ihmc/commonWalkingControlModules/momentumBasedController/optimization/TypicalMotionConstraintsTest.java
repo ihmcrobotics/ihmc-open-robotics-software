@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class TypicalMotionConstraintsTest
 {
 
@@ -46,7 +43,7 @@ public class TypicalMotionConstraintsTest
             {1.0000000000000002, -2.6732326521326063E-17, -6.776263578034403E-21, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {1.023248887507697E-18, 1.0, 6.776263578034403E-21, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {1.3552527156068805E-20, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-      DenseMatrix64F JPrimaryMotionConstraints = new DenseMatrix64F(JPrimaryMotionConstraintsData);
+      DMatrixRMaj JPrimaryMotionConstraints = new DMatrixRMaj(JPrimaryMotionConstraintsData);
 
       double[][] pPrimaryMotionConstraintsData = new double[][]{
             {-0.0014501147245202025}, 
@@ -80,7 +77,7 @@ public class TypicalMotionConstraintsTest
             {-6.089406734865596E-4}, 
             {0.005462630681850569}, 
             {-0.022210425902852826}};
-      DenseMatrix64F pPrimaryMotionConstraints = new DenseMatrix64F(pPrimaryMotionConstraintsData);
+      DMatrixRMaj pPrimaryMotionConstraints = new DMatrixRMaj(pPrimaryMotionConstraintsData);
 
       double[][] centroidalMomentumAMatrixData = new double[][]{
             {0.027368778512757933, -0.005124532507787393, 7.629427951677898E-4, -0.16393673870175382, -0.7611530157399855, -0.007216491954633262, 0.13256882182513652, -0.004750565620989667, -0.003770097244967848, -0.00299789452960618, 1.0561267396826097, 1.0551334457345327, 0.017730098140217032, -0.19321701981218956, -0.4232805622752696, -1.1211126246257051E-4, 0.020891585521461448, 5.8660455703341304E-5, -0.15612754950254562, 0.29187272096546324, 4.350471533044089E-4, 4.963901208509411E-4, 0.35465951301760984, 0.13630534552954282, -8.820483812235037E-4, 7.691860569417269E-4, -1.0806224062196765, -1.0796452246472525, 0.00178370377200607, 0.0013020014832717873, 1.0165638305888756E-4, -1.0300837253197607E-4, 6.015551769002253E-4, 3.4335471957001336E-4}, 
@@ -89,7 +86,7 @@ public class TypicalMotionConstraintsTest
             {0.018322005008625603, 0.09260165567714637, 0.001231644380616366, 7.939061705169116, -1.9761866801928158, -0.5858554221889997, 0.3527227118995135, -0.007770911699740892, -0.024145075198828147, 0.015386199931676656, 3.0868417170601026, 2.9304163610126563, 0.002460128716302248, 11.771630895377092, 11.010572391941317, -0.009755218372677203, -0.6214426669866387, -0.008786640069481709, 0.24307013532445482, 1.7046163042965488, -0.005529514861712938, 4.387930449905746E-4, -12.068502938329562, -12.770194965102126, 6.543453168451895E-4, -0.0019729472815368633, -3.0978007432481767, -2.9415848039900014, 0.0038574927438451818, -0.003188873583453914, 3.4809653610631735E-5, -1.2698065677931167E-5, 8.268848864342076E-4, -7.901664382703052E-4}, 
             {-0.08239169027590112, 0.021324631260717365, -0.0050285820110479405, 1.8041630918892297, 8.614064548533403, -0.1520165841417361, -1.4469354769683866, 0.06578624041402249, 0.061346629114556295, 0.00375065750724262, -11.989221115695763, -12.027446292438457, -0.010019617219423106, 1.5741089976439322, 4.1818326600840905, -2.522406243550364E-4, -0.15115143049045174, -0.004264940336596171, 2.762237076270722, -2.2791517501137806, 0.009713431312175691, 0.011169481952450615, -4.35256771459186, -1.9135799688046014, -0.0055745157326203216, 0.005251260748150685, 12.034204934526215, 12.072377805829833, -5.212019647855364E-4, -0.002236408700922854, -1.0859408496698675E-4, 1.0993777475126522E-4, 1.2185348032470926E-4, -2.832907646035984E-4}, 
             {-3.647187903483253E-4, 0.011168807733183411, 7.09900900725399E-5, -0.9458208804572729, -0.026477705802655533, 1.6471589794594446, 0.0020273285240000123, 0.0024525149208914853, -0.002712383656097989, -0.008127415520891565, -0.16150611270529194, 0.18117064317530518, -4.867569791253047E-5, 1.8526644240202417, 1.8770160398727662, -0.0011915721691277978, -0.008520091887737084, -0.0011906000579936969, -6.339885171542983, -6.358528082347362, 0.0012434937656160955, -0.0012534864511113417, 4.467939257326714, 4.4622115805972635, -0.0011990320503862443, -0.0012005342035749267, 0.16162678490031424, -0.18100114544881593, 0.0044886501383102, -0.004485498135766024, 5.63720046742037E-6, 1.3241993973824969E-5, 0.001297534110449372, -0.0012936278528314755}};
-      DenseMatrix64F centroidalMomentumAMatrix = new DenseMatrix64F(centroidalMomentumAMatrixData);
+      DMatrixRMaj centroidalMomentumAMatrix = new DMatrixRMaj(centroidalMomentumAMatrixData);
 
       double[][] momentumDotEquationRightHandSideData = new double[][]{
             {-0.019632871937077027}, 
@@ -98,7 +95,7 @@ public class TypicalMotionConstraintsTest
             {-0.27216479242510544}, 
             {0.2874138570654739}, 
             {0.014953015847885824}};
-      DenseMatrix64F momentumDotEquationRightHandSide = new DenseMatrix64F(momentumDotEquationRightHandSideData);
+      DMatrixRMaj momentumDotEquationRightHandSide = new DMatrixRMaj(momentumDotEquationRightHandSideData);
 
       double[][] momentumSubspaceData = new double[][]{
             {0.0, 0.0, 0.0}, 
@@ -107,14 +104,14 @@ public class TypicalMotionConstraintsTest
             {1.0, 0.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             {0.0, 0.0, 1.0}};
-      DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
+      DMatrixRMaj momentumSubspace = new DMatrixRMaj(momentumSubspaceData);
 
       TypicalMotionConstraintsTestHelper helper = new TypicalMotionConstraintsTestHelper(JPrimaryMotionConstraintsData, pPrimaryMotionConstraintsData, centroidalMomentumAMatrixData, momentumDotEquationRightHandSideData, momentumSubspaceData);
       
       double minimumSingularValueOfCombinedConstraints = helper.getMinimumSingularValueOfCombinedConstraints();
       System.out.println("minimumSingularValueOfCombinedConstraints = " + minimumSingularValueOfCombinedConstraints);
       
-      DenseMatrix64F combinedSolution = helper.getCombinedSolution();
+      DMatrixRMaj combinedSolution = helper.getCombinedSolution();
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
@@ -154,7 +151,7 @@ public class TypicalMotionConstraintsTest
             {1.0, -8.836247705756861E-18, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {-3.65376132127615E-17, 0.9999999999999999, -8.673617379884035E-19, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {0.0, 8.673617379884035E-19, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-      DenseMatrix64F JPrimaryMotionConstraints = new DenseMatrix64F(JPrimaryMotionConstraintsData);
+      DMatrixRMaj JPrimaryMotionConstraints = new DMatrixRMaj(JPrimaryMotionConstraintsData);
 
       double[][] pPrimaryMotionConstraintsData = new double[][]{
             {4.994838130596103}, 
@@ -188,7 +185,7 @@ public class TypicalMotionConstraintsTest
             {-1.9724919301947594}, 
             {-38.292008860356454}, 
             {11.342072346006573}};
-      DenseMatrix64F pPrimaryMotionConstraints = new DenseMatrix64F(pPrimaryMotionConstraintsData);
+      DMatrixRMaj pPrimaryMotionConstraints = new DMatrixRMaj(pPrimaryMotionConstraintsData);
 
       double[][] centroidalMomentumAMatrixData = new double[][]{
             {0.021313958450514817, -0.004484159088393217, 0.0012020412770974201, -0.20835471509748676, -0.9530726756076926, 0.002212263396226523, 0.13483707191236785, 0.042957426074269875, 0.03597963236516343, -0.0024998211313458914, 1.1018529866627338, 1.1055211995680907, 0.018227928071065734, -0.5067334763507748, -0.07535694522120472, -1.2172801735415737E-4, 0.01972404040408639, 1.443093268445781E-4, 0.4282805137330154, -0.3524871783562849, 2.2236043595482143E-4, 2.3168344118549978E-4, 0.08149960614872129, 0.4319537898417685, -7.552512048943202E-4, 6.584396377653535E-4, -1.1211118152693225, -1.1245374561215333, 0.0017994359803011968, 0.0013782712643602589, 1.0400999571734035E-4, -1.0591366558632881E-4, 5.883932619950583E-4, 3.713873534066485E-4}, 
@@ -197,7 +194,7 @@ public class TypicalMotionConstraintsTest
             {-0.0018360428035244004, 0.10158611338073538, 0.0016200038639919178, 11.368845900643201, -1.5656479516616675, -0.38545150999972894, 0.18269440056874567, 0.08875363458853, 0.053905102636877096, 0.015027458476142074, 2.0542120141039475, 1.909018847094783, 0.0020885165458266303, 12.832950046104626, 13.727390045565658, -0.00974622657723914, -0.8266415607329328, -0.009009690986736957, 2.1924821060555737, 0.5808635426511901, -0.0050404718995333666, 9.977907024960747E-4, -15.08533163000594, -14.366773227274711, 3.7347781327980986E-4, -0.001706021051216013, -2.0490533497209817, -1.902869156100214, 0.003838991263213961, -0.003304493844680079, 2.9074608111214558E-5, -8.388493193310112E-6, 8.331160643515979E-4, -8.052027979411621E-4}, 
             {-0.00799827712254256, 0.018459188354027312, -0.009056449804633906, 2.1315299147655606, 9.260457728970014, 0.0017337034597680436, -1.2708395806695838, -0.4164457350156034, -0.3461302359727172, 0.0028818479553116456, -10.76465585797984, -10.797849377099123, -0.01087670013976243, 4.608952286523809, 0.45636395746170355, 2.434987076581303E-4, -0.15001536522756176, -0.003810263166421161, -3.3115694796539974, 4.199437648473184, 0.010001929682070827, 0.011143017769697118, -1.2963021286048515, -4.66686215167411, -0.005591061158770578, 0.005339410450218499, 10.746878638868264, 10.77756128465248, -7.059024348280129E-4, -0.002074583062527203, -1.1480130239905449E-4, 1.1208489250264264E-4, 8.039094031810536E-5, -2.393723840149504E-4}, 
             {-1.7803278550712672E-4, -0.006881801722621973, 6.11155430134533E-5, -0.9408922683264915, -0.002198114659436212, 0.18563237228741364, 0.0027537392214866353, -0.001558911115015283, 4.2653670766002914E-4, -0.007919809856985406, -0.026795070663612117, 0.004710764973457237, -1.0459122358879914E-4, -1.6080196998834748, -1.6465631780461851, -0.0011901586901152204, 0.06638171608857862, -0.0011944291166552932, 0.8285913566617787, 0.9008039893816359, 0.0012375924269162203, -0.001256940132312168, 0.7876964955876703, 0.753928047430594, -0.0011911029413977908, -0.0011997409497353489, 0.027442983194358835, -0.004870038191755142, 0.004479165508469224, -0.004479849634325471, 3.823156890340401E-6, 1.1796766609736702E-5, 0.0012972725989372175, -0.0012937269132908206}};
-      DenseMatrix64F centroidalMomentumAMatrix = new DenseMatrix64F(centroidalMomentumAMatrixData);
+      DMatrixRMaj centroidalMomentumAMatrix = new DMatrixRMaj(centroidalMomentumAMatrixData);
 
       double[][] momentumDotEquationRightHandSideData = new double[][]{
             {-39.26720857891175}, 
@@ -206,7 +203,7 @@ public class TypicalMotionConstraintsTest
             {1358.446408026797}, 
             {205.26126736307407}, 
             {61.640608531934504}};
-      DenseMatrix64F momentumDotEquationRightHandSide = new DenseMatrix64F(momentumDotEquationRightHandSideData);
+      DMatrixRMaj momentumDotEquationRightHandSide = new DMatrixRMaj(momentumDotEquationRightHandSideData);
 
 //      double[][] momentumSubspaceData = new double[][]{
 //            {0.0, 0.0}, 
@@ -215,7 +212,7 @@ public class TypicalMotionConstraintsTest
 //            {1.0, 0.0}, 
 //            {0.0, 1.0}, 
 //            {0.0, 0.0}};
-//      DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
+//      DMatrixRMaj momentumSubspace = new DMatrixRMaj(momentumSubspaceData);
 
       double[][] momentumSubspaceData = new double[][]{
             {0.0, 0.0, 0.0}, 
@@ -224,7 +221,7 @@ public class TypicalMotionConstraintsTest
             {1.0, 0.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             {0.0, 0.0, 1.0}};
-      DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
+      DMatrixRMaj momentumSubspace = new DMatrixRMaj(momentumSubspaceData);
   
       
       TypicalMotionConstraintsTestHelper helper = new TypicalMotionConstraintsTestHelper(JPrimaryMotionConstraintsData, pPrimaryMotionConstraintsData, centroidalMomentumAMatrixData, momentumDotEquationRightHandSideData, momentumSubspaceData);
@@ -232,7 +229,7 @@ public class TypicalMotionConstraintsTest
       double minimumSingularValueOfCombinedConstraints = helper.getMinimumSingularValueOfCombinedConstraints();
       System.out.println("minimumSingularValueOfCombinedConstraints = " + minimumSingularValueOfCombinedConstraints);
       
-      DenseMatrix64F combinedSolution = helper.getCombinedSolution();
+      DMatrixRMaj combinedSolution = helper.getCombinedSolution();
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
@@ -272,7 +269,7 @@ public class TypicalMotionConstraintsTest
             {1.0, -1.2389392100811041E-17, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {-1.2389339161251837E-17, 1.0000000000000002, -5.421010862427522E-20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {-2.1684043449710089E-19, -5.421010862427522E-20, 1.0000000000000002, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-      DenseMatrix64F JPrimaryMotionConstraints = new DenseMatrix64F(JPrimaryMotionConstraintsData);
+      DMatrixRMaj JPrimaryMotionConstraints = new DMatrixRMaj(JPrimaryMotionConstraintsData);
 
       double[][] pPrimaryMotionConstraintsData = new double[][]{
             {-0.18359246881084257}, 
@@ -306,7 +303,7 @@ public class TypicalMotionConstraintsTest
             {-0.01279140741042857}, 
             {0.16939699829925056}, 
             {-0.42108743815244987}};
-      DenseMatrix64F pPrimaryMotionConstraints = new DenseMatrix64F(pPrimaryMotionConstraintsData);
+      DMatrixRMaj pPrimaryMotionConstraints = new DMatrixRMaj(pPrimaryMotionConstraintsData);
 
       double[][] centroidalMomentumAMatrixData = new double[][]{
             {0.0207261222862488, -0.005500599008465904, 0.001456074596287772, -0.24317169347232678, -0.9161454926444003, 0.025730266566244837, 0.1572370171224416, -0.0061215170062449125, -0.005285527765533078, -0.0028550722928337505, 1.064543601192483, 1.0687596587543435, 0.018050039494921025, -0.5328722274284547, -0.1443470156863394, -1.157960143447809E-4, 0.023217621331733166, 1.3223302827114876E-4, 0.4168837194174082, -0.2892373259114869, 2.5574216609262933E-4, 2.579040063045145E-4, 0.12304986491126393, 0.4362634559077009, -7.689061366911362E-4, 6.537398861421669E-4, -1.0824944244977146, -1.0867082390774745, 0.001808538431776754, 0.0013273000694762976, 1.0086736084100201E-4, -1.0235254268234386E-4, 6.009207665011321E-4, 3.5290771340186337E-4}, 
@@ -315,7 +312,7 @@ public class TypicalMotionConstraintsTest
             {1.5892353530232864E-4, 0.1003601366814468, 0.0026668080127258743, 11.254674196173838, -1.9664047444091393, -1.0130165452395714, 0.3232914097955279, -0.004567352264200977, -0.01952828587966154, 0.014876391434338877, 2.4348867544972195, 2.2608063313594657, 0.002191502327608446, 12.74896721202979, 13.612110724751076, -0.009791726836215413, -0.8125521165206817, -0.008891137981444504, 2.198645346730547, 0.6288893253491684, -0.005223861984795623, 5.995439150662887E-4, -15.000004873889909, -14.30286630227092, 5.195969389417599E-4, -0.0018355952484224848, -2.427826986384706, -2.2540541609347953, 0.0038823678297318456, -0.003284004889836601, 3.5497850500806374E-5, -1.3938039475458194E-5, 8.305738542238386E-4, -7.980721018737781E-4}, 
             {-0.003738025032564664, 0.022276628216117252, -0.011918625402208245, 2.5025112574024573, 8.984533542065675, -0.23455158454721586, -1.4944756477326986, 0.055465198145206195, 0.05154718331575485, 0.003255771076609376, -10.49970554477746, -10.538664081719979, -0.009924199306162798, 4.858426906666547, 1.070702353882251, 4.3219773736095696E-5, -0.1788322346554053, -0.004124230553713279, -3.1176869167343484, 3.7674931307137918, 0.009939549486999487, 0.01121170826325487, -1.7740752898102101, -4.829936933997823, -0.005559347506992095, 0.005271903715272132, 10.47030284720178, 10.509163435565103, -5.957301232815897E-4, -0.0021564596791129303, -1.2638606416720264E-4, 1.2676196568575662E-4, 1.0121775283554408E-4, -2.6205573276788616E-4}, 
             {-1.892481970695081E-4, -0.006845331358779431, 1.3581750032015363E-5, -1.0895113284570228, -0.008466393814761212, 0.2472455285373446, 0.001737752798319347, -3.478047187843577E-4, 2.850220967999851E-4, -0.008168663239364275, -0.011720677888958489, 0.02389660830285495, -5.551134436277357E-5, -1.7629256354418816, -1.763724648421978, -0.0011755792865963237, 0.07601785399699018, -0.001173431718354338, 0.7442063683677906, 0.7459586246259338, 0.001270608597695419, -0.0012751727061916112, 1.026270793764793, 1.0253080585871348, -0.001183815085620447, -0.0011822560157900433, 0.012320709546064476, -0.02404344484168246, 0.004455535187760766, -0.004453703378166877, 3.770908508058566E-6, 1.1484368337969082E-5, 0.0012971141183869984, -0.0012934154066409304}};
-      DenseMatrix64F centroidalMomentumAMatrix = new DenseMatrix64F(centroidalMomentumAMatrixData);
+      DMatrixRMaj centroidalMomentumAMatrix = new DMatrixRMaj(centroidalMomentumAMatrixData);
 
       double[][] momentumDotEquationRightHandSideData = new double[][]{
             {0.5055343078043402}, 
@@ -324,7 +321,7 @@ public class TypicalMotionConstraintsTest
             {-15.500961948642885}, 
             {-5.483357904786595}, 
             {0.7566100210066392}};
-      DenseMatrix64F momentumDotEquationRightHandSide = new DenseMatrix64F(momentumDotEquationRightHandSideData);
+      DMatrixRMaj momentumDotEquationRightHandSide = new DMatrixRMaj(momentumDotEquationRightHandSideData);
 
 //      double[][] momentumSubspaceData = new double[][]{
 //            {0.0, 0.0}, 
@@ -349,7 +346,7 @@ public class TypicalMotionConstraintsTest
             {1.0, 0.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             {0.0, 0.0, 1.0}};
-      DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
+      DMatrixRMaj momentumSubspace = new DMatrixRMaj(momentumSubspaceData);
       
       
       TypicalMotionConstraintsTestHelper helper = new TypicalMotionConstraintsTestHelper(JPrimaryMotionConstraintsData, pPrimaryMotionConstraintsData, centroidalMomentumAMatrixData, momentumDotEquationRightHandSideData, momentumSubspaceData);
@@ -365,7 +362,7 @@ public class TypicalMotionConstraintsTest
       double minimumSingularValueOfCombinedConstraints = helper.getMinimumSingularValueOfCombinedConstraints();
       System.out.println("minimumSingularValueOfCombinedConstraints = " + minimumSingularValueOfCombinedConstraints);
       
-      DenseMatrix64F combinedSolution = helper.getCombinedSolution();
+      DMatrixRMaj combinedSolution = helper.getCombinedSolution();
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
@@ -405,7 +402,7 @@ public class TypicalMotionConstraintsTest
             {1.0, -2.8990549652725683E-17, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {-1.2349740370967699E-18, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 
             {0.0, 4.3368086899420177E-19, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-      DenseMatrix64F JPrimaryMotionConstraints = new DenseMatrix64F(JPrimaryMotionConstraintsData);
+      DMatrixRMaj JPrimaryMotionConstraints = new DMatrixRMaj(JPrimaryMotionConstraintsData);
 
       double[][] pPrimaryMotionConstraintsData = new double[][]{
             {-1.310763246533376}, 
@@ -439,7 +436,7 @@ public class TypicalMotionConstraintsTest
             {1.7052950815904024}, 
             {-0.9761440672455828}, 
             {-0.8602050925615581}};
-      DenseMatrix64F pPrimaryMotionConstraints = new DenseMatrix64F(pPrimaryMotionConstraintsData);
+      DMatrixRMaj pPrimaryMotionConstraints = new DMatrixRMaj(pPrimaryMotionConstraintsData);
 
       double[][] centroidalMomentumAMatrixData = new double[][]{
             {0.042422480153818, -0.01274230236334784, 0.0028226073551008597, -0.4902992442380379, -1.461062125871295, 0.06995897718143854, 0.2628473331127499, 0.001436931997925527, 0.00491517359092655, -0.006397555106192451, 1.629541473622672, 1.6360959011150964, 0.0351088424336117, -0.8470272604019279, -0.8890480001211885, -4.319628823117237E-5, 0.049502194881929404, -4.3463142371675325E-4, 0.13918788187075018, 0.26750562747586304, 0.0015740653322906726, 0.0016746064916821042, 0.7249708738499954, 0.6340788433317653, -0.0015496112592226995, 0.0013589869460442405, -1.6662806833391341, -1.6727366196243698, 0.0020164971519754044, 0.0011294295898431085, 1.0905988923855162E-4, -1.126210414702922E-4, 3.848370168269017E-4, 1.0898491178070995E-4}, 
@@ -448,7 +445,7 @@ public class TypicalMotionConstraintsTest
             {-0.035613947232502136, 0.20962820504180435, 0.007533422718434721, 18.013240653785605, -1.803052973764893, -1.6657131312527036, 0.27495096656355983, 0.01798058353220446, -0.011908411124088913, 0.05209180814066833, 4.121652135486617, 3.8390811621837027, 0.009435099055548847, 20.965634093508758, 20.72921928775201, -0.01042755778780408, -1.4299219168554727, -0.009530279077127975, 1.740367006966139, 2.3059437911491374, -0.005859893069811926, 7.943474157517625E-4, -22.83894378307209, -23.190922419715328, 6.029593499107745E-4, -0.0019552565068128155, -4.091589205500439, -3.8090007124807035, 0.004260547001803801, -0.0036417677026764055, -1.853290124789703E-5, -1.4654221882661693E-6, 8.812604316044589E-4, -7.741055664860914E-4}, 
             {-0.04195311185189033, 0.055576169359844045, -0.02202872187324236, 5.181513960164598, 14.526475011256931, -0.7295234289959255, -2.480312720674353, -0.01934478205612309, -0.03975542527211892, 0.011018607510674915, -16.324957946564194, -16.396522008719568, -0.04345971489762509, 7.722374614906942, 8.13380013061738, 6.200967875076548E-6, -0.38387372190675584, -0.004291244142396245, 0.7371130788871731, -0.5097287342249192, 0.011042820936172393, 0.01246662255549744, -8.51820453685804, -7.638553858609176, -0.006099359169612458, 0.005807691806349653, 16.310764765860327, 16.381189568223725, -5.801295642459261E-4, -0.0022896177715168438, 1.9691674374785017E-5, -2.8283116157507858E-5, -7.795604635767376E-5, -4.35616846474015E-4}, 
             {0.0015016380135244763, 0.006657487795877577, 5.851593676901455E-4, -1.804641044803288, -0.40430227692406784, 0.37380027436281255, 0.07110931697848531, 6.240876694767449E-4, -2.421080436103528E-4, -5.82141260231908E-4, 0.2580607686363667, 0.3111896172980726, -8.220434382906689E-5, -2.246112205406058, -2.136320784840718, -0.0012720736395895266, 0.10100309619632673, -0.001271246581632524, -0.1389510181969278, -0.33141990939795446, 0.0019314107510401243, -0.0019541319154148, 2.3778850968347367, 2.460415662355725, -0.0012431528907740925, -0.0012525307528964262, -0.2588348215093925, -0.3131930767584668, 0.00497153761741595, -0.004968159155948201, -1.7439713359256015E-5, -8.36513583041488E-6, 8.736360448667524E-4, -8.689226307125356E-4}};
-      DenseMatrix64F centroidalMomentumAMatrix = new DenseMatrix64F(centroidalMomentumAMatrixData);
+      DMatrixRMaj centroidalMomentumAMatrix = new DMatrixRMaj(centroidalMomentumAMatrixData);
 
       double[][] momentumDotEquationRightHandSideData = new double[][]{
             {19.900706641588048}, 
@@ -457,7 +454,7 @@ public class TypicalMotionConstraintsTest
             {-851.5691337315677}, 
             {-304.93925369391604}, 
             {398.9739368194259}};
-      DenseMatrix64F momentumDotEquationRightHandSide = new DenseMatrix64F(momentumDotEquationRightHandSideData);
+      DMatrixRMaj momentumDotEquationRightHandSide = new DMatrixRMaj(momentumDotEquationRightHandSideData);
       
       double[][] momentumSubspaceData = new double[][]{
             {0.0, 0.0, 0.0}, 
@@ -482,7 +479,7 @@ public class TypicalMotionConstraintsTest
 //            {1.0, 0.0}, 
 //            {0.0, 1.0}, 
 //            {0.0, 0.0}}; 
-      DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
+      DMatrixRMaj momentumSubspace = new DMatrixRMaj(momentumSubspaceData);
       
       
       TypicalMotionConstraintsTestHelper helper = new TypicalMotionConstraintsTestHelper(JPrimaryMotionConstraintsData, pPrimaryMotionConstraintsData, centroidalMomentumAMatrixData, momentumDotEquationRightHandSideData, momentumSubspaceData);
@@ -498,7 +495,7 @@ public class TypicalMotionConstraintsTest
       double minimumSingularValueOfCombinedConstraints = helper.getMinimumSingularValueOfCombinedConstraints();
       System.out.println("minimumSingularValueOfCombinedConstraints = " + minimumSingularValueOfCombinedConstraints);
       
-      DenseMatrix64F combinedSolution = helper.getCombinedSolution();
+      DMatrixRMaj combinedSolution = helper.getCombinedSolution();
       System.out.println("combinedSolution = " + combinedSolution);
    }
 }

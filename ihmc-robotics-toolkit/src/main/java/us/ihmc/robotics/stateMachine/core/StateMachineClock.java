@@ -1,7 +1,7 @@
 package us.ihmc.robotics.stateMachine.core;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * <li>{@link #dummyClock()}: Provides a default implementation when the absolute time information
  * is not available.
  * <li>{@link #clock(DoubleProvider)}: Provides a clock implementation backed by doubles.
- * <li>{@link #yoClock(DoubleProvider, String, YoVariableRegistry)}: Provides a clock implementation
+ * <li>{@link #yoClock(DoubleProvider, String, YoRegistry)}: Provides a clock implementation
  * backed by {@code YoDouble}.
  * </ul>
  * </p>
@@ -132,7 +132,7 @@ public interface StateMachineClock
     * @param registry the registry to which the {@code YoDouble}s are registered.
     * @return the clock.
     */
-   public static StateMachineClock yoClock(DoubleProvider timeProvider, String namePrefix, YoVariableRegistry registry)
+   public static StateMachineClock yoClock(DoubleProvider timeProvider, String namePrefix, YoRegistry registry)
    {
       YoDouble timeOfLastStateChange = new YoDouble(namePrefix + "SwitchTime", "Time at which the last state change occured.", registry);
       YoDouble timeInCurrentState = new YoDouble(namePrefix + "StateTime", "Time relative to the start of the current state.", registry);

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.sensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
@@ -18,7 +19,7 @@ public class IMUDefinition
       this.transformFromIMUToJoint = new RigidBodyTransform(transformFromIMUToJoint);
 
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
-      imuFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
+      imuFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
    }
 
    public String getName()

@@ -3,14 +3,19 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.reflections.Reflections;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -21,21 +26,66 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -44,7 +94,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -55,7 +105,11 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.*;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
@@ -70,7 +124,11 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.*;
+import us.ihmc.sensorProcessing.outputData.ImuData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.LowLevelState;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -304,21 +362,21 @@ public class CrossRobotCommandRandomTools
                                                        nextElementIn(random, possibleFrames));
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random)
+   public static DMatrixRMaj nextDMatrixRMaj(Random random)
    {
-      return RandomMatrices.createRandom(random.nextInt(10), random.nextInt(10), random);
+      return RandomMatrices_DDRM.rectangle(random.nextInt(10), random.nextInt(10), random);
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numRow, int numCol)
+   public static DMatrixRMaj nextDMatrixRMaj(Random random, int numRow, int numCol)
    {
-      return RandomMatrices.createRandom(numRow, numCol, random);
+      return RandomMatrices_DDRM.rectangle(numRow, numCol, random);
    }
 
    public static DenseMatrixArrayList nextDenseMatrixArrayList(Random random, int numRow, int numCol, int size)
    {
       DenseMatrixArrayList next = new DenseMatrixArrayList();
       while (next.size() < size)
-         next.add().set(nextDenseMatrix64F(random, numRow, numCol));
+         next.add().set(nextDMatrixRMaj(random, numRow, numCol));
       return next;
    }
 
@@ -518,6 +576,7 @@ public class CrossRobotCommandRandomTools
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
+      next.setCommandId(random.nextInt());
       next.setConstraintType(nextElementIn(random, ConstraintType.values()));
       next.setContactingRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.setWeight(nextFrameVector2D(random, possibleFrames));
@@ -528,6 +587,7 @@ public class CrossRobotCommandRandomTools
    public static ContactWrenchCommand nextContactWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       ContactWrenchCommand next = new ContactWrenchCommand();
+      next.setCommandId(random.nextInt());
       next.setConstraintType(nextElementIn(random, ConstraintType.values()));
       next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.getWrench().setIncludingFrame(nextWrench(random, possibleFrames));
@@ -539,6 +599,7 @@ public class CrossRobotCommandRandomTools
    public static ExternalWrenchCommand nextExternalWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       ExternalWrenchCommand next = new ExternalWrenchCommand();
+      next.setCommandId(random.nextInt());
       next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.getExternalWrench().setIncludingFrame(nextWrench(random, possibleFrames));
       return next;
@@ -548,6 +609,7 @@ public class CrossRobotCommandRandomTools
                                                                                                            ReferenceFrame... possibleFrames)
    {
       InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
+      next.setCommandId(random.nextInt());
       next.setRhoMin(random.nextDouble());
       next.setJointAccelerationMax(random.nextDouble());
       next.setRhoWeight(random.nextDouble());
@@ -570,6 +632,7 @@ public class CrossRobotCommandRandomTools
                                                                                              RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -595,6 +658,7 @@ public class CrossRobotCommandRandomTools
                                                                                            RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -620,6 +684,7 @@ public class CrossRobotCommandRandomTools
                                                                                  ReferenceFrame... possibleFrames)
    {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
+      next.setCommandId(random.nextInt());
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -629,7 +694,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         DenseMatrix64F desiredAcceleration = RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random);
+         DMatrixRMaj desiredAcceleration = RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random);
          next.addJoint(joint, desiredAcceleration, random.nextDouble());
       }
 
@@ -639,7 +704,8 @@ public class CrossRobotCommandRandomTools
    public static MomentumRateCommand nextMomentumRateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       MomentumRateCommand next = new MomentumRateCommand();
-      next.setMomentumRate(RandomMatrices.createRandom(6, 1, random));
+      next.setCommandId(random.nextInt());
+      next.setMomentumRate(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.setWeights(nextWeightMatrix6D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
       return next;
@@ -654,6 +720,7 @@ public class CrossRobotCommandRandomTools
                                                                        ReferenceFrame... possibleFrames)
    {
       PlaneContactStateCommand next = new PlaneContactStateCommand();
+      next.setCommandId(random.nextInt());
       next.setContactingRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.setCoefficientOfFriction(random.nextDouble());
       next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3D(random, nextElementIn(random, possibleFrames)));
@@ -681,6 +748,7 @@ public class CrossRobotCommandRandomTools
    public static SpatialAccelerationCommand nextSpatialAccelerationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialAccelerationCommand next = new SpatialAccelerationCommand();
+      next.setCommandId(random.nextInt());
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.getDesiredLinearAcceleration().set(EuclidCoreRandomTools.nextPoint3D(random));
@@ -698,6 +766,7 @@ public class CrossRobotCommandRandomTools
                                                                                                                ReferenceFrame... possibleFrames)
    {
       InverseKinematicsOptimizationSettingsCommand next = new InverseKinematicsOptimizationSettingsCommand();
+      next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, JointVelocityLimitMode.values()));
@@ -713,6 +782,7 @@ public class CrossRobotCommandRandomTools
                                                                            ReferenceFrame... possibleFrames)
    {
       JointLimitReductionCommand next = new JointLimitReductionCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -737,6 +807,7 @@ public class CrossRobotCommandRandomTools
                                                                          ReferenceFrame... possibleFrames)
    {
       JointspaceVelocityCommand next = new JointspaceVelocityCommand();
+      next.setCommandId(random.nextInt());
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -746,7 +817,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
       }
 
       return next;
@@ -755,7 +826,8 @@ public class CrossRobotCommandRandomTools
    public static MomentumCommand nextMomentumCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       MomentumCommand next = new MomentumCommand();
-      next.setMomentum(RandomMatrices.createRandom(6, 1, random));
+      next.setCommandId(random.nextInt());
+      next.setMomentum(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.getWeightMatrix().set(nextWeightMatrix6D(random, possibleFrames));
       next.getSelectionMatrix().set(nextSelectionMatrix6D(random, possibleFrames));
       return next;
@@ -765,6 +837,7 @@ public class CrossRobotCommandRandomTools
                                                                                                      ReferenceFrame... possibleFrames)
    {
       LinearMomentumConvexConstraint2DCommand next = new LinearMomentumConvexConstraint2DCommand();
+      next.setCommandId(random.nextInt());
       int size = random.nextInt(10);
       while (next.getLinearMomentumConstraintVertices().size() < size)
          next.addLinearMomentumConstraintVertex().set(nextVector2D(random));
@@ -780,6 +853,7 @@ public class CrossRobotCommandRandomTools
                                                                                    ReferenceFrame... possibleFrames)
    {
       PrivilegedConfigurationCommand next = new PrivilegedConfigurationCommand();
+      next.setCommandId(random.nextInt());
 
       if (random.nextBoolean())
          next.setDefaultParameters(nextOneDoFJointPrivilegedConfigurationParameters(random));
@@ -812,6 +886,7 @@ public class CrossRobotCommandRandomTools
                                                                              ReferenceFrame... possibleFrames)
    {
       PrivilegedJointSpaceCommand next = new PrivilegedJointSpaceCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -838,6 +913,7 @@ public class CrossRobotCommandRandomTools
    public static SpatialVelocityCommand nextSpatialVelocityCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialVelocityCommand next = new SpatialVelocityCommand();
+      next.setCommandId(random.nextInt());
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextPoint3D(random));
@@ -881,6 +957,7 @@ public class CrossRobotCommandRandomTools
                                                                                ReferenceFrame... possibleFrames)
    {
       JointLimitEnforcementCommand next = new JointLimitEnforcementCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -905,6 +982,7 @@ public class CrossRobotCommandRandomTools
                                                            ReferenceFrame... possibleFrames)
    {
       JointTorqueCommand next = new JointTorqueCommand();
+      next.setCommandId(random.nextInt());
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -914,7 +992,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random));
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random));
       }
 
       return next;
@@ -923,6 +1001,7 @@ public class CrossRobotCommandRandomTools
    public static VirtualForceCommand nextVirtualForceCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       VirtualForceCommand next = new VirtualForceCommand();
+      next.setCommandId(random.nextInt());
 
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getDesiredLinearForce().set(EuclidCoreRandomTools.nextVector3D(random));
@@ -936,6 +1015,7 @@ public class CrossRobotCommandRandomTools
                                                                                                                    ReferenceFrame... possibleFrames)
    {
       VirtualModelControlOptimizationSettingsCommand next = new VirtualModelControlOptimizationSettingsCommand();
+      next.setCommandId(random.nextInt());
       next.setRhoMin(random.nextDouble());
       next.setRhoWeight(random.nextDouble());
       next.setRhoRateWeight(random.nextDouble());
@@ -949,6 +1029,7 @@ public class CrossRobotCommandRandomTools
    public static VirtualTorqueCommand nextVirtualTorqueCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       VirtualTorqueCommand next = new VirtualTorqueCommand();
+      next.setCommandId(random.nextInt());
 
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getDesiredAngularTorque().set(EuclidCoreRandomTools.nextVector3D(random));
@@ -961,6 +1042,7 @@ public class CrossRobotCommandRandomTools
    public static VirtualWrenchCommand nextVirtualWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       VirtualWrenchCommand next = new VirtualWrenchCommand();
+      next.setCommandId(random.nextInt());
 
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getDesiredLinearForce().set(EuclidCoreRandomTools.nextVector3D(random));
@@ -975,6 +1057,7 @@ public class CrossRobotCommandRandomTools
                                                                                            ReferenceFrame... possibleFrames)
    {
       CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getReferencePosition().set(EuclidCoreRandomTools.nextPoint3D(random));
       next.getReferenceLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
@@ -995,6 +1078,7 @@ public class CrossRobotCommandRandomTools
    public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, OneDoFJointBasics joint)
    {
       OneDoFJointFeedbackControlCommand next = new OneDoFJointFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
       next.setJoint(joint);
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.setReferencePosition(random.nextDouble());
@@ -1016,6 +1100,7 @@ public class CrossRobotCommandRandomTools
                                                                                        ReferenceFrame... possibleFrames)
    {
       JointspaceFeedbackControlCommand next = new JointspaceFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -1035,6 +1120,7 @@ public class CrossRobotCommandRandomTools
                                                                                          ReferenceFrame... possibleFrames)
    {
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
@@ -1051,6 +1137,7 @@ public class CrossRobotCommandRandomTools
    public static PointFeedbackControlCommand nextPointFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       PointFeedbackControlCommand next = new PointFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedPointToControl().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
       next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
@@ -1067,6 +1154,7 @@ public class CrossRobotCommandRandomTools
    public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
+      next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
@@ -1102,6 +1190,7 @@ public class CrossRobotCommandRandomTools
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       InverseDynamicsCommandList next = new InverseDynamicsCommandList();
+      next.setCommandId(random.nextInt());
 
       List<Class<? extends InverseDynamicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
       commandTypes.removeIf(Class::isInterface);
@@ -1144,6 +1233,7 @@ public class CrossRobotCommandRandomTools
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       InverseKinematicsCommandList next = new InverseKinematicsCommandList();
+      next.setCommandId(random.nextInt());
 
       List<Class<? extends InverseKinematicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
       commandTypes.removeIf(Class::isInterface);
@@ -1187,6 +1277,7 @@ public class CrossRobotCommandRandomTools
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       VirtualModelControlCommandList next = new VirtualModelControlCommandList();
+      next.setCommandId(random.nextInt());
 
       List<Class<? extends VirtualModelControlCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
       commandTypes.removeIf(Class::isInterface);
@@ -1229,6 +1320,7 @@ public class CrossRobotCommandRandomTools
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       FeedbackControlCommandList next = new FeedbackControlCommandList();
+      next.setCommandId(random.nextInt());
 
       List<Class<? extends FeedbackControlCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
       commandTypes.removeIf(Class::isInterface);
@@ -1491,7 +1583,7 @@ public class CrossRobotCommandRandomTools
          numberOfForceSensors = Math.max(numberOfForceSensors, 1);
       for (int forceSensorIndex = 0; forceSensorIndex < numberOfForceSensors; forceSensorIndex++)
       {
-         next.registerForceSensor("ForceSensor" + forceSensorIndex).set(nextDenseMatrix64F(random, 6, 1));
+         next.registerForceSensor("ForceSensor" + forceSensorIndex).set(nextDMatrixRMaj(random, 6, 1));
       }
 
       return next;
@@ -1553,7 +1645,7 @@ public class CrossRobotCommandRandomTools
       List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
       RigidBodyBasics rigidBody = nextElementIn(random, allBodies);
       next.setDefinition(rigidBody.getName(), nextElementIn(random, possibleFrames), rigidBody);
-      next.setWrench(nextDenseMatrix64F(random, 6, 1));
+      next.setWrench(nextDMatrixRMaj(random, 6, 1));
       return next;
    }
 
@@ -1633,9 +1725,10 @@ public class CrossRobotCommandRandomTools
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
+      next.setDesiredICPAtEndOfState(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
       next.setFinalTransferDuration(random.nextDouble());
-      next.setFootsteps(nextRecyclingArrayList(SimpleAdjustableFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
+      next.setFootsteps(nextRecyclingArrayList(SimpleFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
       next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
       next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
       next.setInitializeForSingleSupport(random.nextBoolean());
@@ -1652,9 +1745,9 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static SimpleAdjustableFootstep nextSimpleAdjustableFootstep(Random random, ReferenceFrame... possibleFrames)
+   public static SimpleFootstep nextSimpleFootstep(Random random, ReferenceFrame... possibleFrames)
    {
-      SimpleAdjustableFootstep next = new SimpleAdjustableFootstep();
+      SimpleFootstep next = new SimpleFootstep();
       next.setSoleFramePose(nextFramePose3D(random, possibleFrames));
       next.setRobotSide(nextElementIn(random, RobotSide.values));
       next.setFoothold(nextConvexPolygon2D(random));
@@ -1702,7 +1795,7 @@ public class CrossRobotCommandRandomTools
    {
       for (int i = 0; i < listToRandomize.size(); i++)
       {
-         listToRandomize.get(i).set(RandomMatrices.createRandom(random.nextInt(15) + 1, random.nextInt(15) + 1, random));
+         listToRandomize.get(i).set(RandomMatrices_DDRM.rectangle(random.nextInt(15) + 1, random.nextInt(15) + 1, random));
       }
    }
 
@@ -1796,9 +1889,9 @@ public class CrossRobotCommandRandomTools
          randomizeAtomicReference((AtomicReference) fieldInstance,
                                   (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
       }
-      else if (fieldType == DenseMatrix64F.class)
+      else if (fieldType == DMatrixRMaj.class)
       {
-         field.set(fieldOwnerInstance, RandomMatrices.createRandom(10, 10, random));
+         field.set(fieldOwnerInstance, RandomMatrices_DDRM.rectangle(10, 10, random));
       }
       else if (fieldType == SideDependentList.class)
       {

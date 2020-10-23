@@ -1,28 +1,39 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import java.util.Arrays;
+
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.BodyPathPawPlanningHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.CompositePawPlanningCostToGoHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawPlanningCostToGoHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawPlanarRegionCliffAvoider;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.Arrays;
 
 public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 {
@@ -38,11 +49,11 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    private PawStepPlannerGoal highLevelGoal;
 
    public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
-                                       QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
+                                       QuadrupedXGaitSettingsReadOnly xGaitSettings, YoRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       CompositePawPlanningCostToGoHeuristics costToGoHeuristics = new CompositePawPlanningCostToGoHeuristics(parameters);
@@ -109,7 +120,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    }
 
    @Override
-   public void setGroundPlane(QuadrupedGroundPlaneMessage groundPlane)
+   public void setGroundPlane(GroundPlaneMessage groundPlane)
    {
 
    }
@@ -145,7 +156,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
       pawPlannerGoal.set(goalPose);
 
       if (alpha >= 1.0)
-         pawPlannerGoal.setOrientation(highLevelGoal.getTargetPose().getOrientation());
+         pawPlannerGoal.getOrientation().set(highLevelGoal.getTargetPose().getOrientation());
 
       lowLevelGoal.set(pawPlannerGoal);
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FinishableStateTest
 {
@@ -26,7 +26,7 @@ public class FinishableStateTest
       factory.addStateAndDoneTransition(StateEnum.TWO, stateTwo, StateEnum.THREE);
       factory.addStateAndDoneTransition(StateEnum.THREE, stateThree, StateEnum.ONE);
       factory.setNamePrefix("example");
-      factory.setRegistry(new YoVariableRegistry("dummy"));
+      factory.setRegistry(new YoRegistry("dummy"));
       StateMachine<StateEnum, ExampleFinishableState> stateMachine = factory.build(StateEnum.ONE);
 
       stateMachine.doActionAndTransition();

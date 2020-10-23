@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.unicycle;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -53,12 +53,12 @@ public class UnicycleRobot extends Robot
       rootJoint.addGroundContactPoint(new GroundContactPoint("gcp_body_8", new Vector3D(-body_x/2.0, -body_y/2.0, 0.0), this));
       this.addRootJoint(rootJoint);
 
-      PinJoint backJoint = new PinJoint("backJoint", new Vector3D(0.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint backJoint = new PinJoint("backJoint", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.Y);
       Link fork = createFork();
       backJoint.setLink(fork);
       rootJoint.addJoint(backJoint);
 
-      PinJoint wheelJoint = new PinJoint("wheelJoint", new Vector3D(0.0, 0.0, -fork_l), this, Axis.Y);
+      PinJoint wheelJoint = new PinJoint("wheelJoint", new Vector3D(0.0, 0.0, -fork_l), this, Axis3D.Y);
       Link wheel = createWheel();
       wheelJoint.setLink(wheel);
       for (int i = 0; i < contactPoints; i++)
@@ -69,7 +69,7 @@ public class UnicycleRobot extends Robot
       }
       backJoint.addJoint(wheelJoint);
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       this.setGroundContactModel(groundContactModel);
 
       showCoordinatesRecursively(rootJoint, false);
@@ -87,7 +87,7 @@ public class UnicycleRobot extends Robot
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, -wheel_d/2.0, 0.0);
-      linkGraphics.rotate(Math.PI/2.0, Axis.X);
+      linkGraphics.rotate(Math.PI/2.0, Axis3D.X);
       linkGraphics.addCylinder(-wheel_d, wheel_r, YoAppearance.Red());
       link.setLinkGraphics(linkGraphics);
 

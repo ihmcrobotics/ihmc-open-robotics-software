@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -24,7 +24,7 @@ public interface ICPOptimizationControllerInterface
 
    void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 
-   void addFootstepToPlan(SimpleAdjustableFootstep footstep, double swingDuration, double transferDuration);
+   void addFootstepToPlan(SimpleFootstep footstep, double swingDuration, double transferDuration);
 
    /**
     * Lets the controller know that it just entered the standing state. This does things

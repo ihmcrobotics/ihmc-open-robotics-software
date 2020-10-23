@@ -48,6 +48,10 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
             * Specifies the orientation of where the foot actually landed.
             */
    public us.ihmc.euclid.tuple4D.Quaternion actual_foot_orientation_in_world_;
+   /**
+            * This is the swing duration of the step.
+            */
+   public double swing_duration_;
 
    public FootstepStatusMessage()
    {
@@ -77,6 +81,8 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_foot_orientation_in_world_, desired_foot_orientation_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.actual_foot_position_in_world_, actual_foot_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.actual_foot_orientation_in_world_, actual_foot_orientation_in_world_);
+      swing_duration_ = other.swing_duration_;
+
    }
 
    /**
@@ -175,6 +181,21 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       return actual_foot_orientation_in_world_;
    }
 
+   /**
+            * This is the swing duration of the step.
+            */
+   public void setSwingDuration(double swing_duration)
+   {
+      swing_duration_ = swing_duration;
+   }
+   /**
+            * This is the swing duration of the step.
+            */
+   public double getSwingDuration()
+   {
+      return swing_duration_;
+   }
+
 
    public static Supplier<FootstepStatusMessagePubSubType> getPubSubType()
    {
@@ -205,6 +226,8 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       if (!this.desired_foot_orientation_in_world_.epsilonEquals(other.desired_foot_orientation_in_world_, epsilon)) return false;
       if (!this.actual_foot_position_in_world_.epsilonEquals(other.actual_foot_position_in_world_, epsilon)) return false;
       if (!this.actual_foot_orientation_in_world_.epsilonEquals(other.actual_foot_orientation_in_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -230,6 +253,8 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       if (!this.desired_foot_orientation_in_world_.equals(otherMyClass.desired_foot_orientation_in_world_)) return false;
       if (!this.actual_foot_position_in_world_.equals(otherMyClass.actual_foot_position_in_world_)) return false;
       if (!this.actual_foot_orientation_in_world_.equals(otherMyClass.actual_foot_orientation_in_world_)) return false;
+      if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
+
 
       return true;
    }
@@ -255,7 +280,9 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       builder.append("actual_foot_position_in_world=");
       builder.append(this.actual_foot_position_in_world_);      builder.append(", ");
       builder.append("actual_foot_orientation_in_world=");
-      builder.append(this.actual_foot_orientation_in_world_);
+      builder.append(this.actual_foot_orientation_in_world_);      builder.append(", ");
+      builder.append("swing_duration=");
+      builder.append(this.swing_duration_);
       builder.append("}");
       return builder.toString();
    }

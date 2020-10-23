@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -15,21 +15,21 @@ public class YoSwitchableFilterModeIMUHandleHolder extends YoIMUHandleHolder
 {
    private final YoEnum<MicroStrainData.MicrostrainFilterType> filterTypeToUse;
 
-   public static YoSwitchableFilterModeIMUHandleHolder create(IMUHandle complimentaryFilterHandle, IMUHandle kalmanFilterHandle, IMUDefinition definition, YoVariableRegistry parentRegistry)
+   public static YoSwitchableFilterModeIMUHandleHolder create(IMUHandle complimentaryFilterHandle, IMUHandle kalmanFilterHandle, IMUDefinition definition, YoRegistry parentRegistry)
    {
       return new YoSwitchableFilterModeIMUHandleHolder(new SwitchableFilterModeIMUHandle(definition.getName(), complimentaryFilterHandle, kalmanFilterHandle), definition, parentRegistry);
    }
 
-   private YoSwitchableFilterModeIMUHandleHolder(final SwitchableFilterModeIMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
+   private YoSwitchableFilterModeIMUHandleHolder(final SwitchableFilterModeIMUHandle handle, IMUDefinition imuDefinition, YoRegistry parentRegistry)
    {
       super(handle, imuDefinition, parentRegistry);
 
       filterTypeToUse = new YoEnum<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicroStrainData.MicrostrainFilterType.class);
 
-      filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
+      filterTypeToUse.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             handle.setFilterTypeToUse(filterTypeToUse.getEnumValue());
          }

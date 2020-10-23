@@ -4,7 +4,6 @@
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
-#include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
 {
   module msg
@@ -17,16 +16,13 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP =
+      const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      /**
-       * The recommended planner type
-       */
-      const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
+      const octet SWING_PLANNER_TYPE_POSITION =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR =
+      const octet SWING_PLANNER_TYPE_PROPORTION =
       2;
 
       const long NO_PLAN_ID =
@@ -44,49 +40,85 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Initial stance foot side
+         * Starting left foot pose
+         */
+        geometry_msgs::msg::dds::Pose start_left_foot_pose;
+        /**
+         * Starting right foot pose
+         */
+        geometry_msgs::msg::dds::Pose start_right_foot_pose;
+        /**
+         * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+         */
+        sequence<geometry_msgs::msg::dds::Point, 10> initial_left_contact_points_2d;
+        /**
+         * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+         */
+        sequence<geometry_msgs::msg::dds::Point, 10> initial_right_contact_points_2d;
+        /**
+         * Goal left foot pose
+         */
+        geometry_msgs::msg::dds::Pose goal_left_foot_pose;
+        /**
+         * Goal right foot pose
+         */
+        geometry_msgs::msg::dds::Pose goal_right_foot_pose;
+        /**
+         * Requested initial stance side. If not specified the planner will choose
          */
         @defaultValue(value=255)
-        octet initial_stance_robot_side;
+        octet requested_initial_stance_side;
         /**
-         * Stance foot sole frame z up position, z must be correct
+         * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
          */
-        geometry_msgs::msg::dds::Point stance_foot_position_in_world;
+        @defaultValue(value=True)
+        boolean snap_goal_steps;
         /**
-         * Stance foot sole frame z up orientation, only the "yaw" is considered
+         * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
          */
-        geometry_msgs::msg::dds::Quaternion stance_foot_orientation_in_world;
+        boolean abort_if_goal_step_snapping_fails;
         /**
-         * Goal mid feet z up position
+         * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
          */
-        geometry_msgs::msg::dds::Point goal_position_in_world;
+        boolean abort_if_body_path_planner_fails;
         /**
-         * Goal mid feet z up orientation, only the "yaw" is considered
+         * If true, will plan a body path. If false, will follow a straight-line path to the goal
          */
-        geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        boolean plan_body_path;
         /**
-         * Footstep planner type, see above
+         * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
          */
-        @defaultValue(value=255)
-        octet requested_footstep_planner_type;
+        @defaultValue(value=True)
+        boolean perform_a_star_search;
         /**
-         * Acceptable xy distance from the given goal for the planner to terminate
+         * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+         */
+        sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
+        /**
+         * (In beta) acceptable xy distance from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_distance_proximity;
         /**
-         * Acceptable yaw offset from the given goal for the planner to terminate
+         * (In beta) acceptable yaw offset from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_yaw_proximity;
         /**
-         * Timeout in seconds
+         * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+         * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
          */
+        double requested_path_heading;
+        /**
+         * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+         */
+        @defaultValue(value=5.0)
         double timeout;
         /**
-         * Best effort timeout in seconds
+         * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
          */
-        double best_effort_timeout;
+        @defaultValue(value=-1)
+        long max_iterations;
         /**
          * Max body path length if using body path
          */
@@ -105,9 +137,27 @@ module controller_msgs
         @defaultValue(value=-1)
         long planner_request_id;
         /**
-         * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+         * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
          */
-        sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
+        @defaultValue(value=1.0)
+        double status_publish_period;
+        /**
+         * Specifies swing planner to use. See the above enumeration
+         */
+        octet requested_swing_planner;
+        /**
+         * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+         */
+        boolean perform_position_based_split_fraction_calculation;
+        /**
+         * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+         */
+        boolean perform_area_based_split_fraction_calculation;
+        /**
+         * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+         * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+         */
+        boolean generate_log;
       };
     };
   };

@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class QuadrupedJointSpaceManager
    private static final double POSITION_LIMIT_DAMPING = 10.0;
    private static final double POSITION_LIMIT_STIFFNESS = 100.0;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final OneDoFJointBasics[] controlledJoints;
 
@@ -54,7 +54,7 @@ public class QuadrupedJointSpaceManager
    private final List<OneDoFJointBasics> kneeJoints = new ArrayList<>();
    private final PairList<OneDoFJointBasics, Double> jointConfigurations = new PairList<>();
 
-   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = controllerToolbox.getRuntimeEnvironment().getPrivilegedConfigurationParameters();

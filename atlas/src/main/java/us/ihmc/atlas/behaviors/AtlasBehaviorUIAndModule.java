@@ -4,27 +4,29 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.communication.CommunicationMode;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 
 public class AtlasBehaviorUIAndModule
 {
-   public AtlasBehaviorUIAndModule()
+   public AtlasBehaviorUIAndModule(BehaviorUIRegistry behaviorRegistry)
    {
-      ThreadTools.startAThread(() -> new AtlasBehaviorModule(), AtlasBehaviorUIAndModule.class.getSimpleName());
-
-      DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-
-      Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
-
-      new BehaviorUI(behaviorMessager, drcRobotModel, PubSubImplementation.FAST_RTPS);
+      CommunicationMode ros2CommunicationMode = CommunicationMode.INTERPROCESS;
+      CommunicationMode messagerCommunicationMode = CommunicationMode.INTRAPROCESS;
+      
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), ros2CommunicationMode, messagerCommunicationMode);
+      new BehaviorUI(behaviorRegistry, behaviorModule.getMessager(), createRobotModel(), ros2CommunicationMode.getPubSubImplementation());
+   }
+   
+   private DRCRobotModel createRobotModel()
+   {
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
    }
 
    public static void main(String[] args)
    {
-      new AtlasBehaviorUIAndModule();
+      new AtlasBehaviorUIAndModule(BehaviorUIRegistry.DEFAULT_BEHAVIORS);
    }
 }

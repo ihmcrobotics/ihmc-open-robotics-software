@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateMachineTest
@@ -31,7 +31,7 @@ public class StateMachineTest
 
       SimpleState[] arrayOfStates = new SimpleState[States.values().length];
 
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble time = new YoDouble("time", registry);
 
       StateMachineFactory<States, SimpleState> factory = new StateMachineFactory<>(States.class);

@@ -5,12 +5,12 @@ import java.util.concurrent.TimeUnit;
 
 import sensor_msgs.CameraInfo;
 import us.ihmc.utilities.ros.RosMainNode;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo> {
 
    boolean isCameraInfoReceived=false;
-   IntrinsicParameters param = new IntrinsicParameters();
+   CameraPinholeBrown param = new CameraPinholeBrown();
    RosMainNode rosMainNode;
    CountDownLatch latch = new CountDownLatch(1);
    
@@ -22,7 +22,7 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
    }
 
 
-   public IntrinsicParameters getIntrinsicParametersBlocking() throws InterruptedException
+   public CameraPinholeBrown getIntrinsicParametersBlocking() throws InterruptedException
    {
       latch.await(5, TimeUnit.SECONDS);
       return param;

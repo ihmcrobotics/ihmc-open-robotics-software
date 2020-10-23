@@ -10,7 +10,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /*
@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ForceSensorToJointTorqueProjector implements  RobotController
 {   
    private final ForceSensorData forceSensorData;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final FrameVector3D tempFrameVector= new FrameVector3D();
 
 
@@ -29,7 +29,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
    public ForceSensorToJointTorqueProjector(String namePrefix, ForceSensorData forceSensorData, RigidBodyBasics sensorLinkBody) 
    {
-      registry = new YoVariableRegistry(namePrefix+getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix+getClass().getSimpleName());
 
       this.forceSensorData = forceSensorData;
 
@@ -50,7 +50,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

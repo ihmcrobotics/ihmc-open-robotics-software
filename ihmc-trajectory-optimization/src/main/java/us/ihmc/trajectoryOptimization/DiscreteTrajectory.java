@@ -1,7 +1,8 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 
@@ -46,7 +47,7 @@ public class DiscreteTrajectory extends DiscreteSequence
       this.setLength(numberOfTimeSteps);
    }
 
-   public void compute(double time, DenseMatrix64F valueToPack)
+   public void compute(double time, DMatrixRMaj valueToPack)
    {
       if (!MathTools.intervalContains(time, startTime, endTime))
       {
@@ -58,8 +59,8 @@ public class DiscreteTrajectory extends DiscreteSequence
       double startTime = startIndex * realDeltaT;
       double alpha = (time - startTime) / realDeltaT;
 
-      CommonOps.scale((1.0 - alpha), get(startIndex), valueToPack);
-      CommonOps.addEquals(valueToPack, alpha, get(startIndex + 1));
+      CommonOps_DDRM.scale((1.0 - alpha), get(startIndex), valueToPack);
+      CommonOps_DDRM.addEquals(valueToPack, alpha, get(startIndex + 1));
    }
 
    public double getStartTime()

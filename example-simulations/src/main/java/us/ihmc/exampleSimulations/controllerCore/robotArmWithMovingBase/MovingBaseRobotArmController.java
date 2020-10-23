@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -17,11 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.exampleSimulations.controllerCore.ControllerCoreModeChangedListener;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -37,14 +34,13 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class MovingBaseRobotArmController implements RobotController
 {
@@ -52,7 +48,7 @@ public class MovingBaseRobotArmController implements RobotController
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final MovingBaseRobotArm robotArm;
    private final YoDouble yoTime;
@@ -104,7 +100,7 @@ public class MovingBaseRobotArmController implements RobotController
       baseFrame = robotArm.getBase().getBodyFixedFrame();
 
       controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-      controllerCoreMode.addVariableChangedListener(v -> controllerCoreModeHasChanged.set(true));
+      controllerCoreMode.addListener(v -> controllerCoreModeHasChanged.set(true));
 
       yoTime = robotArm.getYoTime();
       double gravityZ = robotArm.getGravity();
@@ -136,7 +132,7 @@ public class MovingBaseRobotArmController implements RobotController
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class));
 
 
-      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, lowLevelControllerCoreOutput, registry);
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, new FeedbackControllerTemplate(allPossibleCommands), lowLevelControllerCoreOutput, registry);
 
       yoGraphicsListRegistry.registerYoGraphic("desireds", new YoGraphicCoordinateSystem("targetFrame", handTargetPosition, handTargetOrientation, 0.15,
                                                                                          YoAppearance.Red()));
@@ -147,7 +143,7 @@ public class MovingBaseRobotArmController implements RobotController
       trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", baseFrame, registry, true, yoGraphicsListRegistry);
 
       robotJointLimitWatcher = new RobotJointLimitWatcher(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class));
-      registry.addChild(robotJointLimitWatcher.getYoVariableRegistry());
+      registry.addChild(robotJointLimitWatcher.getYoRegistry());
 
       initialize();
    }
@@ -309,7 +305,7 @@ public class MovingBaseRobotArmController implements RobotController
          trajectory.setInitialPose(initialPosition, initialOrientation);
          FramePoint3D finalPosition = new FramePoint3D(handTargetPosition);
          FrameQuaternion finalOrientation = new FrameQuaternion();
-         handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);
+         finalOrientation.setIncludingFrame(handTargetOrientation);
          trajectory.setFinalPose(finalPosition, finalOrientation);
          trajectory.setTrajectoryTime(trajectoryDuration.getDoubleValue());
          trajectory.initialize();
@@ -336,7 +332,7 @@ public class MovingBaseRobotArmController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

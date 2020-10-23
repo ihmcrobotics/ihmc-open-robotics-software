@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -27,7 +26,8 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotVisionSensorInformation;
@@ -42,7 +42,7 @@ public class RosModule implements CloseableAndDisposable
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final RosMainNode rosMainNode;
    private final RobotROSClockCalculator rosClockCalculator;
@@ -54,28 +54,28 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).generateTopicName(RobotConfigurationData.class),
+           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDescription().getName()).withTypeName(RobotConfigurationData.class),
            pubSubImplementation);
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
                     AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap<?> jointMap,
-                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, String robotConfigurationDataTopicName,
+                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2Topic robotConfigurationDataTopicName,
                     PubSubImplementation pubSubImplementation)
    {
       LogTools.info("Starting ROS Module");
 
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_ros_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_ros_node");
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       robotName = simpleRobotName.toLowerCase();
       String rosTopicPrefix = "/ihmc_ros/" + robotName;
 
       this.rosClockCalculator = rosClockCalculator;
       this.rosClockCalculator.setROSMainNode(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           robotConfigurationDataTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    robotConfigurationDataTopicName,
                                            s -> this.rosClockCalculator.receivedRobotConfigurationData(s.takeNextData()));
 
       this.sensorInformation = sensorInformation;
@@ -140,9 +140,8 @@ public class RosModule implements CloseableAndDisposable
    {
       new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           LocalizationPacket.class,
-                                           ROS2Tools.getDefaultTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    LocalizationPacket.class, ROS2Tools.IHMC_ROOT,
                                            s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
    }
 

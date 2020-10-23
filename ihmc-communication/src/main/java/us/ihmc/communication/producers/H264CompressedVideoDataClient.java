@@ -3,7 +3,7 @@ package us.ihmc.communication.producers;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
@@ -27,7 +27,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public synchronized void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
+   public synchronized void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, CameraPinholeBrown intrinsicParameters)
    {
       nalBuffer.clear();
       nalBuffer.put(data);

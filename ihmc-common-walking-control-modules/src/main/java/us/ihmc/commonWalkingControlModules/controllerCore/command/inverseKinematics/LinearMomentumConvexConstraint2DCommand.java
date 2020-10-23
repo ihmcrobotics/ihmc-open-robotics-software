@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
  */
 public class LinearMomentumConvexConstraint2DCommand implements InverseKinematicsCommand<LinearMomentumConvexConstraint2DCommand>
 {
+   private int commandId;
    /**
     * The convex set of constraints to apply on the linear part of the momentum.
     * <p>
@@ -47,6 +48,7 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
 
    public void clear()
    {
+      commandId = 0;
       linearMomentumConstraintVertices.clear();
    }
 
@@ -54,6 +56,9 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
    public void set(LinearMomentumConvexConstraint2DCommand other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.linearMomentumConstraintVertices.size(); i++)
          linearMomentumConstraintVertices.add().set(other.linearMomentumConstraintVertices.get(i));
    }
@@ -85,6 +90,24 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
    }
 
    @Override
+   public ControllerCoreCommandType getCommandType()
+   {
+      return ControllerCoreCommandType.MOMENTUM_CONVEX_CONSTRAINT;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -94,6 +117,8 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
       else if (object instanceof LinearMomentumConvexConstraint2DCommand)
       {
          LinearMomentumConvexConstraint2DCommand other = (LinearMomentumConvexConstraint2DCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (linearMomentumConstraintVertices.size() != other.linearMomentumConstraintVertices.size())
             return false;
          for (int i = 0; i < linearMomentumConstraintVertices.size(); i++)
@@ -107,11 +132,5 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
       {
          return false;
       }
-   }
-
-   @Override
-   public ControllerCoreCommandType getCommandType()
-   {
-      return ControllerCoreCommandType.MOMENTUM_CONVEX_CONSTRAINT;
    }
 }

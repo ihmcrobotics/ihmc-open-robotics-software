@@ -17,9 +17,9 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
-import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
+import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.function.Consumer;
 
@@ -65,18 +65,18 @@ public class OrientationYawEditor
       mouseMovedOrientation.poll();
       mouseClickedOrientation.poll();
 
-      if (mouseClickedOrientation.hasNext())  // use the clicked position if clicked
+      if (mouseClickedOrientation.hasValue())  // use the clicked position if clicked
       {
-         selectedGraphic.setOrientation(mouseClickedOrientation.peek());
+         selectedGraphic.setOrientation(mouseClickedOrientation.read());
       }
-      else if (mouseMovedOrientation.hasNext())  // just for selection preview
+      else if (mouseMovedOrientation.hasValue())  // just for selection preview
       {
-         selectedGraphic.setOrientation(mouseMovedOrientation.peek());
+         selectedGraphic.setOrientation(mouseMovedOrientation.read());
       }
 
-      if (mouseClickedOrientation.hasNext())
+      if (mouseClickedOrientation.hasValue())
       {
-         LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.peek());
+         LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
          deactivate(FXUITrigger.ORIENTATION_LEFT_CLICK);
       }
 
@@ -103,7 +103,7 @@ public class OrientationYawEditor
    private void mouseMoved(MouseEvent event)
    {
       Orientation3DReadOnly rotationVector = intersectRayWithPlane(event);
-      mouseMovedOrientation.add(rotationVector);
+      mouseMovedOrientation.set(rotationVector);
    }
 
    private void mouseClicked(MouseEvent event)
@@ -115,7 +115,7 @@ public class OrientationYawEditor
          if (event.getButton() == MouseButton.PRIMARY)
          {
             Orientation3DReadOnly orientation = intersectRayWithPlane(event);
-            mouseClickedOrientation.add(orientation);
+            mouseClickedOrientation.set(orientation);
          }
          else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
          {

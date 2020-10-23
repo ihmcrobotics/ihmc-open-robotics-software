@@ -25,6 +25,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
    {
       super(robotModel, startYoVariableServer, pubSubImplementation);
       controller.setInitialRobotConfigurationNamedMap(initialConfiguration(robotModel));
+      controller.getTools().getIKController().getCenterOfMassSafeMargin().set(0.10);
    }
 
    private static Map<String, Double> initialConfiguration(DRCRobotModel robotModel)

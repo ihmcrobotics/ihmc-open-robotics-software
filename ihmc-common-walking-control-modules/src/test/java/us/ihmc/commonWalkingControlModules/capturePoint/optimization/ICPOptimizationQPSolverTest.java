@@ -1,16 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -369,10 +367,10 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedbackExpected = new FrameVector2D();
       FramePoint2D footstepLocationExpected = new FramePoint2D();
 
-      LinearSolver<DenseMatrix64F> simpleSolver = LinearSolverFactory.linear(6);
-      DenseMatrix64F quadratic = new DenseMatrix64F(6, 6);
-      DenseMatrix64F equals = new DenseMatrix64F(6, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(6, 1);
+      LinearSolverDense<DMatrixRMaj> simpleSolver = LinearSolverFactory_DDRM.linear(6);
+      DMatrixRMaj quadratic = new DMatrixRMaj(6, 6);
+      DMatrixRMaj equals = new DMatrixRMaj(6, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       quadratic.set(0, 0, feedbackWeight);
       quadratic.set(1, 1, feedbackWeight);
       quadratic.set(0, 4, 1.0);
@@ -439,10 +437,10 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedbackExpected = new FrameVector2D();
       FramePoint2D footstepLocationExpected = new FramePoint2D();
 
-      LinearSolver<DenseMatrix64F> simpleSolver = LinearSolverFactory.linear(6);
-      DenseMatrix64F quadratic = new DenseMatrix64F(6, 6);
-      DenseMatrix64F equals = new DenseMatrix64F(6, 1);
-      DenseMatrix64F solution = new DenseMatrix64F(6, 1);
+      LinearSolverDense<DMatrixRMaj> simpleSolver = LinearSolverFactory_DDRM.linear(6);
+      DMatrixRMaj quadratic = new DMatrixRMaj(6, 6);
+      DMatrixRMaj equals = new DMatrixRMaj(6, 1);
+      DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       quadratic.set(0, 0, feedbackWeight);
       quadratic.set(1, 1, feedbackWeight);
       quadratic.set(0, 4, 1.0);

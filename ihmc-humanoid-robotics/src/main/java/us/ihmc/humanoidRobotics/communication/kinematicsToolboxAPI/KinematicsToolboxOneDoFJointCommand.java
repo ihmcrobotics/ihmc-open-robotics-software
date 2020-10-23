@@ -1,14 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import java.util.Objects;
+
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.JointHashCodeResolver;
 
 public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsToolboxOneDoFJointCommand, KinematicsToolboxOneDoFJointMessage>
 {
    private long sequenceId;
-   /** This is the unique hash code of the joint to be solved for. */
-   private int jointHashCode;
-
+   private OneDoFJointBasics joint;
    private double desiredPosition;
    private double weight;
 
@@ -16,7 +18,7 @@ public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsTo
    public void clear()
    {
       sequenceId = 0;
-      jointHashCode = 0;
+      joint = null;
       desiredPosition = 0.0;
       weight = Double.NaN;
    }
@@ -25,7 +27,7 @@ public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsTo
    public void set(KinematicsToolboxOneDoFJointCommand other)
    {
       sequenceId = other.sequenceId;
-      jointHashCode = other.jointHashCode;
+      joint = other.joint;
       desiredPosition = other.desiredPosition;
       weight = other.weight;
    }
@@ -33,15 +35,22 @@ public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsTo
    @Override
    public void setFromMessage(KinematicsToolboxOneDoFJointMessage message)
    {
+      set(message, null);
+   }
+
+   public void set(KinematicsToolboxOneDoFJointMessage message, JointHashCodeResolver jointHashCodeResolver)
+   {
+      Objects.requireNonNull(jointHashCodeResolver);
+
       sequenceId = message.getSequenceId();
-      jointHashCode = message.getJointHashCode();
+      joint = jointHashCodeResolver.castAndGetJoint(message.getJointHashCode());
       desiredPosition = message.getDesiredPosition();
       weight = message.getWeight();
    }
 
-   public int getJointHashCode()
+   public OneDoFJointBasics getJoint()
    {
-      return jointHashCode;
+      return joint;
    }
 
    public double getDesiredPosition()

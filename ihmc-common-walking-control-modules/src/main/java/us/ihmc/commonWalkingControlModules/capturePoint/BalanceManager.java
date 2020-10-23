@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -23,18 +20,8 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -53,20 +40,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
@@ -82,7 +70,10 @@ public class BalanceManager
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+   private final YoFrameVector2D yoDesiredCoMVelocity = new YoFrameVector2D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
+   private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
 
    /** CoP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
@@ -155,7 +146,7 @@ public class BalanceManager
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
-                         YoVariableRegistry parentRegistry)
+                         YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -176,7 +167,8 @@ public class BalanceManager
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime,
+      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, referenceFrames.getSoleFrames(),
+                                                      soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime,
                                                       registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ(), icpPlannerParameters);
       smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
 
@@ -236,6 +228,7 @@ public class BalanceManager
       {
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
          YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
@@ -244,6 +237,7 @@ public class BalanceManager
 
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCoMViz.createArtifact());
          YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
          perfectCMPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
@@ -374,6 +368,8 @@ public class BalanceManager
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCenterOfPressurePosition(perfectCoP2d);
+      icpPlanner.getDesiredCenterOfMassPosition(yoDesiredCoMPosition);
+      icpPlanner.getDesiredCenterOfMassVelocity(yoDesiredCoMVelocity);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
@@ -433,6 +429,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setSupportSide(supportSide);
@@ -517,6 +514,21 @@ public class BalanceManager
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
+   public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
+   {
+      desiredCoMPositionToPack.set(yoFinalDesiredCoM);
+   }
+
+   public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
+   {
+      desiredCoMPositionToPack.set(yoDesiredCoMPosition);
+   }
+
+   public void getDesiredCoMVelocity(FixedFrameVector2DBasics desiredCoMVelocityToPack)
+   {
+      desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
+   }
+
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
       icpPlanner.getNextExitCMP(entryCMPToPack);
@@ -582,6 +594,9 @@ public class BalanceManager
             dynamicReachabilityCalculator.checkReachabilityOfStep();
          }
       }
+
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -664,6 +679,9 @@ public class BalanceManager
             dynamicReachabilityCalculator.checkReachabilityOfStep();
          }
       }
+
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -797,6 +815,7 @@ public class BalanceManager
    {
       computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
@@ -809,12 +828,13 @@ public class BalanceManager
       capturePoint2d.checkReferenceFrameMatch(worldFrame);
       desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
 
+      capturabilityBasedStatus.setOmega(controllerToolbox.getOmega0());
       capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
       capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
-         HumanoidMessageTools.packFootSupportPolygon(robotSide, bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide), capturabilityBasedStatus);
+         HumanoidMessageTools.packFootSupportPolygon(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), capturabilityBasedStatus);
       }
 
       return capturabilityBasedStatus;

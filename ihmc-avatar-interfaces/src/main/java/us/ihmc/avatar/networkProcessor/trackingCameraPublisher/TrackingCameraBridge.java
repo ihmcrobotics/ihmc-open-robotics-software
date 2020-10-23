@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StampedPosePacket;
@@ -13,10 +14,7 @@ import geometry_msgs.Pose;
 import geometry_msgs.Vector3;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,8 +22,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
@@ -34,16 +32,13 @@ public class TrackingCameraBridge
 {
    private static final boolean Debug = false;
 
-   private static final Class<StampedPosePacket> messageTypeToPublish = StampedPosePacket.class;
-
    private final String name = getClass().getSimpleName();
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(name));
    private ScheduledFuture<?> publisherTask;
 
    private final AtomicReference<TrackingCameraData> trackingCameraDataToPublish = new AtomicReference<>(null);
    private final AtomicReference<StampedPosePacket> stampedPosePacketToPublish = new AtomicReference<>(null);
 
-   private final String robotName;
    private final FullRobotModel fullRobotModel;
 
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
@@ -54,43 +49,32 @@ public class TrackingCameraBridge
 
    private RobotROSClockCalculator rosClockCalculator = null;
 
-   private final IHMCROS2Publisher<StampedPosePacket> stampedPosePacketPublisher;
-   private final IHMCRealtimeROS2Publisher<StampedPosePacket> stampedPosePacketRealtimePublisher;
+   private final Consumer<StampedPosePacket> stampedPosePacketPublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2Node ros2Node)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           ROS2Tools.getDefaultTopicNameGenerator());
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node);
    }
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                  MessageTopicNameGenerator defaultTopicNameGenerator)
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2Node ros2Node)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           defaultTopicNameGenerator);
-   }
-
-   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                  String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
-   {
-      this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageTypeToPublish);
-      if (ros2Node != null)
-      {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         stampedPosePacketPublisher = ROS2Tools.createPublisher(ros2Node, messageTypeToPublish, generateTopicName);
-         stampedPosePacketRealtimePublisher = null;
-      }
-      else
-      {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         stampedPosePacketPublisher = null;
-         stampedPosePacketRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageTypeToPublish, generateTopicName);
-      }
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                                    s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      stampedPosePacketPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.T265_POSE)::publish;
+   }
+
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, RealtimeROS2Node realtimeROS2Node)
+   {
+      this.fullRobotModel = fullRobotModel;
+
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
+                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      stampedPosePacketPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.T265_POSE)::publish;
    }
 
    public void start()
@@ -221,10 +205,7 @@ public class TrackingCameraBridge
       if (Debug)
          System.out.println("Publishing tracking camera data.");
 
-      if (stampedPosePacketPublisher != null)
-         stampedPosePacketPublisher.publish(message);
-      else
-         stampedPosePacketRealtimePublisher.publish(message);
+      stampedPosePacketPublisher.accept(message);
    }
    
    public StampedPosePacket pollNewData()
@@ -288,8 +269,8 @@ public class TrackingCameraBridge
       {
          StampedPosePacket message = new StampedPosePacket();
 
-         message.getPose().setPosition(position);
-         message.getPose().setOrientation(orientation);
+         message.getPose().getPosition().set(position);
+         message.getPose().getOrientation().set(orientation);
          message.getTwist().getLinear().set(linearVelocity);
          message.getTwist().getAngular().set(angularVelocity);
          message.setTimestamp(timeStamp);

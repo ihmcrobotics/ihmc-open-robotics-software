@@ -1,7 +1,7 @@
 # Blender v2.79 (sub 0) OBJ File: ''
 # www.blender.org
 mtllib left_elbow_mass_sim.mtl
-o Elbow_Mass_Sim_Left_Elbow_Mass_Sim_Left.001
+#o Elbow_Mass_Sim_Left_Elbow_Mass_Sim_Left.001
 v -0.044078 0.156554 -0.043050
 v -0.046722 0.156554 -0.043050
 v -0.045400 0.155232 -0.043050

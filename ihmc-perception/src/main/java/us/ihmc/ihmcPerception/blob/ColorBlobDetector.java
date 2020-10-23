@@ -27,11 +27,11 @@ import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 /**
@@ -236,7 +236,7 @@ public class ColorBlobDetector
          }
          else
          {
-            imagePanel.setBufferedImageSafe(bufferedImage);
+            imagePanel.setImageUI(bufferedImage);
          }
          if (imagePanel2 == null)
          {
@@ -244,7 +244,7 @@ public class ColorBlobDetector
          }
          else if (bufferedImage2 != null)
          {
-            imagePanel2.setBufferedImageSafe(bufferedImage2);
+            imagePanel2.setImageUI(bufferedImage2);
          }
          if (imagePanel3 == null)
          {
@@ -252,7 +252,7 @@ public class ColorBlobDetector
          }
          else if (bufferedImage3 != null)
          {
-            imagePanel3.setBufferedImageSafe(bufferedImage3);
+            imagePanel3.setImageUI(bufferedImage3);
          }
          if (imagePanel4 == null)
          {
@@ -260,7 +260,7 @@ public class ColorBlobDetector
          }
          else if (bufferedImage4 != null)
          {
-            imagePanel4.setBufferedImageSafe(bufferedImage4);
+            imagePanel4.setImageUI(bufferedImage4);
          }
       }
    }

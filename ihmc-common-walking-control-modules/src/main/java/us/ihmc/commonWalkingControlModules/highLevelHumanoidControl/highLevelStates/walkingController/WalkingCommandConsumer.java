@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.List;
 
-import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -22,13 +21,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingCommandConsumer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isAutomaticManipulationAbortEnabled = new YoBoolean("isAutomaticManipulationAbortEnabled", registry);
    private final YoBoolean hasManipulationBeenAborted = new YoBoolean("hasManipulationBeenAborted", registry);
@@ -55,8 +54,9 @@ public class WalkingCommandConsumer
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                 WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
       this.walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       yoTime = controllerToolbox.getYoTime();
@@ -71,7 +71,7 @@ public class WalkingCommandConsumer
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
       ReferenceFrame chestBodyFrame = null;
-      if(chest != null)
+      if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
          this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
@@ -94,7 +94,7 @@ public class WalkingCommandConsumer
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-         if(hand != null)
+         if (hand != null)
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
             RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
@@ -216,7 +216,7 @@ public class WalkingCommandConsumer
          return;
 
       List<GoHomeCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(GoHomeCommand.class);
-      for(int i = 0; i < commands.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
          GoHomeCommand command = commands.get(i);
 
@@ -225,7 +225,7 @@ public class WalkingCommandConsumer
             if (command.getRequest(robotSide, HumanoidBodyPart.ARM))
             {
                RigidBodyControlManager handManager = handManagers.get(robotSide);
-               if(handManager != null)
+               if (handManager != null)
                {
                   handManager.goHome(command.getTrajectoryTime());
                }
@@ -250,15 +250,15 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
       {
-         PelvisOrientationTrajectoryCommand newestCommand = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
-         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
-            pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(newestCommand);
+         PelvisOrientationTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand() || command.getForceExecution())
+            pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(command);
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
          PelvisTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisTrajectoryCommand.class);
-         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand() || command.getForceExecution())
          {
             if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
                return;
@@ -286,66 +286,71 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
 
-      if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
+      boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
+
+      for (int i = 0; i < handTrajectoryCommands.size(); i++)
       {
-         for (int i = 0; i < handTrajectoryCommands.size(); i++)
+         HandTrajectoryCommand command = handTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            HandTrajectoryCommand command = handTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
-               se3Trajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleTaskspaceTrajectoryCommand(se3Trajectory);
-            }
+            SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+            se3Trajectory.setSequenceId(command.getSequenceId());
+            handManager.handleTaskspaceTrajectoryCommand(se3Trajectory);
          }
-         for (int i = 0; i < handWrenchTrajectoryCommands.size(); i++)
-         {
-            HandWrenchTrajectoryCommand command = handWrenchTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
-               wrenchTrajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleWrenchTrajectoryCommand(wrenchTrajectory);
-            }
-         }
-         for (int i = 0; i < armTrajectoryCommands.size(); i++)
-         {
-            ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
-               jointspaceTrajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleJointspaceTrajectoryCommand(jointspaceTrajectory);
-            }
-         }
+      }
 
-         for (int i = 0; i < handHybridCommands.size(); i++)
+      for (int i = 0; i < handWrenchTrajectoryCommands.size(); i++)
+      {
+         HandWrenchTrajectoryCommand command = handWrenchTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
-               JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
-               taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-               jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
-            }
+            WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
+            wrenchTrajectory.setSequenceId(command.getSequenceId());
+            handManager.handleWrenchTrajectoryCommand(wrenchTrajectory);
          }
-
-         for (int i = 0; i < armDesiredAccelerationCommands.size(); i++)
+      }
+      for (int i = 0; i < armTrajectoryCommands.size(); i++)
+      {
+         ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            ArmDesiredAccelerationsCommand command = armDesiredAccelerationCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               DesiredAccelerationsCommand desiredAccelerations = command.getDesiredAccelerations();
-               desiredAccelerations.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleDesiredAccelerationsCommand(desiredAccelerations);
-            }
+            JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+            jointspaceTrajectory.setSequenceId(command.getSequenceId());
+            handManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
+         }
+      }
+
+      for (int i = 0; i < handHybridCommands.size(); i++)
+      {
+         HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
+         {
+            SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
+            JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
+            taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
+            jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+         }
+      }
+
+      for (int i = 0; i < armDesiredAccelerationCommands.size(); i++)
+      {
+         ArmDesiredAccelerationsCommand command = armDesiredAccelerationCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && allowCommand)
+         {
+            DesiredAccelerationsCommand desiredAccelerations = command.getDesiredAccelerations();
+            desiredAccelerations.setSequenceId(command.getSequenceId());
+            handManager.handleDesiredAccelerationsCommand(desiredAccelerations);
          }
       }
    }
@@ -443,7 +448,7 @@ public class WalkingCommandConsumer
             handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
       }
 
-      if(chestManager != null)
+      if (chestManager != null)
       {
          chestManager.handleStopAllTrajectoryCommand(command);
       }
@@ -499,6 +504,14 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
          walkingMessageHandler.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
+      }
+   }
+
+   public void consumePlanarRegionStepConstraintCommand()
+   {
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintRegionCommand.class))
+      {
+         walkingMessageHandler.handleStepConstraintRegionCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintRegionCommand.class));
       }
    }
 

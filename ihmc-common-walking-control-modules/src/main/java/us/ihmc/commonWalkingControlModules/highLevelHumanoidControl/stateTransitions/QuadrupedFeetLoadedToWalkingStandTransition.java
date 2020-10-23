@@ -6,7 +6,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -23,7 +23,7 @@ public class QuadrupedFeetLoadedToWalkingStandTransition extends QuadrupedFeetLo
    public QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState,
                                                       QuadrantDependentList<FootSwitchInterface> footSwitches, double controlDT, double totalMass,
                                                       double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
-                                                      YoVariableRegistry parentRegistry)
+                                                      YoRegistry parentRegistry)
    {
       super(footSwitches, controlDT, totalMass, gravityZ, parentRegistry);
 

@@ -20,20 +20,20 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class IMUYawDriftEstimator implements YawDriftProvider
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final int numberOfFeet;
    private final List<RigidBodyBasics> allFeet;
@@ -90,7 +90,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
    public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet, RobotMotionStatusHolder robotMotionStatusFromController,
-                               StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+                               StateEstimatorParameters stateEstimatorParameters, YoRegistry parentRegistry)
    {
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();

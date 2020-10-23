@@ -3,13 +3,15 @@ package us.ihmc.robotics.numericalMethods;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 
 /**
- * The primary role of this solver is to calculate out closest manifold by searching configuration spaces of the manifold. 
+ * The primary role of this solver is to calculate out closest manifold by searching configuration
+ * spaces of the manifold.
  */
 public class GradientDescentModule
 {
-   private final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
 
    // internal
    private SingleQueryFunction function;
@@ -46,6 +48,11 @@ public class GradientDescentModule
          this.inputUpperLimit.add(Double.POSITIVE_INFINITY);
          this.inputLowerLimit.add(Double.NEGATIVE_INFINITY);
       }
+   }
+
+   public void redefineModule(SingleQueryFunction function)
+   {
+      this.function = function;
    }
 
    private void reduceStepSize()
@@ -143,7 +150,7 @@ public class GradientDescentModule
             {
                tempSignForPerturb = -1.0;
                if (DEBUG)
-                  System.out.println("current input is meeting with upper limit");
+                  LogTools.debug("current input is meeting with upper limit");
             }
 
             double tempInput = perturbedInput.get(j) + perturb * tempSignForPerturb;
@@ -163,6 +170,8 @@ public class GradientDescentModule
          }
 
          newQuery = function.getQuery(optimalInput);
+         if (DEBUG)
+            LogTools.debug("cur Query " + pastQuery + " new Query " + newQuery);
 
          if (newQuery > pastQuery)
          {
@@ -179,7 +188,7 @@ public class GradientDescentModule
             if (DEBUG)
             {
                double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
-               System.out.println("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
+               LogTools.debug("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
             }
 
             if (delta < deltaThreshold)

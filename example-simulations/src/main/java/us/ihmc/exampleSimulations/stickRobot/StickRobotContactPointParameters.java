@@ -50,7 +50,7 @@ public class StickRobotContactPointParameters extends RobotContactPointParameter
             System.out.println("Simulation contact '" + name + "'");
             Vector3D gcOffset = new Vector3D();
 
-            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            gcOffset.set(ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation());
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -60,7 +60,7 @@ public class StickRobotContactPointParameters extends RobotContactPointParameter
             System.out.println("Controller contact '" + name + "'");
             Vector3D gcOffset = new Vector3D();
 
-            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            gcOffset.set(ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation());
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 

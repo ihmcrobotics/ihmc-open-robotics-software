@@ -12,27 +12,27 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleOrientationTrajectoryGeneratorTest
 {
    private static final Random random = new Random(1516351L);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         EuclidCoreRandomTools.nextRigidBodyTransform(random));
+   private static final ReferenceFrame frameA = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
 
 	@Test
    public void testCompareWithSingleFrameTrajectoryGenerator()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -79,7 +79,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
 	@Test
    public void testNegativeTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -112,7 +112,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
 	@Test
    public void testTooBigTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -145,7 +145,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
 	@Test
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", true, worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);

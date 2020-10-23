@@ -12,6 +12,7 @@ import java.util.Set;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -138,7 +139,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void addSensorDefinitions(JointBasics joint, JointDescription jointDescription)
    {
-      ArrayList<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
+      List<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
 
       // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
 //      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
@@ -154,7 +155,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
       for (CameraSensorDescription cameraSensor : jointDescription.getCameraSensors())
       {
-         ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(), joint.getFrameAfterJoint(), cameraSensor.getTransformToJoint());
+         ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(), joint.getFrameAfterJoint(), cameraSensor.getTransformToJoint());
          cameraFrames.put(cameraFrame.getName(), cameraFrame);
       }
 

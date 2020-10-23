@@ -33,7 +33,7 @@ public class PawNodeTools
     */
    public static void getNodeTransformToWorld(double xPosition, double yPosition, RigidBodyTransform nodeTransformToWorldToPack)
    {
-      nodeTransformToWorldToPack.setTranslation(xPosition, yPosition, 0.0);
+      nodeTransformToWorldToPack.getTranslation().set(xPosition, yPosition, 0.0);
    }
 
 
@@ -92,8 +92,8 @@ public class PawNodeTools
    {
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       RigidBodyTransform stepTransform = new RigidBodyTransform();
-      stepTransform.setTranslation(snappedPawPosition);
-      stepTransform.setRotation(pawOrientation);
+      stepTransform.getTranslation().set(snappedPawPosition);
+      stepTransform.getRotation().set(pawOrientation);
 
       getNodeTransformToWorld(xPosition, yPosition, snapTransform);
       snapTransform.preMultiplyInvertThis(stepTransform);

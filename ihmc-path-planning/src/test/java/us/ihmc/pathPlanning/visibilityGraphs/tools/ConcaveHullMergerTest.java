@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,19 +55,19 @@ public class ConcaveHullMergerTest
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
       PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
-      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
-      assertEquals(8, concaveHull.length);
+      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(8, concaveHull.size());
 
       int i = 0;
       double epsilon = 1e-7;
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB0, concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB1, concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 0.5), concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA1, concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 0.0), concaveHull[i++], epsilon);
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB3, concaveHull[i++], epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB0, concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB1, concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 0.5), concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA1, concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 0.0), concaveHull.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB3, concaveHull.get(i++), epsilon);
 
       assertEquals(3, mergedPlanarRegion.getNumberOfConvexPolygons());
    }
@@ -75,7 +76,7 @@ public class ConcaveHullMergerTest
    public void testMergingLargeConcaveHullsDoesNotResultInLoopError()
    {
 
-      ArrayList<Point2D> hullOneIn = new ArrayList<>();
+      List<Point2D> hullOneIn = new ArrayList<>();
       hullOneIn.add(new Point2D(-5.749524598760511, 0.5117437910963702));
       hullOneIn.add(new Point2D(-5.728123782790979, 0.5459983746280823));
       hullOneIn.add(new Point2D(-5.7399913558093285, 0.6035766893026047));
@@ -181,7 +182,7 @@ public class ConcaveHullMergerTest
       hullOneIn.add(new Point2D(-5.726504258756771, 0.3459350450978585));
       hullOneIn.add(new Point2D(-5.723695893328202, 0.4597672373799782));
 
-      ArrayList<Point2D> hullTwoIn = new ArrayList<>();
+      List<Point2D> hullTwoIn = new ArrayList<>();
       hullTwoIn.add(new Point2D(-5.743924018230668, 0.8702030554602013));
       hullTwoIn.add(new Point2D(-5.692933720181574, 0.9949886903216416));
       hullTwoIn.add(new Point2D(-5.644927015011673, 0.9647609403647504));
@@ -397,7 +398,7 @@ public class ConcaveHullMergerTest
 //      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
 //      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      ArrayList<Point2D> points = ConcaveHullMerger.mergeConcaveHulls(hullOneIn, hullTwoIn, listener);
+      List<Point2D> points = ConcaveHullMerger.mergeConcaveHulls(hullOneIn, hullTwoIn, listener);
 
 //      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       if (VISUALIZE)
@@ -431,8 +432,8 @@ public class ConcaveHullMergerTest
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
       PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
-      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
-      assertEquals(4, concaveHull.length);
+      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(4, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, pointA0);
       assertConcaveHullContains(concaveHull, pointA1);
@@ -445,7 +446,7 @@ public class ConcaveHullMergerTest
       mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       concaveHull = mergedPlanarRegion.getConcaveHull();
-      assertEquals(4, concaveHull.length);
+      assertEquals(4, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, pointA0);
       assertConcaveHullContains(concaveHull, pointA1);
@@ -555,9 +556,9 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
 
       RigidBodyTransform transformA = new RigidBodyTransform();
-      transformA.setTranslation(1.0, 2.0, 3.0);
+      transformA.getTranslation().set(1.0, 2.0, 3.0);
       RigidBodyTransform transformB = new RigidBodyTransform();
-      transformB.setTranslation(1.5, 2.5, 3.0);
+      transformB.getTranslation().set(1.5, 2.5, 3.0);
 
       PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
@@ -571,8 +572,8 @@ public class ConcaveHullMergerTest
       BoundingBox3D mergedBoundingBox = mergedPlanarRegion.getBoundingBox3dInWorld();
       assertEquals(new BoundingBox3D(1.0, 2.0, 3.0, 2.5, 3.5, 3.0), mergedBoundingBox);
 
-      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
-      assertEquals(8, concaveHull.length);
+      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(8, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, 0.0, 0.0);
       assertConcaveHullContains(concaveHull, 0.0, 1.0);
@@ -603,8 +604,8 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
 
       RigidBodyTransform transformA = new RigidBodyTransform();
-      transformA.setTranslation(0.1, -0.2, 0.3);
-      transformA.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+      transformA.getTranslation().set(0.1, -0.2, 0.3);
+      transformA.getRotation().setYawPitchRoll(0.16, 0.37, 0.44);
 
       RigidBodyTransform transformAInverse = new RigidBodyTransform(transformA);
       transformAInverse.invert();
@@ -615,8 +616,8 @@ public class ConcaveHullMergerTest
       transformA.transform(pointOnPlaneA);
 
       RigidBodyTransform transformB = new RigidBodyTransform();
-      transformB.setTranslation(pointOnPlaneA);
-      transformB.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+      transformB.getTranslation().set(pointOnPlaneA);
+      transformB.getRotation().setYawPitchRoll(0.16, 0.37, 0.44);
       RigidBodyTransform transformBInverse = new RigidBodyTransform(transformB);
       transformBInverse.invert();
 
@@ -671,8 +672,8 @@ public class ConcaveHullMergerTest
 
       assertTrue(expectedBox.epsilonEquals(mergedBoundingBox, 1e-7));
 
-      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
-      assertEquals(8, concaveHull.length);
+      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(8, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, 1.0, 2.0);
       assertConcaveHullContains(concaveHull, 1.0, 3.0);
@@ -736,7 +737,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, null);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, null);
 
       assertEquals(8, mergedHulls.size());
 
@@ -780,7 +781,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB3);
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -831,7 +832,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB7);
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(8, mergedHulls.size());
 
@@ -878,7 +879,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB3);
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -929,7 +930,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB3);
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -980,7 +981,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB3);
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -1034,7 +1035,7 @@ public class ConcaveHullMergerTest
             {-0.19239786762148312, -0.09986922600319931}, {-0.19854388436229184, -8.514394122500213E-4}, {-0.22962867228965547, 0.05809039869701854}};
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
 
       if (VISUALIZE)
@@ -1108,7 +1109,7 @@ public class ConcaveHullMergerTest
             {-3.8155070000929037, -0.6502645615646477}, {-3.8099417680550687, -0.5730421391584346}, {-3.8250805933151035, -0.47766611704632744}};
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
       assertEquals(164, mergedHulls.size());
 
@@ -1143,7 +1144,7 @@ public class ConcaveHullMergerTest
             {-0.19742918259614284, 0.08807388647119463}, {-0.19789920767358, 0.2125274007666813}};
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
       if (VISUALIZE)
          ThreadTools.sleepForever();
@@ -1169,7 +1170,7 @@ public class ConcaveHullMergerTest
             {0.03329963129665654, -0.06839968113853566}};
 
       ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+      List<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
       if (VISUALIZE)
          ThreadTools.sleepForever();
@@ -1310,12 +1311,12 @@ public class ConcaveHullMergerTest
       return points;
    }
 
-   private void assertConcaveHullContains(Point2D[] concaveHull, Point2D point)
+   private void assertConcaveHullContains(List<Point2D> concaveHull, Point2D point)
    {
       assertConcaveHullContains(concaveHull, point.getX(), point.getY());
    }
 
-   private void assertConcaveHullContains(Point2D[] concaveHull, double x, double y)
+   private void assertConcaveHullContains(List<Point2D> concaveHull, double x, double y)
    {
       double epsilon = 1e-7;
 
@@ -1385,17 +1386,17 @@ public class ConcaveHullMergerTest
    private class EnsureNoLoopsListener implements ConcaveHullMergerListener
    {
       @Override
-      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
       {
       }
 
@@ -1410,19 +1411,19 @@ public class ConcaveHullMergerTest
       }
 
       @Override
-      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
       {
          fail("Hull got looped!");
       }
 
       @Override
-      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      public void hullIsInvalid(List<Point2D> invalidHull)
       {
          fail("Hull is invalid");
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+      public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
       {
          fail("Hulls are invalid");
       }

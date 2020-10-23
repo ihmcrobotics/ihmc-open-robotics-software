@@ -1,7 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -30,8 +31,8 @@ public class REAOcTreeUpdater
    private NormalOcTree referenceOctree;
    private Pose3DBasics sensorPose = new Pose3D();
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
-
-   private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
+   private final Map<REAOcTreeBuffer, AtomicReference<Pose3D>> sensorPoses;
+   private final Map<REAOcTreeBuffer, AtomicBoolean> bufferClearRequest = new HashMap<>();
 
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> enableNormalEstimation;
@@ -45,11 +46,20 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(double octreeResolution, REAOcTreeBuffer[] buffers, Messager reaMessager)
+   /** Lifetime of a node in milliseconds before it decays when not being hit. */
+   private final AtomicReference<Long> nodeLifetimeMilliseconds;
+
+   public REAOcTreeUpdater(double octreeResolution, REAOcTreeBuffer[] buffers, Map<REAOcTreeBuffer, AtomicReference<Pose3D>> sensorPoses, Messager reaMessager)
    {
       initializeReferenceOctree(octreeResolution);
       this.reaOcTreeBuffers = buffers;
+      this.sensorPoses = sensorPoses;
       this.reaMessager = reaMessager;
+
+      for (REAOcTreeBuffer buffer : buffers)
+      {
+         bufferClearRequest.put(buffer, new AtomicBoolean(false));
+      }
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableNormalEstimation = reaMessager.createInput(REAModuleAPI.NormalEstimationEnable, true);
@@ -58,9 +68,14 @@ public class REAOcTreeUpdater
       maxRange = reaMessager.createInput(REAModuleAPI.LidarMaxRange, 5.0);
       useBoundingBox = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters,
-                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(0.0f, -2.0f, -3.0f, 5.0f, 2.0f,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f,
+                                                                                                                           -2.0f,
+                                                                                                                           -3.0f,
+                                                                                                                           5.0f,
+                                                                                                                           2.0f,
                                                                                                                            0.5f));
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
+      nodeLifetimeMilliseconds = reaMessager.createInput(REAModuleAPI.OcTreeNodeLifetimeMillis, 60000L);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
@@ -77,6 +92,7 @@ public class REAOcTreeUpdater
    {
       reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, enable.get());
       reaMessager.submitMessage(REAModuleAPI.NormalEstimationEnable, enableNormalEstimation.get());
+      reaMessager.submitMessage(REAModuleAPI.OcTreeNodeLifetimeMillis, nodeLifetimeMilliseconds.get());
       reaMessager.submitMessage(REAModuleAPI.LidarMinRange, minRange.get());
       reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, maxRange.get());
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
@@ -93,6 +109,9 @@ public class REAOcTreeUpdater
       Boolean enableNormalEstimationFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.NormalEstimationEnable.getName());
       if (enableNormalEstimationFile != null)
          enableNormalEstimation.set(enableNormalEstimationFile);
+      Long nodeLifetimeMillisFile = filePropertyHelper.loadLongProperty(REAModuleAPI.OcTreeNodeLifetimeMillis.getName());
+      if (nodeLifetimeMillisFile != null)
+         nodeLifetimeMilliseconds.set(nodeLifetimeMillisFile);
       String normalEstimationParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.NormalEstimationParameters.getName());
       if (normalEstimationParametersFile != null)
          normalEstimationParameters.set(NormalEstimationParameters.parse(normalEstimationParametersFile));
@@ -114,6 +133,7 @@ public class REAOcTreeUpdater
    {
       filePropertyHelper.saveProperty(REAModuleAPI.OcTreeEnable.getName(), enable.get());
       filePropertyHelper.saveProperty(REAModuleAPI.NormalEstimationEnable.getName(), enableNormalEstimation.get());
+      filePropertyHelper.saveProperty(REAModuleAPI.OcTreeNodeLifetimeMillis.getName(), nodeLifetimeMilliseconds.get());
       filePropertyHelper.saveProperty(REAModuleAPI.OcTreeBoundingBoxEnable.getName(), useBoundingBox.get());
 
       filePropertyHelper.saveProperty(REAModuleAPI.NormalEstimationParameters.getName(), normalEstimationParameters.get().toString());
@@ -136,14 +156,16 @@ public class REAOcTreeUpdater
 
       referenceOctree.setNormalEstimationParameters(normalEstimationParameters.get());
 
-      if (latestLidarPoseReference.get() == null)
-         return;
-
-      Point3DReadOnly sensorOrigin = latestLidarPoseReference.get().getPosition();
       boolean hasOcTreeBeenUpdated = false;
 
       for (REAOcTreeBuffer buffer : reaOcTreeBuffers)
       {
+         AtomicReference<Pose3D> sensorPoseReference = sensorPoses.get(buffer);
+         if (sensorPoseReference.get() == null)
+            continue;
+
+         Point3DReadOnly sensorOrigin = sensorPoseReference.get().getPosition();
+
          boolean isBufferFull = buffer.isBufferFull();
          if (isBufferFull)
             buffer.submitBufferRequest();
@@ -153,13 +175,22 @@ public class REAOcTreeUpdater
 
          if (bufferOctree != null)
          {
+            if (bufferClearRequest.get(buffer).getAndSet(false))
+               referenceOctree.clear();
+
             PointCloud pointCloud = new PointCloud();
             bufferOctree.forEach(node -> pointCloud.add(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ()));
+            pointCloud.setTimestamp(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
             Scan scan = new Scan(sensorOrigin, pointCloud);
             Set<NormalOcTreeNode> updatedNodes = new HashSet<>();
             referenceOctree.insertScan(scan, updatedNodes, null);
+
+            if (nodeLifetimeMilliseconds.get() > 0L)
+               decayOcTreeNodes();
+
             hasOcTreeBeenUpdated = true;
          }
+
          if (bufferSensorPose != null)
          {
             sensorPose.set(bufferSensorPose);
@@ -176,6 +207,24 @@ public class REAOcTreeUpdater
          return;
 
       referenceOctree.updateNormals();
+   }
+
+   private void decayOcTreeNodes()
+   {
+      long currentTimestamp = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+      List<NormalOcTreeNode> decayedNodes = new ArrayList<>();
+
+      for (NormalOcTreeNode node : referenceOctree)
+      {
+         if (currentTimestamp - node.getLastHitTimestamp() >= nodeLifetimeMilliseconds.get())
+            decayedNodes.add(node);
+      }
+      decayedNodes.forEach(node -> referenceOctree.deleteNode(node.getKeyCopy()));
+   }
+
+   public void clearOcTreeOnNextUpdate(REAOcTreeBuffer bufferToClear)
+   {
+      bufferClearRequest.get(bufferToClear).set(true);
    }
 
    public void clearOcTree()
@@ -197,11 +246,18 @@ public class REAOcTreeUpdater
       Point3D max = atomicBoundingBoxParameters.get().getMax();
       boundingBox.setLocalMinMaxCoordinates(min, max);
 
-      if (latestLidarPoseReference.get() != null)
+      Pose3D sensorPose = null;
+      for (REAOcTreeBuffer buffer : reaOcTreeBuffers)
       {
-         Pose3D lidarPose = latestLidarPoseReference.get();
-         boundingBox.setOffset(lidarPose.getPosition());
-         boundingBox.setYawFromQuaternion(new Quaternion(lidarPose.getOrientation()));
+         AtomicReference<Pose3D> sensorPoseReference = sensorPoses.get(buffer);
+         if (sensorPoseReference.get() != null)
+            sensorPose = sensorPoseReference.get();
+      }
+
+      if (sensorPose != null)
+      {
+         boundingBox.setOffset(sensorPose.getPosition());
+         boundingBox.setYawFromQuaternion(new Quaternion(sensorPose.getOrientation()));
       }
 
       boundingBox.update(referenceOctree.getResolution(), referenceOctree.getTreeDepth());
@@ -216,15 +272,5 @@ public class REAOcTreeUpdater
    public Pose3DReadOnly getSensorPose()
    {
       return sensorPose;
-   }
-
-   public void handleLidarScanMessage(LidarScanMessage message)
-   {
-      latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
-   }
-
-   public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
-   {
-      latestLidarPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 }

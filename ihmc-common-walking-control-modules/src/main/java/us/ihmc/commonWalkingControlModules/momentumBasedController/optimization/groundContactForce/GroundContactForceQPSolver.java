@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
@@ -9,70 +9,70 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceQPSolver
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final ActiveSetQPSolver qpSolver;
 
-   private final DenseMatrix64F solverInput_H;
-   private final DenseMatrix64F solverInput_f;
+   private final DMatrixRMaj solverInput_H;
+   private final DMatrixRMaj solverInput_f;
 
-   private final DenseMatrix64F solverInput_Aeq;
-   private final DenseMatrix64F solverInput_beq;
-   private final DenseMatrix64F solverInput_Ain;
-   private final DenseMatrix64F solverInput_bin;
+   private final DMatrixRMaj solverInput_Aeq;
+   private final DMatrixRMaj solverInput_beq;
+   private final DMatrixRMaj solverInput_Ain;
+   private final DMatrixRMaj solverInput_bin;
 
-   private final DenseMatrix64F solverInput_lb;
-   private final DenseMatrix64F solverInput_ub;
+   private final DMatrixRMaj solverInput_lb;
+   private final DMatrixRMaj solverInput_ub;
 
-   private final DenseMatrix64F solverOutput_rhos;
+   private final DMatrixRMaj solverOutput_rhos;
 
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
    private final YoInteger numberOfConstraints = new YoInteger("numberOfConstraints", registry);
-   private final DenseMatrix64F regularizationMatrix;
+   private final DMatrixRMaj regularizationMatrix;
 
-   private final DenseMatrix64F tempJtW;
-   private final DenseMatrix64F tempRhoTask_H;
-   private final DenseMatrix64F tempRhoTask_f;
+   private final DMatrixRMaj tempJtW;
+   private final DMatrixRMaj tempRhoTask_H;
+   private final DMatrixRMaj tempRhoTask_f;
 
    private final int rhoSize;
 
-   public GroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, YoVariableRegistry parentRegistry)
+   public GroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.rhoSize = rhoSize;
 
-      solverInput_H = new DenseMatrix64F(rhoSize, rhoSize);
-      solverInput_f = new DenseMatrix64F(rhoSize, 1);
+      solverInput_H = new DMatrixRMaj(rhoSize, rhoSize);
+      solverInput_f = new DMatrixRMaj(rhoSize, 1);
 
-      solverInput_Aeq = new DenseMatrix64F(0, rhoSize);
-      solverInput_beq = new DenseMatrix64F(0, 1);
-      solverInput_Ain = new DenseMatrix64F(0, rhoSize);
-      solverInput_bin = new DenseMatrix64F(0, 1);
+      solverInput_Aeq = new DMatrixRMaj(0, rhoSize);
+      solverInput_beq = new DMatrixRMaj(0, 1);
+      solverInput_Ain = new DMatrixRMaj(0, rhoSize);
+      solverInput_bin = new DMatrixRMaj(0, 1);
 
-      solverInput_lb = new DenseMatrix64F(rhoSize, 1);
-      solverInput_ub = new DenseMatrix64F(rhoSize, 1);
+      solverInput_lb = new DMatrixRMaj(rhoSize, 1);
+      solverInput_ub = new DMatrixRMaj(rhoSize, 1);
 
-      CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
-      solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
+      solverOutput_rhos = new DMatrixRMaj(rhoSize, 1);
 
-      tempJtW = new DenseMatrix64F(rhoSize, rhoSize);
-      tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
-      tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
+      tempJtW = new DMatrixRMaj(rhoSize, rhoSize);
+      tempRhoTask_H = new DMatrixRMaj(rhoSize, rhoSize);
+      tempRhoTask_f = new DMatrixRMaj(rhoSize, 1);
 
-      regularizationMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      regularizationMatrix = new DMatrixRMaj(rhoSize, rhoSize);
 
       double defaultRhoRegularization = 0.00001;
       for (int i = 0; i < rhoSize; i++)
@@ -81,9 +81,9 @@ public class GroundContactForceQPSolver
       parentRegistry.addChild(registry);
    }
 
-   public void setRhoRegularizationWeight(DenseMatrix64F weight)
+   public void setRhoRegularizationWeight(DMatrixRMaj weight)
    {
-      CommonOps.insert(weight, regularizationMatrix, 0, 0);
+      CommonOps_DDRM.insert(weight, regularizationMatrix, 0, 0);
    }
 
    public void reset()
@@ -98,7 +98,7 @@ public class GroundContactForceQPSolver
 
    public void addRegularization()
    {
-      CommonOps.addEquals(solverInput_H, regularizationMatrix);
+      CommonOps_DDRM.addEquals(solverInput_H, regularizationMatrix);
    }
 
    public void addMotionInput(QPInput input)
@@ -125,24 +125,24 @@ public class GroundContactForceQPSolver
       }
    }
 
-   public void addMomentumTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addMomentumTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
       tempJtW.reshape(rhoSize, taskSize);
-      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
 
       addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
+   public void addMotionTask(DMatrixRMaj taskJ, DMatrixRMaj taskObjective, double taskWeight)
    {
       int taskSize = taskJ.getNumRows();
 
       // J^T W
       tempJtW.reshape(rhoSize, taskSize);
-      CommonOps.transpose(taskJ, tempJtW);
+      CommonOps_DDRM.transpose(taskJ, tempJtW);
 
       addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
    }
@@ -156,7 +156,7 @@ public class GroundContactForceQPSolver
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
     * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
     */
-   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
@@ -168,41 +168,41 @@ public class GroundContactForceQPSolver
    }
 
    // new, and hopefully faster
-   private void addMotionTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   private void addMotionTaskInternal(double weight, DMatrixRMaj taskJt, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.multInner(taskJacobian, tempRhoTask_H);
+      CommonOps_DDRM.multInner(taskJacobian, tempRhoTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, weight);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJt, taskObjective, tempRhoTask_f);
+      CommonOps_DDRM.mult(taskJt, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -weight);
    }
 
-   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   private void addMotionTaskInternal(DMatrixRMaj taskJtW, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
+      CommonOps_DDRM.mult(taskJtW, taskJacobian, tempRhoTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
+      CommonOps_DDRM.mult(taskJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
-   public void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMomentumTaskInternal(DMatrixRMaj taskJtW, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
+      CommonOps_DDRM.mult(taskJtW, taskJacobian, tempRhoTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
 
       // Compute f += -J^T W Objective
-      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
+      CommonOps_DDRM.mult(taskJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
 
-   public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_beq.getNumRows();
@@ -211,21 +211,21 @@ public class GroundContactForceQPSolver
       solverInput_Aeq.reshape(previousSize + taskSize, rhoSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
-      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
-   public void addMotionLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
    }
 
-   public void addMotionGreaterOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
    }
 
-   private void addMotionInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
+   private void addMotionInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_bin.getNumRows();
@@ -238,27 +238,27 @@ public class GroundContactForceQPSolver
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
-   public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addRhoTask(DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
 
-      CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
+      CommonOps_DDRM.mult(taskWeight, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
-   public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addRhoTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
       // J^T W
       tempJtW.reshape(rhoSize, taskSize);
-      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
 
       // Compute: H += J^T W J
-      CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
+      CommonOps_DDRM.mult(tempJtW, taskJacobian, tempRhoTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(tempJtW, taskObjective, tempRhoTask_f);
+      CommonOps_DDRM.mult(tempJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
@@ -287,7 +287,7 @@ public class GroundContactForceQPSolver
       firstCall.set(false);
    }
 
-   public DenseMatrix64F getRhos()
+   public DMatrixRMaj getRhos()
    {
       return solverOutput_rhos;
    }
@@ -298,9 +298,9 @@ public class GroundContactForceQPSolver
          solverInput_lb.set(i, 0, rhoMin);
    }
 
-   public void setMinRho(DenseMatrix64F rhoMin)
+   public void setMinRho(DMatrixRMaj rhoMin)
    {
-      CommonOps.insert(rhoMin, solverInput_lb, 0, 0);
+      CommonOps_DDRM.insert(rhoMin, solverInput_lb, 0, 0);
    }
 
    public void setMaxRho(double rhoMax)
@@ -309,8 +309,8 @@ public class GroundContactForceQPSolver
          solverInput_ub.set(i, 0, rhoMax);
    }
 
-   public void setMaxRho(DenseMatrix64F rhoMax)
+   public void setMaxRho(DMatrixRMaj rhoMax)
    {
-      CommonOps.insert(rhoMax, solverInput_ub, 0, 0);
+      CommonOps_DDRM.insert(rhoMax, solverInput_ub, 0, 0);
    }
 }

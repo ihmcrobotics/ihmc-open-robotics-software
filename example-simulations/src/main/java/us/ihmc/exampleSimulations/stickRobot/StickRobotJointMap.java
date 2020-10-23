@@ -21,7 +21,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class StickRobotJointMap implements DRCRobotJointMap
 {
@@ -384,7 +384,7 @@ public class StickRobotJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry)
    {
       return null;
    }

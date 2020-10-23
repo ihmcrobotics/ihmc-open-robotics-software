@@ -6,7 +6,7 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 
 public class AvatarTestScripts
 {
-   public static void standUp(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables)
+   public static void awaitStandUp(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables)
    {
       LogTools.info("Waiting for robot to stand");
       // 1.8 seconds hand measured for Atlas pelvis to settle
@@ -14,7 +14,7 @@ public class AvatarTestScripts
       conductor.simulate();
    }
 
-   public static void nextTouchdown(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double timeLimit)
+   public static void awaitNextTouchdown(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double timeLimit)
    {
       conductor.addTerminalGoal(YoVariableTestGoal.booleanEquals(variables.getControllerIsInDoubleSupport(), false));
       conductor.addTimeLimit(variables.getYoTime(), timeLimit / 2);
@@ -24,17 +24,20 @@ public class AvatarTestScripts
       conductor.simulate();
    }
 
-   public static void takeSteps(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, int numberOfSteps, double timeLimitPerStep)
+   public static void awaitSteps(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, int numberOfSteps, double timeLimitPerStep)
    {
       LogTools.info("Awaiting steps");
       for (int i = 0; i < numberOfSteps; i++)
       {
          LogTools.info("Waiting for step {}", i + 1);
-         nextTouchdown(conductor, variables, timeLimitPerStep);
+         awaitNextTouchdown(conductor, variables, timeLimitPerStep);
       }
    }
 
-   public static void holdDoubleSupport(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double holdDuration, double timeLimit)
+   public static void awaitDoubleSupportReachedAndHeld(GoalOrientedTestConductor conductor,
+                                                       AvatarTestYoVariables variables,
+                                                       double holdDuration,
+                                                       double timeLimit)
    {
       LogTools.info("Waiting for double support", holdDuration);
       conductor.addTerminalGoal(YoVariableTestGoal.booleanEquals(variables.getControllerIsInDoubleSupport(), true));
@@ -46,7 +49,7 @@ public class AvatarTestScripts
       conductor.simulate();
    }
 
-   public static void wait(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double duration)
+   public static void awaitDuration(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double duration)
    {
       LogTools.info("Waiting for {} s", duration);
       conductor.addDurationGoal(variables.getYoTime(), duration);

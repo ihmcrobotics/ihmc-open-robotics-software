@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.agileRobotArm;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -50,12 +50,12 @@ public class AgileRobotArmRobot extends Robot
 
       /** ************************ Shoulder ********************************** */
 
-      PinJoint shoulder_yaw = new PinJoint("shoulder_yaw", new Vector3D(0.0, 0.0, BASE_HEIGHT), this, Axis.X);
+      PinJoint shoulder_yaw = new PinJoint("shoulder_yaw", new Vector3D(0.0, 0.0, BASE_HEIGHT), this, Axis3D.X);
       Link shoulder_differential = shoulder_differential();
       shoulder_yaw.setLink(shoulder_differential);
       this.addRootJoint(shoulder_yaw);
 
-      PinJoint shoulder_pitch = new PinJoint("shoulder_pitch", new Vector3D(0.0, 0.0, SHOULDER_DIFFERENTIAL_HEIGHT), this, Axis.Y);
+      PinJoint shoulder_pitch = new PinJoint("shoulder_pitch", new Vector3D(0.0, 0.0, SHOULDER_DIFFERENTIAL_HEIGHT), this, Axis3D.Y);
       Link upper_arm = upper_arm();
       shoulder_pitch.setLink(upper_arm);
       shoulder_yaw.addJoint(shoulder_pitch);
@@ -63,24 +63,24 @@ public class AgileRobotArmRobot extends Robot
 
       /** ************************ Elbow ********************************** */
 
-      PinJoint elbow_pitch = new PinJoint("elbow_pitch", new Vector3D(0.0, 0.0, UPPER_ARM_LENGTH), this, Axis.Y);
+      PinJoint elbow_pitch = new PinJoint("elbow_pitch", new Vector3D(0.0, 0.0, UPPER_ARM_LENGTH), this, Axis3D.Y);
       Link forearm = forearm();
       elbow_pitch.setLink(forearm);
       shoulder_pitch.addJoint(elbow_pitch);
 
       /** ************************ Wrist ********************************** */
 
-      PinJoint wrist_pitch = new PinJoint("wrist_pitch", new Vector3D(0.0, 0.0, FOREARM_LENGTH), this, Axis.Y);
+      PinJoint wrist_pitch = new PinJoint("wrist_pitch", new Vector3D(0.0, 0.0, FOREARM_LENGTH), this, Axis3D.Y);
       Link wrist_differential = wrist_differential();
       wrist_pitch.setLink(wrist_differential);
       elbow_pitch.addJoint(wrist_pitch);
 
-      PinJoint wrist_yaw = new PinJoint("wrist_yaw", new Vector3D(0.0, 0.0, 0.0), this, Axis.X);
+      PinJoint wrist_yaw = new PinJoint("wrist_yaw", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.X);
       Link wrist_differential2 = wrist_differential();
       wrist_yaw.setLink(wrist_differential2);
       wrist_pitch.addJoint(wrist_yaw);
 
-      PinJoint wrist_roll = new PinJoint("wrist_roll", new Vector3D(0.0, 0.0, WRIST_DIFFERENTIAL_HEIGHT), this, Axis.Z);
+      PinJoint wrist_roll = new PinJoint("wrist_roll", new Vector3D(0.0, 0.0, WRIST_DIFFERENTIAL_HEIGHT), this, Axis3D.Z);
       Link gripper = gripper();
       wrist_roll.setLink(gripper);
       wrist_yaw.addJoint(wrist_roll);

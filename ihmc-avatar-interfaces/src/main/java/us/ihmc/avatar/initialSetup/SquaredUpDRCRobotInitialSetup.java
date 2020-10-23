@@ -35,13 +35,13 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
    {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.getTranslation(offset);
+      offset.set(rootToWorld.getTranslation());
       Vector3D positionInWorld = new Vector3D();
       
-      rootToWorld.getTranslation(positionInWorld);
+      positionInWorld.set(rootToWorld.getTranslation());
       
       GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-      double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
+      double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionCopy().getZ();
       
       offset.setZ(groundZ + pelvisToFoot);
       robot.setPositionInWorld(offset);

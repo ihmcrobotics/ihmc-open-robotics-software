@@ -18,10 +18,11 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
 {
    private final AtomicReference<Integer> sizeOfPointCloud;
 
-   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic)
+   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic,
+                                       Topic<Integer> sizeTopic)
    {
       super(messageState, uiMessager, enableTopic, clearTopic);
-      sizeOfPointCloud = uiMessager.createInput(REAModuleAPI.UIStereoVisionSize, PointCloudAnchorPaneController.initialSizeOfPointCloud);
+      sizeOfPointCloud = uiMessager.createInput(sizeTopic, PointCloudAnchorPaneController.initialSizeOfPointCloud);
    }
 
    public void render()
@@ -45,8 +46,10 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
    public void unpackPointCloud(StereoVisionPointCloudMessage message)
    {
       Point3D32[] pointcloud = PointCloudCompression.decompressPointCloudToArray32(message);
+      int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+
       meshBuilder.clear();
-      int numberOfScanPoints = message.getPointCloud().size() / 3;
+      int numberOfScanPoints = pointcloud.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, sizeOfPointCloud.get());
 
       Random random = new Random();
@@ -58,8 +61,7 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
          else
             indexToVisualize = random.nextInt(numberOfScanPoints);
 
-         int colorValue = message.getColors().get(indexToVisualize);
-         Color color = intToColor(colorValue);
+         Color color = intToColor(colors[indexToVisualize]);
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), pointcloud[indexToVisualize], color);
       }
@@ -76,5 +78,11 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       int g = value >> 8 & 0xFF;
       int b = value >> 0 & 0xFF;
       return Color.rgb(r, g, b);
+   }
+   
+   public static int colorToInt(javafx.scene.paint.Color color)
+   {
+      int rgb = (int) (color.getRed() * 0xFF) << 16 | (int) (color.getGreen() * 0xFF) << 8 | (int) (color.getBlue() * 0xFF) << 0;
+      return rgb;
    }
 }

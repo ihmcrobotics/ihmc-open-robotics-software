@@ -124,7 +124,7 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       drcSimulationTestHelper.getSimulationConstructionSet().addScript(script);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-      drcSimulationTestHelper.getSimulationConstructionSet().getVariable("walkCSG").setValueFromDouble(1.0);
+      drcSimulationTestHelper.getSimulationConstructionSet().findVariable("walkCSG").setValueFromDouble(1.0);
       script.setPerformAssertions(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0));
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -177,9 +177,9 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       scs.addScript(script);
 
       @SuppressWarnings("unchecked")
-      YoEnum<HighLevelControllerName> currentState = (YoEnum<HighLevelControllerName>) scs.getVariable("highLevelControllerNameCurrentState");
+      YoEnum<HighLevelControllerName> currentState = (YoEnum<HighLevelControllerName>) scs.findVariable("highLevelControllerNameCurrentState");
       currentState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
-      currentState.addVariableChangedListener(v -> currentState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
+      currentState.addListener(v -> currentState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       script.setPerformAssertions(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));

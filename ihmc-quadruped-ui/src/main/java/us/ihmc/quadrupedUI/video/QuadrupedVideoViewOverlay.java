@@ -15,7 +15,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class QuadrupedVideoViewOverlay
 {
-   private final JavaFXROS2VideoView videoView;
+   private final QuadrupedJavaFXROS2VideoView videoView;
    private SizeMode currentMode = SizeMode.MIN;
 
    private final DoubleProperty animationDurationProperty = new SimpleDoubleProperty(this, "animationDuration", 0.15);
@@ -39,7 +39,7 @@ public class QuadrupedVideoViewOverlay
 
    public QuadrupedVideoViewOverlay(int width, int height, boolean flipX, boolean flipY)
    {
-      videoView = new JavaFXROS2VideoView(width, height, flipX, flipY);
+      videoView = new QuadrupedJavaFXROS2VideoView(width, height, flipX, flipY);
       videoView.setPreserveRatio(true);
       videoView.setFitWidth(currentMode.getWidth());
       videoView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);");

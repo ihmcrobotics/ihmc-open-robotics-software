@@ -24,7 +24,7 @@ public class DataObjectTransponder implements StreamingDataConsumer
 
    void createNewDataReadingDaemon()
    {
-      Thread clientThread = new Thread(new DataReadingThread());
+      Thread clientThread = new Thread(new DataReadingThread(), getClass().getSimpleName() + "Client");
       clientThread.setDaemon(true);
       clientThread.start();
    }

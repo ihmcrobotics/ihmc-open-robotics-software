@@ -1,13 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-
 import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingCubicICP;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +7,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -30,7 +29,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
 
    private final YoDouble omega0;
 
-   public ICPPlannerTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoDouble omega0, YoVariableRegistry registry)
+   public ICPPlannerTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoDouble omega0, YoRegistry registry)
    {
       this.omega0 = omega0;
       doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, trajectoryFrame, registry);

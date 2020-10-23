@@ -2,7 +2,7 @@
 #define __controller_msgs__msg__FootstepPlanningToolboxOutputStatus__idl__
 
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
-#include "controller_msgs/msg/./FootstepPlanningStatistics_.idl"
+#include "controller_msgs/msg/./FootstepPlanningTimingsMessage_.idl"
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
@@ -11,28 +11,37 @@ module controller_msgs
   {
     module dds
     {
-      const octet FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION =
+      const octet BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION =
       0;
 
-      const octet FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION =
+      const octet BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS =
       1;
 
-      const octet FOOTSTEP_PLANNING_RESULT_SOLUTION_DOES_NOT_REACH_GOAL =
+      const octet BODY_PATH_PLANNING_RESULT_EXCEPTION =
       2;
 
+      const octet FOOTSTEP_PLANNING_RESULT_PLANNING =
+      0;
+
+      const octet FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION =
+      1;
+
       const octet FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION =
-      3;
+      2;
 
       const octet FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS =
-      4;
-
-      const octet FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED =
-      5;
-
-      const octet FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED =
-      6;
+      3;
 
       const octet FOOTSTEP_PLANNING_RESULT_INVALID_GOAL =
+      4;
+
+      const octet FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED =
+      5;
+
+      const octet FOOTSTEP_PLANNING_RESULT_EXCEPTION =
+      6;
+
+      const octet FOOTSTEP_PLANNING_RESULT_HALTED =
       7;
 
       const long NO_PLAN_ID =
@@ -49,15 +58,46 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
-        @defaultValue(value=255)
-        octet footstep_planning_result;
+        /**
+         * ID of the request this output corresponds to
+         */
         @defaultValue(value=-1)
         long plan_id;
+        /**
+         * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
+         */
+        controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
+        /**
+         * Body path plan result. Null if no result is available
+         */
+        @defaultValue(value=255)
+        octet body_path_planning_result;
+        /**
+         * Footstep planner result. Null if no result is available
+         */
+        @defaultValue(value=255)
+        octet footstep_planning_result;
+        /**
+         * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+         */
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
+        /**
+         * Planned body path. Empty if planner failed
+         */
         sequence<geometry_msgs::msg::dds::Pose> body_path;
-        geometry_msgs::msg::dds::Pose low_level_planner_goal;
-        controller_msgs::msg::dds::FootstepPlanningStatistics footstep_planning_statistics;
+        /**
+         * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
+         */
+        geometry_msgs::msg::dds::Pose goal_pose;
+        /**
+         * Object to record various planner timings, helpful for debugging
+         */
+        controller_msgs::msg::dds::FootstepPlanningTimingsMessage planner_timings;
+        /**
+         * Contains planner stack trace if failure is due to an exception
+         */
+        string exception_message;
+        sequence<string, 20> stacktrace;
       };
     };
   };

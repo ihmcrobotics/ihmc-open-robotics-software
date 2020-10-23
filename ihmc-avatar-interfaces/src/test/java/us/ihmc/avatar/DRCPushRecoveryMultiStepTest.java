@@ -101,7 +101,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setForwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -135,7 +135,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setBackwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -175,7 +175,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       // enable push recovery
       enable.set(true);
@@ -183,9 +183,9 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
-         scs.getVariable(prefix + "FootControlModule", prefix + "State");
+         scs.findVariable(prefix + "FootControlModule", prefix + "State");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingState");
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
    }

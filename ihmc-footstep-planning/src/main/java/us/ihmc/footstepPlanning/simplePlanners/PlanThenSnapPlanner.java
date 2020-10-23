@@ -2,41 +2,42 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
+public class PlanThenSnapPlanner
 {
-   private final FootstepPlanner internalPlanner;
+   private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private PlanarRegionsList planarRegionsList;
    private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
 
-   public PlanThenSnapPlanner(FootstepPlanner internalPlanner, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanThenSnapPlanner(FootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this.internalPlanner = internalPlanner;
+      this.turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
       this.footPolygons = footPolygons;
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setWiggleInWrongDirectionThreshold(Double.NaN);
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
    }
 
-   @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
    {
-      internalPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
+      turnWalkTurnPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
    }
 
-   @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
-      internalPlanner.setGoal(goal);
+      turnWalkTurnPlanner.setGoal(goal);
    }
 
-   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -44,11 +45,10 @@ public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
 
    private FootstepPlan footstepPlan = new FootstepPlan();
 
-   @Override
-   public FootstepPlanningResult plan()
+   public FootstepPlanningResult plan() throws SnappingFailedException
    {
-      FootstepPlanningResult result = internalPlanner.plan();
-      footstepPlan = internalPlanner.getPlan();
+      FootstepPlanningResult result = turnWalkTurnPlanner.plan();
+      footstepPlan = turnWalkTurnPlanner.getPlan();
 
       if (planarRegionsList == null)
          return result;
@@ -56,49 +56,21 @@ public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
       snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
-      for (int i=0; i<numberOfFootsteps; i++)
+      for (int i = 0; i < numberOfFootsteps; i++)
       {
-         SimpleFootstep footstep = footstepPlan.getFootstep(i);
-         try
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         FramePose3D solePose = footstep.getFootstepPose();
+         ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
+         if (footHold != null)
          {
-            FramePose3D solePose = new FramePose3D();
-            footstep.getSoleFramePose(solePose);
-            ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
-            footstep.setSoleFramePose(solePose);
-            if(footHold!=null)
-            {
-               footstep.setFoothold(footHold);
-            }
-         }
-         catch (Exception e)
-         {
-            return FootstepPlanningResult.SNAPPING_FAILED;
+            footstep.getFoothold().set(footHold);
          }
       }
       return result;
    }
 
-   @Override
    public FootstepPlan getPlan()
    {
       return footstepPlan;
    }
-
-   @Override
-   public void setTimeout(double timeout)
-   {
-
-   }
-
-   @Override
-   public double getPlanningDuration()
-   {
-      return -1;
-   }
-
-   @Override
-   public void setPlanningHorizonLength(double planningHorizonLength)
-   {
-   }
-
 }

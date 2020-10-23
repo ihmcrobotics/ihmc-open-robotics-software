@@ -2,11 +2,11 @@ package us.ihmc.robotics.kinematics;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
@@ -29,7 +29,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 public class ReNumericalInverseKinematicsCalculator implements InverseKinematicsCalculator
 {
    private final GeometricJacobian jacobian;
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final LinearSolverDense<DMatrixRMaj> solver;
    private final OneDoFJointBasics[] oneDoFJoints;
    private final OneDoFJointBasics[] oneDoFJointsSeed;
 
@@ -50,10 +50,10 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private final Vector3D axis = new Vector3D();
    private final Vector3D errorTranslationVector = new Vector3D();
 
-   private final DenseMatrix64F error = new DenseMatrix64F(SpatialVector.SIZE, 1);
-   private final DenseMatrix64F correction;
-   private final DenseMatrix64F current;
-   private final DenseMatrix64F best;
+   private final DMatrixRMaj error = new DMatrixRMaj(SpatialVector.SIZE, 1);
+   private final DMatrixRMaj correction;
+   private final DMatrixRMaj current;
+   private final DMatrixRMaj best;
    private final double minRandomSearchScalar;
    private final double maxRandomSearchScalar;
    private int counter;
@@ -65,7 +65,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       if (jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame())
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
       this.jacobian = jacobian;
-      this.solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
+      this.solver = LinearSolverFactory_DDRM.leastSquares(SpatialVector.SIZE, jacobian.getNumberOfColumns()); // new DampedLeastSquaresSolver(jacobian.getNumberOfColumns());
 
       this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       oneDoFJointsSeed = oneDoFJoints.clone();
@@ -73,9 +73,9 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
       int nDoF = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints);
-      correction = new DenseMatrix64F(nDoF, 1);
-      current = new DenseMatrix64F(nDoF, 1);
-      best = new DenseMatrix64F(nDoF, 1);
+      correction = new DMatrixRMaj(nDoF, 1);
+      current = new DMatrixRMaj(nDoF, 1);
+      best = new DMatrixRMaj(nDoF, 1);
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
       this.maxStepSize = maxStepSize;
@@ -126,7 +126,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       solve(desiredTransform);
    }
 
-   private void getJointAngles(DenseMatrix64F angles)
+   private void getJointAngles(DMatrixRMaj angles)
    {
       for (int i = 0; i < angles.getNumRows(); i++)
       {
@@ -134,7 +134,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       }
    }
 
-   private void setJointAngles(DenseMatrix64F angles)
+   private void setJointAngles(DMatrixRMaj angles)
    {
       for (int i = 0; i < angles.getNumRows(); i++)
       {
@@ -168,19 +168,19 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       errorTransform.setAndInvert(desiredTransform);
       errorTransform.multiply(actualTransform);
 
-      errorTransform.getRotation(errorRotationMatrix);
+      errorRotationMatrix.set(errorTransform.getRotation());
       errorAxisAngle.set(errorRotationMatrix);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.set(axis);
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
-      errorTransform.getTranslation(errorTranslationVector);
+      errorTranslationVector.set(errorTransform.getTranslation());
       
       errorRotationVector.get(0, error);
       errorTranslationVector.get(3, error);
 
-      errorScalar = NormOps.normP2(error);
+      errorScalar = NormOps_DDRM.normP2(error);
 
       assert (exponentialCoordinatesOK());
    }
@@ -199,7 +199,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    {
       jacobian.compute();
 
-      DenseMatrix64F dampenedJ = jacobian.getJacobianMatrix().copy();
+      DMatrixRMaj dampenedJ = jacobian.getJacobianMatrix().copy();
 
       for (int i = 0; i < dampenedJ.getNumCols(); i++)
       {
@@ -214,7 +214,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       }
       solver.solve(error, correction);
       double correctionScale = RandomNumbers.nextDouble(random, minRandomSearchScalar, maxRandomSearchScalar);
-      CommonOps.scale(correctionScale, correction);
+      CommonOps_DDRM.scale(correctionScale, correction);
 
       for (int i = 0; i < correction.getNumRows(); i++)
       {

@@ -3,22 +3,26 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ToeOffCalculator
 {
-   public void clear();
+   void clear();
 
-   public ToeOffEnum getEnum();
+   ToeOffEnum getEnum();
 
-   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg);
+   void setExitCMP(FramePoint3DReadOnly exitCMP, RobotSide trailingLeg);
 
-   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg);
+   void computeToeOffContactPoint(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg);
 
-   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg);
+   void getToeOffContactPoint(FramePoint2DBasics contactPointToPack, RobotSide trailingLeg);
 
-   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg);
+   void computeToeOffContactLine(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg);
 
-   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg);
+   void getToeOffContactLine(FrameLineSegment2DBasics contactLineToPack, RobotSide trailingLeg);
 }

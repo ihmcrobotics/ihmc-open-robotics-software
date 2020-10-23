@@ -120,24 +120,24 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
          Link rightThigh = robot.getJoint(rightHipJointName).getLink();
 
          tempTransform.setIdentity();
-         tempTransform.setTranslationZ(shinZOffset + 0.5 * shinLength);
+         tempTransform.getTranslation().setZ(shinZOffset + 0.5 * shinLength);
          shapeFactory.addShape(leftShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
          shapeFactory.addShape(rightShin, tempTransform, new CylinderShapeDescription<>(shinRadius, shinLength), false, 0b01, 0b10);
 
-         tempTransform.setTranslation(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength);
+         tempTransform.getTranslation().set(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength);
          shapeFactory.addShape(leftThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
-         tempTransform.setTranslation(thighXOffset, - thighYOffset, thighZOffset + 0.5 * thighLength);
+         tempTransform.getTranslation().set(thighXOffset, - thighYOffset, thighZOffset + 0.5 * thighLength);
          shapeFactory.addShape(rightThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
          shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
 
          tempTransform.setIdentity();
-         tempTransform.setTranslation(0.0, 0.5 * BOLLARD_DISTANCE, 0.0);
+         tempTransform.getTranslation().set(0.0, 0.5 * BOLLARD_DISTANCE, 0.0);
          collisionDetector.getCollisionObjects().get(4).setTransformToWorld(tempTransform);
 
-         tempTransform.setTranslation(0.0, - 0.5 * BOLLARD_DISTANCE, 0.0);
+         tempTransform.getTranslation().set(0.0, - 0.5 * BOLLARD_DISTANCE, 0.0);
          collisionDetector.getCollisionObjects().get(5).setTransformToWorld(tempTransform);
 
          collisionDetector.getCollisionObjects().get(4).setCollisionGroup(0b10);

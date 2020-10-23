@@ -35,6 +35,7 @@ import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
@@ -42,13 +43,14 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -63,8 +65,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
    private static final String IHMC_SIMULATION_STARTER_NODE_NAME = "ihmc_simulation_starter";
-
-   private static final boolean DEBUG = false;
 
    private final DRCRobotModel robotModel;
    private final CommonAvatarEnvironmentInterface environment;
@@ -91,7 +91,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
-   private RealtimeRos2Node realtimeRos2Node;
+   private RealtimeROS2Node realtimeROS2Node;
 
    /**
     * The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.)
@@ -322,7 +322,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with
     * no yaw.
     */
-   public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
+   public void setStartingLocationOffset(Tuple3DReadOnly robotInitialPosition, double yaw)
    {
       checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
@@ -374,7 +374,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
    }
 
    /**
@@ -414,8 +414,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (automaticallySpawnSimulation)
          avatarSimulation.start();
 
-      if (realtimeRos2Node != null)
-         realtimeRos2Node.spin();
+      if (realtimeROS2Node != null)
+         realtimeROS2Node.spin();
 
       if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
@@ -468,7 +468,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
       for (int i = 0; i < highLevelControllerFactories.size(); i++)
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
@@ -494,7 +494,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
@@ -547,7 +547,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
-         printIfDebug("Streaming SCS Video");
+         LogTools.info("Streaming SCS Video");
          AvatarRobotCameraParameters cameraParameters = sensorInformation.getCameraParameters(0);
          if (cameraParameters != null)
          {
@@ -575,12 +575,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       }
 
       return scsSensorOutputPacketCommunicator;
-   }
-
-   private void printIfDebug(String string)
-   {
-      if (DEBUG)
-         System.out.println(string);
    }
 
    /**
@@ -628,9 +622,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void close()
    {
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         realtimeRos2Node.destroy();
+         realtimeROS2Node.destroy();
       }
 
       if (networkProcessor != null)

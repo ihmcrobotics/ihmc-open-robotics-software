@@ -12,6 +12,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -38,6 +39,7 @@ public class JavaFXRobotVisualizer
    private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
    private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
 
+   private Runnable robotLoadedCallback;
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
 
@@ -77,6 +79,9 @@ public class JavaFXRobotVisualizer
             fullRobotModel.getElevator().updateFramesRecursively();
             graphicsRobot.update();
             robotRootNode.update();
+
+            if (robotLoadedCallback != null)
+               robotLoadedCallback.run();
          }
       };
    }
@@ -140,15 +145,26 @@ public class JavaFXRobotVisualizer
       newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
    }
 
-   public void submitNewConfiguration(QuaternionReadOnly rootJointOrientation, Tuple3DReadOnly rootJointTranslation, ToDoubleFunction<String> jointAngles)
+   public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)
    {
-      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
+      newRootJointPoseReference.set(rootJointTransform);
       float[] jointAngleArray = new float[allJoints.length];
       for (int i = 0; i < allJoints.length; i++)
       {
          jointAngleArray[i] = (float) jointAngles.applyAsDouble(allJoints[i].getName());
       }
       newJointConfigurationReference.set(jointAngleArray);
+   }
+
+   public void submitNewConfiguration(Tuple3DReadOnly rootJointTranslation, Orientation3DReadOnly rootJointOrientation, float[] jointAngles)
+   {
+      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
+      newJointConfigurationReference.set(jointAngles);
+   }
+
+   public void setRobotLoadedCallback(Runnable robotLoadedCallback)
+   {
+      this.robotLoadedCallback = robotLoadedCallback;
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

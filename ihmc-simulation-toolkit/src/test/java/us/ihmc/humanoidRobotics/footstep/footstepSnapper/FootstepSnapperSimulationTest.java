@@ -21,11 +21,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -57,11 +53,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
@@ -93,12 +89,18 @@ public class FootstepSnapperSimulationTest
       while (dataReader.hasAnotherFootstepAndPoints())
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
-         desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
-                                           footstepData.getOrientation().getYaw());
-         Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
-                                RobotSide.fromByte(footstepData.getRobotSide()), listOfPoints, 0.0);
+         desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(),
+                                       footstepData.getLocation().getX(),
+                                       footstepData.getLocation().getY(),
+                                       footstepData.getOrientation().getYaw());
+         footstepSnapper.generateFootstepUsingHeightMap(desiredPose,
+                                                        spoof.getRigidBody(),
+                                                        spoof.getSoleFrame(),
+                                                        RobotSide.fromByte(footstepData.getRobotSide()),
+                                                        listOfPoints,
+                                                        0.0);
 
-         assertTrue(footstep.getFootstepType() != Footstep.FootstepType.BAD_FOOTSTEP);
+         assertTrue(footstepSnapper.getFootstepType() != FootstepType.BAD_FOOTSTEP);
       }
    }
 
@@ -600,7 +602,7 @@ public class FootstepSnapperSimulationTest
 
       private final boolean visualize;
 
-      private final YoVariableRegistry registry = new YoVariableRegistry("HeightMapBestFitPlaneCalculatorTest");
+      private final YoRegistry registry = new YoRegistry("HeightMapBestFitPlaneCalculatorTest");
       private final YoDouble soleX = new YoDouble("soleX", registry);
       private final YoDouble soleY = new YoDouble("soleY", registry);
       private final YoDouble soleZ = new YoDouble("soleZ", registry);
@@ -627,7 +629,7 @@ public class FootstepSnapperSimulationTest
             scs = footstepVisualizer.getSimulationConstructionSet();    // new SimulationConstructionSet(robot);
 
             Robot robot = footstepVisualizer.getRobot();
-            robot.getRobotsYoVariableRegistry().addChild(registry);
+            robot.getRobotsYoRegistry().addChild(registry);
             YoGraphicsListRegistry yoGraphicsListRegistry = footstepVisualizer.getGraphicsListRegistry();
 
             ConvexPolygon2D polygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][]
@@ -955,7 +957,7 @@ public class FootstepSnapperSimulationTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3D(x, y, height / 2));
+      location.getTranslation().set(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

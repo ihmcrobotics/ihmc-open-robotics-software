@@ -21,14 +21,14 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class QuadrupedXGaitStepCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
 
@@ -57,7 +57,7 @@ public class QuadrupedXGaitStepCalculator
    private final RecyclingArrayList<QuadrupedTimedOrientedStep> completeStepSequence = new RecyclingArrayList<>(QuadrupedTimedOrientedStep::new);
 
    public QuadrupedXGaitStepCalculator(QuadrupedXGaitSettingsBasics xGaitSettings, YoDouble timestamp, QuadrupedReferenceFrames referenceFrames,
-                                       DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                       DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
@@ -302,7 +302,7 @@ public class QuadrupedXGaitStepCalculator
       waypointBasedPath.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
-      finalPose.setOrientationYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
+      finalPose.getOrientation().setYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
    }
 
    private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,

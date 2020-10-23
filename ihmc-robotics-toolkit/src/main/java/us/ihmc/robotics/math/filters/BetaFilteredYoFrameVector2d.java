@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 
 public class BetaFilteredYoFrameVector2d extends YoFrameVector2D
 {
@@ -19,22 +19,22 @@ public class BetaFilteredYoFrameVector2d extends YoFrameVector2D
       this.y = y;
    }
 
-   public static BetaFilteredYoFrameVector2d createBetaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, int beta, ReferenceFrame referenceFrame)
+   public static BetaFilteredYoFrameVector2d createBetaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, int beta, ReferenceFrame referenceFrame)
    {
       // beta is a int
-      BetaFilteredYoVariable x = new BetaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, beta);
-      BetaFilteredYoVariable y = new BetaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, beta);
+      BetaFilteredYoVariable x = new BetaFilteredYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, beta);
+      BetaFilteredYoVariable y = new BetaFilteredYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, beta);
 
       BetaFilteredYoFrameVector2d ret = new BetaFilteredYoFrameVector2d(x, y, referenceFrame);
 
       return ret;
    }
 
-   public static BetaFilteredYoFrameVector2d createBetaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, int beta, YoFrameVector2D unfilteredVector)
+   public static BetaFilteredYoFrameVector2d createBetaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry, int beta, YoFrameVector2D unfilteredVector)
    {
       // beta is a int
-      BetaFilteredYoVariable x = new BetaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, beta, unfilteredVector.getYoX());
-      BetaFilteredYoVariable y = new BetaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, beta, unfilteredVector.getYoY());
+      BetaFilteredYoVariable x = new BetaFilteredYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, beta, unfilteredVector.getYoX());
+      BetaFilteredYoVariable y = new BetaFilteredYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, beta, unfilteredVector.getYoY());
 
       BetaFilteredYoFrameVector2d ret = new BetaFilteredYoFrameVector2d(x, y, unfilteredVector.getReferenceFrame());
 

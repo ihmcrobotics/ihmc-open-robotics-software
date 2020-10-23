@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -29,20 +30,34 @@ public class PlanarRegionsMeshBuilder implements Runnable
 
    private final AtomicReference<Pair<Mesh, Material>> meshAndMaterialToRender = new AtomicReference<>(null);
 
+   private final Topic<Boolean> requestPlanarRegionsTopic;
+   
    private final REAUIMessager uiMessager;
 
-   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager)
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarRegionsState)
    {
-      this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
-      clear = uiMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
-      clearOcTree = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      this(uiMessager, planarRegionsState, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestPlanarRegions);
+   }
 
-      planarRegionsListMessage = uiMessager.createInput(REAModuleAPI.PlanarRegionsState);
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarRegionsState, Topic<Boolean> enableTopic,
+                                   Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic, Topic<Boolean> requestPlanarRegionsTopic)
+   {
+      enable = uiMessager.createInput(enableTopic, false);
+      this.uiMessager = uiMessager;
+      clear = uiMessager.createInput(clearTopic, false);
+      clearOcTree = uiMessager.createInput(octreeClearTopic, false);
+      this.requestPlanarRegionsTopic = requestPlanarRegionsTopic;
+
+      planarRegionsListMessage = uiMessager.createInput(planarRegionsState);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+   }
+
+   public void clear()
+   {
+      meshAndMaterialToRender.set(new Pair<>(null, null));
    }
 
    @Override
@@ -60,7 +75,7 @@ public class PlanarRegionsMeshBuilder implements Runnable
       if (!enable.get())
          return;
 
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegions);
+      uiMessager.submitStateRequestToModule(requestPlanarRegionsTopic);
 
       if (newMessage == null || newMessage.getRegionId().size() == 0)
          return;

@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -535,7 +535,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                                                     zddIntermediate, zFinal, zdFinal);
    }
 
-   public void setDirectly(Axis axis, DenseMatrix64F coefficients)
+   public void setDirectly(Axis3D axis, DMatrixRMaj coefficients)
    {
       getTrajectory(axis).setDirectly(coefficients);
    }

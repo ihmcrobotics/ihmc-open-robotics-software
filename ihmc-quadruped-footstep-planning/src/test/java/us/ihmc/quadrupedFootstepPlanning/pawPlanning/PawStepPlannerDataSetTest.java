@@ -186,8 +186,8 @@ public abstract class PawStepPlannerDataSetTest
 
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(1.5, 0.5, 0.0);
-      goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
+      goalPose.getPosition().set(1.5, 0.5, 0.0);
+      goalPose.getOrientation().setYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
 
 
       PawStepPlannerStart start = new PawStepPlannerStart();
@@ -312,13 +312,13 @@ public abstract class PawStepPlannerDataSetTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
 
-      startPose.setPosition(plannerInput.getQuadrupedStartPosition());
-      goalPose.setPosition(plannerInput.getQuadrupedGoalPosition());
+      startPose.getPosition().set(plannerInput.getQuadrupedStartPosition());
+      goalPose.getPosition().set(plannerInput.getQuadrupedGoalPosition());
 
       if(plannerInput.getHasQuadrupedStartYaw())
-         startPose.setOrientation(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
+         startPose.getOrientation().set(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
       if(plannerInput.getHasQuadrupedGoalYaw())
-         goalPose.setOrientation(new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
+         goalPose.getOrientation().set(new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();

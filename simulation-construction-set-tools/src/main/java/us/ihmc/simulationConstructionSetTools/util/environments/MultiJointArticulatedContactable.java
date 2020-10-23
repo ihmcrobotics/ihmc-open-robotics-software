@@ -45,11 +45,11 @@ public abstract class MultiJointArticulatedContactable implements Contactable
                contactsAvailable.add(i, new ArrayList<YoBoolean>());
             }
             
-            GroundContactPoint contactPoint = new GroundContactPoint("contact_" + name + "_" + joint.getName() + "_" + j, robot.getRobotsYoVariableRegistry());
+            GroundContactPoint contactPoint = new GroundContactPoint("contact_" + name + "_" + joint.getName() + "_" + j, robot.getRobotsYoRegistry());
             joint.addGroundContactPoint(groundIdentifier, contactPoint);
             allGroundContactPoints.get(i).add(contactPoint);
             
-            YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + joint.getName() + "_" + j + "_avail", robot.getRobotsYoVariableRegistry());
+            YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + joint.getName() + "_" + j + "_avail", robot.getRobotsYoRegistry());
             contactAvailable.set(true);
             contactsAvailable.get(i).add(contactAvailable);
             

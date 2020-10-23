@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.EnumDependentSliderBoardMapping;
@@ -29,10 +29,10 @@ public class EnumYoVariableDependentInputManager<T extends Enum<T>>
       this.enumValues = enumType.getEnumConstants();
       this.yoEnum = yoEnum;
       
-      yoEnum.addVariableChangedListener(new VariableChangedListener()
+      yoEnum.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             updateListeners(yoEnum);
          }

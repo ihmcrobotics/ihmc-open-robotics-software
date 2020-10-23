@@ -1,19 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -25,8 +21,8 @@ public class KinematicsSolutionQualityCalculator
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 
    /**
-    * Convenience method which goes through the given list of active feedback control command to sum up
-    * their tracking error from which the solution quality is calculated.
+    * Convenience method which goes through the given list of the last output from the feedback
+    * controllers and to sum up their desired velocity from which the solution quality is calculated.
     * <p>
     * For each command, the quality is computed by:
     * <ul>
@@ -34,108 +30,88 @@ public class KinematicsSolutionQualityCalculator
     * weight value will affect more the solution quality, whereas commands with small weight value will
     * barely make a change.
     * <li>this weighted error is then multiplied with the selection matrix from the command. So
-    * uncontrolled axes do not affect the solution quality.
+    * uncontrolled axes are guaranteed to not affect the solution quality.
     * <li>finally the Euclidean norm of the resulting error provides the quality for the command.
     * </ul>
     * The overall solution quality is then computed as the sum of each command quality.
     * </p>
     *
-    * @param activeCommands               the list of feedback control commands that have been
-    *                                     submitted to the controller core this control tick. Not
-    *                                     modified.
     * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
-    *                                     the commands were submitted. It is used to find the tracking
-    *                                     error for each command. Not modified.
+    *                                     the commands were submitted. It is used to find the commands
+    *                                     that were optimized and can be used to evaluate a quality.
+    *                                     Not modified.
+    * @param totalRobotMass               the total mass in kilograms of the robot. It used to
+    *                                     transform a momentum into center of mass velocity which is
+    *                                     necessary for fair comparison against other types of
+    *                                     commands.
+    * @param scale                        factor applied to the resulting quality. When introduced, it
+    *                                     was used to cancel the scaling due to the gains which were
+    *                                     the same for everything.
     * @return the overall solution quality.
     */
-   public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   public double calculateSolutionQuality(FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder, double totalRobotMass, double scale)
    {
       double error = 0.0;
 
-      for (int i = 0; i < activeCommands.getNumberOfCommands(); i++)
-      {
-         FeedbackControlCommand<?> command = activeCommands.getCommand(i);
+      InverseKinematicsCommandList ikOutput = feedbackControllerDataHolder.getLastFeedbackControllerInverseKinematicsOutput();
 
+      for (int i = 0; i < ikOutput.getNumberOfCommands(); i++)
+      {
+         InverseKinematicsCommand<?> command = ikOutput.getCommand(i);
          switch (command.getCommandType())
          {
             case MOMENTUM:
-               error += calculateCommandQuality((CenterOfMassFeedbackControlCommand) command, feedbackControllerDataHolder);
+               error += calculateCommandQuality((MomentumCommand) command, totalRobotMass);
                break;
             case TASKSPACE:
-               error += calculateCommandQuality((SpatialFeedbackControlCommand) command, feedbackControllerDataHolder);
+               error += calculateCommandQuality((SpatialVelocityCommand) command);
                break;
             case JOINTSPACE:
-               error += calculateCommandQuality((OneDoFJointFeedbackControlCommand) command, feedbackControllerDataHolder);
+               error += calculateCommandQuality((JointspaceVelocityCommand) command);
                break;
             default:
                throw new RuntimeException("The following command is not handled: " + command.getClass());
          }
       }
 
-      return error;
+      return error * scale;
    }
 
-   private final FrameVector3D rotationError = new FrameVector3D();
-   private final FrameVector3D positionError = new FrameVector3D();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F error = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj selectionMatrix = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj error = new DMatrixRMaj(6, 1);
 
-   /**
-    * Calculates the quality based on the tracking of the given
-    * {@link CenterOfMassFeedbackControlCommand}.
-    *
-    * @param command                      the command to compute the quality of. Not modified.
-    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
-    *                                     the commands were submitted. It is used to find the tracking
-    *                                     error for each command. Not modified.
-    * @return the quality of the command.
-    */
-   private double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   private final DMatrixRMaj errorWeighted = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj errorSubspace = new DMatrixRMaj(6, 1);
+
+   private double calculateCommandQuality(MomentumCommand command, double totalRobotMass)
    {
-      feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
-      command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
-      command.getMomentumRateCommand().getWeightMatrix(weightMatrix);
-
-      error.zero();
-      positionError.get(3, error);
-
-      return computeQualityFromError(error, weightMatrix, selectionMatrix);
+      command.getSelectionMatrix(worldFrame, selectionMatrix);
+      command.getWeightMatrix(weightMatrix);
+      return computeQualityFromError(command.getMomentum(), weightMatrix, selectionMatrix) / totalRobotMass;
    }
 
-   /**
-    * Calculates the quality based on the tracking of the given {@link SpatialFeedbackControlCommand}.
-    *
-    * @param accelerationCommand          the command to compute the quality of. Not modified.
-    * @param feedbackControllerDataHolder the data holder that belongs to the controller core to which
-    *                                     the commands were submitted. It is used to find the tracking
-    *                                     error for each command. Not modified.
-    * @return the quality of the command.
-    */
-   private double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   private double calculateCommandQuality(SpatialVelocityCommand command)
    {
-      SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
-      RigidBodyBasics endEffector = accelerationCommand.getEndEffector();
+      RigidBodyBasics endEffector = command.getEndEffector();
 
       controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
 
-      feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
-      rotationError.changeFrame(controlFrame);
-
-      feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
-      positionError.changeFrame(controlFrame);
-
-      accelerationCommand.getSelectionMatrix(controlFrame, selectionMatrix);
-      accelerationCommand.getWeightMatrix(controlFrame, weightMatrix);
-
-      rotationError.get(0, error);
-      positionError.get(3, error);
+      command.getDesiredAngularVelocity().get(0, error);
+      command.getDesiredLinearVelocity().get(3, error);
+      command.getSelectionMatrix(controlFrame, selectionMatrix);
+      command.getWeightMatrix(controlFrame, weightMatrix);
 
       return computeQualityFromError(error, weightMatrix, selectionMatrix);
    }
 
-   private final DenseMatrix64F errorWeighted = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F errorSubspace = new DenseMatrix64F(6, 1);
+   private double calculateCommandQuality(JointspaceVelocityCommand command)
+   {
+      if (command.getNumberOfJoints() != 1)
+         throw new IllegalStateException("Unexpected number of joints");
+
+      return Math.abs(command.getDesiredVelocity(0).get(0)) * command.getWeight(0);
+   }
 
    /**
     * This is actually where the calculation of the command quality is happening.
@@ -146,22 +122,17 @@ public class KinematicsSolutionQualityCalculator
     * @param selectionMatrix the 6-by-6 selection matrix of the command. Not modified.
     * @return the command quality.
     */
-   private double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightMatrix, DenseMatrix64F selectionMatrix)
+   private double computeQualityFromError(DMatrixRMaj error, DMatrixRMaj weightMatrix, DMatrixRMaj selectionMatrix)
    {
       // Applying the weight to the error
       errorWeighted.reshape(error.getNumRows(), 1);
-      CommonOps.mult(weightMatrix, error, errorWeighted);
+      CommonOps_DDRM.mult(weightMatrix, error, errorWeighted);
 
       // Selecting only the controlled axes
       errorSubspace.reshape(selectionMatrix.getNumRows(), 1);
-      CommonOps.mult(selectionMatrix, errorWeighted, errorSubspace);
+      CommonOps_DDRM.mult(selectionMatrix, errorWeighted, errorSubspace);
 
       // Returning the Euclidean norm of the error computed as the command quality
-      return NormOps.normP2(errorSubspace);
-   }
-
-   private double calculateCommandQuality(OneDoFJointFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
-   {
-      return Math.abs(command.getJoint().getQ() - command.getReferencePosition()) * command.getWeightForSolver();
+      return NormOps_DDRM.normP2(errorSubspace);
    }
 }

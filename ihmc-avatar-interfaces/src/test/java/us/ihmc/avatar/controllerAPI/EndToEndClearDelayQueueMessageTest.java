@@ -54,8 +54,8 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getName();
-      YoVariable<?> footsteps = scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
-      YoVariable<?> handTrajectoryPoints = scs.getVariable(handName + "TaskspaceControlModule", handName + "TaskspaceNumberOfPoints");
+      YoVariable footsteps = scs.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
+      YoVariable handTrajectoryPoints = scs.findVariable(handName + "TaskspaceControlModule", handName + "TaskspaceNumberOfPoints");
 
       // send hand trajectory and footstep list
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();

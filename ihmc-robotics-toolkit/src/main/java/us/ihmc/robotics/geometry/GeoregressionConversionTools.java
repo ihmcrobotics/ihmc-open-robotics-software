@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import georegression.struct.se.Se3_F64;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,7 +20,7 @@ public class GeoregressionConversionTools
 
       for (int r = 0; r < 3; r++)
       {
-         values[r * 4 + 3] = georegressionTransform.getT().getIndex(r);
+         values[r * 4 + 3] = georegressionTransform.getT().getIdx(r);
       }
 
       for (int c = 0; c < 3; c++)
@@ -40,7 +40,7 @@ public class GeoregressionConversionTools
       {
          {m1[0], m1[1], m1[2]}, {m1[4], m1[5], m1[6]}, {m1[8], m1[9], m1[10]}
       };
-      DenseMatrix64F denseMatrix64F = new DenseMatrix64F(rot);
+      DMatrixRMaj denseMatrix64F = new DMatrixRMaj(rot);
       georegressionTransform.setRotation(denseMatrix64F);
       georegressionTransform.setTranslation(m1[3], m1[7], m1[11]);
    }

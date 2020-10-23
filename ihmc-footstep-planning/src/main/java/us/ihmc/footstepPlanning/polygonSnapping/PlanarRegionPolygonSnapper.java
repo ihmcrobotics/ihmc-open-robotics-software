@@ -80,7 +80,7 @@ public class PlanarRegionPolygonSnapper
       newTranslation.scale(-1.0);
       newTranslation.add(highestVertex);
 
-      transformToReturn.setTranslation(newTranslation);
+      transformToReturn.getTranslation().set(newTranslation);
    }
 
    private static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3D surfaceNormal)
@@ -95,7 +95,7 @@ public class PlanarRegionPolygonSnapper
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.setColumns(xAxis, yAxis, surfaceNormal);
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      transformToReturn.setRotation(rotationMatrix);
+      transformToReturn.getRotation().set(rotationMatrix);
       return transformToReturn;
    }
 }

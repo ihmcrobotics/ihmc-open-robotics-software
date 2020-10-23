@@ -486,7 +486,7 @@ vt 0.2436 0.0524 0.0000
 vt 0.9999 0.3681 0.0000
 # 141 texture coords
 
-o Circle
+#o Circle
 g Circle
 usemtl Material
 s off

@@ -7,6 +7,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
@@ -161,7 +161,7 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private final int[][] verticesIndices = new int[2][2];
+   private transient final int[][] verticesIndices = new int[2][2];
 
    /**
     * Efficiently combines two Disjoint Polygons. Returns false if not disjoint.
@@ -212,15 +212,15 @@ public class ConvexPolygonTools
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
-   private final Vector2D caliperForPolygonP = new Vector2D();
-   private final Vector2D caliperForPolygonQ = new Vector2D();
-   private final Point2D lineStart = new Point2D();
-   private final Point2D lineEnd = new Point2D();
-   private final TIntArrayList bridgeIndicesP = new TIntArrayList();
-   private final TIntArrayList bridgeIndicesQ = new TIntArrayList();
-   private final TIntArrayList bridgeWasOnLeft = new TIntArrayList();
-   private final Vector2D vectorToNextPointOnPolygonP = new Vector2D();
-   private final Vector2D vectorToNextPointOnPolygonQ = new Vector2D();
+   private transient final Vector2D caliperForPolygonP = new Vector2D();
+   private transient final Vector2D caliperForPolygonQ = new Vector2D();
+   private transient final Point2D lineStart = new Point2D();
+   private transient final Point2D lineEnd = new Point2D();
+   private transient final TIntArrayList bridgeIndicesP = new TIntArrayList();
+   private transient final TIntArrayList bridgeIndicesQ = new TIntArrayList();
+   private transient final TIntArrayList bridgeWasOnLeft = new TIntArrayList();
+   private transient final Vector2D vectorToNextPointOnPolygonP = new Vector2D();
+   private transient final Vector2D vectorToNextPointOnPolygonQ = new Vector2D();
 
    /**
     * Computes the intersection of two convex polygons. For references see:
@@ -465,9 +465,9 @@ public class ConvexPolygonTools
       }
    }
 
-   private final LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D();
-   private final Point2D intersection1 = new Point2D();
-   private final Point2D intersection2 = new Point2D();
+   private transient final LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D();
+   private transient final Point2D intersection1 = new Point2D();
+   private transient final Point2D intersection2 = new Point2D();
 
    private boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
                                                                                                                   ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices,
@@ -575,7 +575,7 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private final Point2D intersection = new Point2D();
+   private transient final Point2D intersection = new Point2D();
 
    protected boolean constructPolygonForIntersection(List<TIntArrayList> crossingIndices, ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
                                                      ConvexPolygon2DBasics intersectingPolygonToPack)
@@ -676,7 +676,7 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private final RecyclingArrayList<TIntArrayList> crossingIndices = new RecyclingArrayList<>(TIntArrayList.class);
+   private transient final RecyclingArrayList<TIntArrayList> crossingIndices = new RecyclingArrayList<>(TIntArrayList.class);
 
    private boolean buildCommonPolygonFromBridges(TIntArrayList bridgeIndicesP, TIntArrayList bridgeIndicesQ, TIntArrayList bridgeWasOnLeft,
                                                  ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
@@ -706,11 +706,12 @@ public class ConvexPolygonTools
       return success;
    }
 
-   private final Point2D referencePointInPCopy = new Point2D();
-   private final RecyclingArrayList<Line2D> rays = new RecyclingArrayList<>(Line2D.class);
-   private final Vector2D edgeOnQ = new Vector2D();
-   private final Vector2D edgeOnP = new Vector2D();
-   private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
+   private transient final Point2D referencePointInPCopy = new Point2D();
+   private transient final RecyclingArrayList<Line2D> rays = new RecyclingArrayList<>(Line2D.class);
+   private transient final Vector2D edgeOnQ = new Vector2D();
+   private transient final Vector2D edgeOnP = new Vector2D();
+   private transient final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays
+         = new ConvexPolygonConstructorFromInteriorOfRays();
 
    public boolean shrinkInto(ConvexPolygon2DReadOnly polygonP, Point2DReadOnly referencePointInP, ConvexPolygon2DReadOnly polygonQ,
                              ConvexPolygon2D polygonToPack)
@@ -791,8 +792,8 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private final Point2D intersectionPoint1 = new Point2D();
-   private final Point2D intersectionPoint2 = new Point2D();
+   private transient final Point2D intersectionPoint1 = new Point2D();
+   private transient final Point2D intersectionPoint2 = new Point2D();
 
    public static ConvexPolygonCutResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCut,
                                                                Line2DReadOnly cuttingLine,
@@ -1008,20 +1009,41 @@ public class ConvexPolygonTools
       {
          int index = -1;
          double longestEdgeLength = Double.NEGATIVE_INFINITY;
-         for (int i = 0; i < vertices; i++)
+         Point2DReadOnly lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices + 1; i++)
          {
-            Point2DReadOnly vertex = polygon.getVertex(i);
-            Point2DReadOnly nextVertex = polygon.getNextVertex(i);
-            double edgeLength = vertex.distance(nextVertex);
+            Point2DReadOnly nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+
+            double edgeLength = lastVertex.distance(nextVertex);
             if (edgeLength > longestEdgeLength)
             {
                longestEdgeLength = edgeLength;
                index = i;
             }
+            lastVertex = nextVertex;
          }
 
-         int idx1 = index;
-         int idx2 = polygon.getNextVertexIndex(index);
+         int idx1 = -1;
+         int idx2 = -1;
+
+         if (index == vertices)
+         {
+            idx1 = vertices - 1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = index - 1;
+            idx2 = index;
+         }
 
          Point2DReadOnly vertexA = polygon.getVertex(idx1);
          Point2DReadOnly vertexB = polygon.getVertex(idx2);
@@ -1066,10 +1088,10 @@ public class ConvexPolygonTools
       limitVerticesConservative((ConvexPolygon2DBasics) polygon, desiredVertices);
    }
 
-   private final ConvexPolygon2D intersectingPolygonToPack = new ConvexPolygon2D();
-   private final int[] v1Tangents = new int[2];
-   private final int[] v2Tangents = new int[2];
-   private final int[] updatedIndices = new int[4];
+   private transient final ConvexPolygon2D intersectingPolygonToPack = new ConvexPolygon2D();
+   private transient final int[] v1Tangents = new int[2];
+   private transient final int[] v2Tangents = new int[2];
+   private transient final int[] updatedIndices = new int[4];
 
    /**
     * Finds the minimum distance between two convex polygons Taken from
@@ -1118,8 +1140,8 @@ public class ConvexPolygonTools
    // TODO potentially implement [Chazelle and Dobkin] to get logarithmic running time for computeMinimumDistancePoints (though it would actually be log^2 in current
    // implementation, since binaryElimination, which has is O(log(n)) uses this method in each loop)
 
-   private final Vector2D tangent1 = new Vector2D();
-   private final Vector2D tangent2 = new Vector2D();
+   private transient final Vector2D tangent1 = new Vector2D();
+   private transient final Vector2D tangent2 = new Vector2D();
 
    /**
     * Finds the indices of the vertices of the polygon that form tangent lines to the polygon with
@@ -1170,9 +1192,9 @@ public class ConvexPolygonTools
 
    }
 
-   private final Vector2D base = new Vector2D();
-   private final Vector2D first = new Vector2D();
-   private final Vector2D second = new Vector2D();
+   private transient final Vector2D base = new Vector2D();
+   private transient final Vector2D first = new Vector2D();
+   private transient final Vector2D second = new Vector2D();
 
    /**
     * Uses the fact that if a line passes through a vertex of a convex polygon, the angles to the
@@ -1226,15 +1248,15 @@ public class ConvexPolygonTools
       return false;
    }
 
-   private final Vector2D m = new Vector2D();
-   private final Vector2D mReversed = new Vector2D();
-   private final Vector2D edge1A = new Vector2D();
-   private final Vector2D edge1B = new Vector2D();
-   private final Vector2D edge2A = new Vector2D();
-   private final Vector2D edge2B = new Vector2D();
-   private final int[] range1 = new int[2];
-   private final int[] range2 = new int[2];
-   private final int[] updatedIndicesInBinaryElimination = new int[4];
+   private transient final Vector2D m = new Vector2D();
+   private transient final Vector2D mReversed = new Vector2D();
+   private transient final Vector2D edge1A = new Vector2D();
+   private transient final Vector2D edge1B = new Vector2D();
+   private transient final Vector2D edge2A = new Vector2D();
+   private transient final Vector2D edge2B = new Vector2D();
+   private transient final int[] range1 = new int[2];
+   private transient final int[] range2 = new int[2];
+   private transient final int[] updatedIndicesInBinaryElimination = new int[4];
 
    /**
     * Eliminates vertices and return a range for each polygon, each of which comprises of at most
@@ -1376,7 +1398,7 @@ public class ConvexPolygonTools
       updatedIndices[3] = v2End;
    }
 
-   private final LineSegment2D p = new LineSegment2D();
+   private transient final LineSegment2D p = new LineSegment2D();
 
    /**
     * Binary elimination helper method called if one range has a size of exactly two
@@ -1532,19 +1554,19 @@ public class ConvexPolygonTools
       }
    }
 
-   private final LineSegment2D edge1 = new LineSegment2D();
-   private final LineSegment2D edge2 = new LineSegment2D();
-   private final Point2D proj1AOnto2 = new Point2D();
-   private final Point2D proj1BOnto2 = new Point2D();
-   private final Point2D proj2AOnto1 = new Point2D();
-   private final Point2D proj2BOnto1 = new Point2D();
-   private final Point2D[][] possiblePointPairsWithProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
+   private transient final LineSegment2D edge1 = new LineSegment2D();
+   private transient final LineSegment2D edge2 = new LineSegment2D();
+   private transient final Point2D proj1AOnto2 = new Point2D();
+   private transient final Point2D proj1BOnto2 = new Point2D();
+   private transient final Point2D proj2AOnto1 = new Point2D();
+   private transient final Point2D proj2BOnto1 = new Point2D();
+   private transient final Point2D[][] possiblePointPairsWithProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
          {new Point2D(), new Point2D()}, {new Point2D(), new Point2D()}};
-   private final Point2D[][] possiblePointPairsWithoutProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
+   private transient final Point2D[][] possiblePointPairsWithoutProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
          {new Point2D(), new Point2D()}, {new Point2D(), new Point2D()}};
-   private final double[] possibleDistancesWithProj = new double[4];
-   private final double[] possibleDistancesWithoutProj = new double[4];
-   private final boolean[] possiblePointPairsWithProjValid = new boolean[4];
+   private transient final double[] possibleDistancesWithProj = new double[4];
+   private transient final double[] possibleDistancesWithoutProj = new double[4];
+   private transient final boolean[] possiblePointPairsWithProjValid = new boolean[4];
 
    /**
     * Final phase helper method called if each range has size of exactly two
@@ -1644,7 +1666,7 @@ public class ConvexPolygonTools
       return minIndex;
    }
 
-   private final LineSegment2D pFinalPhasePoint = new LineSegment2D();
+   private transient final LineSegment2D pFinalPhasePoint = new LineSegment2D();
 
    /**
     * Final phase helper method called if one range has a size of exactly one
@@ -1827,7 +1849,7 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
+   private transient final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
 
    //TODO do something smarter here
    public double computeIntersectionAreaOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)

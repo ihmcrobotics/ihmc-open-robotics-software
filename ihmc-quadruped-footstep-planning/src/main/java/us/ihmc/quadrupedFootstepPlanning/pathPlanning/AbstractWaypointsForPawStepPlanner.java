@@ -18,7 +18,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    private double fallbackRegionSize = defaultFallbackRegionSize;
 
 
-   public AbstractWaypointsForPawStepPlanner(String prefix, YoVariableRegistry registry)
+   public AbstractWaypointsForPawStepPlanner(String prefix, YoRegistry registry)
    {
       yoResult = new YoEnum<>(prefix + "PathPlanningResult", registry, PawStepPlanningResult.class);
    }
@@ -50,8 +50,8 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    public void setInitialBodyPose(FramePose3DReadOnly initialPose)
    {
       bodyStartPose.setToZero(ReferenceFrame.getWorldFrame());
-      bodyStartPose.setPosition(initialPose.getX(), initialPose.getY(), 0.0);
-      bodyStartPose.setOrientationYawPitchRoll(initialPose.getYaw(), 0.0, 0.0);
+      bodyStartPose.getPosition().set(initialPose.getX(), initialPose.getY(), 0.0);
+      bodyStartPose.getOrientation().setYawPitchRoll(initialPose.getYaw(), 0.0, 0.0);
    }
 
    @Override

@@ -2,8 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.LinkedHashMap;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
@@ -23,12 +23,12 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 {
    private final InverseDynamicsCalculator idCalculator;
    private final JointBasics[] jointsInOrder;
-   private final DenseMatrix64F massMatrix;
-   private final DenseMatrix64F storedJointDesiredAccelerations;
-   private final DenseMatrix64F tmpDesiredJointAccelerationsMatrix;
-   private final DenseMatrix64F tmpTauMatrix;
+   private final DMatrixRMaj massMatrix;
+   private final DMatrixRMaj storedJointDesiredAccelerations;
+   private final DMatrixRMaj tmpDesiredJointAccelerationsMatrix;
+   private final DMatrixRMaj tmpTauMatrix;
    private final LinkedHashMap<JointBasics, Wrench> storedJointWrenches = new LinkedHashMap<JointBasics, Wrench>();
-   private final DenseMatrix64F storedJointVelocities;
+   private final DMatrixRMaj storedJointVelocities;
    
    private final int totalNumberOfDoFs;
 
@@ -40,12 +40,12 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       idCalculator.setRootAcceleration(zeroRootAcceleration);
       jointsInOrder = MultiBodySystemTools.collectSubtreeJoints(rootBody);
       totalNumberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsInOrder);
-      massMatrix = new DenseMatrix64F(totalNumberOfDoFs, totalNumberOfDoFs);
+      massMatrix = new DMatrixRMaj(totalNumberOfDoFs, totalNumberOfDoFs);
       
-      storedJointDesiredAccelerations = new DenseMatrix64F(totalNumberOfDoFs, 1);
-      storedJointVelocities = new DenseMatrix64F(totalNumberOfDoFs, 1);
-      tmpDesiredJointAccelerationsMatrix = new DenseMatrix64F(totalNumberOfDoFs, 1);
-      tmpTauMatrix = new DenseMatrix64F(totalNumberOfDoFs, 1);
+      storedJointDesiredAccelerations = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      storedJointVelocities = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      tmpDesiredJointAccelerationsMatrix = new DMatrixRMaj(totalNumberOfDoFs, 1);
+      tmpTauMatrix = new DMatrixRMaj(totalNumberOfDoFs, 1);
       
       for (JointBasics joint : jointsInOrder)
       {
@@ -84,7 +84,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       for (JointBasics joint : jointsInOrder)
       {
          joint.setJointAccelerationToZero();
-         joint.setJointVelocity(0, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
+         joint.setJointVelocity(0, new DMatrixRMaj(joint.getDegreesOfFreedom(), 1));
       }
    }
 
@@ -94,12 +94,12 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       MultiBodySystemTools.extractJointsState(jointsInOrder, JointStateType.VELOCITY, storedJointVelocities);
       for (JointBasics joint : jointsInOrder)
       {
-         DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         DMatrixRMaj tauMatrix = new DMatrixRMaj(joint.getDegreesOfFreedom(), 1);
          joint.getJointTau(0, tauMatrix);
-         DenseMatrix64F spatialForce = new DenseMatrix64F(SpatialForce.SIZE, 1);
-         DenseMatrix64F motionSubspace = new DenseMatrix64F(6, joint.getDegreesOfFreedom());
+         DMatrixRMaj spatialForce = new DMatrixRMaj(SpatialForce.SIZE, 1);
+         DMatrixRMaj motionSubspace = new DMatrixRMaj(6, joint.getDegreesOfFreedom());
          joint.getMotionSubspace(motionSubspace);
-         CommonOps.mult(motionSubspace, tauMatrix, spatialForce);
+         CommonOps_DDRM.mult(motionSubspace, tauMatrix, spatialForce);
          Wrench jointWrench = storedJointWrenches.get(joint);
          jointWrench.setIncludingFrame(joint.getFrameAfterJoint(), spatialForce);
          jointWrench.changeFrame(joint.getFrameAfterJoint());
@@ -118,13 +118,13 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    }
 
    @Override
-   public DenseMatrix64F getMassMatrix()
+   public DMatrixRMaj getMassMatrix()
    {
       return massMatrix;
    }
 
    @Override
-   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   public void getMassMatrix(DMatrixRMaj massMatrixToPack)
    {
       massMatrixToPack.set(massMatrix);
    }

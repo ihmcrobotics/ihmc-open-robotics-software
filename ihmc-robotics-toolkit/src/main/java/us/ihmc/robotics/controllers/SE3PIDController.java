@@ -12,7 +12,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Double-geodesic PD controller with feed forward for a left-invariant system (i.e. in body coordinates)
@@ -38,12 +38,12 @@ public class SE3PIDController
    private final FrameVector3D currentVelocity = new FrameVector3D();
    private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoRegistry registry)
    {
       this(namePrefix, bodyFrame, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoPIDSE3Gains gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoPIDSE3Gains gains, YoRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)

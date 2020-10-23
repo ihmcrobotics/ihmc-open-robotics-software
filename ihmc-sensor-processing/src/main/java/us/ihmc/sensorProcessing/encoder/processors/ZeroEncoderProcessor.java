@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ZeroEncoderProcessor implements EncoderProcessor
 {
@@ -29,7 +29,7 @@ public class ZeroEncoderProcessor implements EncoderProcessor
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return null;
    }

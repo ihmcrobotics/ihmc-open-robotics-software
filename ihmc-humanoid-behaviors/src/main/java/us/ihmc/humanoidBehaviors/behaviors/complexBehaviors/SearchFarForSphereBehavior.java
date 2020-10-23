@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarState>
@@ -23,7 +23,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public SearchFarForSphereBehavior(String robotName, YoDouble yoTime,  
-                                     HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
+                                     HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node,
                                       AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "SearchForSpehereFar", SearchFarState.class, yoTime, ros2Node);

@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -32,7 +32,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame!");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrame!");
       frameOrientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(frameOrientation);
    }
@@ -175,9 +175,9 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
    
-   private YoVariableRegistry createRegistry()
+   private YoRegistry createRegistry()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry" + globalCounter);
+      YoRegistry registry = new YoRegistry("registry" + globalCounter);
       globalCounter++;
       return registry;
    }

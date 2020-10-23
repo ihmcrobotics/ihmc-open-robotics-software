@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaBetaFilteredYoVariableTest
@@ -16,7 +16,7 @@ public class AlphaBetaFilteredYoVariableTest
 	@Test
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithNoVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       YoDouble xMeasuredVariable = new YoDouble("xMeasuredVariable", registry);
 
@@ -43,7 +43,7 @@ public class AlphaBetaFilteredYoVariableTest
 	@Test
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithConstantVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       YoDouble xMeasuredVariable = new YoDouble("xMeasuredVariable", registry);
 

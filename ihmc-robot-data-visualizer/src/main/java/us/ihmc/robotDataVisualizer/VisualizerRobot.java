@@ -1,53 +1,54 @@
 package us.ihmc.robotDataVisualizer;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class VisualizerRobot extends FloatingRootJointRobot
 {
-   private final YoVariableRegistry reducedRegistry;
+   private final YoRegistry reducedRegistry;
 
 
    public VisualizerRobot(RobotDescription robotDescription)
    {
       super(robotDescription, false, false);
-      this.reducedRegistry = new YoVariableRegistry(robotDescription.getName());
+      this.reducedRegistry = new YoRegistry(robotDescription.getName());
 
-      reducedRegistry.registerVariable(getRootJoint().getQx());
-      reducedRegistry.registerVariable(getRootJoint().getQy());
-      reducedRegistry.registerVariable(getRootJoint().getQz());
+      reducedRegistry.addVariable(t);
+      reducedRegistry.addVariable(getRootJoint().getQx());
+      reducedRegistry.addVariable(getRootJoint().getQy());
+      reducedRegistry.addVariable(getRootJoint().getQz());
 
-      reducedRegistry.registerVariable(getRootJoint().getQdx());
-      reducedRegistry.registerVariable(getRootJoint().getQdy());
-      reducedRegistry.registerVariable(getRootJoint().getQdz());
+      reducedRegistry.addVariable(getRootJoint().getQdx());
+      reducedRegistry.addVariable(getRootJoint().getQdy());
+      reducedRegistry.addVariable(getRootJoint().getQdz());
 
 
-      reducedRegistry.registerVariable(getRootJoint().getQuaternionQs());
-      reducedRegistry.registerVariable(getRootJoint().getQuaternionQx());
-      reducedRegistry.registerVariable(getRootJoint().getQuaternionQy());
-      reducedRegistry.registerVariable(getRootJoint().getQuaternionQz());
+      reducedRegistry.addVariable(getRootJoint().getQuaternionQs());
+      reducedRegistry.addVariable(getRootJoint().getQuaternionQx());
+      reducedRegistry.addVariable(getRootJoint().getQuaternionQy());
+      reducedRegistry.addVariable(getRootJoint().getQuaternionQz());
 
-      reducedRegistry.registerVariable(getRootJoint().getAngularVelocityX());
-      reducedRegistry.registerVariable(getRootJoint().getAngularVelocityY());
-      reducedRegistry.registerVariable(getRootJoint().getAngularVelocityZ());
+      reducedRegistry.addVariable(getRootJoint().getAngularVelocityX());
+      reducedRegistry.addVariable(getRootJoint().getAngularVelocityY());
+      reducedRegistry.addVariable(getRootJoint().getAngularVelocityZ());
 
       for(OneDegreeOfFreedomJoint joint : getOneDegreeOfFreedomJoints())
       {
-         reducedRegistry.registerVariable(joint.getQYoVariable());
-         reducedRegistry.registerVariable(joint.getQDYoVariable());
+         reducedRegistry.addVariable(joint.getQYoVariable());
+         reducedRegistry.addVariable(joint.getQDYoVariable());
       }
 
    }
 
    @Override
-   public YoVariableRegistry getRobotsYoVariableRegistry()
+   public YoRegistry getRobotsYoRegistry()
    {
       if(this.reducedRegistry == null)
       {
          // Hack to avoid null registry errors on startup.
-         return super.getRobotsYoVariableRegistry();
+         return super.getRobotsYoRegistry();
       }
       else
       {

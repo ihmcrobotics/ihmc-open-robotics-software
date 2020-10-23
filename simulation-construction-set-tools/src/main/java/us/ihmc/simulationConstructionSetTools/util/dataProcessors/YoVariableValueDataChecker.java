@@ -1,12 +1,13 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class YoVariableValueDataChecker implements DataProcessingFunction
+public class YoVariableValueDataChecker implements YoBufferProcessor
 {
    private YoBoolean maximumValueExceeded;
    private YoBoolean minimumValueExceeded;
@@ -62,7 +63,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    {
       this.scs = scs;
       
-      YoVariableRegistry registry = scs.getRootRegistry();
+      YoRegistry registry = scs.getRootRegistry();
 
       this.time = time;
       this.variableToCheck = variableToCheck;
@@ -141,7 +142,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    }
 
    @Override
-   public void initializeProcessing()
+   public void initialize(YoVariableHolder yoVariableHolder)
    {
       maxDerivativeExeeded = false;
       maxSecondDerivativeExeeded = false;
@@ -153,7 +154,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    }
 
    @Override
-   public void processData()
+   public void process(int startIndex, int endIndex, int currentIndex)
    {
       double currentValue = variableToCheck.getDoubleValue();
       minimumValueExceeded.set(currentValue < valueDataCheckerParameters.getMinimumValue());

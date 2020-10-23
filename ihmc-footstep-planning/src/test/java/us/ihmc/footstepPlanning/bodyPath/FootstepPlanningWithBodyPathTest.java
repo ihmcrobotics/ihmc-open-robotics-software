@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +45,13 @@ public class FootstepPlanningWithBodyPathTest
    @Test
    public void testWaypointPathOnFlat(TestInfo testInfo)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       double goalDistance = 5.0;
-      FramePose3D initialStanceFootPose = new FramePose3D();
+      FramePose3D initialMidFootPose = new FramePose3D();
       RobotSide initialStanceFootSide = RobotSide.LEFT;
-      initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
@@ -68,13 +67,13 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
-      request.setInitialStancePose(initialStanceFootPose);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setGoalPose(goalPose);
+      request.setStartFootPoses(defaultStepWidth, initialMidFootPose);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setGoalFootPoses(defaultStepWidth, goalPose);
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(null, plannerOutput.getFootstepPlan(), goalPose, bodyPath);
@@ -116,7 +115,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D initialMidFootPose = new FramePose3D();
       initialMidFootPose.setX(startPos.getX());
       initialMidFootPose.setY(startPos.getY());
-      initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+      initialMidFootPose.getOrientation().setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
       PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
       RobotSide initialStanceFootSide = RobotSide.RIGHT;
@@ -127,7 +126,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+      goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
@@ -135,13 +134,13 @@ public class FootstepPlanningWithBodyPathTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
       request.setPlanarRegionsList(planarRegionsList);
-      request.setInitialStancePose(initialStanceFootPose);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setGoalPose(goalPose);
+      request.setStartFootPoses(defaultStepWidth, initialStanceFootPose);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setGoalFootPoses(defaultStepWidth, goalPose);
       request.getBodyPathWaypoints().addAll(waypoints);
 
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(planarRegionsList, plannerOutput.getFootstepPlan(), goalPose, bodyPath);

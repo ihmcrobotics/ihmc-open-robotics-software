@@ -1,18 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
@@ -66,11 +64,11 @@ public class PointJacobianTest
 
       JointBasics[] joints = geometricJacobian.getJointsInOrder();
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+      DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
-      DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
-      CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
+      DMatrixRMaj pointVelocityFromJacobianMatrix = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
       FrameVector3D pointVelocityFromJacobian = new FrameVector3D(pointJacobian.getFrame());
       pointVelocityFromJacobian.set(pointVelocityFromJacobianMatrix);
 
@@ -116,11 +114,11 @@ public class PointJacobianTest
       pointJacobian2.set(geometricJacobian, point2);
       pointJacobian2.compute();
 
-      DenseMatrix64F assembledJacobian = new DenseMatrix64F(SpatialVector.SIZE, geometricJacobian.getNumberOfColumns());
-      CommonOps.insert(pointJacobian1.getJacobianMatrix(), assembledJacobian, 0, 0);
-      CommonOps.insert(pointJacobian2.getJacobianMatrix(), assembledJacobian, 3, 0);
+      DMatrixRMaj assembledJacobian = new DMatrixRMaj(SpatialVector.SIZE, geometricJacobian.getNumberOfColumns());
+      CommonOps_DDRM.insert(pointJacobian1.getJacobianMatrix(), assembledJacobian, 0, 0);
+      CommonOps_DDRM.insert(pointJacobian2.getJacobianMatrix(), assembledJacobian, 3, 0);
 
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(assembledJacobian.getNumRows(), assembledJacobian.getNumCols(), true, true,
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(assembledJacobian.getNumRows(), assembledJacobian.getNumCols(), true, true,
                                                           false);
       svd.decompose(assembledJacobian);
 

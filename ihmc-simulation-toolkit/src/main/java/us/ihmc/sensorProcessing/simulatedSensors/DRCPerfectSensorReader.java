@@ -2,11 +2,11 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DRCPerfectSensorReader implements SensorReader
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
+   private final YoRegistry registry = new YoRegistry("DRCPerfectSensorReader");
    private RawSensorReader rawSensorReader;
    private SensorOutputMapReadOnly processedSensorOutputMap;
    private SensorOutputMapReadOnly rawSensorOutputMap;
@@ -42,7 +42,7 @@ public class DRCPerfectSensorReader implements SensorReader
       return rawSensorOutputMap;
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

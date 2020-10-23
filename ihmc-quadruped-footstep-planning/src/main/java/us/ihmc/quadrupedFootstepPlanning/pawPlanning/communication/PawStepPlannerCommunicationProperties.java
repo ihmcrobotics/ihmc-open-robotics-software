@@ -2,16 +2,13 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class PawStepPlannerCommunicationProperties
 {
@@ -24,8 +21,6 @@ public class PawStepPlannerCommunicationProperties
       statusMessages.add(FootstepPlanningToolboxOutputStatus.class);
       statusMessages.add(FootstepPlannerStatusMessage.class);
       statusMessages.add(BodyPathPlanMessage.class);
-      statusMessages.add(BodyPathPlanStatisticsMessage.class);
-      statusMessages.add(FootstepNodeDataListMessage.class);
       statusMessages.add(FootstepPlannerOccupancyMapMessage.class);
 
       toolboxSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
@@ -45,13 +40,13 @@ public class PawStepPlannerCommunicationProperties
       return toolboxSupportedCommands;
    }
 
-   public static MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
+   public static ROS2Topic outputTopic(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic inputTopic(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }
 }

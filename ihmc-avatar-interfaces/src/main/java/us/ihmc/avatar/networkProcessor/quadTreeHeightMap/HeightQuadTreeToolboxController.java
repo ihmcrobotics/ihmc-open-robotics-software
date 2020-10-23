@@ -36,7 +36,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
@@ -70,7 +70,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final double quadTreeMessageMaxRadius = 5.0;
 
    public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
-                                          StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+                                          StatusMessageOutputManager statusOutputManager, YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.fullRobotModel = fullRobotModel;
@@ -199,7 +199,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          }
 
          Vector3D translation = robotConfigurationData.getRootTranslation();
-         rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
+         rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();

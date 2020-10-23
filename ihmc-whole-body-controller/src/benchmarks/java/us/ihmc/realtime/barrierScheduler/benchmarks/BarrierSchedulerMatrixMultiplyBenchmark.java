@@ -10,7 +10,7 @@ import us.ihmc.realtime.*;
 import us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses.*;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public class BarrierSchedulerMatrixMultiplyBenchmark
    private static final int NUM_ITERATIONS_OF_SCHEDULER = 60000; // 60 seconds @ 1KHz
    private static final double ESTIMATED_DURATION = (double) SCHEDULER_PERIOD_NANOSECONDS * (double) NUM_ITERATIONS_OF_SCHEDULER / 1e9;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble actualSchedulerDTMillis = new YoDouble("actualSchedulerDTMillis", registry);
    private final YoDouble actualFastTaskDTMillis = new YoDouble("actualFastTaskDTMillis", registry);
    private final YoDouble actualSlowTaskDTMillis = new YoDouble("actualSlowTaskDTMillis", registry);

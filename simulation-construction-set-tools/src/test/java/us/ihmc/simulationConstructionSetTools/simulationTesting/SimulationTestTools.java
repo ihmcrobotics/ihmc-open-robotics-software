@@ -89,13 +89,13 @@ public class SimulationTestTools
 //       throw new RuntimeException("times not equal.");
 //    }
 
-      String message = createFailMessage(scs.getAllVariables(), variableDifferences);
+      String message = createFailMessage(scs.getVariables(), variableDifferences);
 
       scs = null;
       assertEquals(message, true, variableDifferences.isEmpty());
    }
 
-   private static String createFailMessage(List<YoVariable<?>> allVariables, List<VariableDifference> variableDifferences)
+   private static String createFailMessage(List<YoVariable> allVariables, List<VariableDifference> variableDifferences)
    {
       String numberOfVarsChangedString = variableDifferences.size() + " out of " + allVariables.size() + " YoVariables changed.\n";
       String changedVarsString = "Changed vars:\n" + VariableDifference.allVariableDifferencesToString(variableDifferences);
@@ -126,7 +126,7 @@ public class SimulationTestTools
          scs.writeState(stateFiles.get(i));
 //         System.out.println("Run " + i + " done.");
          scs.gotoInPointNow();
-         assertEquals(scs.getIndex(), 0);
+         assertEquals(scs.getCurrentIndex(), 0);
       }
 
       // compare
@@ -150,7 +150,7 @@ public class SimulationTestTools
          scs.writeState(stateFiles.get(i));
 //         System.out.println("Run " + i + " done.");
          scs.gotoInPointNow();
-         assertEquals(scs.getIndex(), 0);
+         assertEquals(scs.getCurrentIndex(), 0);
       }
 
       compare(stateFiles, scs, namesToSkipOver);
@@ -203,7 +203,7 @@ public class SimulationTestTools
          scss.get(0).gotoInPointNow();
          scss.get(0).simulate(1);
          BlockingSimulationRunner.waitForSimulationToFinish(scss.get(0), maximumClockRunTimeInSeconds, true);
-         assertEquals("indices not the same", scss.get(0).getIndex(), scss.get(1).getIndex());
+         assertEquals("indices not the same", scss.get(0).getCurrentIndex(), scss.get(1).getCurrentIndex());
          assertEquals("times not the same", scss.get(0).getRobots()[0].getTime(), scss.get(1).getRobots()[0].getTime(), epsilon);
          boolean result = comparer.compare(scss.get(0), scss.get(1));
 

@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class BipedCoMTrajectoryPlanner
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final BipedContactSequenceUpdater sequenceUpdater;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
@@ -37,7 +37,7 @@ public class BipedCoMTrajectoryPlanner
    private final List<BipedTimedStep> stepSequence = new ArrayList<>();
 
    public BipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, double gravityZ, double nominalCoMHeight,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       sequenceUpdater = new BipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);

@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -11,7 +11,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class YoWhiteBoardReadController implements RobotController, SensorProcessor
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ExecutionTimer yoWhiteBoardReadControllerWaitingGlobalTimer;
    
    private final YoInteger numberOfNewDataSinceLastRead;
@@ -28,7 +28,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
    public YoWhiteBoardReadController(String name, YoWhiteBoard yoWhiteBoard, boolean blockUntilNewDataIsAvailable, int readEveryNTicks,
                                      boolean doNotReadFirstTime, boolean readOnInitialize)
    {
-      registry = new YoVariableRegistry(name + "YoWhiteBoardReadController");
+      registry = new YoRegistry(name + "YoWhiteBoardReadController");
       yoWhiteBoardReadControllerWaitingGlobalTimer = new ExecutionTimer("whiteBoardReadWait", registry);
       numberOfNewDataSinceLastRead = new YoInteger("numberOfNewDataSinceLastRead", registry);
 
@@ -81,7 +81,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

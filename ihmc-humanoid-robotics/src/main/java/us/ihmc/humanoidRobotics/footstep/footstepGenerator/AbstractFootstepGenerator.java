@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunc
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,7 +47,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected SideDependentList<ReferenceFrame> soleFrames;
    protected boolean startStancePreferenceSpecified = false;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected HeightMapWithPoints heightMap;
    protected SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
@@ -134,8 +134,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       ReferenceFrame soleFrame = soleFrames.get(side);
       Vector3D translation = new Vector3D();
       Quaternion rotation = new Quaternion();
-      soleFrame.getTransformToWorldFrame().getTranslation(translation);
-      soleFrame.getTransformToWorldFrame().getRotation(rotation);
+      translation.set(soleFrame.getTransformToWorldFrame().getTranslation());
+      rotation.set(soleFrame.getTransformToWorldFrame().getRotation());
 
       FramePose2D solePose2d = new FramePose2D(soleFrame, new Point2D(translation.getX(), translation.getY()), rotation.getYaw());
       Footstep foot = createFootstep(side, solePose2d);

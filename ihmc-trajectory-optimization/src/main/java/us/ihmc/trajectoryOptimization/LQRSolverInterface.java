@@ -1,11 +1,10 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import org.ejml.data.DMatrixRMaj;
 
 public interface LQRSolverInterface<E extends Enum>
 {
-   void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState);
+   void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DMatrixRMaj initialState);
    void getOptimalSequence(DiscreteOptimizationData optimalSequenceToPack);
 
    DiscreteOptimizationData getOptimalSequence();
@@ -14,7 +13,7 @@ public interface LQRSolverInterface<E extends Enum>
    DiscreteSequence getOptimalFeedbackGainSequence();
    DiscreteSequence getOptimalFeedForwardControlSequence();
 
-   DenseMatrix64F getValueHessian();
+   DMatrixRMaj getValueHessian();
 
    void solveRiccatiEquation(E dynamicState, int startIndex, int endIndex); // backwards pass
    void computeOptimalSequences(E dynamicsState, int startIndex, int endIndex); // forward pass

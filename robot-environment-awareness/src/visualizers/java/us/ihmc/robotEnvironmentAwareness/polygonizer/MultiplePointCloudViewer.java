@@ -43,7 +43,7 @@ public class MultiplePointCloudViewer extends AnimationTimer
    private final ExecutorService executorService;
 
    private final BooleanProperty showPointCloud = new SimpleBooleanProperty(this, "showPointCloud", true);
-   private final DoubleProperty pointCloudSize = new SimpleDoubleProperty(this, "pointCloudSize", 0.025);
+   private final DoubleProperty pointCloudSize = new SimpleDoubleProperty(this, "pointCloudSize", 0.0025);
 
    private final Group rootNode = new Group();
    private final List<PointCloudViewer> pointCloudViewersRendered = new ArrayList<>();

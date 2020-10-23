@@ -2,19 +2,18 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -41,8 +40,7 @@ public class SelectionCalculatorTest
       for (int i = 0; i < 1000; i++)
       {
          RigidBodyTransform selectionFrameTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-         selectionFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("SelectionFrame", ReferenceFrame.getWorldFrame(),
-                                                                                         selectionFrameTransform);
+         selectionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("SelectionFrame", ReferenceFrame.getWorldFrame(), selectionFrameTransform);
          objective = EuclidCoreRandomTools.nextVector3D(random);
          selectionMatrix.setSelectionFrame(selectionFrame);
          selectionMatrix.selectXAxis(random.nextBoolean());
@@ -62,13 +60,13 @@ public class SelectionCalculatorTest
    {
       // Setup an optimization such that we minimize
       // min 0.5 x' H x + f' x
-      DenseMatrix64F H = new DenseMatrix64F(3, 3);
-      DenseMatrix64F f = new DenseMatrix64F(3, 1);
+      DMatrixRMaj H = new DMatrixRMaj(3, 3);
+      DMatrixRMaj f = new DMatrixRMaj(3, 1);
 
       // Add a regularization so all unselected axes will be zeroed.
-      CommonOps.fill(f, 0.0);
-      CommonOps.setIdentity(H);
-      CommonOps.scale(regularizationWeight, H);
+      CommonOps_DDRM.fill(f, 0.0);
+      CommonOps_DDRM.setIdentity(H);
+      CommonOps_DDRM.scale(regularizationWeight, H);
 
       WeightMatrix3D weightMatrix = new WeightMatrix3D();
       weightMatrix.setWeightFrame(selectionMatrix.getSelectionFrame());
@@ -85,15 +83,15 @@ public class SelectionCalculatorTest
          weightMatrix.setZAxisWeight(objectiveWeight);
       }
 
-      DenseMatrix64F taskJacobian = new DenseMatrix64F(0, 0);
-      DenseMatrix64F taskObjective = new DenseMatrix64F(0, 0);
+      DMatrixRMaj taskJacobian = new DMatrixRMaj(0, 0);
+      DMatrixRMaj taskObjective = new DMatrixRMaj(0, 0);
       computeTask(objective, taskJacobian, taskObjective);
 
       SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-      DenseMatrix64F taskJacobianAfterSelection = new DenseMatrix64F(0, 0);
-      DenseMatrix64F taskObjectiveAfterSelection = new DenseMatrix64F(0, 0);
-      DenseMatrix64F taskWeightAfterSelection = new DenseMatrix64F(0, 0);
+      DMatrixRMaj taskJacobianAfterSelection = new DMatrixRMaj(0, 0);
+      DMatrixRMaj taskObjectiveAfterSelection = new DMatrixRMaj(0, 0);
+      DMatrixRMaj taskWeightAfterSelection = new DMatrixRMaj(0, 0);
       selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, taskFrame, taskJacobian, taskObjective, taskJacobianAfterSelection,
                                                taskObjectiveAfterSelection, taskWeightAfterSelection);
 
@@ -101,7 +99,7 @@ public class SelectionCalculatorTest
 
       // Without any constraints the solution to this problem is
       // H x = f
-      DenseMatrix64F x = (new SimpleMatrix(H)).invert().mult(new SimpleMatrix(f)).getMatrix();
+      DMatrixRMaj x = (new SimpleMatrix(H)).invert().mult(new SimpleMatrix(f)).getMatrix();
       Vector3D result = new Vector3D(x.get(0), x.get(1), x.get(2));
 
       FrameVector3D frameResult = new FrameVector3D(taskFrame, result);
@@ -124,7 +122,7 @@ public class SelectionCalculatorTest
 
    private static void visualize(ReferenceFrame taskFrame, ReferenceFrame selectionFrame, Vector3D objective, Vector3D result)
    {
-      //      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      //      YoRegistry registry = new YoRegistry("TestRegistry");
       //      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       //
       //      YoGraphicCoordinateSystem taskFrameViz = new YoGraphicCoordinateSystem("TaskFrame", "Viz", registry, 1.0, YoAppearance.Blue());
@@ -153,17 +151,17 @@ public class SelectionCalculatorTest
       //      ThreadTools.sleepForever();
    }
 
-   private static void computeTask(Vector3D objective, DenseMatrix64F taskJacobianToPack, DenseMatrix64F taskObjectiveToPack)
+   private static void computeTask(Vector3D objective, DMatrixRMaj taskJacobianToPack, DMatrixRMaj taskObjectiveToPack)
    {
       taskJacobianToPack.reshape(3, 3);
-      CommonOps.setIdentity(taskJacobianToPack);
+      CommonOps_DDRM.setIdentity(taskJacobianToPack);
 
       taskObjectiveToPack.reshape(3, 1);
       objective.get(taskObjectiveToPack);
    }
 
-   private static void addTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight, DenseMatrix64F hToModify,
-                               DenseMatrix64F fToModify)
+   private static void addTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, DMatrixRMaj hToModify,
+                               DMatrixRMaj fToModify)
    {
       SimpleMatrix J = new SimpleMatrix(taskJacobian);
       SimpleMatrix W = new SimpleMatrix(taskWeight);
@@ -172,7 +170,7 @@ public class SelectionCalculatorTest
       SimpleMatrix H = J.transpose().mult(W).mult(J);
       SimpleMatrix f = J.transpose().mult(W).mult(b);
 
-      CommonOps.add(hToModify, H.getMatrix(), hToModify);
-      CommonOps.add(fToModify, f.getMatrix(), fToModify);
+      CommonOps_DDRM.add(hToModify, H.getMatrix(), hToModify);
+      CommonOps_DDRM.add(fToModify, f.getMatrix(), fToModify);
    }
 }

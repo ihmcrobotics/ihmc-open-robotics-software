@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSineGenerator3D implements PositionTrajectoryGenerator
 {
@@ -21,9 +21,9 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    private final YoFrameVector3D velocity;
    private final YoFrameVector3D acceleration;
 
-   public YoSineGenerator3D(String namePrefix, ReferenceFrame signalFrame, YoVariableRegistry parentRegistry)
+   public YoSineGenerator3D(String namePrefix, ReferenceFrame signalFrame, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       offset = new YoFrameVector3D(namePrefix + "Offset", signalFrame, registry);

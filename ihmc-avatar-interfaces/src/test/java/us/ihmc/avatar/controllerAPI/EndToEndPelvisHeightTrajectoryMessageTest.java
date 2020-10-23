@@ -20,7 +20,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -46,7 +46,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
@@ -115,7 +115,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       //      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
       //      assertEquals(desiredPosition.getZ(), trajOutput, epsilon);
       // Ending up doing a rough check on the actual height
-      double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
+      double pelvisHeight = scs.findVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
 
       assertEquals(2, statusMessages.size());
@@ -239,7 +239,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
-      YoDouble offsetHeight = (YoDouble) scs.getVariable(namespace, "offsetHeightAboveGround");
+      YoDouble offsetHeight = (YoDouble) scs.findVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
@@ -319,13 +319,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -385,7 +385,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }

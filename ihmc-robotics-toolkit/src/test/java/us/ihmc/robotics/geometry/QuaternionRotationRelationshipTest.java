@@ -31,8 +31,8 @@ public class QuaternionRotationRelationshipTest
       {
          RigidBodyTransform transform1 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform transform2 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-         transform1.setTranslation(new Vector3D());
-         transform2.setTranslation(new Vector3D());
+         transform1.getTranslation().set(new Vector3D());
+         transform2.getTranslation().set(new Vector3D());
 
          verifyRelationship(transform1, transform2);
       }
@@ -44,8 +44,8 @@ public class QuaternionRotationRelationshipTest
       Quaternion quaternion1 = new Quaternion();
       Quaternion quaternion2 = new Quaternion();
 
-      transform1.getRotation(quaternion1);
-      transform2.getRotation(quaternion2);
+      quaternion1.set(transform1.getRotation());
+      quaternion2.set(transform2.getRotation());
       
       // Going through the quaternion multiplication method:
       Quaternion quaternion1TimesQuaternion2TimesQuaternion1Inverse = computeQuat1Quat2Quat1Conjugate(quaternion1, quaternion2);

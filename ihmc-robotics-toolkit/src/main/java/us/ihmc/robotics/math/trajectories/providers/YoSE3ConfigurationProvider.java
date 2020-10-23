@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 /**
@@ -19,7 +19,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
    private final YoFramePoint3D position;
    private final YoFrameQuaternion orientation;
 
-   public YoSE3ConfigurationProvider(String name, ReferenceFrame frame, YoVariableRegistry registry)
+   public YoSE3ConfigurationProvider(String name, ReferenceFrame frame, YoRegistry registry)
    {
       position = new YoFramePoint3D(name, frame, registry);
       orientation = new YoFrameQuaternion(name, frame, registry);

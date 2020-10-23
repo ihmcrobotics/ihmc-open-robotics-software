@@ -6,18 +6,16 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.EjmlUnitTests;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -25,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -34,7 +31,7 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPOptimizationCoPConstraintHandlerTest
@@ -56,16 +53,17 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testDoubleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -88,11 +86,11 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
-      DenseMatrix64F copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      DenseMatrix64F cmpAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F cmpBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj cmpAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj cmpBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       ConvexPolygon2D scaledCoPConstraint = new ConvexPolygon2D();
@@ -101,13 +99,13 @@ public class ICPOptimizationCoPConstraintHandlerTest
       scaler.scaleConvexPolygon(copConstraint, 0.01, scaledCoPConstraint);
       scaler.scaleConvexPolygon(cmpConstraint, -0.05, scaledCMPConstraint);
 
-      DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      DMatrixRMaj perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       PolygonWiggler.convertToInequalityConstraints(scaledCoPConstraint, copAin, copBin, 0.0);
       PolygonWiggler.convertToInequalityConstraints(scaledCMPConstraint, cmpAin, cmpBin, 0.0);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
-      CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
       EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
       EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
@@ -119,17 +117,21 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testSingleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
+      contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -149,30 +151,35 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
-      DenseMatrix64F copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      DenseMatrix64F cmpAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F cmpBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj cmpAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj cmpBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      DMatrixRMaj perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
-      CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertTrue(MatrixFeatures.isEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
 
 
       // test right support
+      contactStates.get(RobotSide.RIGHT).setFullyConstrained();
+      contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
+
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
@@ -196,40 +203,41 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
-      copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      cmpAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      cmpBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      cmpAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      cmpBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
-      CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertTrue(MatrixFeatures.isEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
    }
 
    @Test
    public void testDoubleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -254,37 +262,41 @@ public class ICPOptimizationCoPConstraintHandlerTest
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       ConvexPolygon2D scaledCoPConstraint = new ConvexPolygon2D();
 
-      DenseMatrix64F copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      DMatrixRMaj perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       scaler.scaleConvexPolygon(copConstraint, 0.01, scaledCoPConstraint);
       PolygonWiggler.convertToInequalityConstraints(scaledCoPConstraint, copAin, copBin, 0.0);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
       EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
    }
 
    @Test
    public void testSingleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
+      contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -303,25 +315,29 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
-      DenseMatrix64F copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      DenseMatrix64F copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      DMatrixRMaj copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      DMatrixRMaj copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      DMatrixRMaj perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
 
 
       // test right support
+      contactStates.get(RobotSide.RIGHT).setFullyConstrained();
+      contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
@@ -344,20 +360,20 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
-      copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
-      copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
+      copAin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 2);
+      copBin = new DMatrixRMaj(copConstraint.getNumberOfVertices(), 1);
 
-      perfectCMPMatrix = new DenseMatrix64F(2, 1);
+      perfectCMPMatrix = new DMatrixRMaj(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
       PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
-      CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
+      CommonOps_DDRM.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      assertTrue(MatrixFeatures_DDRM.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
+      assertTrue(MatrixFeatures_DDRM.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
 
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
-      assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
+      assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
    }
 
    private SideDependentList<FootSpoof> setupContactableFeet(double footLength, double footWidth, double totalWidth)
@@ -389,11 +405,11 @@ public class ICPOptimizationCoPConstraintHandlerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry,
+                                                          SideDependentList<YoPlaneContactState> contactStatesToPack)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -410,14 +426,14 @@ public class ICPOptimizationCoPConstraintHandlerTest
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
-         contactStates.put(robotSide, yoPlaneContactState);
+         contactStatesToPack.put(robotSide, yoPlaneContactState);
       }
 
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, null);
-      bipedSupportPolygons.updateUsingContactStates(contactStates);
+      bipedSupportPolygons.updateUsingContactStates(contactStatesToPack);
 
       return bipedSupportPolygons;
    }

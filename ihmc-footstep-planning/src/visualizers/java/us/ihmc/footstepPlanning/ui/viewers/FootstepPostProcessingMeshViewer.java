@@ -10,6 +10,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -41,8 +42,8 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
 
    private final AtomicReference<Boolean> showSolution;
    private final AtomicReference<Boolean> showPostProcessingInfo;
-   private final AtomicReference<Point3D> leftFootPosition;
-   private final AtomicReference<Point3D> rightFootPosition;
+   private final AtomicReference<Pose3DReadOnly> leftFootPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
@@ -53,8 +54,8 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
 
    public FootstepPostProcessingMeshViewer(Messager messager)
    {
-      leftFootPosition = messager.createInput(LeftFootStartPosition, null);
-      rightFootPosition = messager.createInput(RightFootStartPosition, null);
+      leftFootPose = messager.createInput(LeftFootPose, null);
+      rightFootPose = messager.createInput(RightFootPose, null);
 
       messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
@@ -75,25 +76,25 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
       FramePose3D footPose = new FramePose3D();
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
 
-      boolean hasInfoToRenderFootsteps = leftFootPosition.get() != null && rightFootPosition.get() != null;
+      boolean hasInfoToRenderFootsteps = leftFootPose.get() != null && rightFootPose.get() != null;
 
       FramePoint3D stanceFootPosition = new FramePoint3D();
       FramePoint3D previousStanceFootPosition = new FramePoint3D();
       RobotSide firstStepSide = plan.getFootstep(0).getRobotSide();
       if (hasInfoToRenderFootsteps && firstStepSide == RobotSide.LEFT)
       {
-         previousStanceFootPosition.set(leftFootPosition.get());
-         stanceFootPosition.set(rightFootPosition.get());
+         previousStanceFootPosition.set(leftFootPose.get().getPosition());
+         stanceFootPosition.set(rightFootPose.get().getPosition());
       }
       else if (hasInfoToRenderFootsteps)
       {
-         previousStanceFootPosition.set(rightFootPosition.get());
-         stanceFootPosition.set(leftFootPosition.get());
+         previousStanceFootPosition.set(leftFootPose.get().getPosition());
+         stanceFootPosition.set(rightFootPose.get().getPosition());
       }
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         plan.getFootstep(i).getSoleFramePose(footPose);
+         plan.getFootstep(i).getFootstepPose(footPose);
          FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
 
          for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())

@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.omniWrist;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -25,11 +25,11 @@ public class OmniWristSimulation
       OmniWristController controller = new OmniWristController(robot);
       robot.setController(controller);
 
-      YoDouble q_jointOneA = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneA");
-      YoDouble q_jointOneB = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneB");
-      YoDouble q_jointOneC = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneC");
-      YoDouble q_jointOneD = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointOneD");
-      YoDouble q_jointFourA = (YoDouble) robot.getRobotsYoVariableRegistry().getVariable("q_jointFourA");
+      YoDouble q_jointOneA = (YoDouble) robot.getRobotsYoRegistry().findVariable("q_jointOneA");
+      YoDouble q_jointOneB = (YoDouble) robot.getRobotsYoRegistry().findVariable("q_jointOneB");
+      YoDouble q_jointOneC = (YoDouble) robot.getRobotsYoRegistry().findVariable("q_jointOneC");
+      YoDouble q_jointOneD = (YoDouble) robot.getRobotsYoRegistry().findVariable("q_jointOneD");
+      YoDouble q_jointFourA = (YoDouble) robot.getRobotsYoRegistry().findVariable("q_jointFourA");
 
       double initialAngle = -0.38;
       q_jointOneA.set(initialAngle);
@@ -38,7 +38,7 @@ public class OmniWristSimulation
       q_jointOneD.set(initialAngle);
       q_jointFourA.set(-initialAngle);     
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
 
       double weldStiffness = 2000000.0;
       double weldDamping = 500.0;
@@ -70,7 +70,7 @@ public class OmniWristSimulation
    }
 
    private void createWeldConstraint(String weldName, RobotFromDescription robot, double weldStiffness, double weldDamping,
-                                     String externalForcePointName, String externalForcePointMatchName, YoVariableRegistry registry)
+                                     String externalForcePointName, String externalForcePointMatchName, YoRegistry registry)
    {
       ExternalForcePoint ef_B1 = robot.getExternalForcePoint(externalForcePointName);
       ExternalForcePoint ef_matchB1 = robot.getExternalForcePoint(externalForcePointMatchName);

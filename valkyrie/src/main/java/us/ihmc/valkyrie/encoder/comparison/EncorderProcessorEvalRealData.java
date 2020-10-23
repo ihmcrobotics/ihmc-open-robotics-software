@@ -3,7 +3,8 @@ package us.ihmc.valkyrie.encoder.comparison;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
@@ -15,14 +16,13 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class EncorderProcessorEvalRealData
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
@@ -30,7 +30,7 @@ public class EncorderProcessorEvalRealData
    private final YoDouble rawPosition;
    private final YoDouble time;
    private final YoDouble turboJerryRate,fdRate;
-   private final DataBuffer dataBuffer;
+   private final YoBuffer dataBuffer;
 
    private final double dt;
    private final RealLifeEncoderTrajectory encoder;
@@ -39,7 +39,7 @@ public class EncorderProcessorEvalRealData
    public EncorderProcessorEvalRealData() throws IOException
    {
       Robot nullRobot = new Robot("nullRobot");
-      registry = nullRobot.getRobotsYoVariableRegistry();
+      registry = nullRobot.getRobotsYoRegistry();
       rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
       heartBeat = new YoInteger("turboHeartBeat", registry);
@@ -78,7 +78,6 @@ public class EncorderProcessorEvalRealData
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot, parameters);
       scs.hideViewport();
       dataBuffer = scs.getDataBuffer();
-      dataBuffer.setWrapBuffer(false);
       simThread = new Thread(scs, "R2Simulation sim thread");
    }
 
@@ -109,7 +108,7 @@ public class EncorderProcessorEvalRealData
                processedRates.get(processor).set(processor.getQd());
             }
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
             prevPosition=encoder.getPosition();
             encoder.nextTimestep();
       }

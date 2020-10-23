@@ -2,14 +2,11 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -44,11 +42,11 @@ public class AnkleIKSolverTest
 
       Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
       Matrix3D inertia = new Matrix3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
-      DenseMatrix64F achievedJointAngles = new DenseMatrix64F(1, 1);
-      DenseMatrix64F achievedJointVelocities = new DenseMatrix64F(1, 1);
-      DenseMatrix64F jacobianAngularPart = new DenseMatrix64F(3, 2);
-      DenseMatrix64F angularVelocity = new DenseMatrix64F(3, 1);
-      DenseMatrix64F expectedJointVelocities = new DenseMatrix64F(2, 1);
+      DMatrixRMaj achievedJointAngles = new DMatrixRMaj(1, 1);
+      DMatrixRMaj achievedJointVelocities = new DMatrixRMaj(1, 1);
+      DMatrixRMaj jacobianAngularPart = new DMatrixRMaj(3, 2);
+      DMatrixRMaj angularVelocity = new DMatrixRMaj(3, 1);
+      DMatrixRMaj expectedJointVelocities = new DMatrixRMaj(2, 1);
       DampedLeastSquaresSolver solver = new DampedLeastSquaresSolver(2);
 
       for (int i = 0; i < 1000; i++)
@@ -84,7 +82,7 @@ public class AnkleIKSolverTest
          // For the velocities use a Jacobian to validate.
          GeometricJacobian jacobian = new GeometricJacobian(shin, foot, ReferenceFrame.getWorldFrame());
          jacobian.compute();
-         CommonOps.extract(jacobian.getJacobianMatrix(), 0, 3, 0, 2, jacobianAngularPart, 0, 0);
+         CommonOps_DDRM.extract(jacobian.getJacobianMatrix(), 0, 3, 0, 2, jacobianAngularPart, 0, 0);
          solver.setA(jacobianAngularPart);
          desiredAngularVelocity.get(angularVelocity);
          solver.solve(angularVelocity, expectedJointVelocities);

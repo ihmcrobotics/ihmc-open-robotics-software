@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -13,21 +13,20 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointTorqueFromForceSensorVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<RigidBodyBasics> allRigidBodies;
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, GeometricJacobian> jacobians;
    private final Map<OneDoFJointBasics, YoDouble> jointTorques;
 
-   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
+   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 
@@ -57,7 +56,7 @@ public class JointTorqueFromForceSensorVisualizer
    }
 
    private final Wrench wrench = new Wrench();
-   private final DenseMatrix64F jointTorquesMatrix = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj jointTorquesMatrix = new DMatrixRMaj(1, 1);
 
    public void update()
    {

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.ContinuousSLIPDynamics;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.ContinuousSimpleReactionDynamics;
@@ -21,24 +21,24 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    static double qTauY = 1.0;
    static double qTauZ = 1.0;
 
-   private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize / 2);
+   private final DMatrixRMaj Q = new DMatrixRMaj(stateVectorSize / 2, stateVectorSize / 2);
    private final ContinuousSimpleReactionDynamics simpleReactionDynamics;
    private final ContinuousSLIPDynamics slipDynamics;
 
-   private final DenseMatrix64F dynamicsError = new DenseMatrix64F(stateVectorSize / 2, 1);
-   private final DenseMatrix64F stateGradientError = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
-   private final DenseMatrix64F controlGradientError = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+   private final DMatrixRMaj dynamicsError = new DMatrixRMaj(stateVectorSize / 2, 1);
+   private final DMatrixRMaj stateGradientError = new DMatrixRMaj(stateVectorSize / 2, stateVectorSize);
+   private final DMatrixRMaj controlGradientError = new DMatrixRMaj(stateVectorSize / 2, controlVectorSize);
 
-   private final DenseMatrix64F slipFunction = new DenseMatrix64F(stateVectorSize / 2, 1);
-   private final DenseMatrix64F simpleReactionFunction = new DenseMatrix64F(stateVectorSize / 2, 1);
+   private final DMatrixRMaj slipFunction = new DMatrixRMaj(stateVectorSize / 2, 1);
+   private final DMatrixRMaj simpleReactionFunction = new DMatrixRMaj(stateVectorSize / 2, 1);
 
-   private final DenseMatrix64F slipStateGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
-   private final DenseMatrix64F simpleStateGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+   private final DMatrixRMaj slipStateGradient = new DMatrixRMaj(stateVectorSize / 2, stateVectorSize);
+   private final DMatrixRMaj simpleStateGradient = new DMatrixRMaj(stateVectorSize / 2, stateVectorSize);
 
-   private final DenseMatrix64F slipControlGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
-   private final DenseMatrix64F simpleControlGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+   private final DMatrixRMaj slipControlGradient = new DMatrixRMaj(stateVectorSize / 2, controlVectorSize);
+   private final DMatrixRMaj simpleControlGradient = new DMatrixRMaj(stateVectorSize / 2, controlVectorSize);
 
-   private final DenseMatrix64F scalarCost = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj scalarCost = new DMatrixRMaj(1, 1);
 
    private final double pendulumMass;
    private static final Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
@@ -65,12 +65,12 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
 
    @Override
-   public double getCost(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants)
+   public double getCost(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants)
    {
       simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, constants, simpleReactionFunction);
       slipDynamics.getDynamics(hybridState, stateVector, controlVector, constants, slipFunction);
 
-      CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
+      CommonOps_DDRM.subtract(simpleReactionFunction, slipFunction, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, x, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, y, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, z, dynamicsError);
@@ -84,7 +84,7 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getCostStateGradient(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize && matrixToPack.getNumCols() != 1)
          throw new RuntimeException("Matrix control gradient is the improper size.");
@@ -95,8 +95,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
       simpleReactionDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, constants, simpleStateGradient);
       slipDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, constants, slipStateGradient);
 
-      CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
-      CommonOps.subtract(simpleStateGradient, slipStateGradient, stateGradientError);
+      CommonOps_DDRM.subtract(simpleReactionFunction, slipFunction, dynamicsError);
+      CommonOps_DDRM.subtract(simpleStateGradient, slipStateGradient, stateGradientError);
 
       MatrixTools.scaleRow(pendulumMass, x, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, y, dynamicsError);
@@ -116,8 +116,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                      DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                      DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.getNumRows() != controlVectorSize && matrixToPack.getNumCols() != 1)
          throw new RuntimeException("Matrix control gradient is the improper size.");
@@ -128,8 +128,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
       simpleReactionDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, constants, simpleControlGradient);
       slipDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, constants, slipControlGradient);
 
-      CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
-      CommonOps.subtract(simpleControlGradient, slipControlGradient, controlGradientError);
+      CommonOps_DDRM.subtract(simpleReactionFunction, slipFunction, dynamicsError);
+      CommonOps_DDRM.subtract(simpleControlGradient, slipControlGradient, controlGradientError);
 
       MatrixTools.scaleRow(pendulumMass, x, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, y, dynamicsError);
@@ -149,8 +149,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                   DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                   DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of rows.");
@@ -293,8 +293,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostControlHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                     DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                     DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.getNumRows() != controlVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of rows.");
@@ -551,15 +551,15 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateGradientOfControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                                     DenseMatrix64F matrixToPack)
+   public void getCostStateGradientOfControlGradient(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                                     DMatrixRMaj matrixToPack)
    {
 
    }
 
    @Override
-   public void getCostControlGradientOfStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                                     DenseMatrix64F matrixToPack)
+   public void getCostControlGradientOfStateGradient(SLIPState hybridState, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                                     DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize)
          throw new RuntimeException("The hessian has the wrong number of rows.");
@@ -765,20 +765,20 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
    }
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
-   private void multQuad(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   private void multQuad(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
       tempMatrix.reshape(a.numCols, b.numCols);
-      CommonOps.multTransA(a, b, tempMatrix);
-      CommonOps.mult(tempMatrix, c, d);
+      CommonOps_DDRM.multTransA(a, b, tempMatrix);
+      CommonOps_DDRM.mult(tempMatrix, c, d);
    }
 
 
-   private void multQuad(double alpha, DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   private void multQuad(double alpha, DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
       tempMatrix.reshape(a.numCols, b.numCols);
-      CommonOps.multTransA(alpha, a, b, tempMatrix);
-      CommonOps.mult(tempMatrix, c, d);
+      CommonOps_DDRM.multTransA(alpha, a, b, tempMatrix);
+      CommonOps_DDRM.mult(tempMatrix, c, d);
    }
 }

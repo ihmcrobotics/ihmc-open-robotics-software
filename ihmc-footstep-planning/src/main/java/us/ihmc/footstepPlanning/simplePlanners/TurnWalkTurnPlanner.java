@@ -1,26 +1,23 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
-public class TurnWalkTurnPlanner implements FootstepPlanner
+import java.util.ArrayList;
+
+public class TurnWalkTurnPlanner
 {
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
@@ -46,7 +43,6 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       this.parameters = parameters;
    }
 
-   @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
       if (side == null)
@@ -64,7 +60,6 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       this.groundHeight = stanceFootPose.getZ();
    }
 
-   @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
       FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
@@ -74,7 +69,6 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
    private FootstepPlan footstepPlan = new FootstepPlan();
 
-   @Override
    public FootstepPlanningResult plan()
    {
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
@@ -125,7 +119,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
          robotSide = robotSide.getOppositeSide();
          footstepPlan.addFootstep(robotSide, FlatGroundPlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
       }
-      return FootstepPlanningResult.OPTIMAL_SOLUTION;
+      return FootstepPlanningResult.FOUND_SOLUTION;
    }
 
    private void addSquareUp(ArrayList<FramePose2D> footstepList, FramePoint2D robotPosition)
@@ -259,32 +253,9 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       pointToTurnAbout.changeFrame(stanceFootFrame);
    }
 
-   @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-   }
-
-   @Override
    public FootstepPlan getPlan()
    {
       return footstepPlan;
-   }
-
-   @Override
-   public void setTimeout(double timeout)
-   {
-
-   }
-
-   @Override
-   public double getPlanningDuration()
-   {
-      return -1;
-   }
-
-   @Override
-   public void setPlanningHorizonLength(double planningHorizonLength)
-   {
    }
 
    private static class DefaultTurnWalkTurnPlannerParameters extends DefaultFootstepPlannerParameters

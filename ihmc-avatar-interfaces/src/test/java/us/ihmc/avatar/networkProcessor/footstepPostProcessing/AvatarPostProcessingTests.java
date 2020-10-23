@@ -8,23 +8,18 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -38,14 +33,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -53,7 +47,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -65,19 +58,17 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
@@ -88,13 +79,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    protected SimulationTestingParameters simulationTestingParameters;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private IHMCROS2Publisher<FootstepPostProcessingPacket> postProcessingRequestPublisher;
-   private IHMCROS2Publisher<FootstepPostProcessingParametersPacket> postProcessingParametersPublisher;
-   private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
-
    private FootstepPlanningModule footstepPlanningModule;
-   private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
-
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
    @BeforeEach
@@ -111,19 +96,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
-      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
-
-      postProcessingOutputStatus = new AtomicReference<>();
-      Ros2Node ros2Node = drcSimulationTestHelper.getRos2Node();
-
-      String robotName = robotModel.getSimpleRobotName();
-      MessageTopicNameGenerator postProcessingPubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingToolboxModule.moduleName, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-      MessageTopicNameGenerator postProcessingSubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingToolboxModule.moduleName, ROS2Tools.ROS2TopicQualifier.INPUT);
-
-      postProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class, postProcessingSubGenerator);
-      postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingParametersPacket.class, postProcessingSubGenerator);
-
-      drcSimulationTestHelper.createSubscriber(FootstepPostProcessingPacket.class, postProcessingPubGenerator, postProcessingOutputStatus::set);
 
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -145,13 +117,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          drcSimulationTestHelper = null;
       }
 
-      postProcessingRequestPublisher = null;
-      postProcessingOutputStatus = null;
-
       footstepPlanningModule.closeAndDispose();
-      postProcessingToolboxModule.destroy();
       footstepPlanningModule = null;
-      postProcessingToolboxModule = null;
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -171,6 +138,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
       footstepPlannerParameters.setMaximumStepZ(height + 0.05);
+      footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(height - 0.05);
+      footstepPlannerParameters.setMaximumStepXWhenForwardAndDown(0.22);
+      footstepPlannerParameters.setIdealFootstepLength(0.28);
       footstepPlanningModule.getVisibilityGraphParameters().setTooHighToStepDistance(height + 0.05);
 
       ThreadTools.sleep(1000);
@@ -182,10 +152,14 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       startingFrame.setOrientationAndUpdate(new Quaternion(startingLocation.getYaw(), 0.0, 0.0));
 
       FramePose3D goalPose = new FramePose3D(startingFrame);
-      goalPose.setPosition(1.0, 0.0, 0.0);
+      goalPose.getPosition().set(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose);
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+      request.setRequestedPathHeading(Math.toRadians(30.0));
+
+      request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
+      request.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(request);
    }
@@ -210,19 +184,17 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
 
-      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
-      parameters.setSwingOverRegionsProcessingEnabled(true);
-
-      postProcessingParametersPublisher.publish(parameters.getAsPacket());
-
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(2.0, 0.0, 0.0);
+      goalPose.getPosition().set(2.0, 0.0, 0.0);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose);
+      FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+      requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
+      requestPacket.setPerformPositionBasedSplitFractionCalculation(true);
+
       runTest(requestPacket);
    }
 
@@ -234,13 +206,16 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
-      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
-      parameters.setFractionLoadIfFootHasFullSupport(0.6);
-      parameters.setFractionTimeOnFootIfFootHasFullSupport(0.6);
-      parameters.setFractionLoadIfOtherFootHasNoWidth(0.7);
-      parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(0.7);
-
-      postProcessingParametersPublisher.publish(parameters.getAsPacket());
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("doPartialFootholdDetection")).set(false);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("fractionLoadIfFootHasFullSupport")).set(0.6);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("fractionTimeOnFootIfFootHasFullSupport")).set(0.6);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("fractionLoadIfOtherFootHasNoWidth")).set(0.7);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("fractionTimeOnFootIfOtherFootHasNoWidth")).set(0.7);
+//      SplitFractionCalculatorParametersBasics parameters = footstepPlanningModule.getSplitFractionParameters();
+//      parameters.setFractionLoadIfFootHasFullSupport(0.6);
+//      parameters.setFractionTimeOnFootIfFootHasFullSupport(0.6);
+//      parameters.setFractionLoadIfOtherFootHasNoWidth(0.7);
+//      parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(0.7);
 
       // increase ankle damping to match the real robot better
       YoDouble damping_l_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
@@ -296,7 +271,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       double swingDuration = 0.6;
       double transferDuration = 0.5;
-      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingDuration, transferDuration);
+      FootstepPlan footstepPlan = new FootstepPlan();
 
       int numberOfSteps = 2;
 
@@ -305,76 +280,53 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          ArrayList<Point2D> newContactPoints = generateContactPointsForRotatedLineOfContact(0.0, 0.0, 0.0);
 
-         FootstepDataMessage footstepData = new FootstepDataMessage();
+         PlannedFootstep footstep = new PlannedFootstep(robotSide);
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
          FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.getLocation().set(placeToStepInWorld);
-         footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide.toByte());
-         for (Point2D contactPoint : newContactPoints)
-            footstepData.getPredictedContactPoints2d().add().set(contactPoint);
+         footstep.getFootstepPose().getPosition().set(placeToStepInWorld);
+         newContactPoints.forEach(footstep.getFoothold()::addVertex);
+         footstep.getFoothold().update();
 
-         message.getFootstepDataList().add().set(footstepData);
+         footstepPlan.addFootstep(footstep);
       }
 
       RobotSide robotSide = numberOfSteps % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
 
-      FootstepDataMessage footstepData = new FootstepDataMessage();
+      PlannedFootstep footstep = new PlannedFootstep(robotSide);
 
       ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
       FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
       placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       placeToStepInWorld.setX(0.3 * (numberOfSteps - 1));
 
-      footstepData.getLocation().set(placeToStepInWorld);
-      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(robotSide.toByte());
+      footstep.getFootstepPose().getPosition().set(placeToStepInWorld);
+      footstepPlan.addFootstep(footstep);
 
-      message.getFootstepDataList().add().set(footstepData);
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
 
-      FramePose3D leftFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.RIGHT));
-      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootstepPostProcessingPacket postProcessingRequest = new FootstepPostProcessingPacket();
-      postProcessingRequest.getFootstepDataList().set(message);
-      postProcessingRequest.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
-      postProcessingRequest.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
-      postProcessingRequest.getRightFootPositionInWorld().set(rightFootPose.getPosition());
-      postProcessingRequest.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
-      for (Point2DReadOnly vertex : defaultSolePolygon.getVertexBufferView())
+      for(RobotSide side : RobotSide.values)
       {
-         postProcessingRequest.getLeftFootContactPoints2d().add().set(vertex);
-         postProcessingRequest.getRightFootContactPoints2d().add().set(vertex);
+         FramePose3D footPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(side));
+         footPose.changeFrame(ReferenceFrame.getWorldFrame());
+         request.getStartFootPoses().get(side).set(footPose);
+         request.getStartFootholds().get(side).set(defaultSolePolygon);
       }
 
-      postProcessingRequestPublisher.publish(postProcessingRequest);
+      footstepPlanningModule.getPositionBasedSplitFractionCalculator().computeSplitFractions(request, footstepPlan);
 
-      double maxTimeToWait = 20.0;
-      long startTime = System.nanoTime();
-      while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
-      {
-         ThreadTools.sleep(100);
-      }
-
-      if (postProcessingOutputStatus.get() == null)
-      {
-         fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
-      }
-
-      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
-
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
+                                                                                                                    swingDuration,
+                                                                                                                    transferDuration);
       List<FootstepDataMessage> footsteps = new ArrayList<>(footstepDataListMessage.getFootstepDataList());
 
       int stepCounter = 0;
       for (RobotSide robotSide1 : RobotSide.values)
       {
-         footStates.get(robotSide1).addVariableChangedListener(v -> {
+         footStates.get(robotSide1).addListener(v -> {
             if (footStates.get(robotSide1).getEnumValue() == ConstraintType.SWING)
             {
                List<Point3D> contactPoints3D = footsteps.remove(stepCounter).getPredictedContactPoints2d();
@@ -393,6 +345,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((swingDuration + transferDuration) * numberOfSteps + 5.0);
       assertTrue(success);
    }
@@ -431,21 +384,24 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
    }
 
-   private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
+   private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel, PlanarRegionsList planarRegionsList, FramePose3D goalPose, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       FramePose3D leftFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.RIGHT));
       leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-      request.setInitialStanceRobotSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
-      request.getStanceFootPositionInWorld().set(leftFoot.getPosition());
-      request.getStanceFootOrientationInWorld().set(leftFoot.getOrientation());
+      request.setRequestedInitialStanceSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
+      request.getStartLeftFootPose().set(leftFoot);
+      request.getStartRightFootPose().set(rightFoot);
 
-      request.getGoalPositionInWorld().set(goalPose.getPosition());
-      request.getGoalOrientationInWorld().set(goalPose.getOrientation());
+      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalPose, footstepPlannerParameters.getIdealFootstepWidth());
+      request.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
+      request.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      request.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
+      request.setPlanBodyPath(false);
 
       double timeout = 12.0;
       request.setTimeout(timeout);
@@ -457,10 +413,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private void runTest(FootstepPlanningRequestPacket requestPacket) throws SimulationExceededMaximumTimeException
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoFramePoint3D goalPosition = new YoFramePoint3D("goalPosition", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicPosition goalGraphic = new YoGraphicPosition("goalGraphic", goalPosition, 0.05, YoAppearance.Green());
-      goalPosition.set(requestPacket.getGoalPositionInWorld());
+
+      Pose3D goalMidFootPose = new Pose3D();
+      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      goalPosition.set(goalMidFootPose.getPosition());
       yoGraphicsListRegistry.registerYoGraphic("Test", goalGraphic);
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -468,53 +427,21 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(requestPacket);
 
-      footstepPlanningModule.getFootstepPlannerParameters().set(getRobotModel().getFootstepPlannerParameters());
+      footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
-      System.out.println("output. " + plannerOutput.getResult());
+      System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
 
-      if (!plannerOutput.getResult().validForExecution())
+      if (!plannerOutput.getFootstepPlanningResult().validForExecution())
       {
-         fail("Invalid footstep plan: " + plannerOutput.getResult());
+         fail("Invalid footstep plan: " + plannerOutput.getFootstepPlanningResult());
       }
 
-      FramePose3D leftFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.RIGHT));
-      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootstepPostProcessingPacket postProcessingRequest = new FootstepPostProcessingPacket();
-
-      FootstepDataListMessage footstepDataListFromPlan = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
                                                                                                                      -1.0,
-                                                                                                                     -1.0,
-                                                                                                                     ExecutionMode.OVERRIDE);
-      postProcessingRequest.getFootstepDataList().set(footstepDataListFromPlan);
-      postProcessingRequest.getPlanarRegionsList().set(requestPacket.getPlanarRegionsListMessage());
-      postProcessingRequest.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
-      postProcessingRequest.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
-      postProcessingRequest.getRightFootPositionInWorld().set(rightFootPose.getPosition());
-      postProcessingRequest.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
-
-      System.out.println("sending post processing request");
-
-      postProcessingRequestPublisher.publish(postProcessingRequest);
-
-      long startTime = System.nanoTime();
-      double maxTimeToWait = 20.0;
-      while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
-      {
-         ThreadTools.sleep(100);
-      }
-
-      if (postProcessingOutputStatus.get() == null)
-      {
-         fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
-      }
-
-      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
+                                                                                                                     -1.0);
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
@@ -524,7 +451,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
          stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       }
-      double simulationTime = 2.0 + stepTime * footstepDataListMessage.getFootstepDataList().size();
+      double simulationTime = 2.0 + 1.5 * stepTime * footstepDataListMessage.getFootstepDataList().size();
 
       boolean success =  drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
@@ -533,7 +460,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3D center = new Point3D(requestPacket.getGoalPositionInWorld());
+      Point3D center = new Point3D(goalMidFootPose.getPosition());
       center.addZ(0.7);
 
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
@@ -585,7 +512,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return null;
       }
@@ -620,7 +547,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
          int pointIndex = 0;
-         ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+         List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
          for (GroundContactPoint point : allGroundContactPoints)
          {
@@ -682,7 +609,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       // transform line and compute intersections with default foot polygon
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(angle);
-      transform.setTranslation(lineOrigin.getX(), lineOrigin.getY(), 0.0);
+      transform.getTranslation().set(lineOrigin.getX(), lineOrigin.getY(), 0.0);
 
       Line2D line = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
       line.applyTransform(transform);

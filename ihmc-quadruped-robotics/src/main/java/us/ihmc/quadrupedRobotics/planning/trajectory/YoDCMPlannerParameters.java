@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoDCMPlannerParameters implements DCMPlannerParameters
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble safeDistanceFromSupportPolygonEdges = new YoDouble("safeDistanceFromSupportPolygonEdges", registry);
 
@@ -21,7 +21,7 @@ public class YoDCMPlannerParameters implements DCMPlannerParameters
    private final YoDouble maximumWeightShiftForward = new YoDouble("maximumWeightShiftForward", registry);
    private final YoDouble angleForMaxWeightShiftForward = new YoDouble("angleForMaxWeightShiftForward", registry);
 
-   public YoDCMPlannerParameters(DCMPlannerParameters other, YoVariableRegistry parentRegistry)
+   public YoDCMPlannerParameters(DCMPlannerParameters other, YoRegistry parentRegistry)
    {
       safeDistanceFromSupportPolygonEdges.set(other.getSafeDistanceFromSupportPolygonEdges());
 

@@ -166,7 +166,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3D(0, 0, -0.5));
+      location.getTranslation().set(new Vector3D(0, 0, -0.5));
 
       RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3D(location, 45, 45, 1), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);

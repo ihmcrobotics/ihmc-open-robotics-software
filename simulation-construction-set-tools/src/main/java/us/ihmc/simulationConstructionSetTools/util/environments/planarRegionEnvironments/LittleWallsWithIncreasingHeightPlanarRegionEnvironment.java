@@ -6,8 +6,14 @@ public class LittleWallsWithIncreasingHeightPlanarRegionEnvironment extends Plan
 {
    public LittleWallsWithIncreasingHeightPlanarRegionEnvironment()
    {
+      this(true);
+   }
+
+   public LittleWallsWithIncreasingHeightPlanarRegionEnvironment(boolean drawGround)
+   {
       generator.translate(2.0, 0.0, -0.01);
-      generator.addCubeReferencedAtBottomMiddle(6.0, 1.0, 0.01);
+      if (drawGround)
+         generator.addCubeReferencedAtBottomMiddle(6.0, 1.0, 0.01);
       generator.translate(-2.0, 0.0, 0.0);
       generator.translate(0.35, 0.2, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);

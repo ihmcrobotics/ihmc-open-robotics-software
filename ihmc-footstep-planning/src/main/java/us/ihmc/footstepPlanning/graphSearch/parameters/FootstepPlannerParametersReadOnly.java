@@ -1,8 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -21,19 +22,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker}
+    * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
     */
    default boolean checkForPathCollisions()
    {
       return get(checkForPathCollisions);
-   }
-
-   /**
-    * Sets whether or not to perform the defined heuristic search policies.
-    */
-   default boolean performHeuristicSearchPolicies()
-   {
-      return get(performHeuristicSearchPolicies);
    }
 
    /**
@@ -53,23 +46,46 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
-    * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-    * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-    * to allowing footsteps that partially intersect planar regions.
-    *
-    * <p>
-    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-    * <ul>
-    *    <li>The smallest acceptable distance to the edge of a cliff</li>
-    *    <li>The maximum error between desired and actual foot placement</li>
-    * </ul>
-    * </p>
+    * Returns the ideal step width when "shuffling" sideways.
     */
-   default double getWiggleInsideDelta()
+   default double getIdealSideStepWidth()
    {
-      return get(wiggleInsideDelta);
+      return get(idealSideStepWidth);
+   }
+
+   /**
+    * Returns the ideal length when walking backwards. This value is positive.
+    */
+   default double getIdealBackStepLength()
+   {
+      return get(idealBackStepLength);
+   }
+
+   /**
+    * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+    * Ideal step length is linearly interpolated between {@link #getIdealFootstepLength} on flat ground and this value at max stance height
+    */
+   default double getIdealStepLengthAtMaxStepZ()
+   {
+      return get(idealStepLengthAtMaxStepZ);
+   }
+
+   /**
+    * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+    * to the edge. A negative value means the footstep can overhang a region.
+    */
+   default double getWiggleInsideDeltaTarget()
+   {
+      return get(wiggleInsideDeltaTarget);
+   }
+
+   /**
+    * This parameter only is used if {@link #getWiggleWhilePlanning} is true. If a step cannot be wiggled inside by this amount or more,
+    * it will be rejected. Note that if {@link #getWiggleWhilePlanning} if false, it's always best effort on the final plan.
+    */
+   default double getWiggleInsideDeltaMinimum()
+   {
+      return get(wiggleInsideDeltaMinimum);
    }
 
    /**
@@ -121,7 +137,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
+    *    The {@link FootstepPoseChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    default double getMinimumStepWidth()
@@ -306,19 +322,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-    * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-    * {@link #getMaximumStepZWhenForwardAndDown()}.
-    *
-    * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-    * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-    */
-   default double getTranslationScaleFromGrandparentNode()
-   {
-      return get(translationScaleFromGrandparentNode);
-   }
-
-   /**
     * Maximum vertical distance between consecutive footsteps
     *
     * <p>
@@ -326,16 +329,32 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * z-up sole frame.
     * </p>
     */
-   default double getMaximumStepZ()
+   default double getMaxStepZ()
    {
       return get(maxStepZ);
+   }
+
+   /**
+    * Maximum vertical distance between start-of-swing and touchdown
+    */
+   default double getMaxSwingZ()
+   {
+      return get(maxSwingZ);
+   }
+
+   /**
+    * Maximum xy distance between start-of-swing and touchdown
+    */
+   default double getMaxSwingReach()
+   {
+      return get(maxSwingReach);
    }
 
    /**
     * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -348,7 +367,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depdistanceth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depdistanceth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -399,19 +418,20 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * There are two methods of wiggling a polygon into a planar region:
-    * <ul>
-    *    <li>Wiggle the polygon into the planar region itself, which isn't necessarily convex</li>
-    *    <li>Wiggle the polygon into the convex hull of the planar region</li>
-    * </ul>
-    * The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-    * has the biggest overlap with the foothold.
-    *
-    * If this parameter is set to true (recommended), the second wiggle method will be used.
+    * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+    * this toggles between them.
     */
-   default boolean getWiggleIntoConvexHullOfPlanarRegions()
+   default boolean getEnableConcaveHullWiggler()
    {
-      return get(wiggleIntoConvexHullOfPlanarRegions);
+      return get(enableConcaveHullWiggler);
+   }
+
+   /**
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+    */
+   default boolean getWiggleWhilePlanning()
+   {
+      return get(wiggleWhilePlanning);
    }
 
    /**
@@ -456,7 +476,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    *   The {@link FootstepPoseChecker} will reject a node if it is too wide using this parameter.
     * </p>
     */
    default double getMaximumStepWidth()
@@ -475,14 +495,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getCliffHeightToAvoid()
+   default double getCliffBaseHeightToAvoid()
    {
-      return get(cliffHeightToAvoid);
+      return get(cliffBaseHeightToAvoid);
    }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
@@ -497,24 +517,35 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-    * planner should return the best plan that it found. If this value is false, the planner will return
-    * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-    * the "best" effort plan, where the plan is at least {@link #getMinimumStepsForBestEffortPlan()} steps long
-    * "best" is determined by the planner.
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+    * nearby that is cliffTopHeightToAvoid higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffTops away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
     */
-   default boolean getReturnBestEffortPlan()
+   default double getCliffTopHeightToAvoid()
    {
-      return get(returnBestEffortPlan);
+      return get(cliffTopHeightToAvoid);
    }
 
    /**
-    * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-    * contains at least this many footsteps.
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
     */
-   default int getMinimumStepsForBestEffortPlan()
+   default double getMinimumDistanceFromCliffTops()
    {
-      return get(minimumStepsForBestEffortPlan);
+      return get(minimumDistanceFromCliffTops);
    }
 
    /**
@@ -579,13 +610,12 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
     */
-   default double getMinXClearanceFromStance()
+   default double getMaximumSnapHeight()
    {
-      return get(minXClearanceFromStance);
+      return get(maximumSnapHeight);
    }
 
    /**
@@ -593,9 +623,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   default double getMinYClearanceFromStance()
+   default double getMinClearanceFromStance()
    {
-      return get(minYClearanceFromStance);
+      return get(minClearanceFromStance);
    }
 
    /**
@@ -607,69 +637,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-    */
-   default double getFinalTurnBodyPathProximity()
-   {
-      return get(finalTurnBodyPathProximity);
-   }
-
-   /**
-    * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the final orientation should occur.
-    * That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the desired heading,
-    * and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the final orientation.
-    */
-   default double getFinalTurnProximityBlendFactor()
-   {
-      return get(finalTurnProximityBlendFactor);
-   }
-
-   /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-    */
-   default boolean useQuadraticDistanceCost()
-   {
-      return get(useQuadraticDistanceCost);
-   }
-
-   /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-    */
-   default boolean useQuadraticHeightCost()
-   {
-      return get(useQuadraticHeightCost);
-   }
-
-   /**
     * Gets the weight for the heuristics in the A Star planner.
     */
    default DoubleProvider getAStarHeuristicsWeight()
    {
       return () -> get(aStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Visibility graph with A star planner.
-    */
-   default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
-   {
-      return () -> get(visGraphWithAStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Depth First planner.
-    */
-   default DoubleProvider getDepthFirstHeuristicsWeight()
-   {
-      return () -> get(depthFirstHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Body path based planner.
-    */
-   default DoubleProvider getBodyPathBasedHeuristicsWeight()
-   {
-      return () -> get(bodyPathBasedHeuristicsWeight);
    }
 
    /**
@@ -755,18 +727,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
-    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
-    * between the start and end steps.
-    */
-   default int getNumberOfBoundingBoxChecks()
-   {
-      return get(numberOfBoundingBoxChecks);
-   }
-
-   /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-    * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
    default double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
@@ -775,13 +736,13 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-    * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-    * {@code c * (1 - d / d_max)}, where d_max is this value.
+    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
+    * between the start and end steps.
     */
-   default double getBoundingBoxCost()
+   default int getNumberOfBoundingBoxChecks()
    {
-      return get(boundingBoxCost);
+      return get(numberOfBoundingBoxChecks);
    }
 
    /**
@@ -793,33 +754,78 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When using a cost based planning approach this value defines the weight of the step distance of a step longer than {@link FootstepPlannerParameters#getIdealFootstepLength()} .
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+    * Otherwise, it will turn towards the body path
     */
-   default double getLongStepWeight()
-   {
-      return get(longStepWeight);
-   }
-
-   default double getBodyPathViolationWeight()
-   {
-      return get(bodyPathViolationWeight);
-   }
-
    default double getDistanceFromPathTolerance()
    {
       return get(distanceFromPathTolerance);
    }
 
+   /**
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+    * Otherwise, it will turn in plance towards the body path
+    */
    default double getDeltaYawFromReferenceTolerance()
    {
       return get(deltaYawFromReferenceTolerance);
    }
 
    /**
-    * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
     */
-   default AdaptiveSwingParameters getAdaptiveSwingParameters()
+   default int getMaximumBranchFactor()
    {
-      return null;
+      return get(maximumBranchFactor);
+   }
+
+   /**
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+    */
+   default boolean getEnabledExpansionMask()
+   {
+      return get(enableExpansionMask);
+   }
+
+   /**
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+    */
+   default boolean getEnableShinCollisionCheck()
+   {
+      return get(enableShinCollisionCheck);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the toe
+    */
+   default double getShinToeClearance()
+   {
+      return get(shinToeClearance);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the heel
+    */
+   default double getShinHeelClearance()
+   {
+      return get(shinHeelClearance);
+   }
+
+   /**
+    * Length of the shin collidable cylinder
+    */
+   default double getShinLength()
+   {
+      return get(shinLength);
+   }
+
+   /**
+    * Height offset of shin collidable cylinder
+    */
+   default double getShinHeightOffset()
+   {
+      return get(shinHeightOffet);
    }
 }

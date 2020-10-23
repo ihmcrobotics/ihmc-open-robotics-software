@@ -3,6 +3,8 @@ package us.ihmc.simulationConstructionSetTools.util.ground;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -58,7 +60,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
       if (planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
@@ -98,7 +100,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       tempPoint3dForCheckInside.setX(x);
       tempPoint3dForCheckInside.setY(y);

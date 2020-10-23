@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @SuppressWarnings("unused")
@@ -34,7 +34,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
    {
       super("FlyballGovernor" + nameSuffix);
 
-      PinJoint rotation = new PinJoint("rotation", baseWorldOffset, this, Axis.Z);
+      PinJoint rotation = new PinJoint("rotation", baseWorldOffset, this, Axis3D.Z);
       rotation.setDamping(DAMPING1);
       Link centerRod = centerRod();
       rotation.setLink(centerRod);
@@ -42,7 +42,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
       // One of the flyballs
 
-      PinJoint upperPivot1 = new PinJoint("upperPivot1", new Vector3D(R1, 0.0, L1), this, Axis.Y);
+      PinJoint upperPivot1 = new PinJoint("upperPivot1", new Vector3D(R1, 0.0, L1), this, Axis3D.Y);
       upperPivot1.setInitialState(-0.3, 0.0);
       upperPivot1.setDamping(DAMPING2);
       upperPivot1.setLimitStops(-Math.PI / 2.0, -0.2, 100, 10);
@@ -50,7 +50,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot1.setLink(flyBall1);
       rotation.addJoint(upperPivot1);
 
-      PinJoint lowerPivot1 = new PinJoint("lowerPivot1", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
+      PinJoint lowerPivot1 = new PinJoint("lowerPivot1", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis3D.Y);
       lowerPivot1.setInitialState(0.5, 0.0);
       Link loopLink1 = loopLink();
       lowerPivot1.setLink(loopLink1);
@@ -61,7 +61,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
       // The other flyball
 
-      PinJoint upperPivot2 = new PinJoint("upperPivot2", new Vector3D(-R1, 0.0, L1), this, Axis.Y);
+      PinJoint upperPivot2 = new PinJoint("upperPivot2", new Vector3D(-R1, 0.0, L1), this, Axis3D.Y);
       upperPivot2.setInitialState(0.3, 0.0);
       upperPivot2.setDamping(DAMPING2);
       upperPivot2.setLimitStops(0.2, Math.PI / 2.0, 100, 10);
@@ -69,7 +69,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot2.setLink(flyBall2);
       rotation.addJoint(upperPivot2);
 
-      PinJoint lowerPivot2 = new PinJoint("lowerPivot2", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
+      PinJoint lowerPivot2 = new PinJoint("lowerPivot2", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis3D.Y);
       lowerPivot2.setInitialState(-0.5, 0.0);
       Link loopLink2 = loopLink();
       lowerPivot2.setLink(loopLink2);
@@ -81,7 +81,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
       // The sliding Cylinder:
 
-      CylinderJoint cylinderJoint = new CylinderJoint("cylinder_theta", "cylinder_z", baseWorldOffset, this, Axis.Z);
+      CylinderJoint cylinderJoint = new CylinderJoint("cylinder_theta", "cylinder_z", baseWorldOffset, this, Axis3D.Z);
       cylinderJoint.setInitialState(0.0, 0.0, 0.05, 0.0);
       Link cylinderLink = cylinderLink();
       cylinderJoint.setLink(cylinderLink);
@@ -184,7 +184,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
    private YoDouble tau_rotation, q_cylinder_z, qd_cylinder_z;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FlyballGovernorController");
+   private final YoRegistry registry = new YoRegistry("FlyballGovernorController");
    
    private final YoDouble k_feedback, q_d_cylinder_z;
 
@@ -195,9 +195,9 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
    public void initControl()
    {
-      tau_rotation = (YoDouble)this.getVariable("tau_rotation");
-      q_cylinder_z = (YoDouble)this.getVariable("q_cylinder_z");
-      qd_cylinder_z = (YoDouble)this.getVariable("qd_cylinder_z");
+      tau_rotation = (YoDouble)this.findVariable("tau_rotation");
+      q_cylinder_z = (YoDouble)this.findVariable("q_cylinder_z");
+      qd_cylinder_z = (YoDouble)this.findVariable("qd_cylinder_z");
    }
 
    public void doControl()
@@ -205,7 +205,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       tau_rotation.set(k_feedback.getDoubleValue() * (q_d_cylinder_z.getDoubleValue() - q_cylinder_z.getDoubleValue()));
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

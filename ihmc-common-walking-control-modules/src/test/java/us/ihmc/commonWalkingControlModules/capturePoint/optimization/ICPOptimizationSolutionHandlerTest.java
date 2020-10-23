@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -9,27 +11,21 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ICPOptimizationSolutionHandlerTest
 {
-   private YoVariableRegistry registry = new YoVariableRegistry("robert");
+   private YoRegistry registry = new YoRegistry("robert");
 
    private ICPOptimizationParameters parameters;
    private ICPOptimizationSolutionHandler solutionHandler;
@@ -62,7 +58,7 @@ public class ICPOptimizationSolutionHandlerTest
       {
          FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
-         footstepPose.setPosition(length * (i + 1), robotSide.negateIfRightSide(0.5 * width), 0.0);
+         footstepPose.getPosition().set(length * (i + 1), robotSide.negateIfRightSide(0.5 * width), 0.0);
          upcomingFootsteps.add(new Footstep(robotSide, footstepPose, false));
 
          FramePoint2D referenceFootstepPosition = new FramePoint2D(footstepPose.getPosition());
@@ -167,7 +163,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(),  solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -198,7 +194,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -252,7 +248,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -283,7 +279,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -336,7 +332,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), solver);
+      solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 

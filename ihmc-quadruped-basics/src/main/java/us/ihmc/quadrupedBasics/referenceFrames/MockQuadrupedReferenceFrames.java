@@ -9,14 +9,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.EndDependentList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.robotics.robotSide.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 {
@@ -65,7 +59,7 @@ public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFram
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePose3D footPose = footPoses.get(robotQuadrant);
-         footPose.setPosition(yoFootPositions.get(robotQuadrant));
+         footPose.getPosition().set(yoFootPositions.get(robotQuadrant));
          soleFrames.get(robotQuadrant).setPoseAndUpdate(footPose);
          movingSoleFrames.get(robotQuadrant).update();
       }

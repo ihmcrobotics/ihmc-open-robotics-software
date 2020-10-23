@@ -41,7 +41,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 {
    private final RobotTarget target;
 
-   private final ValkyrieJointMap jointMap;
+   protected final ValkyrieJointMap jointMap;
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
@@ -109,13 +109,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowUpperBodyMotionDuringLocomotion()
    {
-      return true;
+      if (target == RobotTarget.SCS)
+         return false;
+      else
+         return true;
    }
 
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
-      return false;
+      if (target == RobotTarget.SCS)
+         return true;
+      else
+         return false;
    }
 
    @Override
