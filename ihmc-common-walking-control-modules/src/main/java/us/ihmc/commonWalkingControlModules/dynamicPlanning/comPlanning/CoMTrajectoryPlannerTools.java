@@ -155,6 +155,39 @@ public class CoMTrajectoryPlannerTools
       zObjectiveMatrixToPack.set(rowStart, 0, centerOfMassLocationForConstraint.getZ());
    }
 
+   public static void addCoMPositionObjective(double weight,
+                                              FramePoint3DReadOnly centerOfMassLocationForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              int rowStart,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack)
+   {
+      centerOfMassLocationForConstraint.checkReferenceFrameMatch(worldFrame);
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      addEquals(objectiveJacobianToPack, rowStart, colStart, weight * getCoMPositionFirstCoefficientTimeFunction(omega, time));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 1, weight * getCoMPositionSecondCoefficientTimeFunction(omega, time));
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      { // assuming the matrix is initialized as zero, these don't have to be set
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 2, weight * getCoMPositionThirdCoefficientTimeFunction(time));
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 3, weight * getCoMPositionFourthCoefficientTimeFunction(time));
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 4, weight * getCoMPositionFifthCoefficientTimeFunction(time));
+      }
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 5, weight * getCoMPositionSixthCoefficientTimeFunction());
+
+      xObjectiveMatrixToPack.set(rowStart, 0, weight * centerOfMassLocationForConstraint.getX());
+      yObjectiveMatrixToPack.set(rowStart, 0, weight * centerOfMassLocationForConstraint.getY());
+      zObjectiveMatrixToPack.set(rowStart, 0, weight * centerOfMassLocationForConstraint.getZ());
+   }
+
+
+
    /**
     * <p> Sets the continuity constraint on the initial CoM velocity. </p>
     * <p> This constraint should be used for the initial velocity of the center of mass to properly initialize the trajectory. </p>
@@ -204,6 +237,38 @@ public class CoMTrajectoryPlannerTools
       xObjectiveMatrixToPack.set(rowStart, 0, centerOfMassVelocityForConstraint.getX());
       yObjectiveMatrixToPack.set(rowStart, 0, centerOfMassVelocityForConstraint.getY());
       zObjectiveMatrixToPack.set(rowStart, 0, centerOfMassVelocityForConstraint.getZ());
+   }
+
+   public static void addCoMVelocityObjective(double weight,
+                                              FrameVector3DReadOnly centerOfMassVelocityForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              int rowStart,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack)
+   {
+      centerOfMassVelocityForConstraint.checkReferenceFrameMatch(worldFrame);
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      addEquals(objectiveJacobianToPack, rowStart, colStart, weight * getCoMVelocityFirstCoefficientTimeFunction(omega, time));
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 1, weight * getCoMVelocitySecondCoefficientTimeFunction(omega, time));
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 2, weight * getCoMVelocityThirdCoefficientTimeFunction(time));
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 3, weight * getCoMVelocityFourthCoefficientTimeFunction(time));
+      }
+      addEquals(objectiveJacobianToPack, rowStart, colStart + 4, weight * getCoMVelocityFifthCoefficientTimeFunction());
+      if (SET_ZERO_VALUES)
+         addEquals(objectiveJacobianToPack, rowStart, colStart + 5, weight * getCoMVelocitySixthCoefficientTimeFunction());
+
+      addEquals(xObjectiveMatrixToPack, rowStart, 0, weight * centerOfMassVelocityForConstraint.getX());
+      addEquals(yObjectiveMatrixToPack, rowStart, 0, weight * centerOfMassVelocityForConstraint.getY());
+      addEquals(zObjectiveMatrixToPack, rowStart, 0, weight * centerOfMassVelocityForConstraint.getZ());
    }
 
    /**
@@ -264,6 +329,42 @@ public class CoMTrajectoryPlannerTools
       zObjectiveMatrixToPack.set(rowStart, 0, desiredDCMPosition.getZ());
    }
 
+   public static void addDCMPositionObjective(double weight,
+                                              int sequenceId,
+                                              int rowStart,
+                                              double time,
+                                              double omega,
+                                              FramePoint3DReadOnly desiredDCMPosition,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack)
+   {
+      desiredDCMPosition.checkReferenceFrameMatch(worldFrame);
+
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      // add constraints on terminal DCM position
+      addEquals(objectiveJacobianToPack, rowStart, startIndex, weight * getDCMPositionFirstCoefficientTimeFunction(omega, time));
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(objectiveJacobianToPack, rowStart, startIndex + 1, weight * getDCMPositionSecondCoefficientTimeFunction());
+      }
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, rowStart, startIndex + 2, weight * getDCMPositionThirdCoefficientTimeFunction(omega, time));
+         addEquals(objectiveJacobianToPack, rowStart, startIndex + 3, weight * getDCMPositionFourthCoefficientTimeFunction(omega, time));
+      }
+      addEquals(objectiveJacobianToPack, rowStart, startIndex + 4, weight * getDCMPositionFifthCoefficientTimeFunction(omega, time));
+      addEquals(objectiveJacobianToPack, rowStart, startIndex + 5, weight * getDCMPositionSixthCoefficientTimeFunction());
+
+      addEquals(xObjectiveMatrixToPack, rowStart, 0, weight * desiredDCMPosition.getX());
+      addEquals(yObjectiveMatrixToPack, rowStart, 0, weight * desiredDCMPosition.getY());
+      addEquals(zObjectiveMatrixToPack, rowStart, 0, weight * desiredDCMPosition.getZ());
+   }
+
    /**
     * <p> Adds a constraint for the desired VRP position.</p>
     * <p> Recall that the VRP is defined as </p>
@@ -316,6 +417,45 @@ public class CoMTrajectoryPlannerTools
       zObjectiveMatrixToPack.set(vrpWaypointPositionIndex, 0, desiredVRPPosition.getZ());
    }
 
+   public static void addVRPPositionObjective(double weight,
+                                              int sequenceId,
+                                              int constraintNumber,
+                                              int vrpWaypointPositionIndex,
+                                              double time,
+                                              double omega,
+                                              FramePoint3DReadOnly desiredVRPPosition,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack,
+                                              DMatrix vrpWaypointJacobianToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      desiredVRPPosition.checkReferenceFrameMatch(worldFrame);
+
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 0, weight * CoMTrajectoryPlannerTools.getVRPPositionFirstCoefficientTimeFunction());
+         addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 1, weight * CoMTrajectoryPlannerTools.getVRPPositionSecondCoefficientTimeFunction());
+      }
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 2, weight * CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, time));
+         addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 4, weight * CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(time));
+      }
+      addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 3, weight * CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, time));
+      addEquals(objectiveJacobianToPack, constraintNumber, startIndex + 5, weight * CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction());
+
+      vrpWaypointJacobianToPack.set(constraintNumber, vrpWaypointPositionIndex, 1.0);
+
+      addEquals(xObjectiveMatrixToPack, vrpWaypointPositionIndex, 0, weight * desiredVRPPosition.getX());
+      addEquals(yObjectiveMatrixToPack, vrpWaypointPositionIndex, 0, weight * desiredVRPPosition.getY());
+      addEquals(zObjectiveMatrixToPack, vrpWaypointPositionIndex, 0, weight * desiredVRPPosition.getZ());
+   }
+
    /**
     * <p> Adds a constraint for the desired VRP velocity.</p>
     * <p> Recall that the VRP velocity is defined as </p>
@@ -364,6 +504,43 @@ public class CoMTrajectoryPlannerTools
       xObjectiveMatrixToPack.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getX());
       yObjectiveMatrixToPack.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getY());
       zObjectiveMatrixToPack.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getZ());
+   }
+
+   public static void addVRPVelocityObjective(double weight,
+                                              int sequenceId,
+                                              int constraintRow,
+                                              int vrpWaypointVelocityIndex,
+                                              double omega,
+                                              double time,
+                                              FrameVector3DReadOnly desiredVRPVelocity,
+                                              DMatrix objectiveJacobianToPack,
+                                              DMatrix xObjectiveMatrixToPack,
+                                              DMatrix yObjectiveMatrixToPack,
+                                              DMatrix zObjectiveMatrixToPack,
+                                              DMatrix vrpWaypointJacobianToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      desiredVRPVelocity.checkReferenceFrameMatch(worldFrame);
+
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(objectiveJacobianToPack, constraintRow, startIndex + 0, weight * CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
+         addEquals(objectiveJacobianToPack, constraintRow, startIndex + 1, weight * CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
+         addEquals(objectiveJacobianToPack, constraintRow, startIndex + 5, weight * CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
+      }
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, constraintRow, startIndex + 3, weight * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(time));
+      }
+      addEquals(objectiveJacobianToPack, constraintRow, startIndex + 2, weight * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, time));
+      addEquals(objectiveJacobianToPack, constraintRow, startIndex + 4, weight * CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
+
+      vrpWaypointJacobianToPack.set(constraintRow, vrpWaypointVelocityIndex, 1.0);
+
+      addEquals(xObjectiveMatrixToPack, vrpWaypointVelocityIndex, 0, weight * desiredVRPVelocity.getX());
+      addEquals(yObjectiveMatrixToPack, vrpWaypointVelocityIndex, 0, weight * desiredVRPVelocity.getY());
+      addEquals(zObjectiveMatrixToPack, vrpWaypointVelocityIndex, 0, weight * desiredVRPVelocity.getZ());
    }
 
    /**
@@ -426,7 +603,7 @@ public class CoMTrajectoryPlannerTools
     * @param nextSequence i in the above equations.
     */
    public static void addCoMPositionContinuityObjective(double weight, int previousSequence, int nextSequence, int constraintRow, double omega,
-                                                        double previousDuration, DMatrix constraintMatrixToPack)
+                                                        double previousDuration, DMatrix objectiveJacobianToPack)
    {
       // move next sequence coefficients to the left hand side
       int previousStartIndex = 6 * previousSequence;
@@ -434,18 +611,24 @@ public class CoMTrajectoryPlannerTools
 
       previousDuration = Math.min(previousDuration, sufficientlyLongTime);
 
-      constraintMatrixToPack.set(constraintRow, previousStartIndex, weight * getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration));
-      constraintMatrixToPack.set(constraintRow, previousStartIndex + 1, weight * getCoMPositionSecondCoefficientTimeFunction(omega, previousDuration));
-      constraintMatrixToPack.set(constraintRow, previousStartIndex + 2, weight * getCoMPositionThirdCoefficientTimeFunction(previousDuration));
-      constraintMatrixToPack.set(constraintRow, previousStartIndex + 3, weight * getCoMPositionFourthCoefficientTimeFunction(previousDuration));
-      constraintMatrixToPack.set(constraintRow, previousStartIndex + 4, weight * getCoMPositionFifthCoefficientTimeFunction(previousDuration));
-      constraintMatrixToPack.set(constraintRow, previousStartIndex + 5, weight * getCoMPositionSixthCoefficientTimeFunction());
-      constraintMatrixToPack.set(constraintRow, nextStartIndex, -getCoMPositionFirstCoefficientTimeFunction(omega, 0.0));
-      constraintMatrixToPack.set(constraintRow, nextStartIndex + 1, -getCoMPositionSecondCoefficientTimeFunction(omega, 0.0));
-      constraintMatrixToPack.set(constraintRow, nextStartIndex + 2, -getCoMPositionThirdCoefficientTimeFunction(0.0));
-      constraintMatrixToPack.set(constraintRow, nextStartIndex + 3, -getCoMPositionFourthCoefficientTimeFunction(0.0));
-      constraintMatrixToPack.set(constraintRow, nextStartIndex + 4, -getCoMPositionFifthCoefficientTimeFunction(0.0));
-      constraintMatrixToPack.set(constraintRow, nextStartIndex + 5, -getCoMPositionSixthCoefficientTimeFunction());
+      addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex, weight * getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration));
+      addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex + 1, weight * getCoMPositionSecondCoefficientTimeFunction(omega, previousDuration));
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(previousDuration, 0.0, minDuration))
+      {
+         addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex + 2, weight * getCoMPositionThirdCoefficientTimeFunction(previousDuration));
+         addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex + 3, weight * getCoMPositionFourthCoefficientTimeFunction(previousDuration));
+         addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex + 4, weight * getCoMPositionFifthCoefficientTimeFunction(previousDuration));
+      }
+      addEquals(objectiveJacobianToPack, constraintRow, previousStartIndex + 5, weight * getCoMPositionSixthCoefficientTimeFunction());
+      addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex, -weight * getCoMPositionFirstCoefficientTimeFunction(omega, 0.0));
+      addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex + 1, -weight * getCoMPositionSecondCoefficientTimeFunction(omega, 0.0));
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex + 2, -weight * getCoMPositionThirdCoefficientTimeFunction(0.0));
+         addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex + 3, -weight * getCoMPositionFourthCoefficientTimeFunction(0.0));
+         addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex + 4, -weight * getCoMPositionFifthCoefficientTimeFunction(0.0));
+      }
+      addEquals(objectiveJacobianToPack, constraintRow, nextStartIndex + 5, -weight * getCoMPositionSixthCoefficientTimeFunction());
    }
 
    /**
@@ -490,6 +673,36 @@ public class CoMTrajectoryPlannerTools
          constraintMatrixToPack.set(constraintRow, nextStartIndex + 2, -getCoMVelocityThirdCoefficientTimeFunction(0.0));
          constraintMatrixToPack.set(constraintRow, nextStartIndex + 3, -getCoMVelocityFourthCoefficientTimeFunction(0.0));
          constraintMatrixToPack.set(constraintRow, nextStartIndex + 5, -getCoMVelocitySixthCoefficientTimeFunction());
+      }
+   }
+
+   public static void addCoMVelocityContinuityObjective(double weight, int previousSequence, int nextSequence, int row, double omega,
+                                                        double previousDuration, DMatrix coefficientJacobianToPack)
+   {
+      // move next sequence coefficients to the left hand side
+      int previousStartIndex = 6 * previousSequence;
+      int nextStartIndex = 6 * nextSequence;
+
+      previousDuration = Math.min(previousDuration, sufficientlyLongTime);
+
+      addEquals(coefficientJacobianToPack, row, previousStartIndex, weight * getCoMVelocityFirstCoefficientTimeFunction(omega, previousDuration));
+      addEquals(coefficientJacobianToPack, row, previousStartIndex + 1, weight * getCoMVelocitySecondCoefficientTimeFunction(omega, previousDuration));
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(previousDuration, 0.0, minDuration))
+      {
+         addEquals(coefficientJacobianToPack, row, previousStartIndex + 2, weight * getCoMVelocityThirdCoefficientTimeFunction(previousDuration));
+         addEquals(coefficientJacobianToPack, row, previousStartIndex + 3, weight * getCoMVelocityFourthCoefficientTimeFunction(previousDuration));
+      }
+      addEquals(coefficientJacobianToPack, row, previousStartIndex + 4, weight * getCoMVelocityFifthCoefficientTimeFunction());
+
+      addEquals(coefficientJacobianToPack, row, nextStartIndex, -weight * getCoMVelocityFirstCoefficientTimeFunction(omega, 0.0));
+      addEquals(coefficientJacobianToPack, row, nextStartIndex + 1, -weight * getCoMVelocitySecondCoefficientTimeFunction(omega, 0.0));
+      addEquals(coefficientJacobianToPack, row, nextStartIndex + 4, -weight * getCoMVelocityFifthCoefficientTimeFunction());
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(coefficientJacobianToPack, row, previousStartIndex + 5, weight * getCoMVelocitySixthCoefficientTimeFunction());
+         addEquals(coefficientJacobianToPack, row, nextStartIndex + 2, -weight * getCoMVelocityThirdCoefficientTimeFunction(0.0));
+         addEquals(coefficientJacobianToPack, row, nextStartIndex + 3, -weight * getCoMVelocityFourthCoefficientTimeFunction(0.0));
+         addEquals(coefficientJacobianToPack, row, nextStartIndex + 5, -weight * getCoMVelocitySixthCoefficientTimeFunction());
       }
    }
 
@@ -634,9 +847,11 @@ public class CoMTrajectoryPlannerTools
 
    private static void addEquals(DMatrix matrixToPack, int row, int col, double val)
    {
-      if( col < 0 || col >= matrixToPack.getNumCols() || row < 0 || row >= matrixToPack.getNumRows() ) {
-         throw new IllegalArgumentException("Specified element is out of bounds");
-      }
+      if( col < 0 || col >= matrixToPack.getNumCols())
+         throw new IllegalArgumentException("Specified col is out of bounds");
+      if (row < 0 || row >= matrixToPack.getNumRows() )
+         throw new IllegalArgumentException("Specified row is out of bounds");
+
       matrixToPack.unsafe_set(row, col, val + matrixToPack.unsafe_get(row, col));
    }
    /**
@@ -673,6 +888,35 @@ public class CoMTrajectoryPlannerTools
       zObjectiveMatrixToPack.set(constraintRow, 0, -Math.abs(gravityZ));
    }
 
+   public static void addCoMAccelerationIsGravityObjective(double weight,
+                                                           int sequenceId,
+                                                           int constraintRow,
+                                                           double omega,
+                                                           double time,
+                                                           double gravityZ,
+                                                           DMatrix constraintMatrixToPack,
+                                                           DMatrix zObjectiveMatrixToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      addEquals(constraintMatrixToPack, constraintRow, startIndex, weight * getCoMAccelerationFirstCoefficientTimeFunction(omega, time));
+      addEquals(constraintMatrixToPack, constraintRow, startIndex + 1, weight * getCoMAccelerationSecondCoefficientTimeFunction(omega, time));
+      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      {
+         addEquals(constraintMatrixToPack, constraintRow, startIndex + 2, weight * getCoMAccelerationThirdCoefficientTimeFunction(time));
+      }
+      addEquals(constraintMatrixToPack, constraintRow, startIndex + 3, weight * getCoMAccelerationFourthCoefficientTimeFunction());
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(constraintMatrixToPack, constraintRow, startIndex + 4, weight * getCoMAccelerationFifthCoefficientTimeFunction());
+         addEquals(constraintMatrixToPack, constraintRow, startIndex + 5, weight * getCoMAccelerationSixthCoefficientTimeFunction());
+      }
+
+      addEquals(zObjectiveMatrixToPack, constraintRow, 0, weight * -Math.abs(gravityZ));
+   }
+
    /**
     * <p> Adds a constraint for the CoM trajectory to have a jerk equal to 0.0 at time t.</p>
     * <p> Recall that the CoM jerk is defined as </p>
@@ -698,6 +942,93 @@ public class CoMTrajectoryPlannerTools
          matrixToPack.set(rowStart, colStart + 4, getCoMJerkFifthCoefficientTimeFunction());
          matrixToPack.set(rowStart, colStart + 5, getCoMJerkSixthCoefficientTimeFunction());
       }
+   }
+
+   public static void addZeroCoMJerkObjective(double weight, double time, double omega, int sequenceId, int rowStart, DMatrix matrixToPack)
+   {
+      time = Math.min(time, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      addEquals(matrixToPack, rowStart, colStart, weight * getCoMJerkFirstCoefficientTimeFunction(omega, time));
+      addEquals(matrixToPack, rowStart, colStart + 1, weight * getCoMJerkSecondCoefficientTimeFunction(omega, time));
+      addEquals(matrixToPack, rowStart, colStart + 2, weight * getCoMJerkThirdCoefficientTimeFunction());
+      if (SET_ZERO_VALUES)
+      {
+         addEquals(matrixToPack, rowStart, colStart + 3, weight * getCoMJerkFourthCoefficientTimeFunction());
+         addEquals(matrixToPack, rowStart, colStart + 4, weight * getCoMJerkFifthCoefficientTimeFunction());
+         addEquals(matrixToPack, rowStart, colStart + 5, weight * getCoMJerkSixthCoefficientTimeFunction());
+      }
+   }
+
+   public static void addMinimizeCoMAccelerationObjective(double weight, double startTime, double endTime, double omega, int sequenceId, DMatrix hessianToPack)
+   {
+      int start = 6 * sequenceId;
+
+      double h00End = getIntegralCoMAccelerationCoefficient00(omega, endTime);
+      double h01End = getIntegralCoMAccelerationCoefficient01(omega, endTime);
+      double h02End = getIntegralCoMAccelerationCoefficient02(omega, endTime);
+      double h03End = getIntegralCoMAccelerationCoefficient03(omega, endTime);
+      double h11End = getIntegralCoMAccelerationCoefficient11(omega, endTime);
+      double h12End = getIntegralCoMAccelerationCoefficient12(omega, endTime);
+      double h13End = getIntegralCoMAccelerationCoefficient13(omega, endTime);
+      double h22End = getIntegralCoMAccelerationCoefficient22(endTime);
+      double h23End = getIntegralCoMAccelerationCoefficient23(endTime);
+      double h33End = getIntegralCoMAccelerationCoefficient33(endTime);
+      double h00Start = getIntegralCoMAccelerationCoefficient00(omega, startTime);
+      double h01Start = getIntegralCoMAccelerationCoefficient01(omega, startTime);
+      double h02Start = getIntegralCoMAccelerationCoefficient02(omega, startTime);
+      double h03Start = getIntegralCoMAccelerationCoefficient03(omega, startTime);
+      double h11Start = getIntegralCoMAccelerationCoefficient11(omega, startTime);
+      double h12Start = getIntegralCoMAccelerationCoefficient12(omega, startTime);
+      double h13Start = getIntegralCoMAccelerationCoefficient13(omega, startTime);
+      double h22Start = getIntegralCoMAccelerationCoefficient22(startTime);
+      double h23Start = getIntegralCoMAccelerationCoefficient23(startTime);
+      double h33Start = getIntegralCoMAccelerationCoefficient33(startTime);
+
+      addEquals(hessianToPack, start + 0, start + 0, weight * (h00End - h00Start));
+      addEquals(hessianToPack, start + 0, start + 1, weight * (h01End - h01Start));
+      addEquals(hessianToPack, start + 0, start + 2, weight * (h02End - h02Start));
+      addEquals(hessianToPack, start + 0, start + 3, weight * (h03End - h03Start));
+      addEquals(hessianToPack, start + 1, start + 0, weight * (h01End - h01Start));
+      addEquals(hessianToPack, start + 1, start + 1, weight * (h11End - h11Start));
+      addEquals(hessianToPack, start + 1, start + 2, weight * (h12End - h12Start));
+      addEquals(hessianToPack, start + 1, start + 3, weight * (h13End - h13Start));
+      addEquals(hessianToPack, start + 2, start + 0, weight * (h02End - h02Start));
+      addEquals(hessianToPack, start + 2, start + 1, weight * (h12End - h12Start));
+      addEquals(hessianToPack, start + 2, start + 2, weight * (h22End - h22Start));
+      addEquals(hessianToPack, start + 2, start + 3, weight * (h23End - h23Start));
+      addEquals(hessianToPack, start + 3, start + 0, weight * (h03End - h03Start));
+      addEquals(hessianToPack, start + 3, start + 1, weight * (h13End - h13Start));
+      addEquals(hessianToPack, start + 3, start + 2, weight * (h23End - h23Start));
+      addEquals(hessianToPack, start + 3, start + 3, weight * (h33End - h33Start));
+   }
+
+   public static void addMinimizeCoMJerkObjective(double weight, double startTime, double endTime, double omega, int sequenceId, DMatrix hessianToPack)
+   {
+      int start = 6 * sequenceId;
+
+      double h00End = getIntegralCoMJerkCoefficient00(omega, endTime);
+      double h01End = getIntegralCoMJerkCoefficient01(omega, endTime);
+      double h02End = getIntegralCoMJerkCoefficient02(omega, endTime);
+      double h11End = getIntegralCoMJerkCoefficient11(omega, endTime);
+      double h12End = getIntegralCoMJerkCoefficient12(omega, endTime);
+      double h22End = getIntegralCoMJerkCoefficient22(endTime);
+      double h00Start = getIntegralCoMJerkCoefficient00(omega, startTime);
+      double h01Start = getIntegralCoMJerkCoefficient01(omega, startTime);
+      double h02Start = getIntegralCoMJerkCoefficient02(omega, startTime);
+      double h11Start = getIntegralCoMJerkCoefficient11(omega, startTime);
+      double h12Start = getIntegralCoMJerkCoefficient12(omega, startTime);
+      double h22Start = getIntegralCoMJerkCoefficient22(startTime);
+
+      addEquals(hessianToPack, start + 0, start + 0, weight * (h00End - h00Start));
+      addEquals(hessianToPack, start + 0, start + 1, weight * (h01End - h01Start));
+      addEquals(hessianToPack, start + 0, start + 2, weight * (h02End - h02Start));
+      addEquals(hessianToPack, start + 1, start + 0, weight * (h01End - h01Start));
+      addEquals(hessianToPack, start + 1, start + 1, weight * (h11End - h11Start));
+      addEquals(hessianToPack, start + 1, start + 2, weight * (h12End - h12Start));
+      addEquals(hessianToPack, start + 2, start + 0, weight * (h02End - h02Start));
+      addEquals(hessianToPack, start + 2, start + 1, weight * (h12End - h12Start));
+      addEquals(hessianToPack, start + 2, start + 2, weight * (h22End - h22Start));
    }
 
    public static double getCoMCoefficientTimeFunction(int order, int coefficient, double omega, double time)
@@ -945,6 +1276,56 @@ public class CoMTrajectoryPlannerTools
       return 0.0;
    }
 
+   public static double getIntegralCoMAccelerationCoefficient00(double omega, double time)
+   {
+      return 0.5 * omega * omega * omega * Math.min(sufficientlyLarge, Math.exp(2.0 * omega * time));
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient01(double omega, double time)
+   {
+      return omega * omega * omega * omega * Math.min(sufficientlyLarge, time);
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient02(double omega, double time)
+   {
+      return 6 * Math.min(sufficientlyLarge, Math.exp(omega * time)) * (omega * Math.min(sufficientlyLarge, time) - 1.0);
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient03(double omega, double time)
+   {
+      return 2 * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient11(double omega, double time)
+   {
+      return -0.5 * omega * omega * omega * Math.min(sufficientlyLarge, Math.exp(-2.0 * omega * time));
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient12(double omega, double time)
+   {
+      return -6 * Math.min(sufficientlyLarge, Math.exp(-omega * time)) * (omega * Math.min(sufficientlyLarge, time) + 1.0);
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient13(double omega, double time)
+   {
+      return -2 * omega * Math.min(sufficientlyLarge, Math.exp(-omega * time));
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient22(double time)
+   {
+      return 12.0 * Math.min(sufficientlyLarge, time * time * time);
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient23(double time)
+   {
+      return 6.0 * Math.min(sufficientlyLarge, time * time);
+   }
+
+   public static double getIntegralCoMAccelerationCoefficient33(double time)
+   {
+      return 4.0 * Math.min(sufficientlyLarge, time);
+   }
+
    /**
     * &omega;<sup>3</sup> e<sup>&omega; t</sup>
     */
@@ -992,6 +1373,42 @@ public class CoMTrajectoryPlannerTools
    {
       return 0.0;
    }
+
+   public static double getIntegralCoMJerkCoefficient00(double omega, double time)
+   {
+      double omega2 = omega * omega;
+      double omega4 = omega2 * omega2;
+      return 0.5 * omega2 * omega4 * Math.min(sufficientlyLarge, Math.exp(2.0 * omega * time));
+   }
+
+   public static double getIntegralCoMJerkCoefficient01(double omega, double time)
+   {
+      double omega3 = omega * omega * omega;
+      return -omega3 * omega3 * Math.min(sufficientlyLarge, time);
+   }
+
+   public static double getIntegralCoMJerkCoefficient02(double omega, double time)
+   {
+      return 6.0 * omega * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
+   }
+
+   public static double getIntegralCoMJerkCoefficient11(double omega, double time)
+   {
+      double omega2 = omega * omega;
+      double omega4 = omega2 * omega2;
+      return -0.5 * omega4 * omega2 * Math.min(sufficientlyLarge, Math.exp(-2.0 * omega * time));
+   }
+
+   public static double getIntegralCoMJerkCoefficient12(double omega, double time)
+   {
+      return -6.0 * omega * omega * Math.min(sufficientlyLarge, Math.exp(-omega * time));
+   }
+
+   public static double getIntegralCoMJerkCoefficient22(double time)
+   {
+      return 36.0 * Math.min(sufficientlyLarge, time);
+   }
+
 
    /**
     * 2 e<sup>&omega; t</sup>

@@ -13,14 +13,12 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.trajectories.OptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -156,7 +154,7 @@ public class BalanceManager
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final OptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                          WalkingControllerParameters walkingControllerParameters,
@@ -210,8 +208,8 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
+      comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+//      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, defaultSupportPolygon, registry);
