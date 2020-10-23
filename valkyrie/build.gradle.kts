@@ -137,6 +137,8 @@ tasks.create("deploy") {
          put(file("launchScripts").toString(), directory)
          exec("chmod +x $directory/runNetworkProcessor.sh")
          exec("ls -halp $directory")
+         // For some reason, this jar needs to be removed to get the JAXB to work.
+         exec("rm ~/valkyrie/lib/jaxb-runtime-2.3.2.jar")
       }
 
       deployNetworkProcessor()
