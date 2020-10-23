@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -16,7 +16,7 @@ public class YoTrajectory
    private YoDouble tFinal;
    private double[] coefficients;
 
-   public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoTrajectory(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.name = name;
       tInitial = new YoDouble(name + "t0", registry);
@@ -84,7 +84,7 @@ public class YoTrajectory
       return polynomial.getAcceleration();
    }
 
-   public DenseMatrix64F getCoefficientsVector()
+   public DMatrixRMaj getCoefficientsVector()
    {
       return polynomial.getCoefficientsVector();
    }
@@ -373,7 +373,7 @@ public class YoTrajectory
       polynomial.setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0, zFinal, zdFinal, zddFinal);
    }
    
-   public void setDirectly(DenseMatrix64F coefficients)
+   public void setDirectly(DMatrixRMaj coefficients)
    {
       polynomial.setDirectly(coefficients);
    }
@@ -401,7 +401,7 @@ public class YoTrajectory
     * @param x
     * @return
     */
-   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   public DMatrixRMaj getXPowersDerivativeVector(int order, double x)
    {
       //if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
          return polynomial.getXPowersDerivativeVector(order, x);

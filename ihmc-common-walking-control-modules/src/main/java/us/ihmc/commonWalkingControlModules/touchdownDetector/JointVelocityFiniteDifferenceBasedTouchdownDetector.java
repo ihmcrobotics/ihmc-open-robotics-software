@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -18,7 +18,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    private double previousVelocity;
    private boolean initialized = false;
 
-   public JointVelocityFiniteDifferenceBasedTouchdownDetector(OneDoFJointBasics joint, YoBoolean controllerSetFootSwitch, YoVariableRegistry registry)
+   public JointVelocityFiniteDifferenceBasedTouchdownDetector(OneDoFJointBasics joint, YoBoolean controllerSetFootSwitch, YoRegistry registry)
    {
       this.joint = joint;
       this.controllerSetFootSwitch = controllerSetFootSwitch;

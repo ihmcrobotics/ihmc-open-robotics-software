@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.bodyPathPlanner;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
@@ -63,6 +64,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
          double previousMaxAlpha = (i == 0) ? 0.0 : maxAlphas[i - 1];
          maxAlphas[i] = previousMaxAlpha + segmentLengths[i] / totalPathLength;
       }
+      maxAlphas[segmentLengths.length - 1] = 1.0;
 
       int startIndex = 0;
       int endIndex = waypointPositions.size() - 1;
@@ -153,6 +155,8 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
          return maxAlphas.length - 1;
       }
 
+      double epsilon = 1e-8;
+      alpha = MathTools.clamp(alpha, epsilon, 1.0 - epsilon);
       for (int i = 0; i < maxAlphas.length; i++)
       {
          if (maxAlphas[i] >= alpha)

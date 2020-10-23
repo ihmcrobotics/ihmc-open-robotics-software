@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.concurrent.ExecutionException;
@@ -11,7 +11,7 @@ public abstract class QuadrupedToolboxController
 {
    protected static final boolean DEBUG = false;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected final OutputManager outputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
@@ -19,7 +19,7 @@ public abstract class QuadrupedToolboxController
 
    private ScheduledFuture<?> futureToListenTo;
 
-   public QuadrupedToolboxController(QuadrupedRobotDataReceiver robotDataReceiver, OutputManager outputManager, YoVariableRegistry parentRegistry)
+   public QuadrupedToolboxController(QuadrupedRobotDataReceiver robotDataReceiver, OutputManager outputManager, YoRegistry parentRegistry)
    {
       this.robotDataReceiver = robotDataReceiver;
       this.outputManager = outputManager;

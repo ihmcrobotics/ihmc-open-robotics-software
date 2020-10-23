@@ -7,10 +7,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
@@ -18,10 +18,7 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,10 +27,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -42,9 +41,7 @@ public class StereoVisionPointCloudPublisher
 {
    private static final boolean Debug = false;
 
-   private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
-
-   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 2500;
+   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 50000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -62,8 +59,7 @@ public class StereoVisionPointCloudPublisher
 
    private RobotROSClockCalculator rosClockCalculator = null;
 
-   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
-   private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
+   private final Consumer<StereoVisionPointCloudMessage> pointcloudPublisher;
 
    private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
@@ -80,47 +76,42 @@ public class StereoVisionPointCloudPublisher
    private final AtomicDouble linearVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
 
-   private long publisherPeriodInMillisecond = 1L;
+   private long publisherPeriodInMillisecond = 200L;
    private double minimumResolution = 0.005;
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           ROS2Tools.getDefaultTopicNameGenerator());
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
    }
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                          MessageTopicNameGenerator defaultTopicNameGenerator)
-   {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           defaultTopicNameGenerator);
-   }
-
-   public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                          String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
+   public StereoVisionPointCloudPublisher(String robotName,
+                                          FullRobotModel fullRobotModel,
+                                          ROS2Node ros2Node,
+                                          ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageType);
-      if (ros2Node != null)
-      {
          ROS2Tools.createCallbackSubscription(ros2Node,
-                                              RobotConfigurationData.class,
-                                              robotConfigurationDataTopicName,
+                                              ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
-         pointcloudRealtimePublisher = null;
-      }
-      else
-      {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
-                                              RobotConfigurationData.class,
-                                              robotConfigurationDataTopicName,
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         pointcloudPublisher = null;
-         pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
-      }
+      LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+   }
+
+   public StereoVisionPointCloudPublisher(String robotName,
+                                          FullRobotModel fullRobotModel,
+                                          RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic<StereoVisionPointCloudMessage> topic)
+   {
+      this.robotName = robotName;
+      this.fullRobotModel = fullRobotModel;
+
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
+                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
+      pointcloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, topic)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
@@ -326,10 +317,7 @@ public class StereoVisionPointCloudPublisher
          System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3) + ", packet size in kilobytes: "
                + (StereoVisionPointCloudMessagePubSubType.getCdrSerializedSize(message) / 1000) + ", compression time in milliseconds: "
                + Conversions.nanosecondsToMilliseconds(endTime - startTime));
-      if (pointcloudPublisher != null)
-         pointcloudPublisher.publish(message);
-      else
-         pointcloudRealtimePublisher.publish(message);
+      pointcloudPublisher.accept(message);
    }
 
    public void enableFilter(boolean enable)

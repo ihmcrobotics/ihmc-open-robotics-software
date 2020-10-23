@@ -15,6 +15,7 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
 {
    private long sequenceId;
    private RobotSide robotSide;
+   private boolean forceExecution = false;
    private final WrenchTrajectoryControllerCommand wrenchTrajectory;
 
    public HandWrenchTrajectoryCommand()
@@ -24,12 +25,13 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
 
    public HandWrenchTrajectoryCommand(RobotSide robotSide, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
-      robotSide = robotSide;
+      this.robotSide = robotSide;
       wrenchTrajectory = new WrenchTrajectoryControllerCommand(dataFrame, trajectoryFrame);
    }
 
    public HandWrenchTrajectoryCommand(Random random)
    {
+      setForceExecution(random.nextBoolean());
       wrenchTrajectory = new WrenchTrajectoryControllerCommand(random);
       robotSide = RobotSide.generateRandomRobotSide(random);
    }
@@ -38,22 +40,25 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
    public void clear()
    {
       sequenceId = 0;
-      wrenchTrajectory.clear();
       robotSide = null;
+      setForceExecution(false);
+      wrenchTrajectory.clear();
    }
 
    public void clear(ReferenceFrame referenceFrame)
    {
-      wrenchTrajectory.clear(referenceFrame);
       robotSide = null;
+      setForceExecution(false);
+      wrenchTrajectory.clear(referenceFrame);
    }
 
    @Override
    public void set(HandWrenchTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
-      wrenchTrajectory.set(other.wrenchTrajectory);
       robotSide = other.robotSide;
+      setForceExecution(other.getForceExecution());
+      wrenchTrajectory.set(other.wrenchTrajectory);
    }
 
    /**
@@ -64,8 +69,9 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
    public void setPropertiesOnly(HandWrenchTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
-      wrenchTrajectory.setPropertiesOnly(other.wrenchTrajectory);
       robotSide = other.robotSide;
+      setForceExecution(other.getForceExecution());
+      wrenchTrajectory.setPropertiesOnly(other.wrenchTrajectory);
    }
 
    @Override
@@ -78,8 +84,9 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
    public void set(ReferenceFrameHashCodeResolver resolver, HandWrenchTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
-      wrenchTrajectory.set(resolver, message.getWrenchTrajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
+      setForceExecution(message.getForceExecution());
+      wrenchTrajectory.set(resolver, message.getWrenchTrajectory());
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -90,6 +97,16 @@ public class HandWrenchTrajectoryCommand implements Command<HandWrenchTrajectory
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
    }
 
    public WrenchTrajectoryControllerCommand getWrenchTrajectory()

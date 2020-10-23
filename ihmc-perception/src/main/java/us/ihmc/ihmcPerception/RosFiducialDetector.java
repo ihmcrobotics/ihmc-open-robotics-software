@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import org.ros.RosCore;
 
 import boofcv.abst.fiducial.FiducialDetector;
+import boofcv.alg.distort.brown.LensDistortionBrown;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
@@ -18,7 +19,7 @@ import boofcv.gui.fiducial.VisualizeFiducial;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import boofcv.struct.image.GrayF32;
 import georegression.metric.UtilAngle;
 import georegression.struct.se.Se3_F64;
@@ -39,7 +40,7 @@ public class RosFiducialDetector extends RosImageSubscriber
    private final GrayF32 gray = new GrayF32(640, 480);
    private ImagePanel imagePanel = null;
    private JFrame frame = null;
-   private IntrinsicParameters intrinsicParameters = null;
+   private CameraPinholeBrown intrinsicParameters = null;
 
    private final FiducialDetector<GrayF32> detector;
 
@@ -66,7 +67,7 @@ public class RosFiducialDetector extends RosImageSubscriber
       catch (InterruptedException e)
       {
          System.out.println("Use default intrinsic parameters");
-         intrinsicParameters = new IntrinsicParameters();
+         intrinsicParameters = new CameraPinholeBrown();
          intrinsicParameters.width = width;
          intrinsicParameters.height = height;
          intrinsicParameters.cx = width / 2;
@@ -74,7 +75,7 @@ public class RosFiducialDetector extends RosImageSubscriber
          intrinsicParameters.fx = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30)); // assume 60 degree FOV
          intrinsicParameters.fy = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30));
       }
-      detector.setIntrinsic(intrinsicParameters);
+      detector.setLensDistortion(new LensDistortionBrown(intrinsicParameters), width, height);
    }
 
    @Override
@@ -115,7 +116,7 @@ public class RosFiducialDetector extends RosImageSubscriber
             int heightOffset = frame.getHeight() - frame.getContentPane().getHeight();
             int widthOffset = frame.getWidth() - frame.getContentPane().getWidth();
             frame.setSize(image.getWidth() + widthOffset, image.getHeight() + heightOffset);
-            imagePanel.setBufferedImageSafe(image);
+            imagePanel.setImageUI(image);
          }
       }
       catch (Exception e)
@@ -147,7 +148,7 @@ public class RosFiducialDetector extends RosImageSubscriber
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "RosMainNode");
 
 //      FiducialDetector<GrayF32> detector = FactoryFiducial.calibChessboard(new ConfigChessboard(5, 6, 0.09), GrayF32.class);
-      FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+      FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
 
       new RosFiducialDetector(rosMainNode, imageTopic, cameraInfoTopic, detector);
       rosMainNode.execute();

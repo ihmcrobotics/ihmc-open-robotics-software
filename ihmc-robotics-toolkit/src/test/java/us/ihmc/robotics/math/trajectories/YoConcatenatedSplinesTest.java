@@ -1,22 +1,22 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoConcatenatedSplinesTest
 {
@@ -37,7 +37,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);
@@ -53,7 +53,7 @@ public class YoConcatenatedSplinesTest
             FramePoint3D actualPosition = concatenatedSplines.getPosition();
             FrameVector3D expectedVelocity = velocities[i];
             FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
-            for (Axis axis : Axis.values())
+            for (Axis3D axis : Axis3D.values())
             {
                assertEquals(expectedPosition.getElement(axis.ordinal()), actualPosition.getElement(axis.ordinal()), EPSILON);
                assertEquals(expectedVelocity.getElement(axis.ordinal()), actualVelocity.getElement(axis.ordinal()), EPSILON);
@@ -66,7 +66,7 @@ public class YoConcatenatedSplinesTest
 	@Test
    public void testSimpleCubicQuinticCubicTroublesome()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+      YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
       
       FramePoint3D p0 = new FramePoint3D(worldFrame, 3.6468620919827135, -4.5527029914004205, -2.7826785633396045);
       FramePoint3D p1 = new FramePoint3D(worldFrame, 1.873647248784934, 4.8291937131106835, 3.1811710040983314);
@@ -93,7 +93,7 @@ public class YoConcatenatedSplinesTest
          FramePoint3D actualPosition = concatenatedSplines.getPosition();
          FrameVector3D expectedVelocity = velocities[i];
          FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             assertEquals(expectedPosition.getElement(axis.ordinal()), actualPosition.getElement(axis.ordinal()), EPSILON);
             assertEquals(expectedVelocity.getElement(axis.ordinal()), actualVelocity.getElement(axis.ordinal()), EPSILON);
@@ -108,7 +108,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);
@@ -130,7 +130,7 @@ public class YoConcatenatedSplinesTest
             FramePoint3D respacedPosition = respacedSplines.getPosition();
             FrameVector3D originalVelocity = originalSplines.getVelocity();
             FrameVector3D respacedVelocity = respacedSplines.getVelocity();
-            for (Axis axis : Axis.values())
+            for (Axis3D axis : Axis3D.values())
             {
                assertEquals(originalPosition.getElement(axis.ordinal()), respacedPosition.getElement(axis.ordinal()), EPSILON);
                assertEquals(originalVelocity.getElement(axis.ordinal()), respacedVelocity.getElement(axis.ordinal()), EPSILON);
@@ -146,7 +146,7 @@ public class YoConcatenatedSplinesTest
 
       for (int trial = 0; trial < trials; trial++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
+         YoRegistry registry = new YoRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint3D[] positions = getRandomPositions(4);
          FrameVector3D[] velocities = getRandomVelocities(4);
@@ -200,7 +200,7 @@ public class YoConcatenatedSplinesTest
       {
          positions[i] = new FramePoint3D(worldFrame);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             positions[i].setElement(axis.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
@@ -216,7 +216,7 @@ public class YoConcatenatedSplinesTest
       {
          velocities[i] = new FrameVector3D(worldFrame);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             velocities[i].setElement(axis.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }

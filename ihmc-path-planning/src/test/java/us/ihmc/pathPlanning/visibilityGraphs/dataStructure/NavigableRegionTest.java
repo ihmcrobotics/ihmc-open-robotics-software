@@ -29,7 +29,7 @@ public class NavigableRegionTest
       {
          PlanarRegion planarRegion = PlanarRegion
                .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomNumbers.nextDouble(random, 0.0, 30.0),
-                                                                          random.nextInt(10));
+                                                                          3 + random.nextInt(10));
          VisibilityMapHolder visibilityMapHolder = VisibilityGraphRandomTools.getRandomSingleSourceVisibilityMap(random);
          Cluster homeRegionCluster = VisibilityGraphRandomTools.getRandomCluster(random);
 

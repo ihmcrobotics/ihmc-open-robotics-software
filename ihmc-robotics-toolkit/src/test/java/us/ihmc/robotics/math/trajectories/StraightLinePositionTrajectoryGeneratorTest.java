@@ -16,7 +16,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class StraightLinePositionTrajectoryGeneratorTest
 {
@@ -30,7 +30,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    private PositionProvider initialPositionProvider;
    private PositionProvider finalPositionProvider;
    private FramePoint3D position;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private double xValue = Math.random();
    private double yValue = Math.random();
@@ -40,8 +40,8 @@ public class StraightLinePositionTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       initialPositionProvider = new ConstantPositionProvider(position);
       finalPositionProvider = new ConstantPositionProvider(position);

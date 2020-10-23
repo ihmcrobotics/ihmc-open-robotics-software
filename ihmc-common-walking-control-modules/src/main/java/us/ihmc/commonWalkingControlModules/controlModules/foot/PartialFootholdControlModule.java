@@ -8,11 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -20,11 +16,11 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PartialFootholdControlModule
@@ -38,7 +34,7 @@ public class PartialFootholdControlModule
       FULL, PARTIAL
    };
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoEnum<PartialFootholdState> footholdState;
 
@@ -106,7 +102,7 @@ public class PartialFootholdControlModule
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
                                        WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
@@ -124,7 +120,7 @@ public class PartialFootholdControlModule
       unsafePolygon = new FrameConvexPolygon2D(defaultFootPolygon);
       lineOfRotation = new FrameLine2D(soleFrame);
 
-      registry = new YoVariableRegistry(namePrefix + name);
+      registry = new YoRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
       footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
@@ -182,7 +178,7 @@ public class PartialFootholdControlModule
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
       lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
-      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getSoleFrame(), explorationParameters, registry);
 
       unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
@@ -364,7 +360,7 @@ public class PartialFootholdControlModule
       {
          tempPosition.setIncludingFrame(controllerFootPolygon.getVertex(i), 0.0);
          YoContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.setPosition(tempPosition);
+         contactPoint.setMatchingFrame(tempPosition);
          contactPoint.setInContact(true);
       }
 

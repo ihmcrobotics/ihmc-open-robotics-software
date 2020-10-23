@@ -67,7 +67,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
-
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
 
       root.getChildren().addAll(bodyPathMeshView);
    }

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -14,7 +12,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -41,12 +39,12 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<TaskspaceTrajectoryStatusMessage> taskSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 
-   public HandTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public HandTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, null, ros2Node, yoTime);
    }
 
-   public HandTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public HandTrajectoryBehavior(String robotName, String namePrefix, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, namePrefix, ros2Node);
 
@@ -198,7 +196,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
          stopArmMotion();
         
    }
-
+ 
    @Override
    public void onBehaviorResumed()
    {

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
@@ -10,9 +10,9 @@ public class QPInput
 
    private final int numberOfVariables;
 
-   public final DenseMatrix64F taskJacobian = new DenseMatrix64F(0, 0);
-   public final DenseMatrix64F taskObjective = new DenseMatrix64F(0, 0);
-   public final DenseMatrix64F taskWeightMatrix = new DenseMatrix64F(0, 0);
+   public final DMatrixRMaj taskJacobian = new DMatrixRMaj(0, 0);
+   public final DMatrixRMaj taskObjective = new DMatrixRMaj(0, 0);
+   public final DMatrixRMaj taskWeightMatrix = new DMatrixRMaj(0, 0);
 
    private boolean useWeightScalar = false;
    private double taskWeightScalar;
@@ -48,32 +48,32 @@ public class QPInput
       taskWeightMatrix.reshape(taskSize, taskSize);
    }
 
-   public void setTaskJacobian(DenseMatrix64F taskJacobian)
+   public void setTaskJacobian(DMatrixRMaj taskJacobian)
    {
       this.taskJacobian.set(taskJacobian);
    }
 
-   public DenseMatrix64F getTaskJacobian()
+   public DMatrixRMaj getTaskJacobian()
    {
       return taskJacobian;
    }
 
-   public void setTaskObjective(DenseMatrix64F taskObjective)
+   public void setTaskObjective(DMatrixRMaj taskObjective)
    {
       this.taskObjective.set(taskObjective);
    }
 
-   public DenseMatrix64F getTaskObjective()
+   public DMatrixRMaj getTaskObjective()
    {
       return taskObjective;
    }
 
-   public void setTaskWeightMatrix(DenseMatrix64F taskWeightMatrix)
+   public void setTaskWeightMatrix(DMatrixRMaj taskWeightMatrix)
    {
       this.taskWeightMatrix.set(taskWeightMatrix);
    }
 
-   public DenseMatrix64F getTaskWeightMatrix()
+   public DMatrixRMaj getTaskWeightMatrix()
    {
       return taskWeightMatrix;
    }

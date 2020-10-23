@@ -11,7 +11,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointAccelerationIntegrationCalculator
@@ -21,7 +21,7 @@ public class JointAccelerationIntegrationCalculator
    public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
    public static final double DEFAULT_MAX_VELOCITY = 2.0;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>();
    private final TDoubleArrayList jointSpecificPositionBreakFrequency = new TDoubleArrayList();
@@ -36,7 +36,7 @@ public class JointAccelerationIntegrationCalculator
 
    private final double controlDT;
 
-   public JointAccelerationIntegrationCalculator(double controlDT, YoVariableRegistry parentRegistry)
+   public JointAccelerationIntegrationCalculator(double controlDT, YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);

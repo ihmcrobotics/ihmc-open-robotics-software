@@ -12,7 +12,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
  * This class should only be used with {@link CrossRobotCommandResolver} and
  * {@link ControllerCoreCommandBuffer} to resolve a {@link ControllerCoreCommand}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
@@ -42,31 +42,38 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
       centerOfMassFeedbackControlCommandBuffer.clear();
    }
 
-   /**
-    * Unsupported operation.
-    */
+   /** {@inheritDoc} */
    @Override
    public void set(FeedbackControlCommandList other)
    {
-      throw new UnsupportedOperationException();
+      clear();
+      addCommandList(other);
    }
 
-   /**
-    * Unsupported operation.
-    */
+   /** {@inheritDoc} */
    @Override
    public void addCommand(FeedbackControlCommand<?> command)
    {
-      throw new UnsupportedOperationException();
-   }
-
-   /**
-    * Unsupported operation.
-    */
-   @Override
-   public void addCommandList(FeedbackControlCommandList commandList)
-   {
-      throw new UnsupportedOperationException();
+      switch (command.getCommandType())
+      {
+         case JOINTSPACE:
+            addOneDoFJointFeedbackControlCommand().set((OneDoFJointFeedbackControlCommand) command);
+            return;
+         case ORIENTATION:
+            addOrientationFeedbackControlCommand().set((OrientationFeedbackControlCommand) command);
+            return;
+         case POINT:
+            addPointFeedbackControlCommand().set((PointFeedbackControlCommand) command);
+            return;
+         case TASKSPACE:
+            addSpatialFeedbackControlCommand().set((SpatialFeedbackControlCommand) command);
+            return;
+         case MOMENTUM:
+            addCenterOfMassFeedbackControlCommand().set((CenterOfMassFeedbackControlCommand) command);
+            return;
+         default:
+            throw new IllegalStateException("Unknown command type: " + command.getCommandType());
+      }
    }
 
    /**
@@ -78,9 +85,38 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
       throw new UnsupportedOperationException();
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public void removeCommand(int commandIndex)
+   {
+      FeedbackControlCommand<?> command = getCommand(commandIndex);
+      super.removeCommand(commandIndex);
+
+      switch (command.getCommandType())
+      {
+         case JOINTSPACE:
+            oneDoFJointFeedbackControlCommandBuffer.remove(command);
+            return;
+         case ORIENTATION:
+            orientationFeedbackControlCommandBuffer.remove(command);
+            return;
+         case POINT:
+            pointFeedbackControlCommandBuffer.remove(command);
+            return;
+         case TASKSPACE:
+            spatialFeedbackControlCommandBuffer.remove(command);
+            return;
+         case MOMENTUM:
+            centerOfMassFeedbackControlCommandBuffer.remove(command);
+            return;
+         default:
+            throw new IllegalStateException("Unknown command type: " + command.getCommandType());
+      }
+   }
+
    /**
     * Gets an available {@link OneDoFJointFeedbackControlCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public OneDoFJointFeedbackControlCommand addOneDoFJointFeedbackControlCommand()
@@ -92,7 +128,7 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
 
    /**
     * Gets an available {@link JointspaceFeedbackControlCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public OrientationFeedbackControlCommand addOrientationFeedbackControlCommand()
@@ -104,7 +140,7 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
 
    /**
     * Gets an available {@link PointFeedbackControlCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public PointFeedbackControlCommand addPointFeedbackControlCommand()
@@ -116,7 +152,7 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
 
    /**
     * Gets an available {@link SpatialFeedbackControlCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public SpatialFeedbackControlCommand addSpatialFeedbackControlCommand()
@@ -128,7 +164,7 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
 
    /**
     * Gets an available {@link CenterOfMassFeedbackControlCommand} and registers it to this list.
-    * 
+    *
     * @return the available command ready to be set.
     */
    public CenterOfMassFeedbackControlCommand addCenterOfMassFeedbackControlCommand()

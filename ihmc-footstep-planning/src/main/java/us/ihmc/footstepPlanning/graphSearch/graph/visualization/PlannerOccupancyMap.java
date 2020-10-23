@@ -66,4 +66,9 @@ public class PlannerOccupancyMap
       for (PlannerCell occupiedCell : occupiedCells)
          occupiedCell.getAsMessage(messageToPack.getOccupiedCells().add());
    }
+
+   public boolean isEmpty()
+   {
+      return occupiedCells.isEmpty();
+   }
 }

@@ -18,8 +18,8 @@ public class BodyPositionSimulationComparer implements SimulationComparer
    public boolean compare(SimulationConstructionSet scs1, SimulationConstructionSet scs2)
    {
       // compare variables
-      YoVariable<?> var0 = getRootJoint(scs1).getQx();
-      YoVariable<?> var1 = getRootJoint(scs2).getQx();
+      YoVariable var0 = getRootJoint(scs1).getQx();
+      YoVariable var1 = getRootJoint(scs2).getQx();
       return (MathTools.epsilonEquals(var0.getValueAsDouble(), var1.getValueAsDouble(), epsilon));
    }
 

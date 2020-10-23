@@ -6,7 +6,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.zip.CRC32;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -73,7 +73,7 @@ public class GenericCRC32 extends CRC32
       update(value.hashCode());
    }
 
-   public void update(DenseMatrix64F value)
+   public void update(DMatrixRMaj value)
    {
       for(int i = 0; i < value.getNumElements(); i++)
       {

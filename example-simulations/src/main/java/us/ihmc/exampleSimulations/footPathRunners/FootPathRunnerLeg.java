@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.footPathRunners;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -9,15 +9,10 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.simulationconstructionset.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootPathRunnerLeg
 {
@@ -39,26 +34,26 @@ public class FootPathRunnerLeg
 
    public FootPathRunnerLeg(RobotSide robotSide, Robot robot, Joint rootJoint, ReferenceFrame bodyReferenceFrame)
    {
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       String sideName = robotSide.getCamelCaseNameForStartOfExpression();
 
-      footXJoint = new SliderJoint(sideName + "FootX", new Vector3D(0.0, robotSide.negateIfRightSide(hipWidth/2.0), 0.0), robot, Axis.X);
+      footXJoint = new SliderJoint(sideName + "FootX", new Vector3D(0.0, robotSide.negateIfRightSide(hipWidth/2.0), 0.0), robot, Axis3D.X);
       footXJoint.setLink(createNullLink());
       rootJoint.addJoint(footXJoint);
 
-      footYJoint = new SliderJoint(sideName + "FootY", new Vector3D(), robot, Axis.Y);
+      footYJoint = new SliderJoint(sideName + "FootY", new Vector3D(), robot, Axis3D.Y);
       footYJoint.setLink(createNullLink());
       footXJoint.addJoint(footYJoint);
 
-      footZJoint = new SliderJoint(sideName + "FootZ", new Vector3D(), robot, Axis.Z);
+      footZJoint = new SliderJoint(sideName + "FootZ", new Vector3D(), robot, Axis3D.Z);
       footZJoint.setLink(createNullLink());
       footYJoint.addJoint(footZJoint);
 
-      footPitchJoint = new PinJoint(sideName + "FootPitch", new Vector3D(), robot, Axis.Y);
+      footPitchJoint = new PinJoint(sideName + "FootPitch", new Vector3D(), robot, Axis3D.Y);
       footPitchJoint.setLink(createNullLink());
       footZJoint.addJoint(footPitchJoint);
 
-      footRollJoint = new PinJoint(sideName + "FootRoll", new Vector3D(), robot, Axis.X);
+      footRollJoint = new PinJoint(sideName + "FootRoll", new Vector3D(), robot, Axis3D.X);
       Link footRollLink = new Link(sideName + "FootRollLink");
       footRollLink.setMassAndRadiiOfGyration(0.001, 0.01, 0.01, 0.01);
 
@@ -70,7 +65,7 @@ public class FootPathRunnerLeg
 
       footPitchJoint.addJoint(footRollJoint);
 
-      footSliderJoint = new SliderJoint(sideName + "FootSlider", new Vector3D(), robot, Axis.Z);
+      footSliderJoint = new SliderJoint(sideName + "FootSlider", new Vector3D(), robot, Axis3D.Z);
       Link footLink = new Link("foot");
 
       footLink.setMassAndRadiiOfGyration(footMass, footRadiusOfGyration, footRadiusOfGyration, footRadiusOfGyration);

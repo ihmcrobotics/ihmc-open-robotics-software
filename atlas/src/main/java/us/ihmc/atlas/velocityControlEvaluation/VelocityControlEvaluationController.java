@@ -2,7 +2,7 @@ package us.ihmc.atlas.velocityControlEvaluation;
 
 import us.ihmc.robotics.math.filters.DelayedYoDouble;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VelocityControlEvaluationController implements RobotController
@@ -10,7 +10,7 @@ public class VelocityControlEvaluationController implements RobotController
    private final VelocityControlEvaluationRobot robot;
    private final double controlDT;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble q_d_x = new YoDouble("q_d_x", registry);
    private final YoDouble qd_d_x = new YoDouble("qd_d_x", registry);
    private final YoDouble qdd_d_x = new YoDouble("qdd_d_x", registry);
@@ -59,7 +59,7 @@ public class VelocityControlEvaluationController implements RobotController
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

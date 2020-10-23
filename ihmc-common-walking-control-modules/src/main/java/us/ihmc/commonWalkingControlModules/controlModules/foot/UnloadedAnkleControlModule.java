@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -20,12 +20,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class UnloadedAnkleControlModule
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final JointDesiredOutputList jointDesiredOutputList;
    private final JointspaceAccelerationCommand accelerationCommand = new JointspaceAccelerationCommand();
@@ -37,8 +37,8 @@ public class UnloadedAnkleControlModule
    private final YoBoolean enabled = new YoBoolean("UnloadedAnkleControlModuleEnabled", registry);
 
    private final AnkleIKSolver ankleIKSolver;
-   private final DenseMatrix64F jointAngles = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jointVelocities = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj jointAngles = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj jointVelocities = new DMatrixRMaj(1, 1);
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
@@ -48,7 +48,7 @@ public class UnloadedAnkleControlModule
    private final RotationMatrix rotationMatrix = new RotationMatrix();
    private final FrameVector3D footAngularVelocityInShin = new FrameVector3D();
 
-   public UnloadedAnkleControlModule(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, AnkleIKSolver ankleIKSolver, YoVariableRegistry parentRegistry)
+   public UnloadedAnkleControlModule(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, AnkleIKSolver ankleIKSolver, YoRegistry parentRegistry)
    {
       this.ankleIKSolver = ankleIKSolver;
 

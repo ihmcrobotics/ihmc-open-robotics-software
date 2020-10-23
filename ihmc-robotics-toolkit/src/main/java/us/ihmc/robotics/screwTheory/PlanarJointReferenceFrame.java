@@ -21,7 +21,7 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       transformToParent.setRotationYawAndZeroTranslation(rotation);
-      transformToParent.setTranslation(translation);
+      transformToParent.getTranslation().set(translation);
    }
 
    public void setRotationAndUpdate(double rotation)

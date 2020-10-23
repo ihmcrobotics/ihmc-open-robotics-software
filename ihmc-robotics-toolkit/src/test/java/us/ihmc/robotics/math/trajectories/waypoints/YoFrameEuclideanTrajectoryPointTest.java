@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -8,14 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -23,14 +19,14 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameEuclideanTrajectoryPointTest
 {
@@ -44,7 +40,7 @@ public class YoFrameEuclideanTrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
@@ -102,7 +98,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameEuclideanTrajectoryPoint testedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                                  new YoVariableRegistry("schnoop"),
+                                                                                                                  new YoRegistry("schnoop"),
                                                                                                                   expectedFrame);
 
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity,
@@ -124,7 +120,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameEuclideanTrajectoryPoint testedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                                  new YoVariableRegistry("schnoop"),
+                                                                                                                  new YoRegistry("schnoop"),
                                                                                                                   expectedFrame);
 
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity,
@@ -156,7 +152,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       expectedLinearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFrame);
 
       YoFrameEuclideanTrajectoryPoint expectedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint("sdfsd", "asd",
-                                                                                                                    new YoVariableRegistry("asawe"),
+                                                                                                                    new YoRegistry("asawe"),
                                                                                                                     expectedFrame);
 
       testedYoFrameEuclideanTrajectoryPoint.set(expectedYoFrameEuclideanTrajectoryPoint);
@@ -181,7 +177,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameEuclideanTrajectoryPoint testedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                                  new YoVariableRegistry("schnoop"),
+                                                                                                                  new YoRegistry("schnoop"),
                                                                                                                   expectedFrame);
 
       testedYoFrameEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
@@ -219,7 +215,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameEuclideanTrajectoryPoint testedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                                  new YoVariableRegistry("schnoop"),
+                                                                                                                  new YoRegistry("schnoop"),
                                                                                                                   expectedFrame);
       testedYoFrameEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
@@ -261,7 +257,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       String expectedNamePrefix = "test";
       String expectedNameSuffix = "blop";
       YoFrameEuclideanTrajectoryPoint testedYoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(expectedNamePrefix, expectedNameSuffix,
-                                                                                                                  new YoVariableRegistry("schnoop"),
+                                                                                                                  new YoRegistry("schnoop"),
                                                                                                                   expectedFrame);
       testedYoFrameEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
@@ -338,7 +334,7 @@ public class YoFrameEuclideanTrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -438,7 +434,7 @@ public class YoFrameEuclideanTrajectoryPointTest
    {
       String namePrefix = "point";
       String nameSuffix = "toTest";
-      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+      YoRegistry registry = new YoRegistry("myRegistry");
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
@@ -29,7 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -59,6 +60,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
+   private final FramePoint3D desiredCoM = new FramePoint3D();
+
    private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
    private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
 
@@ -78,7 +81,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    public WalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                     WalkingControllerParameters walkingControllerParameters, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                    YoVariableRegistry parentRegistry)
+                                    YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
 
@@ -129,6 +132,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
+
+            updateHeightManager();
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -160,6 +165,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
+
+            updateHeightManager();
          }
       }
       else
@@ -177,6 +184,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
+
+            updateHeightManager();
          }
 
          // if the footstep was adjusted, shift the CoM plan, if there is one.
@@ -269,6 +278,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
 
+      updateHeightManager();
+
       if (balanceManager.wasTimingAdjustedForReachability())
       {
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
@@ -323,7 +334,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
-      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
+      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
    }
 
    @Override
@@ -338,7 +349,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());
@@ -443,9 +454,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
-                                                                                                                                                swingSide);
-      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
+   }
+
+   private void updateHeightManager()
+   {
+      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
+
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
+                                                                                                                                                   swingSide);
+      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();

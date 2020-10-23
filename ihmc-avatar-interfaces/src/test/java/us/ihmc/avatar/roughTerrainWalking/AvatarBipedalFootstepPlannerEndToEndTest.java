@@ -15,7 +15,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -26,12 +25,11 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -47,7 +45,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
@@ -57,7 +55,7 @@ import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
@@ -74,7 +72,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
 
    protected final TwoBollardEnvironment bollardEnvironment = new TwoBollardEnvironment(BOLLARD_DISTANCE);
    private PlanarRegionsList cinderBlockField;
@@ -117,19 +115,19 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       networkModuleParameters = new HumanoidNetworkProcessorParameters();
       networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
 
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
-                                                                   FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
-      footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
-                                                                     FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
+                                                                            FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
+      footstepPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlannerParametersPacket.class,
+                                                                              FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
 
       toolboxStatePublisher = ROS2Tools
-            .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
 
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(getSimpleRobotName()),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                                    FootstepPlannerCommunicationProperties.outputTopic(getSimpleRobotName()),
                                            s -> setOutputStatus(s.takeNextData()));
 
       FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();
@@ -181,7 +179,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(cinderBlockField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(false, cinderBlockField, goalPose);
    }
 
    @Disabled
@@ -194,7 +192,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(cinderBlockField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(true, cinderBlockField, goalPose);
    }
 
    @Tag("video")
@@ -207,7 +205,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(steppingStoneField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
+      boolean planBodyPath = false;
+
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, steppingStoneField, goalPose);
    }
 
    @Disabled
@@ -219,7 +219,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       goalPose.setX(1.0);
       setupSimulation(flatGround, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, null, goalPose);
+      boolean planBodyPath = false;
+
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, null, goalPose);
    }
 
    @Disabled
@@ -238,17 +240,17 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);
-      parametersPacket.setReturnBestEffortPlan(false);
       footstepPlannerParametersPublisher.publish(parametersPacket);
+      boolean planBodyPath = false;
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardPlanarRegions, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, bollardPlanarRegions, goalPose);
    }
 
-   private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
+   private void runEndToEndTestAndKeepSCSUpIfRequested(boolean planBodyPath, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
    {
       try
       {
-         runEndToEndTest(plannerType, planarRegionsList, goalPose);
+         runEndToEndTest(planBodyPath, planarRegionsList, goalPose);
          if (simulationTestingParameters.getKeepSCSUp())
          {
             ThreadTools.sleepForever();
@@ -280,7 +282,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.createSubscriberFromController(WalkingStatusMessage.class, this::listenForWalkingComplete);
    }
 
-   private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, FramePose3D goalPose) throws Exception
+   private void runEndToEndTest(boolean planBodyPath, PlanarRegionsList planarRegionsList, FramePose3D goalPose) throws Exception
    {
       blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
       ToolboxStateMessage wakeUpMessage = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
@@ -293,16 +295,22 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
          humanoidRobotDataReceiver.updateRobotModel();
       }
 
-      ReferenceFrame soleFrame = humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
-      FramePose3D initialStancePose = new FramePose3D(soleFrame, new Point3D(0.0, 0.0, 0.001), new AxisAngle());
-      initialStancePose.changeFrame(ReferenceFrame.getWorldFrame());
       RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose3D leftSolePose = new FramePose3D(humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightSolePose = new FramePose3D(humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
+      YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(leftSolePose, goalPose);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
+      double stanceWidth = footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth();
 
-      FootstepPlanningRequestPacket requestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose,
-                                                 plannerType);
+      FootstepPlanningRequestPacket requestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
+                                                                                                                    leftSolePose,
+                                                                                                                    rightSolePose,
+                                                                                                                    goalPose,
+                                                                                                                    stanceWidth,
+                                                                                                                    planBodyPath);
       if(planarRegionsList != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);

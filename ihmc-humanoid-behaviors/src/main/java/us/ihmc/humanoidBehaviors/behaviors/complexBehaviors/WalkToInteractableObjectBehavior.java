@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToInteractableObjectBehavior.WalkToObjectState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -17,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
@@ -37,7 +36,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame midZupFrame;
 
-   public WalkToInteractableObjectBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToInteractableObjectBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "WalkState", WalkToObjectState.class, yoTime, ros2Node);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
@@ -92,7 +91,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
                                                        JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.A_STAR);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };
@@ -116,7 +115,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
                                                        JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.A_STAR);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };

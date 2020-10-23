@@ -1,5 +1,10 @@
 package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -15,20 +20,20 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlanarBodyPathProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final YoDouble timestamp;
@@ -60,7 +65,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private static final double inflationWeight = 1.0;
 
    public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                    DoubleProvider firstStepDelay, YoDouble timestamp, YoVariableRegistry parentRegistry,
+                                                    DoubleProvider firstStepDelay, YoDouble timestamp, YoRegistry parentRegistry,
                                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
@@ -218,7 +223,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
                footStartPoints.get(depth - 1).set(soleDesiredPosition);
                tempPose.set(halfStanceLength, halfStanceWidth, 0.0);
-               tempTransform.setRotationYaw(yawAtStatusMessage);
+               tempTransform.getRotation().setToYawOrientation(yawAtStatusMessage);
                tempPose.applyTransform(tempTransform);
                tempPose.prependTranslation(footStartPoints.get(depth - 1));
                extrapolatePose(newStartTime - timeAtStatusMessage, tempPose, tempPose, desiredPlanarVelocity);

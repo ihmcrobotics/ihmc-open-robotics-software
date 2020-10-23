@@ -7,16 +7,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisPoseNoiseGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame rootJointFrame;
@@ -30,7 +31,7 @@ public class PelvisPoseNoiseGenerator
    private final Vector3D pelvisTranslation = new Vector3D();
    
    private final Quaternion rot = new Quaternion();
-   private final double[] tempRots = new double[3];
+   private final YawPitchRoll tempRots = new YawPitchRoll();
    private final RotationMatrix rotationNoise = new RotationMatrix();
    private final RotationMatrix pelvisRotation = new RotationMatrix();
    
@@ -69,11 +70,11 @@ public class PelvisPoseNoiseGenerator
    private final YoDouble noiseScalar_pitch;
    private final YoDouble noiseScalar_roll;
    
-   public PelvisPoseNoiseGenerator(FullInverseDynamicsStructure inverseDynamicsStructure, YoVariableRegistry parentRegistry)
+   public PelvisPoseNoiseGenerator(FullInverseDynamicsStructure inverseDynamicsStructure, YoRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
-      registry = new YoVariableRegistry("PelvisPoseNoiseGenerator");
+      registry = new YoRegistry("PelvisPoseNoiseGenerator");
       parentRegistry.addChild(registry);
       
       rotationError.setIdentity();
@@ -124,13 +125,13 @@ public class PelvisPoseNoiseGenerator
       updateBeforeYoVariables();
       integrateError();
       
-      pelvisPose.getRotation(pelvisRotation);
+      pelvisRotation.set(pelvisPose.getRotation());
       pelvisRotation.multiply(rotationError);
-      pelvisPose.setRotation(pelvisRotation);
+      pelvisPose.getRotation().set(pelvisRotation);
       
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       pelvisTranslation.add(translationError);
-      pelvisPose.setTranslation(pelvisTranslation);
+      pelvisPose.getTranslation().set(pelvisTranslation);
       
       updateAfterYoVariables();
       
@@ -140,15 +141,15 @@ public class PelvisPoseNoiseGenerator
 
    private void updateBeforeYoVariables()
    {
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       nonProcessedRootJointPosition.set(pelvisTranslation);
       
-      pelvisPose.getRotation(rot);
+      rot.set(pelvisPose.getRotation());
       nonProcessedRootJointQuaternion.set(rot);
-      nonProcessedRootJointQuaternion.getYawPitchRoll(tempRots);
-      nonProcessedRootJointYaw.set(tempRots[0]);
-      nonProcessedRootJointPitch.set(tempRots[1]);
-      nonProcessedRootJointRoll.set(tempRots[2]);
+      tempRots.set(nonProcessedRootJointQuaternion);
+      nonProcessedRootJointYaw.set(tempRots.getYaw());
+      nonProcessedRootJointPitch.set(tempRots.getPitch());
+      nonProcessedRootJointRoll.set(tempRots.getRoll());
    }
    
    private void updateAfterYoVariables()
@@ -160,15 +161,15 @@ public class PelvisPoseNoiseGenerator
       error_y.set(translationError.getY());  
       error_z.set(translationError.getZ()); 
       
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       processedRootJointPosition.set(pelvisTranslation);
       
-      pelvisPose.getRotation(rot);
+      rot.set(pelvisPose.getRotation());
       processedRootJointQuaternion.set(rot);
-      processedRootJointQuaternion.getYawPitchRoll(tempRots);
-      processedRootJointYaw.set(tempRots[0]);
-      processedRootJointPitch.set(tempRots[1]);
-      processedRootJointRoll.set(tempRots[2]);
+      tempRots.set(processedRootJointQuaternion);
+      processedRootJointYaw.set(tempRots.getYaw());
+      processedRootJointPitch.set(tempRots.getPitch());
+      processedRootJointRoll.set(tempRots.getRoll());
    }
    
    private void integrateError()
@@ -186,7 +187,7 @@ public class PelvisPoseNoiseGenerator
       translationNoise.set(xNoise, yNoise, zNoise);
       
       
-      pelvisPose.getRotation(pelvisRotation);
+      pelvisRotation.set(pelvisPose.getRotation());
       
       pelvisRotation.multiply(rotationError);
       pelvisRotation.transform(translationNoise);

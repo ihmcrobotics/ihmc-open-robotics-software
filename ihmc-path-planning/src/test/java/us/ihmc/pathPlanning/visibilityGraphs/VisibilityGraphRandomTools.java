@@ -132,7 +132,7 @@ public class VisibilityGraphRandomTools
    private static PlanarRegion nextPlanarRegion(Random random)
    {
       RigidBodyTransform transformToWorld = nextRegionTransform(random);
-      Point2D[] concaveHullVertices = nextPoint2DArray(random);
+      List<Point2D> concaveHullVertices = nextPoint2DList(random);
       List<ConvexPolygon2D> convexPolygons = nextConvexPolygon2Ds(random);
       PlanarRegion next = new PlanarRegion(transformToWorld, concaveHullVertices, convexPolygons);
       next.setRegionId(random.nextInt());
@@ -152,9 +152,9 @@ public class VisibilityGraphRandomTools
       return IntStream.range(0, size).mapToObj(i -> EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, 100)).collect(Collectors.toList());
    }
 
-   private static Point2D[] nextPoint2DArray(Random random)
+   private static List<Point2D> nextPoint2DList(Random random)
    {
       int size = random.nextInt(500);
-      return IntStream.range(0, size).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).toArray(Point2D[]::new);
+      return IntStream.range(0, size).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).collect(Collectors.toList());
    }
 }

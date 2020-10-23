@@ -1,0 +1,13 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl 07___Default
+Ns 22.999994
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.333000 0.333000 0.333000
+Ke 0.350000 0.350000 0.350000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd door.jpg

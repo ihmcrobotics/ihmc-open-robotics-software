@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.HeatMapPacket;
@@ -42,10 +42,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -61,7 +61,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
@@ -93,7 +93,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
    private final ConcurrentLinkedQueue<ObjectDetectorResultPacket> results = new ConcurrentLinkedQueue<>();
    private final PacketCommunicator valveDetectorClient = PacketCommunicator.createTCPPacketCommunicatorClient("172.16.66.103", NetworkPorts.VALVE_DETECTOR_SERVER_PORT, new IHMCCommunicationKryoNetClassList());
 
-   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
+   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
       this.expectedObjectSize.set(1.0);
       targetIDHasBeenLocated.set(true);
@@ -205,17 +205,17 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
    {
       synchronized (expectedFiducialSizeChangedConch)
       {
-         DenseMatrix64F pixelToNorm = computePixelToNorm(bufferedImage);
+         DMatrixRMaj pixelToNorm = computePixelToNorm(bufferedImage);
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.setTranslation(cameraRigidPosition);
+         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();
 
-         cameraPose.setOrientation(cameraOrientationInWorldXForward);
-         cameraPose.setPosition(cameraPositionInWorld);
+         cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
+         cameraPose.getPosition().set(cameraPositionInWorld);
 
          ObjectDetectorResultPacket result = results.poll();
 
@@ -257,7 +257,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
             GeometryMath_F64.mult(pixelToNorm, bottomRight, bottomRight);
             double distance = knownWidth * 0.66f / Math.abs(bottomRight.getX() - topLeft.getX()); // TODO: detectNet output is about 1/3 smaller than the real object, this is a quick hack for now, should re-train the network
             fiducialToCamera.setTranslation(0, 0, distance);
-            fiducialToCamera.setRotation(new DenseMatrix64F(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0));
+            fiducialToCamera.setRotation(new DMatrixRMaj(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0));
 
             detectorPositionX.set(fiducialToCamera.getX());
             detectorPositionY.set(fiducialToCamera.getY());
@@ -271,8 +271,8 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
             tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-            tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
-            tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+            tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
+            tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
@@ -301,7 +301,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       }
    }
 
-   private DenseMatrix64F computePixelToNorm(BufferedImage image)
+   private DMatrixRMaj computePixelToNorm(BufferedImage image)
    {
       int height = image.getHeight();
       int width = image.getWidth();
@@ -309,7 +309,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       double fx = (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
       double fy = (height / 2.0) / Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
 
-      DenseMatrix64F K_inv = new DenseMatrix64F(3, 3);
+      DMatrixRMaj K_inv = new DMatrixRMaj(3, 3);
       K_inv.set(0,0,fx);
       K_inv.set(1,1,fy);
       K_inv.set(0,1,0);
@@ -317,7 +317,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       K_inv.set(1,2,height / 2.0);
       K_inv.set(2,2,1);
 
-      CommonOps.invert(K_inv);
+      CommonOps_DDRM.invert(K_inv);
 
       return K_inv;
    }

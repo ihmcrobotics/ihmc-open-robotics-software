@@ -1,19 +1,21 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import com.google.common.util.concurrent.AtomicDouble;
+
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -23,7 +25,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -37,13 +38,10 @@ import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ControllerBasedBodyPathTest
 {
@@ -205,25 +203,24 @@ public class ControllerBasedBodyPathTest
             FramePose3D initialMidFootPose = new FramePose3D();
             initialMidFootPose.setX(startPose.getX());
             initialMidFootPose.setY(startPose.getY());
-            initialMidFootPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+            initialMidFootPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
-            initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
-            initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            FramePose3D midFootPose = new FramePose3D(midFootFrame);
+            midFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             FramePose3D goalPose = new FramePose3D();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+            goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
-            request.setInitialStancePose(initialStanceFootPose);
-            request.setInitialStanceSide(initialStanceFootSide);
-            request.setGoalPose(goalPose);
+            request.setStartFootPoses(parameters.getIdealFootstepWidth(), midFootPose);
+            request.setRequestedInitialStanceSide(initialStanceFootSide);
+            request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
             FootstepPlannerOutput output = footstepPlanningModule.handleRequest(request);
 
-            if (output.getResult().validForExecution())
+            if (output.getFootstepPlanningResult().validForExecution())
             {
                FootstepPlan footstepPlan = output.getFootstepPlan();
                int stepsToVisualize = Math.min(footstepPlan.getNumberOfSteps(), steps);
@@ -231,9 +228,9 @@ public class ControllerBasedBodyPathTest
 
                for (int i = 0; i < stepsToVisualize; i++)
                {
-                  SimpleFootstep footstep = footstepPlan.getFootstep(i);
+                  PlannedFootstep footstep = footstepPlan.getFootstep(i);
                   FramePose3D footstepPose = new FramePose3D();
-                  footstep.getSoleFramePose(footstepPose);
+                  footstep.getFootstepPose(footstepPose);
 
                   RobotSide robotSide = footstep.getRobotSide();
                   MutableInt sideCount = counts.get(robotSide);
@@ -253,7 +250,7 @@ public class ControllerBasedBodyPathTest
             }
             else
             {
-               PrintTools.info("Failed: " + output.getResult());
+               PrintTools.info("Failed: " + output.getFootstepPlanningResult());
             }
          }
       }

@@ -38,6 +38,7 @@ public class JavaFXParameterTableEntry<T>
          setter.accept(newValue);
          onUserSpunSpinner.invalidated(observable); // these have to be in this order!
       });
+      spinner.setMaxWidth(100.0);
    }
 
    public void setValue(T value)

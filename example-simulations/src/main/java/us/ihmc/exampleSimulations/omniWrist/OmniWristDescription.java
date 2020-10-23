@@ -62,7 +62,7 @@ public class OmniWristDescription
       JointDescription jointFourAParent = jointOneA.getChildrenJoints().get(0).getChildrenJoints().get(0);
 
       RigidBodyTransform fortyFiveDegreeTransform = new RigidBodyTransform();
-      fortyFiveDegreeTransform.setRotationEuler(0.0, Math.PI / 4.0, 0.0);
+      fortyFiveDegreeTransform.getRotation().setEuler(0.0, Math.PI / 4.0, 0.0);
 
       Vector3D jointFourOffset = new Vector3D(-linkOneLengthOne, 0.0, 0.0);
       fortyFiveDegreeTransform.transform(jointFourOffset);
@@ -182,7 +182,7 @@ public class OmniWristDescription
       jointOne.addJoint(jointTwo);
 
       RigidBodyTransform fortyFiveDegreeTransform = new RigidBodyTransform();
-      fortyFiveDegreeTransform.setRotationEuler(0.0, Math.PI / 4.0, 0.0);
+      fortyFiveDegreeTransform.getRotation().setEuler(0.0, Math.PI / 4.0, 0.0);
 
       jointName = "jointThree" + jointSuffix;
       Vector3D linkTwoBearingToBearingVector = new Vector3D(linkTwoLengthOne, 0.0, linkTwoLengthTwo);

@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
@@ -12,10 +13,10 @@ public class NewtonSignFunction implements SignFunction
    private int maxIterations = Integer.MAX_VALUE;
    private double epsilon = 1e-12;
 
-   private final DenseMatrix64F Wlocal = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F WInverse = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F WDiff = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj Wlocal = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj WInverse = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj WDiff = new DMatrixRMaj(0, 0);
 
    public void setMaxIterations(int maxIterations)
    {
@@ -28,7 +29,7 @@ public class NewtonSignFunction implements SignFunction
    }
 
    @Override
-   public boolean compute(DenseMatrix64F K)
+   public boolean compute(DMatrixRMaj K)
    {
       int size = K.getNumRows();
 
@@ -50,8 +51,8 @@ public class NewtonSignFunction implements SignFunction
          if (debug)
             checkProperInversion(Wlocal, WInverse);
 
-         CommonOps.subtract(Wlocal, WInverse, WDiff);
-         CommonOps.add(Wlocal, -0.5, WDiff, W);
+         CommonOps_DDRM.subtract(Wlocal, WInverse, WDiff);
+         CommonOps_DDRM.add(Wlocal, -0.5, WDiff, W);
 
          converged = MatrixToolsLocal.distance(W, Wlocal) < epsilon;
 
@@ -62,11 +63,11 @@ public class NewtonSignFunction implements SignFunction
       return true;
    }
 
-   private static void checkProperInversion(DenseMatrix64F A, DenseMatrix64F Ainv)
+   private static void checkProperInversion(DMatrixRMaj A, DMatrixRMaj Ainv)
    {
       int n = A.getNumRows();
-      DenseMatrix64F expectedIdentify = new DenseMatrix64F(n, n);
-      CommonOps.mult(Ainv, A, expectedIdentify);
+      DMatrixRMaj expectedIdentify = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.mult(Ainv, A, expectedIdentify);
       for (int row = 0; row < n; row++)
       {
          for (int col = 0; col < n; col++)
@@ -80,7 +81,7 @@ public class NewtonSignFunction implements SignFunction
    }
 
    @Override
-   public DenseMatrix64F getW(DenseMatrix64F WToPack)
+   public DMatrixRMaj getW(DMatrixRMaj WToPack)
    {
       if (WToPack != null)
       {
@@ -88,6 +89,6 @@ public class NewtonSignFunction implements SignFunction
          return null;
       }
       else
-         return new DenseMatrix64F(W);
+         return new DMatrixRMaj(W);
    }
 }

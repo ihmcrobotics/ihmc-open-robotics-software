@@ -1,6 +1,6 @@
 package us.ihmc.robotics.time;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -23,7 +23,7 @@ public class YoStopwatch
    private double suspendStart;
    private double resumedSuspensionTotal;
 
-   public YoStopwatch(String name, YoDouble timeYoVariable, YoVariableRegistry registry)
+   public YoStopwatch(String name, YoDouble timeYoVariable, YoRegistry registry)
    {
       this(timeYoVariable);
 

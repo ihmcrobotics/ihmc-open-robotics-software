@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -11,11 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -54,18 +51,18 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
+   private final YoRegistry registry = new YoRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SideDependentList<YoFrameConvexPolygon2D> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
@@ -269,7 +266,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       // transform line and compute intersections with default foot polygon
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(angle);
-      transform.setTranslation(lineOrigin.getX(), lineOrigin.getY(), 0.0);
+      transform.getTranslation().set(lineOrigin.getX(), lineOrigin.getY(), 0.0);
 
       Line2D line = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
       line.applyTransform(transform);
@@ -421,7 +418,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       yoGraphicsListRegistry.registerArtifact("SupportLeft", new YoArtifactPolygon("SupportLeft", supportPolygons.get(RobotSide.LEFT), Color.BLACK, false));
       yoGraphicsListRegistry.registerArtifact("SupportRight", new YoArtifactPolygon("SupportRight", supportPolygons.get(RobotSide.RIGHT), Color.BLACK, false));
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(new VizUpdater());
    }
@@ -465,7 +462,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return null;
       }
@@ -520,7 +517,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return null;
       }
@@ -555,7 +552,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
          int pointIndex = 0;
-         ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+         List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
          for (GroundContactPoint point : allGroundContactPoints)
          {

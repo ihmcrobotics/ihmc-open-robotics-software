@@ -8,26 +8,26 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ public class AtlasFootstepPlanBehaviorTest
    private AtlasRobotModel robotModel;
    private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
    double lastX = 0.0;
    double lastY = 0.0;
@@ -57,9 +57,9 @@ public class AtlasFootstepPlanBehaviorTest
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    @Disabled
@@ -68,20 +68,20 @@ public class AtlasFootstepPlanBehaviorTest
    {
       FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
-      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+      ros2Node = new ROS2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       abortPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      RemoteSyncedRobotModel syncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+      AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
       planSteps(0.0, 0.0, 0.5);  // 0.24 s
       planSteps(0.0, 0.0, -0.5); // 0.38 s
@@ -98,7 +98,7 @@ public class AtlasFootstepPlanBehaviorTest
       planSteps(0.0, 0.0, 3.1); // timeout
       planSteps(0.0, 0.0, -3.1);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    private void planSteps(double x, double y, double yaw)
@@ -118,14 +118,14 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteFootstepPlannerResult result = resultNotification.blockingPoll();
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(result.getMessage().getFootstepPlanningResult()));
-      LogTools.info("Received footstep plan took: {} s", result.getMessage().getFootstepPlanningStatistics().getTimeTaken());
+      LogTools.info("Received footstep plan took: {} s", result.getMessage().getPlannerTimings().getTotalElapsedSeconds());
       LogTools.info("Received footstep planning status: {}", result);
 
       assertTrue(result.isValidForExecution(), "Solution failed");
 
       footstepDataListPublisher.publish(result.getMessage().getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, result.getMessage().getFootstepDataList().getFootstepDataList().size(), 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, result.getMessage().getFootstepDataList().getFootstepDataList().size(), 6.0);
 
       lastX = x;
       lastY = y;
@@ -139,38 +139,39 @@ public class AtlasFootstepPlanBehaviorTest
       FootstepPlanningToolboxOutputStatus output = setupForFootstepTest();
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size() / 2, 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size() / 2, 6.0);
 
       abortPublisher.publish(new AbortWalkingMessage());   // stop
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 0.5);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 0.5);
    }
 
    private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
    {
       FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
-      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+      ros2Node = new ROS2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       abortPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      RemoteSyncedRobotModel syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+      AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
-      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
+      syncedRobot.update();
+      FramePose3D midFeetZUpPose = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
@@ -196,12 +197,12 @@ public class AtlasFootstepPlanBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      SimulationConstructionSet scs = AtlasBehaviorSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment());
+      SimulationConstructionSet scs = AtlasDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
       variables = new AtlasBehaviorTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

@@ -200,7 +200,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 
       SDFJointHolder joint = joints.get(name);
       RigidBodyTransform visualTransform = new RigidBodyTransform();
-      visualTransform.setRotation(joint.getLinkRotation());
+      visualTransform.getRotation().set(joint.getLinkRotation());
       return new SDFGraphics3DObject(joint.getChildLinkHolder().getVisuals(), resourceDirectories, visualTransform);
    }
 

@@ -1,16 +1,15 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -34,7 +33,7 @@ public class LeastSquaresZPlaneFitterTest
       pointListA.add(new Point3D(-1.0, -1.0, -0.1));
       
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointListA, plane3dA);
-      Vector3D normalA = plane3dA.getNormalCopy();
+      Vector3D normalA = new Vector3D(plane3dA.getNormal());
       
       List<Point3D> pointListB = new ArrayList<Point3D>();
       Plane3D plane3dB = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
@@ -44,7 +43,7 @@ public class LeastSquaresZPlaneFitterTest
       pointListB.add(new Point3D(-1.0 + 4.0, -1.0 + 4.0, -0.1));
       
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointListB, plane3dB);
-      Vector3D normalB = plane3dB.getNormalCopy();
+      Vector3D normalB = new Vector3D(plane3dB.getNormal());
       
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
@@ -63,7 +62,7 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), new Vector3D(plane3d.getNormal()), 1e-7);
    }
 
 	@Test
@@ -124,8 +123,8 @@ public class LeastSquaresZPlaneFitterTest
          Plane3D plane3dSolution = new Plane3D();
          leastSquaresZPlaneFitter.fitPlaneToPoints(listOfPoints, plane3dSolution);
 
-         Point3D pointSolution = plane3dSolution.getPointCopy();
-         Vector3D normalSolution = plane3dSolution.getNormalCopy();
+         Point3D pointSolution = new Point3D(plane3dSolution.getPoint());
+         Vector3D normalSolution = new Vector3D(plane3dSolution.getNormal());
 
          EuclidCoreTestTools.assertTuple3DEquals(planeNormal, normalSolution, normalEpsilon);
 
@@ -147,8 +146,8 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      assertTrue(isNaN(plane3d.getPointCopy()));
-      assertTrue(isNaN(plane3d.getNormalCopy()));
+      assertTrue(isNaN(new Point3D(plane3d.getPoint())));
+      assertTrue(isNaN(new Vector3D(plane3d.getNormal())));
    }
 
 	@Test
@@ -165,8 +164,8 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      assertTrue(isNaN(plane3d.getPointCopy()));
-      assertTrue(isNaN(plane3d.getNormalCopy()));
+      assertTrue(isNaN(new Point3D(plane3d.getPoint())));
+      assertTrue(isNaN(new Vector3D(plane3d.getNormal())));
    }
    
    
@@ -195,7 +194,7 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 1.0, 0.0), plane3d.getNormalCopy(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 1.0, 0.0), new Vector3D(plane3d.getNormal()), 1e-7);
    }
 
   

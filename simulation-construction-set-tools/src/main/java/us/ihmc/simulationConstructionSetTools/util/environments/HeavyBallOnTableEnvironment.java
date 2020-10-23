@@ -55,7 +55,7 @@ public class HeavyBallOnTableEnvironment implements CommonAvatarEnvironmentInter
          GroundContactPoint gc = new GroundContactPoint("ballGC_" + i, new Vector3D(contactPointOffset), ballRobot);
          ballRobot.getRootJoints().get(0).addGroundContactPoint(gc);
       }
-      LinearGroundContactModel ballGCModel = new LinearGroundContactModel(ballRobot, ballRobot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel ballGCModel = new LinearGroundContactModel(ballRobot, ballRobot.getRobotsYoRegistry());
       ballGCModel.setGroundProfile3D(terrain);
       ballRobot.setGroundContactModel(ballGCModel);
       ballRobot.setPosition(centerX, centerY, 0.8 + ballRadius + 0.1);

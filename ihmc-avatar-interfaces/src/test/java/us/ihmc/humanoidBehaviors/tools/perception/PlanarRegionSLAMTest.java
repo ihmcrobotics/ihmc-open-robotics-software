@@ -45,11 +45,11 @@ import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
 {
+   private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
+
    @Test
    public void testSLAMWithThreeNiceWalls()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map;
       PlanarRegionsList newData;
 
@@ -74,7 +74,7 @@ class PlanarRegionSLAMTest
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(map);
          visualizePlanarRegions(mergedMap);
@@ -84,7 +84,7 @@ class PlanarRegionSLAMTest
       // Small translation transform with all six walls.
       RigidBodyTransform smallTranslationTransform = new RigidBodyTransform();
       double delta = 0.05;
-      smallTranslationTransform.setTranslation(delta * 0.5, delta * 1.3, -delta * 0.6);
+      smallTranslationTransform.getTranslation().set(delta * 0.5, delta * 1.3, -delta * 0.6);
 
       map = createSomeRightAngledWalls(0, true, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(6, true, smallTranslationTransform, true, true, true);
@@ -113,7 +113,7 @@ class PlanarRegionSLAMTest
       // Small rotation transform with all six walls.
       RigidBodyTransform smallRotationTransform = new RigidBodyTransform();
 
-      smallRotationTransform.setRotationYawPitchRoll(delta * 0.25, delta * 1.13, -delta * 0.7);
+      smallRotationTransform.getRotation().setYawPitchRoll(delta * 0.25, delta * 1.13, -delta * 0.7);
       map = createSomeRightAngledWalls(0, true, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(6, true, smallRotationTransform, true, true, true);
 
@@ -128,8 +128,8 @@ class PlanarRegionSLAMTest
       // Small translation and rotation transform with all six walls.
       RigidBodyTransform smallRotationAndTranslationTransform = new RigidBodyTransform();
 
-      smallRotationAndTranslationTransform.setTranslation(delta * 0.17, -delta * 0.33, delta * 0.117);
-      smallRotationAndTranslationTransform.setRotationYawPitchRoll(delta * 0.25, delta * 1.13, -delta * 0.7);
+      smallRotationAndTranslationTransform.getTranslation().set(delta * 0.17, -delta * 0.33, delta * 0.117);
+      smallRotationAndTranslationTransform.getRotation().setYawPitchRoll(delta * 0.25, delta * 1.13, -delta * 0.7);
       map = createSomeRightAngledWalls(0, true, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(6, true, smallRotationAndTranslationTransform, true, true, true);
 
@@ -172,7 +172,7 @@ class PlanarRegionSLAMTest
 
       // The floor alone should not give yaw.
       RigidBodyTransform smallYawTransform = new RigidBodyTransform();
-      smallYawTransform.setRotationYaw(delta);
+      smallYawTransform.getRotation().setToYawOrientation(delta);
 
       map = createSomeRightAngledWalls(0, true, new RigidBodyTransform(), true, false, false);
       newData = createSomeRightAngledWalls(6, true, smallYawTransform, true, false, false);
@@ -186,7 +186,7 @@ class PlanarRegionSLAMTest
 
       // The floor alone should give pitch and roll, but might have some yaw in it.
       RigidBodyTransform smallPitchAndRollTransforms = new RigidBodyTransform();
-      smallPitchAndRollTransforms.setRotationYawPitchRoll(0.0, delta * 1.3, -delta * 0.22);
+      smallPitchAndRollTransforms.getRotation().setYawPitchRoll(0.0, delta * 1.3, -delta * 0.22);
 
       map = createSomeRightAngledWalls(0, true, new RigidBodyTransform(), true, false, false);
       newData = createSomeRightAngledWalls(6, true, smallPitchAndRollTransforms, true, false, false);
@@ -213,8 +213,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithTrickyCase()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -234,12 +232,12 @@ class PlanarRegionSLAMTest
 
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListB, parameters, listener);
 
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -251,8 +249,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithAddingTwoSquaresToMapSquare()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -283,7 +279,7 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.0999);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
 
@@ -293,7 +289,7 @@ class PlanarRegionSLAMTest
 
       assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 1e-7));
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(planarRegionsListA);
          visualizePlanarRegions(planarRegionsListBC);
@@ -310,7 +306,7 @@ class PlanarRegionSLAMTest
       mergedMap = slamResult.getMergedMap();
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -320,8 +316,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithThreeUnconnectedSquares()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -352,7 +346,7 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.05);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
 
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
@@ -362,7 +356,7 @@ class PlanarRegionSLAMTest
       mergedMap = slamResult.getMergedMap();
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -372,8 +366,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithAFloorAndAShallowRamp()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map;
       PlanarRegionsList newData;
 
@@ -389,7 +381,7 @@ class PlanarRegionSLAMTest
       double rampAngleDegrees = 5.0;
 
       RigidBodyTransform rampTransform = new RigidBodyTransform();
-      rampTransform.setRotationPitch(Math.toRadians(-rampAngleDegrees));
+      rampTransform.getRotation().setToPitchOrientation(Math.toRadians(-rampAngleDegrees));
       ConvexPolygon2D rampPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(rampPoints));
       PlanarRegion rampPlanarRegion = new PlanarRegion(rampTransform, rampPolygon);
       rampPlanarRegion.setRegionId(33);
@@ -449,7 +441,7 @@ class PlanarRegionSLAMTest
 
       assertTrue(rampTransformRecovered.epsilonEquals(new RigidBodyTransform(), 1e-7));
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(map);
          visualizePlanarRegions(newData);
@@ -478,8 +470,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithRandomPolygonsAndSmallExactTransforms()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map = new PlanarRegionsList();
       PlanarRegionsList newData = new PlanarRegionsList();
 
@@ -496,8 +486,8 @@ class PlanarRegionSLAMTest
       int numberInBoth = 0;
 
       RigidBodyTransform smallTransform = new RigidBodyTransform();
-      smallTransform.setTranslation(new Vector3D(0.011, -0.0137, 0.012));
-      smallTransform.setRotation(new Vector3D(0.002, -0.03, -0.19));
+      smallTransform.getTranslation().set(new Vector3D(0.011, -0.0137, 0.012));
+      smallTransform.getRotation().setRotationVector(new Vector3D(0.002, -0.03, -0.19));
 
       for (int i = 0; i < numberOfPolygonPlanarRegions; i++)
       {
@@ -549,7 +539,7 @@ class PlanarRegionSLAMTest
       parameters.setMaximumPointProjectionDistance(0.1);
       parameters.setDampedLeastSquaresLambda(0.1);
 
-      ConcaveHullMergerListener visualizer = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener visualizer = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters, visualizer);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
       RigidBodyTransform transformResult = slamResult.getTransformFromIncomingToMap();
@@ -560,7 +550,7 @@ class PlanarRegionSLAMTest
 
       assertPlanarRegionsListAreEquivalentThroughPointProjections(random, perfectCombinedMap, mergedMap);
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -578,8 +568,6 @@ class PlanarRegionSLAMTest
     */
    public void testSLAMWithThreeNiceWallsFarFromTheOrigin()
    {
-      boolean visualize = false;
-
       // Parameters, with DampedLeastSquaresLambda = 0, everything should be fine without a better reference.
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
       parameters.setBoundingBoxHeight(0.1);
@@ -590,8 +578,8 @@ class PlanarRegionSLAMTest
       // Small rotation and translation transform but near the origin.
       double delta = 0.05;
       RigidBodyTransform smallRotationAndTranslationTransform = new RigidBodyTransform();
-      smallRotationAndTranslationTransform.setTranslation(delta * 0.17, -delta * 0.33, delta * 0.117);
-      smallRotationAndTranslationTransform.setRotationYawPitchRoll(delta * 1.0, delta * 0.13, -delta * 0.17);
+      smallRotationAndTranslationTransform.getTranslation().set(delta * 0.17, -delta * 0.33, delta * 0.117);
+      smallRotationAndTranslationTransform.getRotation().setYawPitchRoll(delta * 1.0, delta * 0.13, -delta * 0.17);
 
       PlanarRegionsList mapNearOrigin = createSomeRightAngledWalls(0, false, new RigidBodyTransform(), true, true, true);
       PlanarRegionsList newDataNearOrigin = createSomeRightAngledWalls(6, false, smallRotationAndTranslationTransform, true, true, true);
@@ -600,7 +588,7 @@ class PlanarRegionSLAMTest
       PlanarRegionsList mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
       RigidBodyTransform transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
       }
@@ -612,8 +600,8 @@ class PlanarRegionSLAMTest
       // a large transformResult, as opposed to the previous one.
       double largeMovementFromTheOrigin = 10.0;
       RigidBodyTransform largeTransform = new RigidBodyTransform();
-      largeTransform.setTranslation(largeMovementFromTheOrigin * 1.0, largeMovementFromTheOrigin * 0.5, largeMovementFromTheOrigin * 0.2);
-      largeTransform.setRotationYawPitchRoll(0.5, 0.0, 0.0);
+      largeTransform.getTranslation().set(largeMovementFromTheOrigin * 1.0, largeMovementFromTheOrigin * 0.5, largeMovementFromTheOrigin * 0.2);
+      largeTransform.getRotation().setYawPitchRoll(0.5, 0.0, 0.0);
 
       RigidBodyTransform newDataTransform = new RigidBodyTransform();
       newDataTransform.set(largeTransform);
@@ -639,7 +627,7 @@ class PlanarRegionSLAMTest
       expectedLocalTransform.preMultiply(largeTransformInverse);
       expectedLocalTransform.multiply(largeTransform);
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
       }
@@ -655,12 +643,12 @@ class PlanarRegionSLAMTest
       mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
       transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
       }
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mapNearOrigin, mergedMapNearOrigin);
       }
@@ -674,7 +662,7 @@ class PlanarRegionSLAMTest
       mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
       transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
       }
@@ -692,7 +680,7 @@ class PlanarRegionSLAMTest
       mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
       transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
          System.out.println("expectedTransform = \n" + expectedTransform);
@@ -767,7 +755,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion floor = createASingleSquare(new Vector3D(), 0.0, 0.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         floor.transformByPreMultiply(transform);
+         floor.applyTransform(transform);
          floor.setRegionId(regionIdStart + 1);
          planarRegionsList.addPlanarRegion(floor);
 
@@ -776,9 +764,9 @@ class PlanarRegionSLAMTest
             PlanarRegion ceiling = createASingleSquare(new Vector3D(), 0.0, 0.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
             RigidBodyTransform floorToCeiling = new RigidBodyTransform();
-            floorToCeiling.setTranslation(0.0, 0.0, 1.0);
-            ceiling.transformByPreMultiply(floorToCeiling);
-            ceiling.transformByPreMultiply(transform);
+            floorToCeiling.getTranslation().set(0.0, 0.0, 1.0);
+            ceiling.applyTransform(floorToCeiling);
+            ceiling.applyTransform(transform);
 
             ceiling.setRegionId(regionIdStart + 4);
             planarRegionsList.addPlanarRegion(ceiling);
@@ -789,7 +777,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion wallOne = createASingleSquare(new Vector3D(), 0.0, -Math.PI / 2.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         wallOne.transformByPreMultiply(transform);
+         wallOne.applyTransform(transform);
          wallOne.setRegionId(regionIdStart + 2);
          planarRegionsList.addPlanarRegion(wallOne);
 
@@ -798,9 +786,9 @@ class PlanarRegionSLAMTest
             PlanarRegion oppositeWallOne = createASingleSquare(new Vector3D(), 0.0, -Math.PI / 2.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
             RigidBodyTransform wallToWall = new RigidBodyTransform();
-            wallToWall.setTranslation(1.0, 0.0, 0.0);
-            oppositeWallOne.transformByPreMultiply(wallToWall);
-            oppositeWallOne.transformByPreMultiply(transform);
+            wallToWall.getTranslation().set(1.0, 0.0, 0.0);
+            oppositeWallOne.applyTransform(wallToWall);
+            oppositeWallOne.applyTransform(transform);
 
             oppositeWallOne.setRegionId(regionIdStart + 5);
             planarRegionsList.addPlanarRegion(oppositeWallOne);
@@ -811,7 +799,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion wallTwo = createASingleSquare(new Vector3D(), 0.0, 0.0, Math.PI / 2.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         wallTwo.transformByPreMultiply(transform);
+         wallTwo.applyTransform(transform);
          wallTwo.setRegionId(regionIdStart + 3);
          planarRegionsList.addPlanarRegion(wallTwo);
          if (includeOppositeSide)
@@ -819,9 +807,9 @@ class PlanarRegionSLAMTest
             PlanarRegion oppositeWallTwo = createASingleSquare(new Vector3D(), 0.0, 0.0, Math.PI / 2.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
             RigidBodyTransform wallToWall = new RigidBodyTransform();
-            wallToWall.setTranslation(0.0, 1.0, 0.0);
-            oppositeWallTwo.transformByPreMultiply(wallToWall);
-            oppositeWallTwo.transformByPreMultiply(transform);
+            wallToWall.getTranslation().set(0.0, 1.0, 0.0);
+            oppositeWallTwo.applyTransform(wallToWall);
+            oppositeWallTwo.applyTransform(transform);
 
             oppositeWallTwo.setRegionId(regionIdStart + 5);
             planarRegionsList.addPlanarRegion(oppositeWallTwo);
@@ -1010,8 +998,8 @@ class PlanarRegionSLAMTest
    private PlanarRegion createASingleSquare(Vector3D translation, double yaw, double pitch, double roll, Point2D minimumPoint, Point2D maximumPoint)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setTranslation(translation);
-      transformToWorld.setRotationYawPitchRoll(yaw, pitch, roll);
+      transformToWorld.getTranslation().set(translation);
+      transformToWorld.getRotation().setYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<Point2D> vertices = new ArrayList<Point2D>();
       vertices.add(new Point2D(minimumPoint));

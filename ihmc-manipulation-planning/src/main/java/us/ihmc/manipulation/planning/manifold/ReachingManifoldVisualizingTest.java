@@ -12,6 +12,7 @@ import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -22,10 +23,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 /**
  * This test tests whether manifold is well constructed by visualizing.
@@ -41,7 +42,7 @@ public class ReachingManifoldVisualizingTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double trajectoryTime = 0.05;
    private final double dt = 0.001;
@@ -129,7 +130,7 @@ public class ReachingManifoldVisualizingTest
       yoGraphicsListRegistry.registerYoGraphic("pointViz", new YoGraphicCoordinateSystem("closestPointViz", yoFramePoint, yoFrameYawPitchRoll, 0.2));
 
       // run scs
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setDT(dt, recordFrequency);
       Graphics3DObject worldFrameGraphics = new Graphics3DObject();
       worldFrameGraphics.addCoordinateSystem(0.3);
@@ -146,7 +147,7 @@ public class ReachingManifoldVisualizingTest
          yoPZHand.set(initialHandPosition.getZ() + random(handLowerLimits[2], handUpperLimits[2]));
 
          // random hand orientation
-         double[] randomYPR = new double[3];
+         YawPitchRoll randomYPR = new YawPitchRoll();
          Quaternion randomQuat = new Quaternion();
 
          double s = random(0, 1);
@@ -161,14 +162,14 @@ public class ReachingManifoldVisualizingTest
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(randomQuat, randomYPR);
 
-         yoYawHand.set(randomYPR[0]);
-         yoPitchHand.set(randomYPR[1]);
-         yoRollHand.set(randomYPR[2]);
+         yoYawHand.set(randomYPR.getYaw());
+         yoPitchHand.set(randomYPR.getPitch());
+         yoRollHand.set(randomYPR.getRoll());
 
          // find closest frame
          RigidBodyTransform handTransform = new RigidBodyTransform();
          handTransform.appendTranslation(yoPXHand.getDoubleValue(), yoPYHand.getDoubleValue(), yoPZHand.getDoubleValue());
-         handTransform.setRotationYawPitchRoll(yoYawHand.getDoubleValue(), yoPitchHand.getDoubleValue(), yoRollHand.getDoubleValue());
+         handTransform.getRotation().setYawPitchRoll(yoYawHand.getDoubleValue(), yoPitchHand.getDoubleValue(), yoRollHand.getDoubleValue());
 
          RigidBodyTransform closestTransform = new RigidBodyTransform();
          ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifolds, handTransform, closestTransform, 1.0, 0.1);
@@ -177,12 +178,12 @@ public class ReachingManifoldVisualizingTest
          yoPY.set(closestTransform.getTranslationY());
          yoPZ.set(closestTransform.getTranslationZ());
 
-         double[] closestYPR = new double[3];
-         YawPitchRollConversion.convertMatrixToYawPitchRoll(closestTransform.getRotationMatrix(), closestYPR);
+         YawPitchRoll closestYPR = new YawPitchRoll();
+         YawPitchRollConversion.convertMatrixToYawPitchRoll(closestTransform.getRotation(), closestYPR);
 
-         yoYaw.set(closestYPR[0]);
-         yoPitch.set(closestYPR[1]);
-         yoRoll.set(closestYPR[2]);
+         yoYaw.set(closestYPR.getYaw());
+         yoPitch.set(closestYPR.getPitch());
+         yoRoll.set(closestYPR.getRoll());
 
          // update scs
          scs.tickAndUpdate();

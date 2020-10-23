@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -41,7 +41,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.YoStopwatch;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -80,23 +80,24 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    
    private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
+   private final double idealStanceWidth;
 
-
-   public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+   public WalkOverTerrainStateMachineBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
                                               HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
+      this.idealStanceWidth = wholeBodyControllerParameters.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
 
       //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       
       
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
 
       
       
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
       
       
 
@@ -112,9 +113,9 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
 
       stateMachine = setupStateMachine(yoTime);
    }
@@ -282,9 +283,11 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
             goalPoint.changeFrame(pelvisZUpFrame);
 
             RobotSide initialStanceSide = goalPoint.getY() > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose3D initialStanceFootPose = new FramePose3D(referenceFrames.getSoleFrame(initialStanceSide));
-            initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-            sendPlanningRequest(initialStanceFootPose, initialStanceSide);
+            FramePose3D startLeftFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT));
+            FramePose3D startRightFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+            startLeftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            startRightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            sendPlanningRequest(initialStanceSide, startLeftFootPose, startRightFootPose);
 
             planningRequestHasBeenSent.set(true);
          }
@@ -315,7 +318,9 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       private final AtomicReference<FootstepStatusMessage> footstepStatus = new AtomicReference<>();
 
       private final FramePose3D touchdownPose = new FramePose3D();
-      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+      private final FramePose3D startLeftFootPose = new FramePose3D();
+      private final FramePose3D startRightFootPose = new FramePose3D();
+      private final YoEnum<RobotSide> swingSide = new YoEnum<>("swingSide", registry, RobotSide.class);
 
       PlanFromSingleSupportState()
       {
@@ -336,7 +341,20 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
             Quaternion touchdownOrientation = footstepStatus.getDesiredFootOrientationInWorld();
             touchdownPose.set(touchdownPosition, touchdownOrientation);
             swingSide.set(footstepStatus.getRobotSide());
-            sendPlanningRequest(touchdownPose, swingSide.getEnumValue());
+
+            if(swingSide.getValue() == RobotSide.LEFT)
+            {
+               startLeftFootPose.set(touchdownPose);
+               startRightFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+               startRightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else
+            {
+               startRightFootPose.set(touchdownPose);
+               startLeftFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.LEFT));
+               startLeftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            sendPlanningRequest(swingSide.getEnumValue(), startLeftFootPose, startRightFootPose);
          }
 
          FootstepPlanningToolboxOutputStatus plannerResult = WalkOverTerrainStateMachineBehavior.this.plannerResult.get();
@@ -388,14 +406,18 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       footstepPublisher.publish(footstepDataListMessage);
    }
 
-   private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
+   private void sendPlanningRequest(RobotSide initialStanceSide, Pose3DReadOnly startLeftFootPose, Pose3DReadOnly startRightFootPose)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       planId.increment();
-      FootstepPlanningRequestPacket request = FootstepPlannerMessageTools
-            .createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose.get(),
-                                                 FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      boolean planBodyPath = false;
+      FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
+                                                                                                              startLeftFootPose,
+                                                                                                              startRightFootPose,
+                                                                                                              goalPose.get(),
+                                                                                                              idealStanceWidth,
+                                                                                                              planBodyPath);
       request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());

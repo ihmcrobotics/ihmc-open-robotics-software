@@ -26,7 +26,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Perfect sensor reader that reads data from a simulated robot and outputs data in a SensorOutputMap
@@ -46,7 +46,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
    private final ArrayList<ImmutablePair<IMUMount, IMUSensor>> imus = new ArrayList<>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
@@ -124,7 +124,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -209,7 +209,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.normalizeRotationPart();
+      temporaryRootToWorldTransform.getRotation().normalize();
       sensorOutputMap.setRootJointTransform(temporaryRootToWorldTransform);
       rootJointReferenceFrame.setTransformAndUpdate(temporaryRootToWorldTransform);
    }

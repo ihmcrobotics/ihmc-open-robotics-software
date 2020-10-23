@@ -29,14 +29,14 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerPelvisOrientationManager implements PelvisOrientationControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FrameQuaternion desiredPelvisOrientation = new FrameQuaternion();
    private final FrameVector3D desiredPelvisAngularVelocity = new FrameVector3D();
@@ -83,7 +83,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -106,11 +106,14 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             pelvisFrame.getTransformToDesiredFrame(transformToParent, getParent());
-            transformToParent.setRotation(desiredPelvisOrientation);
+            transformToParent.getRotation().set(desiredPelvisOrientation);
          }
       };
 
-      offsetTrajectoryWhileWalking = new PelvisOffsetTrajectoryWhileWalking(controllerToolbox, pelvisOffsetWhileWalkingParameters, registry);
+      if (pelvisOffsetWhileWalkingParameters != null)
+         offsetTrajectoryWhileWalking = new PelvisOffsetTrajectoryWhileWalking(controllerToolbox, pelvisOffsetWhileWalkingParameters, registry);
+      else
+         offsetTrajectoryWhileWalking = null;
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
@@ -123,7 +126,10 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
-      leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, leapOfFaithParameters, registry);
+      if (leapOfFaithParameters != null)
+         leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, leapOfFaithParameters, registry);
+      else
+         leapOfFaithModule = null;
 
       parentRegistry.addChild(registry);
    }
@@ -195,14 +201,21 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       tempAngularVelocity.changeFrame(worldFrame);
       tempAngularAcceleration.changeFrame(worldFrame);
 
-      offsetTrajectoryWhileWalking.update();
-      offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
+      if (offsetTrajectoryWhileWalking != null)
+      {
+         offsetTrajectoryWhileWalking.update();
+         offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
+      }
 
       tempWeight.set(pelvisAngularWeight);
-      leapOfFaithModule.update(deltaTime);
-      leapOfFaithModule.updateAngularOffsets();
-      leapOfFaithModule.addAngularOffset(tempOrientation);
-      leapOfFaithModule.relaxAngularWeight(tempWeight);
+
+      if (leapOfFaithModule != null)
+      {
+         leapOfFaithModule.update(deltaTime);
+         leapOfFaithModule.updateAngularOffsets();
+         leapOfFaithModule.addAngularOffset(tempOrientation);
+         leapOfFaithModule.relaxAngularWeight(tempWeight);
+      }
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
@@ -343,8 +356,10 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       nextSoleFrame.update();
       nextSoleZUpFrame.update();
 
-      offsetTrajectoryWhileWalking.setUpcomingFootstep(upcomingFootstep);
-      leapOfFaithModule.setUpcomingFootstep(upcomingFootstep);
+      if (offsetTrajectoryWhileWalking != null)
+         offsetTrajectoryWhileWalking.setUpcomingFootstep(upcomingFootstep);
+      if (leapOfFaithModule != null)
+         leapOfFaithModule.setUpcomingFootstep(upcomingFootstep);
    }
 
    public void setTrajectoryFromFootstep()
@@ -378,22 +393,28 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    public void initializeStanding()
    {
       setToHoldCurrentDesiredInMidFeetZUpFrame();
-      offsetTrajectoryWhileWalking.initializeStanding();
-      leapOfFaithModule.initializeStanding();
+      if (offsetTrajectoryWhileWalking != null)
+         offsetTrajectoryWhileWalking.initializeStanding();
+      if (leapOfFaithModule != null)
+         leapOfFaithModule.initializeStanding();
    }
 
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
       initializeTiming();
-      offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
-      leapOfFaithModule.initializeTransfer(transferDuration);
+      if (offsetTrajectoryWhileWalking != null)
+         offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      if (leapOfFaithModule != null)
+         leapOfFaithModule.initializeTransfer(transferDuration);
    }
 
    public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
    {
       initializeTiming();
-      offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
-      leapOfFaithModule.initializeSwing(swingDuration);
+      if (offsetTrajectoryWhileWalking != null)
+         offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      if (leapOfFaithModule != null)
+         leapOfFaithModule.initializeSwing(swingDuration);
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)

@@ -3,15 +3,15 @@ package us.ihmc.commonWalkingControlModules.calculators;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ConstantOmega0Calculator implements Omega0CalculatorInterface
 {
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble constantOmega0 = new YoDouble("constantOmega0", registry);
 
-   public ConstantOmega0Calculator(double constantOmega0, YoVariableRegistry parentRegistry)
+   public ConstantOmega0Calculator(double constantOmega0, YoRegistry parentRegistry)
    {
       this.constantOmega0.set(constantOmega0);
 

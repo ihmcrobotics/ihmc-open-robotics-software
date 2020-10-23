@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 
 public class YoPositionProvider implements PositionProvider

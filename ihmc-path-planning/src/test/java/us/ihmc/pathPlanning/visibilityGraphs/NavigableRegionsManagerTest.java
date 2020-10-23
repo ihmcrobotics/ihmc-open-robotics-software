@@ -1,16 +1,23 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import static us.ihmc.robotics.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -18,6 +25,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -28,38 +36,29 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EstimatedCostToGoal;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.TestEnvironmentTools;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.TestEnvironmentTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.testing.JUnitTools;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertNotEquals;
 
 public class NavigableRegionsManagerTest
 {
@@ -822,9 +821,9 @@ public class NavigableRegionsManagerTest
       Quaternion startOrientation = new Quaternion();
       Quaternion goalOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getStartYaw());
       if (dataSet.getPlannerInput().hasGoalOrientation())
-         goalOrientation.setToYawQuaternion(dataSet.getPlannerInput().getGoalYaw());
+         goalOrientation.setToYawOrientation(dataSet.getPlannerInput().getGoalYaw());
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
 
@@ -963,7 +962,7 @@ public class NavigableRegionsManagerTest
       double distanceAlongExpectedPath = 0.0;
 
       Ellipsoid3D walkerShape = new Ellipsoid3D();
-      walkerShape.setRadii(walkerRadii);
+      walkerShape.getRadii().set(walkerRadii);
       List<Point3D> collisions = new ArrayList<>();
 
 
@@ -1061,7 +1060,7 @@ public class NavigableRegionsManagerTest
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 
          Plane3D plane = planarRegion.getPlane();
-         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+         Point3DBasics closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
 
          if (!walkerShapeWorld.isPointInside(closestPoint))
             continue; // Not even close to the region plane, let's keep going.
@@ -1073,7 +1072,7 @@ public class NavigableRegionsManagerTest
 
          if (planarRegion.getNumberOfConvexPolygons() == 0)
          {
-            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(planarRegion.getConcaveHull());
             double depthThreshold = 0.05;
             List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);

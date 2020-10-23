@@ -1,25 +1,25 @@
 package us.ihmc.robotics.linearAlgebra;
 
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixOfCofactorsCalculatorInefficient
 {
-   public static DenseMatrix64F computeMatrixOfCoFactors(DenseMatrix64F mat)
+   public static DMatrixRMaj computeMatrixOfCoFactors(DMatrixRMaj mat)
    {
       int m = mat.getNumRows();
       int n = mat.getNumCols();
-      DenseMatrix64F ret = new DenseMatrix64F(m, n);
+      DMatrixRMaj ret = new DMatrixRMaj(m, n);
       
       for (int i = 0; i < m; i++)
       {
          for (int j = 0; j < n; j++)
          {
-            DenseMatrix64F minor = computeMinor(mat, i, j);
-            double minorDeterminant = CommonOps.det(minor);
+            DMatrixRMaj minor = computeMinor(mat, i, j);
+            double minorDeterminant = CommonOps_DDRM.det(minor);
             int sign = isEven((i + 1) + (j + 1)) ? 1 : -1;
             ret.set(i, j, sign * minorDeterminant);
          }
@@ -32,11 +32,11 @@ public class MatrixOfCofactorsCalculatorInefficient
       return k % 2 == 0;
    }
 
-   private static DenseMatrix64F computeMinor(DenseMatrix64F mat, int i, int j)
+   private static DMatrixRMaj computeMinor(DMatrixRMaj mat, int i, int j)
    {
       int m = mat.getNumRows();
       int n = mat.getNumCols();
-      DenseMatrix64F ret = new DenseMatrix64F(m - 1, n - 1);
+      DMatrixRMaj ret = new DMatrixRMaj(m - 1, n - 1);
 
       int[] rows = determineIndices(i, m);
       int[] columns = determineIndices(j, n);

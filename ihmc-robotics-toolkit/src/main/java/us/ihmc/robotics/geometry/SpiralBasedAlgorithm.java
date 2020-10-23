@@ -102,7 +102,7 @@ public class SpiralBasedAlgorithm
          rayThroughSphere.sub(sphereOrigin, pointsOnSphere[rayIndex]);
          rayThroughSphere.normalize();
 
-         EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
          rotationMatrixForXAxisAlignedWithRay.set(rotationForXAxisAlignedWithRay);
 
          for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)

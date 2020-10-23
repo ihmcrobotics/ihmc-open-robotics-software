@@ -8,42 +8,28 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoMutableFramePoint3D initialPosition;
    private final YoMutableFrameVector3D initialVelocity;
@@ -109,12 +95,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
-   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
       this(namePrefix, referenceFrame, parentRegistry, false, null);
    }
 
-   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+   public VelocityConstrainedPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry, boolean visualize,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.trajectoryFrame = referenceFrame;
@@ -124,7 +110,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       quatFDDelta = new Quaternion();
       omegaVectorDF = new FrameVector3D();
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       initialPosition = new YoMutableFramePoint3D(namePrefix + "InitialPosition", "", registry, referenceFrame);
       initialVelocity = new YoMutableFrameVector3D(namePrefix + "InitialVelocity", "", registry, referenceFrame);
@@ -265,10 +251,10 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
-         showViz.addVariableChangedListener(new VariableChangedListener()
+         showViz.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                boolean visible = showViz.getBooleanValue();
                currentVelocityViz.setVisible(visible);
@@ -279,7 +265,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
                bagOfBalls.setVisible(visible);
             }
          });
-         showViz.notifyVariableChangedListeners();
+         showViz.notifyListeners();
       }
       else
       {
@@ -599,7 +585,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       }
 
       //      currentOrientationForViz.set(currentOrientation);
-      currentOrientationForViz.set(currentTrajectoryFrame.getTransformToWorldFrame());
+      currentOrientationForViz.set(currentTrajectoryFrame.getTransformToWorldFrame().getRotation());
       for (int i = 0; i < visualizationUpdatables.size(); i++)
       {
          visualizationUpdatables.get(i).getRight().setMatchingFrame(visualizationUpdatables.get(i).getLeft());
@@ -694,8 +680,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
-      framePoseToPack.setPosition(currentPosition);
-      framePoseToPack.setOrientation(currentOrientation);
+      framePoseToPack.getPosition().set(currentPosition);
+      framePoseToPack.getOrientation().set(currentOrientation);
    }
 
    @Override

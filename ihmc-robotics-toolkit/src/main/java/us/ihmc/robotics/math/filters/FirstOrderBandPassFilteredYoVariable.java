@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FirstOrderBandPassFilteredYoVariable extends FirstOrderFilteredYoVariable
@@ -10,7 +10,7 @@ public class FirstOrderBandPassFilteredYoVariable extends FirstOrderFilteredYoVa
    private final FirstOrderFilteredYoVariable highPassFilteredInput;
 
    public FirstOrderBandPassFilteredYoVariable(String name, String description, double minPassThroughFrequency_Hz, double maxPassThroughFrequency_Hz,
-         YoDouble yoTime, YoVariableRegistry registry)
+         YoDouble yoTime, YoRegistry registry)
    {
       super(name, description, maxPassThroughFrequency_Hz, yoTime, FirstOrderFilterType.LOW_PASS, registry);
 
@@ -21,7 +21,7 @@ public class FirstOrderBandPassFilteredYoVariable extends FirstOrderFilteredYoVa
    }
    
    public FirstOrderBandPassFilteredYoVariable(String name, String description, double minPassThroughFrequency_Hz, double maxPassThroughFrequency_Hz,
-         double DT, YoVariableRegistry registry)   
+         double DT, YoRegistry registry)   
    {
       super(name, description, maxPassThroughFrequency_Hz, DT, FirstOrderFilterType.LOW_PASS, registry);
 

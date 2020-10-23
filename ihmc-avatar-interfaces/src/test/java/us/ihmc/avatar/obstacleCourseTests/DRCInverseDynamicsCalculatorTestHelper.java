@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -28,27 +28,19 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.IMUMount;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("InverseDynamicsCalculatorTestHelper");
+   private final YoRegistry registry = new YoRegistry("InverseDynamicsCalculatorTestHelper");
 
    private final YoFrameVector3D computedRootJointForces = new YoFrameVector3D("tau_computed_root_force_", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D computedRootJointTorques = new YoFrameVector3D("tau_computed_root_torques_", ReferenceFrame.getWorldFrame(), registry);
@@ -122,7 +114,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator());
       inverseDynamicsCalculator.setGravitionalAcceleration(robot.getGravityZ());
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       if (visualize)
       {
@@ -495,7 +487,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
             ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
 
             groundContactPointBasedWrenchCalculator.calculate();
-            DenseMatrix64F wrenchFromSimulation = groundContactPointBasedWrenchCalculator.getWrench();
+            DMatrixRMaj wrenchFromSimulation = groundContactPointBasedWrenchCalculator.getWrench();
             ReferenceFrame frameAtJoint = rigidBodyToApplyWrenchTo.getParentJoint().getFrameAfterJoint();
 
             Wrench wrench = new Wrench(frameAtJoint, frameAtJoint, wrenchFromSimulation);
@@ -613,7 +605,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
-      rootJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
+      rootJoint.getJointPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<OneDoFJointBasics> oneDoFJoints = new ArrayList<OneDoFJointBasics>();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
@@ -683,8 +675,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setRobotsExternalForcesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
-      ArrayList<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
-      ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
 
       for (int i = 0; i < otherGroundContactPoints.size(); i++)
       {

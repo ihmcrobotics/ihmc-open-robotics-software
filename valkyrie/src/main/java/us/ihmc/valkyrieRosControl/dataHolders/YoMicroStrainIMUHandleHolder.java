@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -13,22 +13,22 @@ public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
 
    private final YoEnum<MicroStrainData.MicrostrainFilterType> filterTypeToUse;
 
-   public static YoMicroStrainIMUHandleHolder create(int sensorId, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
+   public static YoMicroStrainIMUHandleHolder create(int sensorId, IMUDefinition imuDefinition, YoRegistry parentRegistry)
    {
       return new YoMicroStrainIMUHandleHolder(new MicroStrainIMUHandle(imuDefinition.getName(), sensorId), imuDefinition, parentRegistry);
    }
 
-   private YoMicroStrainIMUHandleHolder(MicroStrainIMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
+   private YoMicroStrainIMUHandleHolder(MicroStrainIMUHandle handle, IMUDefinition imuDefinition, YoRegistry parentRegistry)
    {
       super(handle, imuDefinition, parentRegistry);
       this.microStrainIMUHandle = handle;
 
       filterTypeToUse = new YoEnum<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicroStrainData.MicrostrainFilterType.class);
 
-      filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
+      filterTypeToUse.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             microStrainIMUHandle.setFilterTypeToReturn(filterTypeToUse.getEnumValue());
          }

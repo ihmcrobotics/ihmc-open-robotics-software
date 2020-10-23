@@ -196,4 +196,10 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       return 0.25;
    }
+
+   @Override
+   public boolean useSmartICPIntegrator()
+   {
+      return true;
+   }
 }

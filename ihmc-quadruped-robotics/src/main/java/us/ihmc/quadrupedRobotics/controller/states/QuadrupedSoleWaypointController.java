@@ -15,7 +15,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,7 +25,7 @@ import java.util.List;
 public class QuadrupedSoleWaypointController implements EventState, QuadrupedWaypointCallback
 {
    // Yo variables
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
@@ -47,7 +47,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
    private final YoDouble currentTime;
 
    public QuadrupedSoleWaypointController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                          QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
+                                          QuadrupedStepMessageHandler stepMessageHandler, YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.stepMessageHandler = stepMessageHandler;

@@ -1,48 +1,81 @@
 package us.ihmc.humanoidBehaviors;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.messager.Messager;
+import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.ros2.Ros2Node;
 
-public enum BehaviorRegistry
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+
+public class BehaviorRegistry
 {
-   STEP_IN_PLACE(StepInPlaceBehavior::new, StepInPlaceBehavior.API.create()),
-   PATROL(PatrolBehavior::new, PatrolBehaviorAPI.create()),
-   FANCY_POSES(FancyPosesBehavior::new, FancyPosesBehavior.API.create()),
-   EXPLORE(ExploreAreaBehavior::new, ExploreAreaBehavior.ExploreAreaBehaviorAPI.create()),
-   ;
-
-   public static final BehaviorRegistry[] values = values();
-
-   private final BehaviorSupplier behaviorSupplier;
-   private final MessagerAPI behaviorAPI;
-
-   private BehaviorInterface constructedBehavior;
-
-   BehaviorRegistry(BehaviorSupplier behaviorSupplier, MessagerAPI behaviorAPI)
+   public static final BehaviorRegistry DEFAULT_BEHAVIORS = new BehaviorRegistry();
+   public static final BehaviorRegistry ARCHIVED_BEHAVIORS = new BehaviorRegistry();
+   static
    {
-      this.behaviorSupplier = behaviorSupplier;
-      this.behaviorAPI = behaviorAPI;
+      DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
+      ARCHIVED_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
+      ARCHIVED_BEHAVIORS.register(PatrolBehavior.DEFINITION);
+      ARCHIVED_BEHAVIORS.register(FancyPosesBehavior.DEFINITION);
+      ARCHIVED_BEHAVIORS.register(ExploreAreaBehavior.DEFINITION);
+      ARCHIVED_BEHAVIORS.register(NavigationBehavior.DEFINITION);
    }
 
-   public void build(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
+   private static volatile MessagerAPI MESSAGER_API;
+   private static volatile BehaviorRegistry ACTIVE_REGISTRY;
+
+   private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
+
+   public static BehaviorRegistry of(BehaviorDefinition... entries)
    {
-      constructedBehavior = behaviorSupplier.build(new BehaviorHelper(robotModel, messager, ros2Node));
+      BehaviorRegistry registry = new BehaviorRegistry();
+      for (BehaviorDefinition entry : entries)
+      {
+         registry.register(entry);
+      }
+      return registry;
    }
 
-   public MessagerAPI getBehaviorAPI()
+   public void register(BehaviorDefinition definition)
    {
-      return behaviorAPI;
+      definitionEntries.add(definition);
    }
 
-   public BehaviorInterface getConstructedBehavior()
+   public synchronized MessagerAPI getMessagerAPI()
    {
-      return constructedBehavior;
+      if (MESSAGER_API == null) // MessagerAPI can only be created once
+      {
+         MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
+         int i = 0;
+         for (BehaviorDefinition definitionEntry : definitionEntries)
+         {
+            behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
+         }
+         MESSAGER_API = BehaviorModule.API.create(behaviorAPIs);
+         ACTIVE_REGISTRY = this;
+      }
+      else if (!containsSameSetOfBehaviors(ACTIVE_REGISTRY))
+      {
+         throw new RuntimeException("Only one set of behaviors can be initialized per process.");
+      }
+
+      return MESSAGER_API;
+   }
+
+   public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()
+   {
+      return definitionEntries;
+   }
+
+   public boolean containsSameSetOfBehaviors(BehaviorRegistry otherBehaviorRegistry)
+   {
+      HashSet<BehaviorDefinition> theseBehaviors = new HashSet<>(definitionEntries);
+      HashSet<BehaviorDefinition> thoseBehaviors = new HashSet<>(otherBehaviorRegistry.definitionEntries);
+      return theseBehaviors.equals(thoseBehaviors);
    }
 }

@@ -10,13 +10,11 @@ import javax.swing.JFrame;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -28,10 +26,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WaypointDefinedBodyPathPlanTest
 {
@@ -109,7 +108,7 @@ public class WaypointDefinedBodyPathPlanTest
    public static void showPlotter(WaypointDefinedBodyPathPlanHolder plan, String testName)
    {
       int markers = 5;
-      YoVariableRegistry registry = new YoVariableRegistry(testName);
+      YoRegistry registry = new YoRegistry(testName);
       YoGraphicsListRegistry graphicsList = new YoGraphicsListRegistry();
       for (int i = 0; i < markers; i++)
       {

@@ -1,13 +1,13 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface DiscreteData
 {
    void setZero(int size);
    int size();
 
-   DenseMatrix64F get(int index);
-   void add(int index, DenseMatrix64F data);
+   DMatrixRMaj get(int index);
+   void add(int index, DMatrixRMaj data);
    void set(DiscreteData other);
 }

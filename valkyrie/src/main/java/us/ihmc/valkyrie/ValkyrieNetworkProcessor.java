@@ -1,16 +1,13 @@
 package us.ihmc.valkyrie;
 
 import com.martiansoftware.jsap.JSAPException;
-
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
-import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -31,7 +28,9 @@ public class ValkyrieNetworkProcessor
       }
    };
 
-   public static final boolean launchFootstepPlannerModule = true;
+   /** Whether or not to start the footstep planner when running the IHMC network processor. */
+   private static final boolean ihmc_launchFootstepPlannerModule = false;
+
    private static final String REAConfigurationFilePath = System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt";
 
    public static void startIHMCNetworkProcessor(ValkyrieRobotModel robotModel)
@@ -41,13 +40,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsToolboxModule(false);
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
-      new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
-      if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      if (ihmc_launchFootstepPlannerModule)
+         networkProcessor.setupFootstepPlanningToolboxModule();
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -78,14 +76,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
-      new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
-      if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      networkProcessor.setupFootstepPlanningToolboxModule();
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
@@ -98,6 +94,18 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupShutdownHook();
       networkProcessor.start();
+   }
+
+   public static boolean isFootstepPlanningModuleStarted()
+   {
+      if (NetworkProcessorVersion.fromEnvironment() == NetworkProcessorVersion.IHMC)
+      {
+         return ihmc_launchFootstepPlannerModule;
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public static void main(String[] args) throws JSAPException

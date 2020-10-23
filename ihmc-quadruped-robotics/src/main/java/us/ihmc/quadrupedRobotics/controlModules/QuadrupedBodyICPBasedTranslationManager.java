@@ -7,11 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -30,16 +26,21 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class QuadrupedBodyICPBasedTranslationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean useFeedForward = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
    private final YoDouble frozenOffsetDecayAlpha = new YoDouble("frozenOffsetDecayAlpha", registry);
@@ -95,7 +96,7 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<QuadrupedBodyTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(QuadrupedBodyTrajectoryCommand.class, QuadrupedBodyTrajectoryCommand::set);
 
-   public QuadrupedBodyICPBasedTranslationManager(QuadrupedControllerToolbox controllerToolbox, double bodyTranslationICPSupportPolygonSafeMargin, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyICPBasedTranslationManager(QuadrupedControllerToolbox controllerToolbox, double bodyTranslationICPSupportPolygonSafeMargin, YoRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(bodyTranslationICPSupportPolygonSafeMargin);
       frozenOffsetDecayAlpha.set(0.998);
@@ -115,7 +116,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       bodyPositionGains.setMaximumIntegralError(0.05);
       bodyPositionGains.setIntegralLeakRatio(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
 
-      manualMode.addParameterChangedListener(v -> initialize());
+      manualMode.addListener(v -> initialize());
 
       String namePrefix = "BodyXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);

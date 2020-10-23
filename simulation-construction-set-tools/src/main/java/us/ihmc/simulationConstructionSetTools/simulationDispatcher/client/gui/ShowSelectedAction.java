@@ -121,7 +121,7 @@ public class ShowSelectedAction extends AbstractAction implements Runnable
          String[] outputStateVariableNames = dispatchSim.getOutputStateVariableNames();
          for (int i = 0; i < data.length; i++)
          {
-            YoVariable var = sim.getVariable(outputStateVariableNames[i]);
+            YoVariable var = sim.findVariable(outputStateVariableNames[i]);
             if (var != null)
                var.setValueFromDouble(data[i]);
 

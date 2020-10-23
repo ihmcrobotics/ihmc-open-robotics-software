@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class ViconFrames
@@ -29,7 +30,7 @@ public class ViconFrames
    protected void initialize(ReferenceFrame parentReferenceFrame) throws Exception
    {
       if (parentReferenceFrame == null)
-         viconWorldFrame = ReferenceFrame.constructARootFrame(worldFrameName);
+         viconWorldFrame = ReferenceFrameTools.constructARootFrame(worldFrameName);
       else
       {
          viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, true, false)

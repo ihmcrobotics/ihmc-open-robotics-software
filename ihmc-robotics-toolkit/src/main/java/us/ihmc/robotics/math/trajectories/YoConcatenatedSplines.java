@@ -5,21 +5,21 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoConcatenatedSplines
 {
    private static final double EPSILON = 1e-6;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
    private final List<YoSpline3D> splines;
    private final List<ImmutablePair<YoDouble, YoDouble>> rangeList;
@@ -33,9 +33,9 @@ public class YoConcatenatedSplines
    private final YoInteger currentSplineIndex;
 
    public YoConcatenatedSplines(int[] numberOfCoefficientsPerPolynomial, ReferenceFrame referenceFrame, int arcLengthCalculatorDivisionsPerPolynomial,
-                                YoVariableRegistry parentRegistry, String namePrefix)
+                                YoRegistry parentRegistry, String namePrefix)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.referenceFrame = referenceFrame;

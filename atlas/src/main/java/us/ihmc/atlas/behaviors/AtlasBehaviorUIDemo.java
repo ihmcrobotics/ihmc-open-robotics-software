@@ -2,24 +2,23 @@ package us.ihmc.atlas.behaviors;
 
 import java.util.function.Supplier;
 
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
+import us.ihmc.atlas.jfxvisualizer.AtlasFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.parameterTuner.remote.ParameterTuner;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -32,8 +31,6 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 /**
  * Runs self contained behavior demo.
- *
- * Should be fixed to not extend application.
  */
 public class AtlasBehaviorUIDemo
 {
@@ -64,76 +61,72 @@ public class AtlasBehaviorUIDemo
 
       if (ENVIRONMENT != FLAT_GROUND)
       {
-         new Thread(() -> {
-            LogTools.info("Creating planar region publisher");
-            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), PubSubImplementation.FAST_RTPS).start();
-         }).start();
-
-         new Thread(() -> {
-            LogTools.info("Creating bipedal support region publisher");
-            new BipedalSupportPlanarRegionPublisher(createRobotModel(), PubSubImplementation.FAST_RTPS).start();
-         }).start();
+         ThreadTools.startAThread(this::simulatedREAModule, "SimulatedREAModule");
+         ThreadTools.startAThread(this::bipedalSupportRegionPublisher, "BipedalSupportRegionPublisher");
       }
 
-      new Thread(() -> {
-         LogTools.info("Creating simulation");
-         if (USE_KINEMATIC_SIMULATION)
-         {
-            HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-            kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
-            kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YO_VARIABLE_SERVER);
-            HumanoidKinematicsSimulation.create(createRobotModel(), kinematicsSimulationParameters);
-         }
-         else
-         {
-            AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
-                                                        new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
-                                                        recordFrequencySpeedup).simulate();
-         }
-      }).start();
+      ThreadTools.startAThread(this::simulation, "Simulation");
+      ThreadTools.startAThread(this::footstepPlanningToolbox, "FootstepPlanningToolbox");
+      if (LAUNCH_PARAMETER_TUNER) ThreadTools.startAThread(this::parameterTuner, "ParameterTuner");
+      if (LAUNCH_FOOTSTEP_PLANNER_UI) ThreadTools.startAThread(this::footstepPlannerUI, "FootstepPlannerUI");
 
-      new Thread(() -> {
-         LogTools.info("Creating footstep toolbox");
-         FootstepPlanningModuleLauncher.createModule(createRobotModel(), PubSubImplementation.FAST_RTPS);
-      }).start();
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
-      new Thread(() -> {
-         LogTools.info("Creating behavior backpack");
-         BehaviorModule.createForBackpack(createRobotModel());
-      }).start();
-
-      if (LAUNCH_PARAMETER_TUNER)
-      {
-         new Thread(() ->
-                    {
-                       LogTools.info("Spawning parameter tuner");
-                       new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
-                    }).start();
-      }
-
-      if (LAUNCH_FOOTSTEP_PLANNER_UI)
-      {
-         new Thread(() -> {
-            LogTools.info("Launching remote footstep planner UI");
-            AtlasRemoteFootstepPlannerUI atlasRemoteFootstepPlannerUI = new AtlasRemoteFootstepPlannerUI();
-            Platform.runLater(() ->
-            {
-               try
-               {
-                  atlasRemoteFootstepPlannerUI.start(new Stage());
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
-            });
-         }).start();
-      }
+      LogTools.info("Creating behavior module");
+      BehaviorModule.createInterprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      AtlasRobotModel robotModel = createRobotModel();
-      Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
-      new BehaviorUI(behaviorMessager, robotModel, PubSubImplementation.FAST_RTPS);
+      BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
+   }
+
+   private void simulation()
+   {
+      if (USE_KINEMATIC_SIMULATION)
+      {
+         LogTools.info("Creating kinematics simulation");
+         HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+         kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
+         kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YO_VARIABLE_SERVER);
+         HumanoidKinematicsSimulation.create(createRobotModel(), kinematicsSimulationParameters);
+      }
+      else
+      {
+         LogTools.info("Creating dynamics simulation");
+         AtlasDynamicsSimulation.createForManualTest(createRobotModel(),
+                                                     new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
+                                                     recordFrequencySpeedup, 10).simulate();
+      }
+   }
+
+   private void simulatedREAModule()
+   {
+      LogTools.info("Creating planar region publisher");
+      new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), PubSubImplementation.FAST_RTPS).start();
+   }
+
+   private void bipedalSupportRegionPublisher()
+   {
+      LogTools.info("Creating bipedal support region publisher");
+      new BipedalSupportPlanarRegionPublisher(createRobotModel(), PubSubImplementation.FAST_RTPS).start();
+   }
+
+   private void footstepPlanningToolbox()
+   {
+      LogTools.info("Starting footstep toolbox");
+      FootstepPlanningModuleLauncher.createModule(createRobotModel(), PubSubImplementation.FAST_RTPS);
+   }
+
+   private void parameterTuner()
+   {
+      LogTools.info("Spawning parameter tuner");
+      new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
+   }
+
+   private void footstepPlannerUI()
+   {
+      LogTools.info("Launching remote footstep planner UI");
+      AtlasFootstepPlannerUI atlasFootstepPlannerUI = new AtlasFootstepPlannerUI();
+      JavaFXMissingTools.runApplication(atlasFootstepPlannerUI);
    }
 
    private AtlasRobotModel createRobotModel()

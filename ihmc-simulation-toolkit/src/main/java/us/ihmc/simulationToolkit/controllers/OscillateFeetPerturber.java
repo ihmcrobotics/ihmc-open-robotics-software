@@ -7,11 +7,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 
 public class OscillateFeetPerturber extends ModularRobotController
 {
@@ -72,7 +72,7 @@ public class OscillateFeetPerturber extends ModularRobotController
 
    public void setRotationMagnitudeYawPitchRoll(double[] rotationYawPitchRoll)
    {
-      this.rotationMagnitude.setYawPitchRoll(rotationYawPitchRoll);
+      this.rotationMagnitude.set(rotationYawPitchRoll);
    }
    
    public void setTranslationFrequencyHz(RobotSide robotSide, double[] freqHz)
@@ -134,7 +134,7 @@ public class OscillateFeetPerturber extends ModularRobotController
       nextTranslationToSlip.setZ(nextTranslationToSlip.getZ() * (2.0 * Math.PI * translationFreqHz[2] * Math.sin(translationPhase.getZ()) * deltaT));
       
       Vector3D nextRotationToSlipEulerAngles = new Vector3D();
-      rotationMagnitude.getEulerAngles(nextRotationToSlipEulerAngles);
+      rotationMagnitude.getEuler(nextRotationToSlipEulerAngles);
       nextRotationToSlipEulerAngles.setX(nextRotationToSlipEulerAngles.getX() * (2.0 * Math.PI * rotationFreqHzYawPitchRoll[2] * Math.sin(rotationPhaseEuler.getX()) * deltaT));
       nextRotationToSlipEulerAngles.setY(nextRotationToSlipEulerAngles.getY() * (2.0 * Math.PI * rotationFreqHzYawPitchRoll[1] * Math.sin(rotationPhaseEuler.getY()) * deltaT));
       nextRotationToSlipEulerAngles.setZ(nextRotationToSlipEulerAngles.getZ() * (2.0 * Math.PI * rotationFreqHzYawPitchRoll[0] * Math.sin(rotationPhaseEuler.getZ()) * deltaT));

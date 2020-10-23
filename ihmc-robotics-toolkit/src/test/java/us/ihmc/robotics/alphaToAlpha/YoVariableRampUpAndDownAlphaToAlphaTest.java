@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -18,7 +18,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    @Test
    public void testInvalidYoVariables()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
       YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
       YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
@@ -50,7 +50,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    @Test
    public void testValidYoVariables()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
       YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
       YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
@@ -118,7 +118,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    @Test
    public void testOneQuaterOfTheWay()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
       YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
       YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
@@ -167,7 +167,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    @Test
    public void testSmallDifferences()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
       YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
       YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);

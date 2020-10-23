@@ -24,7 +24,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class FusionSensorObjectDetectionManager
 {
@@ -44,7 +44,7 @@ public class FusionSensorObjectDetectionManager
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<BufferedImage> leatestBufferedImage = new AtomicReference<BufferedImage>();
 
-   public FusionSensorObjectDetectionManager(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)
+   public FusionSensorObjectDetectionManager(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
       doorParameterCalculator = new DoorParameterCalculator(ros2Node, DoorParameterPacket.class);

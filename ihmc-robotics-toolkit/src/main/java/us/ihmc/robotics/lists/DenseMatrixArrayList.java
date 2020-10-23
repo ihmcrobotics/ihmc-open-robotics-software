@@ -3,13 +3,12 @@ package us.ihmc.robotics.lists;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.ejml.data.D1Matrix64F;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 
-public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
+public class DenseMatrixArrayList extends RecyclingArrayList<DMatrixRMaj>
 {
 
    public DenseMatrixArrayList()
@@ -29,10 +28,10 @@ public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
          add().set(denseMatrixArrayList.get(i));
    }
 
-   private static Supplier<DenseMatrix64F> createBuilder()
+   private static Supplier<DMatrixRMaj> createBuilder()
    {
       return () -> {
-         DenseMatrix64F denseMatrix64F = new DenseMatrix64F(1);
+         DMatrixRMaj denseMatrix64F = new DMatrixRMaj(1);
          denseMatrix64F.reshape(0, 0);
          return denseMatrix64F;
       };
@@ -56,9 +55,9 @@ public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
          for (int i = 0; i < size(); i++)
          {
             Object otherElement = other.get(i);
-            if (otherElement instanceof D1Matrix64F)
+            if (otherElement instanceof DMatrixRMaj)
             {
-               if (!MatrixFeatures.isEquals(get(i), (D1Matrix64F) otherElement))
+               if (!MatrixFeatures_DDRM.isEquals(get(i), (DMatrixRMaj) otherElement))
                   return false;
             }
             else

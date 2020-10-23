@@ -28,6 +28,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -49,7 +50,6 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class SpatialFeedbackControlCommand implements FeedbackControlCommand<SpatialFeedbackControlCommand>
 {
@@ -147,8 +147,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * can be used to control the end-effector.
     * </p>
     *
-    * @param base the rigid-body located right before the first joint to be used for controlling the
-    *           end-effector.
+    * @param base        the rigid-body located right before the first joint to be used for controlling
+    *                    the end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
@@ -238,9 +238,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     *
     * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
-    *           below the primary base. Optional.
+    *                                      below the primary base. Optional.
     * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
-    *           Optional.
+    *                                      Optional.
     */
    public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
@@ -294,7 +294,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     *
     * @param angularGainsFrame the reference frame to use for the orientation gains.
-    * @param linearGainsFrame the reference frame to use for the position gains.
+    * @param linearGainsFrame  the reference frame to use for the position gains.
     */
    public void setGainsFrames(ReferenceFrame angularGainsFrame, ReferenceFrame linearGainsFrame)
    {
@@ -324,16 +324,17 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
+    * @param desiredOrientation         the orientation the {@code controlFrame} should reach. Not
+    *                                   modified.
     * @param feedForwardAngularVelocity the feed-forward angular velocity of {@code controlFrame} with
-    *           respect to the {@code base}. Not modified.
+    *                                   respect to the {@code base}. Not modified.
     */
    public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
@@ -349,16 +350,17 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredPosition the position the {@code controlFrame} should reach. Not modified.
+    * @param desiredPosition           the position the {@code controlFrame} should reach. Not
+    *                                  modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code controlFrame}'s
-    *           origin with respect to the {@code base}. Not modified.
+    *                                  origin with respect to the {@code base}. Not modified.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
@@ -374,20 +376,22 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
-    * @param desiredPosition the position the {@code controlFrame} should reach. Not modified.
+    * @param desiredOrientation         the orientation the {@code controlFrame} should reach. Not
+    *                                   modified.
+    * @param desiredPosition            the position the {@code controlFrame} should reach. Not
+    *                                   modified.
     * @param feedForwardAngularVelocity the feed-forward angular velocity of {@code controlFrame} with
-    *           respect to the {@code base}. This term is used to improve tracking performance. Not
-    *           modified.
-    * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code controlFrame}'s
-    *           origin with respect to the {@code base}. Not modified.
+    *                                   respect to the {@code base}. This term is used to improve
+    *                                   tracking performance. Not modified.
+    * @param feedForwardLinearVelocity  the feed-forward linear velocity of the {@code controlFrame}'s
+    *                                   origin with respect to the {@code base}. Not modified.
     */
    public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                     FrameVector3DReadOnly feedForwardAngularVelocity, FrameVector3DReadOnly feedForwardLinearVelocity)
@@ -399,16 +403,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredPose the pose the {@code controlFrame} should reach. Not modified.
+    * @param desiredPose         the pose the {@code controlFrame} should reach. Not modified.
     * @param feedForwardVelocity the feed-forward angular & linear velocity of {@code controlFrame}
-    *           with respect to the {@code base}. Not modified.
+    *                            with respect to the {@code base}. Not modified.
     */
    public void setInverseKinematics(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly feedForwardVelocity)
    {
@@ -419,18 +423,20 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse dynamics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse dynamics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
-    * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
+    * @param desiredOrientation             the orientation the {@code controlFrame} should reach. Not
+    *                                       modified.
+    * @param desiredAngularVelocity         the desired angular velocity of {@code controlFrame} with
+    *                                       respect to the {@code base}. Not modified.
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
-    *           {@code controlFrame} with respect to the {@code base}. Not modified.
+    *                                       {@code controlFrame} with respect to the {@code base}. Not
+    *                                       modified.
     */
    public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
@@ -448,18 +454,20 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse dynamics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse dynamics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredPosition the position that the {@code controlFrame} should reach. Not modified.
-    * @param desiredLinearVelocity the desired linear velocity of the {@code controlFrame}'s origin
-    *           with respect to the {@code base}. Not modified.
+    * @param desiredPosition               the position that the {@code controlFrame} should reach. Not
+    *                                      modified.
+    * @param desiredLinearVelocity         the desired linear velocity of the {@code controlFrame}'s
+    *                                      origin with respect to the {@code base}. Not modified.
     * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
-    *           {@code controlFrame}'s origin with respect to the {@code base}. Not modified.
+    *                                      {@code controlFrame}'s origin with respect to the
+    *                                      {@code base}. Not modified.
     */
    public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -477,23 +485,27 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse dynamics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse dynamics.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     * 
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
-    * @param desiredPosition the position that the {@code controlFrame} should reach. Not modified.
-    * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
-    * @param desiredLinearVelocity the desired linear velocity of the {@code controlFrame}'s origin
-    *           with respect to the {@code base}. Not modified.
+    * @param desiredOrientation             the orientation the {@code controlFrame} should reach. Not
+    *                                       modified.
+    * @param desiredPosition                the position that the {@code controlFrame} should reach.
+    *                                       Not modified.
+    * @param desiredAngularVelocity         the desired angular velocity of {@code controlFrame} with
+    *                                       respect to the {@code base}. Not modified.
+    * @param desiredLinearVelocity          the desired linear velocity of the {@code controlFrame}'s
+    *                                       origin with respect to the {@code base}. Not modified.
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
-    *           {@code controlFrame} with respect to the {@code base}. Not modified.
-    * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
-    *           {@code controlFrame}'s origin with respect to the {@code base}. Not modified.
+    *                                       {@code controlFrame} with respect to the {@code base}. Not
+    *                                       modified.
+    * @param feedForwardLinearAcceleration  the feed-forward linear acceleration of the
+    *                                       {@code controlFrame}'s origin with respect to the
+    *                                       {@code base}. Not modified.
     */
    public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                   FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
@@ -513,11 +525,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     * 
-    * @param desiredPose the pose that the {@code controlFrame} should reach. Not modified.
-    * @param desiredVelocity the desired angular & linear velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
+    * @param desiredPose             the pose that the {@code controlFrame} should reach. Not modified.
+    * @param desiredVelocity         the desired angular & linear velocity of {@code controlFrame} with
+    *                                respect to the {@code base}. Not modified.
     * @param feedForwardAcceleration the feed-forward angular & linear acceleration of
-    *           {@code controlFrame} with respect to the {@code base}. Not modified.
+    *                                {@code controlFrame} with respect to the {@code base}. Not
+    *                                modified.
     */
    public void setInverseDynamics(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity, SpatialVectorReadOnly feedForwardAcceleration)
    {
@@ -528,17 +541,19 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for virtual model control.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for virtual model control.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
+    * @param desiredOrientation     the orientation the {@code controlFrame} should reach. Not
+    *                               modified.
     * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
-    * @param feedForwardTorque the feed-forward torque to exert at {@code controlFrame}. Not modified.
+    *                               to the {@code base}. Not modified.
+    * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
+    *                               modified.
     */
    public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
                                       FrameVector3DReadOnly feedForwardTorque)
@@ -556,17 +571,19 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for virtual model control.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for virtual model control.
     * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * @param desiredPosition the position that the {@code controlFrame} should reach. Not modified.
+    * @param desiredPosition       the position that the {@code controlFrame} should reach. Not
+    *                              modified.
     * @param desiredLinearVelocity the desired linear velocity of the {@code controlFrame}'s origin
-    *           with respect to the {@code base}. Not modified.
-    * @param feedForwardForce the feed-forward force to exert at {@code controlFrame}. Not modified.
+    *                              with respect to the {@code base}. Not modified.
+    * @param feedForwardForce      the feed-forward force to exert at {@code controlFrame}. Not
+    *                              modified.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
    {
@@ -590,15 +607,18 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * 
-    * @param desiredOrientation the orientation the {@code controlFrame} should reach. Not modified.
-    * @param desiredPosition the position that the {@code controlFrame} should reach. Not modified.
+    * @param desiredOrientation     the orientation the {@code controlFrame} should reach. Not
+    *                               modified.
+    * @param desiredPosition        the position that the {@code controlFrame} should reach. Not
+    *                               modified.
     * @param desiredAngularVelocity the desired angular velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
-    * @param desiredLinearVelocity the desired linear velocity of the {@code controlFrame}'s origin
-    *           with respect to the {@code base}. Not modified.
-    * @param feedForwardTorque the feed-forward torque to exert at {@code controlFrame}. Not modified.
-    * @param feedForwardForce the feed-forward force to exert at {@code controlFrame}. Not modified.
+    *                               to the {@code base}. Not modified.
+    * @param desiredLinearVelocity  the desired linear velocity of the {@code controlFrame}'s origin
+    *                               with respect to the {@code base}. Not modified.
+    * @param feedForwardTorque      the feed-forward torque to exert at {@code controlFrame}. Not
+    *                               modified.
+    * @param feedForwardForce       the feed-forward force to exert at {@code controlFrame}. Not
+    *                               modified.
     */
    public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FramePoint3DReadOnly desiredPosition,
                                       FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity,
@@ -618,12 +638,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
     *
-    * 
-    * @param desiredPose the pose that the {@code controlFrame} should reach. Not modified.
-    * @param desiredVelocity the desired angular & linear velocity of {@code controlFrame} with respect
-    *           to the {@code base}. Not modified.
+    * @param desiredPose       the pose that the {@code controlFrame} should reach. Not modified.
+    * @param desiredVelocity   the desired angular & linear velocity of {@code controlFrame} with
+    *                          respect to the {@code base}. Not modified.
     * @param feedForwardEffort the feed-forward torque & force to exert at {@code controlFrame}. Not
-    *           modified.
+    *                          modified.
     */
    public void setVirtualModelControl(FramePose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity, SpatialVectorReadOnly feedForwardEffort)
    {
@@ -652,14 +671,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param position the position of the {@code controlFrame}'s origin. Not modified.
     * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
-    *            {@code endEffector.getBodyFixedFrame()}.
+    *                                         {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position)
    {
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       controlFramePoseInEndEffectorFrame.setToZero(endEffector.getBodyFixedFrame());
-      controlFramePoseInEndEffectorFrame.setPosition(position);
+      controlFramePoseInEndEffectorFrame.getPosition().set(position);
    }
 
    /**
@@ -671,10 +690,10 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * the given desired position and orientation.
     * </p>
     *
-    * @param position the position of the {@code controlFrame}'s origin. Not modified.
+    * @param position    the position of the {@code controlFrame}'s origin. Not modified.
     * @param orientation the orientation of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
-    *            {@code endEffector.getBodyFixedFrame()}.
+    *                                         {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
@@ -695,7 +714,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param pose the pose of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *            {@code endEffector.getBodyFixedFrame()}.
+    *                                         {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePose3DReadOnly pose)
    {
@@ -729,6 +748,56 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setSelectionMatrixToIdentity()
    {
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the linear part of this
+    * command will be considered in the optimization.
+    */
+   public void setSelectionMatrixForLinearControl()
+   {
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the angular part of this
+    * command and applying the given selection matrix to the linear part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
+    * </p>
+    * 
+    * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
+   {
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl(linearSelectionMatrix);
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the angular part of this
+    * command will be considered in the optimization.
+    */
+   public void setSelectionMatrixForAngularControl()
+   {
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the linear part of this command
+    * and applying the given selection matrix to the angular part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
+    * </p>
+    * 
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
+   {
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl(angularSelectionMatrix);
    }
 
    /**
@@ -774,7 +843,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     *
     * @param angularWeight the weight value to use for the angular portion of this command.
-    * @param linearWeight the weight value to use for the linear portion of this command.
+    * @param linearWeight  the weight value to use for the linear portion of this command.
     */
    public void setWeightsForSolver(double angularWeight, double linearWeight)
    {
@@ -790,7 +859,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     *
     * @param weightMatrix weight matrix holding the weights to use for each component of the desired
-    *           acceleration. Not modified.
+    *                     acceleration. Not modified.
     */
    public void setWeightMatrixForSolver(WeightMatrix6D weightMatrix)
    {
@@ -806,7 +875,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     *
     * @param angular the weights to use for the angular part of this command. Not modified.
-    * @param linear the weights to use for the linear part of this command. Not modified.
+    * @param linear  the weights to use for the linear part of this command. Not modified.
     */
    public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
@@ -1013,6 +1082,18 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.TASKSPACE;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      spatialAccelerationCommand.setCommandId(id);
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return spatialAccelerationCommand.getCommandId();
    }
 
    @Override

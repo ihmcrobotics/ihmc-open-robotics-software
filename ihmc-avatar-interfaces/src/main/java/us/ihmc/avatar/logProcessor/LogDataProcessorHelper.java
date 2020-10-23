@@ -1,12 +1,12 @@
 package us.ihmc.avatar.logProcessor;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQsName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQxName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQyName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQzName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createXName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createYName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createZName;
 
 import java.util.ArrayList;
 
@@ -35,14 +35,14 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LogDataProcessorHelper
 {
@@ -99,29 +99,29 @@ public class LogDataProcessorHelper
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String bodyName = contactableFeet.get(robotSide).getName();
          String copNamePrefix = bodyName + "StateEstimator";
-         String copNameSpace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         String copNamespace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          String copName = copNamePrefix + "ResolvedCoP";
-         YoDouble copx = (YoDouble) scs.getVariable(copNameSpace, copName + "X");
-         YoDouble copy = (YoDouble) scs.getVariable(copNameSpace, copName + "Y");
+         YoDouble copx = (YoDouble) scs.findVariable(copNamespace, copName + "X");
+         YoDouble copy = (YoDouble) scs.findVariable(copNamespace, copName + "Y");
          if (copx != null && copy != null)
          {
             YoFramePoint2D cop = new YoFramePoint2D(copx, copy, soleFrame);
             cops.put(robotSide, cop);
          }
 
-         String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
+         String desiredCoPNamespace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
-         YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
-         YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoDouble desiredCoPx = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "X");
+         YoDouble desiredCoPy = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "Y");
          YoFramePoint2D desiredCoP = new YoFramePoint2D(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPs.put(robotSide, desiredCoP);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String namePrefix = sidePrefix + "Foot";
-         String footStateNameSpace = sidePrefix + FootControlModule.class.getSimpleName();
+         String footStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
          String footStateName = namePrefix + "State";
          @SuppressWarnings("unchecked")
-         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
+         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.findVariable(footStateNamespace, footStateName);
          footStates.put(robotSide, footState);
       }
 
@@ -130,7 +130,7 @@ public class LogDataProcessorHelper
       double omega0 = walkingControllerParameters.getOmega0();
       double gravityZ = 9.81;
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
-      yoTime = (YoDouble) scs.getVariable(controllerTimeNamespace, "controllerTime");
+      yoTime = (YoDouble) scs.findVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches, null, yoTime,
                                                                           gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
@@ -143,10 +143,10 @@ public class LogDataProcessorHelper
       for (final RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
-         String nameSpaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
-         final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
-         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
-         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
+         String namespaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FilteredFootHitGround");
+         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix +  "ForcePastThresh");
+         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
          {
@@ -297,9 +297,9 @@ public class LogDataProcessorHelper
 
    public YoFramePoint3D findYoFramePoint(String pointPrefix, String pointSuffix, ReferenceFrame pointFrame)
    {
-      YoDouble x = (YoDouble) scs.getVariable(createXName(pointPrefix, pointSuffix));
-      YoDouble y = (YoDouble) scs.getVariable(createYName(pointPrefix, pointSuffix));
-      YoDouble z = (YoDouble) scs.getVariable(createZName(pointPrefix, pointSuffix));
+      YoDouble x = (YoDouble) scs.findVariable(createXName(pointPrefix, pointSuffix));
+      YoDouble y = (YoDouble) scs.findVariable(createYName(pointPrefix, pointSuffix));
+      YoDouble z = (YoDouble) scs.findVariable(createZName(pointPrefix, pointSuffix));
       if (x == null || y == null || z == null)
          return null;
       else
@@ -313,9 +313,9 @@ public class LogDataProcessorHelper
 
    public YoFrameVector3D findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
    {
-      YoDouble x = (YoDouble) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
-      YoDouble y = (YoDouble) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
-      YoDouble z = (YoDouble) scs.getVariable(createZName(vectorPrefix, vectorSuffix));
+      YoDouble x = (YoDouble) scs.findVariable(createXName(vectorPrefix, vectorSuffix));
+      YoDouble y = (YoDouble) scs.findVariable(createYName(vectorPrefix, vectorSuffix));
+      YoDouble z = (YoDouble) scs.findVariable(createZName(vectorPrefix, vectorSuffix));
       if (x == null || y == null || z == null)
          return null;
       else
@@ -329,10 +329,10 @@ public class LogDataProcessorHelper
 
    public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, String quaternionSuffix, ReferenceFrame quaternionFrame)
    {
-      YoDouble qx = (YoDouble) scs.getVariable(createQxName(quaternionPrefix, quaternionSuffix));
-      YoDouble qy = (YoDouble) scs.getVariable(createQyName(quaternionPrefix, quaternionSuffix));
-      YoDouble qz = (YoDouble) scs.getVariable(createQzName(quaternionPrefix, quaternionSuffix));
-      YoDouble qs = (YoDouble) scs.getVariable(createQsName(quaternionPrefix, quaternionSuffix));
+      YoDouble qx = (YoDouble) scs.findVariable(createQxName(quaternionPrefix, quaternionSuffix));
+      YoDouble qy = (YoDouble) scs.findVariable(createQyName(quaternionPrefix, quaternionSuffix));
+      YoDouble qz = (YoDouble) scs.findVariable(createQzName(quaternionPrefix, quaternionSuffix));
+      YoDouble qs = (YoDouble) scs.findVariable(createQsName(quaternionPrefix, quaternionSuffix));
 
       if (qx == null || qy == null || qz == null || qs == null)
          return null;

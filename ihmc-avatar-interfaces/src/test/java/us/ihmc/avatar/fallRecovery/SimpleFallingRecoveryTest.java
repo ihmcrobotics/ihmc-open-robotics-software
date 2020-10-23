@@ -13,7 +13,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerFailedTransitionFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -79,7 +79,7 @@ public abstract class SimpleFallingRecoveryTest implements MultiRobotTestInterfa
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
       double magnitude = 6.0 * TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      pushRobotController.applyForce(Axis.X, magnitude, 0.1);
+      pushRobotController.applyForce(Axis3D.X, magnitude, 0.1);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertFalse(success);

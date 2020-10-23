@@ -1,17 +1,18 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 public class CARETools
 {
-   public static void computeM(DenseMatrix64F BTranspose, DenseMatrix64F R, DenseMatrix64F RinvToPack, DenseMatrix64F SToPack)
+   public static void computeM(DMatrixRMaj BTranspose, DMatrixRMaj R, DMatrixRMaj RinvToPack, DMatrixRMaj SToPack)
    {
       int n = BTranspose.getNumCols();
       if (RinvToPack == null)
-         RinvToPack = new DenseMatrix64F(n, n);
+         RinvToPack = new DMatrixRMaj(n, n);
       else
          RinvToPack.reshape(n, n);
       SToPack.reshape(n, n);
@@ -20,14 +21,14 @@ public class CARETools
       NativeCommonOps.multQuad(BTranspose, RinvToPack, SToPack);
    }
 
-   public static void assembleHamiltonian(DenseMatrix64F A, DenseMatrix64F ATranspose, DenseMatrix64F Q, DenseMatrix64F S, DenseMatrix64F hamiltonianToPack)
+   public static void assembleHamiltonian(DMatrixRMaj A, DMatrixRMaj ATranspose, DMatrixRMaj Q, DMatrixRMaj S, DMatrixRMaj hamiltonianToPack)
    {
       int n = A.getNumRows();
 
       if (ATranspose == null)
       {
-         ATranspose = new DenseMatrix64F(n, n);
-         CommonOps.transpose(A, ATranspose);
+         ATranspose = new DMatrixRMaj(n, n);
+         CommonOps_DDRM.transpose(A, ATranspose);
       }
 
       hamiltonianToPack.reshape(2 * n, 2 * n);
@@ -38,12 +39,12 @@ public class CARETools
       MatrixTools.setMatrixBlock(hamiltonianToPack, n, n, ATranspose, 0, 0, n, n, -1.0);
    }
 
-   public static void computeRiccatiRate(DenseMatrix64F P, DenseMatrix64F A, DenseMatrix64F Q, DenseMatrix64F S, DenseMatrix64F PDotToPack)
+   public static void computeRiccatiRate(DMatrixRMaj P, DMatrixRMaj A, DMatrixRMaj Q, DMatrixRMaj S, DMatrixRMaj PDotToPack)
    {
       NativeCommonOps.multQuad(P, S, PDotToPack);
-      CommonOps.scale(-1.0, PDotToPack);
-      CommonOps.multAddTransA(A, P, PDotToPack);
-      CommonOps.multAdd(P, A, PDotToPack);
-      CommonOps.addEquals(PDotToPack, Q);
+      CommonOps_DDRM.scale(-1.0, PDotToPack);
+      CommonOps_DDRM.multAddTransA(A, P, PDotToPack);
+      CommonOps_DDRM.multAdd(P, A, PDotToPack);
+      CommonOps_DDRM.addEquals(PDotToPack, Q);
    }
 }

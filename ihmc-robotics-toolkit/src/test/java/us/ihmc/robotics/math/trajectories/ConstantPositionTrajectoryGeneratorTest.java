@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
@@ -25,7 +25,7 @@ public class ConstantPositionTrajectoryGeneratorTest
    private ReferenceFrame referenceFrame;
    private PositionProvider positionProvider;
    private FramePoint3D position;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private static double finalTime = 10.0;
    private double xValue = Math.random();
@@ -35,10 +35,10 @@ public class ConstantPositionTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionProvider = new ConstantPositionProvider(position);
-      parentRegistry = new YoVariableRegistry("registry");
+      parentRegistry = new YoRegistry("registry");
    }
 
    @AfterEach

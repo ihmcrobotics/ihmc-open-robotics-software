@@ -22,7 +22,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -33,8 +33,8 @@ public class TestEnvironmentTools
       Point2D wallPointD = new Point2D(0.0, 5.0);
 
       RigidBodyTransform wallTransform = new RigidBodyTransform();
-      wallTransform.setTranslation(-10.0, 0.0, 0.0);
-      wallTransform.setRotationPitch(-Math.PI / 2.0);
+      wallTransform.getTranslation().set(-10.0, 0.0, 0.0);
+      wallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion wallRegion = new PlanarRegion(wallTransform,
                                                  new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
@@ -55,7 +55,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -66,14 +66,14 @@ public class TestEnvironmentTools
       Point2D wallPointD = new Point2D(0.0, 4.5);
 
       RigidBodyTransform leftWallTransform = new RigidBodyTransform();
-      leftWallTransform.setTranslation(-10.0, 0.5, 0.0);
-      leftWallTransform.setRotationPitch(-Math.PI / 2.0);
+      leftWallTransform.getTranslation().set(-10.0, 0.5, 0.0);
+      leftWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion leftWallRegion = new PlanarRegion(leftWallTransform,
                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
       RigidBodyTransform rightWallTransform = new RigidBodyTransform();
-      rightWallTransform.setTranslation(-10.0, -5.0, 0.0);
-      rightWallTransform.setRotationPitch(-Math.PI / 2.0);
+      rightWallTransform.getTranslation().set(-10.0, -5.0, 0.0);
+      rightWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion rightWallRegion = new PlanarRegion(rightWallTransform,
                                                       new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
@@ -95,7 +95,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -106,14 +106,14 @@ public class TestEnvironmentTools
       Point2D wallPointD = new Point2D(0.0, 4.25);
 
       RigidBodyTransform leftWallTransform = new RigidBodyTransform();
-      leftWallTransform.setTranslation(-10.0, 0.75, 0.0);
-      leftWallTransform.setRotationPitch(-Math.PI / 2.0);
+      leftWallTransform.getTranslation().set(-10.0, 0.75, 0.0);
+      leftWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion leftWallRegion = new PlanarRegion(leftWallTransform,
                                                      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
       RigidBodyTransform rightWallTransform = new RigidBodyTransform();
-      rightWallTransform.setTranslation(-10.0, -5.0, 0.0);
-      rightWallTransform.setRotationPitch(-Math.PI / 2.0);
+      rightWallTransform.getTranslation().set(-10.0, -5.0, 0.0);
+      rightWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion rightWallRegion = new PlanarRegion(rightWallTransform,
                                                       new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
@@ -135,7 +135,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -146,14 +146,14 @@ public class TestEnvironmentTools
       Point2D frontWallPointD = new Point2D(0.0, 5.0);
 
       RigidBodyTransform frontWallTransform = new RigidBodyTransform();
-      frontWallTransform.setTranslation(-11.5, 0.0, 0.0);
-      frontWallTransform.setRotationPitch(-Math.PI / 2.0);
+      frontWallTransform.getTranslation().set(-11.5, 0.0, 0.0);
+      frontWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform backWallTransform = new RigidBodyTransform();
-      backWallTransform.setTranslation(-8.5, 0.0, 0.0);
-      backWallTransform.setRotationPitch(-Math.PI / 2.0);
+      backWallTransform.getTranslation().set(-8.5, 0.0, 0.0);
+      backWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
@@ -163,8 +163,8 @@ public class TestEnvironmentTools
       Point2D sideWallPointD = new Point2D(0.0, 3.0);
 
       RigidBodyTransform sideWallTransform = new RigidBodyTransform();
-      sideWallTransform.setTranslation(-11.5, 0.0, 0.0);
-      sideWallTransform.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      sideWallTransform.getTranslation().set(-11.5, 0.0, 0.0);
+      sideWallTransform.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion sideWallRegion = new PlanarRegion(sideWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
@@ -187,7 +187,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -198,14 +198,14 @@ public class TestEnvironmentTools
       Point2D frontWallPointD = new Point2D(0.0, 9.0);
 
       RigidBodyTransform frontWallTransform = new RigidBodyTransform();
-      frontWallTransform.setTranslation(-11.5, -4.5, 0.0);
-      frontWallTransform.setRotationPitch(-Math.PI / 2.0);
+      frontWallTransform.getTranslation().set(-11.5, -4.5, 0.0);
+      frontWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform backWallTransform = new RigidBodyTransform();
-      backWallTransform.setTranslation(-8.5, -4.5, 0.0);
-      backWallTransform.setRotationPitch(-Math.PI / 2.0);
+      backWallTransform.getTranslation().set(-8.5, -4.5, 0.0);
+      backWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
@@ -215,14 +215,14 @@ public class TestEnvironmentTools
       Point2D sideWallPointD = new Point2D(0.0, 3.0);
 
       RigidBodyTransform leftSideWall = new RigidBodyTransform();
-      leftSideWall.setTranslation(-11.5, 4.5, 0.0);
-      leftSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      leftSideWall.getTranslation().set(-11.5, 4.5, 0.0);
+      leftSideWall.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       RigidBodyTransform rightSideWall = new RigidBodyTransform();
-      rightSideWall.setTranslation(-11.5, -4.5, 0.0);
-      rightSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      rightSideWall.getTranslation().set(-11.5, -4.5, 0.0);
+      rightSideWall.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
@@ -246,13 +246,13 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
       // set up island plane, 20 x 10
       RigidBodyTransform islandTransform = new RigidBodyTransform();
-      islandTransform.setTranslation(-10.0, 10.2, 0.0);
+      islandTransform.getTranslation().set(-10.0, 10.2, 0.0);
       PlanarRegion islandPlaneRegion = new PlanarRegion(islandTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -263,14 +263,14 @@ public class TestEnvironmentTools
       Point2D frontWallPointD = new Point2D(0.0, 9.0);
 
       RigidBodyTransform frontWallTransform = new RigidBodyTransform();
-      frontWallTransform.setTranslation(-11.5, -4.5, 0.0);
-      frontWallTransform.setRotationPitch(-Math.PI / 2.0);
+      frontWallTransform.getTranslation().set(-11.5, -4.5, 0.0);
+      frontWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform backWallTransform = new RigidBodyTransform();
-      backWallTransform.setTranslation(-8.5, -4.5, 0.0);
-      backWallTransform.setRotationPitch(-Math.PI / 2.0);
+      backWallTransform.getTranslation().set(-8.5, -4.5, 0.0);
+      backWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
@@ -280,14 +280,14 @@ public class TestEnvironmentTools
       Point2D sideWallPointD = new Point2D(0.0, 3.0);
 
       RigidBodyTransform leftSideWall = new RigidBodyTransform();
-      leftSideWall.setTranslation(-11.5, 4.5, 0.0);
-      leftSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      leftSideWall.getTranslation().set(-11.5, 4.5, 0.0);
+      leftSideWall.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
       RigidBodyTransform rightSideWall = new RigidBodyTransform();
-      rightSideWall.setTranslation(-11.5, -4.5, 0.0);
-      rightSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      rightSideWall.getTranslation().set(-11.5, -4.5, 0.0);
+      rightSideWall.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
@@ -312,7 +312,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -323,14 +323,14 @@ public class TestEnvironmentTools
       Point2D frontWallPointD = new Point2D(0.0, 4.5);
 
       RigidBodyTransform frontLeftWallTransform = new RigidBodyTransform();
-      frontLeftWallTransform.setTranslation(-11.5, 0.5, 0.0);
-      frontLeftWallTransform.setRotationPitch(-Math.PI / 2.0);
+      frontLeftWallTransform.getTranslation().set(-11.5, 0.5, 0.0);
+      frontLeftWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion frontLeftWallRegion = new PlanarRegion(frontLeftWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
       RigidBodyTransform frontRightWallTransform = new RigidBodyTransform();
-      frontRightWallTransform.setTranslation(-11.5, -5.0, 0.0);
-      frontRightWallTransform.setRotationPitch(-Math.PI / 2.0);
+      frontRightWallTransform.getTranslation().set(-11.5, -5.0, 0.0);
+      frontRightWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion frontRightWallRegion = new PlanarRegion(frontRightWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
 
@@ -341,14 +341,14 @@ public class TestEnvironmentTools
       Point2D backWallPointD = new Point2D(0.0, 4.25);
 
       RigidBodyTransform backLeftWallTransform = new RigidBodyTransform();
-      backLeftWallTransform.setTranslation(-8.5, 0.75, 0.0);
-      backLeftWallTransform.setRotationPitch(-Math.PI / 2.0);
+      backLeftWallTransform.getTranslation().set(-8.5, 0.75, 0.0);
+      backLeftWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion backLeftWallRegion = new PlanarRegion(backLeftWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
 
       RigidBodyTransform backRightWallTransform = new RigidBodyTransform();
-      backRightWallTransform.setTranslation(-8.5, -5.0, 0.0);
-      backRightWallTransform.setRotationPitch(-Math.PI / 2.0);
+      backRightWallTransform.getTranslation().set(-8.5, -5.0, 0.0);
+      backRightWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion backRightWallRegion = new PlanarRegion(backRightWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(backWallPointA, backWallPointB, backWallPointC, backWallPointD)));
 
@@ -358,8 +358,8 @@ public class TestEnvironmentTools
       Point2D sideWallPointD = new Point2D(0.0, 3.0);
 
       RigidBodyTransform leftSideWallTransform = new RigidBodyTransform();
-      leftSideWallTransform.setTranslation(-11.5, 0.625, 0.0);
-      leftSideWallTransform.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      leftSideWallTransform.getTranslation().set(-11.5, 0.625, 0.0);
+      leftSideWallTransform.getRotation().setYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
       PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
 
@@ -384,7 +384,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(-10.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -395,8 +395,8 @@ public class TestEnvironmentTools
       Point2D wallPointD = new Point2D(0.0, 5.0);
 
       RigidBodyTransform wallTransform = new RigidBodyTransform();
-      wallTransform.setTranslation(-8.5, 0.0, 0.0);
-      wallTransform.setRotationPitch(-Math.PI / 2.0);
+      wallTransform.getTranslation().set(-8.5, 0.0, 0.0);
+      wallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion wallRegion = new PlanarRegion(wallTransform,
                                                  new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(wallPointA, wallPointB, wallPointC, wallPointD)));
 
@@ -406,8 +406,8 @@ public class TestEnvironmentTools
       Point2D otherWallPointD = new Point2D(0.0, 4.5);
 
       RigidBodyTransform otherWallTransform = new RigidBodyTransform();
-      otherWallTransform.setTranslation(-11.5, 0.5, 0.0);
-      otherWallTransform.setRotationPitch(-Math.PI / 2.0);
+      otherWallTransform.getTranslation().set(-11.5, 0.5, 0.0);
+      otherWallTransform.getRotation().setToPitchOrientation(-Math.PI / 2.0);
       PlanarRegion otherWallRegion = new PlanarRegion(otherWallTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(otherWallPointA, otherWallPointB, otherWallPointC, otherWallPointD)));
 
@@ -429,7 +429,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-5.0, -2.5);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(0.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(0.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -439,7 +439,7 @@ public class TestEnvironmentTools
       Point2D otherGroundPlanePointD = new Point2D(2.5, -20.0);
 
       RigidBodyTransform groundTransformB = new RigidBodyTransform();
-      groundTransformB.setTranslation(7.5, 15.0, 0.0);
+      groundTransformB.getTranslation().set(7.5, 15.0, 0.0);
       PlanarRegion groundPlaneRegionB = new PlanarRegion(groundTransformB, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(otherGroundPlanePointA, otherGroundPlanePointB, otherGroundPlanePointC, otherGroundPlanePointD)));
 
@@ -464,12 +464,12 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-length / 2.0, -width / 2.0);
 
       RigidBodyTransform groundTransform1 = new RigidBodyTransform();
-      groundTransform1.setTranslation(0.0, 0.0, 0.0);
+      groundTransform1.getTranslation().set(0.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion1 = new PlanarRegion(groundTransform1, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
       RigidBodyTransform groundTransform2 = new RigidBodyTransform();
-      groundTransform2.setTranslation(length, 0.0, 0.0);
+      groundTransform2.getTranslation().set(length, 0.0, 0.0);
       PlanarRegion groundPlaneRegion2 = new PlanarRegion(groundTransform2, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -493,7 +493,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePoint1D = new Point2D(-length / 2.0, -width / 2.0);
 
       RigidBodyTransform groundTransform1 = new RigidBodyTransform();
-      groundTransform1.setTranslation(0.0, 0.0, 0.0);
+      groundTransform1.getTranslation().set(0.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion1 = new PlanarRegion(groundTransform1, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePoint1A, groundPlanePoint1B, groundPlanePoint1C, groundPlanePoint1D)));
 
@@ -505,7 +505,7 @@ public class TestEnvironmentTools
       Point2D groundPlanePoint2D = new Point2D(-length / 2.0, -width / 2.0);
 
       RigidBodyTransform groundTransform2 = new RigidBodyTransform();
-      groundTransform2.setTranslation(length, 0.0, 0.0);
+      groundTransform2.getTranslation().set(length, 0.0, 0.0);
       PlanarRegion groundPlaneRegion2 = new PlanarRegion(groundTransform2, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePoint2A, groundPlanePoint2B, groundPlanePoint2C, groundPlanePoint2D)));
 
@@ -527,12 +527,12 @@ public class TestEnvironmentTools
       Point2D groundPlanePointD = new Point2D(-5.0, -width / 2.0);
 
       RigidBodyTransform groundTransform = new RigidBodyTransform();
-      groundTransform.setTranslation(0.0, 0.0, 0.0);
+      groundTransform.getTranslation().set(0.0, 0.0, 0.0);
       PlanarRegion groundPlaneRegion1 = new PlanarRegion(groundTransform, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
       RigidBodyTransform groundTransform2 = new RigidBodyTransform();
-      groundTransform2.setTranslation(0.0, 10.0, 0.0);
+      groundTransform2.getTranslation().set(0.0, 10.0, 0.0);
       PlanarRegion groundPlaneRegion2 = new PlanarRegion(groundTransform2, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
 
@@ -542,7 +542,7 @@ public class TestEnvironmentTools
       Point2D otherGroundPlanePointD = new Point2D(width / 2.0, -(5.0 + width / 2.0));
 
       RigidBodyTransform groundTransformB = new RigidBodyTransform();
-      groundTransformB.setTranslation(5.0 + width / 2.0 + 0.05, 5.0, 0.0);
+      groundTransformB.getTranslation().set(5.0 + width / 2.0 + 0.05, 5.0, 0.0);
       PlanarRegion groundPlaneRegion3 = new PlanarRegion(groundTransformB, new ConvexPolygon2D(
             Vertex2DSupplier.asVertex2DSupplier(otherGroundPlanePointA, otherGroundPlanePointB, otherGroundPlanePointC, otherGroundPlanePointD)));
 

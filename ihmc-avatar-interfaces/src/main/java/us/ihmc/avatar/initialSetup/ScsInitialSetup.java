@@ -25,7 +25,7 @@ public interface ScsInitialSetup
    public abstract int getSimulationDataBufferSize();
    public abstract int getRecordFrequency();
    public abstract double getGravity();
-//   public abstract ScsPhysics createPhysics( ScsCollisionConfigure collisionConfigure , YoVariableRegistry registry );
+//   public abstract ScsPhysics createPhysics( ScsCollisionConfigure collisionConfigure , YoRegistry registry );
    public abstract GroundProfile3D getGroundProfile3D();
 //   public abstract SteppingStones getSteppingStones();
    public abstract DynamicIntegrationMethod getDynamicIntegrationMethod();

@@ -9,10 +9,10 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,10 +31,10 @@ import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * Module to estimate unknown external wrenches, i.e. contacts that are not expected from the controller
@@ -49,7 +49,7 @@ public class ExternalWrenchEstimator implements RobotController
    private static final double defaultEstimatorGain = 0.7;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoBoolean requestInitialize = new YoBoolean("requestInitialize", registry);
 
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
@@ -58,30 +58,30 @@ public class ExternalWrenchEstimator implements RobotController
 
    private final JointBasics[] joints;
    private final int dofs;
-   private final DenseMatrix64F tau;
-   private final DenseMatrix64F qd;
+   private final DMatrixRMaj tau;
+   private final DMatrixRMaj qd;
 
-   private final DenseMatrix64F currentIntegrandValue;
-   private final DenseMatrix64F currentIntegratedValue;
-   private final DenseMatrix64F observedExternalJointTorque;
-   private final DenseMatrix64F hqd0;
-   private final DenseMatrix64F hqd;
-   private final DenseMatrix64F massMatrix;
-   private final DenseMatrix64F massMatrixPrev;
-   private final DenseMatrix64F massMatrixDot;
-   private final DenseMatrix64F coriolisGravityTerm;
+   private final DMatrixRMaj currentIntegrandValue;
+   private final DMatrixRMaj currentIntegratedValue;
+   private final DMatrixRMaj observedExternalJointTorque;
+   private final DMatrixRMaj hqd0;
+   private final DMatrixRMaj hqd;
+   private final DMatrixRMaj massMatrix;
+   private final DMatrixRMaj massMatrixPrev;
+   private final DMatrixRMaj massMatrixDot;
+   private final DMatrixRMaj coriolisGravityTerm;
 
-   private final BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
-   private final Consumer<DenseMatrix64F> tauSetter;
+   private final BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
+   private final Consumer<DMatrixRMaj> tauSetter;
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
 
    private final List<EstimatorContactPoint> contactPoints = new ArrayList<>();
    private final PointJacobian pointJacobian = new PointJacobian();
-   private DenseMatrix64F externalWrenchJacobian;
-   private DenseMatrix64F externalWrenchJacobianTranspose;
-   private DenseMatrix64F estimatedExternalWrenchMatrix;
+   private DMatrixRMaj externalWrenchJacobian;
+   private DMatrixRMaj externalWrenchJacobianTranspose;
+   private DMatrixRMaj estimatedExternalWrenchMatrix;
    private DampedLeastSquaresSolver forceEstimateSolver;
 
    private final YoFixedFrameSpatialVector[] estimatedExternalWrenches = new YoFixedFrameSpatialVector[maximumNumberOfContactPoints];
@@ -97,10 +97,10 @@ public class ExternalWrenchEstimator implements RobotController
     */
    public ExternalWrenchEstimator(JointBasics[] joints,
                                   double dt,
-                                  BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter,
-                                  Consumer<DenseMatrix64F> tauSetter,
+                                  BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
+                                  Consumer<DMatrixRMaj> tauSetter,
                                   YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.tauSetter = tauSetter;
@@ -110,17 +110,17 @@ public class ExternalWrenchEstimator implements RobotController
 
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      this.currentIntegrandValue = new DenseMatrix64F(dofs, 1);
-      this.currentIntegratedValue = new DenseMatrix64F(dofs, 1);
-      this.observedExternalJointTorque = new DenseMatrix64F(dofs, 1);
-      this.hqd = new DenseMatrix64F(dofs, 1);
-      this.massMatrix = new DenseMatrix64F(dofs, dofs);
-      this.massMatrixPrev = new DenseMatrix64F(dofs, dofs);
-      this.massMatrixDot = new DenseMatrix64F(dofs, dofs);
-      this.coriolisGravityTerm = new DenseMatrix64F(dofs, 1);
-      this.tau = new DenseMatrix64F(dofs, 1);
-      this.qd = new DenseMatrix64F(dofs, 1);
-      this.hqd0 = new DenseMatrix64F(dofs, 1);
+      this.currentIntegrandValue = new DMatrixRMaj(dofs, 1);
+      this.currentIntegratedValue = new DMatrixRMaj(dofs, 1);
+      this.observedExternalJointTorque = new DMatrixRMaj(dofs, 1);
+      this.hqd = new DMatrixRMaj(dofs, 1);
+      this.massMatrix = new DMatrixRMaj(dofs, dofs);
+      this.massMatrixPrev = new DMatrixRMaj(dofs, dofs);
+      this.massMatrixDot = new DMatrixRMaj(dofs, dofs);
+      this.coriolisGravityTerm = new DMatrixRMaj(dofs, 1);
+      this.tau = new DMatrixRMaj(dofs, 1);
+      this.qd = new DMatrixRMaj(dofs, 1);
+      this.hqd0 = new DMatrixRMaj(dofs, 1);
       this.solverAlpha.set(0.001);
 
       this.yoObservedExternalJointTorque = new YoDouble[dofs];
@@ -144,7 +144,7 @@ public class ExternalWrenchEstimator implements RobotController
          String nameSuffix;
          if (i < 6 && hasFloatingBase)
          {
-            nameSuffix = (i < 3 ? "Ang" : "Lin") + Axis.values[i % 3];
+            nameSuffix = (i < 3 ? "Ang" : "Lin") + Axis3D.values[i % 3];
          }
          else
          {
@@ -240,8 +240,8 @@ public class ExternalWrenchEstimator implements RobotController
    public void initialize()
    {
       firstTick = true;
-      CommonOps.fill(observedExternalJointTorque, 0.0);
-      CommonOps.fill(currentIntegratedValue, 0.0);
+      CommonOps_DDRM.fill(observedExternalJointTorque, 0.0);
+      CommonOps_DDRM.fill(currentIntegratedValue, 0.0);
 
       for (int i = 0; i < maximumNumberOfContactPoints; i++)
       {
@@ -250,9 +250,9 @@ public class ExternalWrenchEstimator implements RobotController
       }
 
       int decisionVariables = contactPoints.stream().mapToInt(p -> p.numberOfDecisionVariables).sum();
-      externalWrenchJacobian = new DenseMatrix64F(decisionVariables, dofs);
-      externalWrenchJacobianTranspose = new DenseMatrix64F(dofs, decisionVariables);
-      estimatedExternalWrenchMatrix = new DenseMatrix64F(decisionVariables, 1);
+      externalWrenchJacobian = new DMatrixRMaj(decisionVariables, dofs);
+      externalWrenchJacobianTranspose = new DMatrixRMaj(dofs, decisionVariables);
+      estimatedExternalWrenchMatrix = new DMatrixRMaj(decisionVariables, 1);
 
       forceEstimateSolver = new DampedLeastSquaresSolver(dofs, solverAlpha.getDoubleValue());
    }
@@ -286,13 +286,13 @@ public class ExternalWrenchEstimator implements RobotController
 
       if (firstTick)
       {
-         CommonOps.mult(massMatrix, qd, hqd0);
+         CommonOps_DDRM.mult(massMatrix, qd, hqd0);
          firstTick = false;
       }
       else
       {
-         CommonOps.subtract(massMatrix, massMatrixPrev, massMatrixDot);
-         CommonOps.scale(1.0 / dt, massMatrixDot);
+         CommonOps_DDRM.subtract(massMatrix, massMatrixPrev, massMatrixDot);
+         CommonOps_DDRM.scale(1.0 / dt, massMatrixDot);
       }
 
       for (int i = 0; i < dofs; i++)
@@ -302,16 +302,16 @@ public class ExternalWrenchEstimator implements RobotController
 
       // update integral
       currentIntegrandValue.set(tau);
-      CommonOps.subtractEquals(currentIntegrandValue, coriolisGravityTerm);
-      CommonOps.multAdd(massMatrixDot, qd, currentIntegrandValue);
-      CommonOps.addEquals(currentIntegrandValue, observedExternalJointTorque);
-      CommonOps.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
+      CommonOps_DDRM.subtractEquals(currentIntegrandValue, coriolisGravityTerm);
+      CommonOps_DDRM.multAdd(massMatrixDot, qd, currentIntegrandValue);
+      CommonOps_DDRM.addEquals(currentIntegrandValue, observedExternalJointTorque);
+      CommonOps_DDRM.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
 
       // calculate observed external joint torque
-      CommonOps.mult(massMatrix, qd, hqd);
-      CommonOps.subtract(hqd, hqd0, observedExternalJointTorque);
-      CommonOps.subtractEquals(observedExternalJointTorque, currentIntegratedValue);
-      CommonOps.scale(wrenchEstimationGain.getDoubleValue(), observedExternalJointTorque);
+      CommonOps_DDRM.mult(massMatrix, qd, hqd);
+      CommonOps_DDRM.subtract(hqd, hqd0, observedExternalJointTorque);
+      CommonOps_DDRM.subtractEquals(observedExternalJointTorque, currentIntegratedValue);
+      CommonOps_DDRM.scale(wrenchEstimationGain.getDoubleValue(), observedExternalJointTorque);
 
       for (int i = 0; i < dofs; i++)
       {
@@ -319,7 +319,7 @@ public class ExternalWrenchEstimator implements RobotController
       }
 
       // compute jacobian
-      CommonOps.fill(externalWrenchJacobian, 0.0);
+      CommonOps_DDRM.fill(externalWrenchJacobian, 0.0);
       for (int i = 0; i < contactPoints.size(); i++)
       {
          EstimatorContactPoint estimatorContactPoint = contactPoints.get(i);
@@ -327,7 +327,7 @@ public class ExternalWrenchEstimator implements RobotController
          int numberOfRows = estimatorContactPoint.numberOfDecisionVariables;
          int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).numberOfDecisionVariables).sum();
 
-         DenseMatrix64F contactJacobianMatrix;
+         DMatrixRMaj contactJacobianMatrix;
          if(estimatorContactPoint.assumeZeroTorque)
          {
             ReferenceFrame baseFrame = estimatorContactPoint.contactPointJacobian.getBaseFrame();
@@ -355,7 +355,7 @@ public class ExternalWrenchEstimator implements RobotController
       }
 
       // solve for external wrench
-      CommonOps.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
+      CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
       forceEstimateSolver.setA(externalWrenchJacobianTranspose);
       forceEstimateSolver.solve(observedExternalJointTorque, estimatedExternalWrenchMatrix);
 
@@ -380,7 +380,7 @@ public class ExternalWrenchEstimator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

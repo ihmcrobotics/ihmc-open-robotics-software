@@ -59,7 +59,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      YoDouble frontLeftSolePositionX = (YoDouble) conductor.getScs().getVariable("frontLeftSolePositionX");
+      YoDouble frontLeftSolePositionX = (YoDouble) conductor.getScs().findVariable("frontLeftSolePositionX");
       double commandedStepPositionX = frontLeftSolePositionX.getDoubleValue() + 0.2;
 
       variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);

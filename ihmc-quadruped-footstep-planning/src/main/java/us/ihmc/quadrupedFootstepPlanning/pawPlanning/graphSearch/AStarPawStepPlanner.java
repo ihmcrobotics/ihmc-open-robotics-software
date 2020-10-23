@@ -1,12 +1,23 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import org.apache.commons.math3.util.Precision;
+
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,23 +28,40 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawStepGraph;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.BodyPathAndPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTarget;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawPlanningCostToGoHeuristics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawPlaningCostToGoHeuristicsBuilder;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawStepGraph;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawNodeComparator;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawPlaningCostToGoHeuristicsBuilder;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.PawPlanningCostToGoHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.StartAndGoalPawListener;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.CliffAvoidancePlanarRegionFootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PlanarRegionPawConstraintDataHolder;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PlanarRegionPawConstraintDataParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PlanarRegionPawSnapTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -42,24 +70,21 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.*;
-import java.util.List;
-
 public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
 
    private RobotQuadrant startQuadrant;
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final PlanarRegionPawConstraintDataHolder highLevelConstraintDataHolder = new PlanarRegionPawConstraintDataHolder();
@@ -105,7 +130,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public AStarPawStepPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeChecker nodeChecker,
                               PawNodeTransitionChecker nodeTransitionChecker, PawPlanningCostToGoHeuristics heuristics, PawNodeExpansion nodeExpansion,
                               PawNodeCost stepCostCalculator, PawNodeSnapper snapper,
-                              PawStepPlannerListener listener, YoVariableRegistry parentRegistry)
+                              PawStepPlannerListener listener, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
@@ -349,7 +374,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    }
 
    @Override
-   public void setGroundPlane(QuadrupedGroundPlaneMessage message)
+   public void setGroundPlane(GroundPlaneMessage message)
    {
    }
 
@@ -500,8 +525,11 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
             PawNode previousNode = path.get(i - 1);
             Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
             PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
-            RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
-            previousPosition.applyTransform(previousSnapTransform);
+            if (previousSnapData != null)
+            {
+               RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+               previousPosition.applyTransform(previousSnapTransform);
+            }
             if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
             {
                LogTools.error("height change error.");
@@ -810,7 +838,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    }
 
    public static AStarPawStepPlanner createPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                   PawStepPlannerListener listener, YoVariableRegistry registry)
+                                                   PawStepPlannerListener listener, YoRegistry registry)
    {
       PawNodeSnapper snapper = new CliffAvoidancePlanarRegionFootstepNodeSnapper(parameters, true);
       PawNodeExpansion expansion = new ParameterBasedPawNodeExpansion(parameters, xGaitSettings);

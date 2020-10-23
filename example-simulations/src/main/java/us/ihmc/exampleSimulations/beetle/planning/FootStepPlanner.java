@@ -3,12 +3,7 @@ package us.ihmc.exampleSimulations.beetle.planning;
 import java.awt.Color;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -25,15 +20,15 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class FootStepPlanner
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private FullRobotModel fullRobotModel;
    private HexapodReferenceFrames referenceFrames;
 
@@ -65,7 +60,7 @@ public class FootStepPlanner
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
    public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
@@ -165,7 +160,7 @@ public class FootStepPlanner
          bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
          centerOfTurn.changeFrame(bodyZUpFrame);
          GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
-         bodyPoseProjectedInFuture.setPosition(bodyPositionProjectedInFuture);
+         bodyPoseProjectedInFuture.getPosition().set(bodyPositionProjectedInFuture);
          bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
          
          rotationAtEnd.setToZero(bodyFrameProjectedInFuture);

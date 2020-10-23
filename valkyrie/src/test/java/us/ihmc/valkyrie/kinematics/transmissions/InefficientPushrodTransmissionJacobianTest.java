@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InefficientPushrodTransmissionJacobianTest
@@ -26,7 +26,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new Robot("testPushrodTransmission");
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
@@ -48,7 +48,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new Robot("testPushrodTransmission");
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble roll = new YoDouble("roll", registry);
       YoDouble pitch = new YoDouble("pitch", registry);
 
@@ -68,7 +68,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new ValkyrieAnkleRobot();
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
@@ -153,7 +153,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -167,7 +167,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new ValkyrieWaistRobot();      
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble roll = new YoDouble("roll", registry);
       YoDouble pitch = new YoDouble("pitch", registry);
 
@@ -257,7 +257,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -309,8 +309,8 @@ public class InefficientPushrodTransmissionJacobianTest
          double heightOfTopAxisAboveBottomAxis = 0.02032;
 
          linkGraphics.translate(0.0, 0.0, 1.0 - heightOfTopAxisAboveBottomAxis);
-         linkGraphics.rotate(Math.PI/2.0, Axis.Z);
-         linkGraphics.rotate(Math.PI/2.0, Axis.X);
+         linkGraphics.rotate(Math.PI/2.0, Axis3D.Z);
+         linkGraphics.rotate(Math.PI/2.0, Axis3D.X);
          linkGraphics.translate(0.10705, 0.37547, -0.22417);
 
          linkGraphics.addModelFile("models/waistPushrods/waist_assem.STL", YoAppearance.Gold());
@@ -336,7 +336,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
 //         linkGraphics.translate(0.0, 0.0, 1.0 - heightOfTopAxisAboveBottomAxis);
          linkGraphics.translate(0.0, 0.0, 1.0);
-         linkGraphics.rotate(Math.PI/2.0, Axis.X);
+         linkGraphics.rotate(Math.PI/2.0, Axis3D.X);
          linkGraphics.translate(-0.03635, -0.0864, -0.07257);
 
          linkGraphics.addModelFile("models/anklePushrods/ankle_assem.STL", YoAppearance.Gold());

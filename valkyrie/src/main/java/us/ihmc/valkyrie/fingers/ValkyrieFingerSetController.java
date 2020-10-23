@@ -15,7 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieFingerSetController implements RobotController
@@ -29,7 +29,7 @@ public class ValkyrieFingerSetController implements RobotController
    public static final boolean DEBUG = false;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final RobotSide robotSide;
 
@@ -47,7 +47,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                       EnumMap<ValkyrieFingerMotorName, PIDGainsReadOnly> gains,
-                                      EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
+                                      EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles, YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.controlDT = controlDT;
@@ -56,7 +56,7 @@ public class ValkyrieFingerSetController implements RobotController
       this.jointHandles = jointHandles;
 
       String sidePrefix = robotSide.getCamelCaseName();
-      registry = new YoVariableRegistry(sidePrefix + name);
+      registry = new YoRegistry(sidePrefix + name);
 
       mapJointsAndVariables();
       fingerSetTrajectoryGenerator = new ValkyrieFingerSetTrajectoryGenerator<>(ValkyrieFingerMotorName.class, robotSide, yoTime, desiredAngles, registry);
@@ -128,7 +128,7 @@ public class ValkyrieFingerSetController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

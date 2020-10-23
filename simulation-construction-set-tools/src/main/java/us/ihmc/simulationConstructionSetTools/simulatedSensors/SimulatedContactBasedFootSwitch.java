@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
@@ -15,7 +15,7 @@ public class SimulatedContactBasedFootSwitch implements ContactBasedFootSwitch
    private final YoBoolean isInContact;
    private final YoDouble contactForceThreshold;
 
-   public SimulatedContactBasedFootSwitch(String name, ExternalForcePoint forcePoint, YoVariableRegistry registry)
+   public SimulatedContactBasedFootSwitch(String name, ExternalForcePoint forcePoint, YoRegistry registry)
    {
       this.name = name;
       this.forcePoint = forcePoint;

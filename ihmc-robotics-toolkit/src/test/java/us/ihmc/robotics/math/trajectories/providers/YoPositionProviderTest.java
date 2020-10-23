@@ -1,18 +1,17 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertSame;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public class YoPositionProviderTest
@@ -22,7 +21,7 @@ public class YoPositionProviderTest
    private YoFramePoint3D yoFramePoint;
    private String namePrefix = "namePrefixTEST";
    private ReferenceFrame referenceFrame;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    
    private YoPositionProvider provider;
    
@@ -33,8 +32,8 @@ public class YoPositionProviderTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      registry = new YoVariableRegistry("parentRegistryTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
+      registry = new YoRegistry("parentRegistryTEST");
       yoFramePoint = new YoFramePoint3D(namePrefix, referenceFrame, registry);
       yoFramePoint.set(xValue, yValue, zValue);
    }

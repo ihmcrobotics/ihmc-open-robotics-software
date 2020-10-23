@@ -2,11 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +10,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -26,28 +22,24 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.*;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 {
    private Logger logger;
    private final NumberFormat doubleFormat = new DecimalFormat("0.000;-0.000");
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final IMUDefinition imuDefinition;
    private final IMUSensorReadOnly imuSensor;
 
-   private final EnumMap<Axis, List<OneDoFJointSensorValidityChecker>> jointValidityCheckers = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, List<OneDoFJointSensorValidityChecker>> jointValidityCheckers = new EnumMap<>(Axis3D.class);
    private final IMUSensorValidityChecker validityChecker;
    private final OrientationAngularVelocityConsistencyChecker orientationVelocityConsistency;
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
@@ -56,20 +48,20 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    private final YoDouble checkUpDuration;
 
    private final YoFrameVector3D imuAngularVelocityInPelvis;
-   private final EnumMap<Axis, YoDouble> meanOfJointVelocities = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, YoDouble> meanOfJointVelocities = new EnumMap<>(Axis3D.class);
 
    private final YoDouble rampDuration;
-   private final EnumMap<Axis, YoDouble> ramps = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, YoDouble> ramps = new EnumMap<>(Axis3D.class);
 
    private final DiagnosticParameters diagnosticParameters;
 
-   private final EnumMap<Axis, List<OneDoFJointBasics>> jointsToWiggleLists = new EnumMap<>(Axis.class);
-   private final EnumMap<Axis, Set<OneDoFJointBasics>> jointsToWiggle = new EnumMap<>(Axis.class);
-   private final EnumMap<Axis, YoDouble> desiredJointPositionOffsets = new EnumMap<>(Axis.class);
-   private final EnumMap<Axis, YoDouble> desiredJointVelocityOffsets = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, List<OneDoFJointBasics>> jointsToWiggleLists = new EnumMap<>(Axis3D.class);
+   private final EnumMap<Axis3D, Set<OneDoFJointBasics>> jointsToWiggle = new EnumMap<>(Axis3D.class);
+   private final EnumMap<Axis3D, YoDouble> desiredJointPositionOffsets = new EnumMap<>(Axis3D.class);
+   private final EnumMap<Axis3D, YoDouble> desiredJointVelocityOffsets = new EnumMap<>(Axis3D.class);
 
-   private final EnumMap<Axis, YoDouble> axisEvaluationStartTime = new EnumMap<>(Axis.class);
-   private final EnumMap<Axis, YoDouble> axisEvaluationEndTime = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, YoDouble> axisEvaluationStartTime = new EnumMap<>(Axis3D.class);
+   private final EnumMap<Axis3D, YoDouble> axisEvaluationEndTime = new EnumMap<>(Axis3D.class);
 
    private final Mean velocityToOrientationQualityMeanCalculator = new Mean();
    private final YoDouble velocityToOrientationQualityMean;
@@ -109,10 +101,10 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       imuSensor = toolbox.getIMUSensorReadOnly(imuName);
 
-      registry = new YoVariableRegistry(imuName + nameSuffix);
+      registry = new YoRegistry(imuName + nameSuffix);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          YoDouble desiredJointPositionOffset = new YoDouble("q_off_d_pelvis" + axis + nameSuffix, registry);
          YoDouble desiredJointVelocityOffset = new YoDouble("qd_off_d_pelvis" + axis + nameSuffix, registry);
@@ -135,7 +127,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       double startTime = 0.0;
       double endTime = checkUpDuration.getDoubleValue() + 2.0 * rampDuration.getDoubleValue();
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          ramps.put(axis, new YoDouble(imuName + nameSuffix + "SignalRamp" + axis, registry));
 
@@ -194,14 +186,14 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          rollJointsAttachedToPelvis.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL));
       }
 
-      jointsToWiggle.put(Axis.X, rollJointsAttachedToPelvis);
-      jointsToWiggle.put(Axis.Y, pitchJointsAttachedToPelvis);
-      jointsToWiggle.put(Axis.Z, yawJointsAttachedToPelvis);
-      jointsToWiggleLists.put(Axis.X, new ArrayList<>(rollJointsAttachedToPelvis));
-      jointsToWiggleLists.put(Axis.Y, new ArrayList<>(pitchJointsAttachedToPelvis));
-      jointsToWiggleLists.put(Axis.Z, new ArrayList<>(yawJointsAttachedToPelvis));
+      jointsToWiggle.put(Axis3D.X, rollJointsAttachedToPelvis);
+      jointsToWiggle.put(Axis3D.Y, pitchJointsAttachedToPelvis);
+      jointsToWiggle.put(Axis3D.Z, yawJointsAttachedToPelvis);
+      jointsToWiggleLists.put(Axis3D.X, new ArrayList<>(rollJointsAttachedToPelvis));
+      jointsToWiggleLists.put(Axis3D.Y, new ArrayList<>(pitchJointsAttachedToPelvis));
+      jointsToWiggleLists.put(Axis3D.Z, new ArrayList<>(yawJointsAttachedToPelvis));
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = new ArrayList<>();
          for (OneDoFJointBasics joint : jointsToWiggle.get(axis))
@@ -241,20 +233,20 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       if (logger != null)
          logger.info("Starting check up for the IMU: " + imuDefinition.getName());
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
          ramps.get(axis).set(0.0);
    }
 
    private boolean enableEstimators = true;
    private boolean disableEstimators = true;
-   private Axis currentAxis = null;
+   private Axis3D currentAxis = null;
 
    @Override
    public void doAction()
    {
       currentAxis = null;
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          double startTime = axisEvaluationStartTime.get(axis).getDoubleValue();
          double endTime = axisEvaluationEndTime.get(axis).getDoubleValue();
@@ -303,7 +295,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       // The idea is to compare the joint velocities against the IMU velocity to look for delay.
       // By taking the negative average the velocity should be pretty close to the provided by the IMU.
       // If close enough the delay estimator should work, allowing us to compare IMU and joint sensors.
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          meanOfJointVelocities.get(axis).set(0.0);
          for (int i = 0; i < jointsToWiggleLists.get(axis).size(); i++)
@@ -347,7 +339,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
    }
 
-   private void enableEstimators(Axis currentAxis)
+   private void enableEstimators(Axis3D currentAxis)
    {
       if (currentAxis != null)
       {
@@ -357,7 +349,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
       else
       {
-         for (Axis axis : Axis.values)
+         for (Axis3D axis : Axis3D.values)
          {
             List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(axis);
             for (int i = 0; i < jointValidityCheckerList.size(); i++)
@@ -370,7 +362,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       delayEstimator.enable();
    }
 
-   private void disableEstimators(Axis currentAxis)
+   private void disableEstimators(Axis3D currentAxis)
    {
       if (currentAxis != null)
       {
@@ -380,7 +372,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
       else
       {
-         for (Axis axis : Axis.values)
+         for (Axis3D axis : Axis3D.values)
          {
             List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = jointValidityCheckers.get(axis);
             for (int i = 0; i < jointValidityCheckerList.size(); i++)
@@ -404,7 +396,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private void updateDesiredJointOffsets()
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          double positionOffset = ramps.get(axis).getDoubleValue() * functionGenerator.getValue(getTimeInCurrentTask());
          double velocityOffset = ramps.get(axis).getDoubleValue() * functionGenerator.getValueDot();
@@ -420,11 +412,11 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       if (logger != null)
          logger.info("Done with check up for the IMU: " + imuDefinition.getName());
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
          ramps.get(axis).set(0.0);
    }
 
-   private void reportCheckUpResults(Axis axis)
+   private void reportCheckUpResults(Axis3D axis)
    {
       if (logger == null)
          return;
@@ -518,7 +510,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          }
       }
 
-      return getTimeInCurrentTask() >= axisEvaluationEndTime.get(Axis.Z).getDoubleValue();
+      return getTimeInCurrentTask() >= axisEvaluationEndTime.get(Axis3D.Z).getDoubleValue();
    }
 
    @Override
@@ -530,7 +522,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    @Override
    public double getDesiredJointPositionOffset(OneDoFJointBasics joint)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          if (jointsToWiggle.get(axis).contains(joint))
             return desiredJointPositionOffsets.get(axis).getDoubleValue();
@@ -541,7 +533,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    @Override
    public double getDesiredJointVelocityOffset(OneDoFJointBasics joint)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          if (jointsToWiggle.get(axis).contains(joint))
             return desiredJointVelocityOffsets.get(axis).getDoubleValue();
@@ -550,7 +542,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   public void attachParentYoVariableRegistry(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.awt.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedSupportPolygons
 {
@@ -28,7 +27,7 @@ public class QuadrupedSupportPolygons
 
    private static boolean VISUALIZE = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedSupportPolygons");
+   private final YoRegistry registry = new YoRegistry("QuadrupedSupportPolygons");
 
    // Reference frames:
    private final ReferenceFrame centerOfFeetZUpFrame;
@@ -47,7 +46,7 @@ public class QuadrupedSupportPolygons
    private final QuadrantDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new QuadrantDependentList<>();
 
    public QuadrupedSupportPolygons(ReferenceFrame centerOfFeetZUpFrame, QuadrantDependentList<YoPlaneContactState> contactStates,
-                                   QuadrantDependentList<MovingReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                                   QuadrantDependentList<MovingReferenceFrame> soleZUpFrames, YoRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfFeetZUpFrame = centerOfFeetZUpFrame;
@@ -106,15 +105,14 @@ public class QuadrupedSupportPolygons
          {
             for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
             {
-               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
+               ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
                if (!contactPoint.isInContact())
                   continue;
 
-               FramePoint3DReadOnly position = contactPoint.getPosition();
-               footPolygonInWorldFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleZUpFrame.addVertexMatchingFrame(position);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(position);
+               footPolygonInWorldFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleZUpFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(contactPoint);
             }
 
             footPolygonInWorldFrame.update();

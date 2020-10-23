@@ -7,10 +7,10 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
-   id("us.ihmc.ihmc-ci") version "5.3"
+   id("us.ihmc.ihmc-build") version "0.22.0"
+   id("us.ihmc.ihmc-ci") version "6.8"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.3.1"
+   id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
 ihmc {
@@ -39,26 +39,25 @@ mainDependencies {
    }
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
-   api("org.georegression:georegression:0.11")
-   api("org.ejml:core:0.30")
-   api("org.ejml:dense64:0.30")
+   api("org.georegression:georegression:0.22")
+   api("org.ejml:ejml-core:0.39")
+   api("org.ejml:ejml-ddense:0.39")
    api("net.java.dev.jna:jna:4.1.0")
-   api("org.boofcv:geo:0.24.1")
-   api("org.boofcv:ip:0.24.1")
-   api("org.boofcv:visualize:0.24.1")
-   api("org.boofcv:io:0.24.1")
-   api("org.boofcv:recognition:0.24.1")
-   api("org.boofcv:calibration:0.24.1")
+   api("org.boofcv:boofcv-geo:0.36")
+   api("org.boofcv:boofcv-ip:0.36")
+   api("org.boofcv:boofcv-swing:0.36")
+   api("org.boofcv:boofcv-io:0.36")
+   api("org.boofcv:boofcv-recognition:0.36")
+   api("org.boofcv:boofcv-calibration:0.36")
    api("us.ihmc.ihmcPerception:valvenet:0.0.4")
    api("us.ihmc.ihmcPerception:cuda:7.5")
-   api("org.ddogleg:ddogleg:0.7")
+   api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.12.2")
-   api("us.ihmc:ihmc-yovariables:0.4.0")
-   api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.14.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
-   api("us.ihmc:ihmc-graphics-description:0.14.1")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:ihmc-yovariables:0.9.6")
+   api("us.ihmc:simulation-construction-set:0.20.6")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
+   api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -70,10 +69,9 @@ mainDependencies {
 }
 
 testDependencies {
-
-   api("us.ihmc:ihmc-commons-testing:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.14.0")
-   api("us.ihmc:simulation-construction-set-test:0.14.0")
+   api("us.ihmc:ihmc-commons-testing:0.30.3")
+   api("us.ihmc:simulation-construction-set:0.20.6")
+   api("us.ihmc:simulation-construction-set-test:0.20.6")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

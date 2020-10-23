@@ -84,9 +84,9 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      initialControllerState.onExit();
+      initialControllerState.onExit(timeInState);
    }
 
    @Override

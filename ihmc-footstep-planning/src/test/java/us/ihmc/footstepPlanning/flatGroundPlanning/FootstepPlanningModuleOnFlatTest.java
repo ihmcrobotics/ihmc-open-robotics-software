@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,6 +21,7 @@ public class FootstepPlanningModuleOnFlatTest
 {
    private final Random random = new Random(727434726273L);
    private static final double stepWidth = 0.3;
+   private final double idealStanceWidth = new DefaultFootstepPlannerParameters().getIdealFootstepWidth();
 
    @Test
    public void testStraightLine()
@@ -33,17 +35,17 @@ public class FootstepPlanningModuleOnFlatTest
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
-      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      Point2D initialMidFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2D initialMidFootPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), initialMidFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
-      request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setGoalFootPoses(idealStanceWidth, goalPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
 
       runTest(goalPose3d, request);
    }
@@ -60,17 +62,17 @@ public class FootstepPlanningModuleOnFlatTest
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
-      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      Point2D initialMidFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2D initialMidFootPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), initialMidFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
-      request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setGoalFootPoses(idealStanceWidth, goalPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
 
       runTest(goalPose3d, request);
    }
@@ -87,17 +89,17 @@ public class FootstepPlanningModuleOnFlatTest
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = Math.toRadians(20.0);
-      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      Point2D initialMidFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2D initialMidFootPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), initialMidFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
-      request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setGoalFootPoses(idealStanceWidth, goalPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
 
       runTest(goalPose3d, request);
    }
@@ -114,17 +116,17 @@ public class FootstepPlanningModuleOnFlatTest
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
-      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      Point2D initialMidFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2D initialMidFootPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), initialMidFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
-      request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setGoalFootPoses(idealStanceWidth, goalPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
 
       runTest(goalPose3d, request);
    }
@@ -141,31 +143,38 @@ public class FootstepPlanningModuleOnFlatTest
       double xInitialStanceFoot = random.nextDouble();
       double yInitialStanceFoot = random.nextDouble();
       double yawInitial = 0.0;
-      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
-      RobotSide initialStanceFootSide = RobotSide.generateRandomRobotSide(random);
+      Point2D initialMidFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2D initialMidFootPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), initialMidFootPosition, yawInitial);
+      RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
-      request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setGoalFootPoses(idealStanceWidth, goalPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
 
       runTest(goalPose3d, request);
    }
 
-
    private void runTest(FramePose3D goalPose3d, FootstepPlannerRequest request)
    {
-      // test without body path
+      // test without A*
+      request.setPerformAStarSearch(false);
       request.setPlanBodyPath(false);
       FootstepPlannerOutput plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
 
-      // test with body path
+      // test with A* without body path
+      request.setPerformAStarSearch(true);
       request.setPlanBodyPath(false);
+      plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
+      assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
+
+      // test with A* and body path
+      request.setPerformAStarSearch(true);
+      request.setPlanBodyPath(true);
       plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
    }

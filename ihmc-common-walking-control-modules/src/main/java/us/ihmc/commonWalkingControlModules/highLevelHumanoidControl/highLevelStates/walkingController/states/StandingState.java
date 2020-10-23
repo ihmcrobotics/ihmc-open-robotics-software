@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -17,7 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class StandingState extends WalkingState
 {
@@ -36,7 +37,7 @@ public class StandingState extends WalkingState
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                         WalkingFailureDetectionControlModule failureDetectionControlModule, WalkingControllerParameters walkingControllerParameters,
-                        YoVariableRegistry parentRegistry)
+                        YoRegistry parentRegistry)
    {
       super(WalkingStateEnum.STANDING, parentRegistry);
 
@@ -89,6 +90,10 @@ public class StandingState extends WalkingState
       balanceManager.enablePelvisXYControl();
       balanceManager.setICPPlanTransferFromSide(null);
       balanceManager.initializeICPPlanForStanding();
+
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
+            .createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.RIGHT);
+      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
 
       walkingMessageHandler.reportWalkingComplete();
 

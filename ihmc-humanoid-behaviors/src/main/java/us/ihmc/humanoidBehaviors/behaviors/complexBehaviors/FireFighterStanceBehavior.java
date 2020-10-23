@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -57,7 +57,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    private BasicStates currentState = BasicStates.SET_STANCE;
    private FullHumanoidRobotModel fullRobotModel;
 
-   public FireFighterStanceBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node,
+   public FireFighterStanceBehavior(String robotName, String name, YoDouble yoTime, ROS2Node ros2Node,
                                     FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
                                     WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {

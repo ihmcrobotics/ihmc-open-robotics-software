@@ -20,7 +20,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,9 +30,9 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 public class DataExporterExcelWorkbookCreator
 {
@@ -41,7 +41,7 @@ public class DataExporterExcelWorkbookCreator
    private final Robot robot;
    private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
    private final List<Joint> allJoints = new ArrayList<Joint>();
-   private final DataBuffer dataBuffer;
+   private final YoBuffer dataBuffer;
 
    private final WritableCellFormat defaultFormat;
    private final WritableCellFormat headerCellFormat;
@@ -49,7 +49,7 @@ public class DataExporterExcelWorkbookCreator
    private final WritableCellFormat smallNumberFormat;
 
 // TODO: currently only does PinJoints
-   public DataExporterExcelWorkbookCreator(Robot robot, DataBuffer dataBuffer)
+   public DataExporterExcelWorkbookCreator(Robot robot, YoBuffer dataBuffer)
    {
       this.robot = robot;
 
@@ -137,7 +137,7 @@ public class DataExporterExcelWorkbookCreator
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Run time [s]: ", headerCellFormat);
-      addNumberToSheet(infoSheet, dataColumn, row, dataBuffer.getEntry(robot.getYoTime()).getMax());
+      addNumberToSheet(infoSheet, dataColumn, row, dataBuffer.getEntry(robot.getYoTime()).getUpperBound());
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Mechanical cost of transport: ", headerCellFormat);
@@ -154,53 +154,53 @@ public class DataExporterExcelWorkbookCreator
       {
          int column = 0;
 
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
+         YoBufferVariableEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         YoBufferVariableEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         YoBufferVariableEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          addHeaderEntry(dataSheet, column, "Joint");
          String jointName = joint.getName();
          addStringToSheet(dataSheet, column++, row, jointName); 
          
          addHeaderEntry(dataSheet, column, "Min joint position [rad]");
-         addNumberToSheet(dataSheet, column++, row, position.getMin());
+         addNumberToSheet(dataSheet, column++, row, position.getLowerBound());
          
          addHeaderEntry(dataSheet, column, "Max joint position [rad]");
-         addNumberToSheet(dataSheet, column++, row, position.getMax());
+         addNumberToSheet(dataSheet, column++, row, position.getUpperBound());
 
          addHeaderEntry(dataSheet, column, "Min joint speed [rad / s]");
-         addNumberToSheet(dataSheet, column++, row, speed.getMin());
+         addNumberToSheet(dataSheet, column++, row, speed.getLowerBound());
          
          addHeaderEntry(dataSheet, column, "Max joint speed [rad / s]");
-         addNumberToSheet(dataSheet, column++, row, speed.getMax());
+         addNumberToSheet(dataSheet, column++, row, speed.getUpperBound());
          
          addHeaderEntry(dataSheet, column, "Min joint torque [Nm]");
-         addNumberToSheet(dataSheet, column++, row, torque.getMin());
+         addNumberToSheet(dataSheet, column++, row, torque.getLowerBound());
 
          addHeaderEntry(dataSheet, column, "Max joint torque [Nm]");
-         addNumberToSheet(dataSheet, column++, row, torque.getMax());
+         addNumberToSheet(dataSheet, column++, row, torque.getUpperBound());
  
          addHeaderEntry(dataSheet, column, "Range of Motion [rad]");
-         double rangeOfMotion = position.getMax() - position.getMin();
+         double rangeOfMotion = position.getUpperBound() - position.getLowerBound();
          addNumberToSheet(dataSheet, column++, row, rangeOfMotion);
          
          addHeaderEntry(dataSheet, column, "Max unsigned speed [rad / s]");
-         double maxUnsignedSpeed = Math.max(Math.abs(speed.getMax()), Math.abs(speed.getMin()));
+         double maxUnsignedSpeed = Math.max(Math.abs(speed.getUpperBound()), Math.abs(speed.getLowerBound()));
          addNumberToSheet(dataSheet, column++, row, maxUnsignedSpeed);
 
          addHeaderEntry(dataSheet, column, "Average of unsigned speed [rad / s]");
-         double averageOfUnsignedSpeed = computeAverage(speed.getData(), true);
+         double averageOfUnsignedSpeed = computeAverage(speed.getBuffer(), true);
          addNumberToSheet(dataSheet, column++, row, averageOfUnsignedSpeed);
 
          addHeaderEntry(dataSheet, column, "Max unsigned torque [Nm]");
-         double maxUnsignedTorque = Math.max(Math.abs(torque.getMax()), Math.abs(torque.getMin()));
+         double maxUnsignedTorque = Math.max(Math.abs(torque.getUpperBound()), Math.abs(torque.getLowerBound()));
          addNumberToSheet(dataSheet, column++, row, maxUnsignedTorque);
 
          addHeaderEntry(dataSheet, column, "Average of unsigned torque [Nm]");
-         double averageOfUnsignedTorque = computeAverage(torque.getData(), true);
+         double averageOfUnsignedTorque = computeAverage(torque.getBuffer(), true);
          addNumberToSheet(dataSheet, column++, row, averageOfUnsignedTorque);
 
-         double[] mechanicalPower = computeMechanicalPower(speed.getData(), torque.getData());
+         double[] mechanicalPower = computeMechanicalPower(speed.getBuffer(), torque.getBuffer());
 
          addHeaderEntry(dataSheet, column, "Max unsigned mechanical power [W]");
          double maxUnsignedMechanicalPower = computeMax(mechanicalPower, true);
@@ -227,17 +227,17 @@ public class DataExporterExcelWorkbookCreator
       double[] zPosition;
       try
       {
-         xPosition = dataBuffer.getEntry("q_x").getData();
-         yPosition = dataBuffer.getEntry("q_y").getData();
-         zPosition = dataBuffer.getEntry("q_z").getData();
+         xPosition = dataBuffer.findVariableEntry("q_x").getBuffer();
+         yPosition = dataBuffer.findVariableEntry("q_y").getBuffer();
+         zPosition = dataBuffer.findVariableEntry("q_z").getBuffer();
       }
       catch (NullPointerException e)
       {
          GroundContactPoint groundContactPoint = robot.getAllGroundContactPoints().get(0);
          YoFramePoint3D yoPosition = groundContactPoint.getYoPosition();
-         xPosition = dataBuffer.getEntry(yoPosition.getYoX()).getData();
-         yPosition = dataBuffer.getEntry(yoPosition.getYoY()).getData();
-         zPosition = dataBuffer.getEntry(yoPosition.getYoZ()).getData();
+         xPosition = dataBuffer.getEntry(yoPosition.getYoX()).getBuffer();
+         yPosition = dataBuffer.getEntry(yoPosition.getYoY()).getBuffer();
+         zPosition = dataBuffer.getEntry(yoPosition.getYoZ()).getBuffer();
       }
       int dataLength = xPosition.length;
       Vector3D totalDistance = new Vector3D();
@@ -254,7 +254,7 @@ public class DataExporterExcelWorkbookCreator
    {
       double ret = 0.0;
       double[] mechanicalPower = computeTotalUnsignedMechanicalPower();
-      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getMax();
+      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound();
       double simulationDT = simulationTime / dataBuffer.getBufferSize();
 
       for (int i = 0; i < mechanicalPower.length; i++)
@@ -267,15 +267,15 @@ public class DataExporterExcelWorkbookCreator
 
    private double[] computeTotalUnsignedMechanicalPower()
    {
-      int dataLength = dataBuffer.getEntry(robot.getYoTime()).getData().length;
+      int dataLength = dataBuffer.getEntry(robot.getYoTime()).getBuffer().length;
       double[] ret = new double[dataLength];
       for (int i = 0; i < dataLength; i++)
          ret[i] = 0.0;
 
       for (PinJoint joint : pinJoints)
       {
-         double[] speed = dataBuffer.getEntry(joint.getQDYoVariable()).getData();
-         double[] torque = dataBuffer.getEntry(joint.getTauYoVariable()).getData();
+         double[] speed = dataBuffer.getEntry(joint.getQDYoVariable()).getBuffer();
+         double[] torque = dataBuffer.getEntry(joint.getTauYoVariable()).getBuffer();
 
          double[] jointMechincalPower = computeMechanicalPower(speed, torque);
 
@@ -354,10 +354,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D offset = new Vector3D();
          joint.getOffset(offset);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "Joint offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
          }
 
          // Mass
@@ -369,10 +369,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "CoM offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
          }
 
          // Mass moment of inertia
@@ -396,13 +396,13 @@ public class DataExporterExcelWorkbookCreator
    {
       WritableSheet jointDataSheet = workbook.createSheet("Joint Data", workbook.getNumberOfSheets());
       int column = 0;
-      writeJointDataColumn(jointDataSheet, column++, dataBuffer.getEntry("t"), true);
+      writeJointDataColumn(jointDataSheet, column++, dataBuffer.findVariableEntry("t"), true);
       
       for (PinJoint joint : pinJoints)
       {
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
+         YoBufferVariableEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         YoBufferVariableEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         YoBufferVariableEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          writeJointDataColumn(jointDataSheet, column++, position, false);
          writeJointDataColumn(jointDataSheet, column++, speed, false);
@@ -413,14 +413,14 @@ public class DataExporterExcelWorkbookCreator
       }
    }
 
-   private void writeJointDataColumn(WritableSheet dataSheet, int column, DataBufferEntry dataBufferEntry, boolean unsigned)
+   private void writeJointDataColumn(WritableSheet dataSheet, int column, YoBufferVariableEntry dataBufferEntry, boolean unsigned)
    {
       int row = 0;
       String name = dataBufferEntry.getVariableName();
       if (unsigned)
          name = name + " unsigned";
       addStringToSheet(dataSheet, column, row++, name);
-      double[] data = dataBufferEntry.getData();
+      double[] data = dataBufferEntry.getBuffer();
       for (int i = 0; i < data.length; i++)
       {
          double value = data[i];
@@ -430,13 +430,13 @@ public class DataExporterExcelWorkbookCreator
       }
    }
 
-   private void writeMechanicalPowerJointDataColumn(WritableSheet dataSheet, int column, DataBufferEntry speed, DataBufferEntry torque, String jointName)
+   private void writeMechanicalPowerJointDataColumn(WritableSheet dataSheet, int column, YoBufferVariableEntry speed, YoBufferVariableEntry torque, String jointName)
    {
       int row = 0;
       String name = jointName + " unsigned mechanical power";
       addStringToSheet(dataSheet, column, row++, name);
-      double[] speedData = speed.getData();
-      double[] torqueData = torque.getData();
+      double[] speedData = speed.getBuffer();
+      double[] torqueData = torque.getBuffer();
 
       if (speedData.length != torqueData.length)
          throw new RuntimeException("speedData.length != torqueData.length");

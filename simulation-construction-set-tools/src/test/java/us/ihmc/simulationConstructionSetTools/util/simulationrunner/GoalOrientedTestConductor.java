@@ -48,13 +48,13 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
       
-      YoDouble yoTime = (YoDouble) scs.getVariable("t");
-      yoTime.addVariableChangedListener(this::notifyOfVariableChange);
+      YoDouble yoTime = (YoDouble) scs.findVariable("t");
+      yoTime.addListener(this::notifyOfVariableChange);
       scs.startOnAThread();
       scs.addSimulateDoneListener(this);
    }
    
-   public void notifyOfVariableChange(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable v)
    {
       if (yoTimeChangedListenerActive)
       {

@@ -1,57 +1,76 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.robotics.robotSide.RobotSide;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.robotSide.RobotSide;
-
-public class FootstepPlan
+public class FootstepPlan implements FootstepPlanReadOnly
 {
-   private final ArrayList<SimpleFootstep> footsteps = new ArrayList<>();
-   private FramePose3DReadOnly lowLevelPlanGoal = null;
+   private final ArrayList<PlannedFootstep> footsteps = new ArrayList<>();
+   private double finalTransferSplitFraction = -1.0;
+   private double finalTransferWeightDistribution = -1.0;
 
    public FootstepPlan()
    {
+
    }
 
-   public void setLowLevelPlanGoal(FramePose3DReadOnly lowLevelPlanGoal)
+   /** deep copy */
+   public FootstepPlan(FootstepPlan otherFootstepPlan)
    {
-      this.lowLevelPlanGoal = lowLevelPlanGoal;
+      for (PlannedFootstep otherFootstep : otherFootstepPlan.footsteps)
+      {
+         footsteps.add(new PlannedFootstep(otherFootstep));
+      }
+
+      this.finalTransferSplitFraction = otherFootstepPlan.finalTransferSplitFraction;
+      this.finalTransferWeightDistribution = otherFootstepPlan.finalTransferWeightDistribution;
    }
 
+   @Override
    public int getNumberOfSteps()
    {
       return footsteps.size();
    }
 
-   public SimpleFootstep getFootstep(int footstepIndex)
+   @Override
+   public PlannedFootstep getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }
 
-   public void addFootstep(SimpleFootstep footstep)
+   public void addFootstep(PlannedFootstep footstep)
    {
       footsteps.add(footstep);
    }
 
-   public void addFootstepPlan(FootstepPlan other)
+   public PlannedFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
-      footsteps.addAll(other.footsteps);
-   }
-
-   public SimpleFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
-   {
-      SimpleFootstep simpleFootstep = new SimpleFootstep(robotSide, soleFramePose);
+      PlannedFootstep simpleFootstep = new PlannedFootstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);
       return simpleFootstep;
+   }
+
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction;
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution;
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      this.finalTransferSplitFraction = finalTransferSplitFraction;
+   }
+
+   public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
+   {
+      this.finalTransferWeightDistribution = finalTransferWeightDistribution;
    }
 
    public void reverse()
@@ -61,24 +80,13 @@ public class FootstepPlan
 
    public void clear()
    {
-      lowLevelPlanGoal = null;
       footsteps.clear();
+      finalTransferSplitFraction = -1.0;
+      finalTransferWeightDistribution = -1.0;
    }
 
    public void remove(int footstepIndex)
    {
       footsteps.remove(footstepIndex);
-   }
-
-   public boolean hasLowLevelPlanGoal()
-   {
-      return lowLevelPlanGoal != null;
-   }
-
-   public FramePose3DReadOnly getLowLevelPlanGoal()
-   {
-      if (hasLowLevelPlanGoal())
-         lowLevelPlanGoal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      return lowLevelPlanGoal;
    }
 }

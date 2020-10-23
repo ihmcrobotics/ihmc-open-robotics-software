@@ -50,6 +50,8 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,6 +77,9 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorHandleTransformToWorld(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +93,8 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_6(data.getDoorHeight());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorHandleTransformToWorld(), cdr);
+      cdr.write_type_7(data.getTrustedPosition());
+
    }
 
    public static void read(controller_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.CDR cdr)
@@ -99,6 +106,8 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setDoorHeight(cdr.read_type_6());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorHandleTransformToWorld(), cdr);	
+      data.setTrustedPosition(cdr.read_type_7());
+      	
 
    }
 
@@ -113,6 +122,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("door_height", data.getDoorHeight());
       ser.write_type_a("door_handle_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHandleTransformToWorld());
 
+      ser.write_type_7("trusted_position", data.getTrustedPosition());
    }
 
    @Override
@@ -126,6 +136,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setDoorHeight(ser.read_type_6("door_height"));
       ser.read_type_a("door_handle_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHandleTransformToWorld());
 
+      data.setTrustedPosition(ser.read_type_7("trusted_position"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.DoorParameterPacket src, controller_msgs.msg.dds.DoorParameterPacket dest)

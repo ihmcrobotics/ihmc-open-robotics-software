@@ -27,28 +27,46 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 
 /**
- * Euclidean distance from a {@link Cylinder3D_F64} for use with {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.
+ * Euclidean distance from a {@link Cylinder3D_F64} for use with
+ * {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.
  *
  * @author Peter Abeles
  */
-public class DistanceCylinderToPoint3D implements DistanceFromModel<Cylinder3D_F64, Point3D_F64> {
+public class DistanceCylinderToPoint3D implements DistanceFromModel<Cylinder3D_F64, Point3D_F64>
+{
 
-	Cylinder3D_F64 model;
+   Cylinder3D_F64 model;
 
-	@Override
-	public void setModel(Cylinder3D_F64 model) {
-		this.model = model;
-	}
+   @Override
+   public void setModel(Cylinder3D_F64 model)
+   {
+      this.model = model;
+   }
 
-	@Override
-	public double computeDistance(Point3D_F64 pt) {
-		return Math.abs(Distance3D_F64.distance(model, pt));
-	}
+   @Override
+   public double computeDistance(Point3D_F64 pt)
+   {
+      return Math.abs(Distance3D_F64.distance(model, pt));
+   }
 
-	@Override
-	public void computeDistance(List<Point3D_F64> points, double[] distance) {
-		for (int i = 0; i < points.size(); i++) {
-			distance[i] = Math.abs(Distance3D_F64.distance(model, points.get(i)));
-		}
-	}
+   @Override
+   public void computeDistance(List<Point3D_F64> points, double[] distance)
+   {
+      for (int i = 0; i < points.size(); i++)
+      {
+         distance[i] = Math.abs(Distance3D_F64.distance(model, points.get(i)));
+      }
+   }
+
+   @Override
+   public Class<Point3D_F64> getPointType()
+   {
+      return Point3D_F64.class;
+   }
+
+   @Override
+   public Class<Cylinder3D_F64> getModelType()
+   {
+      return Cylinder3D_F64.class;
+   }
 }

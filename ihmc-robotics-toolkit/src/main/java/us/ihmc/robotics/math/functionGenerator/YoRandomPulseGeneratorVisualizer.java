@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoRandomPulseGeneratorVisualizer implements RobotController
 {
-   private YoVariableRegistry registry = new YoVariableRegistry("YoFunGenViz");
+   private YoRegistry registry = new YoRegistry("YoFunGenViz");
 
    private YoRandomPulseGenerator yoRandomPulseGenerator;
 
@@ -22,7 +22,7 @@ public class YoRandomPulseGeneratorVisualizer implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

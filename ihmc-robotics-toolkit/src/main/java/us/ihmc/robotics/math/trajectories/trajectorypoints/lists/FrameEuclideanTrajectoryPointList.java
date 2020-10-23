@@ -38,6 +38,11 @@ public class FrameEuclideanTrajectoryPointList implements FrameTrajectoryPointLi
       newTrajectoryPoint.set(trajectoryPoint);
    }
 
+   public FrameEuclideanTrajectoryPoint addTrajectoryPoint()
+   {
+      return trajectoryPoints.add();
+   }
+
    public void setIncludingFrame(FrameSE3TrajectoryPointList trajectoryPointList)
    {
       clear(trajectoryPointList.getReferenceFrame());

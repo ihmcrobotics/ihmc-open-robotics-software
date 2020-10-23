@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -31,7 +31,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -41,7 +41,7 @@ public class VirtualModelControlOptimizationControlModule
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExternalWrenchHandler externalWrenchHandler;
    private final SpatialForce centroidalMomentumRateSolution = new SpatialForce();
@@ -64,20 +64,20 @@ public class VirtualModelControlOptimizationControlModule
 
    private final QPInput momentumQPInput;
 
-   private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForce.SIZE, SpatialForce.SIZE);
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForce.SIZE, SpatialForce.SIZE);
-   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForce.SIZE, 1);
-   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForce.SIZE, 1);
+   private final DMatrixRMaj identityMatrix = CommonOps_DDRM.identity(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DMatrixRMaj tempSelectionMatrix = new DMatrixRMaj(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DMatrixRMaj tempTaskWeightSubspace = new DMatrixRMaj(SpatialForce.SIZE, SpatialForce.SIZE);
+   private final DMatrixRMaj fullMomentumObjective = new DMatrixRMaj(SpatialForce.SIZE, 1);
+   private final DMatrixRMaj totalWrench = new DMatrixRMaj(SpatialForce.SIZE, 1);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final ReferenceFrame centerOfMassFrame;
 
-   private final DenseMatrix64F zeroObjective = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       this.centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -160,7 +160,7 @@ public class VirtualModelControlOptimizationControlModule
          noConvergenceException = e;
       }
 
-      DenseMatrix64F rhoSolution = qpSolver.getRhos();
+      DMatrixRMaj rhoSolution = qpSolver.getRhos();
 
       Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
@@ -247,10 +247,10 @@ public class VirtualModelControlOptimizationControlModule
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialForce.SIZE);
       DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * I
-      CommonOps.mult(tempSelectionMatrix, identityMatrix, motionQPInputToPack.taskJacobian);
+      CommonOps_DDRM.mult(tempSelectionMatrix, identityMatrix, motionQPInputToPack.taskJacobian);
 
       // Compute the task objective: p = S * hDot
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
@@ -259,28 +259,28 @@ public class VirtualModelControlOptimizationControlModule
       angularMomentum.get(0, fullMomentumObjective);
       linearMomentum.get(3, fullMomentumObjective);
 
-      CommonOps.mult(tempSelectionMatrix, fullMomentumObjective, motionQPInputToPack.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, fullMomentumObjective, motionQPInputToPack.taskObjective);
 
       return true;
    }
 
    private void setupWrenchesEquilibriumConstraint()
    {
-      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
-      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
+      DMatrixRMaj additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DMatrixRMaj gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      DMatrixRMaj rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
    }
 
-   private SpatialForceReadOnly computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
+   private SpatialForceReadOnly computeCentroidalMomentumRateSolution(DMatrixRMaj rhoSolution)
    {
-      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
-      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
+      DMatrixRMaj additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DMatrixRMaj gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      DMatrixRMaj rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
 
-      CommonOps.mult(rhoJacobian, rhoSolution, totalWrench);
-      CommonOps.addEquals(totalWrench, additionalExternalWrench);
-      CommonOps.addEquals(totalWrench, gravityWrench);
+      CommonOps_DDRM.mult(rhoJacobian, rhoSolution, totalWrench);
+      CommonOps_DDRM.addEquals(totalWrench, additionalExternalWrench);
+      CommonOps_DDRM.addEquals(totalWrench, gravityWrench);
 
       centroidalMomentumRateSolution.setIncludingFrame(centerOfMassFrame, totalWrench);
 
@@ -289,16 +289,16 @@ public class VirtualModelControlOptimizationControlModule
 
    private void setupRhoTasks()
    {
-      DenseMatrix64F rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
-      DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
+      DMatrixRMaj rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
+      DMatrixRMaj rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
-      DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
+      DMatrixRMaj copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
+      DMatrixRMaj copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
       qpSolver.addRhoTask(copRegularizationJacobian, zeroObjective, copRegularizationWeight);
 
-      DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
-      DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
+      DMatrixRMaj copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
+      DMatrixRMaj copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
       qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
    }
 }

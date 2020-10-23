@@ -11,11 +11,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * This class implements a processor for fusing gyro, accelerometer, and magnetometer (optional)
@@ -96,12 +96,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    private final ReferenceFrame sensorFrame;
 
    public YoIMUMahonyFilter(String imuName, String nameSuffix, double updateDT, ReferenceFrame sensorFrame, YoFrameQuaternion estimatedOrientation,
-                            YoFrameVector3D estimatedAngularVelocity, YoVariableRegistry parentRegistry)
+                            YoFrameVector3D estimatedAngularVelocity, YoRegistry parentRegistry)
    {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
-      YoVariableRegistry registry = new YoVariableRegistry(imuName + "MahonyFilter");
+      YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
       estimatedOrientation.checkReferenceFrameMatch(sensorFrame);
@@ -121,12 +121,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    }
 
    public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame,
-                            YoVariableRegistry parentRegistry)
+                            YoRegistry parentRegistry)
    {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
-      YoVariableRegistry registry = new YoVariableRegistry(imuName + "MahonyFilter");
+      YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
       estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame, registry);
@@ -387,7 +387,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
             }
          }
       }
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(accelerationCurrentDirectionWorld, accelerationDesiredDirectionWorld, axisAngleOffset);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(accelerationCurrentDirectionWorld, accelerationDesiredDirectionWorld, axisAngleOffset);
       errorToPack.set(axisAngleOffset);
 
       return true;

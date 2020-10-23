@@ -167,7 +167,7 @@ public class OpenCVFaceDetector
          }
          else
          {
-            panel.setBufferedImageSafe(bufferedImage);
+            panel.setImageUI(bufferedImage);
          }
       }
    }

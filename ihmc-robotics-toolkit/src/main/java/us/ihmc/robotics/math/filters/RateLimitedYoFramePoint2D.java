@@ -5,14 +5,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class RateLimitedYoFramePoint2D extends YoFramePoint2D
 {
@@ -25,38 +23,38 @@ public class RateLimitedYoFramePoint2D extends YoFramePoint2D
 
    private final FrameVector2D differenceVector = new FrameVector2D();
 
-   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                   FrameTuple2DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPosition, rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                   ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                   FrameTuple2DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawPosition,
            rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
+   public RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   private RateLimitedYoFramePoint2D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                    FrameTuple2DReadOnly rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

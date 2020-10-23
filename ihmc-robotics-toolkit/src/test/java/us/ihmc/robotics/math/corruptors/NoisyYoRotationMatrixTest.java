@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NoisyYoRotationMatrixTest
 {
@@ -17,7 +17,7 @@ public class NoisyYoRotationMatrixTest
    public void testNoNoise()
    {
       Random random = new Random(176L);
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       NoisyYoRotationMatrix mat = new NoisyYoRotationMatrix("rot", registry);
       mat.setBiasRandomlyBetweenMinAndMax();
       mat.setRandomBound(1.0);

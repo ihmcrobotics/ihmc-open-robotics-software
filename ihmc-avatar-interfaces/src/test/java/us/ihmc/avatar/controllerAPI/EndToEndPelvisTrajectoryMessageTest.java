@@ -13,12 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -32,19 +27,15 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -84,13 +75,9 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.*;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -302,7 +289,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    }
 
    private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                    YoVariableRegistry registry)
+                                    YoRegistry registry)
    {
       referenceFrames.updateFrames();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -509,7 +496,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          return;
       }
 
-      YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.getVariable("CenterOfMassHeightManager",
+      YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.findVariable("CenterOfMassHeightManager",
                                                                                                                          "CenterOfMassHeightManagerCurrentState");
       assertEquals(mode, centerOfMassHeightManagerState.getEnumValue());
    }
@@ -535,7 +522,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Vector3D linearVelocity = EndToEndTestTools.findVector3D(positionZTrajectoryName, linearVelocityZName, suffix, scs);
 
       String timeName = pelvisZPrefix + "Time";
-      simpleSE3TrajectoryPoint.setTime(scs.getVariable(positionZTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSE3TrajectoryPoint.setTime(scs.findVariable(positionZTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSE3TrajectoryPoint.setPosition(position);
       simpleSE3TrajectoryPoint.setLinearVelocity(linearVelocity);
 
@@ -1141,8 +1128,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.15);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
@@ -1165,7 +1152,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String managerName = PelvisOrientationManager.class.getSimpleName();
-      YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.getVariable(managerName,
+      YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.findVariable(managerName,
                                                                                                                            managerName + "CurrentState");
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
@@ -1218,7 +1205,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
-      YoDouble offsetHeight = (YoDouble) scs.getVariable(namespace, "offsetHeightAboveGround");
+      YoDouble offsetHeight = (YoDouble) scs.findVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
@@ -1266,12 +1253,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
@@ -1343,7 +1330,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }
@@ -1427,7 +1414,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static double findCurrentPelvisHeight(SimulationConstructionSet scs)
    {
-      return scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
+      return scs.findVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
    }
 
    public static Vector3D findControllerDesiredLinearVelocity(String bodyName, SimulationConstructionSet scs)
@@ -1445,12 +1432,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static boolean findControllerStopBooleanForXY(SimulationConstructionSet scs)
    {
-      return ((YoBoolean) scs.getVariable(PelvisICPBasedTranslationManager.class.getSimpleName(), "isPelvisTranslationalTrajectoryStopped")).getBooleanValue();
+      return ((YoBoolean) scs.findVariable(PelvisICPBasedTranslationManager.class.getSimpleName(), "isPelvisTranslationalTrajectoryStopped")).getBooleanValue();
    }
 
    public static boolean findControllerStopBooleanForHeight(SimulationConstructionSet scs)
    {
-      return ((YoBoolean) scs.getVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(),
+      return ((YoBoolean) scs.findVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(),
                                           "isPelvisOffsetHeightTrajectoryStopped")).getBooleanValue();
    }
 
@@ -1460,16 +1447,16 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String positionTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
 
-      int numberOfWaypoints = ((YoInteger) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.findVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
    }
 
    public static int findControllerNumberOfCommandsInQueueForXY(SimulationConstructionSet scs)
    {
-      String nameSpace = PelvisICPBasedTranslationManager.class.getSimpleName();
+      String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
       String queuedCommandsVariableName = "PelvisXYTranslationNumberOfQueuedCommands";
 
-      int numberOfCommands = (int) ((YoLong) scs.getVariable(nameSpace, queuedCommandsVariableName)).getLongValue();
+      int numberOfCommands = (int) ((YoLong) scs.findVariable(namespace, queuedCommandsVariableName)).getLongValue();
       return numberOfCommands;
    }
 
@@ -1479,7 +1466,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       //      String offsetHeightTrajectoryName = pelvisPrefix + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       //      String numberOfWaypointsVarName = pelvisPrefix + "NumberOfWaypoints";
       String bodyName = rigidBody.getName();
-      YoInteger pelvisHeightTaskspaceNumberOfPoints = (YoInteger) scs.getVariable(bodyName + "TaskspaceControlModule",
+      YoInteger pelvisHeightTaskspaceNumberOfPoints = (YoInteger) scs.findVariable(bodyName + "TaskspaceControlModule",
                                                                                   bodyName + "PositionTaskspaceNumberOfPoints");
       int numberOfWaypoints = pelvisHeightTaskspaceNumberOfPoints.getIntegerValue();
       return numberOfWaypoints;
@@ -1490,7 +1477,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String bodyName = rigidBody.getName();
       String offsetHeightTrajectoryName = bodyName + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
       String numberOfWaypointsVarName = bodyName + "NumberOfWaypoints";
-      int numberOfWaypoints = ((YoInteger) scs.getVariable(offsetHeightTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      int numberOfWaypoints = ((YoInteger) scs.findVariable(offsetHeightTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
    }
 
@@ -1508,7 +1495,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Vector3D linearVelocity = EndToEndTestTools.findVector3D(positionXYTrajectoryName, linearVelocityXYName, suffix, scs);
 
       String timeName = pelvisXYPrefix + "Time";
-      simpleSE3TrajectoryPoint.setTime(scs.getVariable(positionXYTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSE3TrajectoryPoint.setTime(scs.findVariable(positionXYTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSE3TrajectoryPoint.setPosition(position);
       simpleSE3TrajectoryPoint.setLinearVelocity(linearVelocity);
 
@@ -1634,8 +1621,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    protected FramePose3D getRandomPelvisPose(Random random, RigidBodyBasics pelvis)
    {
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() + getZOffset());
       return desiredRandomPelvisPose;
    }

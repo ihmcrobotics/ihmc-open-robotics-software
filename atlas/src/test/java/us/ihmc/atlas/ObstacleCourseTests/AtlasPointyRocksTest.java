@@ -145,7 +145,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
 
-      return (YoDouble) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
+      return (YoDouble) scs.findVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
                                                 "pelvisRotationErrorInBodyZ");
    }
 

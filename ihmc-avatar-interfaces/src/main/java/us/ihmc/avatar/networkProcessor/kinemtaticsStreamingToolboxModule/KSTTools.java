@@ -41,7 +41,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -54,7 +54,7 @@ public class KSTTools
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final DoubleProvider time;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FullHumanoidRobotModel currentFullRobotModel;
    private final FloatingJointBasics currentRootJoint;
@@ -92,7 +92,7 @@ public class KSTTools
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
-                   YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+                   YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -418,7 +418,7 @@ public class KSTTools
       return yoGraphicsListRegistry;
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

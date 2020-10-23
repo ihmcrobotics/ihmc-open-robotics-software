@@ -14,14 +14,15 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightPartialDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -32,7 +33,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -82,7 +83,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       double doubleSupportPercentageIn = 0.3;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
+      YoRegistry registry = new YoRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
@@ -94,16 +95,24 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);
-      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
-            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, anklePositionsInSoleFrame, yoTime, yoGraphicsListRegistry, registry);
-
-      lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
+      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
+                                                                                                                              nominalHeightAboveGround,
+                                                                                                                              maximumHeightAboveGround,
+                                                                                                                              0.0,
+                                                                                                                              doubleSupportPercentageIn,
+                                                                                                                              pelvisFrame,
+                                                                                                                              pelvisFrame,
+                                                                                                                              ankleZUpFrames,
+                                                                                                                              anklePositionsInSoleFrame,
+                                                                                                                              yoTime,
+                                                                                                                              yoGraphicsListRegistry,
+                                                                                                                              registry);
 
       double dt = 0.01;
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
       scs.setDT(dt, 2);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
 
@@ -258,20 +267,18 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             pelvisFrame.setZ(comPosition.getZ());
             pelvisFrame.update();
 
-            coMHeightPartialDerivativesDataToPack.getCoMHeight(comPosition);
-
             scs.tickAndUpdate();
          }
       }
 
       scs.gotoInPointNow();
-      scs.tick(2);
+      scs.tickAndReadFromBuffer(2);
       scs.setInPoint();
       scs.cropBuffer();
 
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionZ")).getData();
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
 
       double maxChangePerTick = dt * 0.75;
       boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
@@ -300,7 +307,227 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
    }
 
-   private void setupStuff(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   @Test
+   public void testWalkingUpRamp()
+   {
+      //TODO: Make more assertions. Right now we just assert continuity, so this is more a human visualizer and manual tester than an automatic unit test...
+
+      PoseReferenceFrame pelvisFrame = new PoseReferenceFrame("pelvisFrame", worldFrame);
+
+      Random random = new Random(1776L);
+
+      double minimumHeightAboveGround = 0.595 + 0.03;
+      double nominalHeightAboveGround = 0.675 + 0.03;
+      double maximumHeightAboveGround = 0.735 + 0.03;
+
+      double doubleSupportPercentageIn = 0.3;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoRegistry registry = new YoRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
+
+      YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
+
+      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
+      testingParameters.setDataBufferSize(2048);
+
+      Robot robot = new Robot("Dummy");
+      YoDouble yoTime = robot.getYoTime();
+      SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
+
+      setupStuff(yoGraphicsListRegistry, registry);
+      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
+                                                                                                                              nominalHeightAboveGround,
+                                                                                                                              maximumHeightAboveGround,
+                                                                                                                              0.0,
+                                                                                                                              doubleSupportPercentageIn,
+                                                                                                                              pelvisFrame,
+                                                                                                                              pelvisFrame,
+                                                                                                                              ankleZUpFrames,
+                                                                                                                              anklePositionsInSoleFrame,
+                                                                                                                              yoTime,
+                                                                                                                              yoGraphicsListRegistry,
+                                                                                                                              registry);
+
+      lookAheadCoMHeightTrajectoryGenerator.setMinimumHeightAboveGround(0.705);
+      lookAheadCoMHeightTrajectoryGenerator.setNominalHeightAboveGround(0.7849999999999999);
+      lookAheadCoMHeightTrajectoryGenerator.setMaximumHeightAboveGround(0.9249999999999999);
+      lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(false);
+
+      double dt = 0.01;
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
+      scs.setDT(dt, 1);
+      scs.addYoRegistry(registry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      CameraConfiguration cameraConfigurationOne = new CameraConfiguration("one");
+      cameraConfigurationOne.setCameraTracking(false, false, false, false);
+      cameraConfigurationOne.setCameraDolly(false, false, false, false);
+      cameraConfigurationOne.setCameraFix(new Point3D(11.25, 11.8, 0.6));
+      cameraConfigurationOne.setCameraPosition(new Point3D(10.1, 10.3, 0.3));
+      scs.setupCamera(cameraConfigurationOne);
+
+      scs.maximizeMainWindow();
+
+      scs.startOnAThread();
+
+      ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+
+      FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet);
+
+      //    double stepWidth = 0.3;
+      //    double stepLength = 0.75;
+      //    int numberOfSteps = 30;
+      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFootsteps(stepWidth, stepLength, numberOfSteps);
+
+      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFlatGroundWalkingTrackFootstepProvider(registry, updatables);
+
+      List<Footstep> footsteps = generateFootstepsForRamp(footstepTestTools);
+
+      double time = 0.0;
+
+      Footstep transferFromFootstep = footsteps.remove(0);
+      Footstep previousFootstep = transferFromFootstep;
+
+      Footstep transferToFootstep;
+
+      while (footsteps.size() > 2)
+      {
+
+         transferFromFootstep = previousFootstep;
+         transferToFootstep = footsteps.remove(0);
+
+         previousFootstep = transferToFootstep;
+
+         FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
+         FramePoint3D transferFromFootFramePoint = new FramePoint3D();
+         transferFromFootstep.getPosition(transferFromFootFramePoint);
+         FrameQuaternion transferFromFootOrientation = new FrameQuaternion();
+         transferFromFootstep.getOrientation(transferFromFootOrientation);
+         transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
+
+         FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
+         FramePoint3D transferToFootFramePoint = new FramePoint3D();
+         transferToFootstep.getPosition(transferToFootFramePoint);
+         FrameQuaternion transferToFootOrientation = new FrameQuaternion();
+         transferToFootstep.getOrientation(transferToFootOrientation);
+         transferToFootSpoof.setPose(transferToFootFramePoint, transferToFootOrientation);
+
+         TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+         transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+         transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+         transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
+         transferToAndNextFootstepsData.setNextFootstep(null);
+
+         transferToAndNextFootstepsData.setTransferToSide(transferToFootstep.getRobotSide());
+
+         RobotSide supportLeg = transferFromFootstep.getRobotSide();
+         supportLegFrameSide.set(supportLeg);
+
+         List<PlaneContactState> listOfContactStates = new ArrayList<PlaneContactState>();
+         for (YoPlaneContactState contactState : contactStates)
+         {
+            listOfContactStates.add(contactState);
+         }
+
+         // Initialize at the beginning of single support.
+         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
+         CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
+
+         scs.tickAndUpdate();
+
+         double stepTime = 2.0;
+
+         int numberOfTicks = (int) (stepTime / dt);
+         for (int i = 0; i < numberOfTicks; i++)
+         {
+            if (i == 0.35 * numberOfTicks)
+            {
+               // Initialize again at the beginning of double support.
+               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
+               supportLeg = null;
+            }
+            else if (i == 0.65 * numberOfTicks)
+            {
+               supportLeg = transferToFootstep.getRobotSide();
+            }
+
+            time = time + dt;
+            robot.setTime(time);
+
+            for (Updatable updatable : updatables)
+            {
+               updatable.update(time);
+            }
+
+            FramePoint3DReadOnly transferFromFootPosition = transferFromFootstep.getFootstepPose().getPosition();
+            FramePoint3DReadOnly transferToFootPosition = transferToFootstep.getFootstepPose().getPosition();
+
+            FramePoint3D queryPosition = new FramePoint3D();
+
+            double alpha = ((double) i) / ((double) (numberOfTicks - 1));
+
+            queryPosition.interpolate(transferFromFootPosition, transferToFootPosition, alpha);
+
+            pelvisFrame.setX(queryPosition.getX());
+            pelvisFrame.setY(queryPosition.getY());
+            pelvisFrame.update();
+
+            boolean switchSupportSides = random.nextBoolean();
+            if (switchSupportSides)
+            {
+               supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
+               lookAheadCoMHeightTrajectoryGenerator.setSupportLeg(supportLegFrameSide.getEnumValue());
+            }
+
+            boolean isInDoubleSupport = supportLeg == null;
+            lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
+
+            FramePoint3D comPosition = new FramePoint3D();
+            pelvisFrame.setZ(comPosition.getZ());
+            pelvisFrame.update();
+
+            scs.tickAndUpdate();
+         }
+      }
+
+      scs.gotoInPointNow();
+      scs.tickAndReadFromBuffer(2);
+      scs.setInPoint();
+      scs.cropBuffer();
+
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
+
+      double maxChangePerTick = dt * 0.75;
+      boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
+      boolean isDesiredCoMPositionYContinuous = ArrayTools.isContinuous(desiredCoMPositionYData, maxChangePerTick);
+      boolean isDesiredCoMPositionZContinuous = ArrayTools.isContinuous(desiredCoMPositionZData, maxChangePerTick);
+
+      if (!isDesiredCoMPositionXContinuous || !isDesiredCoMPositionYContinuous || !isDesiredCoMPositionZContinuous)
+      {
+         double xMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionXData);
+         double yMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionYData);
+         double zMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionZData);
+
+         System.err.println("desiredCoMPositionXData xMaxChange = " + xMaxChange);
+         System.err.println("desiredCoMPositionYData yMaxChange = " + yMaxChange);
+         System.err.println("desiredCoMPositionZData yMaxChange = " + zMaxChange);
+
+         System.err.println("maxChangePerTick = " + maxChangePerTick);
+
+         if (makeAssertions)
+            fail("Desired CoM position is not continuous!");
+      }
+
+      if (testingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+   }
+
+   private void setupStuff(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -335,8 +562,12 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction,
-               registry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot",
+                                                                           foot,
+                                                                           soleFrame,
+                                                                           contactFramePoints,
+                                                                           coefficientOfFriction,
+                                                                           registry);
          yoPlaneContactState.setFullyConstrained();
          contactStates.put(robotSide, yoPlaneContactState);
       }
@@ -349,34 +580,99 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
-
    }
 
    public List<Footstep> generateFootstepsForATestCase(FootstepTestHelper footstepProviderTestHelper)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.498008237591158, 12.933984676794712, 0.08304866902498514),
-            new Quaternion(0.712207206856358, -0.002952488685311897, 0.003108390899721778, 0.7019562060545106)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(13.170202005363656, 12.938562106620529, 0.08304880466443637),
-            new Quaternion(0.7118317189761082, -0.0030669544205584594, 0.002995905842662467, 0.7023369719716335)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.331337238526865, 13.209631212022698, 0.07946232652345472),
-            new Quaternion(0.7118303580231159, -0.0031545801122483245, 0.018597667622730154, 0.7020980820227274)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(13.080837909205398, 13.505772370798573, 0.07489977483062672),
-            new Quaternion(0.7118264756261261, -0.003742268262861186, 0.003495827367880344, 0.7023367021713666)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-            new Quaternion(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(13.498008237591158, 12.933984676794712, 0.08304866902498514),
+                                                              new Quaternion(0.712207206856358,
+                                                                             -0.002952488685311897,
+                                                                             0.003108390899721778,
+                                                                             0.7019562060545106)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D(13.170202005363656, 12.938562106620529, 0.08304880466443637),
+                                                              new Quaternion(0.7118317189761082,
+                                                                             -0.0030669544205584594,
+                                                                             0.002995905842662467,
+                                                                             0.7023369719716335)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(13.331337238526865, 13.209631212022698, 0.07946232652345472),
+                                                              new Quaternion(0.7118303580231159,
+                                                                             -0.0031545801122483245,
+                                                                             0.018597667622730154,
+                                                                             0.7020980820227274)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D(13.080837909205398, 13.505772370798573, 0.07489977483062672),
+                                                              new Quaternion(0.7118264756261261,
+                                                                             -0.003742268262861186,
+                                                                             0.003495827367880344,
+                                                                             0.7023367021713666)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+                                                              new Quaternion(0.7116005831473223,
+                                                                             0.01831580652938022,
+                                                                             0.024589083079517595,
+                                                                             0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
+                                                              new Quaternion(0.7118265348281387,
+                                                                             -0.00374226855753469,
+                                                                             0.003495827052433593,
+                                                                             0.7023366421694281)));
 
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-            new Quaternion(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+                                                              new Quaternion(0.7116005831473223,
+                                                                             0.01831580652938022,
+                                                                             0.024589083079517595,
+                                                                             0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
+                                                              new Quaternion(0.7118265348281387,
+                                                                             -0.00374226855753469,
+                                                                             0.003495827052433593,
+                                                                             0.7023366421694281)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+                                                              new Quaternion(0.7116005831473223,
+                                                                             0.01831580652938022,
+                                                                             0.024589083079517595,
+                                                                             0.7019148939072867)));
 
       return footsteps;
    }
 
+   public List<Footstep> generateFootstepsForRamp(FootstepTestHelper footstepProviderTestHelper)
+   {
+      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(-0.007, -0.164, 0.001), new Quaternion(-0.000,  0.004, -0.000,  1.000 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(-0.007, 0.164, 0.001), new Quaternion( 0.000,  0.004,  0.000,  1.000 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(0.593, -0.086, 0.009), new Quaternion( 0.000,  0.000,  0.000,  1.000 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D( 1.190,  0.169,  0.069 ),
+                                                              new Quaternion(-0.009, -0.052,  0.011,  0.999 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D( 1.772, -0.072,  0.127 ),
+                                                              new Quaternion( 0.009, -0.051, -0.004,  0.999 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D( 2.378,  0.177,  0.188 ),
+                                                              new Quaternion(-0.010, -0.052,  0.006,  0.999 )));
+
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D( 2.990, -0.068,  0.240 ),
+                                                              new Quaternion( 0.010, -0.050, -0.006,  0.999 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
+                                                              new Point3D( 3.596,  0.174,  0.300 ),
+                                                              new Quaternion(-0.015, -0.052, -0.003,  0.999 )));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D( 4.181, -0.078,  0.354 ),
+                                                              new Quaternion( 0.013, -0.050, -0.015,  0.999 )));
+
+
+      return footsteps;
+   }
 }

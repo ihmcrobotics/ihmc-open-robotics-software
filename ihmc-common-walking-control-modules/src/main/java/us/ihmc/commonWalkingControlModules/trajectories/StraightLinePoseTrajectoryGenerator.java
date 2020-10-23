@@ -6,35 +6,23 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoMutableFramePoint3D initialPosition;
    private final YoMutableFramePoint3D finalPosition;
@@ -78,15 +66,15 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    private final List<ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>> visualizationUpdatables = new ArrayList<>();
 
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
       this(namePrefix, referenceFrame, parentRegistry, false, null);
    }
 
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry, boolean visualize,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       initialPosition = new YoMutableFramePoint3D(namePrefix + "InitialPosition", "", registry, referenceFrame);
       finalPosition = new YoMutableFramePoint3D(namePrefix + "FinalPosition", "", registry, referenceFrame);
@@ -146,10 +134,10 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
-         showViz.addVariableChangedListener(new VariableChangedListener()
+         showViz.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);
@@ -158,7 +146,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
                bagOfBalls.setVisible(visible);
             }
          });
-         showViz.notifyVariableChangedListeners();
+         showViz.notifyListeners();
       }
       else
       {
@@ -398,8 +386,8 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
-      framePoseToPack.setPosition(currentPosition);
-      framePoseToPack.setOrientation(currentOrientation);
+      framePoseToPack.getPosition().set(currentPosition);
+      framePoseToPack.getOrientation().set(currentOrientation);
    }
 
    @Override

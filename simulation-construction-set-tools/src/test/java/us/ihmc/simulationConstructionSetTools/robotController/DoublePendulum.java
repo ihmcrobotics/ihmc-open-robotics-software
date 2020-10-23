@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
@@ -16,7 +16,7 @@ public class DoublePendulum extends Robot
    {
       super("DoublePendulum");
 
-      j1 = new PinJoint("j1", new Vector3D(0, 0, 2), this, Axis.X);
+      j1 = new PinJoint("j1", new Vector3D(0, 0, 2), this, Axis3D.X);
 
       Link l1 = new Link("l1");
       l1.setComOffset(0, 0, 0.5);
@@ -24,7 +24,7 @@ public class DoublePendulum extends Robot
       l1.addEllipsoidFromMassProperties(YoAppearance.Pink());
       j1.setLink(l1);
 
-      j2 = new PinJoint("j2", new Vector3D(0.0, 0.0, 1.0), this, Axis.X);
+      j2 = new PinJoint("j2", new Vector3D(0.0, 0.0, 1.0), this, Axis3D.X);
       Link l2 = new Link("l2");
       l2.setComOffset(0, 0, 0.5);
       l2.setMassAndRadiiOfGyration(1.0, 0.05, 0.05, 0.3);

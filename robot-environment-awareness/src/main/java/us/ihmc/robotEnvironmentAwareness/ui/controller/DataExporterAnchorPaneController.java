@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 
 public class DataExporterAnchorPaneController extends REABasicUIController
@@ -39,13 +40,62 @@ public class DataExporterAnchorPaneController extends REABasicUIController
       this.ownerWindow = ownerWindow;
    }
 
+   private Topic<Boolean> uiStereoDataExportRequestTopic = REAModuleAPI.UIStereoDataExportRequest;
+   private Topic<Boolean> uiSegmentationDataExportRequestTopic = REAModuleAPI.UISegmentationDataExportRequest;
+   private Topic<Boolean> uiPlanarRegionDataExportRequestTopic = REAModuleAPI.UIPlanarRegionDataExportRequest;
+   private Topic<String> uiStereoDataExporterDirectoryTopic = REAModuleAPI.UIStereoDataExporterDirectory;
+   private Topic<String> uiSegmentationDataExporterDirectoryTopic = REAModuleAPI.UISegmentationDataExporterDirectory;
+   private Topic<String> uiPlanarRegionDataExporterDirectoryTopic = REAModuleAPI.UIPlanarRegionDataExporterDirectory;
+
+   public void setUIStereoDataExportRequestTopic(Topic<Boolean> uiStereoDataExportRequestTopic)
+   {
+      this.uiStereoDataExportRequestTopic = uiStereoDataExportRequestTopic;
+   }
+
+   public void setUiSegmentationDataExportRequestTopic(Topic<Boolean> uiSegmentationDataExportRequestTopic)
+   {
+      this.uiSegmentationDataExportRequestTopic = uiSegmentationDataExportRequestTopic;
+   }
+
+   public void setUiPlanarRegionDataExportRequestTopic(Topic<Boolean> uiPlanarRegionDataExportRequestTopic)
+   {
+      this.uiPlanarRegionDataExportRequestTopic = uiPlanarRegionDataExportRequestTopic;
+   }
+
+   public void setUiStereoDataExporterDirectoryTopic(Topic<String> uiStereoDataExporterDirectoryTopic)
+   {
+      this.uiStereoDataExporterDirectoryTopic = uiStereoDataExporterDirectoryTopic;
+   }
+
+   public void setUiSegmentationDataExporterDirectoryTopic(Topic<String> uiSegmentationDataExporterDirectoryTopic)
+   {
+      this.uiSegmentationDataExporterDirectoryTopic = uiSegmentationDataExporterDirectoryTopic;
+   }
+
+   public void setUiPlanarRegionDataExporterDirectoryTopic(Topic<String> uiPlanarRegionDataExporterDirectoryTopic)
+   {
+      this.uiPlanarRegionDataExporterDirectoryTopic = uiPlanarRegionDataExporterDirectoryTopic;
+   }
+
    @Override
    public void bindControls()
    {
       currentSegmentationDataFolderTextField.setText(defaultSegmentationDataFile.getAbsolutePath());
       currentPlanarRegionDataFolderTextField.setText(defaultPlanarRegionDataFile.getAbsolutePath());
       stereoDataFolderTextField.setText(defaultStereoDataFile.getAbsolutePath());
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoDataExportRequest, exportRecodingStereoButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(uiStereoDataExportRequestTopic, exportRecodingStereoButton.selectedProperty());
+   }
+
+   @FXML
+   private void exportSegmentation()
+   {
+      uiMessager.submitMessageInternal(uiSegmentationDataExportRequestTopic, true);
+   }
+
+   @FXML
+   private void exportPlanarRegion()
+   {
+      uiMessager.submitMessageInternal(uiPlanarRegionDataExportRequestTopic, true);
    }
 
    @FXML
@@ -53,7 +103,7 @@ public class DataExporterAnchorPaneController extends REABasicUIController
    {
       segmentationDirectoryChooser.setInitialDirectory(defaultSegmentationDataFile);
       String newPath = segmentationDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(REAModuleAPI.UISegmentationDataExporterDirectory, newPath);
+      uiMessager.submitMessageInternal(uiSegmentationDataExporterDirectoryTopic, newPath);
       Platform.runLater(() -> currentSegmentationDataFolderTextField.setText(newPath));
    }
 
@@ -62,7 +112,7 @@ public class DataExporterAnchorPaneController extends REABasicUIController
    {
       planarRegionDirectoryChooser.setInitialDirectory(defaultPlanarRegionDataFile);
       String newPath = planarRegionDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(REAModuleAPI.UIPlanarRegionDataExporterDirectory, newPath);
+      uiMessager.submitMessageInternal(uiPlanarRegionDataExporterDirectoryTopic, newPath);
       Platform.runLater(() -> currentPlanarRegionDataFolderTextField.setText(newPath));
    }
 
@@ -71,19 +121,9 @@ public class DataExporterAnchorPaneController extends REABasicUIController
    {
       stereoDirectoryChooser.setInitialDirectory(defaultStereoDataFile);
       String newPath = stereoDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(REAModuleAPI.UIStereoDataExporterDirectory, newPath);
+      uiMessager.submitMessageInternal(uiStereoDataExporterDirectoryTopic, newPath);
       Platform.runLater(() -> stereoDataFolderTextField.setText(newPath));
    }
 
-   @FXML
-   private void exportSegmentation()
-   {
-      uiMessager.submitMessageInternal(REAModuleAPI.UISegmentationDataExportRequest, true);
-   }
 
-   @FXML
-   private void exportPlanarRegion()
-   {
-      uiMessager.submitMessageInternal(REAModuleAPI.UIPlanarRegionDataExportRequest, true);
-   }
 }

@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.selfStablePlanarRunner;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -56,7 +56,7 @@ public class SelfStablePlanarRunner_Simulation implements SimulationDoneListener
 	GroundContactModel[] groundModels = new GroundContactModel[robots.length];
 	initGroundProfile();
 	for (int i = 0; i < robots.length; i++) {
-	    groundModels[i] = new LinearGroundContactModel(robots[i], groundKxy, groundBxy, groundKz, groundBz, robots[i].getRobotsYoVariableRegistry());
+	    groundModels[i] = new LinearGroundContactModel(robots[i], groundKxy, groundBxy, groundKz, groundBz, robots[i].getRobotsYoRegistry());
 	    groundModels[i].setGroundProfile3D(groundProfile);
 	    robots[i].setGroundContactModel(groundModels[i]);
 	}
@@ -77,7 +77,7 @@ public class SelfStablePlanarRunner_Simulation implements SimulationDoneListener
 	YoGraphicsList yoGraphicsList = new YoGraphicsList("YoGraphicsList");
 
 	for (SelfStablePlanarRunner_Robot robot: robots) {
-	    ArrayList<GroundContactPoint> ef_point_list = robot.getAllGroundContactPoints();
+	    List<GroundContactPoint> ef_point_list = robot.getAllGroundContactPoints();
 	    for (GroundContactPoint ef_point:ef_point_list) {
 		YoGraphicVector pushForceDynGraphVector = new
 			YoGraphicVector("PushVector_" + ef_point.getName(), ef_point.getYoPosition(), ef_point.getYoForce(),

@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,7 +29,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
    private final ResetRobotBehavior resetRobotBehavior;
 
-   public SimpleArmMotionBehavior(String robotName, YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
+   public SimpleArmMotionBehavior(String robotName, YoDouble yoTime, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node,
                                   AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);

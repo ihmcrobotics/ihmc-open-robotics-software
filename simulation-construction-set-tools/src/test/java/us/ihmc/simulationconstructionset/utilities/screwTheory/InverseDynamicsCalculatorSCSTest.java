@@ -1,18 +1,17 @@
 package us.ihmc.simulationconstructionset.utilities.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,7 +34,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsMechanismExplorer;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
@@ -106,7 +104,7 @@ public class InverseDynamicsCalculatorSCSTest
       
       Vector3D externalForcePointOffset = new Vector3D(comOffset);
       externalForcePointOffset.add(translationFromCoM);
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", externalForcePointOffset, robot.getRobotsYoRegistry());
       rootJoint.addExternalForcePoint(externalForcePoint);
       externalForcePoint.setForce(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
@@ -548,7 +546,7 @@ public class InverseDynamicsCalculatorSCSTest
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
 
       sixDoFJoint.setJointPosition(rootPosition);
-      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
+      sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
    }
    
    private final FrameVector3D linearVelocityFrameVector = new FrameVector3D();
@@ -607,7 +605,7 @@ public class InverseDynamicsCalculatorSCSTest
 
       public void getRobotInformationAsStringBuffer(StringBuffer buffer)
       {
-         ArrayList<Joint> rootJoints = robot.getRootJoints();
+         List<Joint> rootJoints = robot.getRootJoints();
 
          for (Joint rootJoint : rootJoints)
          {
@@ -660,7 +658,7 @@ public class InverseDynamicsCalculatorSCSTest
          Link link = joint.getLink();
          printLinkInformation(link, buffer);
 
-         ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+         List<Joint> childrenJoints = joint.getChildrenJoints();
 
          for (Joint childJoint : childrenJoints)
          {

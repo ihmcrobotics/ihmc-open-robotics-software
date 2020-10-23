@@ -2,4 +2,4 @@ start_position -0.010046385893603203 0.1580916748412766 -0.10490856379975894
 goal_position 0.85 0.18 0.5
 start_yaw 0.18
 goal_yaw 0.1
-a_star_timeout 20.0
+a_star_iteration_limit 100

@@ -74,16 +74,21 @@ public class StartGoalPositionViewer extends AnimationTimer
 
    public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Point3D> lowLevelGoalPositionTopic, Topic<Point3D> goalPositionTopic)
    {
-      startPositionReference = messager.createInput(startPositionTopic, new Point3D());
-      lowLevelGoalPositionReference = messager.createInput(lowLevelGoalPositionTopic, new Point3D());
-      goalPositionReference = messager.createInput(goalPositionTopic, new Point3D());
+      if (startPositionTopic != null)
+         startPositionReference = messager.createInput(startPositionTopic, new Point3D());
+      if (lowLevelGoalPositionTopic != null)
+         lowLevelGoalPositionReference = messager.createInput(lowLevelGoalPositionTopic, new Point3D());
+      if (goalPositionTopic != null)
+         goalPositionReference = messager.createInput(goalPositionTopic, new Point3D());
    }
 
    // TODO
    public void setEditStartGoalTopics(Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic)
    {
-      startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
-      goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
+      if (startEditModeEnabledTopic != null)
+         startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
+      if (goalEditModeEnabledTopic != null)
+         goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
    }
 
    public void setShowStartGoalTopics(Topic<Boolean> showStartTopic, Topic<Boolean> showLowLevelGoalTopic, Topic<Boolean> showGoalTopic)

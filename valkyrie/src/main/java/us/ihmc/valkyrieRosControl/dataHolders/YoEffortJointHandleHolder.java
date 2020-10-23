@@ -6,7 +6,7 @@ import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoEffortJointHandleHolder
@@ -23,10 +23,10 @@ public class YoEffortJointHandleHolder
    private final YoDouble q;
    private final YoDouble qd;
 
-   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJointBasics joint, JointDesiredOutputBasics desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJointBasics joint, JointDesiredOutputBasics desiredJointData, YoRegistry parentRegistry)
    {
       this.name = handle.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoRegistry registry = new YoRegistry(name);
 
       this.handle = handle;
       this.joint = joint;

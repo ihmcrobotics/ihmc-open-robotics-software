@@ -100,6 +100,14 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    }
 
    @Tag("controller-api-slow-3")
+   @Test
+   @Override
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      super.testForceExecutionWithSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -141,11 +149,11 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       RigidBodyBasics chest = fullRobotModel.getChest();
 
       FramePose3D waypoint0 = new FramePose3D(chest.getBodyFixedFrame());
-      waypoint0.setPosition(0.85602, -0.33869, -0.01085);
-      waypoint0.setOrientation(0.99766, 0.01831, 0.06483, 0.01143);
+      waypoint0.getPosition().set(0.85602, -0.33869, -0.01085);
+      waypoint0.getOrientation().set(0.99766, 0.01831, 0.06483, 0.01143);
       FramePose3D waypoint1 = new FramePose3D(chest.getBodyFixedFrame());
-      waypoint1.setPosition(0.97144, -0.38298, -0.02078);
-      waypoint1.setOrientation(-0.98753, -0.00886, -0.06093, 0.14487);
+      waypoint1.getPosition().set(0.97144, -0.38298, -0.02078);
+      waypoint1.getOrientation().set(-0.98753, -0.00886, -0.06093, 0.14487);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       waypoint0.changeFrame(worldFrame);
@@ -178,9 +186,9 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String handName = fullRobotModel.getHand(robotSide).getName();
-      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varname = handName + "ErrorRotationVector";
-      Vector3D rotationError = EndToEndTestTools.findVector3D(nameSpace, varname, scs);
+      Vector3D rotationError = EndToEndTestTools.findVector3D(namespace, varname, scs);
 
       /*
        * Checking the tracking error should be enough. As went the bug is present, the error magnitude

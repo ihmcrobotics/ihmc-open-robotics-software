@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.PartialFootholdCropperModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -11,13 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -38,25 +33,24 @@ import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
- * should be a zero acceleration command. When the foot is barely loaded or the CoP gets close
- * to the edges of the foot polygon some of the directions start becoming feedback controlled. E.g.
- * when barely loaded x and y position as well as foot yaw are controlled to remain constant.
- *
- * The state also contains the ability to shift the CoP around within the foothold in case the
- * support area needs to be explored.
+ * should be a zero acceleration command. When the foot is barely loaded or the CoP gets close to
+ * the edges of the foot polygon some of the directions start becoming feedback controlled. E.g.
+ * when barely loaded x and y position as well as foot yaw are controlled to remain constant. The
+ * state also contains the ability to shift the CoP around within the foothold in case the support
+ * area needs to be explored.
  */
 public class SupportState extends AbstractFootControlState
 {
    private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
@@ -84,7 +78,6 @@ public class SupportState extends AbstractFootControlState
    private final FramePose3D bodyFixedControlledPose = new FramePose3D();
    private final FramePoint3D desiredCopPosition = new FramePoint3D();
 
-   private final FramePoint2D cop = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
    private final FramePoint3D footPosition = new FramePoint3D();
@@ -114,19 +107,16 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble toeLoadingDuration;
    private final YoDouble fullyLoadedMagnitude;
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
-
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
    private final PIDSE3GainsReadOnly gains;
 
-   private final BooleanProvider avoidFootRotations;
    private final BooleanProvider dampFootRotations;
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
-   private final FootRotationDetector footRotationDetector;
+   private final PartialFootholdCropperModule footRotationCalculationModule;
 
    private final YoBoolean liftOff;
    private final YoBoolean touchDown;
@@ -134,14 +124,14 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble pitchTrajectoryEndTime;
    private final YoDouble desiredPitch;
 
-   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
+   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoRegistry parentRegistry)
    {
       super(footControlHelper);
 
       this.gains = holdPositionGains;
 
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);
@@ -210,11 +200,16 @@ public class SupportState extends AbstractFootControlState
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
-      footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
+      footRotationCalculationModule = new PartialFootholdCropperModule(robotSide,
+                                                                       soleFrame,
+                                                                       footControlHelper.getContactableFoot().getContactPoints2d(),
+                                                                       footControlHelper.getFootholdRotationParameters(),
+                                                                       dt,
+                                                                       registry,
+                                                                       graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
-      avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
       dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
       footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
 
@@ -235,6 +230,9 @@ public class SupportState extends AbstractFootControlState
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
 
+      computeFootPolygon();
+      footRotationCalculationModule.initialize(footPolygon);
+
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       liftOff.set(false);
@@ -250,7 +248,7 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.hide();
       explorationHelper.stopExploring();
-      footRotationDetector.reset();
+      footRotationCalculationModule.reset();
 
       liftOff.set(false);
       touchDown.set(false);
@@ -264,13 +262,16 @@ public class SupportState extends AbstractFootControlState
       computeFootPolygon();
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
+      footSwitch.computeAndPackCoP(cop2d);
+      if (cop2d.containsNaN())
+         cop2d.setToZero(contactableFoot.getSoleFrame());
+
       // handle partial foothold detection
       boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
       boolean contactStateHasChanged = false;
       if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
-         footSwitch.computeAndPackCoP(cop);
-         partialFootholdControlModule.compute(desiredCoP, cop);
+         partialFootholdControlModule.compute(desiredCoP, cop2d);
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
@@ -291,7 +292,6 @@ public class SupportState extends AbstractFootControlState
       // toe contact point loading //// TODO: 6/5/17
       if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
       {
-
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
 
@@ -302,8 +302,7 @@ public class SupportState extends AbstractFootControlState
          for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
          {
             YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
-            contactPoint.getPosition(tempPoint);
-            double percentAlongFoot = (tempPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
+            double percentAlongFoot = (contactPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
             double contactPointMagnitude = InterpolationTools.linearInterpolate(fullyLoadedMagnitude.getDoubleValue(), leadingToeMagnitude, percentAlongFoot);
 
             planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
@@ -337,22 +336,21 @@ public class SupportState extends AbstractFootControlState
       localGains.set(gains);
       boolean dampingRotations = false;
 
-      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      footRotationCalculationModule.compute(cop2d, desiredCoP);
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
+         contactState.notifyContactStateHasChanged();
+
+      if (footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
-         if (dampFootRotations.getValue())
-         {
-            PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
-            PID3DGains localOrientationGains = localGains.getOrientationGains();
-            localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
-            localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
-            dampingRotations = true;
-         }
+         PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
+         PID3DGains localOrientationGains = localGains.getOrientationGains();
+         localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
+         localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
+         dampingRotations = true;
       }
 
       // update the control frame
-      footSwitch.computeAndPackCoP(cop2d);
-      if (cop2d.containsNaN())
-         cop2d.setToZero(contactableFoot.getSoleFrame());
       framePosition.setIncludingFrame(cop2d, 0.0);
       frameOrientation.setToZero(contactableFoot.getSoleFrame());
       controlFrame.setPoseAndUpdate(framePosition, frameOrientation);
@@ -371,7 +369,12 @@ public class SupportState extends AbstractFootControlState
       desiredCopPosition.setReferenceFrame(desiredSoleFrame);
       desiredCopPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredCopPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredCopPosition,
+                                                       desiredAngularVelocity,
+                                                       desiredLinearVelocity,
+                                                       desiredAngularAcceleration,
+                                                       desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(localGains);
 
@@ -401,7 +404,7 @@ public class SupportState extends AbstractFootControlState
          isDirectionFeedbackControlled[1] = true; // control y orientation
       }
 
-      for (int i = dofs-1; i >= 0; i--)
+      for (int i = dofs - 1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
             accelerationSelectionMatrix.selectAxis(i, false);
@@ -416,7 +419,6 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
    }
-
 
    private void computeFootPolygon()
    {
@@ -438,7 +440,8 @@ public class SupportState extends AbstractFootControlState
       desiredOrientation.changeFrame(soleZUpFrame);
 
       // The z component is always updated as it is never held in place
-      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
+      if (footBarelyLoaded.getBooleanValue()
+          && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
       { // Only the z component is not held
          desiredPosition.setZ(footPosition.getZ());
       }
@@ -500,9 +503,9 @@ public class SupportState extends AbstractFootControlState
    }
 
    /**
-    * Will cause the support state to perform a foot lift off. This should be called before a step is taken and the desired
-    * foot pitch at the start of swing is provided. This method will enable toe or heel contact points depending on the direction
-    * of the pitch motion.
+    * Will cause the support state to perform a foot lift off. This should be called before a step is
+    * taken and the desired foot pitch at the start of swing is provided. This method will enable toe
+    * or heel contact points depending on the direction of the pitch motion.
     *
     * @param finalPitchInSoleZUp is the final desired foot pitch at lift off.
     * @param finalPitchVelocityInSoleZUp is the final desired foot pitch velocity at lift off.
@@ -529,9 +532,10 @@ public class SupportState extends AbstractFootControlState
    }
 
    /**
-    * Will cause the support state to perform a foot touch down. This should be called right after a step is finished
-    * (if the foot did not land flat on the ground) and the final flat foot pitch provided. This method will enable toe
-    * or heel contact points depending on the direction of the pitch motion.
+    * Will cause the support state to perform a foot touch down. This should be called right after a
+    * step is finished (if the foot did not land flat on the ground) and the final flat foot pitch
+    * provided. This method will enable toe or heel contact points depending on the direction of the
+    * pitch motion.
     *
     * @param initialPitchInSoleZUp is the initial pitch at touchdown.
     * @param initialPitchVelocityInSoleZUp is the initial pitch velocity at touchdown.
@@ -602,7 +606,6 @@ public class SupportState extends AbstractFootControlState
       return inverseDynamicsCommandsList;
    }
 
-
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
@@ -614,5 +617,4 @@ public class SupportState extends AbstractFootControlState
       this.angularWeight = angularWeight;
       this.linearWeight = linearWeight;
    }
-
 }

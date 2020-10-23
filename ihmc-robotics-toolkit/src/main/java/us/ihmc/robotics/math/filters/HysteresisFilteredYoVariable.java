@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -20,7 +20,7 @@ public class HysteresisFilteredYoVariable extends YoDouble
    private double previousUnfilteredValue;
    private double upperLimit, lowerLimit;
 
-   public HysteresisFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble hysteresisAmount)
+   public HysteresisFilteredYoVariable(String name, YoRegistry registry, YoDouble hysteresisAmount)
    {
       super(name, registry);
       this.hysteresisAmount = hysteresisAmount;
@@ -101,7 +101,7 @@ public class HysteresisFilteredYoVariable extends YoDouble
 
    public static void main(String[] args)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble hysteresisAmount = new YoDouble("hysteresisAmount", registry);
       new HysteresisFilteredYoVariable("test", registry, hysteresisAmount);
 

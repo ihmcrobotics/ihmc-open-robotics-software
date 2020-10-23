@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 
 //import java.applet.Applet;
 
@@ -133,12 +133,12 @@ public class StewartPlatformRobot extends Robot
 
       for (int i = 0; i < 6; i++)
       {
-         UniversalJoint uni = new UniversalJoint("base_uni_x_" + i, "base_uni_y_" + i, base_offsets[i], this, Axis.X, Axis.Y);
+         UniversalJoint uni = new UniversalJoint("base_uni_x_" + i, "base_uni_y_" + i, base_offsets[i], this, Axis3D.X, Axis3D.Y);
          Link lowerLeg = lowerLeg();
          uni.setLink(lowerLeg);
          this.addRootJoint(uni);
 
-         SliderJoint slider = new SliderJoint("act" + i, new Vector3D(), this, Axis.Z);
+         SliderJoint slider = new SliderJoint("act" + i, new Vector3D(), this, Axis3D.Z);
          Link upperLeg = upperLeg();
          slider.setLink(upperLeg);
          uni.addJoint(slider);

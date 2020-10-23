@@ -12,9 +12,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MomentumVisualizer implements Updatable
 {
@@ -26,13 +26,13 @@ public class MomentumVisualizer implements Updatable
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
    private final FrameVector3D frameVector = new FrameVector3D();
 
-   public MomentumVisualizer(String name, OneDoFJointBasics rootJoint, YoVariableRegistry registry,
+   public MomentumVisualizer(String name, OneDoFJointBasics rootJoint, YoRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)
    {
       this(name, registry, graphicsRegistry, rootJoint.getSuccessor());
    }
 
-   public MomentumVisualizer(String name, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
+   public MomentumVisualizer(String name, YoRegistry registry, YoGraphicsListRegistry graphicsRegistry,
          RigidBodyBasics rootBody)
    {
       comCalculator = new CenterOfMassCalculator(rootBody, ReferenceFrame.getWorldFrame());

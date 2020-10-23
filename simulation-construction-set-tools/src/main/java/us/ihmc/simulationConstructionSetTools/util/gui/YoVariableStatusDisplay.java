@@ -6,8 +6,8 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
@@ -26,12 +26,12 @@ public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleC
    private ImageIcon falseIcon;
 
    
-   public YoVariableStatusDisplay(String name, YoVariableRegistry parent, String currentStateVariableName)
+   public YoVariableStatusDisplay(String name, YoRegistry parent, String currentStateVariableName)
    {
-      this(name, parent, (YoBoolean) parent.getVariable(currentStateVariableName));
+      this(name, parent, (YoBoolean) parent.findVariable(currentStateVariableName));
    }
 
-   public YoVariableStatusDisplay(String name, YoVariableRegistry parent, YoBoolean currentStateVariable)
+   public YoVariableStatusDisplay(String name, YoRegistry parent, YoBoolean currentStateVariable)
    {
       YoVariableTogglerOutlet nullOutlet = new YoVariableTogglerOutlet(name, parent);
 
@@ -124,7 +124,7 @@ public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleC
    }
 
    @Override
-   public void registerWithVariableChangedListener(VariableChangedListener changedListener)
+   public void registerWithVariableChangedListener(YoVariableChangedListener changedListener)
    {
       buttonToggleState.registerWithVariableChangedListener(changedListener);
    }

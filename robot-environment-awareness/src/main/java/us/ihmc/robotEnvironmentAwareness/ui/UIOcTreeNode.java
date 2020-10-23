@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
-import boofcv.misc.UnsupportedException;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jOctoMap.node.baseImplementation.AbstractOccupancyOcTreeNode;
@@ -164,18 +163,18 @@ public class UIOcTreeNode extends AbstractOccupancyOcTreeNode<UIOcTreeNode>
    @Override
    protected void clear()
    {
-      throw new UnsupportedException();
+      throw new UnsupportedOperationException();
    }
 
    @Override
    public void addValue(float logOdds)
    {
-      throw new UnsupportedException();
+      throw new UnsupportedOperationException();
    }
 
    @Override
    public void allocateChildren()
    {
-      throw new UnsupportedException();
+      throw new UnsupportedOperationException();
    }
 }

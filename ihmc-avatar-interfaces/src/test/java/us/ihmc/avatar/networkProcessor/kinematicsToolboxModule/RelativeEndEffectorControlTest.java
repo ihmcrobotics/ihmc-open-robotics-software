@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -20,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -51,10 +52,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 /**
  * The goal here is to validate control approach used in the {@code KinematicsToolboxModule} when
@@ -71,7 +72,7 @@ public class RelativeEndEffectorControlTest
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private Robot robot;
@@ -83,7 +84,7 @@ public class RelativeEndEffectorControlTest
    public void setup(RobotDescription robotDescription)
    {
       if (mainRegistry == null)
-         mainRegistry = new YoVariableRegistry("main");
+         mainRegistry = new YoRegistry("main");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       if (desiredFullRobotModel == null)
@@ -94,7 +95,7 @@ public class RelativeEndEffectorControlTest
       robot = new RobotFromDescription(robotDescription);
       robot.setDynamic(false);
       robot.setGravity(0);
-      robot.addYoVariableRegistry(mainRegistry);
+      robot.addYoRegistry(mainRegistry);
 
       if (visualize)
       {
@@ -130,7 +131,7 @@ public class RelativeEndEffectorControlTest
                                                            .collect(FeedbackControlCommandList::new,
                                                                     FeedbackControlCommandList::addCommand,
                                                                     FeedbackControlCommandList::addCommandList);
-      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, commandTemplate, mainRegistry);
+      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, new FeedbackControllerTemplate(commandTemplate), mainRegistry);
       controllerCore.compute();
    }
 
@@ -149,7 +150,7 @@ public class RelativeEndEffectorControlTest
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -171,7 +172,7 @@ public class RelativeEndEffectorControlTest
    @Test
    public void testControlEndEffectorRelativeToOtherEndEffector()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
       desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
@@ -292,7 +293,7 @@ public class RelativeEndEffectorControlTest
    @Test
    public void testInequalityEndEffector()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
       desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
@@ -446,7 +447,7 @@ public class RelativeEndEffectorControlTest
    public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
    {
       double angle = 2.0 * Math.PI * frequency * time;
-      Vector3D offset = new Vector3D(Axis.Z);
+      Vector3D offset = new Vector3D(Axis3D.Z);
       offset.scale(radius);
       RotationMatrixTools.applyRollRotation(angle, offset, offset);
       FramePoint3D position = new FramePoint3D();
@@ -464,7 +465,7 @@ public class RelativeEndEffectorControlTest
    {
       double omega = 2.0 * Math.PI * frequency;
       double angle = omega * time;
-      Vector3D offset = new Vector3D(Axis.Z);
+      Vector3D offset = new Vector3D(Axis3D.Z);
       offset.scale(radius);
       RotationMatrixTools.applyRollRotation(angle, offset, offset);
       FrameVector3D linearVelocity = new FrameVector3D();

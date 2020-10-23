@@ -10,17 +10,18 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ClippedSpeedOffsetErrorInterpolator
@@ -29,7 +30,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private final YoBoolean isRotationCorrectionEnabled;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean hasBeenCalled;
 
@@ -108,8 +109,8 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final FrameQuaternion updatedGoalOffsetWithDeadZone_Rotation = new FrameQuaternion(worldFrame);
    private final Quaternion updatedGoalOffsetWithDeadZone_Rotation_quat = new Quaternion();
 
-   double[] stateEstimatorYawPitchRoll = new double[3];
-   double[] temporaryYawPitchRoll = new double[3];
+   YawPitchRoll stateEstimatorYawPitchRoll = new YawPitchRoll();
+   YawPitchRoll temporaryYawPitchRoll = new YawPitchRoll();
    private final YoDouble startYaw;
    private final YoDouble goalYaw;
    private final YoDouble interpolatedYaw;
@@ -137,14 +138,14 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFrameYawPitchRoll yoGoalOffsetFrameOrientation_Rotation;
    private final YoFrameYawPitchRoll yoInterpolatedOffsetFrameOrientation_Rotation;
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt)
+   public ClippedSpeedOffsetErrorInterpolator(YoRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt)
    {
       this(parentRegistry, referenceFrame, estimator_dt, new ClippedSpeedOffsetErrorInterpolatorParameters());
    }
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, ClippedSpeedOffsetErrorInterpolatorParameters parameters)
+   public ClippedSpeedOffsetErrorInterpolator(YoRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
-      this.registry = new YoVariableRegistry(getClass().getSimpleName());
+      this.registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
@@ -221,10 +222,10 @@ public class ClippedSpeedOffsetErrorInterpolator
                                                                               startOffsetErrorReferenceFrame_Rotation,
                                                                               registry);
 
-      this.alphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      this.alphaFilterBreakFrequency.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(alphaFilterBreakFrequency.getValue(), dt.getValue()));
          }
@@ -241,8 +242,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetErrorPose.setIncludingFrame(goalOffsetError);
       if (!isRotationCorrectionEnabled.getBooleanValue())
       {
-         startOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
-         goalOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+         startOffsetErrorPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+         goalOffsetErrorPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
 //         goalOffsetErrorPose.set(startOffsetError);
       }
       //scs feedback only
@@ -270,7 +271,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    {
       //Translation
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
-      stateEstimatorTransform_Translation.setRotationToZero();
+      stateEstimatorTransform_Translation.getRotation().setToZero();
       stateEstimatorPose_Translation.set(stateEstimatorTransform_Translation);
       stateEstimatorReferenceFrame_Translation.setPoseAndUpdate(stateEstimatorPose_Translation);
 
@@ -301,7 +302,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    {
       //Rotation  
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
-      stateEstimatorTransform_Rotation.setTranslationToZero();
+      stateEstimatorTransform_Rotation.getTranslation().setToZero();
       stateEstimatorPose_Rotation.set(stateEstimatorTransform_Rotation);
       stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
 
@@ -318,10 +319,10 @@ public class ClippedSpeedOffsetErrorInterpolator
       startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
 
       offsetBetweenStartAndGoal_Rotation.difference(updatedStartOffset_Rotation, updatedGoalOffset_Rotation);
-      offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
-      goalYawRaw.set(temporaryYawPitchRoll[0]);
+      temporaryYawPitchRoll.set(offsetBetweenStartAndGoal_Rotation);
+      goalYawRaw.set(temporaryYawPitchRoll.getYaw());
       goalYawWithDeadZone.update();
-      updatedGoalOffsetWithDeadZone_Rotation_quat.setYawPitchRoll(goalYawWithDeadZone.getValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2]);
+      updatedGoalOffsetWithDeadZone_Rotation_quat.setYawPitchRoll(goalYawWithDeadZone.getValue(), temporaryYawPitchRoll.getPitch(), temporaryYawPitchRoll.getRoll());
       updatedGoalOffsetWithDeadZone_Rotation_quat.multiply(updatedStartOffset_Rotation_quat, updatedGoalOffsetWithDeadZone_Rotation_quat);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
 
@@ -343,9 +344,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       }
 
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
-      stateEstimatorTransform_Translation.setRotationToZero();
+      stateEstimatorTransform_Translation.getRotation().setToZero();
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
-      stateEstimatorTransform_Rotation.setTranslationToZero();
+      stateEstimatorTransform_Rotation.getTranslation().setToZero();
 
       //update the start and goal translations and rotations
       //localization translation times interpolated translation times localization rotation times interpolated rotation
@@ -356,8 +357,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedStartOffsetTransform.multiply(startOffsetTransform_Rotation);
       updatedStartOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
-      updatedStartOffsetTransform.getTranslation(updatedStartOffset_Translation);
-      updatedStartOffsetTransform.getRotation(updatedStartOffset_Rotation_quat);
+      updatedStartOffset_Translation.set(updatedStartOffsetTransform.getTranslation());
+      updatedStartOffset_Rotation_quat.set(updatedStartOffsetTransform.getRotation());
 
       updatedGoalOffsetTransform.setIdentity();
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Translation);
@@ -365,8 +366,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Rotation);
       updatedGoalOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
-      updatedGoalOffsetTransform.getTranslation(updatedGoalOffset_Translation);
-      updatedGoalOffsetTransform.getRotation(updatedGoalOffset_Rotation_quat);
+      updatedGoalOffset_Translation.set(updatedGoalOffsetTransform.getTranslation());
+      updatedGoalOffset_Rotation_quat.set(updatedGoalOffsetTransform.getRotation());
 
       //interpolation here
 
@@ -375,20 +376,20 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
-         stateEstimatorTransform_Rotation.getRotationYawPitchRoll(stateEstimatorYawPitchRoll);
+         stateEstimatorYawPitchRoll.set(stateEstimatorTransform_Rotation.getRotation());
 
-         updatedStartOffset_Rotation_quat.getYawPitchRoll(temporaryYawPitchRoll);
-         startYaw.set(temporaryYawPitchRoll[0]);
+         temporaryYawPitchRoll.set(updatedStartOffset_Rotation_quat);
+         startYaw.set(temporaryYawPitchRoll.getYaw());
 
-         updatedGoalOffset_Rotation_quat.getYawPitchRoll(temporaryYawPitchRoll);
-         goalYaw.set(temporaryYawPitchRoll[0]);
+         temporaryYawPitchRoll.set(updatedGoalOffset_Rotation_quat);
+         goalYaw.set(temporaryYawPitchRoll.getYaw());
 
          angleToTravel.set(Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw.getValue(), startYaw.getValue())));
       }
       else
       {
          angleToTravel.set(0.0);
-         stateEstimatorTransform_Rotation.getRotation(interpolatedRotation);
+         interpolatedRotation.set(stateEstimatorTransform_Rotation.getRotation());
       }
 
       maximumAlphaFilterChangeTranslation.set(1.0);
@@ -419,7 +420,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
          interpolatedYaw.set(AngleTools.interpolateAngle(startYaw.getValue(), goalYaw.getValue(), cLippedAlphaFilterValue.getValue()));
-         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll.getPitch(), stateEstimatorYawPitchRoll.getRoll());
       }
 
       offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
@@ -433,11 +434,11 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       //here we express the goal and interpolated translation and rotation with respect to the start Translation and rotation so that the graphs are easier to read in SCS 
       startOffsetErrorPose_Translation.setToZero(worldFrame);
-      startOffsetErrorPose_Translation.setPosition(updatedStartOffset_Translation);
+      startOffsetErrorPose_Translation.getPosition().set(updatedStartOffset_Translation);
       startOffsetErrorReferenceFrame_Translation.setPoseAndUpdate(startOffsetErrorPose_Translation);
 
       startOffsetErrorPose_Rotation.setToZero(worldFrame);
-      startOffsetErrorPose_Rotation.setOrientation(updatedStartOffset_Rotation);
+      startOffsetErrorPose_Rotation.getOrientation().set(updatedStartOffset_Rotation);
       startOffsetErrorReferenceFrame_Rotation.setPoseAndUpdate(startOffsetErrorPose_Rotation);
 
       goalOffsetFramePoint_Translation.changeFrame(worldFrame);

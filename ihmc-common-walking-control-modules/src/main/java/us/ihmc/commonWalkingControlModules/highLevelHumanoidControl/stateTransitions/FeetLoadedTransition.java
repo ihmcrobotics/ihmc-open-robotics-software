@@ -7,13 +7,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetLoadedTransition implements StateTransitionCondition
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 6.0;
    private static final double TIME_WINDOW = 3.0;
@@ -27,7 +27,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
    private final SideDependentList<SimpleMovingAverageFilteredYoVariable> prepFootFzAverages = new SideDependentList<>();
 
    public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
-                               double controlDT, double gravityZ, double totalMass, YoVariableRegistry parentRegistry)
+                               double controlDT, double gravityZ, double totalMass, YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
          footSensors.put(robotSide, forceSensorDataHolder.getByName(feetForceSensors.get(robotSide)));

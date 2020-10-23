@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public class DirectedGraph<N>
 {
-   private final HashMap<GraphEdge, EdgeCost> edgeCostMap = new HashMap<>();
+   private final HashMap<GraphEdge<N>, EdgeCost> edgeCostMap = new HashMap<>();
    private final HashMap<N, NodeCost> nodeCostMap = new HashMap<>();
 
    private final HashMap<N, HashSet<GraphEdge<N>>> outgoingEdges = new HashMap<>();
@@ -62,11 +62,33 @@ public class DirectedGraph<N>
       if (edgeCostMap.containsKey(edge))
          throw new RuntimeException("Edge exists already.");
 
-      if (!outgoingEdges.containsKey(startNode))
-         outgoingEdges.put(startNode, new HashSet<>());
+      outgoingEdges.computeIfAbsent(startNode, node -> new HashSet<>()).add(edge);
+      setEdge(edge, transitionCost);
+
+      if(graphExpansionCallback != null)
+         graphExpansionCallback.accept(edge);
+   }
+
+   public void updateEdgeCost(N startNode, N endNode, double transitionCost)
+   {
+      GraphEdge<N> edge = new GraphEdge<>(startNode, endNode);
+      if (edgeCostMap.containsKey(edge))
+      {
+         setEdge(edge, transitionCost);
+      }
+      else
+      {
+         checkAndSetEdge(startNode, endNode, transitionCost);
+      }
+   }
+
+   private void setEdge(GraphEdge<N> edge, double transitionCost)
+   {
+      N startNode = edge.getStartNode();
+      N endNode = edge.getEndNode();
+
       EdgeCost cost = new EdgeCost(transitionCost);
       edgeCostMap.put(edge, cost);
-      outgoingEdges.get(startNode).add(edge);
 
       double newNodeCost = nodeCostMap.get(startNode).getNodeCost() + transitionCost;
       if (nodeCostMap.containsKey(endNode))
@@ -84,9 +106,6 @@ public class DirectedGraph<N>
          nodeCostMap.put(endNode, new NodeCost(newNodeCost));
          incomingBestEdge.put(endNode, edge);
       }
-
-      if(graphExpansionCallback != null)
-         graphExpansionCallback.accept(edge);
    }
 
    /**
@@ -120,6 +139,26 @@ public class DirectedGraph<N>
 
       Collections.reverse(path);
       return path;
+   }
+
+   /**
+    * Returns the number of edges along the path from the start node to the given node
+    */
+   public int getPathLengthFromStart(N node)
+   {
+      checkNodeExists(node);
+
+      int pathLength = 0;
+
+      GraphEdge<N> edgeFromParent = incomingBestEdge.get(node);
+      while (edgeFromParent.getStartNode() != null)
+      {
+         N parentNode = edgeFromParent.getStartNode();
+         edgeFromParent = incomingBestEdge.get(parentNode);
+         pathLength++;
+      }
+
+      return pathLength;
    }
 
    /**
@@ -166,5 +205,10 @@ public class DirectedGraph<N>
    public void setGraphExpansionCallback(Consumer<GraphEdge<N>> graphExpansionCallback)
    {
       this.graphExpansionCallback = graphExpansionCallback;
+   }
+
+   public HashMap<GraphEdge<N>, EdgeCost> getEdgeCostMap()
+   {
+      return edgeCostMap;
    }
 }

@@ -1,12 +1,17 @@
 package us.ihmc.footstepPlanning.occlusion;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -26,11 +31,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -39,14 +42,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
@@ -72,38 +73,6 @@ public class SimpleOcclusionTests
    }
 
    @Test
-   @Disabled // Resource file does not seem to exist.
-   public void testOcclusionsFromData(TestInfo testInfo)
-   {
-      FramePose3D startPose = new FramePose3D(worldFrame);
-      startPose.setPosition(0.25, -0.25, 0.0);
-
-      FramePose3D goalPose = new FramePose3D(worldFrame);
-      goalPose.setPosition(2.75, 0.95, 0.0);
-      BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
-
-      Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
-      PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
-
-      runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
-   }
-
-   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
-   {
-      @Override
-      public boolean getReturnBestEffortPlan()
-      {
-         return true;
-      }
-
-      @Override
-      public int getMinimumStepsForBestEffortPlan()
-      {
-         return 3;
-      }
-   }
-
-   @Test
    @Disabled
    public void testMazeWithOcclusions(TestInfo testInfo)
    {
@@ -121,12 +90,12 @@ public class SimpleOcclusionTests
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
                         VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setGoalPose(goalPose);
+      request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
 
       FramePose3D stancePose = new FramePose3D();
       RobotSide stanceSide = computeStanceFootPose(startPose, parameters, stancePose);
@@ -256,10 +225,10 @@ public class SimpleOcclusionTests
             }
          }
 
-         request.setGoalPose(goalPose);
+         request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
          request.setPlanarRegionsList(visiblePlanarRegions);
-         request.setInitialStanceSide(stanceSide);
-         request.setInitialStancePose(stancePose);
+         request.setRequestedInitialStanceSide(stanceSide);
+         request.setStartFootPoses(parameters.getIdealFootstepWidth(), stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);
          request.setPlanBodyPath(true);
          request.setHorizonLength(1.0);
@@ -277,14 +246,14 @@ public class SimpleOcclusionTests
                maxSolveTime = seconds;
             }
 
-            if (plannerOutput.getResult().validForExecution())
+            if (plannerOutput.getFootstepPlanningResult().validForExecution())
             {
                haveNewPlan = true;
                plan = plannerOutput.getFootstepPlan();
             }
             else
             {
-               PrintTools.info("Planner failed: " + plannerOutput.getResult());
+               PrintTools.info("Planner failed: " + plannerOutput.getFootstepPlanningResult());
             }
          }
          catch (Exception e)
@@ -337,9 +306,9 @@ public class SimpleOcclusionTests
             int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsPerSideToVisualize);
             for (int stepIdx = 0; stepIdx < stepsToShow; stepIdx++)
             {
-               SimpleFootstep footstep = plan.getFootstep(stepIdx);
+               PlannedFootstep footstep = plan.getFootstep(stepIdx);
                FramePose3D footstepPose = new FramePose3D();
-               footstep.getSoleFramePose(footstepPose);
+               footstep.getFootstepPose(footstepPose);
 
                List<YoFramePoseUsingYawPitchRoll> listOfPoses = solePosesForVisualization.get(footstep.getRobotSide());
                YoFramePoseUsingYawPitchRoll yoSolePose = listOfPoses.get(stepIdx / 2);
@@ -352,8 +321,8 @@ public class SimpleOcclusionTests
             stepPosesTaken.get(i).set(stancePose);
          }
 
-         SimpleFootstep firstStep = plan.getFootstep(0);
-         firstStep.getSoleFramePose(stancePose);
+         PlannedFootstep firstStep = plan.getFootstep(0);
+         firstStep.getFootstepPose(stancePose);
          stanceSide = firstStep.getRobotSide();
 
          Point3D bodyPoint = computeBodyPoint(stancePose, stanceSide, parameters, 0.0);
@@ -387,11 +356,11 @@ public class SimpleOcclusionTests
       }
    }
 
-   private static SimulationConstructionSet setupSCS(String testName, YoVariableRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
+   private static SimulationConstructionSet setupSCS(String testName, YoRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
                                                      FramePose3D goalPose)
    {
       Robot robot = new Robot(SimpleOcclusionTests.class.getSimpleName());
-      robot.addYoVariableRegistry(testRegistry);
+      robot.addYoRegistry(testRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -445,8 +414,8 @@ public class SimpleOcclusionTests
       footPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       stancePoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      stancePoseToPack.setPosition(footPosition);
-      stancePoseToPack.setOrientation(startPose.getOrientation());
+      stancePoseToPack.getPosition().set(footPosition);
+      stancePoseToPack.getOrientation().set(startPose.getOrientation());
 
       return side;
    }
@@ -592,25 +561,25 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createSimpleOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 6.0);
       generator.translate(-1.0, -1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      startPoseToPack.setPosition(-2.0, -2.0, 0.0);
+      startPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.getPosition().set(-2.0, -2.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      goalPoseToPack.setPosition(2.0, 2.0, 0.0);
+      goalPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.getPosition().set(2.0, 2.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       return generator.getPlanarRegionsList();
@@ -619,41 +588,41 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createMazeOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 12.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(-1.0, -2.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 0.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, -4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, 4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      startPoseToPack.setPosition(-2.0, -5.0, 0.0);
+      startPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.getPosition().set(-2.0, -5.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setOrientationYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
-      goalPoseToPack.setPosition(0.0, -5.0, 0.0);
+      goalPoseToPack.getOrientation().setYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.getPosition().set(0.0, -5.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       return generator.getPlanarRegionsList();

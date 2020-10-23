@@ -15,7 +15,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    private Simulation simulation;
 
    private String[] inputStateVariableNames, outputStateVariableNames;
-   private YoVariable<?>[] inputStateVariables, outputStateVariables;
+   private YoVariable[] inputStateVariables, outputStateVariables;
 
    private SimulationConstructor constructor;
    private boolean isSimulationDone;
@@ -47,14 +47,14 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       simulation = constructor.constructSimulation(structuralParameterNames, structuralParameterValues);
       simulation.addSimulateDoneListener(this);
 
-      time = (YoDouble) simulation.getVariable("t");
+      time = (YoDouble) simulation.findVariable("t");
 
       if (inputStateVariableNames != null)
       {
          for (int i = 0; i < inputStateVariables.length; i++)
          {
             System.out.println("Getting var: " + inputStateVariableNames[i]);
-            inputStateVariables[i] = simulation.getVariable(inputStateVariableNames[i]);
+            inputStateVariables[i] = simulation.findVariable(inputStateVariableNames[i]);
          }
       }
 
@@ -63,7 +63,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
          for (int i = 0; i < outputStateVariables.length; i++)
          {
             System.out.println("Getting var: " + outputStateVariableNames[i]);
-            outputStateVariables[i] = simulation.getVariable(outputStateVariableNames[i]);
+            outputStateVariables[i] = simulation.findVariable(outputStateVariableNames[i]);
          }
       }
    }
@@ -114,7 +114,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 
       for (int i = 0; i < inputStateVariables.length; i++)
       {
-         YoVariable<?> var = inputStateVariables[i];
+         YoVariable var = inputStateVariables[i];
          if (var != null)
          {
             var.setValueFromDouble(inputStateVals[i]);
@@ -129,7 +129,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    {
       for (int i = 0; i < outputStateVariables.length; i++)
       {
-         YoVariable<?> var = outputStateVariables[i];
+         YoVariable var = outputStateVariables[i];
          if (var != null)
          {
             System.out.println(var.getName() + ": " + var.getValueAsDouble());
@@ -198,7 +198,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 
       for (int i = 0; i < ret.length; i++)
       {
-         YoVariable<?> var = outputStateVariables[i];
+         YoVariable var = outputStateVariables[i];
          if (var != null)
             ret[i] = outputStateVariables[i].getValueAsDouble();
          else

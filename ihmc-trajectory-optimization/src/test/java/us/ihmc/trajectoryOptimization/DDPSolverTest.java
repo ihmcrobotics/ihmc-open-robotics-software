@@ -2,11 +2,11 @@ package us.ihmc.trajectoryOptimization;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -20,17 +20,17 @@ public class DDPSolverTest
       TestDynamics dynamics = new TestDynamics();
       DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
-      DenseMatrix64F feedforwardTerm = new DenseMatrix64F(3, 1);
+      DMatrixRMaj feedforwardTerm = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F updatedState = new DenseMatrix64F(6, 1);
-      DenseMatrix64F updatedControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj updatedState = new DMatrixRMaj(6, 1);
+      DMatrixRMaj updatedControl = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F updatedControlExpected = new DenseMatrix64F(3, 1);
+      DMatrixRMaj updatedControlExpected = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj gainMatrix = new DMatrixRMaj(3, 6);
 
       double xyPositionGain = 2.0;
       double zPositionGain = 5.0;
@@ -98,12 +98,12 @@ public class DDPSolverTest
 
       calculator.computeUpdatedControl(currentState, updatedState, gainMatrix, feedforwardTerm, currentControl, updatedControl);
 
-      DenseMatrix64F stateError = new DenseMatrix64F(6, 1);
-      DenseMatrix64F updatedControlAlternative = new DenseMatrix64F(3, 1);
+      DMatrixRMaj stateError = new DMatrixRMaj(6, 1);
+      DMatrixRMaj updatedControlAlternative = new DMatrixRMaj(3, 1);
 
-      CommonOps.subtract(updatedState, currentState, stateError);
-      CommonOps.add(currentControl, feedforwardTerm, updatedControlAlternative);
-      CommonOps.multAdd(gainMatrix, stateError, updatedControlAlternative);
+      CommonOps_DDRM.subtract(updatedState, currentState, stateError);
+      CommonOps_DDRM.add(currentControl, feedforwardTerm, updatedControlAlternative);
+      CommonOps_DDRM.multAdd(gainMatrix, stateError, updatedControlAlternative);
 
       MatrixTestTools.assertMatrixEquals(updatedControlAlternative, updatedControl, 1e-12);
       MatrixTestTools.assertMatrixEquals(updatedControlExpected, updatedControl, 1e-12);
@@ -113,32 +113,32 @@ public class DDPSolverTest
    public void testUpdateHamiltonianApproximations()
    {
       Random random = new Random(1738);
-      DenseMatrix64F V_X = RandomMatrices.createRandom(6, 1, random);
-      DenseMatrix64F V_XX = RandomMatrices.createSymmetric(6, -1000, 1000, random);
+      DMatrixRMaj V_X = RandomMatrices_DDRM.rectangle(6, 1, random);
+      DMatrixRMaj V_XX = RandomMatrices_DDRM.symmetric(6, -1000, 1000, random);
 
-      DenseMatrix64F L_X = RandomMatrices.createRandom(6, 1, random);
-      DenseMatrix64F L_U = RandomMatrices.createRandom(3, 1, random);
-      DenseMatrix64F L_XX = RandomMatrices.createRandom(6, 6, random);
-      DenseMatrix64F L_XU = RandomMatrices.createRandom(6, 3, random);
-      DenseMatrix64F L_UX = new DenseMatrix64F(3, 6);
-      DenseMatrix64F L_UU = RandomMatrices.createRandom(3, 3, random);
-      CommonOps.transpose(L_XU, L_UX);
+      DMatrixRMaj L_X = RandomMatrices_DDRM.rectangle(6, 1, random);
+      DMatrixRMaj L_U = RandomMatrices_DDRM.rectangle(3, 1, random);
+      DMatrixRMaj L_XX = RandomMatrices_DDRM.rectangle(6, 6, random);
+      DMatrixRMaj L_XU = RandomMatrices_DDRM.rectangle(6, 3, random);
+      DMatrixRMaj L_UX = new DMatrixRMaj(3, 6);
+      DMatrixRMaj L_UU = RandomMatrices_DDRM.rectangle(3, 3, random);
+      CommonOps_DDRM.transpose(L_XU, L_UX);
 
-      DenseMatrix64F f_X = RandomMatrices.createRandom(6, 6, random);
-      DenseMatrix64F f_U = RandomMatrices.createRandom(6, 3, random);
+      DMatrixRMaj f_X = RandomMatrices_DDRM.rectangle(6, 6, random);
+      DMatrixRMaj f_U = RandomMatrices_DDRM.rectangle(6, 3, random);
 
-      DenseMatrix64F Qx = new DenseMatrix64F(6, 1);
-      DenseMatrix64F Qu = new DenseMatrix64F(3, 1);
-      DenseMatrix64F Qxx = new DenseMatrix64F(6, 6);
-      DenseMatrix64F Quu = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Qux = new DenseMatrix64F(3, 6);
-      DenseMatrix64F Qxu = new DenseMatrix64F(6, 3);
-      DenseMatrix64F QuExpected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F QxExpected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F QxxExpected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F QuuExpected = new DenseMatrix64F(3, 3);
-      DenseMatrix64F QuxExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F QxuExpected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj Qx = new DMatrixRMaj(6, 1);
+      DMatrixRMaj Qu = new DMatrixRMaj(3, 1);
+      DMatrixRMaj Qxx = new DMatrixRMaj(6, 6);
+      DMatrixRMaj Quu = new DMatrixRMaj(3, 3);
+      DMatrixRMaj Qux = new DMatrixRMaj(3, 6);
+      DMatrixRMaj Qxu = new DMatrixRMaj(6, 3);
+      DMatrixRMaj QuExpected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj QxExpected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj QxxExpected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj QuuExpected = new DMatrixRMaj(3, 3);
+      DMatrixRMaj QuxExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj QxuExpected = new DMatrixRMaj(6, 3);
 
       TestDynamics dynamics = new TestDynamics();
       DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
@@ -146,27 +146,27 @@ public class DDPSolverTest
       calculator.updateHamiltonianApproximations(DefaultDiscreteState.DEFAULT, 0, L_X, L_U, L_XX, L_UU, L_XU, f_X, f_U, V_X, V_XX, Qx, Qu, Qxx, Quu, Qxu, Qux);
 
       QxExpected.set(L_X);
-      CommonOps.multAddTransA(f_X, V_X, QxExpected);
+      CommonOps_DDRM.multAddTransA(f_X, V_X, QxExpected);
 
       QuExpected.set(L_U);
-      CommonOps.multAddTransA(f_U, V_X, QuExpected);
+      CommonOps_DDRM.multAddTransA(f_U, V_X, QuExpected);
 
-      DenseMatrix64F aV = new DenseMatrix64F(6, 6);
-      DenseMatrix64F bV = new DenseMatrix64F(3, 6);
-      CommonOps.multTransA(f_X, V_XX, aV);
-      CommonOps.multTransA(f_U, V_XX, bV);
+      DMatrixRMaj aV = new DMatrixRMaj(6, 6);
+      DMatrixRMaj bV = new DMatrixRMaj(3, 6);
+      CommonOps_DDRM.multTransA(f_X, V_XX, aV);
+      CommonOps_DDRM.multTransA(f_U, V_XX, bV);
 
       QxxExpected.set(L_XX);
-      CommonOps.multAdd(aV, f_X, QxxExpected);
+      CommonOps_DDRM.multAdd(aV, f_X, QxxExpected);
 
       QuuExpected.set(L_UU);
-      CommonOps.multAdd(bV, f_U, QuuExpected);
+      CommonOps_DDRM.multAdd(bV, f_U, QuuExpected);
 
       QuxExpected.set(L_UX);
-      CommonOps.multAdd(bV, f_X, QuxExpected);
+      CommonOps_DDRM.multAdd(bV, f_X, QuxExpected);
 
       QxuExpected.set(L_XU);
-      CommonOps.multAdd(aV, f_U, QxuExpected);
+      CommonOps_DDRM.multAdd(aV, f_U, QxuExpected);
 
       MatrixTestTools.assertMatrixEquals(QxExpected, Qx, 1e-12);
       MatrixTestTools.assertMatrixEquals(QuExpected, Qu, 1e-12);
@@ -184,13 +184,13 @@ public class DDPSolverTest
       TestDynamics dynamics = new TestDynamics();
       DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
-      DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Q_XU = new DenseMatrix64F(6, 3);
-      DenseMatrix64F Q_XX = new DenseMatrix64F(6, 6);
+      DMatrixRMaj Q_UU = new DMatrixRMaj(3, 3);
+      DMatrixRMaj Q_UU_inv = new DMatrixRMaj(3, 3);
+      DMatrixRMaj Q_XU = new DMatrixRMaj(6, 3);
+      DMatrixRMaj Q_XX = new DMatrixRMaj(6, 6);
 
-      DenseMatrix64F Q_U = new DenseMatrix64F(3, 1);
-      DenseMatrix64F Q_X = new DenseMatrix64F(6, 1);
+      DMatrixRMaj Q_U = new DMatrixRMaj(3, 1);
+      DMatrixRMaj Q_X = new DMatrixRMaj(6, 1);
 
       Q_U.set(0, 0, 8.5);
       Q_U.set(1, 0, 9.5);
@@ -281,27 +281,27 @@ public class DDPSolverTest
       Q_XX.set(5, 4, 21.0);
       Q_XX.set(5, 5, 21.0);
 
-      LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(0);
+      LinearSolverDense<DMatrixRMaj> linearSolver = LinearSolverFactory_DDRM.linear(0);
       linearSolver.setA(Q_UU);
       linearSolver.invert(Q_UU_inv);
 
-      DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj gainMatrix = new DMatrixRMaj(3, 6);
 
-      CommonOps.multTransB(Q_UU_inv, Q_XU, gainMatrix);
+      CommonOps_DDRM.multTransB(Q_UU_inv, Q_XU, gainMatrix);
 
-      DenseMatrix64F V_X = new DenseMatrix64F(6, 1);
-      DenseMatrix64F V_XX = new DenseMatrix64F(6, 6);
+      DMatrixRMaj V_X = new DMatrixRMaj(6, 1);
+      DMatrixRMaj V_XX = new DMatrixRMaj(6, 6);
 
       calculator.computePreviousValueApproximation(Q_X, Q_U, Q_XX, Q_XU, gainMatrix, V_X, V_XX);
 
-      DenseMatrix64F V_X_expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F V_XX_expected = new DenseMatrix64F(6, 6);
+      DMatrixRMaj V_X_expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj V_XX_expected = new DMatrixRMaj(6, 6);
 
       V_X_expected.set(Q_X);
       V_XX_expected.set(Q_XX);
 
-      CommonOps.multAddTransA(gainMatrix, Q_U, V_X_expected);
-      CommonOps.multAdd(Q_XU, gainMatrix, V_XX_expected);
+      CommonOps_DDRM.multAddTransA(gainMatrix, Q_U, V_X_expected);
+      CommonOps_DDRM.multAdd(Q_XU, gainMatrix, V_XX_expected);
 
       MatrixTestTools.assertMatrixEquals(V_X_expected, V_X, 1e-12);
       MatrixTestTools.assertMatrixEquals(V_XX_expected, V_XX, 1e-12);
@@ -313,13 +313,13 @@ public class DDPSolverTest
       TestDynamics dynamics = new TestDynamics();
       DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
-      DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Q_UX = new DenseMatrix64F(3, 6);
-      DenseMatrix64F Q_XX = new DenseMatrix64F(6, 6);
+      DMatrixRMaj Q_UU = new DMatrixRMaj(3, 3);
+      DMatrixRMaj Q_UU_inv = new DMatrixRMaj(3, 3);
+      DMatrixRMaj Q_UX = new DMatrixRMaj(3, 6);
+      DMatrixRMaj Q_XX = new DMatrixRMaj(6, 6);
 
-      DenseMatrix64F Q_U = new DenseMatrix64F(3, 1);
-      DenseMatrix64F Q_X = new DenseMatrix64F(6, 1);
+      DMatrixRMaj Q_U = new DMatrixRMaj(3, 1);
+      DMatrixRMaj Q_X = new DMatrixRMaj(6, 1);
 
       Q_U.set(0, 0, 8.5);
       Q_U.set(1, 0, 9.5);
@@ -407,20 +407,20 @@ public class DDPSolverTest
       Q_XX.set(5, 4, 21.0);
       Q_XX.set(5, 5, 21.0);
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
+      LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(0);
       solver.setA(Q_UU);
       solver.invert(Q_UU_inv);
 
-      DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
-      DenseMatrix64F feedforwardMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj gainMatrix = new DMatrixRMaj(3, 6);
+      DMatrixRMaj feedforwardMatrix = new DMatrixRMaj(3, 1);
 
       calculator.computeFeedbackGainAndFeedForwardTerms(Q_U, Q_UU, Q_UX, gainMatrix, feedforwardMatrix);
 
-      DenseMatrix64F gainExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F feedforwardExpected = new DenseMatrix64F(3, 1);
+      DMatrixRMaj gainExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj feedforwardExpected = new DMatrixRMaj(3, 1);
 
-      CommonOps.mult(-1.0, Q_UU_inv, Q_UX, gainExpected);
-      CommonOps.mult(-1.0, Q_UU_inv, Q_U, feedforwardExpected);
+      CommonOps_DDRM.mult(-1.0, Q_UU_inv, Q_UX, gainExpected);
+      CommonOps_DDRM.mult(-1.0, Q_UU_inv, Q_U, feedforwardExpected);
 
       MatrixTestTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-6);
       MatrixTestTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
@@ -430,33 +430,33 @@ public class DDPSolverTest
    public void testAddMultQuad()
    {
       Random random = new Random(1738);
-      DenseMatrix64F d = RandomMatrices.createRandom(6, 3, random);
-      DenseMatrix64F a = RandomMatrices.createRandom(4, 6, random);
-      DenseMatrix64F b = RandomMatrices.createRandom(4, 4, random);
-      DenseMatrix64F c = RandomMatrices.createRandom(4, 3, random);
+      DMatrixRMaj d = RandomMatrices_DDRM.rectangle(6, 3, random);
+      DMatrixRMaj a = RandomMatrices_DDRM.rectangle(4, 6, random);
+      DMatrixRMaj b = RandomMatrices_DDRM.rectangle(4, 4, random);
+      DMatrixRMaj c = RandomMatrices_DDRM.rectangle(4, 3, random);
 
-      DenseMatrix64F a_expected = new DenseMatrix64F(a);
-      DenseMatrix64F b_expected = new DenseMatrix64F(b);
-      DenseMatrix64F c_expected = new DenseMatrix64F(c);
-      DenseMatrix64F d_original = new DenseMatrix64F(d);
+      DMatrixRMaj a_expected = new DMatrixRMaj(a);
+      DMatrixRMaj b_expected = new DMatrixRMaj(b);
+      DMatrixRMaj c_expected = new DMatrixRMaj(c);
+      DMatrixRMaj d_original = new DMatrixRMaj(d);
 
       TestDynamics dynamics = new TestDynamics();
       DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       calculator.addMultQuad(a, b, c, d);
 
-      DenseMatrix64F d_expected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F abc = new DenseMatrix64F(6, 3);
+      DMatrixRMaj d_expected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj abc = new DMatrixRMaj(6, 3);
 
-      DenseMatrix64F aTran = new DenseMatrix64F(6, 4);
-      CommonOps.transpose(a, aTran);
+      DMatrixRMaj aTran = new DMatrixRMaj(6, 4);
+      CommonOps_DDRM.transpose(a, aTran);
 
-      DenseMatrix64F aTranB = new DenseMatrix64F(6, 4);
-      CommonOps.mult(aTran, b, aTranB);
+      DMatrixRMaj aTranB = new DMatrixRMaj(6, 4);
+      CommonOps_DDRM.mult(aTran, b, aTranB);
 
-      CommonOps.mult(aTranB, c, abc);
+      CommonOps_DDRM.mult(aTranB, c, abc);
 
-      CommonOps.add(d_original, abc, d_expected);
+      CommonOps_DDRM.add(d_original, abc, d_expected);
 
       MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
       MatrixTestTools.assertMatrixEquals(b_expected, b, 1e-12);
@@ -466,7 +466,7 @@ public class DDPSolverTest
       double alpha = RandomNumbers.nextDouble(random, 1000);
 
       d.set(d_original);
-      CommonOps.add(d_original, alpha, abc, d_expected);
+      CommonOps_DDRM.add(d_original, alpha, abc, d_expected);
       calculator.addMultQuad(alpha, a, b, c, d);
 
       MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
@@ -502,62 +502,62 @@ public class DDPSolverTest
       }
 
       @Override
-      public void getNextState(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                               DenseMatrix64F matrixToPack)
+      public void getNextState(DefaultDiscreteState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                               DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsStateGradient(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                           DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsStateGradient(DefaultDiscreteState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                           DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsControlGradient(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                             DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsControlGradient(DefaultDiscreteState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                             DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsStateHessian(DefaultDiscreteState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                          DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsStateHessian(DefaultDiscreteState hybridState, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                          DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsControlHessian(DefaultDiscreteState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                            DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsControlHessian(DefaultDiscreteState hybridState, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                            DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState hybridState, int stateVariable, DenseMatrix64F currentState,
-                                                            DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState hybridState, int stateVariable, DMatrixRMaj currentState,
+                                                            DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState hybridState, int controlVariable, DenseMatrix64F currentState,
-                                                            DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState hybridState, int controlVariable, DMatrixRMaj currentState,
+                                                            DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
 
       }
 
       @Override
-      public void getContinuousAMatrix(DenseMatrix64F A)
+      public void getContinuousAMatrix(DMatrixRMaj A)
       {
 
       }
 
       @Override
-      public void getContinuousBMatrix(DenseMatrix64F A)
+      public void getContinuousBMatrix(DMatrixRMaj A)
       {
 
       }
@@ -566,45 +566,45 @@ public class DDPSolverTest
    private class BasicLQCostFunction implements LQTrackingCostFunction<DefaultDiscreteState>
    {
       @Override
-      public double getCost(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                            DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
+      public double getCost(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVector,
+                            DMatrixRMaj desiredStateVector, DMatrixRMaj constants)
       {
          return 0;
       }
 
       @Override
-      public void getCostStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                       DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getCostStateGradient(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVector,
+                                       DMatrixRMaj desiredStateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
       }
 
       @Override
-      public void getCostControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getCostControlGradient(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVector,
+                                         DMatrixRMaj desiredStateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
       }
 
       @Override
-      public void getCostStateHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                      DenseMatrix64F matrixToPack)
+      public void getCostStateHessian(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                      DMatrixRMaj matrixToPack)
       {
       }
 
       @Override
-      public void getCostControlHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                        DenseMatrix64F matrixToPack)
+      public void getCostControlHessian(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                        DMatrixRMaj matrixToPack)
       {
       }
 
       @Override
-      public void getCostStateGradientOfControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
-                                                        DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getCostStateGradientOfControlGradient(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector,
+                                                        DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
       }
 
       @Override
-      public void getCostControlGradientOfStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
-                                                        DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+      public void getCostControlGradientOfStateGradient(DefaultDiscreteState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector,
+                                                        DMatrixRMaj constants, DMatrixRMaj matrixToPack)
       {
       }
    }
