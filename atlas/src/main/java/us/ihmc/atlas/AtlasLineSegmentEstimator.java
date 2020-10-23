@@ -131,7 +131,7 @@ public class AtlasLineSegmentEstimator
          // ROS2Tools.VIDEO (AtlasLookAndStepBehaviorDemo)
          new ROS2Callback<>(ros2Node, ROS2Tools.VIDEO, message ->
          {
-            LogTools.info("Message Received: ", message);
+//            LogTools.info("Message Received: ", message);
             videoPacketsRos2.addLast(message);
             cameraIntrinsics = HumanoidMessageTools.toIntrinsicParameters(message.intrinsic_parameters_);
             lineRegionAssociator.setIntrinsics(cameraIntrinsics);
@@ -185,9 +185,7 @@ public class AtlasLineSegmentEstimator
 
    public void mainUpdateUsingROS2Topics()
    {
-      LogTools.info(StringTools.format("Regions:{} Video:{}",
-                                       currentPlanarRegionsListMessage != null,
-                                       videoPacketsRos2.size()));
+//      LogTools.info(StringTools.format("Regions:{} Video:{}",currentPlanarRegionsListMessage != null, videoPacketsRos2.size()));
 
       if (currentPlanarRegionsListMessage != null
           && videoPacketsRos2.size() > 1)
@@ -197,8 +195,10 @@ public class AtlasLineSegmentEstimator
             videoPacketsRos2.removeFirst();
          }
 
+
+
          neckFrame.update();
-         LogTools.info("NeckFrame: {}", neckFrame.getTransformToWorldFrame());
+//         LogTools.info("NeckFrame: {}", neckFrame.getTransformToWorldFrame());
 
          VideoPacket latest = videoPacketsRos2.removeFirst();
          VideoPacket previous = videoPacketsRos2.getFirst();
@@ -247,7 +247,7 @@ public class AtlasLineSegmentEstimator
 //      Imgcodecs imgcodecs = new Imgcodecs();
 //      imgcodecs.imwrite("~/.ihmc/logs/IMG_" + videoPacketsRos2.peekFirst().getTimestamp(), currentImage);
 
-      Imgproc.resize(dispImage, dispImage, new Size(1200, 500));
+      Imgproc.resize(dispImage, dispImage, new Size(2400, 1000));
       HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
       HighGui.imshow("LineEstimator", dispImage);
       HighGui.waitKey(1);

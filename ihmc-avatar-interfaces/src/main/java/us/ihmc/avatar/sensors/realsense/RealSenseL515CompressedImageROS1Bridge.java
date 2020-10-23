@@ -76,7 +76,7 @@ public class RealSenseL515CompressedImageROS1Bridge
       throttleTimer.sleepUntilExpiration(MIN_PUBLISH_PERIOD);
       throttleTimer.reset();
 
-      LogTools.info("Message Received: " + image);
+//      LogTools.info("CompressedImage: {}", image.getHeader().getStamp().totalNsecs());
 
       try
       {

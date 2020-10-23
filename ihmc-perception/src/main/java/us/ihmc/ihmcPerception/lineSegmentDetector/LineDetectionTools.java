@@ -18,7 +18,7 @@ public class LineDetectionTools
       Mat gray = new Mat();
       Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
 
-      FastLineDetector fld = Ximgproc.createFastLineDetector(20, 1.41421356f, 50, 50, 3, true);
+      FastLineDetector fld = Ximgproc.createFastLineDetector(30, 1.41421356f, 50, 50, 3, true);
       fld.detect(gray, lines);
       return lines;
    }

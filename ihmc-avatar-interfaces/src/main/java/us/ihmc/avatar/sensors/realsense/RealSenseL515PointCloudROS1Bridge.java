@@ -30,7 +30,7 @@ public class RealSenseL515PointCloudROS1Bridge
 
    private Point3D32[] points;
 
-   private static final int MAX_POINTS = 5000;
+   private static final int MAX_POINTS = 50000;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
    private static final String l515PointCloudTopic = "/camera/depth/color/points";
 
@@ -59,35 +59,23 @@ public class RealSenseL515PointCloudROS1Bridge
 
    private void repackAndPublish(PointCloud2 cloud)
    {
-
       throttleTimer.sleepUntilExpiration(MIN_PUBLISH_PERIOD);
       throttleTimer.reset();
 
-      LogTools.info("ROS1 PointCloud Received.");
-
       PointCloudData pointCloudData = new PointCloudData(cloud, MAX_POINTS, false);
+//      LogTools.info("ROS1 PointCloud Received: {}", pointCloudData.getPointCloud().length);
 
       RigidBodyTransform transform = new RigidBodyTransform();
       ArrayList<Point3D> pointCloud = new ArrayList<>();
       for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
       {
          Point3D point = pointCloudData.getPointCloud()[i];
-//         pointCloud.add(new Point3D(point));
          pointCloud.add(new Point3D(point.getZ(), -point.getX(), -point.getY()));
       }
 
       StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, sensorPose);
-      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
+//      LogTools.info("ROS2 PointCloud Published: {}", message.getNumberOfPoints());
       stereoVisionPublisher.publish(message);
-
-      //        RosPointCloudSubscriber.UnpackedPointCloud unpackedPointCloud = RosPointCloudSubscriber.unpackPointsAndIntensities(cloud);
-      //        points = new Point3D32[unpackedPointCloud.getPoints().length];
-      //        int i = 0;
-      //        for (Point3D point : unpackedPointCloud.getPoints()) {
-      //            Point3D32 pointf = new Point3D32(point.getX32(), point.getY32(), point.getZ32());
-      //            points[i] = pointf;
-      //            i++;
-      //        }
    }
 
    public static void main(String[] args) throws URISyntaxException

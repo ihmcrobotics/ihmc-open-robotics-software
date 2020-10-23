@@ -29,7 +29,7 @@ public class AtlasLineDetectionDemo
 
       new RealSenseL515CompressedImageROS1Bridge(rosMainNode, ros2Node);
       new RealSenseL515PointCloudROS1Bridge(rosMainNode, ros2Node);
-      new AtlasRealsenseBasedREAStandaloneLauncher(true);
+      new AtlasRealsenseBasedREAStandaloneLauncher(false);
       new AtlasLineSegmentEstimator(rosMainNode, ros2Node);
 
 //      execFootstepPlan();

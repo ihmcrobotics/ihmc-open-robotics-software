@@ -65,6 +65,8 @@ public class LineSegmentToPlanarRegionAssociator
 
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
 
+      LogTools.info("Planar Regions: {}", newRegions.getNumberOfPlanarRegions());
+
       for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
       {
          ArrayList<Point> pointList = new ArrayList<>();
@@ -136,7 +138,7 @@ public class LineSegmentToPlanarRegionAssociator
          p3d.applyInverseTransform(tfWorldToCamera);
          Point3D tfdP3d = new Point3D(-p3d.getY(), -p3d.getZ(), p3d.getX());
          if (tfdP3d.getZ() >= 0) {
-            LogTools.info("Region Point:{} {} {}", camIntrinsics.cx, camIntrinsics.cy, tfdP3d);
+//            LogTools.info("Region Point:{} {} {}", camIntrinsics.cx, camIntrinsics.cy, tfdP3d);
             double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
             double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
             regionMidPoint.add(px, py);
@@ -185,10 +187,10 @@ public class LineSegmentToPlanarRegionAssociator
          if (regionMidPoint.getX() < camIntrinsics.getWidth() && regionMidPoint.getY() < camIntrinsics.getHeight() && regionMidPoint.getX() >= 0
              && regionMidPoint.getY() >= 0)
          {
-            // Mat mask = Mat.zeros(curImg.rows() + 2, curImg.cols() + 2, CvType.CV_8U);
-            // Imgproc.floodFill(curImgSegment, mask, new Point((int)regionMidPoint.getX(), (int)regionMidPoint.getY()),
-            //         new Scalar(100 + region.getRegionId()*123 % 155, 100 + region.getRegionId()*321 % 155, 100 + region.getRegionId()*135 % 155),
-            //         new Rect(), new Scalar(4,4,4), new Scalar(4,4,4), 4);
+//             Mat mask = Mat.zeros(img.rows() + 2, img.cols() + 2, CvType.CV_8U);
+//             Imgproc.floodFill(img, mask, new Point((int)regionMidPoint.getX(), (int)regionMidPoint.getY()),
+//                               new Scalar(id * 123 % 255, id * 321 % 255, id * 135 % 255),
+//                     new Rect(), new Scalar(4,4,4), new Scalar(4,4,4), 4);
 
             ArrayList<Point> regionSegment = getSegmentFromLines(curLines, regionMidPoint);
 
@@ -229,13 +231,13 @@ public class LineSegmentToPlanarRegionAssociator
          }
       }
 
-      LogTools.info("Queue Size:" + queue.size());
+//      LogTools.info("Queue Size:" + queue.size());
 
       ArrayList<Line2D> polygon = new ArrayList<Line2D>();
 
       for (LineSegment2D ls : queue)
       {
-         LogTools.info("Distance:" + ls.distance(centroid));
+//         LogTools.info("Distance:" + ls.distance(centroid));
 
          segments.add(new Point(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
          segments.add(new Point(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
