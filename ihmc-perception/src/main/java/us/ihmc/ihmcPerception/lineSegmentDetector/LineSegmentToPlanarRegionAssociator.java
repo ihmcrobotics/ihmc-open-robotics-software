@@ -136,6 +136,7 @@ public class LineSegmentToPlanarRegionAssociator
          p3d.applyInverseTransform(tfWorldToCamera);
          Point3D tfdP3d = new Point3D(-p3d.getY(), -p3d.getZ(), p3d.getX());
          if (tfdP3d.getZ() >= 0) {
+            LogTools.info("Region Point:{} {} {}", camIntrinsics.cx, camIntrinsics.cy, tfdP3d);
             double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
             double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
             regionMidPoint.add(px, py);

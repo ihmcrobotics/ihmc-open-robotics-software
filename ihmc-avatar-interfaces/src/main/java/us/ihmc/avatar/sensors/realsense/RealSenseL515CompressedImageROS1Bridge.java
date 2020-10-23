@@ -1,5 +1,6 @@
 package us.ihmc.avatar.sensors.realsense;
 
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import sensor_msgs.CompressedImage;
 import us.ihmc.codecs.generated.YUVPicture;
@@ -7,6 +8,11 @@ import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.ihmcPerception.camera.RosCameraInfoSubscriber;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -17,7 +23,6 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RealSenseCompressedImageSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosCameraInfoSubscriber;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -62,7 +67,7 @@ public class RealSenseL515CompressedImageROS1Bridge
       rosNode.execute();
 
       colorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
-      colorImageInfoSubscriber = new RosCameraInfoSubscriber(rosNode, l515CameraInfoTopic);
+      colorImageInfoSubscriber = new RosCameraInfoSubscriber(l515CameraInfoTopic);
       rosNode.attachSubscriber(l515CameraInfoTopic, colorImageInfoSubscriber);
    }
 
@@ -85,10 +90,16 @@ public class RealSenseL515CompressedImageROS1Bridge
          byte[] data = new byte[buffer.remaining()];
          buffer.get(data);
 
-         VideoPacket message = new VideoPacket();
-         message.setTimestamp(System.nanoTime());
-         message.getData().add(data);
-
+         Point3D position = new Point3D();
+         Quaternion orientation = new Quaternion();
+         long timeStamp = image.getHeader().getStamp().totalNsecs();
+         CameraPinholeBrown intrinsicParameters = colorImageInfoSubscriber.getIntrinisicParameters();
+         VideoPacket message = HumanoidMessageTools.createVideoPacket(VideoSource.MULTISENSE_LEFT_EYE,
+                                                                      timeStamp,
+                                                                      data,
+                                                                      position,
+                                                                      orientation,
+                                                                      intrinsicParameters);
          videoPacketPublisher.publish(message);
       }
       catch (Exception e)

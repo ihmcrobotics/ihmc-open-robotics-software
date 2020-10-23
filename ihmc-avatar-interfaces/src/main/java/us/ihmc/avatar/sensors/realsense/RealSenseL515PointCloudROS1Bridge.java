@@ -6,6 +6,7 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
@@ -38,7 +39,7 @@ public class RealSenseL515PointCloudROS1Bridge
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-   public RealSenseL515PointCloudROS1Bridge(RosMainNode rosMainNode, ROS2Node ros2Node) throws URISyntaxException
+   public RealSenseL515PointCloudROS1Bridge(RosMainNode rosMainNode, ROS2Node ros2Node)
    {
       // stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.IHMC_ROOT);
       ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD;
@@ -66,10 +67,13 @@ public class RealSenseL515PointCloudROS1Bridge
 
       PointCloudData pointCloudData = new PointCloudData(cloud, MAX_POINTS, false);
 
+      RigidBodyTransform transform = new RigidBodyTransform();
       ArrayList<Point3D> pointCloud = new ArrayList<>();
       for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
       {
-         pointCloud.add(new Point3D(pointCloudData.getPointCloud()[i]));
+         Point3D point = pointCloudData.getPointCloud()[i];
+//         pointCloud.add(new Point3D(point));
+         pointCloud.add(new Point3D(point.getZ(), -point.getX(), -point.getY()));
       }
 
       StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, sensorPose);

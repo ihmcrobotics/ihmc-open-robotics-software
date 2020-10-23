@@ -185,15 +185,11 @@ public class AtlasLineSegmentEstimator
 
    public void mainUpdateUsingROS2Topics()
    {
-      LogTools.info(StringTools.format("{} {} {} {}",
+      LogTools.info(StringTools.format("Regions:{} Video:{}",
                                        currentPlanarRegionsListMessage != null,
-//                                       syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0),
-//                                       cameraIntrinsics != null,
-                                       videoPacketsRos2.size() > 1));
+                                       videoPacketsRos2.size()));
 
       if (currentPlanarRegionsListMessage != null
-//          && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0)
-//          && cameraIntrinsics != null
           && videoPacketsRos2.size() > 1)
       {
          while (videoPacketsRos2.size() > 2)
@@ -265,7 +261,7 @@ public class AtlasLineSegmentEstimator
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
       RosMainNode ros1Node = new RosMainNode(masterURI, "video_viewer", true);
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "line_detection");
-      new AtlasLineDetectionDemo(ros2Node).execFootstepPlan();
+      new AtlasLineDetectionDemo(ros1Node, ros2Node).execFootstepPlan();
       new AtlasLineSegmentEstimator(ros1Node, ros2Node);
    }
 }
