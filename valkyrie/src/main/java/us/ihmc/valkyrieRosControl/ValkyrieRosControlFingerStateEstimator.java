@@ -400,8 +400,11 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       Path transmissionFilePath = Paths.get(filePath);
       try
       {
-         Files.createDirectories(transmissionFilePath.getParent());
+         if (!transmissionFilePath.getParent().toFile().exists())
+            Files.createDirectories(transmissionFilePath.getParent());
          File file = transmissionFilePath.toFile();
+         if (!file.exists())
+            file.createNewFile();
          Yaml yaml = new Yaml();
          Map<String, Map<String, Double>> coeffs = new LinkedHashMap<>();
          for (RobotSide robotSide : RobotSide.values)
