@@ -411,6 +411,44 @@ public class CoMTrajectoryPlannerTools
    }
 
    /**
+    * <p> Set a continuity constraint on the CoM position at a state change, aka a trajectory knot.. </p>
+    * <p> Recall that the equation for the center of mass position is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * </p>
+    * <p> This constraint is then defined as </p>
+    * <p> x<sub>i-1</sub>(T<sub>i-1</sub>) = x<sub>i</sub>(0), </p>
+    * <p> substituting in the trajectory coefficients. </p>
+    *
+    * @param previousSequence i-1 in the above equations.
+    * @param nextSequence i in the above equations.
+    */
+   public static void addCoMPositionContinuityObjective(double weight, int previousSequence, int nextSequence, int constraintRow, double omega,
+                                                        double previousDuration, DMatrix constraintMatrixToPack)
+   {
+      // move next sequence coefficients to the left hand side
+      int previousStartIndex = 6 * previousSequence;
+      int nextStartIndex = 6 * nextSequence;
+
+      previousDuration = Math.min(previousDuration, sufficientlyLongTime);
+
+      constraintMatrixToPack.set(constraintRow, previousStartIndex, weight * getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 1, weight * getCoMPositionSecondCoefficientTimeFunction(omega, previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 2, weight * getCoMPositionThirdCoefficientTimeFunction(previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 3, weight * getCoMPositionFourthCoefficientTimeFunction(previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 4, weight * getCoMPositionFifthCoefficientTimeFunction(previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 5, weight * getCoMPositionSixthCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, nextStartIndex, -getCoMPositionFirstCoefficientTimeFunction(omega, 0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 1, -getCoMPositionSecondCoefficientTimeFunction(omega, 0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 2, -getCoMPositionThirdCoefficientTimeFunction(0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 3, -getCoMPositionFourthCoefficientTimeFunction(0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 4, -getCoMPositionFifthCoefficientTimeFunction(0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 5, -getCoMPositionSixthCoefficientTimeFunction());
+   }
+
+   /**
     * <p> Set a continuity constraint on the CoM velocity at a state change, aka a trajectory knot.. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
