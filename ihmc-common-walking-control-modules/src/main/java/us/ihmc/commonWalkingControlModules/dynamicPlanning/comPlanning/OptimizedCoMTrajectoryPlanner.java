@@ -299,7 +299,15 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       addDynamicsInitialObjective(HIGH_WEIGHT_SQRT, MEDIUM_WEIGHT_SQRT, contactSequence, 0);
 
       // add transition continuity constraints
-      for (int transition = 0; transition < numberOfTransitions; transition++)
+      int transition = 0;
+      {
+         addCoMPositionContinuityObjective(CONSTRAINT_WEIGHT_SQRT, contactSequence, 0, 1);
+         addCoMVelocityContinuityObjective(CONSTRAINT_WEIGHT_SQRT, contactSequence, 0, 1);
+         addDynamicsFinalObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT, contactSequence, 0);
+         addDynamicsInitialObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT, contactSequence, 1);
+      }
+      transition++;
+      for (; transition < numberOfTransitions; transition++)
       {
          int previousSequence = transition;
          int nextSequence = transition + 1;
