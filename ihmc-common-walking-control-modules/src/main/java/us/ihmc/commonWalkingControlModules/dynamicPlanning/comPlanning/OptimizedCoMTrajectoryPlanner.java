@@ -142,11 +142,8 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
 
    private int numberOfConstraints = 0;
-   private final YoBoolean maintainInitialCoMVelocityContinuity = new YoBoolean("maintainInitialComVelocityContinuity", registry);
 
    private CornerPointViewer viewer = null;
-
-   private CoMContinuityCalculator comContinuityCalculator = null;
 
    public OptimizedCoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
@@ -158,7 +155,6 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       this.omega = omega;
 
-      maintainInitialCoMVelocityContinuity.set(false);
       parentRegistry.addChild(registry);
    }
 
@@ -170,25 +166,16 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       omega.addListener(v -> comHeight.set(gravityZ / MathTools.square(omega.getValue())));
       omega.notifyListeners();
 
-      maintainInitialCoMVelocityContinuity.set(false);
-
-
       parentRegistry.addChild(registry);
    }
 
    public void setMaintainInitialCoMVelocityContinuity(boolean maintainInitialCoMVelocityContinuity)
    {
-      this.maintainInitialCoMVelocityContinuity.set(maintainInitialCoMVelocityContinuity);
    }
 
    public void setCornerPointViewer(CornerPointViewer viewer)
    {
       this.viewer = viewer;
-   }
-
-   public void setComContinuityCalculator(CoMContinuityCalculator comContinuityCalculator)
-   {
-      this.comContinuityCalculator = comContinuityCalculator;
    }
 
    /** {@inheritDoc} */
@@ -220,25 +207,6 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
                                                     endVRPPositions, false);
 
       solveForCoefficientConstraintMatrix(contactSequence);
-
-      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null)
-      {
-         int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
-         double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
-         compute(segmentId, time, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
-
-         comContinuityCalculator.setInitialCoMPosition(currentCoMPosition);
-         comContinuityCalculator.setInitialCoMVelocity(currentCoMVelocity);
-         comContinuityCalculator.setFinalICPToAchieve(dcmPositionToThrowAway);
-
-         if (comContinuityCalculator.solve(contactSequence))
-         {
-            comContinuityCalculator.getXCoefficientOverrides(xCoefficientVector);
-            comContinuityCalculator.getYCoefficientOverrides(yCoefficientVector);
-            comContinuityCalculator.getZCoefficientOverrides(zCoefficientVector);
-         }
-      }
 
       // update coefficient holders
       int firstCoefficientIndex = 0;
@@ -336,7 +304,6 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       CommonOps_DSCC.add(1.0, tempSparse, 1.0, zConstants, zEquivalents, gw, gx);
 
       // We have J x - b, we need to formulate that into the QP
-
       CommonOps_DSCC.innerProductLower(coefficientJacobian, lowerTriangularHessian, gw, gx);
       CommonOps_DSCC.symmLowerToFull(lowerTriangularHessian, hessian, gw );
 
