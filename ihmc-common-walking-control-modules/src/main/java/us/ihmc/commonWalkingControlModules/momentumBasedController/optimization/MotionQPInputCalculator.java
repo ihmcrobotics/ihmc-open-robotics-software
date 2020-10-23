@@ -25,6 +25,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.matrixlib.NullspaceProjector;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
@@ -66,7 +68,8 @@ public class MotionQPInputCalculator
    private final DMatrixRMaj tempPrimaryTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
 
    private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
-   private final DMatrixRMaj projectedTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
+   private final NativeMatrix tempTaskJacobianNative = new NativeMatrix(SpatialVector.SIZE, 12);
+   private final NativeMatrix projectedTaskJacobian = new NativeMatrix(SpatialVector.SIZE, 12);
    private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(SpatialVector.SIZE, 1);
    private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
    private final DMatrixRMaj tempTaskWeightSubspace = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
@@ -83,9 +86,13 @@ public class MotionQPInputCalculator
    private final JointIndexHandler jointIndexHandler;
 
    private final DMatrixRMaj allTaskJacobian;
+   private final NativeMatrix allTaskJacobianNative;
 
    private final int numberOfDoFs;
 
+   private final NullspaceProjector accelerationNullspaceProjector;
+   private final NullspaceProjector velocityNullspaceProjector;
+   
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
                                   JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoRegistry parentRegistry)
@@ -125,7 +132,11 @@ public class MotionQPInputCalculator
       }
 
       allTaskJacobian = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
+      allTaskJacobianNative = new NativeMatrix(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
+      
+      accelerationNullspaceProjector = new NullspaceProjector(numberOfDoFs);
+      velocityNullspaceProjector = new NullspaceProjector(numberOfDoFs);
 
       parentRegistry.addChild(registry);
    }
@@ -178,15 +189,17 @@ public class MotionQPInputCalculator
       if (robotTaskSize > 0)
       {
          OneDoFJointBasics[] joints = privilegedConfigurationHandler.getJoints();
-         tempTaskJacobian.reshape(robotTaskSize, numberOfDoFs);
-         boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, tempTaskJacobian);
+         tempTaskJacobianNative.reshape(robotTaskSize, numberOfDoFs);
+         boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, tempTaskJacobianNative);
 
          if (success)
          {
             qpInputToPack.reshape(robotTaskSize);
-            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
+            allTaskJacobianNative.set(allTaskJacobian);
+            accelerationNullspaceProjector.project(tempTaskJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
+//            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
 
-            CommonOps_DDRM.insert(projectedTaskJacobian, qpInputToPack.taskJacobian, taskSize, 0);
+            projectedTaskJacobian.extract(qpInputToPack.taskJacobian, taskSize, 0);
             CommonOps_DDRM.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), qpInputToPack.taskObjective, taskSize, 0);
             CommonOps_DDRM.insert(privilegedConfigurationHandler.getWeights(), qpInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
@@ -223,8 +236,10 @@ public class MotionQPInputCalculator
       if (!success)
          return false;
 
-      NativeCommonOps.projectOnNullspace(qpInputToPack.taskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
-      qpInputToPack.taskJacobian.set(projectedTaskJacobian);
+      tempTaskJacobianNative.set(qpInputToPack.taskJacobian);
+      allTaskJacobianNative.set(allTaskJacobian);
+      velocityNullspaceProjector.project(tempTaskJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
+      projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
       return true;
    }

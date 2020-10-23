@@ -32,7 +32,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.0")
+   api("us.ihmc:ihmc-convex-optimization:0.17.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
