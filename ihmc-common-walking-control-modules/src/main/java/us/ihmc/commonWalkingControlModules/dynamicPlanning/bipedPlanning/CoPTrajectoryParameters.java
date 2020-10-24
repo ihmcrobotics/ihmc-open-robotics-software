@@ -89,7 +89,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private final DoubleParameter safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final DoubleParameter exitCoPForwardSafetyMarginOnToes;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry("CoPTrajectoryParameters");
 
    public CoPTrajectoryParameters()
    {
