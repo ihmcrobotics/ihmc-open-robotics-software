@@ -37,7 +37,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
 
    private static final double defaultTransferSplitFraction = 0.5;
    private static final double defaultSwingSplitFraction = 0.5;
-   private static final double defaultSwingDurationShiftFraction = 0.9;
+   private static final double defaultSwingDurationShiftFraction = 0.85;
    private static final double defaultTransferWeightDistribution = 0.5;
 
    private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, -0.005);
