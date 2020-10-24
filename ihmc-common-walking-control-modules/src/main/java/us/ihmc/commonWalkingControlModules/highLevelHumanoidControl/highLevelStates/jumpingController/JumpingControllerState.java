@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.capturePoint.JumpingMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -10,10 +10,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -37,38 +36,31 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JumpingControllerState extends HighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
-   private final static FrameVector2D emptyVector = new FrameVector2D();
 
    private final WholeBodyControllerCore controllerCore;
-   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
+   private final JumpingMomentumRateControlModule momentumRateControlModule;
    private final JumpingHumanoidController jumpingController;
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
-   private final boolean deactivateAccelerationIntegrationInWBC;
-
    private boolean requestIntegratorReset = false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
-   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
+   private final JumpingControllerToolbox controllerToolbox;
 
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
-
-   public JumpingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
+   public JumpingControllerState(HighLevelControlManagerFactory managerFactory, JumpingControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
+                                 CoPTrajectoryParameters copTrajectoryParameters)
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
-      jumpingController = new JumpingHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 controllerToolbox);
+      jumpingController = new JumpingHumanoidController(managerFactory, walkingControllerParameters, copTrajectoryParameters, controllerToolbox);
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -88,21 +80,12 @@ public class JumpingControllerState extends HighLevelControllerState
       template.setAllowDynamicControllerConstruction(false);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
-      ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
-      jumpingController.setControllerCoreOutput(controllerCoreOutput);
 
-      deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
-
-      double controlDT = controllerToolbox.getControlDT();
-      double gravityZ = controllerToolbox.getGravityZ();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
+      momentumRateControlModule = new JumpingMomentumRateControlModule(referenceFrames, elevator, walkingControllerParameters, registry, yoGraphicsListRegistry);
 
       registry.addChild(jumpingController.getYoVariableRegistry());
    }
@@ -111,7 +94,7 @@ public class JumpingControllerState extends HighLevelControllerState
    {
       controllerCore.initialize();
       jumpingController.initialize();
-      linearMomentumRateControlModule.reset();
+      momentumRateControlModule.reset();
       requestIntegratorReset = true;
    }
 
@@ -120,19 +103,11 @@ public class JumpingControllerState extends HighLevelControllerState
    {
       jumpingController.doAction();
 
-      linearMomentumRateControlModule.setInputFromWalkingStateMachine(jumpingController.getLinearMomentumRateControlModuleInput());
-      if (!linearMomentumRateControlModule.computeControllerCoreCommands())
-      {
-         controllerToolbox.reportControllerFailureToListeners(emptyVector);
-      }
-      jumpingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
+      momentumRateControlModule.setInputFromWalkingStateMachine(jumpingController.getJumpingMomentumRateControlModuleInput());
+      momentumRateControlModule.computeControllerCoreCommands();
 
       ControllerCoreCommand controllerCoreCommand = jumpingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
-      if (useCoPObjective.getValue())
-      {
-         controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
-      }
+      controllerCoreCommand.addInverseDynamicsCommand(momentumRateControlModule.getMomentumRateCommand());
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
 
@@ -147,11 +122,7 @@ public class JumpingControllerState extends HighLevelControllerState
          yoRequestingIntegratorReset.set(false);
       }
 
-      JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
-      if (!deactivateAccelerationIntegrationInWBC)
-      {
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
-      }
+      controllerCoreCommand.addInverseDynamicsCommand(getAccelerationIntegrationCommand());
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
@@ -159,8 +130,8 @@ public class JumpingControllerState extends HighLevelControllerState
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
 
-      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
-      linearMomentumRateControlModule.computeAchievedCMP();
+      momentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+      momentumRateControlModule.computeAchievedCMP();
    }
 
    @Override
@@ -191,14 +162,5 @@ public class JumpingControllerState extends HighLevelControllerState
    public boolean isJointLoadBearing(String jointName)
    {
       return jumpingController.isJointLoadBearing(jointName);
-   }
-
-   /**
-    * Returns the currently active walking state. This is used for unit testing.
-    * @return WalkingStateEnum
-    */
-   public WalkingStateEnum getWalkingStateEnum()
-   {
-      return jumpingController.getWalkingStateEnum();
    }
 }
