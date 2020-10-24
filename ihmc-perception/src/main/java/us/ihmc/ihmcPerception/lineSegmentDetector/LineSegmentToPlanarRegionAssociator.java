@@ -62,11 +62,8 @@ public class LineSegmentToPlanarRegionAssociator
    }
 
    public void associateInImageSpace(PlanarRegionsListMessage currentPlanarRegionsListMessage, Mat currentImage, Mat curImgLeft){
-
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
-
       LogTools.info("Planar Regions: {}", newRegions.getNumberOfPlanarRegions());
-
       for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
       {
          ArrayList<Point> pointList = new ArrayList<>();
@@ -74,9 +71,13 @@ public class LineSegmentToPlanarRegionAssociator
 
          if (region.getConvexHull().getArea() * 1000 > 50)
          {
-            pointList = projectPlanarRegionUsingCameraPose(region, regionMidPoint);
-            drawPolygonOnImage(currentImage, pointList, regionMidPoint, region.getRegionId());
-            drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
+            PlanarSegment regionBasedSegment = new PlanarSegment(region.getRegionId());
+            projectPlanarRegionUsingCameraPose(region, regionBasedSegment);
+            drawPolygonOnImage(currentImage, regionBasedSegment);
+
+            PlanarSegment lineBasedSegment = new PlanarSegment(region.getRegionId());
+            associateLinesToSegment(lineBasedSegment, regionBasedSegment);
+            drawPolygonOnImage(curImgLeft, lineBasedSegment);
          }
       }
 
@@ -118,19 +119,13 @@ public class LineSegmentToPlanarRegionAssociator
       return pointList;
    }
 
-   public ArrayList<Point> projectPlanarRegionUsingCameraPose(PlanarRegion region, Point2D regionMidPoint)
+   public void projectPlanarRegionUsingCameraPose(PlanarRegion region, PlanarSegment segmentToPack)
    {
-
       RigidBodyTransform tfLocalToWorld = new RigidBodyTransform();
       region.getTransformToWorld(tfLocalToWorld);
-
       QuaternionBasedTransform tfWorldToCamera = new QuaternionBasedTransform(cameraOrientation, cameraPosition);
-
       List<Point2D> concaveHull = region.getConcaveHull();
-
-      ArrayList<Point> pointList = new ArrayList<>();
-
-      int regionSize = 0;
+      Point2D centroid = new Point2D();
 
       for (int i = 0; i < concaveHull.size(); i++) {
          Point3D p3d = new Point3D(concaveHull.get(i).getX(), concaveHull.get(i).getY(), 0);
@@ -141,70 +136,60 @@ public class LineSegmentToPlanarRegionAssociator
 //            LogTools.info("Region Point:{} {} {}", camIntrinsics.cx, camIntrinsics.cy, tfdP3d);
             double px = camIntrinsics.cx + camIntrinsics.fx * tfdP3d.getX() / tfdP3d.getZ();
             double py = camIntrinsics.cy + camIntrinsics.fy * tfdP3d.getY() / tfdP3d.getZ();
-            regionMidPoint.add(px, py);
-            regionSize += 1;
-            pointList.add(new Point(px, py));
+            centroid.add(px, py);
+            segmentToPack.getVertices().add(new Point2D(px, py));
          }
       }
-      regionMidPoint.scale(1/(double)regionSize);
-      return pointList;
+      centroid.scale(1 / (double) segmentToPack.getVertices().size());
+      segmentToPack.updateArea();
+      segmentToPack.setCentroid(centroid);
    }
 
-   public void drawPolygonOnImage(Mat img, ArrayList<Point> pointList, Point2D regionMidPoint, int id)
+   public ArrayList<Point> getOpenCVPoints(ArrayList<Point2D> euclidPoints)
    {
-      if (pointList.size() > 2)
+      ArrayList<Point> opencvPoints = new ArrayList<>();
+      for (Point2D point : euclidPoints)
       {
+         opencvPoints.add(new Point(point.getX(), point.getY()));
+      }
+      return opencvPoints;
+   }
 
+   public void drawPolygonOnImage(Mat img, PlanarSegment segment)
+   {
+      if (segment.getVertices().size() > 2)
+      {
          MatOfPoint points = new MatOfPoint();
+         ArrayList<Point> pointList = getOpenCVPoints(segment.getVertices());
          points.fromList(pointList);
 
-         MatOfInt hull = new MatOfInt();
-         Imgproc.convexHull(points, hull);
-
-         Point[] hullPoints = new Point[hull.rows()];
-
-         List<Integer> hullContourIdxList = hull.toList();
-         Point[] polygonArray = points.toArray();
-         for (int i = 0; i < hullContourIdxList.size(); i++)
-         {
-            hullPoints[i] = polygonArray[hullContourIdxList.get(i)];
-         }
-
-         MatOfPoint convexPoly = new MatOfPoint(hullPoints);
-         List<MatOfPoint> ppt = new ArrayList<>();
-         ppt.add(convexPoly);
-
-         Imgproc.fillPoly(img, ppt, new Scalar(id * 123 % 255, id * 321 % 255, id * 135 % 255));
-         Imgproc.circle(img, new Point(regionMidPoint.getX(), regionMidPoint.getY()), 3, new Scalar(255, 140, 255), -1);
+         Scalar color = new Scalar(segment.getRegionId() * 123 % 255, segment.getRegionId() * 321 % 255, segment.getRegionId() * 135 % 255);
+         Imgproc.fillConvexPoly(img, points, color, 4);
+         Imgproc.circle(img, new Point(segment.getCentroid().getX(), segment.getCentroid().getY()), 3, new Scalar(255, 140, 255), -1);
       }
    }
 
-   public void drawLineRegionAssociation(Mat img, ArrayList<Point> pointList, Point2D regionMidPoint, int id)
+   public void associateLinesToSegment(PlanarSegment lineBasedSegment, PlanarSegment regionBasedSegment)
    {
-      if (pointList.size() > 2)
+      if (regionBasedSegment.getVertices().size() > 2)
       {
-
-         if (regionMidPoint.getX() < camIntrinsics.getWidth() && regionMidPoint.getY() < camIntrinsics.getHeight() && regionMidPoint.getX() >= 0
-             && regionMidPoint.getY() >= 0)
+         if (regionBasedSegment.getCentroid().getX() < camIntrinsics.getWidth() && regionBasedSegment.getCentroid().getY() < camIntrinsics.getHeight()
+             && regionBasedSegment.getCentroid().getX() >= 0 && regionBasedSegment.getCentroid().getY() >= 0)
          {
-//             Mat mask = Mat.zeros(img.rows() + 2, img.cols() + 2, CvType.CV_8U);
-//             Imgproc.floodFill(img, mask, new Point((int)regionMidPoint.getX(), (int)regionMidPoint.getY()),
-//                               new Scalar(id * 123 % 255, id * 321 % 255, id * 135 % 255),
-//                     new Rect(), new Scalar(4,4,4), new Scalar(4,4,4), 4);
-
-            ArrayList<Point> regionSegment = getSegmentFromLines(curLines, regionMidPoint);
-
-            // for (Point2D segment : regionSegment) {
-            //     Imgproc.line(img, new Point(segment.getX(), segment.getY()), new Point(regionMidPoint.getX(), regionMidPoint.getY()),
-            //             new Scalar(255, 100, 10), 2);
-            //     // Imgproc.line(img, new Point(segment.getSecondEndpointX(), segment.getSecondEndpointY()), new Point(regionMidPoint.getX(), regionMidPoint.getY()),
-            //     //         new Scalar(255, 100, 10), 2);
-            //     Imgproc.circle(img, new Point(segment.getX(), segment.getY()), 8, new Scalar(255, 0, 255), -1);
-            // }
-            drawPolygonOnImage(img, regionSegment, regionMidPoint, id);
+            lineBasedSegment.setCentroid(regionBasedSegment.getCentroid());
+            lineBasedSegment.updateOrder();
+            lineBasedSegment.updateArea();
+            getSegmentFromLines(curLines, regionBasedSegment.getCentroid(), lineBasedSegment);
          }
-         Imgproc.circle(img, new Point(regionMidPoint.getX(), regionMidPoint.getY()), 3, new Scalar(255, 140, 255), -1);
+
       }
+   }
+
+   public void floodFill(Mat img, Point2D seed, int id){
+                   Mat mask = Mat.zeros(img.rows() + 2, img.cols() + 2, CvType.CV_8U);
+                   Imgproc.floodFill(img, mask, new Point((int)seed.getX(), (int)seed.getY()),
+                                     new Scalar(id * 123 % 255, id * 321 % 255, id * 135 % 255),
+                           new Rect(), new Scalar(4,4,4), new Scalar(4,4,4), 4);
    }
 
    public int compare(LineSegment2D a, LineSegment2D b, Point2D centroid)
@@ -217,9 +202,8 @@ public class LineSegmentToPlanarRegionAssociator
       return 0;
    }
 
-   public ArrayList<Point> getSegmentFromLines(Mat curLines, Point2D centroid)
+   public void getSegmentFromLines(Mat curLines, Point2D centroid, PlanarSegment segmentToPack)
    {
-      ArrayList<Point> segments = new ArrayList<>();
       PriorityQueue<LineSegment2D> queue = new PriorityQueue<>(10, (a, b) -> compare(a, b, centroid));
       for (int i = 0; i < curLines.rows(); i++)
       {
@@ -231,16 +215,11 @@ public class LineSegmentToPlanarRegionAssociator
          }
       }
 
-//      LogTools.info("Queue Size:" + queue.size());
-
       ArrayList<Line2D> polygon = new ArrayList<Line2D>();
-
       for (LineSegment2D ls : queue)
       {
-//         LogTools.info("Distance:" + ls.distance(centroid));
-
-         segments.add(new Point(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
-         segments.add(new Point(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
+         segmentToPack.getVertices().add(new Point2D(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
+         segmentToPack.getVertices().add(new Point2D(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
 
          // Point2D closest = (Point2D) ls.orthogonalProjectionCopy(centroid);
          // boolean present = false;
@@ -266,7 +245,6 @@ public class LineSegmentToPlanarRegionAssociator
       //         segments.add(corner);
       //     }
       // }
-      return segments;
    }
 
    public void setCamIntrinsics(CameraPinholeBrown camIntrinsics)

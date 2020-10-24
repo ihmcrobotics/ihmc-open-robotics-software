@@ -89,14 +89,9 @@ public class AtlasLineSegmentEstimator
 
    public AtlasLineSegmentEstimator(RosMainNode ros1Node, ROS2Node ros2Node)
    {
-
-
-
-
       // System.out.println(System.getProperty("java.library.path"));
       System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
       // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
-
 
       /*
          Use tf for the head-world. Hold a buffer of camera poses. Do a linear interpolation to find nearest timestamp.
@@ -231,14 +226,13 @@ public class AtlasLineSegmentEstimator
 
       currentLines = LineDetectionTools.getFLDLinesFromImage(currentImage);
 
-      lineRegionAssociator.setCurLines(currentLines);
-      correspondingLines = matchFLDLines(previousLines, currentLines);
-
       LineTools.drawLines(currentImage, currentLines); // Visualize Lines on Right Image
       // displayLineMatches(prevImg, curImg, dispImage, correspLines);
       Mat curImgLeft = new Mat();
       currentImage.copyTo(curImgLeft);
 
+      correspondingLines = matchFLDLines(previousLines, currentLines);
+      lineRegionAssociator.setCurLines(currentLines);
       lineRegionAssociator.associateInImageSpace(currentPlanarRegionsListMessage, currentImage, curImgLeft);
 
       List<Mat> src = Arrays.asList(curImgLeft, currentImage);
