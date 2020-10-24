@@ -39,7 +39,30 @@ public class WalkingCoPTrajectoryGeneratorTest
       SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
-      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      double swingShiftFraction = 0.9;
+      double swingSplitFraction = 0.4;
+      double transferSplitFraction = 0.5;
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters()
+      {
+         @Override
+         public double getDefaultSwingDurationShiftFraction()
+         {
+            return swingShiftFraction;
+         }
+
+         @Override
+         public double getDefaultSwingSplitFraction()
+         {
+            return swingSplitFraction;
+         }
+
+         @Override
+         public double getDefaultTransferSplitFraction()
+         {
+            return transferSplitFraction;
+         }
+      };
+
       registry.addChild(parameters.getRegistry());
       WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
                                                                                       CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
@@ -64,9 +87,6 @@ public class WalkingCoPTrajectoryGeneratorTest
       double swingTime = 1.0;
       double transferTime = 0.6;
       double finalTransferTime = 1.0;
-      double swingShiftFraction = 0.9;
-      double swingSplitFraction = 0.4;
-      double transferSplitFraction = 0.5;
       FootstepTiming timing = new FootstepTiming();
       timing.setTimings(swingTime, transferTime);
 
