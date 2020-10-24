@@ -127,7 +127,7 @@ public class TransferToStandingState extends WalkingState
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
       double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
-      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
+      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
       comHeightManager.transfer(midFootPosition, finalTransferTime);
 
