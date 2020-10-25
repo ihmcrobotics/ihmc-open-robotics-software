@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -32,6 +33,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
+import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -133,6 +135,7 @@ public class JumpingSimulationController implements RobotController
                                                                                robotModel.getSensorInformation().getFeetForceSensorNames(),
                                                                                yoGraphicsListRegistry,
                                                                                registry);
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
       JumpingControllerToolbox controllerToolbox = new JumpingControllerToolbox(fullRobotModel,
                                                                                 referenceFrames,
@@ -143,7 +146,9 @@ public class JumpingSimulationController implements RobotController
                                                                                 robotModel.getWalkingControllerParameters().getOmega0(),
                                                                                 feet,
                                                                                 robotModel.getControllerDT(),
-                                                                                new ArrayList<>(), yoGraphicsListRegistry);
+                                                                                new ArrayList<>(),
+                                                                                yoGraphicsListRegistry,
+                                                                                jointsToIgnore);
 //      controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
 
       HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(registry);
