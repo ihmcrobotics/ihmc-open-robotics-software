@@ -20,10 +20,10 @@ public class JumpingStandingState extends JumpingState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final JumpingBalanceManager balanceManager;
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final JumpingPelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   public JumpingStandingState(JumpingControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+   public JumpingStandingState(JumpingControllerToolbox controllerToolbox, JumpingControlManagerFactory managerFactory,
                                JumpingBalanceManager balanceManager, WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
    {
