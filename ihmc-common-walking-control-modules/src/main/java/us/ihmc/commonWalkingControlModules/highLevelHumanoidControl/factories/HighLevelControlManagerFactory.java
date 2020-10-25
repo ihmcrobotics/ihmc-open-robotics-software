@@ -193,6 +193,8 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
+      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
+         return null;
 
       // Gains
       PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
