@@ -228,28 +228,6 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
-   /**
-    * Request the controller to set all its desireds to match the current configuration of the robot.
-    * <p>
-    * Calling that method right after {@link #initialize()} will cause the controller to maintain the
-    * current robot configuration.
-    * </p>
-    */
-   public void requestImmediateTransitionToStandingAndHoldCurrent()
-   {
-      stateMachine.performTransition(JumpingStateEnum.STANDING);
-
-      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
-      {
-         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
-         if (bodyManager != null)
-            bodyManager.hold();
-      }
-
-      pelvisOrientationManager.setToHoldCurrentInWorldFrame();
-      balanceManager.requestICPPlannerToHoldCurrentCoM();
-   }
-
    private void initializeContacts()
    {
       controllerToolbox.clearContacts();
@@ -260,8 +238,6 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
          feetManager.setFlatFootContactState(robotSide);
       }
    }
-
-   private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
 
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -315,8 +291,6 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
    public void updateManagers()
    {
-      desiredCoMVelocityAsFrameVector.setIncludingFrame(balanceManager.getDesiredCoMVelocity());
-
       feetManager.compute();
 
       pelvisOrientationManager.compute();

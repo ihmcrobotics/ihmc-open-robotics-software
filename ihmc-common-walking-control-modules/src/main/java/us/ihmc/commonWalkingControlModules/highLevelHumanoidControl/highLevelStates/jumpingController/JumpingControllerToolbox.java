@@ -26,6 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -76,7 +77,6 @@ public class JumpingControllerToolbox
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
 
    protected final SideDependentList<ContactableFoot> feet;
-   protected final List<ContactablePlaneBody> contactableBodies;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
@@ -118,14 +118,16 @@ public class JumpingControllerToolbox
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
-   public JumpingControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
+   public JumpingControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                    WalkingControllerParameters walkingControllerParameters,
                                    SideDependentList<? extends FootSwitchInterface> footSwitches, YoDouble yoTime, double gravityZ, double omega0,
                                    SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
-                                   List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+
+      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       finalTransferTime = new YoDouble("finalTransferTime", registry);
@@ -161,7 +163,6 @@ public class JumpingControllerToolbox
 
       // Initialize the contactable bodies
       this.feet = feet;
-      this.contactableBodies = contactableBodies;
 
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -496,19 +497,6 @@ public class JumpingControllerToolbox
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
-   }
-
-   public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
-   {
-      return contactableBodies;
-   }
-
-   public ContactablePlaneBody getContactableBody(RigidBodyBasics body)
-   {
-      for (ContactablePlaneBody contactableBody : contactableBodies)
-         if (contactableBody.getRigidBody().getName().equals(body.getName()))
-            return contactableBody;
-      return null;
    }
 
    public YoPlaneContactState getFootContactState(RobotSide robotSide)
