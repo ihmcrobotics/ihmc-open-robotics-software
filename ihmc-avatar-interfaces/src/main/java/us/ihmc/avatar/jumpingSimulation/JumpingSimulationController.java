@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
@@ -35,10 +36,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class JumpingSimulationController implements RobotController
 {
@@ -75,6 +73,27 @@ public class JumpingSimulationController implements RobotController
 
       // Make the sensor reader
       sensorReader = new SDFPerfectSimulatedSensorReader(humanoidRobotModel, fullRobotModel, null);
+      if (fullRobotModel.getIMUDefinitions() != null)
+      {
+         for (IMUDefinition imuDefinition : fullRobotModel.getIMUDefinitions())
+            sensorReader.addIMUSensor(imuDefinition);
+      }
+      List<WrenchCalculatorInterface> forceSensors = new ArrayList<>();
+      humanoidRobotModel.getForceSensors(forceSensors);
+      if (fullRobotModel.getForceSensorDefinitions() != null)
+      {
+         for (ForceSensorDefinition forceSensorDefinition : fullRobotModel.getForceSensorDefinitions())
+         {
+            for (WrenchCalculatorInterface forceSensor : forceSensors)
+            {
+               if (forceSensorDefinition.getSensorName().equals(forceSensor.getName()))
+               {
+                  sensorReader.addForceTorqueSensorPort(forceSensorDefinition, forceSensor);
+                  break;
+               }
+            }
+         }
+      }
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
