@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -176,10 +177,10 @@ public class LineSegmentToPlanarRegionAssociator
          if (regionBasedSegment.getCentroid().getX() < camIntrinsics.getWidth() && regionBasedSegment.getCentroid().getY() < camIntrinsics.getHeight()
              && regionBasedSegment.getCentroid().getX() >= 0 && regionBasedSegment.getCentroid().getY() >= 0)
          {
+            getSegmentFromLines(curLines, regionBasedSegment, lineBasedSegment);
             lineBasedSegment.setCentroid(regionBasedSegment.getCentroid());
             lineBasedSegment.updateOrder();
             lineBasedSegment.updateArea();
-            getSegmentFromLines(curLines, regionBasedSegment.getCentroid(), lineBasedSegment);
          }
 
       }
@@ -202,14 +203,17 @@ public class LineSegmentToPlanarRegionAssociator
       return 0;
    }
 
-   public void getSegmentFromLines(Mat curLines, Point2D centroid, PlanarSegment segmentToPack)
+   public void getSegmentFromLines(Mat curLines, PlanarSegment regionBasedSegment, PlanarSegment segmentToPack)
    {
-      PriorityQueue<LineSegment2D> queue = new PriorityQueue<>(10, (a, b) -> compare(a, b, centroid));
+      PriorityQueue<LineSegment2D> queue = new PriorityQueue<>(10, (a, b) -> compare(a, b, regionBasedSegment.getCentroid()));
       for (int i = 0; i < curLines.rows(); i++)
       {
          double[] line = curLines.get(i, 0);
          LineSegment2D ls = new LineSegment2D(line[0], line[1], line[2], line[3]);
-         if (ls.distanceSquared(centroid) < 8000 && ls.length() > 30)
+         Line2D lineLs = new Line2D(ls);
+         LogTools.info("Distance:{}", lineLs.distance(regionBasedSegment.getCentroid()));
+         if(lineLs.distance(regionBasedSegment.getCentroid()) < 50)
+//         if (ls.distanceSquared(regionBasedSegment.getCentroid()) < 8000 && ls.length() > 30)
          {
             queue.add(ls);
          }
@@ -218,33 +222,9 @@ public class LineSegmentToPlanarRegionAssociator
       ArrayList<Line2D> polygon = new ArrayList<Line2D>();
       for (LineSegment2D ls : queue)
       {
-         segmentToPack.getVertices().add(new Point2D(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
-         segmentToPack.getVertices().add(new Point2D(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
-
-         // Point2D closest = (Point2D) ls.orthogonalProjectionCopy(centroid);
-         // boolean present = false;
-         // ArrayList<Point2D> projections = new ArrayList<>();
-         // Line2D line = new Line2D(ls);
-         // Point2D proj = (Point2D) line.orthogonalProjectionCopy(centroid);
-         // for(Point2D p : projections){
-         //     if(proj.distanceSquared(p) < 10){
-         //         present = true;
-         //     }
-         // }
-         // if(!present){
-         //     projections.add(proj);
-         //     polygon.add(line);
-         // }
-         // if(polygon.size() >= 4)break;
+            segmentToPack.getVertices().add(new Point2D(ls.getFirstEndpointX(), ls.getFirstEndpointY()));
+            segmentToPack.getVertices().add(new Point2D(ls.getSecondEndpointX(), ls.getSecondEndpointY()));
       }
-
-      // if(polygon.size() >= 4){
-      //     for(int i = 0; i<polygon.size()-1; i++){
-      //         LogTools.info( (i+1) % polygon.size());
-      //         Point2D corner = (Point2D) polygon.get(i).intersectionWith(polygon.get( i+1 ));
-      //         segments.add(corner);
-      //     }
-      // }
    }
 
    public void setCamIntrinsics(CameraPinholeBrown camIntrinsics)

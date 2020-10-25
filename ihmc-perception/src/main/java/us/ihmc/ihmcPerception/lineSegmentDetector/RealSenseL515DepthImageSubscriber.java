@@ -1,18 +1,25 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import sensor_msgs.Image;
+import sensor_msgs.PointCloud2;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.ihmcPerception.camera.RosCameraInfoSubscriber;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -20,6 +27,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class RealSenseL515DepthImageSubscriber extends AbstractRosTopicSubscriber<Image>
 {
@@ -64,4 +73,14 @@ public class RealSenseL515DepthImageSubscriber extends AbstractRosTopicSubscribe
 
       // imageReceived(timeStamp, RosTools.bufferedImageFromRosMessageRaw(colorModel, message));
    }
+
+   public static void main(String[] args) throws URISyntaxException
+   {
+      System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+      RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"), "RealSenseL515DataPublisher", true);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
+      new RealSenseL515DepthImageSubscriber(rosMainNode, ros2Node);
+      rosMainNode.execute();
+   }
+
 }

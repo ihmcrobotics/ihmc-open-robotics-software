@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.VideoPacket;
 import javafx.scene.shape.Sphere;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
@@ -14,11 +13,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineDetectionTools;
 import us.ihmc.ihmcPerception.lineSegmentDetector.LineMatch;
@@ -27,13 +22,10 @@ import us.ihmc.ihmcPerception.lineSegmentDetector.LineTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -48,7 +40,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static us.ihmc.ihmcPerception.lineSegmentDetector.LineMatchingTools.matchFLDLines;
+import static us.ihmc.ihmcPerception.lineSegmentDetector.LineTools.matchFLDLines;
 
 public class AtlasLineSegmentEstimator
 {
