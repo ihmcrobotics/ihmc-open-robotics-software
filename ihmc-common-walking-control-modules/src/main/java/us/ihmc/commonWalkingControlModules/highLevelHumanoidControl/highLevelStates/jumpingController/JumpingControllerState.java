@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -56,6 +57,8 @@ public class JumpingControllerState extends HighLevelControllerState
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
    private final JumpingControllerToolbox controllerToolbox;
+   private final JointDesiredOutputList jointDesiredOutputList;
+   private final JointDesiredOutputList uncontrolledJointDesiredOutputList;
 
    public JumpingControllerState(JumpingControlManagerFactory managerFactory, JumpingControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
@@ -63,6 +66,12 @@ public class JumpingControllerState extends HighLevelControllerState
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
+      controllerToolbox.getControlledJoints();
+
+      jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
+      uncontrolledJointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getUncontrolledOneDoFJoints());
+      for (OneDoFJointBasics joint : controllerToolbox.getUncontrolledOneDoFJoints())
+         uncontrolledJointDesiredOutputList.setDesiredJointTorque(joint, 0.0);
 
       // create walking controller
       jumpingController = new JumpingHumanoidController(managerFactory, walkingControllerParameters, copTrajectoryParameters, controllerToolbox);
@@ -141,6 +150,10 @@ public class JumpingControllerState extends HighLevelControllerState
 
       momentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       momentumRateControlModule.computeAchievedCMP();
+
+      jointDesiredOutputList.clear();
+      jointDesiredOutputList.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
+      jointDesiredOutputList.overwriteWith(uncontrolledJointDesiredOutputList);
    }
 
    @Override
@@ -158,7 +171,7 @@ public class JumpingControllerState extends HighLevelControllerState
    @Override
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
-      return controllerCore.getOutputForLowLevelController();
+      return jointDesiredOutputList;
    }
 
    @Override

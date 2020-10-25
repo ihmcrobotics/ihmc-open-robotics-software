@@ -292,6 +292,13 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    {
       feetManager.compute();
 
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      {
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+            bodyManager.compute();
+      }
+
       pelvisOrientationManager.compute();
       balanceManager.compute();
    }
