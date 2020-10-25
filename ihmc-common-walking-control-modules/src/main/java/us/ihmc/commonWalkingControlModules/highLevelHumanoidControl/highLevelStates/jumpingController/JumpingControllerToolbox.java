@@ -94,6 +94,7 @@ public class JumpingControllerToolbox
 
    private final JointBasics[] controlledJoints;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] uncontrolledOneDoFJoints;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
@@ -194,6 +195,7 @@ public class JumpingControllerToolbox
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
+      uncontrolledOneDoFJoints = MultiBodySystemTools.filterJoints(jointsToIgnore, OneDoFJointBasics.class);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -533,6 +535,11 @@ public class JumpingControllerToolbox
    public OneDoFJointBasics[] getControlledOneDoFJoints()
    {
       return controlledOneDoFJoints;
+   }
+
+   public OneDoFJointBasics[] getUncontrolledOneDoFJoints()
+   {
+      return uncontrolledOneDoFJoints;
    }
 
    public YoBoolean getControllerFailedBoolean()
