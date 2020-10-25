@@ -27,6 +27,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -36,6 +38,9 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JumpingControllerState extends HighLevelControllerState
 {
@@ -66,6 +71,10 @@ public class JumpingControllerState extends HighLevelControllerState
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
 
+      List<ContactablePlaneBody> contactableBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactableBodies.add(controllerToolbox.getContactableFeet().get(robotSide));
+
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
@@ -74,7 +83,7 @@ public class JumpingControllerState extends HighLevelControllerState
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-      toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
+      toolbox.setupForInverseDynamicsSolver(contactableBodies);
       FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
       // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
       template.setAllowDynamicControllerConstruction(false);
