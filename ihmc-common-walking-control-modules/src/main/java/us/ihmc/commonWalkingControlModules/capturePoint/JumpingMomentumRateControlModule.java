@@ -47,7 +47,7 @@ public class JumpingMomentumRateControlModule
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private double omega0;
+   private double omega0 = 3.0;
    private double totalMass;
    private double timeInContactPhase;
 
@@ -179,6 +179,7 @@ public class JumpingMomentumRateControlModule
    {
       controlledCoMAcceleration.set(lqrMomentumController.getU());
       linearMomentumRateOfChange.setIncludingFrame(controlledCoMAcceleration);
+      linearMomentumRateOfChange.changeFrame(worldFrame);
       linearMomentumRateOfChange.scale(totalMass);
    }
 }

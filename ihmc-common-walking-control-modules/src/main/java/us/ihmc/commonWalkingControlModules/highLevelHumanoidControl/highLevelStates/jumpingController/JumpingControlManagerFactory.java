@@ -145,13 +145,12 @@ public class JumpingControlManagerFactory
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      ContactablePlaneBody contactableBody = contactablePlaneBodySupplier.apply(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, controlFrame, baseFrame,
                                                                     taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
-                                                                    taskspacePositionGains, contactableBody, defaultControlMode, yoTime, graphicsListRegistry, registry);
+                                                                    taskspacePositionGains, null, defaultControlMode, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
