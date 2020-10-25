@@ -36,6 +36,7 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -115,6 +116,7 @@ public class JumpingSimulationController implements RobotController
       YoRegistry stateEstimatorRegistry = new YoRegistry("stateEstimatorRegistry");
       estimator = estimatorFactory.createStateEstimator(stateEstimatorRegistry, yoGraphicsListRegistry);
       registry.addChild(stateEstimatorRegistry);
+      registry.addChild(estimator.getYoRegistry());
 
       // Create the jumping controller
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -161,9 +163,12 @@ public class JumpingSimulationController implements RobotController
                                               robotModel.getHighLevelControllerParameters(),
                                               robotModel.getWalkingControllerParameters(),
                                               robotModel.getCoPTrajectoryParameters());
+      registry.addChild(controller.getYoRegistry());
 
       // Set up the output writer
       outputWriter = new PerfectSimulatedOutputWriter(humanoidRobotModel, fullRobotModel, controller.getOutputForLowLevelController());
+
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -191,6 +196,8 @@ public class JumpingSimulationController implements RobotController
       return footSwitches;
    }
 
+   private boolean initialized = false;
+
    @Override
    public void initialize()
    {
@@ -198,6 +205,8 @@ public class JumpingSimulationController implements RobotController
       estimator.initialize();
       controller.initialize();
       outputWriter.initialize();
+
+      initialized = true;
    }
 
    @Override
@@ -206,9 +215,13 @@ public class JumpingSimulationController implements RobotController
       return registry;
    }
 
+
    @Override
    public void doControl()
    {
+      if (!initialized)
+         initialize();
+
       sensorReader.read();
 
       estimator.doControl();

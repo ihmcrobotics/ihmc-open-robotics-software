@@ -107,7 +107,7 @@ public class JumpingFootControlModule
 
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
 
-      String targetRegistryName = FeetManager.class.getSimpleName();
+      String targetRegistryName = JumpingFeetManager.class.getSimpleName();
       String parameterRegistryName = JumpingFootControlModule.class.getSimpleName() + "Parameters";
       coefficientOfFriction = ParameterProvider.getOrCreateParameter(targetRegistryName,
                                                                      parameterRegistryName,

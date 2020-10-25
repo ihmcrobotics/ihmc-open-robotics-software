@@ -25,6 +25,7 @@ public class JumpingSimulationFactory
       SimulationConstructionSet scs = new SimulationConstructionSet(humanoidRobot);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.startOnAThread();
+      scs.simulate();
    }
 
 }

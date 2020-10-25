@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -37,8 +38,6 @@ public class JumpingSupportState implements JumpingFootControlState
    private final JumpingControllerToolbox controllerToolbox;
 
    private final YoRegistry registry;
-
-   private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
    private final FootSwitchInterface footSwitch;
 
@@ -91,13 +90,13 @@ public class JumpingSupportState implements JumpingFootControlState
       }
    }
 
+   private final FrameVector3D contactNormal = new FrameVector3D();
+
    @Override
    public void onEntry()
    {
-      FrameVector3D fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
-      controllerToolbox.setFootContactStateNormalContactVector(robotSide, fullyConstrainedNormalContactVector);
-
-      computeFootPolygon();
+      contactNormal.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+      controllerToolbox.setFootContactStateNormalContactVector(robotSide, contactNormal);
    }
 
    @Override
@@ -110,8 +109,6 @@ public class JumpingSupportState implements JumpingFootControlState
    @Override
    public void doAction(double timeInState)
    {
-      computeFootPolygon();
-
       footSwitch.computeAndPackCoP(cop2d);
       if (cop2d.containsNaN())
          cop2d.setToZero(contactableFoot.getSoleFrame());
@@ -145,15 +142,6 @@ public class JumpingSupportState implements JumpingFootControlState
       // update visualization
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
-   }
-
-   private void computeFootPolygon()
-   {
-      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-      footPolygon.clear(soleFrame);
-      for (int i = 0; i < contactableFoot.getTotalNumberOfContactPoints(); i++)
-         footPolygon.addVertex(contactableFoot.getContactPoints2d().get(i));
-      footPolygon.update();
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
