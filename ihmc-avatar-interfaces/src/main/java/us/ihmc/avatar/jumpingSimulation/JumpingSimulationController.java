@@ -22,6 +22,7 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.*;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -88,9 +89,17 @@ public class JumpingSimulationController implements RobotController
       estimatorFactory.setEstimatorForceSensorDataHolder(forceSensorDataHolder);
       estimatorFactory.setCenterOfPressureDataHolderFromController(new CenterOfPressureDataHolder(fullRobotModel));
       estimatorFactory.setRobotMotionStatusFromController(new RobotMotionStatusHolder());
-      estimator = estimatorFactory.createStateEstimator(registry, yoGraphicsListRegistry);
+
+      YoRegistry stateEstimatorRegistry = new YoRegistry("stateEstimatorRegistry");
+      estimator = estimatorFactory.createStateEstimator(stateEstimatorRegistry, yoGraphicsListRegistry);
+      registry.addChild(stateEstimatorRegistry);
 
       // Create the jumping controller
+      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(footContactPoints);
       contactableBodiesFactory.setToeContactParameters(toeContactPoints, toeContactLines);
 
@@ -107,6 +116,7 @@ public class JumpingSimulationController implements RobotController
                                                                                registry);
 
       JumpingControllerToolbox controllerToolbox = new JumpingControllerToolbox(fullRobotModel,
+                                                                                referenceFrames,
                                                                                 robotModel.getWalkingControllerParameters(),
                                                                                 footSwitches,
                                                                                 humanoidRobotModel.getYoTime(),
