@@ -48,10 +48,10 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
    private final YoDouble yoTime;
 
-   private final HighLevelControlManagerFactory managerFactory;
+   private final JumpingControlManagerFactory managerFactory;
 
-   private final PelvisOrientationManager pelvisOrientationManager;
-   private final FeetManager feetManager;
+   private final JumpingPelvisOrientationManager pelvisOrientationManager;
+   private final JumpingFeetManager feetManager;
    private final JumpingBalanceManager balanceManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
@@ -76,7 +76,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
    private boolean firstTick = true;
 
-   public JumpingHumanoidController(HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
+   public JumpingHumanoidController(JumpingControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                     CoPTrajectoryParameters copTrajectoryParameters, JumpingControllerToolbox controllerToolbox)
    {
       this.managerFactory = managerFactory;
@@ -225,7 +225,6 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       pelvisOrientationManager.initialize();
 //      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
-      feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
    private void initializeContacts()
@@ -312,7 +311,6 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
-         controllerCoreCommand.completeLowLevelJointData(feetManager.getJointDesiredData(robotSide));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();

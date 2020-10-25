@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -151,9 +152,8 @@ public class JumpingSimulationController implements RobotController
                                                                                 jointsToIgnore);
 //      controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
 
-      HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(registry);
-//      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      managerFactory.setCopTrajectoryParameters(robotModel.getCoPTrajectoryParameters());
+      JumpingControlManagerFactory managerFactory = new JumpingControlManagerFactory(registry);
+      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(robotModel.getWalkingControllerParameters());
 
       controller = new JumpingControllerState(managerFactory,

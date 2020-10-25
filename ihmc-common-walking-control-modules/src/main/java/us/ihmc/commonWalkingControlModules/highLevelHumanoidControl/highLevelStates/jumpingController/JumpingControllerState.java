@@ -57,7 +57,7 @@ public class JumpingControllerState extends HighLevelControllerState
 
    private final JumpingControllerToolbox controllerToolbox;
 
-   public JumpingControllerState(HighLevelControlManagerFactory managerFactory, JumpingControllerToolbox controllerToolbox,
+   public JumpingControllerState(JumpingControlManagerFactory managerFactory, JumpingControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
                                  CoPTrajectoryParameters copTrajectoryParameters)
    {
