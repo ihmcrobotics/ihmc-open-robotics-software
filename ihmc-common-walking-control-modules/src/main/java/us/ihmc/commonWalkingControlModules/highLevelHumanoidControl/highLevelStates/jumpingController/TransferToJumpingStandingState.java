@@ -19,15 +19,15 @@ public class TransferToJumpingStandingState extends JumpingState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final JumpingBalanceManager balanceManager;
-   private final PelvisOrientationManager pelvisOrientationManager;
-   private final FeetManager feetManager;
+   private final JumpingPelvisOrientationManager pelvisOrientationManager;
+   private final JumpingFeetManager feetManager;
 
    private final FramePoint3D leftFootPosition = new FramePoint3D();
    private final FramePoint3D rightFootPosition = new FramePoint3D();
 
    private final Point3D midFootPosition = new Point3D();
 
-   public TransferToJumpingStandingState(JumpingControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+   public TransferToJumpingStandingState(JumpingControllerToolbox controllerToolbox, JumpingControlManagerFactory managerFactory,
                                          JumpingBalanceManager balanceManager, WalkingFailureDetectionControlModule failureDetectionControlModule, YoRegistry parentRegistry)
    {
       super(JumpingStateEnum.TO_STANDING, parentRegistry);
