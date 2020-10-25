@@ -119,6 +119,7 @@ public class JumpingControllerToolbox
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public JumpingControllerToolbox(FullHumanoidRobotModel fullRobotModel,
+                                   CommonHumanoidReferenceFrames referenceFrames,
                                    WalkingControllerParameters walkingControllerParameters,
                                    SideDependentList<? extends FootSwitchInterface> footSwitches, YoDouble yoTime, double gravityZ, double omega0,
                                    SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
@@ -127,7 +128,6 @@ public class JumpingControllerToolbox
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       finalTransferTime = new YoDouble("finalTransferTime", registry);

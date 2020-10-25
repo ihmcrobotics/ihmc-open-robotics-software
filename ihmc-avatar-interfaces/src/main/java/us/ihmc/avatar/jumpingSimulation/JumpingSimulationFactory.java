@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class JumpingSimulationFactory
 {
    private final DRCRobotModel robotModel;
-   private static final double gravityZ = -9.81;
+   private static final double gravityZ = 9.81;
 
    public JumpingSimulationFactory(DRCRobotModel robotModel)
    {
