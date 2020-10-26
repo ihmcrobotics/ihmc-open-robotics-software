@@ -23,12 +23,17 @@ public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
 
    private final YoFramePoint2D initialCoP;
 
+   private final JumpingGoalVariable jumpingGoal;
+
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
    private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> soleContactFrames = new SideDependentList<>();
 
    public JumpingCoPTrajectoryGeneratorState(YoRegistry registry)
    {
+      jumpingGoal = new JumpingGoalVariable("", registry);
+      registerStateToSave(jumpingGoal);
+
       finalTransferDuration = new YoDouble("finalTransferDuration", registry);
       registerVariableToSave(finalTransferDuration);
 
@@ -91,6 +96,11 @@ public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
    public FrameConvexPolygon2DReadOnly getFootPolygonInSole(RobotSide robotSide)
    {
       return footPolygonsInSole.get(robotSide);
+   }
+
+   public JumpingGoalVariable getJumpingGoal()
+   {
+      return jumpingGoal;
    }
 
    public double getFinalTransferDuration()

@@ -4,10 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.OptimizedCoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.StandingCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -70,14 +67,17 @@ public class JumpingBalanceManager
 
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
+      JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters = new JumpingCoPTrajectoryParameters(registry);
+
       comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
+      copTrajectoryState.registerStateToSave(jumpingCoPTrajectoryParameters);
 
       copTrajectoryForStanding = new StandingCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       copTrajectoryForStanding.registerState(copTrajectoryState);
 
-      copTrajectoryForJumping = new JumpingCoPTrajectoryGenerator(copTrajectoryParameters, registry);
+      copTrajectoryForJumping = new JumpingCoPTrajectoryGenerator(copTrajectoryParameters, jumpingCoPTrajectoryParameters, registry);
       copTrajectoryForJumping.registerState(copTrajectoryState);
 
       String graphicListName = getClass().getSimpleName();
