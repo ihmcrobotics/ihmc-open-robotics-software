@@ -106,8 +106,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    public void addIMUSensor(IMUDefinition imuDefinition, IMUMount imuMount)
    {
-      imuSensorPairs.add(new ImmutablePair<>(new IMUSensor(imuDefinition, null), imuMount));
-      imuSensors.add(new IMUSensor(imuDefinition, null));
+      IMUSensor imuSensor = new IMUSensor(imuDefinition, null);
+      imuSensorPairs.add(new ImmutablePair<>(imuSensor, imuMount));
+      imuSensors.add(imuSensor);
    }
 
    @Override
