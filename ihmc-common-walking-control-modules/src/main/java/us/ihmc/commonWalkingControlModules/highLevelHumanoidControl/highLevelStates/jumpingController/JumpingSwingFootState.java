@@ -64,7 +64,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JumpingSwingState implements JumpingFootControlState
+public class JumpingSwingFootState implements JumpingFootControlState
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -213,10 +213,10 @@ public class JumpingSwingState implements JumpingFootControlState
    private final RigidBodyTransform newBodyFrameDesiredTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromNewBodyFrameToOldBodyFrame = new RigidBodyTransform();
 
-   public JumpingSwingState(JumpingFootControlHelper footControlHelper,
-                            FrameVector3DReadOnly touchdownVelocity,
-                            FrameVector3DReadOnly touchdownAcceleration,
-                            PIDSE3GainsReadOnly gains, YoRegistry registry)
+   public JumpingSwingFootState(JumpingFootControlHelper footControlHelper,
+                                FrameVector3DReadOnly touchdownVelocity,
+                                FrameVector3DReadOnly touchdownAcceleration,
+                                PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       this.footControlHelper = footControlHelper;
       contactableFoot = footControlHelper.getContactableFoot();

@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -57,7 +58,8 @@ public class JumpingSimulationController implements RobotController
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;
 
-   public JumpingSimulationController(DRCRobotModel robotModel,
+   public JumpingSimulationController(CommandInputManager commandInputManager,
+                                      DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
                                       HumanoidFloatingRootJointRobot humanoidRobotModel,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -174,7 +176,8 @@ public class JumpingSimulationController implements RobotController
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(robotModel.getWalkingControllerParameters());
 
-      controller = new JumpingControllerState(managerFactory,
+      controller = new JumpingControllerState(commandInputManager,
+                                              managerFactory,
                                               controllerToolbox,
                                               robotModel.getHighLevelControllerParameters(),
                                               robotModel.getWalkingControllerParameters(),

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -62,8 +61,8 @@ public class JumpingFootControlModule
    private final JumpingControllerToolbox controllerToolbox;
    private final RobotSide robotSide;
 
-   private final JumpingSwingState swingState;
-   private final JumpingSupportState supportState;
+   private final JumpingSwingFootState swingState;
+   private final JumpingSupportFootState supportState;
 
    private final JumpingFootControlHelper footControlHelper;
 
@@ -108,8 +107,8 @@ public class JumpingFootControlModule
                                                                                 defaultTouchdownAcceleration,
                                                                                 registry);
 
-      supportState = new JumpingSupportState(footControlHelper, registry);
-      swingState = new JumpingSwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
+      supportState = new JumpingSupportFootState(footControlHelper, registry);
+      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
