@@ -22,7 +22,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class JumpingSupportState implements JumpingFootControlState
+public class JumpingSupportFootState implements JumpingFootControlState
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -55,7 +55,7 @@ public class JumpingSupportState implements JumpingFootControlState
    private final FramePoint3D framePosition = new FramePoint3D();
    private final FrameQuaternion frameOrientation = new FrameQuaternion();
 
-   public JumpingSupportState(JumpingFootControlHelper footControlHelper, YoRegistry parentRegistry)
+   public JumpingSupportFootState(JumpingFootControlHelper footControlHelper, YoRegistry parentRegistry)
    {
       this.footControlHelper = footControlHelper;
       contactableFoot = footControlHelper.getContactableFoot();

@@ -3,6 +3,7 @@ package us.ihmc.avatar.jumpingSimulation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -14,22 +15,29 @@ public class JumpingSimulationFactory
 {
    private final DRCRobotModel robotModel;
    private final DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup;
+   private final CommandInputManager commandInputManager;
 
    private static final double gravityZ = 9.81;
    private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
-   public JumpingSimulationFactory(DRCRobotModel robotModel, DRCRobotInitialSetup initialSetup)
+   public JumpingSimulationFactory(DRCRobotModel robotModel, DRCRobotInitialSetup initialSetup, CommandInputManager commandInputManager)
    {
       this.robotModel = robotModel;
       this.initialSetup = initialSetup;
+      this.commandInputManager = commandInputManager;
    }
 
-   public void createSimulation()
+   public SimulationConstructionSet createSimulation()
    {
       HumanoidFloatingRootJointRobot humanoidRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      JumpingSimulationController simulationController = new JumpingSimulationController(robotModel, fullRobotModel, humanoidRobot, graphicsListRegistry, gravityZ,
+      JumpingSimulationController simulationController = new JumpingSimulationController(commandInputManager,
+                                                                                         robotModel,
+                                                                                         fullRobotModel,
+                                                                                         humanoidRobot,
+                                                                                         graphicsListRegistry,
+                                                                                         gravityZ,
                                                                                          getClass().getResourceAsStream(parameterResourceName));
       humanoidRobot.setController(simulationController);
 
@@ -49,8 +57,8 @@ public class JumpingSimulationFactory
       SimulationConstructionSet scs = new SimulationConstructionSet(humanoidRobot);
       scsInitialSetup.initializeSimulation(scs);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
-      scs.startOnAThread();
-      scs.simulate();
-   }
 
+
+      return scs;
+   }
 }
