@@ -104,11 +104,7 @@ public class JumpingControllerState extends HighLevelControllerState
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
 
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
-      momentumRateControlModule = new JumpingMomentumRateControlModule(referenceFrames, elevator, walkingControllerParameters, registry, yoGraphicsListRegistry);
+      momentumRateControlModule = new JumpingMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
 
       registry.addChild(jumpingController.getYoVariableRegistry());
    }
@@ -124,6 +120,8 @@ public class JumpingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      controllerToolbox.update();
+
       jumpingController.doAction();
 
       momentumRateControlModule.setInputFromWalkingStateMachine(jumpingController.getJumpingMomentumRateControlModuleInput());

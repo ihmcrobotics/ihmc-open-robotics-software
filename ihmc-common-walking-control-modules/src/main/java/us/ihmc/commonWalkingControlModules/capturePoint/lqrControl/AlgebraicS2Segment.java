@@ -60,7 +60,7 @@ public class AlgebraicS2Segment implements S2Segment
          betaLocalPrevious = betaLocal;
       }
 
-      double duration = vrpTrajectory.getDuration();
+      double duration = Math.min(vrpTrajectory.getDuration(), 1e1);
       summedBetas.zero();
       for (int i = 0; i <= k; i++)
          CommonOps_DDRM.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(i));
