@@ -76,7 +76,7 @@ public class JumpingControllerToolbox
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
 
-   protected final SideDependentList<ContactableFoot> feet;
+   private final SideDependentList<ContactableFoot> feet;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
@@ -105,7 +105,7 @@ public class JumpingControllerToolbox
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
-   protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
+   private final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
@@ -390,23 +390,6 @@ public class JumpingControllerToolbox
       return getName();
    }
 
-
-   public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
-   {
-      RobotSide robotSide = nextFootstep.getRobotSide();
-
-      List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
-
-      if ((predictedContactPoints != null) && (!predictedContactPoints.isEmpty()))
-      {
-         setFootPlaneContactPoints(robotSide, predictedContactPoints);
-      }
-      else
-      {
-         resetFootPlaneContactPoint(robotSide);
-      }
-   }
-
    public void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
@@ -416,18 +399,6 @@ public class JumpingControllerToolbox
       footContactState.setContactFramePoints(defaultContactPoints);
    }
 
-   private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2D> predictedContactPoints)
-   {
-      YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      footContactState.getContactFramePoint2dsInContact(previousFootContactPoints.get(robotSide));
-      footContactState.setContactPoints(predictedContactPoints);
-   }
-
-   public void restorePreviousFootContactPoints(RobotSide robotSide)
-   {
-      YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      footContactState.setContactFramePoints(previousFootContactPoints.get(robotSide));
-   }
 
    public void setFootContactCoefficientOfFriction(RobotSide robotSide, double coefficientOfFriction)
    {
@@ -599,15 +570,6 @@ public class JumpingControllerToolbox
       }
    }
 
-   public void getDefaultFootPolygon(RobotSide robotSide, FrameConvexPolygon2D polygonToPack)
-   {
-      polygonToPack.set(defaultFootPolygons.get(robotSide));
-   }
-
-   public SideDependentList<FrameConvexPolygon2D> getDefaultFootPolygons()
-   {
-      return defaultFootPolygons;
-   }
 
    private final FramePoint3D tempPosition = new FramePoint3D();
 

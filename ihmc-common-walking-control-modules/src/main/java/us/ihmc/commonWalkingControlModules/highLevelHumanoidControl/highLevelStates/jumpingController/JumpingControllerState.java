@@ -62,12 +62,23 @@ public class JumpingControllerState extends HighLevelControllerState
    private final JointDesiredOutputList jointDesiredOutputList;
    private final JointDesiredOutputList uncontrolledJointDesiredOutputList;
 
-   public JumpingControllerState(JumpingControlManagerFactory managerFactory, JumpingControllerToolbox controllerToolbox,
-                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
+   private final CommandInputManager commandInputManager;
+   private final JumpingGoalHandler jumpingGoalHandler;
+
+   public JumpingControllerState(CommandInputManager commandInputManager,
+                                 JumpingControlManagerFactory managerFactory,
+                                 JumpingControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters,
+                                 WalkingControllerParameters walkingControllerParameters,
                                  CoPTrajectoryParameters copTrajectoryParameters)
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
+
+      this.commandInputManager = commandInputManager;
       this.controllerToolbox = controllerToolbox;
+
+      jumpingGoalHandler = new JumpingGoalHandler();
+
       controllerToolbox.getControlledJoints();
 
       jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
@@ -120,6 +131,9 @@ public class JumpingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      if (commandInputManager.isNewCommandAvailable(JumpingGoal.class))
+         jumpingGoalHandler.consumeJumpingGoal(commandInputManager.pollNewestCommand(JumpingGoal.class));
+
       controllerToolbox.update();
 
       jumpingController.doAction();
