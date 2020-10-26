@@ -5,7 +5,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumCo
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -30,8 +32,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class JumpingMomentumRateControlModule
 {
@@ -56,8 +57,6 @@ public class JumpingMomentumRateControlModule
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
-   private final CenterOfMassJacobian centerOfMassJacobian;
-
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -68,30 +67,34 @@ public class JumpingMomentumRateControlModule
    private final LQRMomentumController lqrMomentumController;
 
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
+   private final YoFramePoint3D yoDesiredVRP = new YoFramePoint3D("desiredVRP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
 
-   public JumpingMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
-                                           RigidBodyBasics elevator,
+   private final JumpingControllerToolbox controllerToolbox;
+
+   public JumpingMomentumRateControlModule(JumpingControllerToolbox controllerToolbox,
                                            WalkingControllerParameters walkingControllerParameters,
-                                           YoRegistry parentRegistry,
-                                           YoGraphicsListRegistry yoGraphicsListRegistry)
+                                           YoRegistry parentRegistry)
    {
-      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      this.totalMass = TotalMassCalculator.computeSubTreeMass(controllerToolbox.getFullRobotModel().getElevator());
+      this.controllerToolbox = controllerToolbox;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
+      centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
+      controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", worldFrame, registry);
 
-      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
-
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition desiredVRPViz = new YoGraphicPosition("Desired VRP", yoDesiredVRP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
+
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredVRPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
       }
@@ -130,9 +133,8 @@ public class JumpingMomentumRateControlModule
 
    public void computeControllerCoreCommands()
    {
-      centerOfMassJacobian.reset();
-      yoCenterOfMass.set(centerOfMassJacobian.getCenterOfMass());
-      yoCenterOfMassVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
+      yoCenterOfMass.set(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass());
+      yoCenterOfMassVelocity.set(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
 
       yoCenterOfMass.get(currentState);
       yoCenterOfMassVelocity.get(3, currentState);
@@ -177,9 +179,13 @@ public class JumpingMomentumRateControlModule
 
    private void computeDesiredLinearMomentumRateOfChange()
    {
-      controlledCoMAcceleration.set(lqrMomentumController.getU());
-      linearMomentumRateOfChange.setIncludingFrame(controlledCoMAcceleration);
+      linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+
+      controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
+
       linearMomentumRateOfChange.changeFrame(worldFrame);
       linearMomentumRateOfChange.scale(totalMass);
+
+      yoDesiredVRP.set(lqrMomentumController.getFeedbackVRPPosition());
    }
 }

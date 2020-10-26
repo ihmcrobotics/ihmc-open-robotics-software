@@ -29,6 +29,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
+import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -77,15 +78,29 @@ public class JumpingSimulationController implements RobotController
       contactableBodiesFactory.setFootContactPoints(footContactPoints);
       contactableBodiesFactory.setToeContactParameters(toeContactPoints, toeContactLines);
 
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(this.fullRobotModel.getForceSensorDefinitions()));
+
       // Make the sensor reader
-      sensorReader = new SDFPerfectSimulatedSensorReader(humanoidRobotModel, this.fullRobotModel, null);
+      List<WrenchCalculatorInterface> forceSensors = new ArrayList<>();
+      List<IMUMount> imuMounts = new ArrayList<>();
+      humanoidRobotModel.getForceSensors(forceSensors);
+      humanoidRobotModel.getIMUMounts(imuMounts);
+
+      sensorReader = new SDFPerfectSimulatedSensorReader(humanoidRobotModel, this.fullRobotModel, forceSensorDataHolder, null);
       if (this.fullRobotModel.getIMUDefinitions() != null)
       {
          for (IMUDefinition imuDefinition : this.fullRobotModel.getIMUDefinitions())
-            sensorReader.addIMUSensor(imuDefinition);
+         {
+            for (IMUMount imuMount : imuMounts)
+            {
+               if (imuDefinition.getName().equals(imuMount.getName()))
+               {
+                  sensorReader.addIMUSensor(imuDefinition, imuMount);
+                  break;
+               }
+            }
+         }
       }
-      List<WrenchCalculatorInterface> forceSensors = new ArrayList<>();
-      humanoidRobotModel.getForceSensors(forceSensors);
       if (this.fullRobotModel.getForceSensorDefinitions() != null)
       {
          for (ForceSensorDefinition forceSensorDefinition : this.fullRobotModel.getForceSensorDefinitions())
@@ -101,7 +116,6 @@ public class JumpingSimulationController implements RobotController
          }
       }
 
-      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(this.fullRobotModel.getForceSensorDefinitions()));
 
       // Create DRC Estimator:
       KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();

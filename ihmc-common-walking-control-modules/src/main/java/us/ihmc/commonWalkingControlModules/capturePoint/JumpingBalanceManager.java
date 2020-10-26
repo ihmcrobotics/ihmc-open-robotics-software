@@ -13,8 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,14 +20,10 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
@@ -45,11 +39,11 @@ public class JumpingBalanceManager
 
    private final JumpingControllerToolbox controllerToolbox;
 
-   private final YoFramePoint2D yoDesiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
-   private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoDesiredDCM = new YoFramePoint3D("desiredDCM", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
-   private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
+   private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -104,18 +98,20 @@ public class JumpingBalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-//         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
 
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredICP, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
+         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredDCM, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition desiredCoMViz = new YoGraphicPosition("Desired CoM", yoDesiredCoMPosition, 0.01, Red(), GraphicType.SOLID_BALL);
+         YoGraphicPosition perfectVRPViz = new YoGraphicPosition("Perfect VRP", yoPerfectVRP, 0.002, BlueViolet());
 
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCapturePointViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, perfectVRPViz);
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
-         YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-         perfectCMPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCoMViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectVRPViz.createArtifact());
       }
-      yoDesiredICP.setToNaN();
-      yoPerfectCMP.setToNaN();
+      yoDesiredDCM.setToNaN();
+      yoPerfectVRP.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -127,9 +123,9 @@ public class JumpingBalanceManager
 
    public void compute()
    {
-      yoDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
-      yoDesiredICPVelocity.set(comTrajectoryPlanner.getDesiredDCMVelocity());
-      yoPerfectCMP.set(comTrajectoryPlanner.getDesiredECMPPosition());
+      yoDesiredDCM.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      yoDesiredDCMVelocity.set(comTrajectoryPlanner.getDesiredDCMVelocity());
+      yoPerfectVRP.set(comTrajectoryPlanner.getDesiredECMPPosition());
       yoDesiredCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
@@ -137,7 +133,7 @@ public class JumpingBalanceManager
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
 
-      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredICP, yoDesiredICPVelocity, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredDCM, yoDesiredDCMVelocity, omega0, yoPerfectVRP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -178,14 +174,14 @@ public class JumpingBalanceManager
       plannerTimer.stopMeasurement();
    }
 
-   public FramePoint2DReadOnly getDesiredICP()
+   public FramePoint3DReadOnly getDesiredDCM()
    {
-      return yoDesiredICP;
+      return yoDesiredDCM;
    }
 
-   public FrameVector2DReadOnly getDesiredICPVelocity()
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
    {
-      return yoDesiredICPVelocity;
+      return yoDesiredDCMVelocity;
    }
 
    public FrameVector3DReadOnly getDesiredCoMVelocity()
@@ -195,11 +191,12 @@ public class JumpingBalanceManager
 
    public void initialize()
    {
-      yoDesiredICP.set(controllerToolbox.getCapturePoint());
+      yoDesiredDCM.set(controllerToolbox.getCapturePoint());
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
+      yoDesiredCoMPosition.setZ(comTrajectoryPlanner.getNominalCoMHeight());
       yoDesiredCoMVelocity.setToZero();
 
-      yoPerfectCMP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      yoPerfectVRP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
@@ -212,7 +209,7 @@ public class JumpingBalanceManager
 
    public void initializeICPPlanForStanding()
    {
-      copTrajectoryState.setInitialCoP(yoPerfectCMP);
+      copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
@@ -227,7 +224,7 @@ public class JumpingBalanceManager
 
    public void initializeICPPlanForTransferToStanding()
    {
-      copTrajectoryState.setInitialCoP(yoPerfectCMP);
+      copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 

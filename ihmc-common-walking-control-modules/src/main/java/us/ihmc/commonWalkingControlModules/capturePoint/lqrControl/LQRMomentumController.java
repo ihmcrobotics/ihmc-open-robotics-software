@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -234,6 +235,16 @@ public class LQRMomentumController
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
+   }
+
+   public FramePoint3DReadOnly getFeedbackVRPPosition()
+   {
+      return feedbackVRPPosition;
+   }
+
+   public FramePoint3DReadOnly getReferenceVRPPosition()
+   {
+      return referenceVRPPosition;
    }
 
    /**
