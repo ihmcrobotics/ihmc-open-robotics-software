@@ -57,12 +57,13 @@ public class JumpingSimulationController implements RobotController
    private final PerfectSimulatedOutputWriter outputWriter;
 
    public JumpingSimulationController(DRCRobotModel robotModel,
+                                      FullHumanoidRobotModel fullRobotModel,
                                       HumanoidFloatingRootJointRobot humanoidRobotModel,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                       double gravityZ,
                                       InputStream parameterFile)
    {
-      fullRobotModel = robotModel.createFullRobotModel();
+      this.fullRobotModel = fullRobotModel;
       this.humanoidRobotModel = humanoidRobotModel;
       time = humanoidRobotModel.getYoTime();
 
@@ -77,17 +78,17 @@ public class JumpingSimulationController implements RobotController
       contactableBodiesFactory.setToeContactParameters(toeContactPoints, toeContactLines);
 
       // Make the sensor reader
-      sensorReader = new SDFPerfectSimulatedSensorReader(humanoidRobotModel, fullRobotModel, null);
-      if (fullRobotModel.getIMUDefinitions() != null)
+      sensorReader = new SDFPerfectSimulatedSensorReader(humanoidRobotModel, this.fullRobotModel, null);
+      if (this.fullRobotModel.getIMUDefinitions() != null)
       {
-         for (IMUDefinition imuDefinition : fullRobotModel.getIMUDefinitions())
+         for (IMUDefinition imuDefinition : this.fullRobotModel.getIMUDefinitions())
             sensorReader.addIMUSensor(imuDefinition);
       }
       List<WrenchCalculatorInterface> forceSensors = new ArrayList<>();
       humanoidRobotModel.getForceSensors(forceSensors);
-      if (fullRobotModel.getForceSensorDefinitions() != null)
+      if (this.fullRobotModel.getForceSensorDefinitions() != null)
       {
-         for (ForceSensorDefinition forceSensorDefinition : fullRobotModel.getForceSensorDefinitions())
+         for (ForceSensorDefinition forceSensorDefinition : this.fullRobotModel.getForceSensorDefinitions())
          {
             for (WrenchCalculatorInterface forceSensor : forceSensors)
             {
@@ -100,18 +101,18 @@ public class JumpingSimulationController implements RobotController
          }
       }
 
-      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(this.fullRobotModel.getForceSensorDefinitions()));
 
       // Create DRC Estimator:
       KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();
-      estimatorFactory.setEstimatorFullRobotModel(fullRobotModel);
+      estimatorFactory.setEstimatorFullRobotModel(this.fullRobotModel);
       estimatorFactory.setSensorInformation(robotModel.getSensorInformation());
       estimatorFactory.setSensorOutputMapReadOnly(sensorReader);
       estimatorFactory.setGravity(gravityZ);
       estimatorFactory.setStateEstimatorParameters(robotModel.getStateEstimatorParameters());
       estimatorFactory.setContactableBodiesFactory(contactableBodiesFactory);
       estimatorFactory.setEstimatorForceSensorDataHolder(forceSensorDataHolder);
-      estimatorFactory.setCenterOfPressureDataHolderFromController(new CenterOfPressureDataHolder(fullRobotModel));
+      estimatorFactory.setCenterOfPressureDataHolderFromController(new CenterOfPressureDataHolder(this.fullRobotModel));
       estimatorFactory.setRobotMotionStatusFromController(new RobotMotionStatusHolder());
 
       YoRegistry stateEstimatorRegistry = new YoRegistry("stateEstimatorRegistry");
@@ -120,17 +121,17 @@ public class JumpingSimulationController implements RobotController
       registry.addChild(estimator.getYoRegistry());
 
       // Create the jumping controller
-      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(this.fullRobotModel);
 
       contactableBodiesFactory = new ContactableBodiesFactory<>();
-      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setFullRobotModel(this.fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(footContactPoints);
       contactableBodiesFactory.setToeContactParameters(toeContactPoints, toeContactLines);
 
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
 
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalMass = TotalMassCalculator.computeSubTreeMass(this.fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
                                                                                forceSensorDataHolder,
@@ -139,9 +140,9 @@ public class JumpingSimulationController implements RobotController
                                                                                robotModel.getSensorInformation().getFeetForceSensorNames(),
                                                                                yoGraphicsListRegistry,
                                                                                registry);
-      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(this.fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      JumpingControllerToolbox controllerToolbox = new JumpingControllerToolbox(fullRobotModel,
+      JumpingControllerToolbox controllerToolbox = new JumpingControllerToolbox(this.fullRobotModel,
                                                                                 referenceFrames,
                                                                                 robotModel.getWalkingControllerParameters(),
                                                                                 footSwitches,
@@ -167,7 +168,7 @@ public class JumpingSimulationController implements RobotController
       registry.addChild(controller.getYoRegistry());
 
       // Set up the output writer
-      outputWriter = new PerfectSimulatedOutputWriter(humanoidRobotModel, fullRobotModel, controller.getOutputForLowLevelController());
+      outputWriter = new PerfectSimulatedOutputWriter(humanoidRobotModel, this.fullRobotModel, controller.getOutputForLowLevelController());
 
       ParameterLoaderHelper.loadParameters(this, parameterFile, registry);
    }
