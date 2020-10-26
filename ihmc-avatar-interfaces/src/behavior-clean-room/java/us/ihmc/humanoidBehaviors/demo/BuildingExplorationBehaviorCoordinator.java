@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.demo;
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -372,6 +373,18 @@ public class BuildingExplorationBehaviorCoordinator
          String behaviorName = LookAndStepBehavior.DEFINITION.getName();
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
+
+         Notification bodyPathPlanningStateReached = new Notification();
+         messager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+         {
+            if (state.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING.name()))
+            {
+               bodyPathPlanningStateReached.set();
+            }
+         });
+         LogTools.info("Waiting for BODY_PATH_PLANNING state...");
+         bodyPathPlanningStateReached.blockingPoll();
+         LogTools.info("BODY_PATH_PLANNING state reached");
 
          messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
          ThreadTools.sleep(100);
