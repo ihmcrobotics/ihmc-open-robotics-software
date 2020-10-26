@@ -18,7 +18,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
    private final String robotName;
    private final RigidBodyBasics rootBody;
    private MultiBodySystemStateWriter robotInitialStateWriter;
-   private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
+   private final List<MultiBodySystemStateWriter> physicsInputStateWriters = new ArrayList<>();
+   private final List<MultiBodySystemStateReader> physicsOutputStateReaders = new ArrayList<>();
 
    private final YoRegistry robotRegistry;
    private final YoRegistry environmentContactCalculatorRegistry = new YoRegistry("Environment" + ContactCalculatorNameSuffix);
@@ -97,12 +98,20 @@ public class PhysicsEngineRobotData implements CollidableHolder
       setControllerOutputWriter(robotInitialStateWriter);
    }
 
-   public void addPhysicsOutputReader(MultiBodySystemStateReader physicsOutputReader)
+   public void addPhysicsInputStateWriter(MultiBodySystemStateWriter physicsInputStateWriter)
    {
-      if (physicsOutputReader == null)
+      if (physicsInputStateWriter == null)
          return;
-      physicsOutputReader.setMultiBodySystem(multiBodySystem);
-      physicsOutputReaders.add(physicsOutputReader);
+      physicsInputStateWriter.setMultiBodySystem(multiBodySystem);
+      physicsInputStateWriters.add(physicsInputStateWriter);
+   }
+
+   public void addPhysicsOutputStateReader(MultiBodySystemStateReader physicsOutputStateReader)
+   {
+      if (physicsOutputStateReader == null)
+         return;
+      physicsOutputStateReader.setMultiBodySystem(multiBodySystem);
+      physicsOutputStateReaders.add(physicsOutputStateReader);
    }
 
    public void initialize()
@@ -111,9 +120,21 @@ public class PhysicsEngineRobotData implements CollidableHolder
       updateFrames();
    }
 
-   public void notifyPhysicsOutputReaders()
+   public boolean notifyPhysicsInputStateWriters()
    {
-      physicsOutputReaders.forEach(MultiBodySystemStateReader::read);
+      boolean stateChanged = false;
+
+      for (MultiBodySystemStateWriter stateWriter : physicsInputStateWriters)
+      {
+         stateChanged |= stateWriter.write();
+      }
+
+      return stateChanged;
+   }
+
+   public void notifyPhysicsOutputStateReaders()
+   {
+      physicsOutputStateReaders.forEach(MultiBodySystemStateReader::read);
    }
 
    public void updateCollidableBoundingBoxes()

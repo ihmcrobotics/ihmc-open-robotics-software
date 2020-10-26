@@ -108,9 +108,21 @@ public class BuildingExplorationUIDashboardController
    }
 
    @FXML
+   public void placeGoal()
+   {
+      messager.submitMessage(BuildingExplorationBehaviorAPI.PlaceGoal, true);
+   }
+
+   @FXML
    public void ignoreDebris()
    {
       messager.submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
+   }
+
+   @FXML
+   public void confirmDoor()
+   {
+      messager.submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
    }
 
    @FXML

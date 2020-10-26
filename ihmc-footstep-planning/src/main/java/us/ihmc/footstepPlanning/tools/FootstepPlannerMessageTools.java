@@ -56,6 +56,7 @@ public class FootstepPlannerMessageTools
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setIdealSideStepWidth(parameters.getIdealSideStepWidth());
       packet.setIdealBackStepLength(parameters.getIdealBackStepLength());
+      packet.setIdealStepLengthAtMaxStepZ(parameters.getIdealStepLengthAtMaxStepZ());
       packet.setWiggleInsideDeltaTarget(parameters.getWiggleInsideDeltaTarget());
       packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
@@ -69,12 +70,12 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
-      packet.setMaximumLeftStepZ(parameters.getMaximumLeftStepZ());
-      packet.setMaximumRightStepZ(parameters.getMaximumRightStepZ());
+      packet.setMaximumStepZ(parameters.getMaxStepZ());
+      packet.setMaximumSwingZ(parameters.getMaxSwingZ());
+      packet.setMaximumSwingReach(parameters.getMaxSwingReach());
       packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
       packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
       packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
-      packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
@@ -103,9 +104,6 @@ public class FootstepPlannerMessageTools
       packet.setShinHeelClearance(parameters.getShinHeelClearance());
       packet.setShinLength(parameters.getShinLength());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
-
-      RobotSide stepOnlyWithRequestedSide = parameters.getStepOnlyWithRequestedSide();
-      packet.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide == null ? -1 : stepOnlyWithRequestedSide.toByte());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

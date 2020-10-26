@@ -2,6 +2,5 @@ start_position -2.0 0.11 0.0
 goal_position 2.0 0.0 0.0
 start_yaw 0.0
 goal_yaw 0.0
-a_star_iteration_limit 800
-step_planner_status test
+a_star_iteration_limit 1200 800
 plan_then_snap_status test

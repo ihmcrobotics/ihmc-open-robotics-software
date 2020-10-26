@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
@@ -28,7 +29,7 @@ public class ThrottledRobotStateCallback
    {
       updatePeriod = UnitConversions.hertzToSeconds(rateHz);
       syncableRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.queueExecution(waitThenAct));
+      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.submitTask(waitThenAct));
    }
 
    private void waitThenAct()

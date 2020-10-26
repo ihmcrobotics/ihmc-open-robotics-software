@@ -96,10 +96,11 @@ public class NewtonsCradleExperimentalSimulation
          private List<OneDoFJointBasics> joints;
 
          @Override
-         public void write()
+         public boolean write()
          {
             joints.get(0).setQ(0.3);
             joints.get(1).setQ(0.3);
+            return true;
          }
 
          @Override

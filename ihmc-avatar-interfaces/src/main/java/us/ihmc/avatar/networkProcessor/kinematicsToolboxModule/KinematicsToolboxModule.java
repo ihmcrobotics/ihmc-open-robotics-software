@@ -63,20 +63,37 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
-            kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData());
+         {
+            s.takeNextData(robotConfigurationData, null);
+            kinematicsToolBoxController.updateRobotConfigurationData(robotConfigurationData);
+         }
       });
+
+      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
-            kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData());
+         {
+            s.takeNextData(capturabilityBasedStatus, null);
+            kinematicsToolBoxController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
+         }
       });
+
+      MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
-            kinematicsToolBoxController.updateMultiContactBalanceStatus(s.takeNextData());
+         {
+            s.takeNextData(multiContactBalanceStatus, null);
+            kinematicsToolBoxController.updateMultiContactBalanceStatus(multiContactBalanceStatus);
+         }
       });
    }
 

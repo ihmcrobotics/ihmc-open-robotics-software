@@ -6,6 +6,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -15,15 +16,14 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.CustomNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.CustomFootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
@@ -110,9 +110,9 @@ public class LookAndStepFootstepPlanningTask
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         localizationResultInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         planarRegionsInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.queueExecution(this::evaluateAndRun));
+         localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         planarRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -279,10 +279,10 @@ public class LookAndStepFootstepPlanningTask
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.addCustomTerminationCondition(
-            (plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
-      MinimumStepNodeChecker stepInPlaceChecker = new MinimumStepNodeChecker();
+            (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
+      MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
-      footstepPlanningModule.getChecker().attachCustomNodeChecker(stepInPlaceChecker);
+      footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
 
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
@@ -331,7 +331,7 @@ public class LookAndStepFootstepPlanningTask
       }
    }
 
-   private class MinimumStepNodeChecker implements CustomNodeChecker
+   private class MinimumFootstepChecker implements CustomFootstepChecker
    {
       private final Pose3D leftFootStancePose = new Pose3D();
       private final Pose3D rightFootStancePose = new Pose3D();
@@ -361,20 +361,20 @@ public class LookAndStepFootstepPlanningTask
       }
 
       @Override
-      public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
+      public boolean isStepValid(DiscreteFootstep candidateFootstep, DiscreteFootstep stanceNode)
       {
          double distanceX, distanceY, angularDistance;
-         if (candidateNode.getRobotSide() == RobotSide.LEFT)
+         if (candidateFootstep.getRobotSide() == RobotSide.LEFT)
          {
-            distanceX = leftFootStancePose.getX() - candidateNode.getX();
-            distanceY = leftFootStancePose.getY() - candidateNode.getY();
-            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(leftFootStancePose.getYaw(), candidateNode.getYaw());
+            distanceX = leftFootStancePose.getX() - candidateFootstep.getX();
+            distanceY = leftFootStancePose.getY() - candidateFootstep.getY();
+            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(leftFootStancePose.getYaw(), candidateFootstep.getYaw());
          }
          else
          {
-            distanceX = rightFootStancePose.getX() - candidateNode.getX();
-            distanceY = rightFootStancePose.getY() - candidateNode.getY();
-            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(rightFootStancePose.getYaw(), candidateNode.getYaw());
+            distanceX = rightFootStancePose.getX() - candidateFootstep.getX();
+            distanceY = rightFootStancePose.getY() - candidateFootstep.getY();
+            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(rightFootStancePose.getYaw(), candidateFootstep.getYaw());
          }
 
          return EuclidCoreTools.norm(distanceX, distanceY) > minimumTranslation || angularDistance > minimumRotation;

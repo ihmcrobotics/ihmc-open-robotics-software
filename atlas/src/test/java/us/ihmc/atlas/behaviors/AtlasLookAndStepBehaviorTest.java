@@ -34,13 +34,12 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -52,7 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
@@ -97,18 +95,18 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(0).goalPose = new Pose3D(1.5, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(0).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.7;
       };
       waypoints.add(new TestWaypoint());
       waypoints.get(1).name = "ALL THE WAY";
       waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(1).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 2.2 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.8;
       };
 
       boolean useDynamicsSimulation = false;
@@ -133,9 +131,9 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(0).goalPose = new Pose3D(4.1, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(0).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.8;
       };
 
 

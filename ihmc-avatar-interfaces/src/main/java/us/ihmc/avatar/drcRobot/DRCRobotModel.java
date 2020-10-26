@@ -29,7 +29,11 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.wholeBodyController.*;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
+import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -107,6 +111,17 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
                                                                            HumanoidRobotContextData contextData)
    {
       return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
+   }
+
+   /**
+    * Returns a factory for creating low-level joint controller that can be used to simulate for
+    * instance a joint position controller.
+    * 
+    * @return the low-level controller factory to use in simulation.
+    */
+   public default SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
+   {
+      return new DefaultSimulationLowLevelControllerFactory(getJointMap(), getSimulateDT());
    }
 
    /**

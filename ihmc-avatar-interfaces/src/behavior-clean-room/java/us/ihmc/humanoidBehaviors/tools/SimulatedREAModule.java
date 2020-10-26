@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
