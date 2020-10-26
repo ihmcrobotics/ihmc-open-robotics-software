@@ -2,17 +2,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JumpingStandingState extends JumpingState
 {
@@ -22,9 +20,15 @@ public class JumpingStandingState extends JumpingState
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
+   private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
+   private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
 
-   public JumpingStandingState(JumpingControllerToolbox controllerToolbox, JumpingControlManagerFactory managerFactory,
-                               JumpingBalanceManager balanceManager, WalkingFailureDetectionControlModule failureDetectionControlModule,
+   private final YoBoolean squat = new YoBoolean("ShouldBeSquatting", registry);
+
+   public JumpingStandingState(JumpingControllerToolbox controllerToolbox,
+                               JumpingControlManagerFactory managerFactory,
+                               JumpingBalanceManager balanceManager,
+                               WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
    {
       super(JumpingStateEnum.STANDING, parentRegistry);
@@ -32,6 +36,18 @@ public class JumpingStandingState extends JumpingState
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.balanceManager = balanceManager;
+
+      standingHeight.set(1.05);
+      squattingHeight.set(0.6);
+
+      squat.addListener(v ->
+                        {
+                           if (squat.getBooleanValue())
+                              balanceManager.setDesiredCoMHeight(squattingHeight.getDoubleValue());
+                           else
+                              balanceManager.setDesiredCoMHeight(standingHeight.getDoubleValue());
+                        });
+      squat.notifyListeners();
 
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       if (chest != null)
@@ -56,7 +72,7 @@ public class JumpingStandingState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.computeICPPlan();
+      balanceManager.computeCoMPlanForStanding();
    }
 
    @Override
@@ -65,7 +81,7 @@ public class JumpingStandingState extends JumpingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.initializeICPPlanForStanding();
+      balanceManager.initializeCoMPlanForStanding();
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.initializeStanding();
