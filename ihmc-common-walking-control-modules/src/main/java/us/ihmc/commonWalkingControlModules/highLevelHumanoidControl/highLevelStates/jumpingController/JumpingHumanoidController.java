@@ -168,7 +168,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       StateMachineFactory<JumpingStateEnum, JumpingState> factory = new StateMachineFactory<>(JumpingStateEnum.class);
       factory.setNamePrefix("jumping").setRegistry(registry).buildYoClock(yoTime);
 
-      JumpingStandingState standingState = new JumpingStandingState(controllerToolbox, 
+      JumpingStandingState standingState = new JumpingStandingState(controllerToolbox,
                                                                     managerFactory,
                                                                     failureDetectionControlModule,
                                                                     registry);
