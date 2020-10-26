@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -34,6 +35,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -71,7 +73,10 @@ public class JumpingControllerState extends HighLevelControllerState
       jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
       uncontrolledJointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getUncontrolledOneDoFJoints());
       for (OneDoFJointBasics joint : controllerToolbox.getUncontrolledOneDoFJoints())
+      {
+         uncontrolledJointDesiredOutputList.setJointControlMode(joint, JointDesiredControlMode.EFFORT);
          uncontrolledJointDesiredOutputList.setDesiredJointTorque(joint, 0.0);
+      }
 
       // create walking controller
       jumpingController = new JumpingHumanoidController(managerFactory, walkingControllerParameters, copTrajectoryParameters, controllerToolbox);
@@ -152,8 +157,8 @@ public class JumpingControllerState extends HighLevelControllerState
       momentumRateControlModule.computeAchievedCMP();
 
       jointDesiredOutputList.clear();
-      jointDesiredOutputList.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
-      jointDesiredOutputList.overwriteWith(uncontrolledJointDesiredOutputList);
+      jointDesiredOutputList.overwriteWith(controllerCore.getOutputForLowLevelController());
+      jointDesiredOutputList.completeWith(uncontrolledJointDesiredOutputList);
    }
 
    @Override

@@ -29,6 +29,8 @@ import java.util.List;
  */
 public class LQRMomentumController
 {
+   private final static double sufficientlyLarge = 1e3;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
@@ -123,7 +125,7 @@ public class LQRMomentumController
       relativeVRPTrajectories.clear();
 
       Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(lastTrajectory.getFinalTime());
+      lastTrajectory.compute(Math.min(sufficientlyLarge, lastTrajectory.getFinalTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 

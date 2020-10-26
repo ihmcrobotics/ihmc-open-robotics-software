@@ -9,6 +9,7 @@ public class JumpingSimulationFactory
 {
    private final DRCRobotModel robotModel;
    private static final double gravityZ = 9.81;
+   private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public JumpingSimulationFactory(DRCRobotModel robotModel)
    {
@@ -19,7 +20,8 @@ public class JumpingSimulationFactory
    {
       HumanoidFloatingRootJointRobot humanoidRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      JumpingSimulationController simulationController = new JumpingSimulationController(robotModel, humanoidRobot, graphicsListRegistry, gravityZ);
+      JumpingSimulationController simulationController = new JumpingSimulationController(robotModel, humanoidRobot, graphicsListRegistry, gravityZ,
+                                                                                         getClass().getResourceAsStream(parameterResourceName));
       humanoidRobot.setController(simulationController);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(humanoidRobot);

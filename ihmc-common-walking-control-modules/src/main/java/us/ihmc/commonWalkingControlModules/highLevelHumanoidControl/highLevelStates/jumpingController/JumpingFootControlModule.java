@@ -5,7 +5,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,10 +23,13 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.GEQ_INEQUALITY;
 
 public class JumpingFootControlModule
 {
@@ -63,6 +68,9 @@ public class JumpingFootControlModule
    private final JumpingFootControlHelper footControlHelper;
 
    private final YoBoolean resetFootPolygon;
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final ContactWrenchCommand minWrenchCommand;
+   private final YoDouble minZForce;
 
    public JumpingFootControlModule(RobotSide robotSide,
                                    WalkingControllerParameters walkingControllerParameters,
@@ -114,6 +122,20 @@ public class JumpingFootControlModule
                                                                      "CoefficientOfFriction",
                                                                      registry,
                                                                      defaultCoefficientOfFriction);
+
+      minWrenchCommand = new ContactWrenchCommand(GEQ_INEQUALITY);
+      setupWrenchCommand(minWrenchCommand);
+      minZForce = new YoDouble(robotSide.getLowerCaseName() + "MinZForce", registry);
+      minWrenchCommand.getWrench().setLinearPartZ(minZForce.getValue());
+   }
+
+   private void setupWrenchCommand(ContactWrenchCommand command)
+   {
+      command.setRigidBody(contactableFoot.getRigidBody());
+      command.getSelectionMatrix().clearSelection();
+      command.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
+      command.getSelectionMatrix().selectLinearZ(true);
+      command.getWrench().setToZero(contactableFoot.getRigidBody().getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
    }
 
    private void setupContactStatesMap()
@@ -220,7 +242,12 @@ public class JumpingFootControlModule
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return stateMachine.getCurrentState().getInverseDynamicsCommand();
+      inverseDynamicsCommandList.clear();
+
+      inverseDynamicsCommandList.addCommand(minWrenchCommand);
+      inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
+
+      return inverseDynamicsCommandList;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
