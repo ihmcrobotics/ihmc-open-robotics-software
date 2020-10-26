@@ -35,6 +35,7 @@ public class AtlasJumpingSimulation
 
       YoRegistry registry = scs.getRootRegistry();
       YoBoolean triggerJump = new YoBoolean("triggerJump", registry);
+      addButton("ShouldBeSquatting", 1.0, scs);
       addButton("triggerJump", 1.0, scs);
 
       triggerJump.addListener(v ->
