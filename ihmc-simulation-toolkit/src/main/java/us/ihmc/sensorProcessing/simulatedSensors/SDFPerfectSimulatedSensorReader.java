@@ -9,6 +9,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -25,8 +27,10 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -39,7 +43,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
-   private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
+   private final PairList<OneDegreeOfFreedomJoint, OneDoFJointBasics> oneDoFJointPairs = new PairList<>();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
@@ -47,6 +51,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
+   private final PairList<IMUSensor, IMUMount> imuSensorPairs = new PairList<>();
    private final List<IMUSensor> imuSensors = new ArrayList<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
@@ -96,6 +101,12 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    public void addIMUSensor(IMUDefinition imuDefinition)
    {
+      addIMUSensor(imuDefinition, null);
+   }
+
+   public void addIMUSensor(IMUDefinition imuDefinition, IMUMount imuMount)
+   {
+      imuSensorPairs.add(new ImmutablePair<>(new IMUSensor(imuDefinition, null), imuMount));
       imuSensors.add(new IMUSensor(imuDefinition, null));
    }
 
@@ -124,6 +135,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private final RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
+   private final Vector3D linearAcceleration = new Vector3D();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
 
    @Override
    public void read()
@@ -150,15 +164,35 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          }
       }
 
-      for (IMUSensor imuSensor : imuSensors)
+      for (ImmutablePair<IMUSensor, IMUMount> imuSensorPair : imuSensorPairs)
       {
+         IMUSensor imuSensor = imuSensorPair.getLeft();
+         IMUMount imuMount = imuSensorPair.getRight();
+
          ReferenceFrame measurementFrame = imuSensor.getMeasurementFrame();
-         Twist twist = new Twist(imuSensor.getMeasurementLink().getBodyFixedFrame().getTwistOfFrame());
-         twist.changeFrame(measurementFrame);
-         imuSensor.setOrientationMeasurement(measurementFrame.getTransformToRoot().getRotation());
-         imuSensor.setAngularVelocityMeasurement(twist.getAngularPart());
-         // TODO Add acceleration update.
+
+         if (imuMount != null)
+         {
+            imuMount.getLinearAccelerationInBody(linearAcceleration);
+            imuMount.getAngularVelocityInBody(angularVelocity);
+            imuMount.getOrientation(orientation);
+
+            imuSensor.setLinearAccelerationMeasurement(linearAcceleration);
+            imuSensor.setAngularVelocityMeasurement(angularVelocity);
+            imuSensor.setOrientationMeasurement(orientation);
+         }
+         else
+         {
+            Twist twist = new Twist(imuSensor.getMeasurementLink().getBodyFixedFrame().getTwistOfFrame());
+            twist.changeFrame(measurementFrame);
+            imuSensor.setAngularVelocityMeasurement(twist.getAngularPart());
+            imuSensor.setOrientationMeasurement(measurementFrame.getTransformToRoot().getRotation());
+
+            // TODO add acceleration
+         }
+
       }
+
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
