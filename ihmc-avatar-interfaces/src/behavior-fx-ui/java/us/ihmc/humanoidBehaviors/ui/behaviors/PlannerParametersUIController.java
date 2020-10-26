@@ -18,8 +18,7 @@ public class PlannerParametersUIController
    @FXML private Spinner<Double> maxStepLength;
    @FXML private Spinner<Double> maxStepWidth;
    @FXML private Spinner<Double> maxStepYaw;
-   @FXML private Spinner<Double> maxLeftStepZ;
-   @FXML private Spinner<Double> maxRightStepZ;
+   @FXML private Spinner<Double> maxStepZ;
    @FXML private Spinner<Double> maxXYWiggle;
    @FXML private Spinner<Double> maxYawWiggle;
    @FXML private Spinner<Double> minFootholdPercent;
@@ -54,8 +53,7 @@ public class PlannerParametersUIController
       maxStepLength       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReach()                , 0.05   ));
       maxStepWidth        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepWidth()                , 0.05   ));
       maxStepYaw          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepYaw()                  , 0.05   ));
-      maxLeftStepZ        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumLeftStepZ()                , 0.05   ));
-      maxRightStepZ       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumRightStepZ()               , 0.05   ));
+      maxStepZ            .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaxStepZ()                        , 0.05   ));
       maxXYWiggle         .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumXYWiggleDistance()         , 0.05   ));
       maxYawWiggle        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumYawWiggle()                , 0.05   ));
       minFootholdPercent  .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumFootholdPercent()          , 0.05   ));
@@ -82,8 +80,7 @@ public class PlannerParametersUIController
       maxStepLength.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       maxStepWidth.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       maxStepYaw.getValueFactory().valueProperty().addListener(observable -> publishParameters());
-      maxLeftStepZ.getValueFactory().valueProperty().addListener(observable -> publishParameters());
-      maxRightStepZ.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepZ.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       maxXYWiggle.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       maxYawWiggle.getValueFactory().valueProperty().addListener(observable -> publishParameters());
       minFootholdPercent.getValueFactory().valueProperty().addListener(observable -> publishParameters());
@@ -113,8 +110,7 @@ public class PlannerParametersUIController
       tunedFootstepPlannerParameters.setMaxStepLength                    ( maxStepLength        .getValue());
       tunedFootstepPlannerParameters.setMaxStepWidth                     ( maxStepWidth         .getValue());
       tunedFootstepPlannerParameters.setMaxStepYaw                       ( maxStepYaw           .getValue());
-      tunedFootstepPlannerParameters.setMaxLeftStepZ                     ( maxLeftStepZ         .getValue());
-      tunedFootstepPlannerParameters.setMaxRightStepZ                    ( maxRightStepZ        .getValue());
+      tunedFootstepPlannerParameters.setMaxStepZ                         ( maxStepZ             .getValue());
       tunedFootstepPlannerParameters.setMaxXYWiggle                      ( maxXYWiggle          .getValue());
       tunedFootstepPlannerParameters.setMaxYawWiggle                     ( maxYawWiggle         .getValue());
       tunedFootstepPlannerParameters.setMinFootholdPercent               ( minFootholdPercent   .getValue());

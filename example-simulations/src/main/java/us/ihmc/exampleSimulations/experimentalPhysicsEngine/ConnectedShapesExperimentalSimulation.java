@@ -72,13 +72,14 @@ public class ConnectedShapesExperimentalSimulation
       MapBasedJointStateWriter initialStateWriter = new MapBasedJointStateWriter()
       {
          @Override
-         public void write()
+         public boolean write()
          {
             FloatingJointBasics rootJoint = getJoint("root");
             rootJoint.getJointPose().set(0.0, 0.0, boxSize1.getZ(), 0.0, 0.0, 0.0);
             RevoluteJointBasics pinJoint = getJoint("pin");
             pinJoint.setQ(0.0);
             pinJoint.setTau(2.0);
+            return true;
          }
       };
 

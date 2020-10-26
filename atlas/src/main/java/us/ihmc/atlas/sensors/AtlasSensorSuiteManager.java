@@ -56,7 +56,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private boolean enableVideoPublisher = true;
    private boolean enableLidarScanPublisher = true;
    private boolean enableStereoVisionPointCloudPublisher = false;
-   private boolean enableDepthPointCloudPublisher = true;
+   private boolean enableDepthPointCloudPublisher = false;
    private boolean enableFisheyeCameraPublishers = false;
 
    public AtlasSensorSuiteManager(String robotName,

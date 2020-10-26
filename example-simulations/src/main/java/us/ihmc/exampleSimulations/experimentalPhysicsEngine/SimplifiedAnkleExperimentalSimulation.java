@@ -90,7 +90,7 @@ public class SimplifiedAnkleExperimentalSimulation
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
       experimentalSimulation.addRobot(robotDescription, collisionModel, initialStateWriter, controller);
       experimentalSimulation.addEnvironmentCollidable(groundCollidable);
-      experimentalSimulation.getPhysicsEngine().addRobotPhysicsOutputReader(robotName, createPhysicsOutputReader());
+      experimentalSimulation.getPhysicsEngine().addRobotPhysicsOutputStateReader(robotName, createPhysicsOutputReader());
       experimentalSimulation.addSimulationEnergyStatistics();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(experimentalSimulation,
@@ -118,7 +118,7 @@ public class SimplifiedAnkleExperimentalSimulation
          FrameVector3D forceWorld = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 9.81 * comBallMass);
 
          @Override
-         public void write()
+         public boolean write()
          {
             OneDoFJointBasics anklePitch = getJoint(anklePitchName);
             OneDoFJointBasics ankleRoll = getJoint(ankleRollName);
@@ -145,6 +145,7 @@ public class SimplifiedAnkleExperimentalSimulation
             double tau_fb_ankleRoll = ankleGains.getKp() * (desiredPositionAnkleRoll.getValue() - q_ankleRoll) - ankleGains.getKd() * qd_ankleRoll;
 
             ankleRoll.setTau(tau_fb_ankleRoll + tau_ff_ankleRoll);
+            return true;
          }
       };
       return controller;
@@ -231,13 +232,14 @@ public class SimplifiedAnkleExperimentalSimulation
       return new MapBasedJointStateWriter()
       {
          @Override
-         public void write()
+         public boolean write()
          {
             FloatingJointBasics rootJoint = getJoint(rootJointName);
 
             rootJoint.getJointPose().getPosition().setZ(comBallRadius + legLength + footSize.getZ() + 0.01);
             rootJoint.getJointTwist().getLinearPart().set(1.0, 0.5, 0.0);
             rootJoint.getJointWrench().getAngularPart().setZ(1.0);
+            return true;
          }
       };
    }

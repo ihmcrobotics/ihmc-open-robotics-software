@@ -297,7 +297,7 @@ public abstract class FootstepPlannerDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
-      int maxIterations = plannerInput.getIterationLimitFlag(getTestNamePrefix().toLowerCase());
+      int maxIterations = 300; // plannerInput.getIterationLimitFlag(getTestNamePrefix().toLowerCase());
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);

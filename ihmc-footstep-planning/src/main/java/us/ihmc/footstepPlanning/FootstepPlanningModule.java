@@ -10,9 +10,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
@@ -276,7 +277,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       requestCallback = requestCallback.andThen(callback);
    }
 
-   public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
+   public void addIterationCallback(Consumer<AStarIterationData<FootstepGraphNode>> callback)
    {
       aStarFootstepPlanner.addIterationCallback(callback);
    }
@@ -354,12 +355,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getFootPolygons();
    }
 
-   public FootstepNodeSnapAndWiggler getSnapper()
+   public FootstepSnapAndWiggler getSnapper()
    {
       return aStarFootstepPlanner.getSnapper();
    }
 
-   public FootstepNodeChecker getChecker()
+   public FootstepChecker getChecker()
    {
       return aStarFootstepPlanner.getChecker();
    }
@@ -374,12 +375,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return bodyPathPlanHolder.getBodyPathPlan();
    }
 
-   public FootstepNode getEndNode()
+   public FootstepGraphNode getEndNode()
    {
       return aStarFootstepPlanner.getEndNode();
    }
 
-   public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
+   public HashMap<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return aStarFootstepPlanner.getEdgeDataMap();
    }

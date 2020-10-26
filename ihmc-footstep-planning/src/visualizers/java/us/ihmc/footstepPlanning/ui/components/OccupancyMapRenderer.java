@@ -14,7 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerCell;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -83,8 +83,8 @@ public class OccupancyMapRenderer extends AnimationTimer
          if (renderedCells.contains(cell))
             continue;
 
-         double x = cell.getXIndex() * LatticeNode.gridSizeXY;
-         double y = cell.getYIndex() * LatticeNode.gridSizeXY;
+         double x = cell.getXIndex() * LatticePoint.gridSizeXY;
+         double y = cell.getYIndex() * LatticePoint.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.getTranslation().set(x, y, z);

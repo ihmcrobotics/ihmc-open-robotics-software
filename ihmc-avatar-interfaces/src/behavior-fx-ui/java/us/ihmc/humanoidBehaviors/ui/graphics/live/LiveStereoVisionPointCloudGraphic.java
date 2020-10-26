@@ -46,7 +46,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
-      threadQueue.queueExecution(() ->
+      threadQueue.submitTask(() ->
       {
          Point3D32[] points = PointCloudCompression.decompressPointCloudToArray32(message);
          int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
@@ -56,7 +56,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private void queueRenderLidarScan(LidarScanMessage message)
    {
-      threadQueue.queueExecution(() ->
+      threadQueue.submitTask(() ->
       {
          int numberOfPoints = message.getScan().size() / 3;
          Point3D32[] points = new Point3D32[numberOfPoints];

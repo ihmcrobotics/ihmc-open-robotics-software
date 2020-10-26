@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.ihmc-ci") version "5.3"
+   id("us.ihmc.ihmc-ci") version "6.8"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
@@ -29,7 +29,7 @@ mainDependencies {
    api("org.boofcv:boofcv-geo:0.36")
 
    api("us.ihmc:euclid-frame:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.4")
+   api("us.ihmc:ihmc-yovariables:0.9.6")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -38,7 +38,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:simulation-construction-set-test:0.20.5")
+   api("us.ihmc:simulation-construction-set-test:0.20.6")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }

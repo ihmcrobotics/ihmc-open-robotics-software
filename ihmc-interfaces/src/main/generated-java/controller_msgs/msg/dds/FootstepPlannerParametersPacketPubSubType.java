@@ -96,6 +96,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -179,8 +181,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -279,6 +279,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -403,9 +406,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -427,6 +427,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getIdealSideStepWidth());
 
       cdr.write_type_6(data.getIdealBackStepLength());
+
+      cdr.write_type_6(data.getIdealStepLengthAtMaxStepZ());
 
       cdr.write_type_6(data.getWiggleInsideDeltaTarget());
 
@@ -454,11 +456,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMaximumStepZWhenForwardAndDown());
 
-      cdr.write_type_6(data.getTranslationScaleFromGrandparentNode());
+      cdr.write_type_6(data.getMaximumStepZ());
 
-      cdr.write_type_6(data.getMaximumLeftStepZ());
+      cdr.write_type_6(data.getMaximumSwingZ());
 
-      cdr.write_type_6(data.getMaximumRightStepZ());
+      cdr.write_type_6(data.getMaximumSwingReach());
 
       cdr.write_type_6(data.getMinimumStepZWhenFullyPitched());
 
@@ -554,8 +556,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getShinHeightOffet());
 
-      cdr.write_type_9(data.getStepOnlyWithRequestedSide());
-
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -573,6 +573,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setIdealSideStepWidth(cdr.read_type_6());
       	
       data.setIdealBackStepLength(cdr.read_type_6());
+      	
+      data.setIdealStepLengthAtMaxStepZ(cdr.read_type_6());
       	
       data.setWiggleInsideDeltaTarget(cdr.read_type_6());
       	
@@ -600,11 +602,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMaximumStepZWhenForwardAndDown(cdr.read_type_6());
       	
-      data.setTranslationScaleFromGrandparentNode(cdr.read_type_6());
+      data.setMaximumStepZ(cdr.read_type_6());
       	
-      data.setMaximumLeftStepZ(cdr.read_type_6());
+      data.setMaximumSwingZ(cdr.read_type_6());
       	
-      data.setMaximumRightStepZ(cdr.read_type_6());
+      data.setMaximumSwingReach(cdr.read_type_6());
       	
       data.setMinimumStepZWhenFullyPitched(cdr.read_type_6());
       	
@@ -700,8 +702,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setShinHeightOffet(cdr.read_type_6());
       	
-      data.setStepOnlyWithRequestedSide(cdr.read_type_9());
-      	
 
    }
 
@@ -715,6 +715,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("ideal_footstep_length", data.getIdealFootstepLength());
       ser.write_type_6("ideal_side_step_width", data.getIdealSideStepWidth());
       ser.write_type_6("ideal_back_step_length", data.getIdealBackStepLength());
+      ser.write_type_6("ideal_step_length_at_max_step_z", data.getIdealStepLengthAtMaxStepZ());
       ser.write_type_6("wiggle_inside_delta_target", data.getWiggleInsideDeltaTarget());
       ser.write_type_6("wiggle_inside_delta_minimum", data.getWiggleInsideDeltaMinimum());
       ser.write_type_6("maximum_step_reach", data.getMaximumStepReach());
@@ -728,9 +729,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_step_x_when_forward_and_down", data.getMaximumStepXWhenForwardAndDown());
       ser.write_type_6("maximum_step_y_when_forward_and_down", data.getMaximumStepYWhenForwardAndDown());
       ser.write_type_6("maximum_step_z_when_forward_and_down", data.getMaximumStepZWhenForwardAndDown());
-      ser.write_type_6("translation_scale_from_grandparent_node", data.getTranslationScaleFromGrandparentNode());
-      ser.write_type_6("maximum_left_step_z", data.getMaximumLeftStepZ());
-      ser.write_type_6("maximum_right_step_z", data.getMaximumRightStepZ());
+      ser.write_type_6("maximum_step_z", data.getMaximumStepZ());
+      ser.write_type_6("maximum_swing_z", data.getMaximumSwingZ());
+      ser.write_type_6("maximum_swing_reach", data.getMaximumSwingReach());
       ser.write_type_6("minimum_step_z_when_fully_pitched", data.getMinimumStepZWhenFullyPitched());
       ser.write_type_6("maximum_step_x_when_fully_pitched", data.getMaximumStepXWhenFullyPitched());
       ser.write_type_6("step_yaw_reduction_factor_at_max_reach", data.getStepYawReductionFactorAtMaxReach());
@@ -778,7 +779,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("shin_heel_clearance", data.getShinHeelClearance());
       ser.write_type_6("shin_length", data.getShinLength());
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
-      ser.write_type_9("step_only_with_requested_side", data.getStepOnlyWithRequestedSide());
    }
 
    @Override
@@ -791,6 +791,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setIdealFootstepLength(ser.read_type_6("ideal_footstep_length"));
       data.setIdealSideStepWidth(ser.read_type_6("ideal_side_step_width"));
       data.setIdealBackStepLength(ser.read_type_6("ideal_back_step_length"));
+      data.setIdealStepLengthAtMaxStepZ(ser.read_type_6("ideal_step_length_at_max_step_z"));
       data.setWiggleInsideDeltaTarget(ser.read_type_6("wiggle_inside_delta_target"));
       data.setWiggleInsideDeltaMinimum(ser.read_type_6("wiggle_inside_delta_minimum"));
       data.setMaximumStepReach(ser.read_type_6("maximum_step_reach"));
@@ -804,9 +805,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumStepXWhenForwardAndDown(ser.read_type_6("maximum_step_x_when_forward_and_down"));
       data.setMaximumStepYWhenForwardAndDown(ser.read_type_6("maximum_step_y_when_forward_and_down"));
       data.setMaximumStepZWhenForwardAndDown(ser.read_type_6("maximum_step_z_when_forward_and_down"));
-      data.setTranslationScaleFromGrandparentNode(ser.read_type_6("translation_scale_from_grandparent_node"));
-      data.setMaximumLeftStepZ(ser.read_type_6("maximum_left_step_z"));
-      data.setMaximumRightStepZ(ser.read_type_6("maximum_right_step_z"));
+      data.setMaximumStepZ(ser.read_type_6("maximum_step_z"));
+      data.setMaximumSwingZ(ser.read_type_6("maximum_swing_z"));
+      data.setMaximumSwingReach(ser.read_type_6("maximum_swing_reach"));
       data.setMinimumStepZWhenFullyPitched(ser.read_type_6("minimum_step_z_when_fully_pitched"));
       data.setMaximumStepXWhenFullyPitched(ser.read_type_6("maximum_step_x_when_fully_pitched"));
       data.setStepYawReductionFactorAtMaxReach(ser.read_type_6("step_yaw_reduction_factor_at_max_reach"));
@@ -854,7 +855,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinHeelClearance(ser.read_type_6("shin_heel_clearance"));
       data.setShinLength(ser.read_type_6("shin_length"));
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
-      data.setStepOnlyWithRequestedSide(ser.read_type_9("step_only_with_requested_side"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)
