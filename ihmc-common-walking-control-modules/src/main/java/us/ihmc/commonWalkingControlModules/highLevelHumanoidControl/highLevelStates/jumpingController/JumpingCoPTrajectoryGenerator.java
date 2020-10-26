@@ -1,18 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.saveableModule.SaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class StandingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTrajectoryGeneratorState>
+public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTrajectoryGeneratorState>
 {
    private final CoPTrajectoryParameters parameters;
 
@@ -23,9 +20,9 @@ public class StandingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTra
    private final FramePoint2D tempFramePoint2D = new FramePoint2D();
    private final FramePoint2D tempPointForCoPCalculation = new FramePoint2D();
 
-   public StandingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, YoRegistry parentRegistry)
+   public JumpingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, YoRegistry parentRegistry)
    {
-      super(StandingCoPTrajectoryGenerator.class, parentRegistry);
+      super(JumpingCoPTrajectoryGenerator.class, parentRegistry);
 
       this.parameters = parameters;
 
@@ -53,7 +50,12 @@ public class StandingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTra
       contactState.setStartTime(0.0);
       contactState.setStartCopPosition(state.getInitialCoP());
 
-      SettableContactStateProvider previousContactState = contactState;
+      computeForFinalTransfer();
+   }
+
+   private void computeForFinalTransfer()
+   {
+      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
 
       tempPointForCoPCalculation.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
@@ -66,7 +68,7 @@ public class StandingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTra
       previousContactState.setDuration(segmentDuration);
 
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
-      contactState = contactStateProviders.add();
+      SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
