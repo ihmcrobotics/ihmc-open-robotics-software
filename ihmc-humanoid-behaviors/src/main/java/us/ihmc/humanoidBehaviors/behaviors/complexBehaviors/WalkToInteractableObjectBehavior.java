@@ -30,7 +30,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    ResetRobotBehavior reset;
    private boolean succeded = true;
    private boolean behaviorComplete = false;
-   private double proximityToGoalToKeepOrientation = Double.MAX_VALUE;
+   private double proximityToGoalToKeepOrientation = Double.MIN_VALUE;
 
    public enum WalkToObjectState
    {

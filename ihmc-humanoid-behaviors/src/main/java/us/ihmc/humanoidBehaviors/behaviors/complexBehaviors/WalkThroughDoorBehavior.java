@@ -100,7 +100,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
 
    // If the goal is within this proximity, the robot won't turn towards the goal but will maintain it's initial orientation while walking
-   private static final double proximityToGoalToMaintainOrientation = 0.75;
+   private static final double proximityToGoalToMaintainOrientation = 1.5;
 
    public WalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                   FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
