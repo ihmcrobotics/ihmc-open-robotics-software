@@ -68,6 +68,11 @@ mainDependencies {
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
    api("us.ihmc:ihmc-avatar-interfaces-behavior-clean-room:source")
    api("us.ihmc:ihmc-avatar-interfaces-behavior-fx-ui:source")
+
+   // use new pub sub
+   api("us.ihmc:ihmc-pub-sub:0.16.0")
+   api("us.ihmc:ihmc-ros2-library:0.20.1")
+   api("us.ihmc:ros2-common-interfaces:0.20.1")
 }
 
 testDependencies {
