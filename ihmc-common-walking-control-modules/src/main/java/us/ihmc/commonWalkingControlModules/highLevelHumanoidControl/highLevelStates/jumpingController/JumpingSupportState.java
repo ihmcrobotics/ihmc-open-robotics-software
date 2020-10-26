@@ -12,41 +12,31 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JumpingStandingState extends JumpingState
+public class JumpingSupportState extends JumpingState
 {
    private final JumpingControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
+   private final JumpingGoalHandler jumpingGoalHandler;
+   private final JumpingGoal jumpingGoal = new JumpingGoal();
+
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
-   private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
-   private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
 
-   private final YoBoolean squat = new YoBoolean("ShouldBeSquatting", registry);
-
-   public JumpingStandingState(JumpingControllerToolbox controllerToolbox,
-                               JumpingControlManagerFactory managerFactory,
-                               WalkingFailureDetectionControlModule failureDetectionControlModule,
-                               YoRegistry parentRegistry)
+   public JumpingSupportState(JumpingGoalHandler jumpingGoalHandler,
+                              JumpingControllerToolbox controllerToolbox,
+                              JumpingControlManagerFactory managerFactory,
+                              WalkingFailureDetectionControlModule failureDetectionControlModule,
+                              YoRegistry parentRegistry)
    {
       super(JumpingStateEnum.STANDING, parentRegistry);
 
+      this.jumpingGoalHandler = jumpingGoalHandler;
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.balanceManager = managerFactory.getOrCreateBalanceManager();
 
-      standingHeight.set(1.05);
-      squattingHeight.set(0.6);
-
-      squat.addListener(v ->
-                        {
-                           if (squat.getBooleanValue())
-                              balanceManager.setDesiredCoMHeight(squattingHeight.getDoubleValue());
-                           else
-                              balanceManager.setDesiredCoMHeight(standingHeight.getDoubleValue());
-                        });
-      squat.notifyListeners();
+      balanceManager = managerFactory.getOrCreateBalanceManager();
 
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       if (chest != null)
@@ -77,6 +67,8 @@ public class JumpingStandingState extends JumpingState
    @Override
    public void onEntry()
    {
+      jumpingGoalHandler.peekNextJumpingGoal(jumpingGoal);
+
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
@@ -92,13 +84,7 @@ public class JumpingStandingState extends JumpingState
    @Override
    public void onExit()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).prepareForLocomotion();
-      }
 
-      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
    }
 
    @Override

@@ -44,6 +44,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
    private final YoDouble yoTime;
 
+   private final JumpingGoalHandler jumpingGoalHandler;
    private final JumpingControlManagerFactory managerFactory;
 
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
@@ -72,9 +73,13 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
    private boolean firstTick = true;
 
-   public JumpingHumanoidController(JumpingControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                    CoPTrajectoryParameters copTrajectoryParameters, JumpingControllerToolbox controllerToolbox)
+   public JumpingHumanoidController(JumpingGoalHandler jumpingGoalHandler,
+                                    JumpingControlManagerFactory managerFactory,
+                                    WalkingControllerParameters walkingControllerParameters,
+                                    CoPTrajectoryParameters copTrajectoryParameters,
+                                    JumpingControllerToolbox controllerToolbox)
    {
+      this.jumpingGoalHandler = jumpingGoalHandler;
       this.managerFactory = managerFactory;
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -135,11 +140,10 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
          legJointNames.put(robotSide, jointNames);
       }
 
-      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, registry);
-
+      balanceManager = managerFactory.getOrCreateBalanceManager();
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
-      stateMachine = setupStateMachine(balanceManager);
+      stateMachine = setupStateMachine();
 
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
       JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestictiveLimits();
@@ -159,19 +163,38 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
    }
 
-   private StateMachine<JumpingStateEnum, JumpingState> setupStateMachine(JumpingBalanceManager balanceManager)
+   private StateMachine<JumpingStateEnum, JumpingState> setupStateMachine()
    {
       StateMachineFactory<JumpingStateEnum, JumpingState> factory = new StateMachineFactory<>(JumpingStateEnum.class);
       factory.setNamePrefix("jumping").setRegistry(registry).buildYoClock(yoTime);
 
-      JumpingStandingState standingState = new JumpingStandingState(controllerToolbox, managerFactory,
-                                                                    balanceManager, failureDetectionControlModule, registry);
-      TransferToJumpingStandingState toStandingState = new TransferToJumpingStandingState(controllerToolbox, managerFactory,
-                                                                                          balanceManager, failureDetectionControlModule, registry);
+      JumpingStandingState standingState = new JumpingStandingState(controllerToolbox, 
+                                                                    managerFactory,
+                                                                    failureDetectionControlModule,
+                                                                    registry);
+      TransferToJumpingStandingState toStandingState = new TransferToJumpingStandingState(controllerToolbox,
+                                                                                          managerFactory,
+                                                                                          failureDetectionControlModule,
+                                                                                          registry);
+      JumpingSupportState supportState = new JumpingSupportState(jumpingGoalHandler,
+                                                                 controllerToolbox,
+                                                                 managerFactory,
+                                                                 failureDetectionControlModule,
+                                                                 registry);
+      JumpingFlightState flightState = new JumpingFlightState(jumpingGoalHandler,
+                                                              controllerToolbox,
+                                                              managerFactory,
+                                                              failureDetectionControlModule,
+                                                              registry);
       factory.addState(JumpingStateEnum.TO_STANDING, toStandingState);
       factory.addState(JumpingStateEnum.STANDING, standingState);
+      factory.addState(JumpingStateEnum.SUPPORT, supportState);
+      factory.addState(JumpingStateEnum.FLIGHT, flightState);
 
       factory.addDoneTransition(JumpingStateEnum.TO_STANDING, JumpingStateEnum.STANDING);
+      factory.addTransition(JumpingStateEnum.STANDING, JumpingStateEnum.SUPPORT, (time) -> jumpingGoalHandler.hasJumpingGoal());
+      factory.addDoneTransition(JumpingStateEnum.SUPPORT, JumpingStateEnum.FLIGHT);
+      factory.addDoneTransition(JumpingStateEnum.FLIGHT, JumpingStateEnum.TO_STANDING);
 
       // Update the previous state info for each state using state changed listeners.
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousJumpingStateEnum(from)));

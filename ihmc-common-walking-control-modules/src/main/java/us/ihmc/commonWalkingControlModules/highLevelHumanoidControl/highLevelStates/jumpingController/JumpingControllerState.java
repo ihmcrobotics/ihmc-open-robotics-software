@@ -90,7 +90,11 @@ public class JumpingControllerState extends HighLevelControllerState
       }
 
       // create walking controller
-      jumpingController = new JumpingHumanoidController(managerFactory, walkingControllerParameters, copTrajectoryParameters, controllerToolbox);
+      jumpingController = new JumpingHumanoidController(jumpingGoalHandler,
+                                                        managerFactory,
+                                                        walkingControllerParameters,
+                                                        copTrajectoryParameters,
+                                                        controllerToolbox);
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
