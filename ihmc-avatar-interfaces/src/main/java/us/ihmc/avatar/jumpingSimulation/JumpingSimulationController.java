@@ -40,6 +40,7 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.io.InputStream;
 import java.util.*;
 
 public class JumpingSimulationController implements RobotController
@@ -55,11 +56,11 @@ public class JumpingSimulationController implements RobotController
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final PerfectSimulatedOutputWriter outputWriter;
 
-
    public JumpingSimulationController(DRCRobotModel robotModel,
                                       HumanoidFloatingRootJointRobot humanoidRobotModel,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
-                                      double gravityZ)
+                                      double gravityZ,
+                                      InputStream parameterFile)
    {
       fullRobotModel = robotModel.createFullRobotModel();
       this.humanoidRobotModel = humanoidRobotModel;
@@ -168,7 +169,7 @@ public class JumpingSimulationController implements RobotController
       // Set up the output writer
       outputWriter = new PerfectSimulatedOutputWriter(humanoidRobotModel, fullRobotModel, controller.getOutputForLowLevelController());
 
-      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
+      ParameterLoaderHelper.loadParameters(this, parameterFile, registry);
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
