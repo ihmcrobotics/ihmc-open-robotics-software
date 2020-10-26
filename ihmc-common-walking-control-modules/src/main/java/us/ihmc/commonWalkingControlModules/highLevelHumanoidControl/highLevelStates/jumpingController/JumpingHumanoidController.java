@@ -189,6 +189,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
+      balanceManager.initialize();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
@@ -221,9 +222,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
             bodyManager.initialize();
       }
 
-
       pelvisOrientationManager.initialize();
-//      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
    }
 
