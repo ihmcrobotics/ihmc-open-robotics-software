@@ -11,4 +11,24 @@ public class JumpingGoalHandler
    {
       jumpingGoalList.add(jumpingGoal);
    }
+
+   public boolean hasJumpingGoal()
+   {
+      return !jumpingGoalList.isEmpty();
+   }
+
+   public JumpingGoal pollNextJumpingGoal()
+   {
+      return jumpingGoalList.remove(0);
+   }
+
+   public void pollNextJumpingGoal(JumpingGoal jumpingGoal)
+   {
+      jumpingGoal.set(jumpingGoalList.remove(0));
+   }
+
+   public void peekNextJumpingGoal(JumpingGoal jumpingGoal)
+   {
+      jumpingGoal.set(jumpingGoalList.get(0));
+   }
 }

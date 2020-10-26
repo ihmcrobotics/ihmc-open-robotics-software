@@ -9,6 +9,9 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
    private double goalRotation;
    private double goalHeight;
 
+   private double supportDuration;
+   private double flightDuration;
+
    public void setGoalLength(double goalLength)
    {
       this.goalLength = goalLength;
@@ -27,6 +30,16 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
    public void setGoalHeight(double goalHeight)
    {
       this.goalHeight = goalHeight;
+   }
+
+   public void setSupportDuration(double supportDuration)
+   {
+      this.supportDuration = supportDuration;
+   }
+
+   public void setFlightDuration(double flightDuration)
+   {
+      this.flightDuration = flightDuration;
    }
 
    public double getGoalLength()
@@ -49,6 +62,16 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
       return goalHeight;
    }
 
+   public double getSupportDuration()
+   {
+      return supportDuration;
+   }
+
+   public double getFlightDuration()
+   {
+      return flightDuration;
+   }
+
    @Override
    public void clear()
    {
@@ -56,6 +79,8 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
       goalFootWidth = Double.NaN;
       goalRotation = Double.NaN;
       goalHeight = Double.NaN;
+      supportDuration = Double.NaN;
+      flightDuration = Double.NaN;
    }
 
    @Override
@@ -89,5 +114,7 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
       setGoalFootWidth(other.getGoalFootWidth());
       setGoalRotation(other.getGoalRotation());
       setGoalHeight(other.getGoalHeight());
+      setSupportDuration(other.getSupportDuration());
+      setFlightDuration(other.getFlightDuration());
    }
 }
