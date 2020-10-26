@@ -7,9 +7,26 @@ public class JumpingGoalHandler
 {
    private final List<JumpingGoal> jumpingGoalList = new ArrayList<>();
 
+   private final JumpingCoPTrajectoryParameters parameters;
+
+   public JumpingGoalHandler(JumpingCoPTrajectoryParameters parameters)
+   {
+      this.parameters = parameters;
+   }
+
    public void consumeJumpingGoal(JumpingGoal jumpingGoal)
    {
+      if (isInvalidDuration(jumpingGoal.getSupportDuration()))
+         jumpingGoal.setSupportDuration(parameters.getDefaultSupportDuration());
+      if (isInvalidDuration(jumpingGoal.getFlightDuration()))
+         jumpingGoal.setFlightDuration(parameters.getDefaultFlightDuration());
+
       jumpingGoalList.add(jumpingGoal);
+   }
+
+   private static boolean isInvalidDuration(double duration)
+   {
+      return Double.isNaN(duration) || duration <= 1e-3;
    }
 
    public boolean hasJumpingGoal()

@@ -29,7 +29,7 @@ public class JumpingFlightState extends JumpingState
                              WalkingFailureDetectionControlModule failureDetectionControlModule,
                              YoRegistry parentRegistry)
    {
-      super(JumpingStateEnum.STANDING, parentRegistry);
+      super(JumpingStateEnum.FLIGHT, parentRegistry);
 
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.controllerToolbox = controllerToolbox;
@@ -60,7 +60,7 @@ public class JumpingFlightState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.computeCoMPlanForJumping();
+      balanceManager.computeCoMPlanForJumping(jumpingGoal);
    }
 
    @Override
@@ -73,13 +73,12 @@ public class JumpingFlightState extends JumpingState
 
       // TODO trigger the swing in the feet manager
 
-      balanceManager.initializeCoMPlanForStanding();
+      balanceManager.initializeCoMPlanForFlight(jumpingGoal);
 
-      if (pelvisOrientationManager != null)
-         pelvisOrientationManager.initializeStanding();
+//      if (pelvisOrientationManager != null)
+//         pelvisOrientationManager.initializeStanding();
 
-      failureDetectionControlModule.setNextFootstep(null);
-      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
+//      failureDetectionControlModule.setNextFootstep(null);
    }
 
    @Override
@@ -97,6 +96,7 @@ public class JumpingFlightState extends JumpingState
    @Override
    public boolean isDone(double timeInState)
    {
+      // TODO check for both feet being in contact
       return true;
    }
 }

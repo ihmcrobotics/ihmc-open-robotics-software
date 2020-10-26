@@ -30,7 +30,7 @@ public class JumpingSupportState extends JumpingState
                               WalkingFailureDetectionControlModule failureDetectionControlModule,
                               YoRegistry parentRegistry)
    {
-      super(JumpingStateEnum.STANDING, parentRegistry);
+      super(JumpingStateEnum.SUPPORT, parentRegistry);
 
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.controllerToolbox = controllerToolbox;
@@ -61,7 +61,7 @@ public class JumpingSupportState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.computeCoMPlanForStanding();
+      balanceManager.computeCoMPlanForJumping(jumpingGoal);
    }
 
    @Override
@@ -72,13 +72,12 @@ public class JumpingSupportState extends JumpingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.initializeCoMPlanForStanding();
+      balanceManager.initializeCoMPlanForSupport(jumpingGoal);
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.initializeStanding();
 
-      failureDetectionControlModule.setNextFootstep(null);
-      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
+//      failureDetectionControlModule.setNextFootstep(null);
    }
 
    @Override
@@ -89,7 +88,12 @@ public class JumpingSupportState extends JumpingState
 
    @Override
    public boolean isDone(double timeInState)
+
+   // TODO add a fallback finished. Also add criteria on "legs are straight" and "feet are unloaded"
    {
-      return true;
+      if (timeInState >= jumpingGoal.getSupportDuration())
+         return true;
+      else
+         return false;
    }
 }

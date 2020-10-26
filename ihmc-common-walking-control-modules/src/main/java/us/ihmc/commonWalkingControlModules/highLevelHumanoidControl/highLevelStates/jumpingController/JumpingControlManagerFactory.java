@@ -66,6 +66,7 @@ public class JumpingControlManagerFactory
    private JumpingControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
+   private JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -97,6 +98,11 @@ public class JumpingControlManagerFactory
    public void setCoPTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.copTrajectoryParameters = copTrajectoryParameters;
+   }
+
+   public void setJumpingCoPTrajectoryParameters(JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters)
+   {
+      this.jumpingCopTrajectoryParameters = jumpingCopTrajectoryParameters;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -209,8 +215,10 @@ public class JumpingControlManagerFactory
          return null;
       if (!hasCoPTrajectoryParameters(JumpingBalanceManager.class))
          return null;
+      if (!hasJumpingCoPTrajectoryParameters(JumpingBalanceManager.class))
+         return null;
 
-      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, registry);
+      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, jumpingCopTrajectoryParameters, registry);
 
       return balanceManager;
    }
@@ -259,6 +267,14 @@ public class JumpingControlManagerFactory
       if (copTrajectoryParameters != null)
          return true;
       missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
+      return false;
+   }
+
+   private boolean hasJumpingCoPTrajectoryParameters(Class<?> managerClass)
+   {
+      if (jumpingCopTrajectoryParameters != null)
+         return true;
+      missingObjectWarning(JumpingCoPTrajectoryParameters.class, managerClass);
       return false;
    }
 
