@@ -5,6 +5,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public enum JumpingStateEnum
 {
    STANDING,
+   SUPPORT,
+   FLIGHT,
    TO_STANDING;
 
 
@@ -22,8 +24,4 @@ public enum JumpingStateEnum
       }
    }
 
-   public boolean isSingleSupport()
-   {
-      return !isDoubleSupport();
-   }
 }

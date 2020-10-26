@@ -20,16 +20,6 @@ public abstract class JumpingState implements State
       parentRegistry.addChild(registry);
    }
 
-   public boolean isDoubleSupportState()
-   {
-      return getStateEnum().isDoubleSupport();
-   }
-
-   public boolean isSingleSupportState()
-   {
-      return getStateEnum().isSingleSupport();
-   }
-
    public JumpingStateEnum getStateEnum()
    {
       return jumpingStateEnum;

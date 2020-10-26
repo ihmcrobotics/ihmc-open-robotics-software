@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
@@ -58,11 +59,13 @@ public class JumpingControlManagerFactory
 
    private JumpingFeetManager feetManager;
    private JumpingPelvisOrientationManager pelvisOrientationManager;
+   private JumpingBalanceManager balanceManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private JumpingControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
+   private CoPTrajectoryParameters copTrajectoryParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -89,6 +92,11 @@ public class JumpingControlManagerFactory
    public void setHighLevelHumanoidControllerToolbox(JumpingControllerToolbox controllerToolbox)
    {
       this.controllerToolbox = controllerToolbox;
+   }
+
+   public void setCoPTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
+   {
+      this.copTrajectoryParameters = copTrajectoryParameters;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -192,6 +200,21 @@ public class JumpingControlManagerFactory
       return feetManager;
    }
 
+   public JumpingBalanceManager getOrCreateBalanceManager()
+   {
+      if (balanceManager != null)
+         return balanceManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(JumpingBalanceManager.class))
+         return null;
+      if (!hasCoPTrajectoryParameters(JumpingBalanceManager.class))
+         return null;
+
+      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, registry);
+
+      return balanceManager;
+   }
+
    public JumpingPelvisOrientationManager getOrCreatePelvisOrientationManager()
    {
       if (pelvisOrientationManager != null)
@@ -231,6 +254,13 @@ public class JumpingControlManagerFactory
       return false;
    }
 
+   private boolean hasCoPTrajectoryParameters(Class<?> managerClass)
+   {
+      if (copTrajectoryParameters != null)
+         return true;
+      missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
+      return false;
+   }
 
    private boolean hasMomentumOptimizationSettings(Class<?> managerClass)
    {

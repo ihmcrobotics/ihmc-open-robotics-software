@@ -22,15 +22,17 @@ public class TransferToJumpingStandingState extends JumpingState
 
    private final Point3D midFootPosition = new Point3D();
 
-   public TransferToJumpingStandingState(JumpingControllerToolbox controllerToolbox, JumpingControlManagerFactory managerFactory,
-                                         JumpingBalanceManager balanceManager, WalkingFailureDetectionControlModule failureDetectionControlModule, YoRegistry parentRegistry)
+   public TransferToJumpingStandingState(JumpingControllerToolbox controllerToolbox,
+                                         JumpingControlManagerFactory managerFactory,
+                                         WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                         YoRegistry parentRegistry)
    {
       super(JumpingStateEnum.TO_STANDING, parentRegistry);
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.balanceManager = balanceManager;
 
+      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
    }
@@ -51,13 +53,6 @@ public class TransferToJumpingStandingState extends JumpingState
    public void onEntry()
    {
       balanceManager.clearICPPlan();
-
-      JumpingStateEnum previousStateEnum = getPreviousJumpingStateEnum();
-
-      // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
-      // restore the full foot contact.
-      if (previousStateEnum != null && previousStateEnum.isDoubleSupport())
-         feetManager.initializeContactStatesForDoubleSupport(null);
 
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
