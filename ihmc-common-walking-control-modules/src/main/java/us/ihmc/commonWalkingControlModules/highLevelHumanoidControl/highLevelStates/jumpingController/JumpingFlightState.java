@@ -60,7 +60,7 @@ public class JumpingFlightState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.computeCoMPlanForStanding();
+      balanceManager.computeCoMPlanForJumping();
    }
 
    @Override

@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.OptimizedCoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.StandingCoPTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.*;
@@ -49,8 +51,11 @@ public class JumpingBalanceManager
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
-   private final CoPTrajectoryGeneratorState copTrajectoryState;
+   private final JumpingCoPTrajectoryGeneratorState copTrajectoryState;
+
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
+   private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
+
    private final OptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
@@ -66,10 +71,14 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
       comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
+      copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
+
       copTrajectoryForStanding = new StandingCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       copTrajectoryForStanding.registerState(copTrajectoryState);
+
+      copTrajectoryForJumping = new JumpingCoPTrajectoryGenerator(copTrajectoryParameters, registry);
+      copTrajectoryForJumping.registerState(copTrajectoryState);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -147,6 +156,28 @@ public class JumpingBalanceManager
       plannerTimer.stopMeasurement();
    }
 
+   public void computeCoMPlanForJumping()
+   {
+      plannerTimer.startMeasurement();
+
+      // update online to account for foot slip
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFootContactState(robotSide).inContact())
+            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
+      }
+      copTrajectoryForJumping.compute(copTrajectoryState);
+
+      comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
+      comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
+
+      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
+      timeInSupportSequence.add(controllerToolbox.getControlDT());
+
+      comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+
+      plannerTimer.stopMeasurement();
+   }
 
    public FramePoint3DReadOnly getDesiredDCM()
    {
