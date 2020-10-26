@@ -45,8 +45,10 @@ public class JumpingBalanceManager
 
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
+   private final YoDouble yoTime;
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
+   private final YoDouble startTimeForSupportSequence = new YoDouble("startTimeForSupportSequence", registry);
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
    private final JumpingCoPTrajectoryGeneratorState copTrajectoryState;
 
@@ -57,17 +59,18 @@ public class JumpingBalanceManager
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
+                                JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
                                 YoRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
+      yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
-      JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters = new JumpingCoPTrajectoryParameters(registry);
 
       comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
@@ -149,16 +152,17 @@ public class JumpingBalanceManager
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
-      timeInSupportSequence.add(controllerToolbox.getControlDT());
+      timeInSupportSequence.set(yoTime.getValue() - startTimeForSupportSequence.getDoubleValue());
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
       plannerTimer.stopMeasurement();
    }
 
-   public void computeCoMPlanForJumping()
+   public void computeCoMPlanForJumping(JumpingGoal jumpingGoal)
    {
       plannerTimer.startMeasurement();
+      copTrajectoryState.setJumpingGoal(jumpingGoal);
 
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
@@ -172,7 +176,7 @@ public class JumpingBalanceManager
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
-      timeInSupportSequence.add(controllerToolbox.getControlDT());
+      timeInSupportSequence.set(yoTime.getValue() - startTimeForSupportSequence.getDoubleValue());
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
@@ -205,6 +209,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
@@ -218,6 +223,7 @@ public class JumpingBalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
+      startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
@@ -233,9 +239,40 @@ public class JumpingBalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
+      startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
+
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+
+      comPlannerDone.set(false);
+   }
+
+   public void initializeCoMPlanForSupport(JumpingGoal jumpingGoal)
+   {
+      copTrajectoryState.setInitialCoP(yoPerfectVRP);
+      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      startTimeForSupportSequence.set(yoTime.getValue());
+      timeInSupportSequence.set(0.0);
+      currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+
+      comPlannerDone.set(false);
+   }
+
+   public void initializeCoMPlanForFlight(JumpingGoal jumpingGoal)
+   {
+      copTrajectoryState.setInitialCoP(yoPerfectVRP);
+      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 

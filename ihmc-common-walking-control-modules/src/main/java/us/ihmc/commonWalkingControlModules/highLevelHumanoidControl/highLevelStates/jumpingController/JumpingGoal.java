@@ -12,6 +12,11 @@ public class JumpingGoal implements Command<JumpingGoal, JumpingGoal>
    private double supportDuration;
    private double flightDuration;
 
+   public JumpingGoal()
+   {
+      clear();
+   }
+
    public void setGoalLength(double goalLength)
    {
       this.goalLength = goalLength;

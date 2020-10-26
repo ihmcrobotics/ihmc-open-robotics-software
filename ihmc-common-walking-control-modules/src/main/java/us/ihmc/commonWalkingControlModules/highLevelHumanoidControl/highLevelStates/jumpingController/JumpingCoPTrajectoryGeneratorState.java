@@ -82,6 +82,10 @@ public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
    }
 
+   public void setJumpingGoal(JumpingGoal jumpingGoal)
+   {
+      this.jumpingGoal.set(jumpingGoal);
+   }
 
    public FramePoint2DReadOnly getInitialCoP()
    {

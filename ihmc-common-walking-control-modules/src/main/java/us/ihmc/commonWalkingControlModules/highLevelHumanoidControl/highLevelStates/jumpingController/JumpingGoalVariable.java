@@ -23,6 +23,19 @@ public class JumpingGoalVariable extends SaveableModuleState
 
       supportDuration = new YoDouble("supportDuration" + suffix, registry);
       flightDuration = new YoDouble("flightDuration" + suffix, registry);
+
+      reset();
+   }
+
+   public void reset()
+   {
+      goalLength.setToNaN();
+      goalFootWidth.setToNaN();
+      goalRotation.setToNaN();
+      goalHeight.setToNaN();
+
+      supportDuration.setToNaN();
+      flightDuration.setToNaN();
    }
 
    public void set(JumpingGoal jumpingGoal)

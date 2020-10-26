@@ -108,6 +108,7 @@ public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTraj
 
    private void computeForFinalTransfer()
    {
+      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactState = contactStateProviders.add();
 
       double goalLength = state.getJumpingGoal().getGoalLength();
@@ -118,10 +119,12 @@ public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTraj
       goalMidpoint.changeFrameAndProjectToXYPlane(worldFrame);
 
       double segmentDuration = parameters.getDefaultFinalTransferSplitFraction() * state.getFinalTransferDuration();
+      contactState.setStartCopPosition(goalMidpoint);
       contactState.setEndCopPosition(goalMidpoint);
+      contactState.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactState.setDuration(segmentDuration);
 
-      SettableContactStateProvider previousContactState = contactState;
+      previousContactState = contactState;
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
@@ -172,16 +173,20 @@ public class JumpingSimulationController implements RobotController
                                                                                 jointsToIgnore);
 //      controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
 
+      JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters = new JumpingCoPTrajectoryParameters(registry);
       JumpingControlManagerFactory managerFactory = new JumpingControlManagerFactory(registry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      managerFactory.setCoPTrajectoryParameters(robotModel.getCoPTrajectoryParameters());
       managerFactory.setWalkingControllerParameters(robotModel.getWalkingControllerParameters());
+      managerFactory.setJumpingCoPTrajectoryParameters(jumpingCoPTrajectoryParameters);
 
       controller = new JumpingControllerState(commandInputManager,
                                               managerFactory,
                                               controllerToolbox,
                                               robotModel.getHighLevelControllerParameters(),
                                               robotModel.getWalkingControllerParameters(),
-                                              robotModel.getCoPTrajectoryParameters());
+                                              robotModel.getCoPTrajectoryParameters(),
+                                              jumpingCoPTrajectoryParameters);
       registry.addChild(controller.getYoRegistry());
 
       // Set up the output writer
