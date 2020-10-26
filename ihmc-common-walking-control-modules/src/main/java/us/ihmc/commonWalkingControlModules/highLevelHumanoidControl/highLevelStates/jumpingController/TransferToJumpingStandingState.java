@@ -2,14 +2,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -43,13 +38,13 @@ public class TransferToJumpingStandingState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.computeICPPlan();
+      balanceManager.computeCoMPlanForStanding();
    }
 
    @Override
    public boolean isDone(double timeInState)
    {
-      return balanceManager.isICPPlanDone();
+      return balanceManager.isCoMPlanDone();
    }
 
    @Override
@@ -78,6 +73,6 @@ public class TransferToJumpingStandingState extends JumpingState
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.initializeICPPlanForTransferToStanding();
+      balanceManager.initializeCoMPlanForTransferToStanding();
    }
 }
