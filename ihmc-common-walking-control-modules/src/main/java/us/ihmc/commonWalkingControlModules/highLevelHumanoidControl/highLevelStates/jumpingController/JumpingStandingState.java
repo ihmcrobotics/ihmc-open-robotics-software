@@ -20,8 +20,7 @@ public class JumpingStandingState extends JumpingState
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
    private final RigidBodyControlManager chestManager;
-   private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
-   private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
+
 
    private final YoBoolean squat = new YoBoolean("ShouldBeSquatting", registry);
 
@@ -36,15 +35,13 @@ public class JumpingStandingState extends JumpingState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
 
-      standingHeight.set(1.05);
-      squattingHeight.set(0.6);
 
       squat.addListener(v ->
                         {
                            if (squat.getBooleanValue())
-                              balanceManager.setDesiredCoMHeight(squattingHeight.getDoubleValue());
+                              balanceManager.setDesiredCoMHeight(controllerToolbox.getSquattingHeight());
                            else
-                              balanceManager.setDesiredCoMHeight(standingHeight.getDoubleValue());
+                              balanceManager.setDesiredCoMHeight(controllerToolbox.getStandingHeight());
                         });
       squat.notifyListeners();
 
@@ -81,6 +78,7 @@ public class JumpingStandingState extends JumpingState
    @Override
    public void onExit()
    {
+      squat.set(false);
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
    }
 

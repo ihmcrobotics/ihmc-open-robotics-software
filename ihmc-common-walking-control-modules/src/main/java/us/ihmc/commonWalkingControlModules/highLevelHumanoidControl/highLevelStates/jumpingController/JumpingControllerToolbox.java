@@ -69,6 +69,9 @@ public class JumpingControllerToolbox
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
+   private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
+   private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
+
    private final ReferenceFrame centerOfMassFrame;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CapturePointCalculator capturePointCalculator;
@@ -129,6 +132,8 @@ public class JumpingControllerToolbox
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      standingHeight.set(1.05);
+      squattingHeight.set(0.6);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       finalTransferTime = new YoDouble("finalTransferTime", registry);
@@ -345,6 +350,16 @@ public class JumpingControllerToolbox
    public FramePoint3DReadOnly getCapturePoint()
    {
       return yoCapturePoint;
+   }
+
+   public double getStandingHeight()
+   {
+      return standingHeight.getDoubleValue();
+   }
+
+   public double getSquattingHeight()
+   {
+      return squattingHeight.getDoubleValue();
    }
 
    public void getCapturePoint(FixedFramePoint3DBasics capturePointToPack)

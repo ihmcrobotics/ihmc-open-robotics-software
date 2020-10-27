@@ -81,8 +81,6 @@ public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTraj
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
 
       double supportDuration = state.getJumpingGoal().getSupportDuration();
-      if (Double.isNaN(supportDuration))
-         supportDuration = jumpingParameters.getDefaultSupportDuration();
       double segmentDuration = jumpingParameters.getFractionSupportForShift() * supportDuration;
       previousContactState.setEndCopPosition(footMidpoint);
       previousContactState.setDuration(segmentDuration);
@@ -96,8 +94,6 @@ public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTraj
    private void computeForFlight()
    {
       double flightDuration = state.getJumpingGoal().getFlightDuration();
-      if (Double.isNaN(flightDuration))
-         flightDuration = jumpingParameters.getDefaultFlightDuration();
 
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactSate = contactStateProviders.add();
