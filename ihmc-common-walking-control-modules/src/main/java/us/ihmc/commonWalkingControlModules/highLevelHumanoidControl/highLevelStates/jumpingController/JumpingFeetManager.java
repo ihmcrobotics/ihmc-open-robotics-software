@@ -114,11 +114,6 @@ public class JumpingFeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
-   {
-      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
-   }
-
    public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
    {
       if (transferToSide == null)
