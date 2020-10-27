@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.PredefinedContactExternalForceSolver;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -37,7 +38,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class JointspaceExternalContactEstimatorTest
+public class PredefinedContactExternalForceSolverTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -49,7 +50,7 @@ public class JointspaceExternalContactEstimatorTest
    private OneDoFJointBasics[] joints;
    private ExternalForcePoint externalForcePoint;
    private Vector3D externalForcePointOffset;
-   private JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
+   private PredefinedContactExternalForceSolver externalForceSolver;
    private BlockingSimulationRunner blockingSimulationRunner;
    private Vector3D minForce, maxForce;
 
@@ -88,20 +89,20 @@ public class JointspaceExternalContactEstimatorTest
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      jointspaceExternalContactEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      jointspaceExternalContactEstimator.setEstimatorGain(5.0);
-      jointspaceExternalContactEstimator.setSolverAlpha(1e-6);
-      jointspaceExternalContactEstimator.initialize();
+      externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
+      externalForceSolver.setEstimatorGain(5.0);
+      externalForceSolver.setSolverAlpha(1e-6);
+      externalForceSolver.initialize();
 
-      robot.setController(jointspaceExternalContactEstimator);
+      robot.setController(externalForceSolver);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       YoGraphicVector forceVector = new YoGraphicVector("forceVector",
                                                         externalForcePoint.getYoPosition(),
                                                         externalForcePoint.getYoForce(),
-                                                        JointspaceExternalContactEstimator.forceGraphicScale,
+                                                        PredefinedContactExternalForceSolver.forceGraphicScale,
                                                         YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.02, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
@@ -197,7 +198,7 @@ public class JointspaceExternalContactEstimatorTest
 
             blockingSimulationRunner.simulateAndBlock(1.5);
             blockingSimulationRunner.simulateAndBlock(estimationTime);
-            YoFrameVector3D estimatedExternalForce = jointspaceExternalContactEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
+            YoFrameVector3D estimatedExternalForce = externalForceSolver.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
             boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
 
@@ -232,7 +233,7 @@ public class JointspaceExternalContactEstimatorTest
       joints = null;
       externalForcePoint = null;
       externalForcePointOffset = null;
-      jointspaceExternalContactEstimator = null;
+      externalForceSolver = null;
       minForce = null;
       maxForce = null;
    }
