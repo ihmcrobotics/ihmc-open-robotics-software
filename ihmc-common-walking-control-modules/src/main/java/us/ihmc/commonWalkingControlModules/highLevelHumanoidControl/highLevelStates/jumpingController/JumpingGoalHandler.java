@@ -7,9 +7,9 @@ public class JumpingGoalHandler
 {
    private final List<JumpingGoal> jumpingGoalList = new ArrayList<>();
 
-   private final JumpingCoPTrajectoryParameters parameters;
+   private final JumpingParameters parameters;
 
-   public JumpingGoalHandler(JumpingCoPTrajectoryParameters parameters)
+   public JumpingGoalHandler(JumpingParameters parameters)
    {
       this.parameters = parameters;
    }

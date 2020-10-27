@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -51,7 +52,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    private final JumpingFeetManager feetManager;
    private final JumpingBalanceManager balanceManager;
 
-   private final JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters;
+   private final JumpingParameters jumpingParameters;
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
    private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
@@ -77,13 +78,13 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    public JumpingHumanoidController(JumpingGoalHandler jumpingGoalHandler,
                                     JumpingControlManagerFactory managerFactory,
                                     WalkingControllerParameters walkingControllerParameters,
-                                    JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters,
+                                    JumpingParameters jumpingParameters,
                                     JumpingControllerToolbox controllerToolbox)
    {
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.managerFactory = managerFactory;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.jumpingCoPTrajectoryParameters = jumpingCopTrajectoryParameters;
+      this.jumpingParameters = jumpingParameters;
 
       // Getting parameters from the JumpingControllerToolbox
       this.controllerToolbox = controllerToolbox;
@@ -181,13 +182,14 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       JumpingSupportState supportState = new JumpingSupportState(jumpingGoalHandler,
                                                                  controllerToolbox,
                                                                  managerFactory,
+                                                                 jumpingParameters,
                                                                  failureDetectionControlModule,
                                                                  registry);
       JumpingFlightState flightState = new JumpingFlightState(jumpingGoalHandler,
                                                               controllerToolbox,
                                                               managerFactory,
                                                               failureDetectionControlModule,
-                                                              jumpingCoPTrajectoryParameters,
+                                                              jumpingParameters,
                                                               registry);
       factory.addState(JumpingStateEnum.TO_STANDING, toStandingState);
       factory.addState(JumpingStateEnum.STANDING, standingState);
@@ -221,6 +223,21 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+         LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
+         for (LegJointName legJointName : legJointNames)
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointName), PrivilegedConfigurationOption.AT_MID_RANGE);
+      }
+      for (int i = 0; i < privilegedConfigurationCommand.getNumberOfJoints(); i++)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).equals(privilegedConfigurationCommand.getJoint(i)))
+            {
+               privilegedConfigurationCommand.setConfigurationGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKp());
+               privilegedConfigurationCommand.setVelocityGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKd());
+               privilegedConfigurationCommand.setWeight(i, 50.0);
+            }
+         }
       }
 
       initializeContacts();
@@ -331,11 +348,11 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      if (!limitCommandSent.getBooleanValue())
-      {
-         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
-         limitCommandSent.set(true);
-      }
+//      if (!limitCommandSent.getBooleanValue())
+//      {
+//         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
+//         limitCommandSent.set(true);
+//      }
 
       for (RobotSide robotSide : RobotSide.values)
       {

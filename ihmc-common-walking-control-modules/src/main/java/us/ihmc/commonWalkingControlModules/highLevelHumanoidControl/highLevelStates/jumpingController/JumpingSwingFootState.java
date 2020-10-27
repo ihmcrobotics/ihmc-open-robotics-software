@@ -210,6 +210,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
       initialOrientation.setToZero(soleFrame);
       initialLinearVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getLinearPart());
       initialAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
+      initialLinearVelocity.changeFrame(worldFrame);
+      initialLinearVelocity.addZ(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity().getZ());
 
       fillAndInitializeTrajectories(true);
    }
@@ -250,7 +252,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
                                                        desiredAngularAcceleration,
                                                        desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(nominalAngularWeight, nominalLinearWeight);
-      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(true, 0.0);
+//      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(true, 0.0);
       spatialFeedbackControlCommand.setGains(gains);
    }
 
