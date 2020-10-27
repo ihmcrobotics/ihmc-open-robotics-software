@@ -15,7 +15,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class JumpingFlightState extends JumpingState
 {
    private static final double swingHeight = 0.2;
-   private static final double defaultWidth = 0.2;
    private final JumpingControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -140,6 +139,11 @@ public class JumpingFlightState extends JumpingState
    public boolean isDone(double timeInState)
    {
       // TODO check for both feet being in contact
-      return true;
+
+      double desiredFlightDuration = Double.isNaN(jumpingGoal.getFlightDuration()) ? jumpingCoPTrajectoryParameters.getDefaultFlightDuration() : jumpingGoal.getFlightDuration();
+      if (timeInState >= desiredFlightDuration)
+         return true;
+      else
+         return false;
    }
 }
