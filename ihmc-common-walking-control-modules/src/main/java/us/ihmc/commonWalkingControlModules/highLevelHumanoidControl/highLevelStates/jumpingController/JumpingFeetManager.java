@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -102,10 +103,10 @@ public class JumpingFeetManager
       }
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   public void requestSwing(RobotSide upcomingSwingSide, FramePose3DReadOnly footstepPose, double swingHeight, double swingTime)
    {
       JumpingFootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime);
+      footControlModule.setFootstep(footstepPose, swingHeight, swingTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 

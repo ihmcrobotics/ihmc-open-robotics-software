@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -223,9 +224,9 @@ public class JumpingFootControlModule
       return currentConstraintType == ConstraintType.FULL;
    }
 
-   public void setFootstep(Footstep footstep, double swingTime)
+   public void setFootstep(FramePose3DReadOnly footstepPose, double swingHeight, double swingTime)
    {
-      swingState.setFootstep(footstep.getFootstepPose(), footstep.getSwingHeight(), swingTime);
+      swingState.setFootstep(footstepPose, swingHeight, swingTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
