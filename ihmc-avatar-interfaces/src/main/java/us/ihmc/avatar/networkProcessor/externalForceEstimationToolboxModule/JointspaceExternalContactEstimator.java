@@ -14,8 +14,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Arrays;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepency between
@@ -51,8 +49,7 @@ public class JointspaceExternalContactEstimator implements RobotController
    private final DMatrixRMaj massMatrixDot;
    private final DMatrixRMaj coriolisGravityTerm;
 
-   private final BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
-   private final Consumer<DMatrixRMaj> tauSetter;
+   private final ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
@@ -61,16 +58,14 @@ public class JointspaceExternalContactEstimator implements RobotController
 
    public JointspaceExternalContactEstimator(JointBasics[] joints,
                                              double dt,
-                                             BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
-                                             Consumer<DMatrixRMaj> tauSetter,
+                                             ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                              YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.dt = dt;
       this.estimationGain.set(defaultEstimatorGain);
-      this.dynamicMatrixSetter = dynamicMatrixSetter;
-      this.tauSetter = tauSetter;
 
+      this.dynamicMatrixUpdater = dynamicMatrixUpdater;
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       this.currentIntegrandValue = new DMatrixRMaj(dofs, 1);
@@ -140,9 +135,8 @@ public class JointspaceExternalContactEstimator implements RobotController
    {
       massMatrixPrev.set(massMatrix);
 
-      dynamicMatrixSetter.accept(massMatrix, coriolisGravityTerm);
+      dynamicMatrixUpdater.update(massMatrix, coriolisGravityTerm, tau);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
-      tauSetter.accept(tau);
 
       if (firstTick)
       {

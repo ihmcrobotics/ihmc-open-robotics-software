@@ -23,8 +23,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 public class PredefinedContactExternalForceSolver implements RobotController
@@ -55,14 +53,14 @@ public class PredefinedContactExternalForceSolver implements RobotController
 
    public PredefinedContactExternalForceSolver(JointBasics[] joints,
                                                double dt,
-                                               BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
-                                               Consumer<DMatrixRMaj> tauSetter,
+                                               ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                                YoGraphicsListRegistry graphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
       this.solverAlpha.set(0.001);
       this.joints = joints;
-      this.jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, dt, dynamicMatrixSetter, tauSetter, registry);
+
+      this.jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, dt, dynamicMatrixUpdater, registry);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       for (int i = 0; i < maximumNumberOfContactPoints; i++)
