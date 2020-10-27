@@ -13,7 +13,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -37,13 +36,12 @@ public class PredefinedContactExternalForceSolver implements RobotController
    private final JointBasics[] joints;
    private final int dofs;
 
-   private final List<ForceEstimatorContactPoint> contactPoints = new ArrayList<>();
+   private final List<EstimatorContactPoint> contactPoints = new ArrayList<>();
    private final JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
 
    private final YoFixedFrameSpatialVector[] estimatedExternalWrenches = new YoFixedFrameSpatialVector[maximumNumberOfContactPoints];
    private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[maximumNumberOfContactPoints];
 
-   private final PointJacobian pointJacobian = new PointJacobian();
    private DMatrixRMaj externalWrenchJacobian;
    private DMatrixRMaj externalWrenchJacobianTranspose;
    private DMatrixRMaj estimatedExternalWrenchMatrix;
@@ -79,17 +77,6 @@ public class PredefinedContactExternalForceSolver implements RobotController
          parentRegistry.addChild(registry);
    }
 
-   public void clearContactPoints()
-   {
-      contactPoints.clear();
-   }
-
-   @Override
-   public YoRegistry getYoRegistry()
-   {
-      return registry;
-   }
-
    /**
     * Adds a contact point to the estimator.
     *
@@ -102,9 +89,14 @@ public class PredefinedContactExternalForceSolver implements RobotController
       if(contactPoints.size() == maximumNumberOfContactPoints)
          throw new RuntimeException("The maximum number of contact points (" + maximumNumberOfContactPoints + ") has been reached. Increase to add more points");
 
-      RigidBodyBasics baseLink = joints[0].getPredecessor();
-      GeometricJacobian jacobian = new GeometricJacobian(baseLink, rigidBody, baseLink.getBodyFixedFrame());
-      contactPoints.add(new ForceEstimatorContactPoint(joints, rigidBody, contactPointOffset, jacobian, assumeZeroTorque));
+      EstimatorContactPoint contactPoint = new EstimatorContactPoint(joints, rigidBody, assumeZeroTorque);
+      contactPoint.setContactPointOffset(contactPointOffset);
+      contactPoints.add(contactPoint);
+   }
+
+   public void clearContactPoints()
+   {
+      contactPoints.clear();
    }
 
    @Override
@@ -116,7 +108,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
          contactPointPositions[i].setToNaN();
       }
 
-      int decisionVariables = contactPoints.stream().mapToInt(ForceEstimatorContactPoint::getNumberOfDecisionVariables).sum();
+      int decisionVariables = contactPoints.stream().mapToInt(EstimatorContactPoint::getNumberOfDecisionVariables).sum();
       externalWrenchJacobian = new DMatrixRMaj(decisionVariables, dofs);
       externalWrenchJacobianTranspose = new DMatrixRMaj(dofs, decisionVariables);
       estimatedExternalWrenchMatrix = new DMatrixRMaj(decisionVariables, 1);
@@ -134,30 +126,12 @@ public class PredefinedContactExternalForceSolver implements RobotController
       CommonOps_DDRM.fill(externalWrenchJacobian, 0.0);
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         ForceEstimatorContactPoint forceEstimatorContactPoint = contactPoints.get(i);
+         EstimatorContactPoint forceEstimatorContactPoint = contactPoints.get(i);
 
          int numberOfRows = forceEstimatorContactPoint.getNumberOfDecisionVariables();
          int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).getNumberOfDecisionVariables()).sum();
 
-         DMatrixRMaj contactJacobianMatrix;
-         if(forceEstimatorContactPoint.getAssumeZeroTorque())
-         {
-            ReferenceFrame baseFrame = forceEstimatorContactPoint.getContactPointJacobian().getBaseFrame();
-            forceEstimatorContactPoint.getContactPointJacobian().changeFrame(baseFrame);
-            forceEstimatorContactPoint.getContactPointJacobian().compute();
-
-            tempPoint.setIncludingFrame(forceEstimatorContactPoint.getContactingLink().getParentJoint().getFrameAfterJoint(), forceEstimatorContactPoint.getContactPointOffset());
-            pointJacobian.set(forceEstimatorContactPoint.getContactPointJacobian(), tempPoint);
-            pointJacobian.compute();
-            contactJacobianMatrix = pointJacobian.getJacobianMatrix();
-         }
-         else
-         {
-            forceEstimatorContactPoint.getContactPointFrame().update();
-            forceEstimatorContactPoint.getContactPointJacobian().changeFrame(forceEstimatorContactPoint.getContactPointFrame());
-            forceEstimatorContactPoint.getContactPointJacobian().compute();
-            contactJacobianMatrix = forceEstimatorContactPoint.getContactPointJacobian().getJacobianMatrix();
-         }
+         DMatrixRMaj contactJacobianMatrix = forceEstimatorContactPoint.computeContactJacobian();
 
          for (int j = 0; j < contactJacobianMatrix.getNumCols(); j++)
          {
@@ -187,10 +161,16 @@ public class PredefinedContactExternalForceSolver implements RobotController
             estimatedExternalWrenches[i].set(rowOffset, estimatedExternalWrenchMatrix);
          }
 
-         tempPoint.setIncludingFrame(contactPoints.get(i).getContactingLink().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointOffset());
+         tempPoint.setIncludingFrame(contactPoints.get(i).getRigidBody().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointOffset());
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions[i].set(tempPoint);
       }
+   }
+
+   @Override
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
    }
 
    public YoFixedFrameSpatialVector[] getEstimatedExternalWrenches()
