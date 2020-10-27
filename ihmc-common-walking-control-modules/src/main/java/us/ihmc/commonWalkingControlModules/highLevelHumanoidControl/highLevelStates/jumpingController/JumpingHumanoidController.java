@@ -51,6 +51,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    private final JumpingFeetManager feetManager;
    private final JumpingBalanceManager balanceManager;
 
+   private final JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters;
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
    private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
@@ -76,12 +77,13 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    public JumpingHumanoidController(JumpingGoalHandler jumpingGoalHandler,
                                     JumpingControlManagerFactory managerFactory,
                                     WalkingControllerParameters walkingControllerParameters,
-                                    CoPTrajectoryParameters copTrajectoryParameters,
+                                    JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters,
                                     JumpingControllerToolbox controllerToolbox)
    {
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.managerFactory = managerFactory;
       this.walkingControllerParameters = walkingControllerParameters;
+      this.jumpingCoPTrajectoryParameters = jumpingCopTrajectoryParameters;
 
       // Getting parameters from the JumpingControllerToolbox
       this.controllerToolbox = controllerToolbox;
@@ -185,6 +187,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
                                                               controllerToolbox,
                                                               managerFactory,
                                                               failureDetectionControlModule,
+                                                              jumpingCoPTrajectoryParameters,
                                                               registry);
       factory.addState(JumpingStateEnum.TO_STANDING, toStandingState);
       factory.addState(JumpingStateEnum.STANDING, standingState);

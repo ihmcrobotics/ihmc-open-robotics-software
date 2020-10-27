@@ -120,15 +120,15 @@ public class JumpingSwingFootState implements JumpingFootControlState
       RigidBodyBasics foot = contactableFoot.getRigidBody();
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
 
-      controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
-      FramePose3D controlFramePose = new FramePose3D(controlFrame);
-      controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      changeControlFrame(controlFramePose);
-
       spatialFeedbackControlCommand.set(fullRobotModel.getElevator(), foot);
       spatialFeedbackControlCommand.setPrimaryBase(fullRobotModel.getPelvis());
       ReferenceFrame linearGainsFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getPelvisZUpFrame();
       spatialFeedbackControlCommand.setGainsFrames(null, linearGainsFrame);
+
+      controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+      FramePose3D controlFramePose = new FramePose3D(controlFrame);
+      controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      changeControlFrame(controlFramePose);
 
       this.touchdownVelocity = touchdownVelocity;
 

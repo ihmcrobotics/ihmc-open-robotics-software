@@ -43,4 +43,9 @@ public class JumpingCoPTrajectoryParameters extends SaveableModuleState
    {
       return defaultFlightDuration.getValue();
    }
+
+   public double getDefaultFootWidth()
+   {
+      return defaultFootWidth.getValue();
+   }
 }

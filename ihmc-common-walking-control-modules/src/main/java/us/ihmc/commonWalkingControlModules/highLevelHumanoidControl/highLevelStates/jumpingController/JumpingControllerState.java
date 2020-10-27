@@ -94,7 +94,7 @@ public class JumpingControllerState extends HighLevelControllerState
       jumpingController = new JumpingHumanoidController(jumpingGoalHandler,
                                                         managerFactory,
                                                         walkingControllerParameters,
-                                                        copTrajectoryParameters,
+                                                        jumpingCoPTrajectoryParameters,
                                                         controllerToolbox);
 
       // create controller core
