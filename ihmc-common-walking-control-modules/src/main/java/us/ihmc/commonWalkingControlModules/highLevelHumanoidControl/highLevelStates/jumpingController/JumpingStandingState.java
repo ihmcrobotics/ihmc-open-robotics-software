@@ -19,7 +19,7 @@ public class JumpingStandingState extends JumpingState
 
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
-   private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
+   private final RigidBodyControlManager chestManager;
    private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
    private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
 
@@ -49,22 +49,11 @@ public class JumpingStandingState extends JumpingState
       squat.notifyListeners();
 
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      if (chest != null)
-      {
-         ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
+      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      ReferenceFrame pelvisBodyFrame = pelvis.getBodyFixedFrame();
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            if (hand != null)
-            {
-               ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
-               handManagers.put(robotSide, handManager);
-            }
-         }
-      }
-
+      chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisBodyFrame);
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
    }
 
@@ -92,12 +81,6 @@ public class JumpingStandingState extends JumpingState
    @Override
    public void onExit()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).prepareForLocomotion();
-      }
-
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
    }
 

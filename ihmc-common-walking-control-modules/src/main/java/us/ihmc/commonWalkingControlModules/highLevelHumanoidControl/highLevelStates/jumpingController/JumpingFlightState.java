@@ -20,7 +20,6 @@ public class JumpingFlightState extends JumpingState
 
    private final JumpingBalanceManager balanceManager;
    private final JumpingFeetManager feetManager;
-   private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters;
    private final JumpingGoalHandler jumpingGoalHandler;
@@ -43,23 +42,6 @@ public class JumpingFlightState extends JumpingState
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-
-      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      if (chest != null)
-      {
-         ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            if (hand != null)
-            {
-               ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
-               handManagers.put(robotSide, handManager);
-            }
-         }
-      }
    }
 
    @Override
@@ -77,6 +59,7 @@ public class JumpingFlightState extends JumpingState
    public void onEntry()
    {
       jumpingGoalHandler.pollNextJumpingGoal(jumpingGoal);
+      balanceManager.setMinimizeAngularMomentumRate(false);
 
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
@@ -121,20 +104,11 @@ public class JumpingFlightState extends JumpingState
 //      failureDetectionControlModule.setNextFootstep(null);
    }
 
-
-
    @Override
    public void onExit()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).prepareForLocomotion();
-      }
-
-      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
+      balanceManager.setMinimizeAngularMomentumRate(true);
    }
-
    @Override
    public boolean isDone(double timeInState)
    {

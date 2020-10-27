@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -178,6 +180,12 @@ public class JumpingSwingFootState implements JumpingFootControlState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicPosition desiredPosition = new YoGraphicPosition(namePrefix + "DesiredPosition", yoDesiredSolePosition, 0.015, YoAppearance.Green());
+         yoGraphicsListRegistry.registerYoGraphic("Swing Foot", desiredPosition);
+      }
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -242,6 +250,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
                                                        desiredAngularAcceleration,
                                                        desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(nominalAngularWeight, nominalLinearWeight);
+      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(true, 0.0);
       spatialFeedbackControlCommand.setGains(gains);
    }
 

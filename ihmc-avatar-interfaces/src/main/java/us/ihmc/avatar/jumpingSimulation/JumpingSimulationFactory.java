@@ -9,6 +9,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class JumpingSimulationFactory
@@ -18,7 +19,6 @@ public class JumpingSimulationFactory
    private final CommandInputManager commandInputManager;
 
    private static final double gravityZ = 9.81;
-   private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public JumpingSimulationFactory(DRCRobotModel robotModel, DRCRobotInitialSetup initialSetup, CommandInputManager commandInputManager)
    {
@@ -27,7 +27,7 @@ public class JumpingSimulationFactory
       this.commandInputManager = commandInputManager;
    }
 
-   public SimulationConstructionSet createSimulation()
+   public SimulationConstructionSet createSimulation(String parameterResourceName)
    {
       HumanoidFloatingRootJointRobot humanoidRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -58,6 +58,11 @@ public class JumpingSimulationFactory
       scsInitialSetup.initializeSimulation(scs);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
 
+      SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+      plotterFactory.setShowOnStart(true);
+      plotterFactory.setVariableNameToTrack("centerOfMass");
+      plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+      plotterFactory.createOverheadPlotter();
 
       return scs;
    }
