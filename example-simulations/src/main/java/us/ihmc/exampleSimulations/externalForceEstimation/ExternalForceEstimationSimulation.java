@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -47,9 +47,9 @@ import java.util.function.Consumer;
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalWrenchEstimator externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      robot.setController(externalWrenchEstimator);
+      JointspaceExternalContactEstimator jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      jointspaceExternalContactEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
+      robot.setController(jointspaceExternalContactEstimator);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);

@@ -65,7 +65,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DMatrixRMaj coriolisMatrix;
 
    private final CommandInputManager commandInputManager;
-   private ExternalWrenchEstimator externalWrenchEstimator;
+   private JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
 
    public ExternalForceEstimationToolboxController(DRCRobotModel robotModel,
@@ -124,7 +124,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       };
       Consumer<DMatrixRMaj> tauSetter = tau -> tau.set(controllerDesiredTau);
 
-      externalWrenchEstimator = new ExternalWrenchEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, graphicsListRegistry, registry);
+      jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, graphicsListRegistry, registry);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -147,31 +147,31 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
                ExternalForceEstimationToolboxConfigurationCommand.class);
 
 
-         externalWrenchEstimator.clearContactPoints();
+         jointspaceExternalContactEstimator.clearContactPoints();
          int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
          for (int i = 0; i < numberOfContactPoints; i++)
          {
             RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(i));
             Point3D contactPoint = configurationCommand.getContactPointPositions().get(i);
-            externalWrenchEstimator.addContactPoint(rigidBody, contactPoint, true);
+            jointspaceExternalContactEstimator.addContactPoint(rigidBody, contactPoint, true);
          }
 
          calculateRootJointWrench.set(configurationCommand.getCalculateRootJointWrench());
          if(calculateRootJointWrench.getValue())
          {
-            externalWrenchEstimator.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
+            jointspaceExternalContactEstimator.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
          }
 
-         externalWrenchEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
-         externalWrenchEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
+         jointspaceExternalContactEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
+         jointspaceExternalContactEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
       }
-      else if (externalWrenchEstimator == null)
+      else if (jointspaceExternalContactEstimator == null)
       {
          return false;
       }
 
-      externalWrenchEstimator.initialize();
+      jointspaceExternalContactEstimator.initialize();
       return true;
    }
 
@@ -198,12 +198,12 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
       CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisMatrix);
 
-      externalWrenchEstimator.doControl();
+      jointspaceExternalContactEstimator.doControl();
 
       outputStatus.getEstimatedExternalForces().clear();
-      YoFixedFrameSpatialVector[] estimatedExternalWrenches = externalWrenchEstimator.getEstimatedExternalWrenches();
+      YoFixedFrameSpatialVector[] estimatedExternalWrenches = jointspaceExternalContactEstimator.getEstimatedExternalWrenches();
 
-      int numberOfContactPoints = externalWrenchEstimator.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
+      int numberOfContactPoints = jointspaceExternalContactEstimator.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
       for (int i = 0; i < numberOfContactPoints; i++)
       {
          outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
@@ -211,9 +211,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       if(calculateRootJointWrench.getValue())
       {
-         int lastIndex = externalWrenchEstimator.getNumberOfContactPoints() - 1;
-         outputStatus.getEstimatedRootJointWrench().getTorque().set(externalWrenchEstimator.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
-         outputStatus.getEstimatedRootJointWrench().getForce().set(externalWrenchEstimator.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
+         int lastIndex = jointspaceExternalContactEstimator.getNumberOfContactPoints() - 1;
+         outputStatus.getEstimatedRootJointWrench().getTorque().set(jointspaceExternalContactEstimator.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
+         outputStatus.getEstimatedRootJointWrench().getForce().set(jointspaceExternalContactEstimator.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
       }
       else
       {
