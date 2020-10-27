@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.IntUnaryOperator;
-import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
 import org.ejml.data.DMatrixRMaj;
@@ -15,7 +13,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -37,12 +34,14 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * Module to estimate unknown external wrenches, i.e. contacts that are not expected from the controller
+ * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepency between
+ * the expected and actual system behavior. In the below paper, this module tau_ext, i.e. the "generalized external forces", which
+ * can in turn be used to estimate taskspace forces in a number of different ways.
  *
  * Implementation based on Haddadin, et. al:
  * <a href="www.repo.uni-hannover.de/bitstream/handle/123456789/3543/VorndammeSchHad2017_accepted.pdf">Collision Detection, Isolation and Identification for Humanoids</a>
  */
-public class ExternalWrenchEstimator implements RobotController
+public class JointspaceExternalContactEstimator implements RobotController
 {
    public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
@@ -77,7 +76,7 @@ public class ExternalWrenchEstimator implements RobotController
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
 
-   private final List<EstimatorContactPoint> contactPoints = new ArrayList<>();
+   private final List<ForceEstimatorContactPoint> contactPoints = new ArrayList<>();
    private final PointJacobian pointJacobian = new PointJacobian();
    private DMatrixRMaj externalWrenchJacobian;
    private DMatrixRMaj externalWrenchJacobianTranspose;
@@ -95,12 +94,12 @@ public class ExternalWrenchEstimator implements RobotController
     *
     * @param dynamicMatrixSetter sets the mass matrix and coriolis-gravity matrices respectively
     */
-   public ExternalWrenchEstimator(JointBasics[] joints,
-                                  double dt,
-                                  BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
-                                  Consumer<DMatrixRMaj> tauSetter,
-                                  YoGraphicsListRegistry graphicsListRegistry,
-                                  YoRegistry parentRegistry)
+   public JointspaceExternalContactEstimator(JointBasics[] joints,
+                                             double dt,
+                                             BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
+                                             Consumer<DMatrixRMaj> tauSetter,
+                                             YoGraphicsListRegistry graphicsListRegistry,
+                                             YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.tauSetter = tauSetter;
@@ -159,61 +158,6 @@ public class ExternalWrenchEstimator implements RobotController
          parentRegistry.addChild(registry);
    }
 
-   private class EstimatorContactPoint
-   {
-      final RigidBodyBasics endEffector;
-      final Tuple3DReadOnly contactPointOffset;
-      final GeometricJacobian contactPointJacobian;
-      final ReferenceFrame contactPointFrame;
-      final boolean assumeZeroTorque;
-      final int numberOfDecisionVariables;
-
-      // indexing helper to go from this contactPointJacobian to externalWrenchJacobian
-      // contactPointJacobian column i ==> externalWrenchJacobian column indexMap[i]
-      final int[] indexMap;
-
-      EstimatorContactPoint(RigidBodyBasics endEffector, Tuple3DReadOnly contactPointOffset, GeometricJacobian contactPointJacobian, boolean assumeZeroTorque)
-      {
-         this.endEffector = endEffector;
-         this.contactPointOffset = contactPointOffset;
-         this.contactPointJacobian = contactPointJacobian;
-         this.indexMap = new int[contactPointJacobian.getJacobianMatrix().getNumCols()];
-         this.assumeZeroTorque = assumeZeroTorque;
-         this.numberOfDecisionVariables = assumeZeroTorque ? 3 : 6;
-
-         this.contactPointFrame = new ReferenceFrame(endEffector.getName() + "ContactFrame", ReferenceFrame.getWorldFrame())
-         {
-            @Override
-            protected void updateTransformToParent(RigidBodyTransform transformToParent)
-            {
-               tempPoint.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), contactPointOffset);
-               tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-               transformToParent.setTranslationAndIdentityRotation(tempPoint);
-            }
-         };
-
-         contactPointJacobian.changeFrame(contactPointFrame);
-
-         JointBasics[] jointPath = contactPointJacobian.getJointsInOrder();
-         ToIntFunction<JointBasics> jointIndexFunction = joint -> IntStream.range(0, joints.length)
-                                                                           .filter(i -> joint == joints[i])
-                                                                           .findFirst()
-                                                                           .orElseThrow(() -> new RuntimeException("Could not find joint"));
-         IntUnaryOperator indexOffset = i -> IntStream.range(0, i).map(j -> joints[j].getDegreesOfFreedom()).sum();
-
-         for (int jointIndex = 0, mappedIndex = 0; jointIndex < jointPath.length; jointIndex++)
-         {
-            JointBasics joint = jointPath[jointIndex];
-            int offset = indexOffset.applyAsInt(jointIndexFunction.applyAsInt(joint));
-
-            for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-            {
-               indexMap[mappedIndex++] = offset + i;
-            }
-         }
-      }
-   }
-
    public void clearContactPoints()
    {
       contactPoints.clear();
@@ -233,7 +177,7 @@ public class ExternalWrenchEstimator implements RobotController
 
       RigidBodyBasics baseLink = joints[0].getPredecessor();
       GeometricJacobian jacobian = new GeometricJacobian(baseLink, rigidBody, baseLink.getBodyFixedFrame());
-      contactPoints.add(new EstimatorContactPoint(rigidBody, contactPointOffset, jacobian, assumeZeroTorque));
+      contactPoints.add(new ForceEstimatorContactPoint(joints, rigidBody, contactPointOffset, jacobian, assumeZeroTorque));
    }
 
    @Override
@@ -249,7 +193,7 @@ public class ExternalWrenchEstimator implements RobotController
          contactPointPositions[i].setToNaN();
       }
 
-      int decisionVariables = contactPoints.stream().mapToInt(p -> p.numberOfDecisionVariables).sum();
+      int decisionVariables = contactPoints.stream().mapToInt(ForceEstimatorContactPoint::getNumberOfDecisionVariables).sum();
       externalWrenchJacobian = new DMatrixRMaj(decisionVariables, dofs);
       externalWrenchJacobianTranspose = new DMatrixRMaj(dofs, decisionVariables);
       estimatedExternalWrenchMatrix = new DMatrixRMaj(decisionVariables, 1);
@@ -322,34 +266,34 @@ public class ExternalWrenchEstimator implements RobotController
       CommonOps_DDRM.fill(externalWrenchJacobian, 0.0);
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         EstimatorContactPoint estimatorContactPoint = contactPoints.get(i);
+         ForceEstimatorContactPoint forceEstimatorContactPoint = contactPoints.get(i);
 
-         int numberOfRows = estimatorContactPoint.numberOfDecisionVariables;
-         int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).numberOfDecisionVariables).sum();
+         int numberOfRows = forceEstimatorContactPoint.getNumberOfDecisionVariables();
+         int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).getNumberOfDecisionVariables()).sum();
 
          DMatrixRMaj contactJacobianMatrix;
-         if(estimatorContactPoint.assumeZeroTorque)
+         if(forceEstimatorContactPoint.getAssumeZeroTorque())
          {
-            ReferenceFrame baseFrame = estimatorContactPoint.contactPointJacobian.getBaseFrame();
-            estimatorContactPoint.contactPointJacobian.changeFrame(baseFrame);
-            estimatorContactPoint.contactPointJacobian.compute();
+            ReferenceFrame baseFrame = forceEstimatorContactPoint.getContactPointJacobian().getBaseFrame();
+            forceEstimatorContactPoint.getContactPointJacobian().changeFrame(baseFrame);
+            forceEstimatorContactPoint.getContactPointJacobian().compute();
 
-            tempPoint.setIncludingFrame(estimatorContactPoint.endEffector.getParentJoint().getFrameAfterJoint(), estimatorContactPoint.contactPointOffset);
-            pointJacobian.set(estimatorContactPoint.contactPointJacobian, tempPoint);
+            tempPoint.setIncludingFrame(forceEstimatorContactPoint.getContactingLink().getParentJoint().getFrameAfterJoint(), forceEstimatorContactPoint.getContactPointOffset());
+            pointJacobian.set(forceEstimatorContactPoint.getContactPointJacobian(), tempPoint);
             pointJacobian.compute();
             contactJacobianMatrix = pointJacobian.getJacobianMatrix();
          }
          else
          {
-            estimatorContactPoint.contactPointFrame.update();
-            estimatorContactPoint.contactPointJacobian.changeFrame(estimatorContactPoint.contactPointFrame);
-            estimatorContactPoint.contactPointJacobian.compute();
-            contactJacobianMatrix = estimatorContactPoint.contactPointJacobian.getJacobianMatrix();
+            forceEstimatorContactPoint.getContactPointFrame().update();
+            forceEstimatorContactPoint.getContactPointJacobian().changeFrame(forceEstimatorContactPoint.getContactPointFrame());
+            forceEstimatorContactPoint.getContactPointJacobian().compute();
+            contactJacobianMatrix = forceEstimatorContactPoint.getContactPointJacobian().getJacobianMatrix();
          }
 
          for (int j = 0; j < contactJacobianMatrix.getNumCols(); j++)
          {
-            int column = estimatorContactPoint.indexMap[j];
+            int column = forceEstimatorContactPoint.getSystemJacobianIndex(j);
             MatrixTools.setMatrixBlock(externalWrenchJacobian, rowOffset, column, contactJacobianMatrix, 0, j, numberOfRows, 1, 1.0);
          }
       }
@@ -362,8 +306,8 @@ public class ExternalWrenchEstimator implements RobotController
       // pack result and update graphics variables
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).numberOfDecisionVariables).sum();
-         if(contactPoints.get(i).assumeZeroTorque)
+         int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).getNumberOfDecisionVariables()).sum();
+         if(contactPoints.get(i).getAssumeZeroTorque())
          {
             estimatedExternalWrenches[i].getAngularPart().setToZero();
             estimatedExternalWrenches[i].getLinearPart().set(rowOffset, estimatedExternalWrenchMatrix);
@@ -373,7 +317,7 @@ public class ExternalWrenchEstimator implements RobotController
             estimatedExternalWrenches[i].set(rowOffset, estimatedExternalWrenchMatrix);
          }
 
-         tempPoint.setIncludingFrame(contactPoints.get(i).endEffector.getParentJoint().getFrameAfterJoint(), contactPoints.get(i).contactPointOffset);
+         tempPoint.setIncludingFrame(contactPoints.get(i).getContactingLink().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointOffset());
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions[i].set(tempPoint);
       }
