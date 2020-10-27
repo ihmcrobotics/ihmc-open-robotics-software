@@ -3,15 +3,12 @@ package us.ihmc.avatar.externalForceEstimationToolboxModule;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ForceEstimatorDynamicMatrixUpdater;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.PredefinedContactExternalForceSolver;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -59,7 +56,7 @@ public class PredefinedContactExternalForceSolverTest
    private double epsilon;
    private final int iterations = 5;
 
-   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
+   private ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    @BeforeEach
    public void setup()
@@ -78,18 +75,18 @@ public class PredefinedContactExternalForceSolverTest
       gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-gravity);
       CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
 
-      this.dynamicMatrixSetter = (m, c) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau) ->
       {
          m.set(massMatrixCalculator.getMassMatrix());
          gravityCoriolisExternalWrenchMatrixCalculator.compute();
-         c.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
+         cqg.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
 
-      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
       externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
       externalForceSolver.setEstimatorGain(5.0);
       externalForceSolver.setSolverAlpha(1e-6);

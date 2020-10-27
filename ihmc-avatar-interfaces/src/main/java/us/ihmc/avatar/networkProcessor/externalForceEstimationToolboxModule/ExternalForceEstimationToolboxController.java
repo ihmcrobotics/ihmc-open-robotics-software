@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
@@ -62,7 +61,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DMatrixRMaj controllerDesiredTau;
 
    private final DMatrixRMaj massMatrix;
-   private final DMatrixRMaj coriolisMatrix;
+   private final DMatrixRMaj coriolisGravityMatrix;
 
    private final CommandInputManager commandInputManager;
    private PredefinedContactExternalForceSolver externalForceSolver;
@@ -115,16 +114,16 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.controllerDesiredTau = new DMatrixRMaj(degreesOfFreedom, 1);
 
       this.massMatrix = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
-      this.coriolisMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.coriolisGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter = (massMatrix, coriolisMatrix) ->
+      ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater = (massMatrix, coriolisGravityMatrix, tau) ->
       {
          massMatrix.set(this.massMatrix);
-         coriolisMatrix.set(this.coriolisMatrix);
+         coriolisGravityMatrix.set(this.coriolisGravityMatrix);
+         tau.set(controllerDesiredTau);
       };
-      Consumer<DMatrixRMaj> tauSetter = tau -> tau.set(controllerDesiredTau);
 
-      externalForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixSetter, tauSetter, graphicsListRegistry, registry);
+      externalForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -192,10 +191,10 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       dynamicsMatrixCalculator.compute();
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
-      dynamicsMatrixCalculator.getCoriolisMatrix(coriolisMatrix);
+      dynamicsMatrixCalculator.getCoriolisMatrix(coriolisGravityMatrix);
 
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
-      CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisMatrix);
+      CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);
 
       externalForceSolver.doControl();
 
