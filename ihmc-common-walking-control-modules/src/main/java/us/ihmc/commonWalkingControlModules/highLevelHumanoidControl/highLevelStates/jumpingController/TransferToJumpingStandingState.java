@@ -56,6 +56,7 @@ public class TransferToJumpingStandingState extends JumpingState
          feetManager.setFlatFootContactState(robotSide);
 
       balanceManager.clearICPPlan();
+      balanceManager.setDesiredCoMHeight(controllerToolbox.getStandingHeight());
 
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 

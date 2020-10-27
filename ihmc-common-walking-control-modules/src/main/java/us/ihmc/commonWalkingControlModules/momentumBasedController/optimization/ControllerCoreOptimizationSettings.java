@@ -72,7 +72,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default double getMaximumJointAcceleration()
    {
-      return 200.0;
+      return 1000.0;
    }
 
    /**
