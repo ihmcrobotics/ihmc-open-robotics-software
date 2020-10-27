@@ -88,12 +88,8 @@ public class JumpingSupportState extends JumpingState
 
    @Override
    public boolean isDone(double timeInState)
-
-   // TODO add a fallback finished. Also add criteria on "legs are straight" and "feet are unloaded"
    {
-      if (timeInState >= jumpingGoal.getSupportDuration())
-         return true;
-      else
-         return false;
+      // TODO add a fallback finished. Also add criteria on "legs are straight" and "feet are unloaded"
+      return timeInState >= jumpingGoal.getSupportDuration();
    }
 }
