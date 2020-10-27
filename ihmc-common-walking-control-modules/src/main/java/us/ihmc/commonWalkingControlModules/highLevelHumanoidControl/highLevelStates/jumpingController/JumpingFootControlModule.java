@@ -225,7 +225,7 @@ public class JumpingFootControlModule
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
-      swingState.setFootstep(footstep, swingTime);
+      swingState.setFootstep(footstep.getFootstepPose(), footstep.getSwingHeight(), swingTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
