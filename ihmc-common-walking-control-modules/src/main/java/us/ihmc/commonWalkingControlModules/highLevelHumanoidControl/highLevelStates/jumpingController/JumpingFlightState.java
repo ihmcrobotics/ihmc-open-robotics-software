@@ -62,6 +62,8 @@ public class JumpingFlightState extends JumpingState
       balanceManager.setMinimizeAngularMomentumRate(false);
 
       // need to always update biped support polygons after a change to the contact states
+      for (RobotSide robotSide : RobotSide.values)
+         controllerToolbox.setFootContactStateFree(robotSide);
       controllerToolbox.updateBipedSupportPolygons();
 
       // TODO trigger the swing in the feet manager
@@ -109,15 +111,29 @@ public class JumpingFlightState extends JumpingState
    {
       balanceManager.setMinimizeAngularMomentumRate(true);
    }
+
+   private static final double minFractionThroughSwingForContact = 0.8;
    @Override
    public boolean isDone(double timeInState)
    {
-      // TODO check for both feet being in contact
-
       double desiredFlightDuration = Double.isNaN(jumpingGoal.getFlightDuration()) ? jumpingParameters.getDefaultFlightDuration() : jumpingGoal.getFlightDuration();
-      if (timeInState >= desiredFlightDuration)
-         return true;
-      else
+      if (timeInState < minFractionThroughSwingForContact * desiredFlightDuration)
          return false;
+
+      boolean bothFeetHaveHitGround = true;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (!controllerToolbox.getFootSwitches().get(robotSide).hasFootHitGround())
+            bothFeetHaveHitGround = false;
+         else if (!feetManager.getCurrentConstraintType(robotSide).isLoadBearing())
+         {
+            feetManager.setFlatFootContactState(robotSide);
+            controllerToolbox.setFootContactStateFullyConstrained(robotSide);
+            controllerToolbox.updateBipedSupportPolygons();
+         }
+      }
+
+
+      return bothFeetHaveHitGround;
    }
 }

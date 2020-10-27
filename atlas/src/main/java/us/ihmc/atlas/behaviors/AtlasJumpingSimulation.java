@@ -21,7 +21,7 @@ import java.util.List;
 public class AtlasJumpingSimulation
 {
    private static double jumpLength = 0.0;
-   private static double flightDuration = 0.2;
+   private static double flightDuration = 0.25;
    private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public static void main(String[] args)
