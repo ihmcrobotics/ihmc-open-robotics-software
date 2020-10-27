@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -15,6 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class JumpingSupportState extends JumpingState
 {
    private final JumpingControllerToolbox controllerToolbox;
+   private final JumpingParameters jumpingParameters;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final JumpingGoalHandler jumpingGoalHandler;
@@ -26,6 +28,7 @@ public class JumpingSupportState extends JumpingState
    public JumpingSupportState(JumpingGoalHandler jumpingGoalHandler,
                               JumpingControllerToolbox controllerToolbox,
                               JumpingControlManagerFactory managerFactory,
+                              JumpingParameters jumpingParameters,
                               WalkingFailureDetectionControlModule failureDetectionControlModule,
                               YoRegistry parentRegistry)
    {
@@ -33,6 +36,7 @@ public class JumpingSupportState extends JumpingState
 
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.controllerToolbox = controllerToolbox;
+      this.jumpingParameters = jumpingParameters;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -54,6 +58,7 @@ public class JumpingSupportState extends JumpingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
+      balanceManager.setDesiredCoMHeight(controllerToolbox.getStandingHeight());
       balanceManager.initializeCoMPlanForSupport(jumpingGoal);
 
       if (pelvisOrientationManager != null)
@@ -66,6 +71,20 @@ public class JumpingSupportState extends JumpingState
    public boolean isDone(double timeInState)
    {
       // TODO add a fallback finished. Also add criteria on "legs are straight" and "feet are unloaded"
-      return timeInState >= jumpingGoal.getSupportDuration();
+      if (timeInState >= jumpingGoal.getSupportDuration())
+         return true;
+
+      return areLegsStraight();
+   }
+
+   private boolean areLegsStraight()
+   {
+      double minKneeAngle = Double.POSITIVE_INFINITY;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         minKneeAngle = Math.min(minKneeAngle, controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH).getQ());
+      }
+
+      return minKneeAngle <= jumpingParameters.getMinKneeAngleForTakeOff();
    }
 }

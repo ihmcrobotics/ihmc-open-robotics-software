@@ -14,14 +14,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JumpingFlightState extends JumpingState
 {
-   private static final double swingHeight = 0.2;
+   private static final double swingHeight = 0.4;
    private final JumpingControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final JumpingBalanceManager balanceManager;
    private final JumpingFeetManager feetManager;
 
-   private final JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters;
+   private final JumpingParameters jumpingParameters;
    private final JumpingGoalHandler jumpingGoalHandler;
 
    private final JumpingGoal jumpingGoal = new JumpingGoal();
@@ -30,7 +30,7 @@ public class JumpingFlightState extends JumpingState
                              JumpingControllerToolbox controllerToolbox,
                              JumpingControlManagerFactory managerFactory,
                              WalkingFailureDetectionControlModule failureDetectionControlModule,
-                             JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
+                             JumpingParameters jumpingParameters,
                              YoRegistry parentRegistry)
    {
       super(JumpingStateEnum.FLIGHT, parentRegistry);
@@ -38,7 +38,7 @@ public class JumpingFlightState extends JumpingState
       this.jumpingGoalHandler = jumpingGoalHandler;
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.jumpingCoPTrajectoryParameters = jumpingCoPTrajectoryParameters;
+      this.jumpingParameters = jumpingParameters;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       feetManager = managerFactory.getOrCreateFeetManager();
@@ -84,7 +84,7 @@ public class JumpingFlightState extends JumpingState
          if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
             width = robotSide.negateIfRightSide(0.5 * jumpingGoal.getGoalFootWidth());
          else
-            width = robotSide.negateIfRightSide(0.5 * jumpingCoPTrajectoryParameters.getDefaultFootWidth());
+            width = robotSide.negateIfRightSide(0.5 * jumpingParameters.getDefaultFootWidth());
 
          footGoalPose.setY(width);
          footGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -93,7 +93,7 @@ public class JumpingFlightState extends JumpingState
          if (!Double.isNaN(jumpingGoal.getFlightDuration()))
             flightDuration = jumpingGoal.getFlightDuration();
          else
-            flightDuration = jumpingCoPTrajectoryParameters.getDefaultFlightDuration();
+            flightDuration = jumpingParameters.getDefaultFlightDuration();
          feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
          controllerToolbox.setFootContactStateFree(robotSide);
       }
@@ -114,7 +114,7 @@ public class JumpingFlightState extends JumpingState
    {
       // TODO check for both feet being in contact
 
-      double desiredFlightDuration = Double.isNaN(jumpingGoal.getFlightDuration()) ? jumpingCoPTrajectoryParameters.getDefaultFlightDuration() : jumpingGoal.getFlightDuration();
+      double desiredFlightDuration = Double.isNaN(jumpingGoal.getFlightDuration()) ? jumpingParameters.getDefaultFlightDuration() : jumpingGoal.getFlightDuration();
       if (timeInState >= desiredFlightDuration)
          return true;
       else

@@ -15,6 +15,7 @@ public class TransferToJumpingStandingState extends JumpingState
 
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
+   private final JumpingFeetManager feetManager;
 
    private final FramePoint3D leftFootPosition = new FramePoint3D();
    private final FramePoint3D rightFootPosition = new FramePoint3D();
@@ -33,6 +34,7 @@ public class TransferToJumpingStandingState extends JumpingState
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
+      feetManager = managerFactory.getOrCreateFeetManager();
    }
 
    @Override
@@ -50,6 +52,9 @@ public class TransferToJumpingStandingState extends JumpingState
    @Override
    public void onEntry()
    {
+      for (RobotSide robotSide : RobotSide.values)
+         feetManager.setFlatFootContactState(robotSide);
+
       balanceManager.clearICPPlan();
 
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states

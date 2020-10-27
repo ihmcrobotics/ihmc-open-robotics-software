@@ -5,10 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -51,7 +48,7 @@ public class JumpingSimulationController implements RobotController
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final JumpingControllerState controller;
-   private final StateEstimatorController estimator;
+//   private final StateEstimatorController estimator;
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidFloatingRootJointRobot humanoidRobotModel;
    private final YoDouble time;
@@ -132,10 +129,10 @@ public class JumpingSimulationController implements RobotController
       estimatorFactory.setCenterOfPressureDataHolderFromController(new CenterOfPressureDataHolder(this.fullRobotModel));
       estimatorFactory.setRobotMotionStatusFromController(new RobotMotionStatusHolder());
 
-      YoRegistry stateEstimatorRegistry = new YoRegistry("stateEstimatorRegistry");
-      estimator = estimatorFactory.createStateEstimator(stateEstimatorRegistry, yoGraphicsListRegistry);
-      registry.addChild(stateEstimatorRegistry);
-      registry.addChild(estimator.getYoRegistry());
+//      YoRegistry stateEstimatorRegistry = new YoRegistry("stateEstimatorRegistry");
+//      estimator = estimatorFactory.createStateEstimator(stateEstimatorRegistry, yoGraphicsListRegistry);
+//      registry.addChild(stateEstimatorRegistry);
+//      registry.addChild(estimator.getYoRegistry());
 
       // Create the jumping controller
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(this.fullRobotModel);
@@ -174,6 +171,7 @@ public class JumpingSimulationController implements RobotController
 //      controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
 
       JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters = new JumpingCoPTrajectoryParameters(registry);
+      JumpingParameters jumpingParameters = new JumpingParameters(registry);
       JumpingControlManagerFactory managerFactory = new JumpingControlManagerFactory(registry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCoPTrajectoryParameters(robotModel.getCoPTrajectoryParameters());
@@ -185,8 +183,8 @@ public class JumpingSimulationController implements RobotController
                                               controllerToolbox,
                                               robotModel.getHighLevelControllerParameters(),
                                               robotModel.getWalkingControllerParameters(),
-                                              robotModel.getCoPTrajectoryParameters(),
-                                              jumpingCoPTrajectoryParameters);
+                                              jumpingCoPTrajectoryParameters,
+                                              jumpingParameters);
       registry.addChild(controller.getYoRegistry());
 
       // Set up the output writer
@@ -226,7 +224,7 @@ public class JumpingSimulationController implements RobotController
    public void initialize()
    {
       sensorReader.initialize();
-      estimator.initialize();
+//      estimator.initialize();
       controller.initialize();
       outputWriter.initialize();
 
@@ -248,7 +246,7 @@ public class JumpingSimulationController implements RobotController
 
       sensorReader.read();
 
-      estimator.doControl();
+//      estimator.doControl();
       controller.doAction(time.getDoubleValue());
 
       outputWriter.write();
