@@ -267,10 +267,6 @@ public class JumpingBalanceManager
 
    public void initializeCoMPlanForFlight(JumpingGoal jumpingGoal)
    {
-      copTrajectoryState.setInitialCoP(yoPerfectVRP);
-      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 

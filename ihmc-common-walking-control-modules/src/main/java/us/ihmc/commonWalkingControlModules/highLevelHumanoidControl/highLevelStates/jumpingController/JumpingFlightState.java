@@ -113,7 +113,9 @@ public class JumpingFlightState extends JumpingState
          else
             flightDuration = jumpingCoPTrajectoryParameters.getDefaultFlightDuration();
          feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
+         controllerToolbox.setFootContactStateFree(robotSide);
       }
+
 //      if (pelvisOrientationManager != null)
 //         pelvisOrientationManager.initializeStanding();
 
