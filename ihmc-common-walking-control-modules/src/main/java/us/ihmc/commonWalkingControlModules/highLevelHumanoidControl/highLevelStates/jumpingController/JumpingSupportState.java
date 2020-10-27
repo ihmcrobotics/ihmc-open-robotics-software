@@ -22,7 +22,6 @@ public class JumpingSupportState extends JumpingState
 
    private final JumpingBalanceManager balanceManager;
    private final JumpingPelvisOrientationManager pelvisOrientationManager;
-   private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    public JumpingSupportState(JumpingGoalHandler jumpingGoalHandler,
                               JumpingControllerToolbox controllerToolbox,
@@ -37,23 +36,6 @@ public class JumpingSupportState extends JumpingState
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
-
-      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      if (chest != null)
-      {
-         ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            if (hand != null)
-            {
-               ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
-               handManagers.put(robotSide, handManager);
-            }
-         }
-      }
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
    }
@@ -78,12 +60,6 @@ public class JumpingSupportState extends JumpingState
          pelvisOrientationManager.initializeStanding();
 
 //      failureDetectionControlModule.setNextFootstep(null);
-   }
-
-   @Override
-   public void onExit()
-   {
-
    }
 
    @Override

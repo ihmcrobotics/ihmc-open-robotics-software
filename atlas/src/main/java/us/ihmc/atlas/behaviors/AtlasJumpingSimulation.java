@@ -20,7 +20,9 @@ import java.util.List;
 
 public class AtlasJumpingSimulation
 {
-   private static double jumpLength = 0.5;
+   private static double jumpLength = 0.0;
+   private static double flightDuration = 0.3;
+   private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public static void main(String[] args)
    {
@@ -31,7 +33,7 @@ public class AtlasJumpingSimulation
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       AtlasSimInitialSetup initialSetup = new AtlasSimInitialSetup();
       JumpingSimulationFactory simulationFactory = new JumpingSimulationFactory(robotModel, initialSetup, commandInputManager);
-      SimulationConstructionSet scs = simulationFactory.createSimulation();
+      SimulationConstructionSet scs = simulationFactory.createSimulation(parameterResourceName);
 
       YoRegistry registry = scs.getRootRegistry();
       YoBoolean triggerJump = new YoBoolean("triggerJump", registry);
@@ -46,6 +48,7 @@ public class AtlasJumpingSimulation
 
                                     JumpingGoal jumpingGoal = new JumpingGoal();
                                     jumpingGoal.setGoalLength(jumpLength);
+                                    jumpingGoal.setFlightDuration(flightDuration);
                                     commandInputManager.submitCommand(jumpingGoal);
                                  }
                               });

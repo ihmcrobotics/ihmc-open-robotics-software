@@ -9,6 +9,8 @@ public class JumpingMomentumRateControlModuleInput
 {
    private double omega0;
    private double timeInState;
+   private boolean minimizeAngularMomentumRate;
+   private boolean inFlight;
    private List<Trajectory3D> vrpTrajectories;
 
    public void setOmega0(double omega0)
@@ -31,6 +33,26 @@ public class JumpingMomentumRateControlModuleInput
       return timeInState;
    }
 
+   public void setMinimizeAngularMomentumRate(boolean minimizeAngularMomentumRate)
+   {
+      this.minimizeAngularMomentumRate = minimizeAngularMomentumRate;
+   }
+
+   public boolean getMinimizeAngularMomentumRate()
+   {
+      return minimizeAngularMomentumRate;
+   }
+
+   public void setInFlight(boolean inFlight)
+   {
+      this.inFlight = inFlight;
+   }
+
+   public boolean getInFlight()
+   {
+      return inFlight;
+   }
+
    public void setVrpTrajectories(List<Trajectory3D> vrpTrajectories)
    {
       this.vrpTrajectories = vrpTrajectories;
@@ -45,7 +67,9 @@ public class JumpingMomentumRateControlModuleInput
    {
       omega0 = other.omega0;
       timeInState = other.timeInState;
+      inFlight = other.inFlight;
       vrpTrajectories = other.vrpTrajectories;
+      minimizeAngularMomentumRate = other.minimizeAngularMomentumRate;
    }
 
    @Override
@@ -61,6 +85,10 @@ public class JumpingMomentumRateControlModuleInput
          if (Double.compare(omega0, other.omega0) != 0)
             return false;
          if (Double.compare(timeInState, other.timeInState) != 0)
+            return false;
+         if (minimizeAngularMomentumRate != other.minimizeAngularMomentumRate)
+            return false;
+         if (inFlight != other.inFlight)
             return false;
          if (vrpTrajectories.size() != other.vrpTrajectories.size())
             return false;

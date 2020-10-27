@@ -29,6 +29,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class JumpingMomentumRateControlModule
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
+   private boolean inFlight = false;
    private double omega0 = 3.0;
    private double totalMass;
    private double timeInContactPhase;
@@ -63,6 +65,7 @@ public class JumpingMomentumRateControlModule
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
+   private final FrameVector3D angularMomentumRateOfChange = new FrameVector3D();
 
    private final LQRMomentumController lqrMomentumController;
 
@@ -70,6 +73,7 @@ public class JumpingMomentumRateControlModule
    private final YoFramePoint3D yoDesiredVRP = new YoFramePoint3D("desiredVRP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
+   private final YoBoolean minimizeAngularMomentumRate = new YoBoolean("minimizeAngularMomentumRate", registry);
 
    private final JumpingControllerToolbox controllerToolbox;
 
@@ -83,6 +87,8 @@ public class JumpingMomentumRateControlModule
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
+
+      minimizeAngularMomentumRate.set(true);
 
       centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", worldFrame, registry);
@@ -114,9 +120,11 @@ public class JumpingMomentumRateControlModule
 
    public void setInputFromWalkingStateMachine(JumpingMomentumRateControlModuleInput input)
    {
+      this.inFlight = input.getInFlight();
       this.omega0 = input.getOmega0();
       this.timeInContactPhase = input.getTimeInState();
       this.vrpTrajectories = input.getVrpTrajectories();
+      this.minimizeAngularMomentumRate.set(input.getMinimizeAngularMomentumRate());
    }
 
    public void setInputFromControllerCore(ControllerCoreOutput controllerCoreOutput)
@@ -139,10 +147,13 @@ public class JumpingMomentumRateControlModule
       yoCenterOfMass.get(currentState);
       yoCenterOfMassVelocity.get(3, currentState);
 
-      computeICPController();
       computeDesiredLinearMomentumRateOfChange();
+      computeDesiredAngularMomentumRateOfChange();
 
-      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.resetSelection();
+      if (!minimizeAngularMomentumRate.getBooleanValue())
+         selectionMatrix.setToLinearSelectionOnly();
+
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
@@ -170,16 +181,16 @@ public class JumpingMomentumRateControlModule
       yoAchievedCMP.set(achievedCMP);
    }
 
-   private void computeICPController()
+   private void computeDesiredLinearMomentumRateOfChange()
    {
       lqrMomentumController.setOmega(omega0);
       lqrMomentumController.setVRPTrajectory(vrpTrajectories);
       lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
-   }
 
-   private void computeDesiredLinearMomentumRateOfChange()
-   {
-      linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+      if (inFlight)
+         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
+      else
+         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
 
       controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
 
@@ -188,4 +199,11 @@ public class JumpingMomentumRateControlModule
 
       yoDesiredVRP.set(lqrMomentumController.getFeedbackVRPPosition());
    }
+
+   private void computeDesiredAngularMomentumRateOfChange()
+   {
+      angularMomentumRateOfChange.setToZero(centerOfMassFrame);
+      angularMomentumRateOfChange.changeFrame(worldFrame);
+   }
+
 }

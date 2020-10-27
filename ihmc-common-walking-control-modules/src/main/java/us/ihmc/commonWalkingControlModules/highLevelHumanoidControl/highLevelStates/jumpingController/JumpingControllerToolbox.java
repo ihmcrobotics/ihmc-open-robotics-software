@@ -132,7 +132,7 @@ public class JumpingControllerToolbox
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       finalTransferTime = new YoDouble("finalTransferTime", registry);
-      finalTransferTime.set(walkingControllerParameters.getDefaultFinalTransferTime());
+      finalTransferTime.set(0.25);
 
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, yoGraphicsListRegistry);
 
