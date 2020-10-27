@@ -101,14 +101,8 @@ public class JumpingFootControlModule
                                                                             defaultTouchdownVelocity,
                                                                             registry);
 
-      Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration",
-                                                                                ReferenceFrame.getWorldFrame(),
-                                                                                defaultTouchdownAcceleration,
-                                                                                registry);
-
       supportState = new JumpingSupportFootState(footControlHelper, registry);
-      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
+      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
@@ -171,11 +165,6 @@ public class JumpingFootControlModule
    {
       swingState.setWeights(footAngularWeight, footLinearWeight);
       supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
-   }
-
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      swingState.setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
    }
 
    public void setContactState(ConstraintType constraintType)
