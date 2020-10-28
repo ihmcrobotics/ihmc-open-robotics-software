@@ -6,8 +6,8 @@
                 <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                 <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                 <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
-                <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
         </registry>
@@ -52,7 +52,7 @@
             <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
         </registry>
         <registry name="JointspaceGains">
-            <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
+            <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
             <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
             <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
             <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>

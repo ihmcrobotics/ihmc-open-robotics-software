@@ -60,6 +60,7 @@ public class JumpingSupportState extends JumpingState
 
       balanceManager.setDesiredCoMHeight(controllerToolbox.getStandingHeight());
       balanceManager.initializeCoMPlanForSupport(jumpingGoal);
+      balanceManager.setMinimizeAngularMomentumRate(true);
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.initializeStanding();
