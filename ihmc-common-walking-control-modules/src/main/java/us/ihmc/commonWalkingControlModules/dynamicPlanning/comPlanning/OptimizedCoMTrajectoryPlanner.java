@@ -128,6 +128,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
+   private final YoBoolean maintainInitialCoMVelocityContinuity = new YoBoolean("maintainInitialCoMVelocityContinuity", registry);
    private final YoFramePoint3D finalDCMPosition = new YoFramePoint3D("goalDCMPosition", worldFrame, registry);
 
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
@@ -178,6 +179,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    public void setMaintainInitialCoMVelocityContinuity(boolean maintainInitialCoMVelocityContinuity)
    {
+      this.maintainInitialCoMVelocityContinuity.set(maintainInitialCoMVelocityContinuity);
    }
 
    public void setCornerPointViewer(CornerPointViewer viewer)
