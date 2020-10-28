@@ -3,16 +3,16 @@ package us.ihmc.tools.saveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public abstract class SaveableModule<T extends SaveableModuleState>
+public abstract class YoSaveableModule<T extends YoSaveableModuleState>
 {
    public T state;
 
-   public SaveableModule(Class<? extends SaveableModule> moduleName, YoRegistry registry)
+   public YoSaveableModule(Class<? extends YoSaveableModule> moduleName, YoRegistry registry)
    {
       this(moduleName.getSimpleName(), registry);
    }
 
-   public SaveableModule(String moduleName, YoRegistry registry)
+   public YoSaveableModule(String moduleName, YoRegistry registry)
    {
       YoBoolean saveStateFileTrigger = new YoBoolean(moduleName + "SaveStateFileTrigger", registry);
       saveStateFileTrigger.addListener((v) ->
@@ -22,7 +22,7 @@ public abstract class SaveableModule<T extends SaveableModuleState>
                                              saveStateFileTrigger.set(false, false);
                                              try
                                              {
-                                                SaveableModuleStateTools.save(moduleName, state);
+                                                YoSaveableModuleStateTools.save(moduleName, state);
                                              }
                                              catch (Exception e)
                                              {

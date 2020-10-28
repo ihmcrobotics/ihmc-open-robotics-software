@@ -23,7 +23,7 @@ import java.util.Random;
 
 public class CoPTrajectoryGeneratorTestTools
 {
-   static void assertFootstepEqual(Footstep footstepExpected, PlanningFootstep footstep, double epsilon)
+   static void assertFootstepEqual(Footstep footstepExpected, DynamicPlanningFootstep footstep, double epsilon)
    {
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
                                                                  footstep.getFootstepPose().getPosition(),
@@ -45,7 +45,7 @@ public class CoPTrajectoryGeneratorTestTools
       }
    }
 
-   static void assertFootstepEqual(PlanningFootstep footstepExpected, PlanningFootstep footstep, double epsilon)
+   static void assertFootstepEqual(DynamicPlanningFootstep footstepExpected, DynamicPlanningFootstep footstep, double epsilon)
    {
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(footstepExpected.getFootstepPose().getPosition(),
                                                                  footstep.getFootstepPose().getPosition(),
@@ -109,9 +109,9 @@ public class CoPTrajectoryGeneratorTestTools
       return footstep;
    }
 
-   static PlanningFootstep getRandomPlanningFootstep(Random random)
+   static DynamicPlanningFootstep getRandomPlanningFootstep(Random random)
    {
-      PlanningFootstep footstep = new PlanningFootstep("", new YoRegistry("test"));
+      DynamicPlanningFootstep footstep = new DynamicPlanningFootstep("", new YoRegistry("test"));
       footstep.set(getRandomFootstep(random));
 
       return footstep;

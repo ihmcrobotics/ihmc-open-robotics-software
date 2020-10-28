@@ -6,8 +6,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,16 +15,16 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
 
-public class PlanningFootstep extends SaveableModuleState
+public class DynamicPlanningFootstep extends YoSaveableModuleState
 {
    private final YoPreallocatedList<YoPoint2D> predictedContactPoints;
    private final YoFramePose3D footstepPose;
    private final YoEnum<RobotSide> stepSide;
 
-   public PlanningFootstep(String suffix, YoRegistry registry)
+   public DynamicPlanningFootstep(String suffix, YoRegistry registry)
    {
       footstepPose = new YoFramePose3D("footstepPose" + suffix, ReferenceFrame.getWorldFrame(), registry);
-      SaveableModuleStateTools.registerYoFramePose3DToSave(footstepPose, this);
+      YoSaveableModuleStateTools.registerYoFramePose3DToSave(footstepPose, this);
       predictedContactPoints = new YoPreallocatedList<>(YoPoint2D.class, () -> createYoContactPoint(suffix, registry), "footstep" + suffix + "ContactPoint", registry, 6);
       registerVariableToSave(predictedContactPoints.getYoPosition());
       stepSide = new YoEnum<>("stepSide" + suffix, registry, RobotSide.class);
@@ -38,7 +38,7 @@ public class PlanningFootstep extends SaveableModuleState
    private YoPoint2D createYoContactPoint(String suffix, YoRegistry registry)
    {
       YoPoint2D point = new YoPoint2D("footstep" + suffix + "ContactPoint" + contactPointCounter++, registry);
-      SaveableModuleStateTools.registerYoTuple2DToSave(point, this);
+      YoSaveableModuleStateTools.registerYoTuple2DToSave(point, this);
       return point;
    }
 

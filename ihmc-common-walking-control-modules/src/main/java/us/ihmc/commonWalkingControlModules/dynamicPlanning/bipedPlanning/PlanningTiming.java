@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PlanningTiming extends SaveableModuleState
+public class PlanningTiming extends YoSaveableModuleState
 {
    /** The nominal swing duration of a footstep as specified in the FootstepData */
    private final YoDouble swingTime;

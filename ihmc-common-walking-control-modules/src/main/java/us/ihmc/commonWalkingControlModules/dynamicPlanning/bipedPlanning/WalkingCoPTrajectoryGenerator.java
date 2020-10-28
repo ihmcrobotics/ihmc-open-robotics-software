@@ -244,7 +244,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          // Compute all the upcoming waypoints
          for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
          {
-            PlanningFootstep footstep = state.getFootstep(footstepIndex);
+            DynamicPlanningFootstep footstep = state.getFootstep(footstepIndex);
             PlanningTiming timings = state.getTiming(footstepIndex);
             PlanningShiftFraction shiftFraction = state.getShiftFraction(footstepIndex);
             RobotSide swingSide = footstep.getRobotSide();
@@ -311,7 +311,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       return contactStateProviders;
    }
 
-   private ReferenceFrame extractStepFrame(PlanningFootstep footstep)
+   private ReferenceFrame extractStepFrame(DynamicPlanningFootstep footstep)
    {
       PoseReferenceFrame stepFrame = stepFrames.get(footstep.getRobotSide()).add();
       stepFrame.setPoseAndUpdate(footstep.getFootstepPose());
@@ -319,7 +319,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       return stepFrame;
    }
 
-   private void extractSupportPolygon(PlanningFootstep footstep,
+   private void extractSupportPolygon(DynamicPlanningFootstep footstep,
                                       ReferenceFrame stepFrame,
                                       FrameConvexPolygon2DBasics footSupportPolygonToPack,
                                       ConvexPolygon2DReadOnly defaultSupportPolygon)

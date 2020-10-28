@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import us.ihmc.tools.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class YoSplitFractionCalculatorParameters extends SaveableModuleState implements SplitFractionCalculatorParametersReadOnly
+public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState implements SplitFractionCalculatorParametersReadOnly
 {
    private final BooleanParameter computeSplitFractionsFromPositions;
    private final BooleanParameter computeSplitFractionsFromArea;
