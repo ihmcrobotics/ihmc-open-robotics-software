@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -16,7 +15,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
@@ -73,7 +72,7 @@ public class CoPTrajectoryGeneratorStateTest
          stateA.initializeStance(RobotSide.LEFT, randomLeftFootPolygon, soleFrames.get(RobotSide.LEFT));
          stateA.initializeStance(RobotSide.RIGHT, randomRightFootPolygon, soleFrames.get(RobotSide.RIGHT));
 
-         stateB.loadValues(SaveableModuleStateTools.readSaveableRegistryToDataMap(SaveableModuleStateTools.writeStateToSaveableRegistry(stateA)));
+         stateB.loadValues(YoSaveableModuleStateTools.readSaveableRegistryToDataMap(YoSaveableModuleStateTools.writeStateToSaveableRegistry(stateA)));
 
          EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming0, stateB.getTiming(0), epsilon);
