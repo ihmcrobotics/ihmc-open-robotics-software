@@ -106,6 +106,8 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    final DMatrixSparseCSC yCoefficientVector = new DMatrixSparseCSC(0, 1);
    final DMatrixSparseCSC zCoefficientVector = new DMatrixSparseCSC(0, 1);
 
+   private final List<CoMTrajectoryPlanningCostPolicy> costPolicies = new ArrayList<>();
+
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
@@ -321,6 +323,10 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       CommonOps_DSCC.innerProductLower(coefficientJacobian, lowerTriangularHessian, gw, gx);
       CommonOps_DSCC.symmLowerToFull(lowerTriangularHessian, hessian, gw );
 
+      CommonOps_DSCC.multTransA(coefficientJacobian, xEquivalents, xGradient, gw, gx);
+      CommonOps_DSCC.multTransA(coefficientJacobian, yEquivalents, yGradient, gw, gx);
+      CommonOps_DSCC.multTransA(coefficientJacobian, zEquivalents, zGradient, gw, gx);
+
       for (int segment = 0; segment < numberOfPhases; segment++)
       {
          double duration = contactSequence.get(segment).getTimeInterval().getDuration();
@@ -328,9 +334,8 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
          CoMTrajectoryPlannerTools.addMinimizeCoMJerkObjective(VERY_LOW_WEIGHT, 0.0, duration, omega.getValue(), segment, hessian);
       }
 
-      CommonOps_DSCC.multTransA(coefficientJacobian, xEquivalents, xGradient, gw, gx);
-      CommonOps_DSCC.multTransA(coefficientJacobian, yEquivalents, yGradient, gw, gx);
-      CommonOps_DSCC.multTransA(coefficientJacobian, zEquivalents, zGradient, gw, gx);
+      for (int i = 0; i < costPolicies.size(); i++)
+         costPolicies.get(i).assessPolicy(this, contactSequence, hessian, xGradient, yGradient, zGradient);
 
       sparseSolver.setA(hessian);
       sparseSolver.solveSparse(xGradient, xCoefficientVector);
