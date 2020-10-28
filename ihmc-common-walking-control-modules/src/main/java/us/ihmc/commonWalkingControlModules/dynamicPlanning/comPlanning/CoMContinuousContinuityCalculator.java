@@ -178,13 +178,13 @@ public class CoMContinuousContinuityCalculator implements CoMContinuityCalculato
 
       sparseSolver.setA(coefficientMultipliersSparse);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpXWaypoints, tempSparse);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpXWaypoints, tempSparse, gw, gx);
       CommonOps_DSCC.add(1.0, tempSparse, 1.0, xConstants, xEquivalents, gw, gx);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpYWaypoints, tempSparse);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpYWaypoints, tempSparse, gw, gx);
       CommonOps_DSCC.add(1.0, tempSparse, 1.0, yConstants, yEquivalents, gw, gx);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpZWaypoints, tempSparse);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpZWaypoints, tempSparse, gw, gx);
       CommonOps_DSCC.add(1.0, tempSparse, 1.0, zConstants, zEquivalents, gw, gx);
 
       sparseSolver.solveSparse(xEquivalents, xCoefficientVector);
