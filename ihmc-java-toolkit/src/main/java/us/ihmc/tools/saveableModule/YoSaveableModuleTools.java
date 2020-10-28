@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-public class SaveableModuleTools
+public class YoSaveableModuleTools
 {
    static File ensureFileExists(File file)
    {

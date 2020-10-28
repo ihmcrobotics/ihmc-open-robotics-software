@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PlanningShiftFraction extends SaveableModuleState
+public class PlanningShiftFraction extends YoSaveableModuleState
 {
    /** The nominal fraction of the swing duration of a footstep as specified in the FootstepData that is spent shifting the CoP from the heel to the toe.*/
    private final YoDouble swingDurationShiftFraction;

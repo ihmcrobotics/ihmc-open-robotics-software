@@ -23,26 +23,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SaveableModuleStateTools
+public class YoSaveableModuleStateTools
 {
    private static final Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
    private static final String testFormatPostfix = "_Log";
 
-   public static void registerYoTuple3DToSave(YoTuple3D framePoint3D, SaveableModuleState state)
+   public static void registerYoTuple3DToSave(YoTuple3D framePoint3D, YoSaveableModuleState state)
    {
       state.registerVariableToSave(framePoint3D.getYoX());
       state.registerVariableToSave(framePoint3D.getYoY());
       state.registerVariableToSave(framePoint3D.getYoZ());
    }
 
-   public static void registerYoTuple2DToSave(YoTuple2D framePoint2D, SaveableModuleState state)
+   public static void registerYoTuple2DToSave(YoTuple2D framePoint2D, YoSaveableModuleState state)
    {
       state.registerVariableToSave(framePoint2D.getYoX());
       state.registerVariableToSave(framePoint2D.getYoY());
    }
 
-   public static void registerYoFrameQuaternionToSave(YoFrameQuaternion frameQuaternion, SaveableModuleState state)
+   public static void registerYoFrameQuaternionToSave(YoFrameQuaternion frameQuaternion, YoSaveableModuleState state)
    {
       state.registerVariableToSave(frameQuaternion.getYoQs());
       state.registerVariableToSave(frameQuaternion.getYoQx());
@@ -50,18 +50,18 @@ public class SaveableModuleStateTools
       state.registerVariableToSave(frameQuaternion.getYoQz());
    }
 
-   public static void registerYoFramePose3DToSave(YoFramePose3D framePose3D, SaveableModuleState state)
+   public static void registerYoFramePose3DToSave(YoFramePose3D framePose3D, YoSaveableModuleState state)
    {
       registerYoTuple3DToSave(framePose3D.getPosition(), state);
       registerYoFrameQuaternionToSave(framePose3D.getOrientation(), state);
    }
 
-   public static void save(String moduleName, SaveableModuleState state)
+   public static void save(String moduleName, YoSaveableModuleState state)
    {
       JFileChooser fileChooser = new JFileChooser();
       Path directory = rootPath;
       File logDirectory = new File(directory.toString());
-      SaveableModuleTools.ensureFileExists(logDirectory);
+      YoSaveableModuleTools.ensureFileExists(logDirectory);
       File fileToSave = new File(moduleName + dateFormat.format(new Date()) + testFormatPostfix + File.separator);
 
       fileChooser.setCurrentDirectory(logDirectory);
@@ -77,14 +77,14 @@ public class SaveableModuleStateTools
       save(file, state);
    }
 
-   public static void save(File fileToSaveTo, SaveableModuleState stateToSave)
+   public static void save(File fileToSaveTo, YoSaveableModuleState stateToSave)
    {
       if (fileToSaveTo == null)
          throw new IllegalArgumentException("File has not been set.");
       if (stateToSave == null)
          throw new IllegalArgumentException("State has not been set.");
 
-      SaveableModuleTools.ensureFileExists(fileToSaveTo);
+      YoSaveableModuleTools.ensureFileExists(fileToSaveTo);
 
       try
       {
@@ -98,12 +98,12 @@ public class SaveableModuleStateTools
       }
    }
 
-   public static void load(SaveableModuleState state)
+   public static void load(YoSaveableModuleState state)
    {
       JFileChooser fileChooser = new JFileChooser();
       Path directory = rootPath;
       File logDirectory = new File(directory.toString());
-      SaveableModuleTools.ensureFileExists(logDirectory);
+      YoSaveableModuleTools.ensureFileExists(logDirectory);
 
       fileChooser.setCurrentDirectory(logDirectory);
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -117,7 +117,7 @@ public class SaveableModuleStateTools
       load(file, state);
    }
 
-   public static void load(File fileToLoad, SaveableModuleState stateToLoad)
+   public static void load(File fileToLoad, YoSaveableModuleState stateToLoad)
    {
       if (fileToLoad == null)
          throw new IllegalArgumentException("File has not been set.");
@@ -136,7 +136,7 @@ public class SaveableModuleStateTools
       }
    }
 
-   public static SaveableRegistry writeStateToSaveableRegistry(SaveableModuleState stateToSave)
+   public static SaveableRegistry writeStateToSaveableRegistry(YoSaveableModuleState stateToSave)
    {
       SaveableRegistry registry = new SaveableRegistry(stateToSave.getClass().getSimpleName());
       List<YoParameter> parameters = stateToSave.getParametersToSave();
@@ -186,7 +186,7 @@ public class SaveableModuleStateTools
       }
    }
 
-   private static void writeStream(OutputStream outputStream, SaveableModuleState stateToSave) throws IOException
+   private static void writeStream(OutputStream outputStream, YoSaveableModuleState stateToSave) throws IOException
    {
       try
       {

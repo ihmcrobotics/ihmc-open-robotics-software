@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class SaveableModuleState
+public abstract class YoSaveableModuleState
 {
    private final List<YoParameter> yoParameters = new ArrayList<>();
    private final List<YoVariable> yoVariables = new ArrayList<>();
@@ -25,7 +25,7 @@ public abstract class SaveableModuleState
       yoParameters.add(doubleParameter);
    }
 
-   public void registerStateToSave(SaveableModuleState other)
+   public void registerStateToSave(YoSaveableModuleState other)
    {
       for (int i = 0; i < other.getParametersToSave().size(); i++)
          yoParameters.add(other.getParametersToSave().get(i));

@@ -93,7 +93,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactStateProvider.setStartTime(0.0);
       contactStateProvider.setStartCopPosition(state.getInitialCoP());
 
-      PlanningFootstep footstep = state.getFootstep(0);
+      DynamicPlanningFootstep footstep = state.getFootstep(0);
       PlanningTiming timings = state.getTiming(0);
       PlanningShiftFraction shiftFraction = state.getShiftFraction(0);
       RobotSide supportSide = footstep.getRobotSide().getOppositeSide();

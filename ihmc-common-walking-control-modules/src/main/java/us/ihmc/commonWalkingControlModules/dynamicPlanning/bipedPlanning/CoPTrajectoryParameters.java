@@ -5,18 +5,13 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
-import us.ihmc.yoVariables.euclid.YoVector2D;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
-public class CoPTrajectoryParameters extends SaveableModuleState
+public class CoPTrajectoryParameters extends YoSaveableModuleState
 {
    private static final double defaultMinimumDistanceInsidePolygon = 0.01;
 

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -126,7 +126,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       copTrajectory.registerState(state);
       state.registerStateToSave(parameters);
 
-      SaveableModuleStateTools.load(state);
+      YoSaveableModuleStateTools.load(state);
 
       copTrajectory.compute(state);
       CoPTrajectoryVisualizer.visualize(copTrajectory);

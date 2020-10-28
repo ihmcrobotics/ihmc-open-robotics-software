@@ -9,8 +9,8 @@ import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -21,9 +21,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoPTrajectoryGeneratorState extends SaveableModuleState
+public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 {
-   private final YoPreallocatedList<PlanningFootstep> footsteps;
+   private final YoPreallocatedList<DynamicPlanningFootstep> footsteps;
    private final YoPreallocatedList<PlanningTiming> footstepTimings;
    private final YoPreallocatedList<PlanningShiftFraction> footstepShiftFractions;
 
@@ -40,7 +40,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
 
    public CoPTrajectoryGeneratorState(YoRegistry registry)
    {
-      footsteps = new YoPreallocatedList<>(PlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
+      footsteps = new YoPreallocatedList<>(DynamicPlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
       footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, 3);
       footstepShiftFractions = new YoPreallocatedList<>(PlanningShiftFraction.class, () -> createShiftFractions(registry), "footstepShiftFraction", registry, 3);
       registerVariableToSave(footsteps.getYoPosition());
@@ -59,12 +59,12 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       percentageStandingWeightDistributionOnLeftFoot.set(0.5);
 
       initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
-      SaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
+      YoSaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
-         SaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
+         YoSaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
          footPoses.put(robotSide, footPose);
 
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseName() + "SoleFrame", footPose);
@@ -77,7 +77,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
          for (int i = 0; i < 6; i++)
          {
             YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrame, registry);
-            SaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
+            YoSaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
             vertexBuffer.add(vertex);
          }
          YoInteger numberOfVertices = new YoInteger(prefix + "NumVertices", registry);
@@ -113,7 +113,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       return initialCoP;
    }
 
-   public PlanningFootstep getFootstep(int index)
+   public DynamicPlanningFootstep getFootstep(int index)
    {
       return footsteps.get(index);
    }
@@ -221,9 +221,9 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
 
    private int footstepCounter = 0;
 
-   private PlanningFootstep createFootstep(YoRegistry registry)
+   private DynamicPlanningFootstep createFootstep(YoRegistry registry)
    {
-      PlanningFootstep footstep = new PlanningFootstep("" + footstepCounter++, registry);
+      DynamicPlanningFootstep footstep = new DynamicPlanningFootstep("" + footstepCounter++, registry);
       registerStateToSave(footstep);
       return footstep;
    }
