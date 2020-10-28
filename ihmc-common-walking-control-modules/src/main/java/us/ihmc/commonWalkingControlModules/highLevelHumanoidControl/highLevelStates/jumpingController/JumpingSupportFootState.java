@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -60,10 +59,10 @@ public class JumpingSupportFootState implements JumpingFootControlState
       this.footControlHelper = footControlHelper;
       contactableFoot = footControlHelper.getContactableFoot();
 
-      controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
+      controllerToolbox = footControlHelper.getJumpingControllerToolbox();
 
       robotSide = footControlHelper.getRobotSide();
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getJumpingControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       rootBody = fullRobotModel.getElevator();
 
@@ -71,14 +70,14 @@ public class JumpingSupportFootState implements JumpingFootControlState
       registry = new YoRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);
+      footSwitch = footControlHelper.getJumpingControllerToolbox().getFootSwitches().get(robotSide);
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
 
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialAccelerationCommand.setPrimaryBase(pelvis);
 
-      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
+      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getJumpingControllerToolbox().getYoGraphicsListRegistry();
       if (graphicsListRegistry != null)
       {
          frameViz = new YoGraphicReferenceFrame(controlFrame, registry, false, 0.2);

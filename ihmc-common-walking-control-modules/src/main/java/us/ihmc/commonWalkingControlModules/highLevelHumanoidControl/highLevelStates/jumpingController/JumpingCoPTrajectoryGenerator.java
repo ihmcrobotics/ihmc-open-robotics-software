@@ -10,10 +10,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.saveableModule.SaveableModule;
+import us.ihmc.tools.saveableModule.YoSaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class JumpingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTrajectoryGeneratorState>
+public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTrajectoryGeneratorState>
 {
    private final CoPTrajectoryParameters parameters;
    private final JumpingCoPTrajectoryParameters jumpingParameters;

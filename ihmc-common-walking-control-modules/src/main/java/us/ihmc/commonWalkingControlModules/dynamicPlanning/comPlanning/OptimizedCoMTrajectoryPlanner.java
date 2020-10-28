@@ -19,6 +19,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -144,6 +147,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    private int numberOfConstraints = 0;
 
    private CornerPointViewer viewer = null;
+   private BagOfBalls comTrajectoryViewer = null;
 
    public OptimizedCoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
@@ -176,6 +180,11 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    public void setCornerPointViewer(CornerPointViewer viewer)
    {
       this.viewer = viewer;
+   }
+
+   public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      comTrajectoryViewer = new BagOfBalls(50, 0.01, YoAppearance.Black(), registry, yoGraphicsListRegistry);
    }
 
    /** {@inheritDoc} */
@@ -247,6 +256,10 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
          viewer.updateDCMCornerPoints(dcmCornerPoints);
          viewer.updateCoMCornerPoints(comCornerPoints);
          viewer.updateVRPWaypoints(vrpSegments);
+      }
+      if (comTrajectoryViewer != null)
+      {
+         updateCoMTrajectoryViewer();
       }
    }
 
@@ -359,6 +372,27 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
          vrpTrajectories.add(trajectory3D);
 
          vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
+      }
+
+      verbose = verboseBefore;
+   }
+
+   private void updateCoMTrajectoryViewer()
+   {
+      comTrajectoryViewer.reset();
+
+      boolean verboseBefore = verbose;
+      verbose = false;
+      for (int i = 0; i < comTrajectoryViewer.getNumberOfBalls(); i++)
+      {
+         double time = 0.05 * i;
+         int segmentId = getSegmentNumber(time);
+         double timeInSegment = getTimeInSegment(segmentId, time);
+
+         compute(segmentId, timeInSegment, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+
+         comTrajectoryViewer.setBall(comPositionToThrowAway);
       }
 
       verbose = verboseBefore;
