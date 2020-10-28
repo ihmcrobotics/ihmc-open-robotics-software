@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import cern.colt.function.IntDoubleFunction;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.tools.functional.IntDoubleConsumer;
 
 import java.util.function.*;
 
@@ -25,8 +27,8 @@ public class SplitFractionFromPositionCalculator
    private IntToDoubleFunction transferSplitFractionProvider;
    private DoubleConsumer finalTransferWeightDistributionConsumer;
    private DoubleConsumer finalTransferSplitFractionConsumer;
-   private IntFunction<DoubleConsumer> transferWeightDistributionConsumer;
-   private IntFunction<DoubleConsumer> transferSplitFractionConsumer;
+   private IntDoubleConsumer transferWeightDistributionConsumer;
+   private IntDoubleConsumer transferSplitFractionConsumer;
 
    public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
    {
@@ -68,12 +70,12 @@ public class SplitFractionFromPositionCalculator
       this.transferSplitFractionProvider = transferSplitFractionProvider;
    }
 
-   public void setTransferWeightDistributionConsumer(IntFunction<DoubleConsumer> transferWeightDistributionConsumer)
+   public void setTransferWeightDistributionConsumer(IntDoubleConsumer transferWeightDistributionConsumer)
    {
       this.transferWeightDistributionConsumer = transferWeightDistributionConsumer;
    }
 
-   public void setTransferSplitFractionConsumer(IntFunction<DoubleConsumer> transferSplitFractionConsumer)
+   public void setTransferSplitFractionConsumer(IntDoubleConsumer transferSplitFractionConsumer)
    {
       this.transferSplitFractionConsumer = transferSplitFractionConsumer;
    }
@@ -154,8 +156,8 @@ public class SplitFractionFromPositionCalculator
                                                                                             currentWeightDistribution,
                                                                                             defaultWeightDistribution);
 
-               transferSplitFractionConsumer.apply(stepNumber + 1).accept(splitFractionToSet);
-               transferWeightDistributionConsumer.apply(stepNumber + 1).accept(weightDistributionToSet);
+               transferSplitFractionConsumer.accept(stepNumber + 1, splitFractionToSet);
+               transferWeightDistributionConsumer.accept(stepNumber + 1, weightDistributionToSet);
             }
          }
       }
