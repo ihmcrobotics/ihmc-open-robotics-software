@@ -45,12 +45,12 @@ public class SupportSequence
    private static final int INITIAL_CAPACITY = 50;
    private static final double UNSET_TIME = -1.0;
 
+   private static final double stepLengthToDoToeOff = 0.05;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
-
-   private final CoPTrajectoryPolygonParametersReadOnly parameters;
 
    private final RecyclingArrayList<ConvexPolygon2D> supportPolygons = new RecyclingArrayList<>(INITIAL_CAPACITY, ConvexPolygon2D.class);
    private final TDoubleArrayList supportInitialTimes = new TDoubleArrayList(INITIAL_CAPACITY, UNSET_TIME);
@@ -74,23 +74,20 @@ public class SupportSequence
     */
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
 
-   public SupportSequence(CoPTrajectoryPolygonParametersReadOnly parameters,
-                          ConvexPolygon2DReadOnly defaultSupportPolygon,
+   public SupportSequence(ConvexPolygon2DReadOnly defaultSupportPolygon,
                           SideDependentList<? extends ReferenceFrame> soleFrames,
                           SideDependentList<? extends ReferenceFrame> soleZUpFrames)
    {
-      this(parameters, defaultSupportPolygon, soleFrames, soleZUpFrames, null, null, null);
+      this(defaultSupportPolygon, soleFrames, soleZUpFrames, null, null, null);
    }
 
-   public SupportSequence(CoPTrajectoryPolygonParametersReadOnly parameters,
-                          ConvexPolygon2DReadOnly defaultSupportPolygon,
+   public SupportSequence(ConvexPolygon2DReadOnly defaultSupportPolygon,
                           SideDependentList<? extends ReferenceFrame> soleFrames,
                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                           BipedSupportPolygons bipedSupportPolygons,
-                          YoRegistry parentRegistry, YoGraphicsListRegistry graphicRegistry)
+                          YoRegistry parentRegistry,
+                          YoGraphicsListRegistry graphicRegistry)
    {
-      this.parameters = parameters;
-
       if (graphicRegistry != null)
       {
          for (int i = 0; i < 10; i++)
@@ -214,7 +211,6 @@ public class SupportSequence
          footSupportInitialTimes.get(robotSide).add(0.0);
       }
 
-
       // Assemble the individual foot support trajectories for regular walking
       double stepStartTime = 0.0;
       for (int stepIndex = 0; stepIndex < footsteps.size(); stepIndex++)
@@ -224,7 +220,6 @@ public class SupportSequence
          RobotSide stepSide = footstep.getRobotSide();
 
          // Add swing - no support for foot
-         addMidStanceFootPolygon(footstep, footstepTiming, stepStartTime);
          addToeOffPolygon(footstep, footstepTiming, stepStartTime);
          footSupportSequences.get(stepSide).add().clearAndUpdate();
          footSupportInitialTimes.get(stepSide).add(stepStartTime + footstepTiming.getTransferTime());
@@ -300,27 +295,15 @@ public class SupportSequence
       stepFrame.setPoseAndUpdate(footstep.getFootstepPose());
 
       // Check if the footstep contains a partial foothold touchdown
-//      boolean doPartialFootholdTouchdown = checkForTouchdown(footstep, footstepTiming);
+      //      boolean doPartialFootholdTouchdown = checkForTouchdown(footstep, footstepTiming);
 
       // Compute the touchdown polygon in step sole frame
       FrameConvexPolygon2DBasics touchdownPolygon = footSupports.add();
 
-         touchdownPolygon.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
+      touchdownPolygon.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
       footInitialTimes.add(stepStartTime + footstepTiming.getStepTime());
-
-      // In case there was a partial touchdown polygon we need to add the full support after the touchdown is finished.
-//      if (doPartialFootholdTouchdown)
-//      {
-//         FrameConvexPolygon2D fullSupportPolygon = footSupports.add();
-//         fullSupportPolygon.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
-//         footInitialTimes.add(stepStartTime + footstepTiming.getStepTime() + footstepTiming.getTouchdownDuration());
-//      }
    }
 
-   private void addMidStanceFootPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
-   {
-
-   }
    private void addToeOffPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
    {
       RobotSide stepSide = footstep.getRobotSide();
@@ -360,8 +343,6 @@ public class SupportSequence
       System.out.println(initialTimes);
       throw new RuntimeException("Tried to add " + initialTime);
    }
-
-
 
    private final FrameConvexPolygon2D framePolygonA = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D framePolygonB = new FrameConvexPolygon2D();
@@ -451,7 +432,7 @@ public class SupportSequence
    {
       stepLocation.setToZero(swingFootStartFrame);
       stepLocation.changeFrame(stanceFrame);
-      return stepLocation.getX() < -parameters.getStepLengthToPlanToeOff();
+      return stepLocation.getX() < -stepLengthToDoToeOff;
    }
 
    private void reset()
