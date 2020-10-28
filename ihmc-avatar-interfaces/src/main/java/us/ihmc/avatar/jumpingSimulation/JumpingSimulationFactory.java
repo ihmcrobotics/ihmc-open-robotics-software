@@ -57,6 +57,7 @@ public class JumpingSimulationFactory
       SimulationConstructionSet scs = new SimulationConstructionSet(humanoidRobot);
       scsInitialSetup.initializeSimulation(scs);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.setDT(robotModel.getSimulateDT(), 1);
 
       SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
       plotterFactory.setShowOnStart(true);
