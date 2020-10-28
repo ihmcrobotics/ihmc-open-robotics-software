@@ -1,9 +1,7 @@
 package us.ihmc.avatar.ros;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -12,12 +10,12 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -29,18 +27,11 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosImuPublisher;
-import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
-import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
-import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
-import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
-import us.ihmc.utilities.ros.publisher.RosStringPublisher;
-import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
+import us.ihmc.utilities.ros.publisher.*;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable, CloseableAndDisposable
 {
@@ -50,6 +41,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final RosTfPublisher tfPublisher;
 
+   private final HashMap<RosJointStatePublisher, JointStatePublisherHelper> additionalJointStatePublisherMap = new HashMap<RosJointStatePublisher, JointStatePublisherHelper>();
+   private RosJointStatePublisher[] additionalJointStatePublishers = new RosJointStatePublisher[0];
    private final RosJointStatePublisher jointStatePublisher;
    private final RosImuPublisher[] imuPublishers;
    private final RosOdometryPublisher pelvisOdometryPublisher;
@@ -58,9 +51,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final IMUDefinition[] imuDefinitions;
-   private final int[] jointIndicesToIgnore;
-   private final List<String> rosDefaultJointNames = new ArrayList<>();
-   private final List<String> robotConfigurationDataJointNames = new ArrayList<>();
+   private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    private final RobotROSClockCalculator rosClockCalculator;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
@@ -130,27 +121,10 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       }
 
       OneDoFJointBasics[] joints = fullRobotModel.getControllableOneDoFJoints();
-      Set<String> jointsToIgnore = new HashSet<>();
-
-      for (AvatarRobotLidarParameters lidarParameters : sensorInformation.getLidarParameters())
-      {
-         String lidarSpindleJointName = lidarParameters.getLidarSpindleJointName();
-         jointsToIgnore.add(lidarSpindleJointName);
-      }
-
-      int index = 0;
-      jointIndicesToIgnore = new int[jointsToIgnore.size()];
-      Arrays.fill(jointIndicesToIgnore, -1);
-
       for (int i = 0; i < joints.length; i++)
       {
-         robotConfigurationDataJointNames.add(joints[i].getName());
-         if (jointsToIgnore.contains(joints[i].getName()))
-            jointIndicesToIgnore[index++] = i;
+         nameList.add(joints[i].getName());
       }
-
-      rosDefaultJointNames.addAll(robotConfigurationDataJointNames);
-      rosDefaultJointNames.removeAll(jointsToIgnore);
 
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
 
@@ -198,6 +172,23 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       }
    }
 
+   public void setAdditionalJointStatePublishing(String topicName, String... jointNames)
+   {
+      RosJointStatePublisher jointStatePublisher = new RosJointStatePublisher(false);
+      rosMainNode.attachPublisher(topicName, jointStatePublisher);
+
+      JointStatePublisherHelper pubData = new JointStatePublisherHelper(jointStatePublisher, jointNames);
+      additionalJointStatePublisherMap.put(jointStatePublisher, pubData);
+      rebuildKeySetArray();
+   }
+
+   private void rebuildKeySetArray()
+   {
+      Set<RosJointStatePublisher> keySet = additionalJointStatePublisherMap.keySet();
+      additionalJointStatePublishers = new RosJointStatePublisher[keySet.size()];
+      additionalJointStatePublishers = keySet.toArray(additionalJointStatePublishers);
+   }
+
    @Override
    public void run()
    {
@@ -213,24 +204,31 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             // Ignore and skip to the next loop iteration
             continue;
          }
-
-         if (robotConfigurationData.getJointNameHash() != jointNameHash)
-         {
-            throw new RuntimeException("Joint names do not match for RobotConfigurationData");
-         }
-
          if (rosMainNode.isStarted())
          {
-            long rostimeStamp = rosClockCalculator.computeROSTime(robotConfigurationData.getWallTime(), robotConfigurationData.getMonotonicTime());
-            Time rosTime = Time.fromNano(rostimeStamp);
+            float[] jointAngles = robotConfigurationData.getJointAngles().toArray();
+            float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
+            float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
-            double[] jointAngles = toDoubleArray(robotConfigurationData.getJointAngles(), jointIndicesToIgnore);
-            double[] jointVelocities = toDoubleArray(robotConfigurationData.getJointVelocities(), jointIndicesToIgnore);
-            double[] jointTorques = toDoubleArray(robotConfigurationData.getJointTorques(), jointIndicesToIgnore);
-            jointStatePublisher.publish(rosDefaultJointNames, jointAngles, jointVelocities, jointTorques, rosTime);
+            long timeStamp = rosClockCalculator.computeROSTime(robotConfigurationData.getWallTime(), robotConfigurationData.getMonotonicTime());
+            Time t = Time.fromNano(timeStamp);
+
+            if (robotConfigurationData.getJointNameHash() != jointNameHash)
+            {
+               throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+            }
+
+            for (int i = 0; i < additionalJointStatePublishers.length; i++)
+            {
+               RosJointStatePublisher jointStatePublisher = additionalJointStatePublishers[i];
+               JointStatePublisherHelper pubData = additionalJointStatePublisherMap.get(jointStatePublisher);
+               pubData.publish(jointAngles, jointVelocities, jointTorques, t);
+            }
 
             RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(),
                                                                         robotConfigurationData.getRootTranslation());
+
+            jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
 
             if (publishForceSensorInformation)
             {
@@ -240,7 +238,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
                   robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
                   footForceSensorWrenches.put(robotSide, arrayToPublish);
-                  footForceSensorPublishers.get(robotSide).publish(rostimeStamp, footForceSensorWrenches.get(robotSide));
+                  footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
 
                   if (!handForceSensorIndexes.isEmpty())
                   {
@@ -248,30 +246,26 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                      robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
                      robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
                      wristForceSensorWrenches.put(robotSide, arrayToPublish);
-                     wristForceSensorPublishers.get(robotSide).publish(rostimeStamp, wristForceSensorWrenches.get(robotSide));
+                     wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
                   }
                }
             }
 
             for (int sensorNumber = 0; sensorNumber < Math.min(imuDefinitions.length, robotConfigurationData.getImuSensorData().size()); sensorNumber++)
             {
-               RosImuPublisher rosImuPublisher = imuPublishers[sensorNumber];
+               RosImuPublisher rosImuPublisher = this.imuPublishers[sensorNumber];
                IMUPacket imuPacket = robotConfigurationData.getImuSensorData().get(sensorNumber);
                ReferenceFrame imuFrame = imuDefinitions[sensorNumber].getIMUFrame();
-               rosImuPublisher.publish(rostimeStamp, imuPacket, imuFrame.getName());
+               rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
             }
 
-            pelvisOdometryPublisher.publish(rostimeStamp,
-                                            pelvisTransform,
-                                            robotConfigurationData.getPelvisLinearVelocity(),
-                                            robotConfigurationData.getPelvisAngularVelocity(),
-                                            jointMap.getUnsanitizedRootJointInSdf(),
-                                            WORLD_FRAME);
+            pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
+                                            robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(), WORLD_FRAME);
 
             robotMotionStatusPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).name());
             robotBehaviorPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).getBehaviorId());
 
-            tfPublisher.publish(pelvisTransform, rostimeStamp, WORLD_FRAME, jointMap.getUnsanitizedRootJointInSdf());
+            tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, jointMap.getUnsanitizedRootJointInSdf());
             if (staticTransforms != null)
             {
                for (int i = 0; i < staticTransforms.size(); i++)
@@ -280,7 +274,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   String from = staticTransformTriplet.getLeft();
                   String to = staticTransformTriplet.getMiddle();
                   RigidBodyTransform staticTransform = staticTransformTriplet.getRight();
-                  tfPublisher.publish(staticTransform, rostimeStamp, from, to);
+                  tfPublisher.publish(staticTransform, timeStamp, from, to);
                }
             }
 
@@ -297,10 +291,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   String messageType = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(packetClass);
                   if (messageType != null)
                   {
-                     lastReceivedMessagePublisher.publish(messageType,
-                                                          robotConfigurationData.getLastReceivedPacketUniqueId(),
-                                                          rostimeStamp,
-                                                          robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                     lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(),
+                                                          timeStamp, robotConfigurationData.getLastReceivedPacketRobotTimestamp());
                   }
                }
             }
@@ -308,25 +300,46 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       }
    }
 
-   private static double[] toDoubleArray(TFloatArrayList input, int[] indicesToIgnore)
+   private class JointStatePublisherHelper
    {
-      double[] output = new double[input.size() - indicesToIgnore.length];
-      int ignoreIndex = 0;
-      int outputIndex = 0;
+      private final RosJointStatePublisher jointStatePublisher;
+      private final ArrayList<String> jointNames = new ArrayList<String>();
+      private final int[] jointIndices;
+      private final double[] jointAnglesSubSet;
+      private final double[] jointVelocitiesSubSet;
+      private final double[] jointJointTorquesSubSet;
 
-      for (int inputIndex = 0; inputIndex < input.size(); inputIndex++)
+      public JointStatePublisherHelper(RosJointStatePublisher jointStatePublisher, String[] jointNames)
       {
-         if (ignoreIndex < indicesToIgnore.length && indicesToIgnore[ignoreIndex] >= 0 && inputIndex == indicesToIgnore[ignoreIndex])
+         this.jointStatePublisher = jointStatePublisher;
+         jointIndices = new int[jointNames.length];
+         for (int i = 0; i < jointNames.length; i++)
          {
-            ignoreIndex++;
+            int index = nameList.indexOf(jointNames[i]);
+            if (index == -1)
+            {
+               LogTools.error("DID NOT FIND JOINT " + jointNames[i]);
+               continue;
+            }
+            this.jointNames.add(jointNames[i]);
+            jointIndices[i] = index;
          }
-         else
-         {
-            output[outputIndex++] = input.get(inputIndex);
-         }
+
+         jointAnglesSubSet = new double[this.jointNames.size()];
+         jointVelocitiesSubSet = new double[this.jointNames.size()];
+         jointJointTorquesSubSet = new double[this.jointNames.size()];
       }
 
-      return output;
+      public void publish(float[] jointAngles, float[] jointVelocities, float[] jointTorques, Time t)
+      {
+         for (int i = 0; i < jointIndices.length; i++)
+         {
+            jointAnglesSubSet[i] = jointAngles[jointIndices[i]];
+            jointVelocitiesSubSet[i] = jointVelocities[jointIndices[i]];
+            jointJointTorquesSubSet[i] = jointTorques[jointIndices[i]];
+         }
+         jointStatePublisher.publish(jointNames, jointAnglesSubSet, jointVelocitiesSubSet, jointJointTorquesSubSet, t);
+      }
    }
 
    @Override
