@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.demo;
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -92,14 +94,7 @@ public class BuildingExplorationBehaviorCoordinator
                                            getClass().getSimpleName(),
                                            UPDATE_RATE_MILLIS);
 
-      try
-      {
-         kryoMessager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
+      ThreadTools.startAsDaemon(() -> ExceptionTools.handle(kryoMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoConnect");
 
       teleopState = new TeleopState();
       lookAndStepState = new LookAndStepState(robotName, ros2Node, kryoMessager, bombPosition);
