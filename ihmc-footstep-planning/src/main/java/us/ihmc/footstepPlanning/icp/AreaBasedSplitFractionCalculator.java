@@ -60,8 +60,8 @@ public class AreaBasedSplitFractionCalculator
       calculator.setFinalTransferSplitFractionConsumer(footstepPlan::setFinalTransferSplitFraction);
       calculator.setFinalTransferWeightDistributionConsumer(footstepPlan::setFinalTransferWeightDistribution);
 
-      calculator.setTransferWeightDistributionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferWeightDistribution(d));
-      calculator.setTransferSplitFractionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferSplitFraction(d));
+      calculator.setTransferWeightDistributionConsumer((i, d) -> footstepPlan.getFootstep(i).setTransferWeightDistribution(d));
+      calculator.setTransferSplitFractionConsumer((i, d) -> footstepPlan.getFootstep(i).setTransferSplitFraction(d));
 
       calculator.setFirstSupportPolygonProvider(() ->
                                                 {
