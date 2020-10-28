@@ -257,7 +257,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
 
    private void computeAndPackTrajectory(double timeInState)
    {
-      currentTime.set(timeInState);
+      currentTime.set(Math.min(timeInState, swingDuration.getDoubleValue()));
 
       double time = currentTime.getDoubleValue();
 
