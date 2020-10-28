@@ -106,8 +106,8 @@ public class SplinedHeightTrajectory
 
       int numberOfWaypoints = waypoints.size();
 
-      alphaWaypoints.clear();
-      heightWaypoints.clear();
+      alphaWaypoints.reset();
+      heightWaypoints.reset();
 
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(numberOfWaypoints - 1);
