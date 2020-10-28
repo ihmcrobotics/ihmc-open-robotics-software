@@ -48,7 +48,7 @@ public class CopTrajectoryTest
 
       ConvexPolygon2D defaultSupportPolygon = createDefaultSupportPolygon();
       SideDependentList<PoseReferenceFrame> soleFrames = createSoleFrames(0.2);
-      SupportSequence supportSequence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleFrames);
+      SupportSequence supportSequence = new SupportSequence(defaultSupportPolygon, soleFrames, soleFrames);
       CopTrajectory copTrajectory = new CopTrajectory();
 
       supportSequence.initializeStance();

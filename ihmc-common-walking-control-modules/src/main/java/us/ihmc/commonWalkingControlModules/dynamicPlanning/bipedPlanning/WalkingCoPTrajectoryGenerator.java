@@ -67,7 +67,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
 
-   private WaypointViewer viewer = null;
+   private CoPPointViewer viewer = null;
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                         ConvexPolygon2DReadOnly defaultSupportPolygon,
@@ -173,7 +173,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       return registry;
    }
 
-   public void setWaypointViewer(WaypointViewer viewer)
+   public void setWaypointViewer(CoPPointViewer viewer)
    {
       this.viewer = viewer;
    }

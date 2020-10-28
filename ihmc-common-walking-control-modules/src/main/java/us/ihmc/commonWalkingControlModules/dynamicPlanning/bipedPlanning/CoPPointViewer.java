@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WaypointViewer
+public class CoPPointViewer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -24,7 +24,7 @@ public class WaypointViewer
 
    private static final String name = "Corner Points";
 
-   public WaypointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoPPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (int i = 0; i < maxPoints; i++)
       {
