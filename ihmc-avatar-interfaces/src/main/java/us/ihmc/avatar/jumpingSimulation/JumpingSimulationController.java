@@ -168,6 +168,7 @@ public class JumpingSimulationController implements RobotController
                                                                                 new ArrayList<>(),
                                                                                 yoGraphicsListRegistry,
                                                                                 jointsToIgnore);
+      registry.addChild(controllerToolbox.getYoVariableRegistry());
 //      controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
 
       JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters = new JumpingCoPTrajectoryParameters(registry);
