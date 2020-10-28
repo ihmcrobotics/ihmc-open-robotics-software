@@ -5,8 +5,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.saveableModule.SaveableModuleState;
-import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
+public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
 {
    private final YoDouble finalTransferDuration;
 
@@ -38,12 +38,12 @@ public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
       registerVariableToSave(finalTransferDuration);
 
       initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
-      SaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
+      YoSaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
-         SaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
+         YoSaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
          footPoses.put(robotSide, footPose);
 
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseName() + "SoleFrame", footPose);
@@ -56,7 +56,7 @@ public class JumpingCoPTrajectoryGeneratorState extends SaveableModuleState
          for (int i = 0; i < 6; i++)
          {
             YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrame, registry);
-            SaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
+            YoSaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
             vertexBuffer.add(vertex);
          }
          YoInteger numberOfVertices = new YoInteger(prefix + "NumVertices", registry);

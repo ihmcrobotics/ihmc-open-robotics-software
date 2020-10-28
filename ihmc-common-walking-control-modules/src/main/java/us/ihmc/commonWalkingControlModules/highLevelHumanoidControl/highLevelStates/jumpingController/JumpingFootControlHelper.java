@@ -51,7 +51,7 @@ public class JumpingFootControlHelper
       return contactableFoot;
    }
 
-   public JumpingControllerToolbox getHighLevelHumanoidControllerToolbox()
+   public JumpingControllerToolbox getJumpingControllerToolbox()
    {
       return controllerToolbox;
    }

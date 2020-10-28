@@ -92,6 +92,7 @@ public class JumpingBalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
+         comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
                                                                           yoDesiredDCM,
@@ -218,6 +219,11 @@ public class JumpingBalanceManager
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
       return yoDesiredCoMVelocity;
+   }
+
+   public FramePoint3DReadOnly getTouchdownCoMPosition()
+   {
+      return touchdownCoMPosition;
    }
 
    public void initialize()
