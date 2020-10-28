@@ -25,6 +25,7 @@ public class LQRMomentumControllerSimulation
 {
    private static final boolean include1 = true;
    private static final boolean include2 = true;
+   private static final boolean include3 = true;
 
    private final static double desiredHeight = 0.75;
    private final static double controlDT = 0.001;
@@ -34,14 +35,15 @@ public class LQRMomentumControllerSimulation
 
    private final SphereControllerInterface controller1;
    private final SphereControllerInterface controller2;
+   private final SphereControllerInterface controller3;
 
    private final HashMap<SphereControllerInterface, Vector3DReadOnly> shift = new HashMap<>();
 
    public LQRMomentumControllerSimulation()
    {
       List<Robot> robots = new ArrayList<>();
-      YoGraphicsListRegistry yoGraphicsListRegistry1, yoGraphicsListRegistry2;
-      PusherController pushController1, pushController2;
+      YoGraphicsListRegistry yoGraphicsListRegistry1, yoGraphicsListRegistry2, yoGraphicsListRegistry3;
+      PusherController pushController1, pushController2, pushController3;
       if (include1)
       {
          Vector3D initialPosition1 = new Vector3D(0.0, 0.0, desiredHeight);
@@ -96,6 +98,35 @@ public class LQRMomentumControllerSimulation
          pushController2 = null;
       }
 
+      if (include3)
+      {
+         Vector3D initialPosition3 = new Vector3D(0.0, 1.0, desiredHeight);
+         yoGraphicsListRegistry3 = new YoGraphicsListRegistry();
+         SphereRobot sphereRobot3 = new SphereRobot("SphereRobot3", gravity, controlDT, desiredHeight, yoGraphicsListRegistry3);
+         sphereRobot3.initRobot(initialPosition3, new Vector3D());
+
+         robots.add(sphereRobot3.getScsRobot());
+
+         SimpleCoMTrajectoryPlanner dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot3.getOmega0Provider());
+         dcmPlan.setNominalCoMHeight(sphereRobot3.getDesiredHeight());
+         dcmPlan.setCornerPointViewer(new CornerPointViewer(sphereRobot3.getScsRobot().getRobotsYoRegistry(),
+                                                            yoGraphicsListRegistry3));
+
+         controller3 = new LQRJumpSphereController(sphereRobot3, dcmPlan, yoGraphicsListRegistry3);
+
+         pushController3 = createPusher(sphereRobot3, yoGraphicsListRegistry3);
+         setupGroundContactModel(sphereRobot3.getScsRobot());
+
+         shift.put(controller3, initialPosition3);
+      }
+      else
+      {
+         controller3 = null;
+         yoGraphicsListRegistry3 = null;
+         pushController3 = null;
+      }
+
+
       Robot[] robotArray = robots.toArray(new Robot[robots.size()]);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -109,6 +140,8 @@ public class LQRMomentumControllerSimulation
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry1);
       if (yoGraphicsListRegistry2 != null)
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry2);
+      if (yoGraphicsListRegistry3 != null)
+         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry3);
 
       plotterFactory.createOverheadPlotter();
 
@@ -119,6 +152,8 @@ public class LQRMomentumControllerSimulation
          pushController1.bindSCSPushButton(button);
       if (pushController2 != null)
          pushController2.bindSCSPushButton(button);
+      if (pushController3 != null)
+         pushController3.bindSCSPushButton(button);
 
       scs.addButton(button);
 
@@ -168,6 +203,10 @@ public class LQRMomentumControllerSimulation
       if (controller2 != null)
       {
          controller2.solveForTrajectory(copyContactsWithShift(contacts, shift.get(controller2)));
+      }
+      if (controller3 != null)
+      {
+         controller3.solveForTrajectory(copyContactsWithShift(contacts, shift.get(controller3)));
       }
    }
 
