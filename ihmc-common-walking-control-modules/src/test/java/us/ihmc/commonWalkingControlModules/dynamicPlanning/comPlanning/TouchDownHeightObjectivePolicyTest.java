@@ -44,7 +44,7 @@ public class TouchDownHeightObjectivePolicyTest
 
       MatrixTools.addDiagonal(hessian, 1e-4);
 
-      TouchDownHeightObjectivePolicy policy = new TouchDownHeightObjectivePolicy(yoOmega);
+      TouchDownHeightObjectivePolicy policy = new TouchDownHeightObjectivePolicy(yoOmega, 1.0);
       policy.assessPolicy(planner, contactSequence, hessian, null, null, zGradient);
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.lu(6);

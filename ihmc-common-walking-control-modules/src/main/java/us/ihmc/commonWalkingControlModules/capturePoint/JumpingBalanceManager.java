@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.OptimizedCoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TakeOffHeightObjectivePolicy;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TouchDownHeightObjectivePolicy;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -75,6 +77,9 @@ public class JumpingBalanceManager
       registry.addChild(copTrajectoryParameters.getRegistry());
 
       comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
+      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
+
       copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectoryState.registerStateToSave(jumpingCoPTrajectoryParameters);
