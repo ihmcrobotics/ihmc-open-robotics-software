@@ -845,7 +845,7 @@ public class CoMTrajectoryPlannerTools
       zObjectiveMatrixToPack.set(vrpWaypointPositionIndex, 0, relativeDesiredVRPPosition.getZ());
    }
 
-   private static void addEquals(DMatrix matrixToPack, int row, int col, double val)
+   public static void addEquals(DMatrix matrixToPack, int row, int col, double val)
    {
       if( col < 0 || col >= matrixToPack.getNumCols())
          throw new IllegalArgumentException("Specified col is out of bounds");
