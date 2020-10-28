@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
-import us.ihmc.tools.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JumpingGoalVariable extends SaveableModuleState
+public class JumpingGoalVariable extends YoSaveableModuleState
 {
    private final YoDouble goalLength;
    private final YoDouble goalFootWidth;

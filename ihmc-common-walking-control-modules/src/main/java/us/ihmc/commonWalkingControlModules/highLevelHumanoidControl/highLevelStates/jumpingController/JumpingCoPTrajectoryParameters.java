@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
-import us.ihmc.tools.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class JumpingCoPTrajectoryParameters extends SaveableModuleState
+public class JumpingCoPTrajectoryParameters extends YoSaveableModuleState
 {
    private static final double defaultFractionSupportForShift = 0.2;
 

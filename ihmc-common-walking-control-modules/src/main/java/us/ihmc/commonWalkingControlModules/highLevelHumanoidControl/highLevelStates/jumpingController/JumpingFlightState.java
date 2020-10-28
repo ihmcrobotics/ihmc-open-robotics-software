@@ -53,6 +53,7 @@ public class JumpingFlightState extends JumpingState
    private final FramePose3D footGoalPose = new FramePose3D();
    private final FramePose3D midFootPose = new FramePose3D();
    private final FramePose3D goalPose = new FramePose3D();
+   private final FramePose3D touchdownCoMPose = new FramePose3D();
    private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
 
    @Override
@@ -79,6 +80,9 @@ public class JumpingFlightState extends JumpingState
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
       goalPoseFrame.setPoseAndUpdate(goalPose);
 
+      touchdownCoMPose.getOrientation().set(goalPose.getOrientation());
+      touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
+
       for (RobotSide robotSide : RobotSide.values)
       {
          footGoalPose.setToZero(goalPoseFrame);
@@ -96,7 +100,7 @@ public class JumpingFlightState extends JumpingState
             flightDuration = jumpingGoal.getFlightDuration();
          else
             flightDuration = jumpingParameters.getDefaultFlightDuration();
-         feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
+         feetManager.requestSwing(robotSide, footGoalPose, touchdownCoMPose, swingHeight, flightDuration);
          controllerToolbox.setFootContactStateFree(robotSide);
       }
 

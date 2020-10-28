@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
@@ -146,7 +145,7 @@ public class JumpingFootControlModule
    private StateMachine<ConstraintType, JumpingFootControlState> setupStateMachine(String namePrefix)
    {
       StateMachineFactory<ConstraintType, JumpingFootControlState> factory = new StateMachineFactory<>(ConstraintType.class);
-      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(footControlHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(footControlHelper.getJumpingControllerToolbox().getYoTime());
       factory.addState(ConstraintType.FULL, supportState);
       factory.addState(ConstraintType.SWING, swingState);
 
@@ -224,9 +223,9 @@ public class JumpingFootControlModule
       return currentConstraintType == ConstraintType.FULL;
    }
 
-   public void setFootstep(FramePose3DReadOnly footstepPose, double swingHeight, double swingTime)
+   public void setFootstep(FramePose3DReadOnly footstepPose, FramePose3DReadOnly touchdownCoMPose, double swingHeight, double swingTime)
    {
-      swingState.setFootstep(footstepPose, swingHeight, swingTime);
+      swingState.setFootstep(footstepPose, touchdownCoMPose, swingHeight, swingTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

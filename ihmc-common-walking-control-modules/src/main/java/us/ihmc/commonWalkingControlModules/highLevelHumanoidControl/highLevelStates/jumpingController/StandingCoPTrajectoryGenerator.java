@@ -9,10 +9,10 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.saveableModule.SaveableModule;
+import us.ihmc.tools.saveableModule.YoSaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class StandingCoPTrajectoryGenerator extends SaveableModule<JumpingCoPTrajectoryGeneratorState>
+public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTrajectoryGeneratorState>
 {
    private final CoPTrajectoryParameters parameters;
 
