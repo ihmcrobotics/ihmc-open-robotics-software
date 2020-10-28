@@ -356,8 +356,11 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
    private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
    private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
+   private final FrameVector3D vrpVelocityToThrowAway = new FrameVector3D();
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
+   private final FrameVector3D vrpStartVelocity = new FrameVector3D();
    private final FramePoint3D vrpEndPosition = new FramePoint3D();
+   private final FrameVector3D vrpEndVelocity = new FrameVector3D();
    private final FramePoint3D ecmpPositionToThrowAway = new FramePoint3D();
 
    private void updateCornerPoints(List<? extends ContactStateProvider> contactSequence)
@@ -376,12 +379,12 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
          compute(segmentId, 0.0, comCornerPoints.add(), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.add(),
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+                 dcmVelocityToThrowAway, vrpStartPosition, vrpStartVelocity, ecmpPositionToThrowAway);
          compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpEndPosition, ecmpPositionToThrowAway);
+                 dcmVelocityToThrowAway, vrpEndPosition, vrpEndVelocity, ecmpPositionToThrowAway);
 
          Trajectory3D trajectory3D = vrpTrajectoryPool.add();
-         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
+         trajectory3D.setCubic(0.0, Math.min(duration, CoMTrajectoryPlannerTools.sufficientlyLarge), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          vrpTrajectories.add(trajectory3D);
 
          vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
@@ -436,6 +439,14 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
                        FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
    {
+      compute(segmentId, timeInPhase, comPositionToPack, comVelocityToPack, comAccelerationToPack, dcmPositionToPack, dcmVelocityToPack,
+              vrpPositionToPack, vrpVelocityToThrowAway, ecmpPositionToPack);
+   }
+
+   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack, FixedFrameVector3DBasics vrpVelocityToPack, FixedFramePoint3DBasics ecmpPositionToPack)
+   {
       if (segmentId < 0)
          throw new IllegalArgumentException("time is invalid.");
 
@@ -478,7 +489,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
                                       sixthCoefficient, timeInPhase, omega);
 
-      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(desiredVRPVelocity, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
                                                             sixthCoefficient, timeInPhase, omega);
 
       CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
