@@ -336,6 +336,9 @@ public class BuildingExplorationBehaviorCoordinator
       private Runnable debrisDetectedCallback = () -> {};
       private Runnable stairsDetectedCallback = () -> {};
 
+      private Notification bodyPathPlanningStateReached = new Notification();
+      private LookAndStepBehavior.State currentState = LookAndStepBehavior.State.RESET;
+
       public LookAndStepState(String robotName, ROS2Node ros2Node, KryoMessager messager, Point3DReadOnly bombPosition)
       {
          this.messager = messager;
@@ -363,6 +366,14 @@ public class BuildingExplorationBehaviorCoordinator
                stepCounter.incrementAndGet();
             }
          });
+         messager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+         {
+            currentState = LookAndStepBehavior.State.valueOf(state);
+            if (currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+            {
+               bodyPathPlanningStateReached.set();
+            }
+         });
       }
 
       @Override
@@ -374,17 +385,13 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
-         Notification bodyPathPlanningStateReached = new Notification();
-         messager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+         if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
          {
-            if (state.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING.name()))
-            {
-               bodyPathPlanningStateReached.set();
-            }
-         });
-         LogTools.info("Waiting for BODY_PATH_PLANNING state...");
-         bodyPathPlanningStateReached.blockingPoll();
-         LogTools.info("BODY_PATH_PLANNING state reached");
+            LogTools.info("Waiting for BODY_PATH_PLANNING state...");
+            bodyPathPlanningStateReached.poll(); // clear it to wait for another one
+            bodyPathPlanningStateReached.blockingPoll();
+         }
+         LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
 
          messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
          ThreadTools.sleep(100);
