@@ -73,6 +73,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static final double HIGH_WEIGHT_SQRT = Math.sqrt(HIGH_WEIGHT);
    private static final double MEDIUM_WEIGHT_SQRT = Math.sqrt(MEDIUM_WEIGHT);
    private static final double LOW_WEIGHT_SQRT = Math.sqrt(LOW_WEIGHT);
+   private static final double VERY_LOW_WEIGHT_SQRT = Math.sqrt(VERY_LOW_WEIGHT);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -275,8 +276,8 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       // set initial constraint
       addCoMPositionObjective(HIGH_WEIGHT_SQRT, currentCoMPosition);
-      if (includeVelocityObjective)
-         addCoMVelocityObjective(HIGH_WEIGHT_SQRT, currentCoMVelocity);
+      if (includeVelocityObjective && maintainInitialCoMVelocityContinuity.getBooleanValue())
+         addCoMVelocityObjective(MEDIUM_WEIGHT_SQRT, currentCoMVelocity);
       addDynamicsInitialObjective(HIGH_WEIGHT_SQRT, MEDIUM_WEIGHT_SQRT, contactSequence, 0);
 
       // add transition continuity constraints
@@ -284,8 +285,8 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          addCoMPositionContinuityObjective(CONSTRAINT_WEIGHT_SQRT, contactSequence, 0, 1);
          addCoMVelocityContinuityObjective(CONSTRAINT_WEIGHT_SQRT, contactSequence, 0, 1);
-         addDynamicsFinalObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT, contactSequence, 0);
-         addDynamicsInitialObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT, contactSequence, 1);
+         addDynamicsFinalObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT_SQRT, contactSequence, 0);
+         addDynamicsInitialObjective(LOW_WEIGHT_SQRT, VERY_LOW_WEIGHT_SQRT, contactSequence, 1);
       }
       transition++;
       for (; transition < numberOfTransitions; transition++)
@@ -546,7 +547,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       int size = indexHandler.getTotalNumberOfCoefficients();
       int numberOfVRPWaypoints = indexHandler.getNumberOfVRPWaypoints();
 
-      int extraObjectives = includeVelocityObjective ? 1 : 0;
+      int extraObjectives = includeVelocityObjective && maintainInitialCoMVelocityContinuity.getBooleanValue() ? 1 : 0;
       coefficientJacobian.reshape(size + extraObjectives, size);
       hessian.reshape(size, size);
       lowerTriangularHessian.reshape(size, size);
