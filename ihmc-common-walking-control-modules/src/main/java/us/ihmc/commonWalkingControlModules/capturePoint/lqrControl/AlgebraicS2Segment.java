@@ -34,6 +34,7 @@ public class AlgebraicS2Segment implements S2Segment
       this.A2.set(A2);
 
       int k = vrpTrajectory.getNumberOfCoefficients() - 1;
+      betas.clear();
       for (int i = 0; i <= k; i++)
       {
          betas.add().zero();
