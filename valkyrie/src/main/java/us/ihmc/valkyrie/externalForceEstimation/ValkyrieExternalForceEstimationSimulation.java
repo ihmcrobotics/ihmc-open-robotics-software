@@ -42,13 +42,14 @@ public class ValkyrieExternalForceEstimationSimulation
 
    public ValkyrieExternalForceEstimationSimulation()
    {
-      ValkyrieRobotVersion version = ValkyrieExternalForceEstimationModule.version;
+      ValkyrieRobotVersion version = ValkyrieRobotVersion.FINGERLESS;
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new FlatGroundProfile());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.createSimulation(null, false, false);
+      simulationStarter.getSCSInitialSetup().setUsePerfectSensors(true);
 
       double controllerDT = robotModel.getControllerDT();
       RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");
@@ -64,8 +65,8 @@ public class ValkyrieExternalForceEstimationSimulation
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
 
       // ----- 1DOF Joints ----- //
-      //      String endEffectorName = "torsoRoll"; // Chest
-      //      String endEffectorName = "rightShoulderRoll"; // Shoulder
+//            String endEffectorName = "torsoRoll"; // Chest
+//            String endEffectorName = "rightShoulderRoll"; // Shoulder
       String endEffectorName = "rightElbowPitch"; // Elbow
       //      String endEffectorName = "rightForearmYaw"; // Forearm
       //      String endEffectorName = "rightWristRoll"; // Wrist roll
@@ -74,6 +75,8 @@ public class ValkyrieExternalForceEstimationSimulation
       RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
 
       Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
+//      Vector3D externalForcePointOffset = new Vector3D(0.3, 0.0, 0.5);
+//      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.5);
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
       scsEndEffector.addExternalForcePoint(externalForcePoint);
