@@ -66,7 +66,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private static final double CONSTRAINT_WEIGHT = 1e7;
    private static final double HIGH_WEIGHT = 1e3;
-   private static final double MEDIUM_WEIGHT = 1e1;
+   public static final double MEDIUM_WEIGHT = 1e1;
    private static final double LOW_WEIGHT = 1e-1;
    private static final double VERY_LOW_WEIGHT = 1e-5;
    private static final double CONSTRAINT_WEIGHT_SQRT = Math.sqrt(CONSTRAINT_WEIGHT);
@@ -188,6 +188,11 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       comTrajectoryViewer = new BagOfBalls(50, 0.01, YoAppearance.Black(), registry, yoGraphicsListRegistry);
+   }
+
+   public void addCostPolicy(CoMTrajectoryPlanningCostPolicy costPolicy)
+   {
+      this.costPolicies.add(costPolicy);
    }
 
    /** {@inheritDoc} */

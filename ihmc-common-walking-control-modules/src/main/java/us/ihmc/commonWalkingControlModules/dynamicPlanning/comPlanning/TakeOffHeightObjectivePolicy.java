@@ -7,7 +7,12 @@ import java.util.List;
 
 public class TakeOffHeightObjectivePolicy implements CoMTrajectoryPlanningCostPolicy
 {
-   double weight = 1.0;
+   private final double weight;
+
+   public TakeOffHeightObjectivePolicy(double weight)
+   {
+      this.weight = weight;
+   }
 
    public void assessPolicy(CoMTrajectoryPlannerInterface comTrajectoryPlanner,
                             List<? extends ContactStateProvider> contactSequence,

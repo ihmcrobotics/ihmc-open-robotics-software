@@ -7,12 +7,13 @@ import java.util.List;
 
 public class TouchDownHeightObjectivePolicy implements CoMTrajectoryPlanningCostPolicy
 {
-   double weight = 1.0;
+   private final double weight;
    private final YoDouble omega;
 
-   public TouchDownHeightObjectivePolicy(YoDouble omega)
+   public TouchDownHeightObjectivePolicy(YoDouble omega, double weight)
    {
       this.omega = omega;
+      this.weight = weight;
    }
 
    public void assessPolicy(CoMTrajectoryPlannerInterface comTrajectoryPlanner,
