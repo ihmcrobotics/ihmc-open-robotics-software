@@ -277,6 +277,11 @@ public class SimpleBipedCoMTrajectoryPlanner
    {
       return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
    }
+
+   public List<? extends ContactStateProvider> getContactStateProviders()
+   {
+      return sequenceUpdater.getContactSequence();
+   }
    
    public double getTimeInContactPhase()
    {

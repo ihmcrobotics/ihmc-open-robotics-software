@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +10,10 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class LQRSphereController implements SphereControllerInterface
+import java.util.ArrayList;
+import java.util.List;
+
+public class LQRJumpSphereController implements SphereControllerInterface
 {
    private final YoRegistry registry = new YoRegistry("SphereController");
 
@@ -22,24 +21,24 @@ public class LQRSphereController implements SphereControllerInterface
    private final SphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
 
-   private final LQRMomentumController lqrMomentumController;
+   private final LQRJumpMomentumController lqrMomentumController;
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
    private final CoMTrajectoryProvider dcmPlan;
    private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
 
-   public LQRSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LQRJumpSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider dcmPlan, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scsRobot = sphereRobot.getScsRobot();
       this.sphereRobot = sphereRobot;
-      externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
+      this.dcmPlan = dcmPlan;
 
-      dcmPlan = comTrajectoryProvider;
+      externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), registry);
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
@@ -60,7 +59,7 @@ public class LQRSphereController implements SphereControllerInterface
 
       if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
       {
-         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
+         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories(), contactStateProviders);
          sphereRobot.getCenterOfMass().get(currentState);
          sphereRobot.getCenterOfMassVelocity().get(3, currentState);
          lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());

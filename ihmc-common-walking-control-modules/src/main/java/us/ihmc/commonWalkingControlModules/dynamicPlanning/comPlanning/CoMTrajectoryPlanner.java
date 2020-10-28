@@ -125,7 +125,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
 
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void setCornerPointViewer(CornerPointViewer viewer)
