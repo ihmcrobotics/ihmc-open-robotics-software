@@ -28,7 +28,7 @@ public class CoPTrajectoryVisualizer
       YoRegistry registry = new YoRegistry("visualizer");
       registry.addChild(copTrajectoryGenerator.getYoRegistry());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      WaypointViewer viewer = new WaypointViewer(registry, graphicsListRegistry);
+      CoPPointViewer viewer = new CoPPointViewer(registry, graphicsListRegistry);
 
       YoFramePoint3D desiredCoP = new YoFramePoint3D("desiredCoP", ReferenceFrame.getWorldFrame(), registry);
       BagOfBalls desiredCoPViz = new BagOfBalls(100, 0.005, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);

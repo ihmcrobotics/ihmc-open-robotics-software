@@ -3,27 +3,18 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.Bound;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 {
@@ -46,7 +37,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private final FramePoint2D tempPointForCoPCalculation = new FramePoint2D();
    private final FramePoint2D midfootCoP = new FramePoint2D();
 
-   private WaypointViewer viewer = null;
+   private CoPPointViewer viewer = null;
 
    public FlamingoCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, YoRegistry parentRegistry)
    {
@@ -70,7 +61,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       return registry;
    }
 
-   public void setWaypointViewer(WaypointViewer viewer)
+   public void setWaypointViewer(CoPPointViewer viewer)
    {
       this.viewer = viewer;
    }
