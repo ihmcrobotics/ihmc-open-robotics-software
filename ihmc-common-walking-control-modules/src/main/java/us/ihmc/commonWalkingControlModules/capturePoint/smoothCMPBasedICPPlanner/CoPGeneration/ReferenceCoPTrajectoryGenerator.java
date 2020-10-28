@@ -325,8 +325,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       positionSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
       positionSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
 
-      positionSplitFractionCalculator.setTransferWeightDistributionConsumer((i) -> (d) -> transferWeightDistributions.get(i).set(d));
-      positionSplitFractionCalculator.setTransferSplitFractionConsumer((i) -> (d) -> transferSplitFractions.get(i).set(d));
+      positionSplitFractionCalculator.setTransferWeightDistributionConsumer((i, d) -> transferWeightDistributions.get(i).set(d));
+      positionSplitFractionCalculator.setTransferSplitFractionConsumer((i, d) -> transferSplitFractions.get(i).set(d));
 
       positionSplitFractionCalculator.setFirstSupportPoseProvider(() ->
                                                                   {
@@ -350,8 +350,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       areaSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
       areaSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
 
-      areaSplitFractionCalculator.setTransferWeightDistributionConsumer((i) -> (d) -> transferWeightDistributions.get(i).set(d));
-      areaSplitFractionCalculator.setTransferSplitFractionConsumer((i) -> (d) -> transferSplitFractions.get(i).set(d));
+      areaSplitFractionCalculator.setTransferWeightDistributionConsumer((i, d) -> transferWeightDistributions.get(i).set(d));
+      areaSplitFractionCalculator.setTransferSplitFractionConsumer((i, d) -> transferSplitFractions.get(i).set(d));
 
       areaSplitFractionCalculator.setFirstSupportPolygonProvider(() ->
                                                 {
