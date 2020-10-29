@@ -56,7 +56,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final OptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -73,7 +73,7 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+      comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
@@ -94,7 +94,7 @@ public class JumpingBalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-//         comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
+         comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
                                                                           yoDesiredDCM,
