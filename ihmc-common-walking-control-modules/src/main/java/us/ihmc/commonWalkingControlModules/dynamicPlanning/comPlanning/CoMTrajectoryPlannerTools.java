@@ -770,6 +770,68 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   public static void addContinuityObjective(double weight,
+                                        int sequenceId1,
+                                        int sequenceId2,
+                                        double omega,
+                                        double time,
+                                        CoefficientProvider coefficientProvider,
+                                        CoefficientSelectedProvider selectedProvider,
+                                        DMatrix hessianToPack)
+   {
+      int startIndex1 = 6 * sequenceId1;
+      int startIndex2 = 6 * sequenceId2;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      int maxIndex = 12;
+      for (int row = 0; row < maxIndex; row++)
+      {
+         double rowTime = time;
+         int rowInternal = row;
+         int rowStart = startIndex1;
+         double rowMultiplier = 1.0;
+         if (row > 5)
+         {
+            rowTime = 0.0;
+            rowInternal -= 6;
+            rowStart = startIndex2;
+            rowMultiplier = -1.0;
+         }
+
+         boolean includeRow = selectedProvider.include(rowInternal, rowTime);
+         if (!includeRow)
+            continue;
+
+         double rowValue = coefficientProvider.coefficient(rowInternal, omega, rowTime);
+         addEquals(hessianToPack, rowStart + rowInternal, rowStart + rowInternal, weight * rowValue * rowValue);
+
+         for (int col = row + 1; col < maxIndex; col++)
+         {
+            double colTime = time;
+            int colInternal = col;
+            int colStart = startIndex1;
+            double colMultiplier = 1.0;
+            if (col > 5)
+            {
+               colTime = 0.0;
+               colInternal -= 6;
+               colStart = startIndex2;
+               colMultiplier = -1.0;
+            }
+
+            boolean includeCol = selectedProvider.include(colInternal, colTime);
+            if (!includeCol)
+               continue;
+
+            double colValue = coefficientProvider.coefficient(colInternal, omega, colTime);
+            double value = weight * rowMultiplier * colMultiplier * rowValue * colValue;
+            addEquals(hessianToPack, rowStart + rowInternal, colStart + colInternal, value);
+            addEquals(hessianToPack, colStart + colInternal, rowStart + rowInternal, value);
+         }
+      }
+   }
+
    /**
     * <p> Adds a constraint for the desired VRP velocity.</p>
     * <p> Recall that the VRP velocity is defined as </p>
@@ -1099,6 +1161,26 @@ public class CoMTrajectoryPlannerTools
          addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 3, weight * c15 * c03);
          addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 4, weight * c15 * c04);
       }
+   }
+
+   public static void addCoMPositionContinuityObjectiveDirectly(double weight,
+                                                        int previousSequence,
+                                                        int nextSequence,
+                                                        double omega,
+                                                        double previousDuration,
+                                                        DMatrix hessianToPack)
+   {
+      addContinuityObjective(weight, previousSequence, nextSequence, omega, previousDuration, comPositionCoefficientProvider, comPositionCoefficientSelectedProvider, hessianToPack);
+   }
+
+   public static void addCoMVelocityContinuityObjectiveDirectly(double weight,
+                                                                int previousSequence,
+                                                                int nextSequence,
+                                                                double omega,
+                                                                double previousDuration,
+                                                                DMatrix hessianToPack)
+   {
+      addContinuityObjective(weight, previousSequence, nextSequence, omega, previousDuration, comVelocityCoefficientProvider, comVelocityCoefficientSelectedProvider, hessianToPack);
    }
 
    /**
