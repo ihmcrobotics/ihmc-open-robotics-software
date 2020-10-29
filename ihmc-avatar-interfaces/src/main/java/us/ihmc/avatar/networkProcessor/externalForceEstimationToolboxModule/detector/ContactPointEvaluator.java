@@ -2,8 +2,7 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.det
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,23 +16,27 @@ import us.ihmc.log.LogTools;
  */
 public class ContactPointEvaluator
 {
-   private final QuadProgSolver qpSolver = new QuadProgSolver();
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+
+   private final double convergenceThreshold = 1e-10;
+   private final int maximumNumberOfIterations = 500;
+   private final double dampingTerm = 1e-3;
 
    private final Vector3D[] polyhedraBasisVectors = new Vector3D[4];
    private final FrameVector3D[] polyhedraFrameBasisVectors = new FrameVector3D[4];
 
    private final DMatrixRMaj basisVectorMatrix = new DMatrixRMaj(3, 4);
-   private final DMatrixRMaj JTF = new DMatrixRMaj();
-   /** Quadratic term - input to the qp */
-   private final DMatrixRMaj Q = new DMatrixRMaj();
-   /** Linear term - input to the qp */
-   private final DMatrixRMaj f = new DMatrixRMaj();
+   private final DMatrixRMaj JTF = new DMatrixRMaj(0);
+   private final DMatrixRMaj diagonalCost = new DMatrixRMaj(0);
+   private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0);
+   private final DMatrixRMaj linearCost = new DMatrixRMaj(0);
+   private final DMatrixRMaj scalarCost = new DMatrixRMaj(0);
    /** Inequality terms */
    private final DMatrixRMaj Ain = new DMatrixRMaj(4, 4);
    private final DMatrixRMaj bin = new DMatrixRMaj(4, 1);
    /** Equality terms - not used */
-   private final DMatrixRMaj Aeq = new DMatrixRMaj(4, 1);
-   private final DMatrixRMaj beq = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Aeq = new DMatrixRMaj(0, 4);
+   private final DMatrixRMaj beq = new DMatrixRMaj(0, 1);
    /** Basis vector coefficients to solve */
    private final DMatrixRMaj rho = new DMatrixRMaj(4, 1);
 
@@ -50,6 +53,8 @@ public class ContactPointEvaluator
       }
 
       CommonOps_DDRM.setIdentity(Ain);
+      CommonOps_DDRM.scale(-1.0, Ain);
+      CommonOps_DDRM.fill(beq, 0.01);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -72,10 +77,10 @@ public class ContactPointEvaluator
     *
     * @param jointspaceResidual gamma in the above paper (eq 12)
     * @param contactPointJacobian J_rt in the above paper (eq 12)
-    * @param zOutContactFrame reference frame of the contact point, with z pointing away from the mesh
+    * @param zInContactFrame reference frame of the contact point, with z pointing into the mesh
     * @return likelihood of the given contact point, QP in the above paper
     */
-   public double evaluate(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, ReferenceFrame zOutContactFrame)
+   public double evaluate(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, ReferenceFrame zInContactFrame)
    {
       if (polyhedraBasisVectors[0].containsNaN())
       {
@@ -85,29 +90,38 @@ public class ContactPointEvaluator
 
       for (int i = 0; i < polyhedraFrameBasisVectors.length; i++)
       {
-         polyhedraFrameBasisVectors[i].setIncludingFrame(ReferenceFrame.getWorldFrame(), polyhedraBasisVectors[i]);
-         polyhedraFrameBasisVectors[i].changeFrame(zOutContactFrame);
+         polyhedraFrameBasisVectors[i].setIncludingFrame(zInContactFrame, polyhedraBasisVectors[i]);
+         polyhedraFrameBasisVectors[i].changeFrame(ReferenceFrame.getWorldFrame());
          polyhedraFrameBasisVectors[i].get(0, i, basisVectorMatrix);
       }
 
       CommonOps_DDRM.multTransA(contactPointJacobian, basisVectorMatrix, JTF);
-      CommonOps_DDRM.multInner(JTF, Q);
+      CommonOps_DDRM.multInner(JTF, quadraticCost);
 
-      CommonOps_DDRM.multTransA(JTF, jointspaceResidual, f);
-      CommonOps_DDRM.scale(-1.0, f);
+      diagonalCost.reshape(quadraticCost.getNumRows(), quadraticCost.getNumCols());
+      CommonOps_DDRM.setIdentity(diagonalCost);
+      CommonOps_DDRM.scale(dampingTerm, diagonalCost);
+      CommonOps_DDRM.addEquals(quadraticCost, diagonalCost);
 
-      try
-      {
-         qpSolver.solve(Q, f, Aeq, beq, Ain, bin, rho, true);
-      }
-      catch (NoConvergenceException e)
-      {
-         LogTools.debug("No convergence exception");
-         return Double.MAX_VALUE;
-      }
+      CommonOps_DDRM.multTransA(JTF, jointspaceResidual, linearCost);
+      CommonOps_DDRM.scale(-1.0, linearCost);
+
+      CommonOps_DDRM.multInner(jointspaceResidual, scalarCost);
+
+      qpSolver.clear();
+      qpSolver.resetActiveSet();
+
+      qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations);
+      qpSolver.setConvergenceThreshold(convergenceThreshold);
+      qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, scalarCost.get(0, 0));
+      qpSolver.setLinearInequalityConstraints(Aeq, beq);
+      qpSolver.setLinearInequalityConstraints(Ain, bin);
+
+      qpSolver.solve(rho);
 
       CommonOps_DDRM.mult(basisVectorMatrix, rho, estimatedForce);
-      return qpSolver.getCost();
+
+      return qpSolver.getObjectiveCost(rho);
    }
 
    public DMatrixRMaj getEstimatedForce()
