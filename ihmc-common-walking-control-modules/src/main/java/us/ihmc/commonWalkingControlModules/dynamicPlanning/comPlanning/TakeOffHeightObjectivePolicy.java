@@ -43,9 +43,9 @@ public class TakeOffHeightObjectivePolicy implements CoMTrajectoryPlanningCostPo
          double copHeight = contactSequence.get(sequenceId - 1).getCopEndPosition().getZ();
          double objectiveCoMHeight = copHeight + comTrajectoryPlanner.getNominalCoMHeight();
 
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx, 0, weight * objectiveCoMHeight);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 1, 0, weight * objectiveCoMHeight);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 5, 0, weight * objectiveCoMHeight);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx, 0, 2.0 * weight * objectiveCoMHeight);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 1, 0, 2.0 * weight * objectiveCoMHeight);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 5, 0, 2.0 * weight * objectiveCoMHeight);
 
       }
    }

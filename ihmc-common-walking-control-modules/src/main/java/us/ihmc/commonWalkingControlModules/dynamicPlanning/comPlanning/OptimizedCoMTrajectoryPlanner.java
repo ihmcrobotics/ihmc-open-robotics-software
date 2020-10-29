@@ -334,6 +334,10 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       CommonOps_DSCC.multTransA(coefficientJacobian, yEquivalents, yGradient, gw, gx);
       CommonOps_DSCC.multTransA(coefficientJacobian, zEquivalents, zGradient, gw, gx);
 
+      CommonOps_DSCC.scale(2.0, xGradient, xGradient);
+      CommonOps_DSCC.scale(2.0, yGradient, yGradient);
+      CommonOps_DSCC.scale(2.0, zGradient, zGradient);
+
       for (int segment = 0; segment < numberOfPhases; segment++)
       {
          double duration = contactSequence.get(segment).getTimeInterval().getDuration();
@@ -343,6 +347,10 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       for (int i = 0; i < costPolicies.size(); i++)
          costPolicies.get(i).assessPolicy(this, contactSequence, hessian, xGradient, yGradient, zGradient);
+
+      CommonOps_DSCC.scale(0.5, xGradient, xGradient);
+      CommonOps_DSCC.scale(0.5, yGradient, yGradient);
+      CommonOps_DSCC.scale(0.5, zGradient, zGradient);
 
       sparseSolver.setA(hessian);
       sparseSolver.solveSparse(xGradient, xCoefficientVector);

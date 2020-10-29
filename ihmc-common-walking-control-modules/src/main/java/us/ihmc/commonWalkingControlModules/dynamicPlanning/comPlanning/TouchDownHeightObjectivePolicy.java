@@ -78,12 +78,12 @@ public class TouchDownHeightObjectivePolicy implements CoMTrajectoryPlanningCost
          double copHeight = contactSequence.get(sequenceId + 1).getCopStartPosition().getZ();
          double objectiveCoMHeight = copHeight + comTrajectoryPlanner.getNominalCoMHeight();
 
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx, 0, weight * objectiveCoMHeight * c0);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 1, 0, weight * objectiveCoMHeight * c1);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 2, 0, weight * objectiveCoMHeight * c2);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 3, 0, weight * objectiveCoMHeight * c3);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 4, 0, weight * objectiveCoMHeight * c4);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 5, 0, weight * objectiveCoMHeight * c5);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx, 0, 2.0 * weight * objectiveCoMHeight * c0);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 1, 0, 2.0 * weight * objectiveCoMHeight * c1);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 2, 0, 2.0 * weight * objectiveCoMHeight * c2);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 3, 0, 2.0 * weight * objectiveCoMHeight * c3);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 4, 0, 2.0 * weight * objectiveCoMHeight * c4);
+         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 5, 0, 2.0 * weight * objectiveCoMHeight * c5);
 
       }
    }
