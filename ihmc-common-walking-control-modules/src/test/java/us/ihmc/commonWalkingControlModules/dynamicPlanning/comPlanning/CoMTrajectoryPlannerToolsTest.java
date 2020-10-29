@@ -244,8 +244,6 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-      /*
-
    @Test
    public void testCoMPositionContinuityObjective()
    {
@@ -255,16 +253,135 @@ public class CoMTrajectoryPlannerToolsTest
       DMatrixRMaj jacobian = new DMatrixRMaj(12, 12);
       DMatrixRMaj hessian1 = new DMatrixRMaj(12, 12);
       DMatrixRMaj hessian2 = new DMatrixRMaj(12, 12);
+      DMatrixRMaj hessian3 = new DMatrixRMaj(12, 12);
 
       double weight = 10.0;
       double weightSqrt = Math.sqrt(weight);
+
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian3);
 
       CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weightSqrt, 0, 1, 0, omega, previousDuration, jacobian);
       CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weight, 0, 1, omega, previousDuration, hessian2);
       CommonOps_DDRM.multInner(jacobian, hessian1);
 
       EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
+      EjmlUnitTests.assertEquals(hessian1, hessian3, 1e-5);
    }
+
+
+   @Test
+   public void testCoMPositionContinuityObjective2()
+   {
+      double omega = 3.0;
+      double previousDuration = 1.5;
+
+      DMatrixRMaj hessian = new DMatrixRMaj(12, 12);
+      DMatrixRMaj xGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj yGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj zGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj xSolution = new DMatrixRMaj(12, 1);
+      DMatrixRMaj ySolution = new DMatrixRMaj(12, 1);
+      DMatrixRMaj zSolution = new DMatrixRMaj(12, 1);
+
+      FramePoint3D desiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.5, 2.0);
+
+      double weight = 10.0;
+
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMPositionObjective(weight, desiredPosition, omega, previousDuration,0, hessian, xGradient, yGradient, zGradient);
+
+      MatrixTools.addDiagonal(hessian, 1e-7);
+
+      solveProblem(hessian, xGradient, xSolution);
+      solveProblem(hessian, yGradient, ySolution);
+      solveProblem(hessian, zGradient, zSolution);
+
+      double x0Value = 0.0;
+      double y0Value = 0.0;
+      double z0Value = 0.0;
+      for (int i = 0; i < 6; i++)
+      {
+         x0Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, previousDuration) * xSolution.get(i);
+         y0Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, previousDuration) * ySolution.get(i);
+         z0Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, previousDuration) * zSolution.get(i);
+      }
+
+      double x1Value = 0.0;
+      double y1Value = 0.0;
+      double z1Value = 0.0;
+      for (int i = 0; i < 6; i++)
+      {
+         x1Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6);
+         y1Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6);
+         z1Value += CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6);
+      }
+
+      assertEquals(desiredPosition.getX(), x0Value, 1e-4);
+      assertEquals(desiredPosition.getY(), y0Value, 1e-4);
+      assertEquals(desiredPosition.getZ(), z0Value, 1e-4);
+
+      assertEquals(desiredPosition.getX(), x1Value, 1e-4);
+      assertEquals(desiredPosition.getY(), y1Value, 1e-4);
+      assertEquals(desiredPosition.getZ(), z1Value, 1e-4);
+
+   }
+
+   @Test
+   public void testCoMVelocityContinuityObjective2()
+   {
+      double omega = 3.0;
+      double previousDuration = 1.5;
+
+      DMatrixRMaj hessian = new DMatrixRMaj(12, 12);
+      DMatrixRMaj xGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj yGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj zGradient = new DMatrixRMaj(12, 1);
+      DMatrixRMaj xSolution = new DMatrixRMaj(12, 1);
+      DMatrixRMaj ySolution = new DMatrixRMaj(12, 1);
+      DMatrixRMaj zSolution = new DMatrixRMaj(12, 1);
+
+      FrameVector3D desiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 1.5, 2.0);
+
+      double weight = 10.0;
+
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMVelocityObjective(weight, desiredVelocity, omega, previousDuration,0, hessian, xGradient, yGradient, zGradient);
+
+      MatrixTools.addDiagonal(hessian, 1e-7);
+
+      solveProblem(hessian, xGradient, xSolution);
+      solveProblem(hessian, yGradient, ySolution);
+      solveProblem(hessian, zGradient, zSolution);
+
+      double x0Value = 0.0;
+      double y0Value = 0.0;
+      double z0Value = 0.0;
+      for (int i = 0; i < 6; i++)
+      {
+         x0Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, previousDuration) * xSolution.get(i);
+         y0Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, previousDuration) * ySolution.get(i);
+         z0Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, previousDuration) * zSolution.get(i);
+      }
+
+      double x1Value = 0.0;
+      double y1Value = 0.0;
+      double z1Value = 0.0;
+      for (int i = 0; i < 6; i++)
+      {
+         x1Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6);
+         y1Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6);
+         z1Value += CoMTrajectoryPlannerTools.getCoMVelocityCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6);
+      }
+
+      assertEquals(desiredVelocity.getX(), x0Value, 1e-4);
+      assertEquals(desiredVelocity.getY(), y0Value, 1e-4);
+      assertEquals(desiredVelocity.getZ(), z0Value, 1e-4);
+
+      assertEquals(desiredVelocity.getX(), x1Value, 1e-4);
+      assertEquals(desiredVelocity.getY(), y1Value, 1e-4);
+      assertEquals(desiredVelocity.getZ(), z1Value, 1e-4);
+   }
+
 
    @Test
    public void testCoMVelocityContinuityObjective()
@@ -285,8 +402,6 @@ public class CoMTrajectoryPlannerToolsTest
 
       EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
    }
-
-    */
 
    @Test
    public void testCoMPositionObjective()
