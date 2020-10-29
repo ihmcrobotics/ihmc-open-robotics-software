@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.OptimizedCoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TakeOffHeightObjectivePolicy;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TouchDownHeightObjectivePolicy;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -59,7 +56,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final OptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
+   private final CoMTrajectoryPlanner comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -76,9 +73,9 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
-      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+//      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
+//      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
       copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
@@ -97,7 +94,7 @@ public class JumpingBalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
+//         comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
                                                                           yoDesiredDCM,

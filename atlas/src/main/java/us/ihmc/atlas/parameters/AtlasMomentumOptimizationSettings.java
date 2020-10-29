@@ -123,6 +123,12 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       return rhoRateDefaultWeight;
    }
 
+   @Override
+   public boolean areJointVelocityLimitsConsidered()
+   {
+      return false;
+   }
+
    /** @inheritDoc */
    @Override
    public double getRhoRateHighWeight()
