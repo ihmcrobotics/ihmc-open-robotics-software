@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -94,8 +95,10 @@ public class JumpingSwingFootState implements JumpingFootControlState
 
    // for unit testing and debugging:
    private final YoFramePoint3D yoDesiredSolePosition;
-   private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector3D yoDesiredSoleLinearVelocity;
+   private final YoFramePoint3D yoDesiredSolePositionInCoMFrame;
+   private final YoFrameVector3D yoDesiredSoleLinearVelocityInCoMFrame;
+   private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector3D yoDesiredSoleAngularVelocity;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private Vector3DReadOnly nominalAngularWeight;
@@ -131,7 +134,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(controlFramePose);
 
-      this.touchdownVelocity = touchdownVelocity;
+      this.touchdownVelocity = new FrameVector3D(centerOfMassFrame);//touchdownVelocity;
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
@@ -178,6 +181,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
       yoDesiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
+      yoDesiredSolePositionInCoMFrame = new YoFramePoint3D(namePrefix + "DesiredSolePositionInCoMFrame", centerOfMassFrame, registry);
+      yoDesiredSoleLinearVelocityInCoMFrame = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInCoMFrame", centerOfMassFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
 
       if (yoGraphicsListRegistry != null)
@@ -269,11 +274,21 @@ public class JumpingSwingFootState implements JumpingFootControlState
       swingTrajectory.compute(time);
       swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      if (timeInState > swingDuration.getDoubleValue())
+      {
+         desiredLinearVelocity.setToZero(centerOfMassFrame);
+         desiredLinearAcceleration.setToZero(centerOfMassFrame);
+
+         desiredAngularVelocity.setToZero(worldFrame);
+         desiredAngularAcceleration.setToZero(worldFrame);
+      }
 
       yoDesiredSolePosition.setMatchingFrame(desiredPosition);
       yoDesiredSoleOrientation.setMatchingFrame(desiredOrientation);
       yoDesiredSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       yoDesiredSoleAngularVelocity.setMatchingFrame(desiredAngularVelocity);
+      yoDesiredSolePositionInCoMFrame.setMatchingFrame(desiredPosition);
+      yoDesiredSoleLinearVelocityInCoMFrame.setMatchingFrame(desiredLinearVelocity);
 
       transformDesiredsFromSoleFrameToControlFrame();
    }

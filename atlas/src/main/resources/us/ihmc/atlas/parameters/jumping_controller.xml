@@ -41,9 +41,9 @@
             <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
+            <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
             <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
-            <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+            <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="75.0"/>
             <parameter name="LoadedFootAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
             <parameter name="LoadedFootAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
             <parameter name="LoadedFootAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
@@ -114,8 +114,8 @@
             <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
         </registry>
         <registry name="FootGains">
-            <parameter name="kpXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
-            <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+            <parameter name="kpXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="300.0"/>
+            <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="400.0"/>
             <parameter name="zetaXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
             <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
             <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>

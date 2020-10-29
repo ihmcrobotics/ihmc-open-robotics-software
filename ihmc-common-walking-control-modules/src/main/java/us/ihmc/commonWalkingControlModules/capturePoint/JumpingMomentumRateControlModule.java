@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRJumpMomentumController;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.MathTools;
@@ -55,6 +57,7 @@ public class JumpingMomentumRateControlModule
    private double timeInContactPhase;
 
    private List<Trajectory3D> vrpTrajectories;
+   private List<? extends ContactStateProvider> contactStateProviders;
 
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
@@ -67,7 +70,7 @@ public class JumpingMomentumRateControlModule
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
    private final FrameVector3D angularMomentumRateOfChange = new FrameVector3D();
 
-   private final LQRMomentumController lqrMomentumController;
+   private final LQRJumpMomentumController lqrMomentumController;
 
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoDesiredVRP = new YoFramePoint3D("desiredVRP", worldFrame, registry);
@@ -107,7 +110,7 @@ public class JumpingMomentumRateControlModule
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
 
-      lqrMomentumController = new LQRMomentumController(omega0, registry);
+      lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -124,6 +127,7 @@ public class JumpingMomentumRateControlModule
       this.omega0 = input.getOmega0();
       this.timeInContactPhase = input.getTimeInState();
       this.vrpTrajectories = input.getVrpTrajectories();
+      this.contactStateProviders = input.getContactStateProviders();
       this.minimizeAngularMomentumRate.set(input.getMinimizeAngularMomentumRate());
    }
 
@@ -183,8 +187,7 @@ public class JumpingMomentumRateControlModule
 
    private void computeDesiredLinearMomentumRateOfChange()
    {
-      lqrMomentumController.setOmega(omega0);
-      lqrMomentumController.setVRPTrajectory(vrpTrajectories);
+      lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
       lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
 
       if (inFlight)

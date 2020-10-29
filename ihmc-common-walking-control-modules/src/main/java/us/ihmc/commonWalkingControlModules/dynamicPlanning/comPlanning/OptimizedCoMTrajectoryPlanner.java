@@ -311,7 +311,7 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       finalDCMPosition.set(endVRPPositions.getLast());
-      double finalDuration = lastContactPhase.getTimeInterval().getDuration();
+      double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
       addDCMPositionObjective(HIGH_WEIGHT_SQRT, numberOfPhases - 1, finalDuration, finalDCMPosition);
       addDynamicsFinalObjective(HIGH_WEIGHT_SQRT, MEDIUM_WEIGHT_SQRT, contactSequence, numberOfPhases - 1);
 
@@ -378,13 +378,15 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
+         duration = Math.min(duration, CoMTrajectoryPlannerTools.sufficientlyLongTime);
          compute(segmentId, 0.0, comCornerPoints.add(), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.add(),
                  dcmVelocityToThrowAway, vrpStartPosition, vrpStartVelocity, ecmpPositionToThrowAway);
          compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
                  dcmVelocityToThrowAway, vrpEndPosition, vrpEndVelocity, ecmpPositionToThrowAway);
 
          Trajectory3D trajectory3D = vrpTrajectoryPool.add();
-         trajectory3D.setCubic(0.0, Math.min(duration, CoMTrajectoryPlannerTools.sufficientlyLarge), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+//         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
          vrpTrajectories.add(trajectory3D);
 
          vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
