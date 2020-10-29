@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -12,6 +13,7 @@ public class JumpingMomentumRateControlModuleInput
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
    private List<Trajectory3D> vrpTrajectories;
+   private List<? extends ContactStateProvider> contactStateProviders;
 
    public void setOmega0(double omega0)
    {
@@ -63,12 +65,23 @@ public class JumpingMomentumRateControlModuleInput
       return vrpTrajectories;
    }
 
+   public void setContactStateProvider(List<? extends ContactStateProvider> contactStateProviders)
+   {
+      this.contactStateProviders = contactStateProviders;
+   }
+
+   public List<? extends ContactStateProvider> getContactStateProviders()
+   {
+      return contactStateProviders;
+   }
+
    public void set(JumpingMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
       timeInState = other.timeInState;
       inFlight = other.inFlight;
       vrpTrajectories = other.vrpTrajectories;
+      contactStateProviders = other.contactStateProviders;
       minimizeAngularMomentumRate = other.minimizeAngularMomentumRate;
    }
 
@@ -95,6 +108,13 @@ public class JumpingMomentumRateControlModuleInput
          for (int i = 0; i < vrpTrajectories.size(); i++)
          {
             if (!vrpTrajectories.get(i).equals(other.vrpTrajectories.get(i)))
+               return false;
+         }
+         if (contactStateProviders.size() != other.contactStateProviders.size())
+            return false;
+         for (int i = 0; i < contactStateProviders.size(); i++)
+         {
+            if (!contactStateProviders.get(i).equals(other.contactStateProviders.get(i)))
                return false;
          }
          return true;

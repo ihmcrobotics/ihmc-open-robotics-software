@@ -179,6 +179,8 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      jumpingMomentumRateControlModuleInput.setContactStateProvider(copTrajectoryForStanding.getContactStateProviders());
+
       plannerTimer.stopMeasurement();
    }
 
@@ -207,6 +209,8 @@ public class JumpingBalanceManager
       timeInSupportSequence.set(yoTime.getValue() - startTimeForSupportSequence.getDoubleValue());
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+
+      jumpingMomentumRateControlModuleInput.setContactStateProvider(copTrajectoryForJumping.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }

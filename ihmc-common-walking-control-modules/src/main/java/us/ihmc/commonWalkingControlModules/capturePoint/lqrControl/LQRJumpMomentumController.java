@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -15,6 +17,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 /**
  * This LQR controller tracks the CoM dynamics of the robot, using a VRP output.
@@ -124,7 +128,7 @@ public class LQRJumpMomentumController
       this.contactStateProviders.clear();
 
       Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(lastTrajectory.getFinalTime());
+      lastTrajectory.compute(Math.min(sufficientlyLongTime, lastTrajectory.getFinalTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 
@@ -214,7 +218,6 @@ public class LQRJumpMomentumController
       reversedS2FunctionList.clear();
       s2FunctionList.clear();
 
-
       int numberOfSegments = relativeVRPTrajectories.size();
       int numberOfEndingContactSegments = 0;
       int j = numberOfSegments - 1;
@@ -287,7 +290,7 @@ public class LQRJumpMomentumController
    void computeS2AndK2(double time)
    {
       int j = getSegmentNumber(time);
-      double timeInSegment = computeTimeInSegment(time, j);
+      double timeInSegment = Math.min(sufficientlyLongTime, computeTimeInSegment(time, j));
 
       relativeVRPTrajectories.get(j).compute(timeInSegment);
       referenceVRPPosition.set(relativeVRPTrajectories.get(j).getPosition());
@@ -421,5 +424,10 @@ public class LQRJumpMomentumController
    S2Segment getS2Segment(int segment)
    {
       return s2FunctionList.get(segment);
+   }
+
+   public FramePoint3DReadOnly getFeedbackVRPPosition()
+   {
+      return feedbackVRPPosition;
    }
 }
