@@ -6,10 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 
 import java.util.List;
 
@@ -20,6 +17,22 @@ public class CoMTrajectoryPlannerTools
    public static final double minDuration = 1.0e-5;
    public static final double sufficientlyLarge = 1.0e10;
    public static final double sufficientlyLongTime = 1.0e2;
+
+   private static final CoefficientProvider comPositionCoefficientProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientTimeFunction;
+   private static final CoefficientProvider comVelocityCoefficientProvider = CoMTrajectoryPlannerTools::getCoMVelocityCoefficientTimeFunction;
+   private static final CoefficientProvider comAccelerationCoefficientProvider = CoMTrajectoryPlannerTools::getCoMAccelerationCoefficientTimeFunction;
+   private static final CoefficientProvider comJerkCoefficientProvider = CoMTrajectoryPlannerTools::getCoMJerkCoefficientTimeFunction;
+   private static final CoefficientProvider dcmPositionCoefficientProvider = CoMTrajectoryPlannerTools::getDCMPositionCoefficientTimeFunction;
+   private static final CoefficientProvider vrpPositionCoefficientProvider = CoMTrajectoryPlannerTools::getVRPPositionCoefficientTimeFunction;
+   private static final CoefficientProvider vrpVelocityCoefficientProvider = CoMTrajectoryPlannerTools::getVRPVelocityCoefficientTimeFunction;
+   private static final CoefficientSelectedProvider comPositionCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientNonZero;
+   private static final CoefficientSelectedProvider comVelocityCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMVelocityCoefficientNonZero;
+   private static final CoefficientSelectedProvider comAccelerationCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMAccelerationCoefficientNonZero;
+   private static final CoefficientSelectedProvider comJerkCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMJerkCoefficientNonZero;
+   private static final CoefficientSelectedProvider dcmPositionCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getDCMPositionCoefficientNonZero;
+   private static final CoefficientSelectedProvider dcmVelocityCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getDCMVelocityCoefficientNonZero;
+   private static final CoefficientSelectedProvider vrpPositionCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getVRPPositionCoefficientNonZero;
+   private static final CoefficientSelectedProvider vrpVelocityCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getVRPVelocityCoefficientNonZero;
 
    public static void computeVRPWaypoints(double nominalCoMHeight,
                                           double gravityZ,
@@ -206,91 +219,17 @@ public class CoMTrajectoryPlannerTools
                                               DMatrix yGradientToPack,
                                               DMatrix zGradientToPack)
    {
-      centerOfMassLocationForConstraint.checkReferenceFrameMatch(worldFrame);
-
-      time = Math.min(time, sufficientlyLongTime);
-      int startIdx = 6 * sequenceId;
-
-      double c0 = getCoMPositionFirstCoefficientTimeFunction(omega, time);
-      double c1 = getCoMPositionSecondCoefficientTimeFunction(omega, time);
-      double c5 = getCoMPositionSixthCoefficientTimeFunction();
-
-      addEquals(hessianToPack, startIdx, startIdx, weight * c0 * c0);
-      addEquals(hessianToPack, startIdx, startIdx + 1, weight * c0 * c1);
-      addEquals(hessianToPack, startIdx, startIdx + 5, weight * c0 * c5);
-
-      addEquals(hessianToPack, startIdx + 1, startIdx, weight * c1 * c0);
-      addEquals(hessianToPack, startIdx + 1, startIdx + 1, weight * c1 * c1);
-      addEquals(hessianToPack, startIdx + 1, startIdx + 5, weight * c1 * c5);
-
-      addEquals(hessianToPack, startIdx + 5, startIdx, weight * c5 * c0);
-      addEquals(hessianToPack, startIdx + 5, startIdx + 1, weight * c5 * c1);
-      addEquals(hessianToPack, startIdx + 5, startIdx + 5, weight * c5 * c5);
-
-      addEquals(xGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassLocationForConstraint.getX());
-      addEquals(xGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassLocationForConstraint.getX());
-      addEquals(xGradientToPack, startIdx + 5, 0, 2.0 * weight * c5 * centerOfMassLocationForConstraint.getX());
-
-      addEquals(yGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassLocationForConstraint.getY());
-      addEquals(yGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassLocationForConstraint.getY());
-      addEquals(yGradientToPack, startIdx + 5, 0, 2.0 * weight * c5 * centerOfMassLocationForConstraint.getY());
-
-      addEquals(zGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassLocationForConstraint.getZ());
-      addEquals(zGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassLocationForConstraint.getZ());
-      addEquals(zGradientToPack, startIdx + 5, 0, 2.0 * weight * c5 * centerOfMassLocationForConstraint.getZ());
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
-      { // assuming the matrix is initialized as zero, these don't have to be set
-
-         double c2 = getCoMPositionThirdCoefficientTimeFunction(time);
-         double c3 = getCoMPositionFourthCoefficientTimeFunction(time);
-         double c4 = getCoMPositionFifthCoefficientTimeFunction(time);
-
-         addEquals(hessianToPack, startIdx, startIdx + 2, weight * c0 * c2);
-         addEquals(hessianToPack, startIdx, startIdx + 3, weight * c0 * c3);
-         addEquals(hessianToPack, startIdx, startIdx + 4, weight * c0 * c4);
-
-         addEquals(hessianToPack, startIdx + 1, startIdx + 2, weight * c1 * c2);
-         addEquals(hessianToPack, startIdx + 1, startIdx + 3, weight * c1 * c3);
-         addEquals(hessianToPack, startIdx + 1, startIdx + 4, weight * c1 * c4);
-
-         addEquals(hessianToPack, startIdx + 2, startIdx, weight * c2 * c0);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 1, weight * c2 * c1);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 2, weight * c2 * c2);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 3, weight * c2 * c3);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 4, weight * c2 * c4);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 5, weight * c2 * c5);
-
-         addEquals(hessianToPack, startIdx + 3, startIdx, weight * c3 * c0);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 1, weight * c3 * c1);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 2, weight * c3 * c2);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 3, weight * c3 * c3);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 4, weight * c3 * c4);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 5, weight * c3 * c5);
-
-         addEquals(hessianToPack, startIdx + 4, startIdx, weight * c4 * c0);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 1, weight * c4 * c1);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 2, weight * c4 * c2);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 3, weight * c4 * c3);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 4, weight * c4 * c4);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 5, weight * c4 * c5);
-
-         addEquals(hessianToPack, startIdx + 5, startIdx + 2, weight * c5 * c2);
-         addEquals(hessianToPack, startIdx + 5, startIdx + 3, weight * c5 * c3);
-         addEquals(hessianToPack, startIdx + 5, startIdx + 4, weight * c5 * c4);
-
-         addEquals(xGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassLocationForConstraint.getX());
-         addEquals(xGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassLocationForConstraint.getX());
-         addEquals(xGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassLocationForConstraint.getX());
-
-         addEquals(yGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassLocationForConstraint.getY());
-         addEquals(yGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassLocationForConstraint.getY());
-         addEquals(yGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassLocationForConstraint.getY());
-
-         addEquals(zGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassLocationForConstraint.getZ());
-         addEquals(zGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassLocationForConstraint.getZ());
-         addEquals(zGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassLocationForConstraint.getZ());
-      }
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        centerOfMassLocationForConstraint,
+                        comPositionCoefficientProvider,
+                        comPositionCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
    }
 
    /**
@@ -387,74 +326,109 @@ public class CoMTrajectoryPlannerTools
                                               DMatrix yGradientToPack,
                                               DMatrix zGradientToPack)
    {
-      centerOfMassVelocityForConstraint.checkReferenceFrameMatch(worldFrame);
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        centerOfMassVelocityForConstraint,
+                        comVelocityCoefficientProvider,
+                        comVelocityCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
+   }
 
-      time = Math.min(time, sufficientlyLongTime);
-      int startIdx = 6 * sequenceId;
+   public static void addCoMJerkObjective(double weight,
+                                              FrameVector3DReadOnly centerOfMassJerkObjective,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              DMatrix hessianToPack,
+                                              DMatrix xGradientToPack,
+                                              DMatrix yGradientToPack,
+                                              DMatrix zGradientToPack)
+   {
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        centerOfMassJerkObjective,
+                        comJerkCoefficientProvider,
+                        comJerkCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
+   }
 
-      double c0 = getCoMVelocityFirstCoefficientTimeFunction(omega, time);
-      double c1 = getCoMVelocitySecondCoefficientTimeFunction(omega, time);
-      double c4 = getCoMVelocityFifthCoefficientTimeFunction();
+   public static void addDCMPositionObjective(double weight,
+                                              FramePoint3DReadOnly dcmLocationForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              DMatrix hessianToPack,
+                                              DMatrix xGradientToPack,
+                                              DMatrix yGradientToPack,
+                                              DMatrix zGradientToPack)
+   {
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        dcmLocationForConstraint,
+                        dcmPositionCoefficientProvider,
+                        dcmPositionCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
+   }
 
-      addEquals(hessianToPack, startIdx, startIdx, weight * c0 * c0);
-      addEquals(hessianToPack, startIdx, startIdx + 1, weight * c0 * c1);
-      addEquals(hessianToPack, startIdx, startIdx + 4, weight * c0 * c4);
+   public static void addVRPPositionObjective(double weight,
+                                              FramePoint3DReadOnly vrpLocationForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              DMatrix hessianToPack,
+                                              DMatrix xGradientToPack,
+                                              DMatrix yGradientToPack,
+                                              DMatrix zGradientToPack)
+   {
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        vrpLocationForConstraint,
+                        vrpPositionCoefficientProvider,
+                        vrpPositionCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
+   }
 
-      addEquals(hessianToPack, startIdx + 1, startIdx, weight * c1 * c0);
-      addEquals(hessianToPack, startIdx + 1, startIdx + 1, weight * c1 * c1);
-      addEquals(hessianToPack, startIdx + 1, startIdx + 4, weight * c1 * c4);
-
-      addEquals(hessianToPack, startIdx + 4, startIdx, weight * c4 * c0);
-      addEquals(hessianToPack, startIdx + 4, startIdx + 1, weight * c4 * c1);
-      addEquals(hessianToPack, startIdx + 4, startIdx + 4, weight * c4 * c4);
-
-      addEquals(xGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassVelocityForConstraint.getX());
-      addEquals(xGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassVelocityForConstraint.getX());
-      addEquals(xGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassVelocityForConstraint.getX());
-
-      addEquals(yGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassVelocityForConstraint.getY());
-      addEquals(yGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassVelocityForConstraint.getY());
-      addEquals(yGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassVelocityForConstraint.getY());
-
-      addEquals(zGradientToPack, startIdx, 0, 2.0 * weight * c0 * centerOfMassVelocityForConstraint.getZ());
-      addEquals(zGradientToPack, startIdx + 1, 0, 2.0 * weight * c1 * centerOfMassVelocityForConstraint.getZ());
-      addEquals(zGradientToPack, startIdx + 4, 0, 2.0 * weight * c4 * centerOfMassVelocityForConstraint.getZ());
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
-      { // assuming the matrix is initialized as zero, these don't have to be set
-         double c2 = getCoMVelocityThirdCoefficientTimeFunction(time);
-         double c3 = getCoMVelocityFourthCoefficientTimeFunction(time);
-
-         addEquals(hessianToPack, startIdx, startIdx + 2, weight * c0 * c2);
-         addEquals(hessianToPack, startIdx, startIdx + 3, weight * c0 * c3);
-
-         addEquals(hessianToPack, startIdx + 1, startIdx + 2, weight * c1 * c2);
-         addEquals(hessianToPack, startIdx + 1, startIdx + 3, weight * c1 * c3);
-
-         addEquals(hessianToPack, startIdx + 2, startIdx, weight * c2 * c0);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 1, weight * c2 * c1);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 2, weight * c2 * c2);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 3, weight * c2 * c3);
-         addEquals(hessianToPack, startIdx + 2, startIdx + 4, weight * c2 * c4);
-
-         addEquals(hessianToPack, startIdx + 3, startIdx, weight * c3 * c0);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 1, weight * c3 * c1);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 2, weight * c3 * c2);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 3, weight * c3 * c3);
-         addEquals(hessianToPack, startIdx + 3, startIdx + 4, weight * c3 * c4);
-
-         addEquals(hessianToPack, startIdx + 4, startIdx + 2, weight * c4 * c2);
-         addEquals(hessianToPack, startIdx + 4, startIdx + 3, weight * c4 * c3);
-
-         addEquals(xGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassVelocityForConstraint.getX());
-         addEquals(xGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassVelocityForConstraint.getX());
-
-         addEquals(yGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassVelocityForConstraint.getY());
-         addEquals(yGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassVelocityForConstraint.getY());
-
-         addEquals(zGradientToPack, startIdx + 2, 0, 2.0 * weight * c2 * centerOfMassVelocityForConstraint.getZ());
-         addEquals(zGradientToPack, startIdx + 3, 0, 2.0 * weight * c3 * centerOfMassVelocityForConstraint.getZ());
-      }
+   public static void addVRPVelocityObjective(double weight,
+                                              FrameVector3DReadOnly vrpVelocityForConstraint,
+                                              double omega,
+                                              double time,
+                                              int sequenceId,
+                                              DMatrix hessianToPack,
+                                              DMatrix xGradientToPack,
+                                              DMatrix yGradientToPack,
+                                              DMatrix zGradientToPack)
+   {
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        vrpVelocityForConstraint,
+                        vrpVelocityCoefficientProvider,
+                        vrpVelocityCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
    }
 
    /**
@@ -653,67 +627,146 @@ public class CoMTrajectoryPlannerTools
       addEquals(zObjectiveMatrixToPack, vrpWaypointPositionIndex, 0, weight * desiredVRPPosition.getZ());
    }
 
-   public static void addVRPPositionObjective(double weight,
-                                              int sequenceId,
-                                              double time,
-                                              double omega,
-                                              FramePoint3DReadOnly desiredVRPPosition,
-                                              DMatrix hessianToPack,
-                                              DMatrix xGradientToPack,
-                                              DMatrix yGradientToPack,
-                                              DMatrix zGradientToPack)
+   private interface CoefficientProvider
+   {
+      double coefficient(int coefficientIdx, double omega, double time);
+   }
+
+   private interface CoefficientSelectedProvider
+   {
+      boolean include(int coefficientIdx, double time);
+   }
+
+   public static void addMinimizationObjective(double weight,
+                                               int sequenceId,
+                                               double time,
+                                               double omega,
+                                               CoefficientProvider coefficientProvider,
+                                               CoefficientSelectedProvider selectedProvider,
+                                               DMatrix hessianToPack)
    {
       int startIndex = 6 * sequenceId;
 
       time = Math.min(time, sufficientlyLongTime);
 
-      desiredVRPPosition.checkReferenceFrameMatch(worldFrame);
-
-      double c2 = CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, time);
-      double c3 = CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, time);
-      double c5 = CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction();
-
-      addEquals(hessianToPack, startIndex + 2, startIndex + 2, weight * c2 * c2);
-      addEquals(hessianToPack, startIndex + 2, startIndex + 3, weight * c2 * c3);
-      addEquals(hessianToPack, startIndex + 2, startIndex + 5, weight * c2 * c5);
-
-      addEquals(hessianToPack, startIndex + 3, startIndex + 2, weight * c3 * c2);
-      addEquals(hessianToPack, startIndex + 3, startIndex + 3, weight * c3 * c3);
-      addEquals(hessianToPack, startIndex + 3, startIndex + 5, weight * c3 * c5);
-
-      addEquals(hessianToPack, startIndex + 5, startIndex + 2, weight * c5 * c2);
-      addEquals(hessianToPack, startIndex + 5, startIndex + 3, weight * c5 * c3);
-      addEquals(hessianToPack, startIndex + 5, startIndex + 5, weight * c5 * c5);
-
-      addEquals(xGradientToPack, startIndex + 2, startIndex + 2, 2.0 * weight * c2 * desiredVRPPosition.getX());
-      addEquals(xGradientToPack, startIndex + 2, startIndex + 3, 2.0 * weight * c3 * desiredVRPPosition.getX());
-      addEquals(xGradientToPack, startIndex + 2, startIndex + 5, 2.0 * weight * c5 * desiredVRPPosition.getX());
-
-      addEquals(yGradientToPack, startIndex + 2, startIndex + 2, 2.0 * weight * c2 * desiredVRPPosition.getY());
-      addEquals(yGradientToPack, startIndex + 2, startIndex + 3, 2.0 * weight * c3 * desiredVRPPosition.getY());
-      addEquals(yGradientToPack, startIndex + 2, startIndex + 5, 2.0 * weight * c5 * desiredVRPPosition.getY());
-
-      addEquals(zGradientToPack, startIndex + 2, startIndex + 2, 2.0 * weight * c2 * desiredVRPPosition.getZ());
-      addEquals(zGradientToPack, startIndex + 2, startIndex + 3, 2.0 * weight * c3 * desiredVRPPosition.getZ());
-      addEquals(zGradientToPack, startIndex + 2, startIndex + 5, 2.0 * weight * c5 * desiredVRPPosition.getZ());
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
+      for (int row = 0; row < 6; row++)
       {
-         double c4 = CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(time);
+         boolean includeRow = selectedProvider.include(row, time);
+         if (!includeRow)
+            continue;
 
-         addEquals(hessianToPack, startIndex + 2, startIndex + 4, weight * c2 * c4);
-         addEquals(hessianToPack, startIndex + 3, startIndex + 4, weight * c3 * c4);
+         double rowValue = coefficientProvider.coefficient(row, omega, time);
+         addEquals(hessianToPack, startIndex + row, startIndex + row, weight * rowValue * rowValue);
 
-         addEquals(hessianToPack, startIndex + 4, startIndex + 2, weight * c4 * c2);
-         addEquals(hessianToPack, startIndex + 4, startIndex + 3, weight * c4 * c3);
-         addEquals(hessianToPack, startIndex + 4, startIndex + 4, weight * c4 * c4);
-         addEquals(hessianToPack, startIndex + 4, startIndex + 5, weight * c4 * c5);
+         for (int col = row + 1; col < 6; col++)
+         {
+            boolean includeCol = selectedProvider.include(col, time);
+            if (!includeCol)
+               return;
 
-         addEquals(hessianToPack, startIndex + 5, startIndex + 4, weight * c5 * c4);
+            double colValue = coefficientProvider.coefficient(col, omega, time);
+            double value = weight * rowValue * colValue;
+            addEquals(hessianToPack, startIndex + row, startIndex + col, value);
+            addEquals(hessianToPack, startIndex + col, startIndex + row, value);
+         }
+      }
+   }
 
-         addEquals(xGradientToPack, startIndex + 2, startIndex + 4, 2.0 * weight * c4 * desiredVRPPosition.getX());
-         addEquals(yGradientToPack, startIndex + 2, startIndex + 4, 2.0 * weight * c4 * desiredVRPPosition.getY());
-         addEquals(zGradientToPack, startIndex + 2, startIndex + 4, 2.0 * weight * c4 * desiredVRPPosition.getZ());
+   public static void addValueObjective(double weight,
+                                        int sequenceId,
+                                        double omega,
+                                        double time,
+                                        FrameTuple3DReadOnly valueProvider,
+                                        CoefficientProvider coefficientProvider,
+                                        CoefficientSelectedProvider selectedProvider,
+                                        DMatrix hessianToPack,
+                                        DMatrix xGradientToPack,
+                                        DMatrix yGradientToPack,
+                                        DMatrix zGradientToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      double weight2 = -2.0 * weight;
+
+      boolean addX = false, addY = false, addZ = false;
+      if (valueProvider != null)
+      {
+         valueProvider.checkReferenceFrameMatch(worldFrame);
+         addX = Double.isFinite(valueProvider.getX()) && !MathTools.epsilonEquals(valueProvider.getX(), 0.0, 1e-4);
+         addY = Double.isFinite(valueProvider.getY()) && !MathTools.epsilonEquals(valueProvider.getY(), 0.0, 1e-4);
+         addZ = Double.isFinite(valueProvider.getZ()) && !MathTools.epsilonEquals(valueProvider.getZ(), 0.0, 1e-4);
+      }
+
+      for (int row = 0; row < 6; row++)
+      {
+         boolean includeRow = selectedProvider.include(row, time);
+         if (!includeRow)
+            continue;
+
+         double rowValue = coefficientProvider.coefficient(row, omega, time);
+         addEquals(hessianToPack, startIndex + row, startIndex + row, weight * rowValue * rowValue);
+
+         if (addX)
+            addEquals(xGradientToPack, startIndex + row, 0, weight2 * rowValue * valueProvider.getX());
+         if (addY)
+            addEquals(yGradientToPack, startIndex + row, 0, weight2 * rowValue * valueProvider.getY());
+         if (addZ)
+            addEquals(zGradientToPack, startIndex + row, 0, weight2 * rowValue * valueProvider.getZ());
+
+         for (int col = row + 1; col < 6; col++)
+         {
+            boolean includeCol = selectedProvider.include(col, time);
+            if (!includeCol)
+               return;
+
+            double colValue = coefficientProvider.coefficient(col, omega, time);
+            double value = weight * rowValue * colValue;
+            addEquals(hessianToPack, startIndex + row, startIndex + col, value);
+            addEquals(hessianToPack, startIndex + col, startIndex + row, value);
+         }
+      }
+   }
+
+   public static void addValueObjective(double weight,
+                                        int sequenceId,
+                                        double omega,
+                                        double time,
+                                        double valueObjective,
+                                        CoefficientProvider coefficientProvider,
+                                        CoefficientSelectedProvider selectedProvider,
+                                        DMatrix hessianToPack,
+                                        DMatrix gradientToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      double weight2 = -2.0 * weight;
+
+      for (int row = 0; row < 6; row++)
+      {
+         boolean includeRow = selectedProvider.include(row, time);
+         if (!includeRow)
+            continue;
+
+         double rowValue = coefficientProvider.coefficient(row, omega, time);
+         addEquals(hessianToPack, startIndex + row, startIndex + row, weight * rowValue * rowValue);
+
+         addEquals(gradientToPack, startIndex + row, 0, weight2 * rowValue * valueObjective);
+
+         for (int col = row + 1; col < 6; col++)
+         {
+            boolean includeCol = selectedProvider.include(col, time);
+            if (!includeCol)
+               return;
+
+            double colValue = coefficientProvider.coefficient(col, omega, time);
+            double value = weight * rowValue * colValue;
+            addEquals(hessianToPack, startIndex + row, startIndex + col, value);
+            addEquals(hessianToPack, startIndex + col, startIndex + row, value);
+         }
       }
    }
 
@@ -1478,6 +1531,29 @@ public class CoMTrajectoryPlannerTools
       addEquals(zObjectiveMatrixToPack, constraintRow, 0, weight * -Math.abs(gravityZ));
    }
 
+   public static void addCoMAccelerationObjective(double weight,
+                                                           int sequenceId,
+                                                           double omega,
+                                                           double time,
+                                                           FrameVector3DReadOnly gravity,
+                                                           DMatrix hessianToPack,
+                                                           DMatrix xGradientToPack,
+                                                           DMatrix yGradientToPack,
+                                                           DMatrix zGradientToPack)
+   {
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        gravity,
+                        comAccelerationCoefficientProvider,
+                        comAccelerationCoefficientSelectedProvider,
+                        hessianToPack,
+                        xGradientToPack,
+                        yGradientToPack,
+                        zGradientToPack);
+   }
+
    public static void addCoMAccelerationIsGravityObjective(double weight,
                                                            int sequenceId,
                                                            double omega,
@@ -1486,49 +1562,15 @@ public class CoMTrajectoryPlannerTools
                                                            DMatrix hessianToPack,
                                                            DMatrix zGradientToPack)
    {
-      int startIndex = 6 * sequenceId;
-
-      time = Math.min(time, sufficientlyLongTime);
-      gravityZ = -Math.abs(gravityZ);
-
-      double c0 = getCoMAccelerationFirstCoefficientTimeFunction(omega, time);
-      double c1 = getCoMAccelerationSecondCoefficientTimeFunction(omega, time);
-      double c3 = getCoMAccelerationFourthCoefficientTimeFunction();
-
-
-      addEquals(hessianToPack, startIndex, startIndex, weight * c0 * c0);
-      addEquals(hessianToPack, startIndex, startIndex + 1, weight * c0 * c1);
-      addEquals(hessianToPack, startIndex, startIndex + 3, weight * c0 * c3);
-
-      addEquals(hessianToPack, startIndex + 1, startIndex, weight * c1 * c0);
-      addEquals(hessianToPack, startIndex + 1, startIndex + 1, weight * c1 * c1);
-      addEquals(hessianToPack, startIndex + 1, startIndex + 3, weight * c1 * c3);
-
-      addEquals(hessianToPack, startIndex + 3, startIndex, weight * c3 * c0);
-      addEquals(hessianToPack, startIndex + 3, startIndex + 1, weight * c3 * c1);
-      addEquals(hessianToPack, startIndex + 3, startIndex + 3, weight * c3 * c3);
-
-      addEquals(zGradientToPack, startIndex, 0, 2.0 * weight * gravityZ * c0);
-      addEquals(zGradientToPack, startIndex + 1, 0, 2.0 * weight * gravityZ * c1);
-      addEquals(zGradientToPack, startIndex + 3, 0, 2.0 * weight * gravityZ * c3);
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(time, 0.0, minDuration))
-      {
-         double c2 = getCoMAccelerationThirdCoefficientTimeFunction(time);
-
-         addEquals(hessianToPack, startIndex, startIndex + 2, weight * c0 * c2);
-
-         addEquals(hessianToPack, startIndex + 1, startIndex + 2, weight * c1 * c2);
-
-         addEquals(hessianToPack, startIndex + 2, startIndex, weight * c2 * c0);
-         addEquals(hessianToPack, startIndex + 2, startIndex + 1, weight * c2 * c1);
-         addEquals(hessianToPack, startIndex + 2, startIndex + 2, weight * c2 * c2);
-         addEquals(hessianToPack, startIndex + 2, startIndex + 3, weight * c2 * c3);
-
-         addEquals(hessianToPack, startIndex + 3, startIndex + 2, weight * c3 * c2);
-
-         addEquals(zGradientToPack, startIndex + 2, 0, 2.0 * weight * gravityZ * c2);
-      }
+      addValueObjective(weight,
+                        sequenceId,
+                        omega,
+                        time,
+                        gravityZ,
+                        comAccelerationCoefficientProvider,
+                        comAccelerationCoefficientSelectedProvider,
+                        hessianToPack,
+                        zGradientToPack);
    }
 
    /**
@@ -1575,26 +1617,9 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
-   public static void addZeroCoMJerkObjective(double weight, double time, double omega, int sequenceId,  DMatrix matrixToPack)
+   public static void addZeroCoMJerkObjective(double weight, double time, double omega, int sequenceId, DMatrix hessianToPack)
    {
-      time = Math.min(time, sufficientlyLongTime);
-
-      double c0 = getCoMJerkFirstCoefficientTimeFunction(omega, time);
-      double c1 = getCoMJerkSecondCoefficientTimeFunction(omega, time);
-      double c2 = getCoMJerkThirdCoefficientTimeFunction();
-
-      int startIdx = 6 * sequenceId;
-      addEquals(matrixToPack, startIdx, startIdx, weight * c0 * c0);
-      addEquals(matrixToPack, startIdx, startIdx + 1, weight * c0 * c1);
-      addEquals(matrixToPack, startIdx, startIdx + 2, weight * c0 * c2);
-
-      addEquals(matrixToPack, startIdx + 1, startIdx, weight * c1 * c0);
-      addEquals(matrixToPack, startIdx + 1, startIdx + 1, weight * c1 * c1);
-      addEquals(matrixToPack, startIdx + 1, startIdx + 2, weight * c1 * c2);
-
-      addEquals(matrixToPack, startIdx + 2, startIdx, weight * c2 * c0);
-      addEquals(matrixToPack, startIdx + 2, startIdx + 1, weight * c2 * c1);
-      addEquals(matrixToPack, startIdx + 2, startIdx + 2, weight * c2 * c2);
+      addCoMJerkObjective(weight, null, omega, time, sequenceId, hessianToPack, null, null, null);
    }
 
    public static void addMinimizeCoMAccelerationObjective(double weight, double startTime, double endTime, double omega, int sequenceId, DMatrix hessianToPack)
@@ -1685,6 +1710,150 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+
+
+   public static boolean getCoMPositionCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 1:
+         case 5:
+            return true;
+         case 2:
+         case 3:
+         case 4:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getCoMVelocityCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 1:
+         case 4:
+            return true;
+         case 2:
+         case 3:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         case 5:
+            return false;
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getCoMAccelerationCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 1:
+         case 3:
+            return true;
+         case 2:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         case 4:
+         case 5:
+            return false;
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getCoMJerkCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 1:
+         case 3:
+            return true;
+         case 2:
+         case 4:
+         case 5:
+            return false;
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getDCMPositionCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 4:
+         case 5:
+            return true;
+         case 1:
+            return false;
+         case 2:
+         case 3:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getDCMVelocityCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+         case 3:
+         case 4:
+            return true;
+         case 1:
+         case 5:
+            return false;
+         case 2:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getVRPPositionCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 3:
+         case 5:
+            return true;
+         case 0:
+         case 1:
+            return false;
+         case 2:
+         case 4:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static boolean getVRPVelocityCoefficientNonZero(int coefficient, double time)
+   {
+      switch (coefficient)
+      {
+         case 2:
+         case 4:
+            return true;
+         case 0:
+         case 1:
+         case 5:
+            return false;
+         case 3:
+            return !MathTools.epsilonEquals(time, 0.0, minDuration);
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
    public static double getCoMPositionCoefficientTimeFunction(int coefficient, double omega, double time)
    {
       switch (coefficient)
@@ -1764,6 +1933,69 @@ public class CoMTrajectoryPlannerTools
             return CoMTrajectoryPlannerTools.getCoMJerkFifthCoefficientTimeFunction();
          case 5:
             return CoMTrajectoryPlannerTools.getCoMJerkSixthCoefficientTimeFunction();
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static double getDCMPositionCoefficientTimeFunction(int coefficient, double omega, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+            return CoMTrajectoryPlannerTools.getDCMPositionFirstCoefficientTimeFunction(omega, time);
+         case 1:
+            return CoMTrajectoryPlannerTools.getDCMPositionSecondCoefficientTimeFunction();
+         case 2:
+            return CoMTrajectoryPlannerTools.getDCMPositionThirdCoefficientTimeFunction(omega, time);
+         case 3:
+            return CoMTrajectoryPlannerTools.getDCMPositionFourthCoefficientTimeFunction(omega, time);
+         case 4:
+            return CoMTrajectoryPlannerTools.getDCMPositionFifthCoefficientTimeFunction(omega, time);
+         case 5:
+            return CoMTrajectoryPlannerTools.getDCMPositionSixthCoefficientTimeFunction();
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static double getVRPPositionCoefficientTimeFunction(int coefficient, double omega, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+            return CoMTrajectoryPlannerTools.getVRPPositionFirstCoefficientTimeFunction();
+         case 1:
+            return CoMTrajectoryPlannerTools.getVRPPositionSecondCoefficientTimeFunction();
+         case 2:
+            return CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, time);
+         case 3:
+            return CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, time);
+         case 4:
+            return CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(time);
+         case 5:
+            return CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction();
+         default:
+            throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
+      }
+   }
+
+   public static double getVRPVelocityCoefficientTimeFunction(int coefficient, double omega, double time)
+   {
+      switch (coefficient)
+      {
+         case 0:
+            return CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction();
+         case 1:
+            return CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction();
+         case 2:
+            return CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, time);
+         case 3:
+            return CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(time);
+         case 4:
+            return CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction();
+         case 5:
+            return CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction();
          default:
             throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
       }
