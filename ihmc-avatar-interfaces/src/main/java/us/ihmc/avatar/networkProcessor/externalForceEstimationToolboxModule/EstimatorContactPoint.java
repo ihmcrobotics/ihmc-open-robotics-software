@@ -15,7 +15,7 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
-class EstimatorContactPoint
+public class EstimatorContactPoint
 {
    /** Contacting rigid body */
    private final RigidBodyBasics rigidBody;
