@@ -2,18 +2,23 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactPointEvaluator;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.screwTheory.PointJacobian;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -28,6 +33,10 @@ public class PredefinedContactExternalForceSolver implements RobotController
 {
    public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
+
+   private static final boolean useOptimizationSolverIfPossible = false;
+   private static final AxisAngle contactFrameOrientationInWorld = new AxisAngle(0.0, 1.0, 0.0, -0.5 * Math.PI);
+   private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -140,12 +149,40 @@ public class PredefinedContactExternalForceSolver implements RobotController
          }
       }
 
-      // solve for external wrench
-      DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      if (useOptimizationSolverIfPossible && contactPoints.size() == 1 && contactPoints.get(0).getAssumeZeroTorque())
+      {
+         contactPointEvaluator.setCoefficientOfFriction(0.5);
+         DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
 
-      CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
-      forceEstimateSolver.setA(externalWrenchJacobianTranspose);
-      forceEstimateSolver.solve(observedExternalJointTorque, estimatedExternalWrenchMatrix);
+         MovingReferenceFrame parentJointFrame = contactPoints.get(0).getRigidBody().getParentJoint().getFrameAfterJoint();
+         Tuple3DReadOnly contactPointOffset = contactPoints.get(0).getContactPointOffset();
+         FramePoint3D contactPosition = new FramePoint3D(parentJointFrame, contactPointOffset);
+
+         FrameQuaternion contactPointOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), contactFrameOrientationInWorld);
+         contactPointOrientation.changeFrame(parentJointFrame);
+
+         FramePose3D contactFramePose = new FramePose3D(parentJointFrame, contactPosition, contactPointOrientation);
+         PoseReferenceFrame contactFrame = new PoseReferenceFrame("contactFrame", contactFramePose);
+
+         try
+         {
+            double cost = contactPointEvaluator.evaluate(observedExternalJointTorque, externalWrenchJacobian, contactFrame);
+            estimatedExternalWrenchMatrix.set(contactPointEvaluator.getEstimatedForce());
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+      else
+      {
+         // solve for external wrench
+         DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+
+         CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
+         forceEstimateSolver.setA(externalWrenchJacobianTranspose);
+         forceEstimateSolver.solve(observedExternalJointTorque, estimatedExternalWrenchMatrix);
+      }
 
       // pack result and update graphics variables
       for (int i = 0; i < contactPoints.size(); i++)
