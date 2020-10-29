@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,8 @@ public class TouchDownHeightObjectivePolicyTest
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.lu(6);
       MatrixTools.addDiagonal(hessian, 1e-5);
+      CommonOps_DDRM.scale(0.5, zGradient);
+
       solver.setA(hessian);
       solver.solve(zGradient, zCoefficients);
 

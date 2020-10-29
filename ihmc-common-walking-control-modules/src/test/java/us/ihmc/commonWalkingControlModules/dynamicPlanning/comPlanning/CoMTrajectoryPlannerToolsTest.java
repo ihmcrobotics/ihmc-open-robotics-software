@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.RandomNumbers;
@@ -235,5 +238,45 @@ public class CoMTrajectoryPlannerToolsTest
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPositionExpected, epsilon);
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPosition2, epsilon);
       }
+   }
+
+   @Test
+   public void testCoMPositionContinuityObjective()
+   {
+      double omega = 3.0;
+      double previousDuration = 1.5;
+
+      DMatrixRMaj jacobian = new DMatrixRMaj(12, 12);
+      DMatrixRMaj hessian1 = new DMatrixRMaj(12, 12);
+      DMatrixRMaj hessian2 = new DMatrixRMaj(12, 12);
+
+      double weight = 10.0;
+      double weightSqrt = Math.sqrt(weight);
+
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weightSqrt, 0, 1, 0, omega, previousDuration, jacobian);
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weight, 0, 1, omega, previousDuration, hessian2);
+      CommonOps_DDRM.multInner(jacobian, hessian1);
+
+      EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
+   }
+
+   @Test
+   public void testCoMVelocityContinuityObjective()
+   {
+      double omega = 3.0;
+      double previousDuration = 1.5;
+
+      DMatrixRMaj jacobian = new DMatrixRMaj(12, 12);
+      DMatrixRMaj hessian1 = new DMatrixRMaj(12, 12);
+      DMatrixRMaj hessian2 = new DMatrixRMaj(12, 12);
+
+      double weight = 10.0;
+      double weightSqrt = Math.sqrt(weight);
+
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(weightSqrt, 0, 1, 0, omega, previousDuration, jacobian);
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(weight, 0, 1, omega, previousDuration, hessian2);
+      CommonOps_DDRM.multInner(jacobian, hessian1);
+
+      EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
    }
 }
