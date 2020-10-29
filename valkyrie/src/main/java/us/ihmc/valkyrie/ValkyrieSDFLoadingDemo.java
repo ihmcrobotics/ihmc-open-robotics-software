@@ -113,7 +113,7 @@ public class ValkyrieSDFLoadingDemo
       return links;
    }
 
-   public void addJointAxis(FloatingRootJointRobot valkyrieRobot)
+   public static void addJointAxis(FloatingRootJointRobot valkyrieRobot)
    {
 
       ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDegreeOfFreedomJoints()));
@@ -127,7 +127,7 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   public void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
    {
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 
