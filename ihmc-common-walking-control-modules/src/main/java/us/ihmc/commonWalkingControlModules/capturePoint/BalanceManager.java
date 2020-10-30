@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
@@ -342,7 +343,8 @@ public class BalanceManager
       bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
    }
 
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, FeedbackControlCommand<?> heightControlCommand,
+                       boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -371,6 +373,7 @@ public class BalanceManager
 
       if (precomputedICPPlanner != null)
       {
+         // FIXME what is this method used for?
          precomputedICPPlanner.setCoMZAcceleration(desiredCoMHeightAcceleration);
          if (blendICPTrajectories.getBooleanValue())
          {
@@ -396,6 +399,7 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
+      linearMomentumRateControlModuleInput.setHeightControlCommand(heightControlCommand);
       linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);

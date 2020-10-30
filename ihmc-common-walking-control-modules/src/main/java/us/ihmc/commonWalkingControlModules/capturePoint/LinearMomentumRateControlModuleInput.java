@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -60,6 +61,8 @@ public class LinearMomentumRateControlModuleInput
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
     */
    private boolean controlHeightWithMomentum;
+
+   private FeedbackControlCommand<?> heightControlCommand;
 
    @Deprecated // The CoM height control should be moved to the fast thread or this should use the achieved value from the last tick.
    private double desiredCoMHeightAcceleration = 0.0;
@@ -165,6 +168,16 @@ public class LinearMomentumRateControlModuleInput
    public double getDesiredCoMHeightAcceleration()
    {
       return desiredCoMHeightAcceleration;
+   }
+
+   public void setHeightControlCommand(FeedbackControlCommand<?> heightControlCommand)
+   {
+      this.heightControlCommand = heightControlCommand;
+   }
+
+   public FeedbackControlCommand<?> getHeightControlCommand()
+   {
+      return heightControlCommand;
    }
 
    public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
@@ -286,6 +299,7 @@ public class LinearMomentumRateControlModuleInput
       initializeForTransfer = other.initializeForTransfer;
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
+      heightControlCommand = other.heightControlCommand;
       for (RobotSide robotSide : RobotSide.values)
          contactStateCommands.get(robotSide).set(other.contactStateCommands.get(robotSide));
    }
@@ -327,6 +341,8 @@ public class LinearMomentumRateControlModuleInput
          if (keepCoPInsideSupportPolygon ^ other.keepCoPInsideSupportPolygon)
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
+            return false;
+         if (!heightControlCommand.equals(other.heightControlCommand))
             return false;
 
          for (RobotSide robotSide : RobotSide.values)

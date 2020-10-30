@@ -327,6 +327,18 @@ public class CenterOfMassHeightManager
       }
    }
 
+   public FeedbackControlCommand<?> getHeightControlCommand()
+   {
+      if (useStateMachine)
+      {
+         return stateMachine.getCurrentState().getHeightControlCommand();
+      }
+      else
+      {
+         return pelvisHeightControlState.getHeightControlCommand();
+      }
+   }
+
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       if (useStateMachine)
