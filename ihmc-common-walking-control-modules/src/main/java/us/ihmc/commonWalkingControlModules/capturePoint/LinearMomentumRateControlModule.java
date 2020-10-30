@@ -120,7 +120,6 @@ public class LinearMomentumRateControlModule
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
    private RobotSide supportSide = null;
-   private RobotSide transferToSide = null;
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
@@ -138,10 +137,6 @@ public class LinearMomentumRateControlModule
    private boolean initializeForSingleSupport;
    private boolean initializeForTransfer;
    private boolean keepCoPInsideSupportPolygon;
-   private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
-   private final TDoubleArrayList swingDurations = new TDoubleArrayList();
-   private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
@@ -255,26 +250,9 @@ public class LinearMomentumRateControlModule
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
       this.supportSide = input.getSupportSide();
-      this.transferToSide = input.getTransferToSide();
-      this.footsteps.clear();
-      for (int i = 0; i < input.getFootsteps().size(); i++)
-      {
-         this.footsteps.add().set(input.getFootsteps().get(i));
-      }
-      this.swingDurations.reset();
-      for (int i = 0; i < input.getSwingDurations().size(); i++)
-      {
-         this.swingDurations.add(input.getSwingDurations().get(i));
-      }
-      this.transferDurations.reset();
-      for (int i = 0; i < input.getTransferDurations().size(); i++)
-      {
-         this.transferDurations.add(input.getTransferDurations().get(i));
-      }
       this.initializeForStanding = input.getInitializeForStanding();
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();
       this.initializeForTransfer = input.getInitializeForTransfer();
-      this.remainingTimeInSwingUnderDisturbance = input.getRemainingTimeInSwingUnderDisturbance();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
       {

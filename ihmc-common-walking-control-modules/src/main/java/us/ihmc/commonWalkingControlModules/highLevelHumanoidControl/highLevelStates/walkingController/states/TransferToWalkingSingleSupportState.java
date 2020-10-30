@@ -115,7 +115,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
          balanceManager.addFootstepToPlan(footstep, timing);
       }
 
-      balanceManager.setICPPlanTransferToSide(transferToSide);
       FootstepTiming firstTiming = footstepTimings[0];
       currentTransferDuration.set(firstTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);

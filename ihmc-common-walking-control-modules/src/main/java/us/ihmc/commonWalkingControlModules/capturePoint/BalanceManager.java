@@ -36,6 +36,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -143,10 +145,10 @@ public class BalanceManager
    private boolean minimizeAngularMomentumRateZ = false;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
-   private RobotSide transferToSide;
    private final FixedFrameVector2DBasics residualICPErrorForStepAdjustment = new FrameVector2D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
+   private final SimpleFootstep currentFootstep = new SimpleFootstep();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
@@ -305,7 +307,6 @@ public class BalanceManager
          return false;
       }
 
-      double remainingTimeInSwingUnderDisturbance = linearMomentumRateControlModuleInput.getRemainingTimeInSwingUnderDisturbance();
       double omega0 = linearMomentumRateControlModuleInput.getOmega0();
       FramePoint2D desiredCapturePoint = linearMomentumRateControlModuleInput.getDesiredCapturePoint();
 
@@ -313,8 +314,8 @@ public class BalanceManager
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
 
-      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
+      if (!Double.isNaN(timeRemainingInSwing) && timeRemainingInSwing > 0.0)
+         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
 
@@ -334,16 +335,6 @@ public class BalanceManager
    public void setICPPlanSupportSide(RobotSide supportSide)
    {
       this.supportSide = supportSide;
-   }
-
-   public void setICPPlanTransferToSide(RobotSide transferToSide)
-   {
-      this.transferToSide = transferToSide;
-   }
-
-   public void setICPPlanTransferFromSide(RobotSide robotSide)
-   {
-      this.transferToSide = robotSide != null ? robotSide.getOppositeSide() : null;
    }
 
    private void updatePolygons()
@@ -409,30 +400,23 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
-      linearMomentumRateControlModuleInput.setFromFootsteps(footsteps);
-      linearMomentumRateControlModuleInput.setFromFootstepTimings(footstepTimings);
-      linearMomentumRateControlModuleInput.setFinalTransferDuration(copTrajectoryState.getFinalTransferDuration());
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
-      linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setSupportSide(supportSide);
-      linearMomentumRateControlModuleInput.setTransferToSide(transferToSide);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
-      linearMomentumRateControlModuleInput.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
+
       supportSide = null;
-      transferToSide = null;
-      timeRemainingInSwing = Double.NaN;
 
       // This is for debugging such that the momentum trajectory handler YoVariables contain the current value:
       if (momentumTrajectoryHandler != null)
@@ -633,8 +617,9 @@ public class BalanceManager
    {
       inSingleSupport.set(true);
       currentTiming.set(footstepTimings.get(0));
+      currentFootstep.set(footsteps.get(0));
       stepAdjustmentController.reset();
-      stepAdjustmentController.setFootstepToAdjust(linearMomentumRateControlModuleInput.getFootsteps().get(0), currentTiming.getSwingTime(), currentTiming.getTransferTime());
+      stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
       timeInSupportSequence.set(currentTiming.getTransferTime());
@@ -645,7 +630,6 @@ public class BalanceManager
       initializeForSingleSupport = true;
       icpPlannerDone.set(false);
    }
-
 
    public void initializeICPPlanForStanding()
    {
