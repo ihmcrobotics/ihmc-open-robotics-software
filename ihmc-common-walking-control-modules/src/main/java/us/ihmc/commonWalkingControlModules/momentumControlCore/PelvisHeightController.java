@@ -5,15 +5,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PelvisHeightController
+public class PelvisHeightController implements HeightController<PointFeedbackControlCommand>
 {
-   private final RigidBodyBasics pelvis;
+   private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
 
    private final YoDouble currentPelvisHeightInWorld;
@@ -34,12 +34,12 @@ public class PelvisHeightController
    private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final Twist twist = new Twist();
 
-   public PelvisHeightController(RigidBodyBasics pelvis, RigidBodyBasics elevator, YoRegistry parentRegistry)
+   public PelvisHeightController(MovingReferenceFrame pelvisFrame, ReferenceFrame baseFrame, YoRegistry parentRegistry)
    {
-      this.pelvis = pelvis;
-      this.baseFrame = elevator.getBodyFixedFrame();
+      this.pelvisFrame = pelvisFrame;
+      this.baseFrame = baseFrame;
 
-      yoControlFrame = new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
+      yoControlFrame = new YoSE3OffsetFrame("pelvisHeightBodyFixedControlFrame", pelvisFrame, registry);
       linearMomentumZPDController = new PDController("pelvisHeightControlState_linearMomentumZPDController", registry);
 
       currentPelvisHeightInWorld = new YoDouble("currentPelvisHeightInWorld", registry);
@@ -52,12 +52,11 @@ public class PelvisHeightController
       parentRegistry.addChild(registry);
    }
 
-
-
+   @Override
    public void compute(PointFeedbackControlCommand feedbackCommand)
    {
       controlPosition.setIncludingFrame(feedbackCommand.getBodyFixedPointToControl());
-      controlPosition.changeFrame(pelvis.getBodyFixedFrame());
+      controlPosition.changeFrame(pelvisFrame);
       yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
       yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
       currentLinearVelocity.setIncludingFrame(twist.getLinearPart());
@@ -81,5 +80,11 @@ public class PelvisHeightController
       feedbackPelvisAcceleration.set(linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
                                                  currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue()));
       feedbackPelvisAcceleration.add(feedForwardLinearAcceleration.getZ());
+   }
+
+   @Override
+   public double getHeightAcceleration()
+   {
+      return feedbackPelvisAcceleration.getDoubleValue();
    }
 }

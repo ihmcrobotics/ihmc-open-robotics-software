@@ -9,7 +9,7 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class CoMHeightController
+public class CoMHeightController implements HeightController<CenterOfMassFeedbackControlCommand>
 {
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final PDController comHeightController;
@@ -43,6 +43,7 @@ public class CoMHeightController
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void compute(CenterOfMassFeedbackControlCommand feedbackCommand)
    {
       controlPosition.setIncludingFrame(centerOfMassJacobian.getCenterOfMass());
@@ -69,4 +70,9 @@ public class CoMHeightController
       feedbackCoMAcceleration.add(feedForwardLinearAcceleration.getZ());
    }
 
+   @Override
+   public double getHeightAcceleration()
+   {
+      return feedbackCoMAcceleration.getDoubleValue();
+   }
 }

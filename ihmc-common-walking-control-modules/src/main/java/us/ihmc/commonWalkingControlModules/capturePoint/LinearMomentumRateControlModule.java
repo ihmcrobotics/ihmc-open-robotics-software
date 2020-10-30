@@ -12,6 +12,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -19,6 +22,9 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHand
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightController;
+import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
+import us.ihmc.commonWalkingControlModules.momentumControlCore.PelvisHeightController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
@@ -74,6 +80,11 @@ public class LinearMomentumRateControlModule
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+
+   private final PelvisHeightController pelvisHeightController;
+   private final CoMHeightController comHeightController;
+
+   private FeedbackControlCommand<?> heightControlCommand;
 
    private double omega0;
    private double totalMass;
@@ -182,6 +193,10 @@ public class LinearMomentumRateControlModule
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, elevator);
+
+      pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
+      comHeightController = new CoMHeightController(capturePointCalculator.getCenterOfMassJacobian(), registry);
+
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
       capturePointVelocity = new FilteredVelocityYoFrameVector2d("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
@@ -202,8 +217,6 @@ public class LinearMomentumRateControlModule
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
 
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
@@ -241,6 +254,7 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
+      this.heightControlCommand = input.getHeightControlCommand();
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
@@ -320,6 +334,7 @@ public class LinearMomentumRateControlModule
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       updatePolygons();
+      updateHeightController();
       updateICPControllerState();
       computeICPController();
 
@@ -383,6 +398,30 @@ public class LinearMomentumRateControlModule
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
       bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
+   }
+
+   private void updateHeightController()
+   {
+      if (heightControlCommand == null)
+         return;
+
+      switch (heightControlCommand.getCommandType())
+      {
+         case POINT:
+            desiredCoMHeightAcceleration = handleHeightControlCommand((PointFeedbackControlCommand) heightControlCommand, pelvisHeightController);
+            break;
+         case MOMENTUM:
+            desiredCoMHeightAcceleration = handleHeightControlCommand((CenterOfMassFeedbackControlCommand) heightControlCommand, comHeightController);
+            break;
+         default:
+            throw new IllegalArgumentException("This command type has not been set up for height control.");
+      }
+   }
+
+   private static <T extends FeedbackControlCommand<T>> double  handleHeightControlCommand(T command, HeightController<T> controller)
+   {
+      controller.compute(command);
+      return controller.getHeightAcceleration();
    }
 
    private void updateICPControllerState()
