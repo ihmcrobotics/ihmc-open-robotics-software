@@ -216,6 +216,7 @@ public class JumpingMomentumRateControlModule
 //      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
 //      orientationController.getDesiredTorque(angularMomentumRateOfChange);
+
       angularMomentumRateOfChange.changeFrame(worldFrame);
    }
 
