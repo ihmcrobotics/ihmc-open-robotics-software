@@ -2,15 +2,19 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixSparseCSC;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class TakeOffHeightObjectivePolicy implements CoMTrajectoryPlanningCostPolicy
 {
+   private final DoubleProvider omega;
    private final double weight;
 
-   public TakeOffHeightObjectivePolicy(double weight)
+   public TakeOffHeightObjectivePolicy(DoubleProvider omega, double weight)
    {
+      this.omega = omega;
       this.weight = weight;
    }
 
@@ -28,25 +32,17 @@ public class TakeOffHeightObjectivePolicy implements CoMTrajectoryPlanningCostPo
          if (!isStartTakeOff)
             continue;
 
-         // NOTE because this is being evaluated at t = 0.0, most of the hessian cost term is ZERO
-         int startIdx = 6 * sequenceId;
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx, startIdx, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx, startIdx + 1, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx, startIdx + 5, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 1, startIdx, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 1, startIdx + 1, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 1, startIdx + 5, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 5, startIdx, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 5, startIdx + 1, weight);
-         CoMTrajectoryPlannerTools.addEquals(hessianToPack, startIdx + 5, startIdx + 5, weight);
-
-         double copHeight = contactSequence.get(sequenceId - 1).getCopEndPosition().getZ();
+         double copHeight = contactSequence.get(sequenceId + 1).getCopStartPosition().getZ();
          double objectiveCoMHeight = copHeight + comTrajectoryPlanner.getNominalCoMHeight();
-
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx, 0, 2.0 * weight * objectiveCoMHeight);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 1, 0, 2.0 * weight * objectiveCoMHeight);
-         CoMTrajectoryPlannerTools.addEquals(zGradientToPack, startIdx + 5, 0, 2.0 * weight * objectiveCoMHeight);
-
+         CoMTrajectoryPlannerTools.addValueObjective(weight,
+                                                     sequenceId,
+                                                     omega.getValue(),
+                                                     0.0,
+                                                     objectiveCoMHeight,
+                                                     CoMTrajectoryPlannerTools.comPositionCoefficientProvider,
+                                                     CoMTrajectoryPlannerTools.comPositionCoefficientSelectedProvider,
+                                                     hessianToPack,
+                                                     zGradientToPack);
       }
    }
 }
