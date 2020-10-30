@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectorySta
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionController;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
@@ -423,5 +424,11 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       statusActualPosition.setY(Double.NaN);
 
       return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getHeightControlCommand()
+   {
+      return positionController.getFeedbackControlCommand();
    }
 }
