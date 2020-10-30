@@ -9,18 +9,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRController;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
@@ -71,6 +71,7 @@ public class JumpingMomentumRateControlModule
    private final FrameVector3D angularMomentumRateOfChange = new FrameVector3D();
 
    private final LQRJumpMomentumController lqrMomentumController;
+   private final VariationalLQRController orientationController;
 
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoDesiredVRP = new YoFramePoint3D("desiredVRP", worldFrame, registry);
@@ -111,6 +112,8 @@ public class JumpingMomentumRateControlModule
       yoCenterOfMass.setToNaN();
 
       lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), registry);
+      orientationController = new VariationalLQRController();
+      orientationController.setInertia(controllerToolbox.getFullRobotModel().getChest().getInertia());
 
       parentRegistry.addChild(registry);
    }
@@ -128,7 +131,7 @@ public class JumpingMomentumRateControlModule
       this.timeInContactPhase = input.getTimeInState();
       this.vrpTrajectories = input.getVrpTrajectories();
       this.contactStateProviders = input.getContactStateProviders();
-      this.minimizeAngularMomentumRate.set(input.getMinimizeAngularMomentumRate());
+//      this.minimizeAngularMomentumRate.set(input.getMinimizeAngularMomentumRate());
    }
 
    public void setInputFromControllerCore(ControllerCoreOutput controllerCoreOutput)
@@ -203,9 +206,16 @@ public class JumpingMomentumRateControlModule
       yoDesiredVRP.set(lqrMomentumController.getFeedbackVRPPosition());
    }
 
+   private final FramePose3D centerOfMass = new FramePose3D();
+
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      angularMomentumRateOfChange.setToZero(centerOfMassFrame);
+      MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
+      centerOfMass.setToZero(chestFrame);
+      centerOfMass.changeFrame(worldFrame);
+      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+
+      orientationController.getDesiredTorque(angularMomentumRateOfChange);
       angularMomentumRateOfChange.changeFrame(worldFrame);
    }
 
