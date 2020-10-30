@@ -8,6 +8,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactParticleFilter;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -28,6 +29,8 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -35,12 +38,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 public class ExternalForceEstimationToolboxController extends ToolboxController
 {
+   private final YoBoolean estimateContactPosition = new YoBoolean("estimateContactPosition", registry);
    private final HumanoidReferenceFrames referenceFrames;
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
@@ -64,8 +68,10 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DMatrixRMaj coriolisGravityMatrix;
 
    private final CommandInputManager commandInputManager;
-   private PredefinedContactExternalForceSolver externalForceSolver;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
+
+   private PredefinedContactExternalForceSolver predefinedContactForceSolver;
+   private ContactParticleFilter contactParticleFilter;
 
    public ExternalForceEstimationToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -123,7 +129,11 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          tau.set(controllerDesiredTau);
       };
 
-      externalForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
+
+      predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
+      contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -145,31 +155,44 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          ExternalForceEstimationToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(
                ExternalForceEstimationToolboxConfigurationCommand.class);
 
-         externalForceSolver.clearContactPoints();
-         int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
-         for (int i = 0; i < numberOfContactPoints; i++)
+         estimateContactPosition.set(configurationCommand.getEstimateContactLocation());
+
+         if (estimateContactPosition.getBooleanValue())
          {
-            RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(i));
-            Point3D contactPoint = configurationCommand.getContactPointPositions().get(i);
-            externalForceSolver.addContactPoint(rigidBody, contactPoint, true);
+            RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(0));
+            contactParticleFilter.setLinkToEstimate(rigidBody);
+            contactParticleFilter.initialize();
+         }
+         else
+         {
+            predefinedContactForceSolver.clearContactPoints();
+            int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
+            for (int i = 0; i < numberOfContactPoints; i++)
+            {
+               RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(i));
+               Point3D contactPoint = configurationCommand.getContactPointPositions().get(i);
+               predefinedContactForceSolver.addContactPoint(rigidBody, contactPoint, true);
+            }
+
+            calculateRootJointWrench.set(configurationCommand.getCalculateRootJointWrench());
+            if(calculateRootJointWrench.getValue())
+            {
+               predefinedContactForceSolver.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
+            }
+
+            predefinedContactForceSolver.setEstimatorGain(configurationCommand.getEstimatorGain());
+            predefinedContactForceSolver.setSolverAlpha(configurationCommand.getSolverAlpha());
          }
 
-         calculateRootJointWrench.set(configurationCommand.getCalculateRootJointWrench());
-         if(calculateRootJointWrench.getValue())
-         {
-            externalForceSolver.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
-         }
+         predefinedContactForceSolver.initialize();
 
-         externalForceSolver.setEstimatorGain(configurationCommand.getEstimatorGain());
-         externalForceSolver.setSolverAlpha(configurationCommand.getSolverAlpha());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
       }
-      else if (externalForceSolver == null)
+      else if (predefinedContactForceSolver == null)
       {
          return false;
       }
 
-      externalForceSolver.initialize();
       return true;
    }
 
@@ -196,31 +219,38 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
       CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);
 
-      externalForceSolver.doControl();
-
-      outputStatus.getEstimatedExternalForces().clear();
-      YoFixedFrameSpatialVector[] estimatedExternalWrenches = externalForceSolver.getEstimatedExternalWrenches();
-
-      int numberOfContactPoints = externalForceSolver.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
-      for (int i = 0; i < numberOfContactPoints; i++)
+      if (estimateContactPosition.getBooleanValue())
       {
-         outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
-      }
-
-      if(calculateRootJointWrench.getValue())
-      {
-         int lastIndex = externalForceSolver.getNumberOfContactPoints() - 1;
-         outputStatus.getEstimatedRootJointWrench().getTorque().set(externalForceSolver.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
-         outputStatus.getEstimatedRootJointWrench().getForce().set(externalForceSolver.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
+         contactParticleFilter.doControl();
+         // TODO pack output
       }
       else
       {
-         outputStatus.getEstimatedRootJointWrench().getTorque().setToNaN();
-         outputStatus.getEstimatedRootJointWrench().getForce().setToNaN();
+         predefinedContactForceSolver.doControl();
+
+         outputStatus.getEstimatedExternalForces().clear();
+         YoFixedFrameSpatialVector[] estimatedExternalWrenches = predefinedContactForceSolver.getEstimatedExternalWrenches();
+
+         int numberOfContactPoints = predefinedContactForceSolver.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
+         for (int i = 0; i < numberOfContactPoints; i++)
+         {
+            outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
+         }
+
+         if(calculateRootJointWrench.getValue())
+         {
+            int lastIndex = predefinedContactForceSolver.getNumberOfContactPoints() - 1;
+            outputStatus.getEstimatedRootJointWrench().getTorque().set(predefinedContactForceSolver.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
+            outputStatus.getEstimatedRootJointWrench().getForce().set(predefinedContactForceSolver.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
+         }
+         else
+         {
+            outputStatus.getEstimatedRootJointWrench().getTorque().setToNaN();
+            outputStatus.getEstimatedRootJointWrench().getForce().setToNaN();
+         }
       }
 
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
-
       statusOutputManager.reportStatusMessage(outputStatus);
    }
 
