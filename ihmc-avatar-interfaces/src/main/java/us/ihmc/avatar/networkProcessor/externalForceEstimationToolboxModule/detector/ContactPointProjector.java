@@ -121,4 +121,9 @@ public class ContactPointProjector
    {
       return surfaceFrame;
    }
+
+   public List<Collidable> getCollidablesToCheck()
+   {
+      return collidablesToCheck;
+   }
 }

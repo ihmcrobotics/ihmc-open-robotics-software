@@ -43,7 +43,7 @@ public class EstimatorContactPoint
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   EstimatorContactPoint(JointBasics[] joints, RigidBodyBasics rigidBody, boolean assumeZeroTorque)
+   public EstimatorContactPoint(JointBasics[] joints, RigidBodyBasics rigidBody, boolean assumeZeroTorque)
    {
       this.rigidBody = rigidBody;
       this.assumeZeroTorque = assumeZeroTorque;
