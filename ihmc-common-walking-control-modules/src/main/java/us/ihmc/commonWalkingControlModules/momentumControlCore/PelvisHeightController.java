@@ -72,8 +72,8 @@ public class PelvisHeightController implements HeightController<PointFeedbackCon
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
       desiredPelvisVelocityInWorld.set(feedbackCommand.getReferenceLinearVelocity().getZ());
 
-      linearMomentumZPDController.setProportionalGain(feedbackCommand.getGains().getProportionalGains()[3]);
-      linearMomentumZPDController.setDerivativeGain(feedbackCommand.getGains().getDerivativeGains()[3]);
+      linearMomentumZPDController.setProportionalGain(feedbackCommand.getGains().getProportionalGains()[2]);
+      linearMomentumZPDController.setDerivativeGain(feedbackCommand.getGains().getDerivativeGains()[2]);
       linearMomentumZPDController.setPositionDeadband(0.0);
 
       feedForwardPelvisAcceleration.set(feedForwardLinearAcceleration.getZ());
