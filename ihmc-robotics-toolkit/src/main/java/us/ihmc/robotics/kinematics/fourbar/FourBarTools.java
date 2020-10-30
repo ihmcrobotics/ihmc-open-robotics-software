@@ -7,6 +7,52 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class FourBarTools
 {
+   public static void setToMinAngle(FourBarVertex vertex)
+   {
+      vertex.setToMin();
+
+      FourBarVertex nextVertex = vertex.getNextVertex();
+      if (vertex.isConvex() == nextVertex.isConvex())
+         nextVertex.setToMax();
+      else
+         nextVertex.setToMin();
+
+      FourBarVertex oppositeVertex = vertex.getOppositeVertex();
+      if (vertex.isConvex() == oppositeVertex.isConvex())
+         oppositeVertex.setToMin();
+      else
+         oppositeVertex.setToMax();
+
+      FourBarVertex previousVertex = vertex.getPreviousVertex();
+      if (vertex.isConvex() == previousVertex.isConvex())
+         previousVertex.setToMax();
+      else
+         previousVertex.setToMin();
+   }
+
+   public static void setToMaxAngle(FourBarVertex vertex)
+   {
+      vertex.setToMax();
+
+      FourBarVertex nextVertex = vertex.getNextVertex();
+      if (vertex.isConvex() == nextVertex.isConvex())
+         nextVertex.setToMin();
+      else
+         nextVertex.setToMax();
+
+      FourBarVertex oppositeVertex = vertex.getOppositeVertex();
+      if (vertex.isConvex() == oppositeVertex.isConvex())
+         oppositeVertex.setToMax();
+      else
+         oppositeVertex.setToMin();
+
+      FourBarVertex previousVertex = vertex.getPreviousVertex();
+      if (vertex.isConvex() == previousVertex.isConvex())
+         previousVertex.setToMin();
+      else
+         previousVertex.setToMax();
+   }
+
    public static Bound update(FourBarVertex vertex, double angle)
    {
       FourBarVertex A = vertex;
@@ -16,18 +62,12 @@ public class FourBarTools
 
       if (angle <= A.getMinAngle())
       {
-         A.setToMin();
-         B.setToMax();
-         C.setToMin();
-         D.setToMax();
+         setToMinAngle(A);
          return Bound.MIN;
       }
       else if (angle >= A.getMaxAngle())
       {
-         A.setToMax();
-         B.setToMin();
-         C.setToMax();
-         D.setToMin();
+         setToMaxAngle(A);
          return Bound.MAX;
       }
 
