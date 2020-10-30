@@ -223,6 +223,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D desiredAcceleration = new FrameVector3D();
+   private PDGainsReadOnly gains;
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesDataBasics comHeightPartialDerivatives = new YoCoMHeightPartialDerivativesData(registry);
    private final FramePoint3D comPosition = new FramePoint3D();
@@ -340,6 +341,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredVelocity.set(0.0, 0.0, zdDesired);
       desiredAcceleration.set(0.0, 0.0, zddFeedForward);
 
+      updateGains();
       pelvisHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
       comHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
 
@@ -379,9 +381,17 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    {
    }
 
-   private final DefaultPID3DGains gainsTemp = new DefaultPID3DGains();
 
    public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
+   {
+      this.gains = gains;
+      centerOfMassHeightController.setGains(gains);
+      comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
+   }
+
+   private final DefaultPID3DGains gainsTemp = new DefaultPID3DGains();
+
+   public void updateGains()
    {
       gainsTemp.setProportionalGains(0.0, 0.0, gains.getKp());
       gainsTemp.setDerivativeGains(0.0, 0.0, gains.getKd());
@@ -389,9 +399,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       pelvisHeightControlCommand.setGains(gainsTemp);
       comHeightControlCommand.setGains(gainsTemp);
-
-      centerOfMassHeightController.setGains(gains);
-      comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
    }
 
    @Override
