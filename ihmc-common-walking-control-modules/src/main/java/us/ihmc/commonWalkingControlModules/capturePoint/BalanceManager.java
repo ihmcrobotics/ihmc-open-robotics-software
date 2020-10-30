@@ -373,8 +373,6 @@ public class BalanceManager
 
       if (precomputedICPPlanner != null)
       {
-         // FIXME what is this method used for?
-         precomputedICPPlanner.setCoMZAcceleration(desiredCoMHeightAcceleration);
          if (blendICPTrajectories.getBooleanValue())
          {
             precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
