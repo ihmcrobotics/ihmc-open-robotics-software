@@ -69,18 +69,21 @@ public class ContactPointEvaluator
          double angleToRotateAroundInXY = i * Math.PI / 2.0;
          AxisAngle basisVectorRotation = new AxisAngle(Math.cos(angleToRotateAroundInXY), Math.sin(angleToRotateAroundInXY), 0.0, angleFromNormal);
          basisVectorRotation.transform(basisVector);
+
+         // provided frame is "z out" at the surface and the basis vectors should point into the mesh
+         basisVector.negate();
       }
    }
 
    /**
-    * Solves the QP in eq 12 of the above paper. The returned value is proportional to the probability associated with the given contact location
+    * Solves the QP in eq 12 of the above paper. The returned value can be used to compute the probability associated with the given contact location
     *
     * @param jointspaceResidual gamma in the above paper (eq 12)
     * @param contactPointJacobian J_rt in the above paper (eq 12)
     * @param zInContactFrame reference frame of the contact point, with z pointing into the mesh
     * @return likelihood of the given contact point, QP in the above paper
     */
-   public double evaluate(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, ReferenceFrame zInContactFrame)
+   public double computeMaximumLikelihoodForce(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, ReferenceFrame zInContactFrame)
    {
       if (polyhedraBasisVectors[0].containsNaN())
       {

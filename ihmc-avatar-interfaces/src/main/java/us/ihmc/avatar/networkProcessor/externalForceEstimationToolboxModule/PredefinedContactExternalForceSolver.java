@@ -166,7 +166,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
 
          try
          {
-            double cost = contactPointEvaluator.evaluate(observedExternalJointTorque, externalWrenchJacobian, contactFrame);
+            double cost = contactPointEvaluator.computeMaximumLikelihoodForce(observedExternalJointTorque, externalWrenchJacobian, contactFrame);
             estimatedExternalWrenchMatrix.set(contactPointEvaluator.getEstimatedForce());
          }
          catch (Exception e)
