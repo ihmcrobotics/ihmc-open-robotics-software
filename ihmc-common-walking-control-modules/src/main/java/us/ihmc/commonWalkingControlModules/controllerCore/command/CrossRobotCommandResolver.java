@@ -847,10 +847,7 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
    {
       resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
-      resolveFrameTuple3D(in.getEffectiveICPAdjustment(), out.getEffectiveICPAdjustment());
-      out.setUsingStepAdjustment(in.getUsingStepAdjustment());
-      out.setFootstepWasAdjusted(in.getFootstepWasAdjusted());
-      resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
+      resolveFrameTuple2D(in.getResidualICPErrorForStepAdjustment(), out.getResidualICPErrorForStepAdjustment());
    }
 
    public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)

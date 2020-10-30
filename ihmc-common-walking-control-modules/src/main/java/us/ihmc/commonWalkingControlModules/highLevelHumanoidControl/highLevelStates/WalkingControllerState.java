@@ -112,8 +112,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry);
-      linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
-      linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
+      managerFactory.getOrCreateBalanceManager().setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
