@@ -4,15 +4,14 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
@@ -25,10 +24,13 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -77,13 +79,17 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FramePoint3D statusActualPosition = new FramePoint3D();
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
+   private final PointFeedbackControlCommand pelvisHeightControlCommand = new PointFeedbackControlCommand();
+   private final CenterOfMassFeedbackControlCommand comHeightControlCommand = new CenterOfMassFeedbackControlCommand();
+
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters,
                                          YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = new CenterOfMassJacobian(controllerToolbox.getFullRobotModel().getElevator(), worldFrame);
+      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       gravity = controllerToolbox.getGravityZ();
@@ -96,6 +102,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
       centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
+
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+      selectionMatrix.selectXAxis(false);
+      selectionMatrix.selectYAxis(false);
+      pelvisHeightControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getPelvis());
+      pelvisHeightControlCommand.setSelectionMatrix(selectionMatrix);
+      comHeightControlCommand.setSelectionMatrix(selectionMatrix);
 
       parentRegistry.addChild(registry);
    }
@@ -207,6 +220,9 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassTrajectoryGenerator.solve(comHeightPartialDerivativesToPack, isInDoubleSupport);
    }
 
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesDataBasics comHeightPartialDerivatives = new YoCoMHeightPartialDerivativesData(registry);
    private final FramePoint3D comPosition = new FramePoint3D();
@@ -237,7 +253,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.reset();
       comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
@@ -252,7 +267,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          zCurrent = pelvisPosition.getZ();
          pelvisFrame.getTwistOfFrame(currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
+         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...    FIXME this is likely to be a source of discrepancy
       }
 
       // TODO: use current omega0 instead of previous
@@ -321,6 +336,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       double zdDesired = finalComHeightData.getComHeightVelocity();
       double zddFeedForward = finalComHeightData.getComHeightAcceleration();
 
+      desiredPosition.set(0.0, 0.0, zDesired);
+      desiredVelocity.set(0.0, 0.0, zdDesired);
+      desiredAcceleration.set(0.0, 0.0, zddFeedForward);
+
+      pelvisHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+      comHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
 
       // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
@@ -344,12 +366,30 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    }
 
    @Override
+   public FeedbackControlCommand<?> getHeightControlCommand()
+   {
+      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+         return pelvisHeightControlCommand;
+      else
+         return comHeightControlCommand;
+   }
+
+   @Override
    public void doAction(double timeInState)
    {
    }
 
+   private final DefaultPID3DGains gainsTemp = new DefaultPID3DGains();
+
    public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
    {
+      gainsTemp.setProportionalGains(0.0, 0.0, gains.getKp());
+      gainsTemp.setDerivativeGains(0.0, 0.0, gains.getKd());
+      gainsTemp.setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
+
+      pelvisHeightControlCommand.setGains(gainsTemp);
+      comHeightControlCommand.setGains(gainsTemp);
+
       centerOfMassHeightController.setGains(gains);
       comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
    }

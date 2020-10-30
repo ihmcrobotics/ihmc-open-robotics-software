@@ -34,6 +34,8 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   FeedbackControlCommand<?> getHeightControlCommand();
+
    /**
     * This method is intended to reset the internal state of this control state to be identical to
     * when starting up the whole controller.
