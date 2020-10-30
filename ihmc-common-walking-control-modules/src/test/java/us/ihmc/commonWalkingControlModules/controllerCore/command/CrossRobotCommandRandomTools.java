@@ -1707,10 +1707,7 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setEffectiveICPAdjustment(nextFrameVector3D(random, possibleFrames));
-      next.setUsingStepAdjustment(random.nextBoolean());
-      next.setFootstepWasAdjusted(random.nextBoolean());
-      next.setFootstepSolution(nextFramePose3D(random, possibleFrames));
+      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 

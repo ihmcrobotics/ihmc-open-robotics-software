@@ -110,7 +110,6 @@ public class LinearMomentumRateControlModule
    private boolean desiredCoPcontainedNaN = false;
 
    private final ICPController icpController;
-   private final StepAdjustmentController stepAdjustmentController;
 
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -139,7 +138,6 @@ public class LinearMomentumRateControlModule
    private boolean initializeForSingleSupport;
    private boolean initializeForTransfer;
    private boolean keepCoPInsideSupportPolygon;
-   private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
    private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
    private final TDoubleArrayList swingDurations = new TDoubleArrayList();
@@ -149,9 +147,6 @@ public class LinearMomentumRateControlModule
                                                                                                             new PlaneContactStateCommand());
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
-
-   private PlanarRegionsListHandler planarRegionsListHandler;
-   private StepConstraintRegionHandler stepConstraintRegionHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
@@ -225,14 +220,7 @@ public class LinearMomentumRateControlModule
                                         controlDT,
                                         registry,
                                         yoGraphicsListRegistry);
-      stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
-                                                              soleZUpFrames,
-                                                              bipedSupportPolygons,
-                                                              icpControlPolygons,
-                                                              contactableFeet,
-                                                              controlDT,
-                                                              registry,
-                                                              yoGraphicsListRegistry);
+
 
       parentRegistry.addChild(registry);
    }
@@ -246,16 +234,6 @@ public class LinearMomentumRateControlModule
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
-   }
-
-   public void setPlanarRegionStepConstraintHandler(StepConstraintRegionHandler planarRegionStepConstraint)
-   {
-      this.stepConstraintRegionHandler = planarRegionStepConstraint;
-   }
-
-   public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
-   {
-      this.planarRegionsListHandler = planarRegionsListHandler;
    }
 
    /**
@@ -293,7 +271,6 @@ public class LinearMomentumRateControlModule
       {
          this.transferDurations.add(input.getTransferDurations().get(i));
       }
-      this.finalTransferDuration = input.getFinalTransferDuration();
       this.initializeForStanding = input.getInitializeForStanding();
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();
       this.initializeForTransfer = input.getInitializeForTransfer();
@@ -441,33 +418,21 @@ public class LinearMomentumRateControlModule
       if (initializeForStanding)
       {
          icpController.initializeForStanding();
-         stepAdjustmentController.reset();
       }
       if (initializeForSingleSupport)
       {
-         stepAdjustmentController.reset();
          icpController.initializeForSingleSupport(supportSide);
-
-         double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
-         stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
-         stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
       }
       if (initializeForTransfer)
       {
          icpController.initializeForTransfer();
-         stepAdjustmentController.reset();
       }
 
       icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
-      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-      if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-         stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
    }
 
    private void computeICPController()
    {
-
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
@@ -480,8 +445,6 @@ public class LinearMomentumRateControlModule
       }
       icpController.getDesiredCMP(desiredCMP);
       icpController.getDesiredCoP(desiredCoP);
-
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint, icpController.getResidualError(), omega0);
    }
 
    private void checkAndPackOutputs()
@@ -511,9 +474,7 @@ public class LinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      output.setFootstepSolution(stepAdjustmentController.getFootstepSolution());
-      output.setFootstepWasAdjusted(stepAdjustmentController.wasFootstepAdjusted());
-      output.setUsingStepAdjustment(stepAdjustmentController.useStepAdjustment());
+      output.setResidualICPErrorForStepAdjustment(icpController.getResidualError());
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()

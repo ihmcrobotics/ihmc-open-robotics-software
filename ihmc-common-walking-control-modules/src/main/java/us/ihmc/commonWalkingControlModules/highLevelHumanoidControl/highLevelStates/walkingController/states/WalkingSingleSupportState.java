@@ -160,7 +160,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
       else
       {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
          if (footstepIsBeingAdjusted)
          {
