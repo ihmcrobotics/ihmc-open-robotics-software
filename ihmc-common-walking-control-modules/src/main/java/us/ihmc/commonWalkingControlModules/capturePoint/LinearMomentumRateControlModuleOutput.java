@@ -24,7 +24,7 @@ public class LinearMomentumRateControlModuleOutput
 
    public void setResidualICPErrorForStepAdjustment(FrameVector2DReadOnly residualICPErrorForStepAdjustment)
    {
-      this.residualICPErrorForStepAdjustment.set(residualICPErrorForStepAdjustment);
+      this.residualICPErrorForStepAdjustment.setIncludingFrame(residualICPErrorForStepAdjustment);
    }
 
    public FrameVector2DBasics getResidualICPErrorForStepAdjustment()
