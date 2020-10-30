@@ -244,30 +244,6 @@ public class CoMTrajectoryPlannerToolsTest
       }
    }
 
-   @Test
-   public void testCoMPositionContinuityObjective()
-   {
-      double omega = 3.0;
-      double previousDuration = 1.5;
-
-      DMatrixRMaj jacobian = new DMatrixRMaj(12, 12);
-      DMatrixRMaj hessian1 = new DMatrixRMaj(12, 12);
-      DMatrixRMaj hessian2 = new DMatrixRMaj(12, 12);
-      DMatrixRMaj hessian3 = new DMatrixRMaj(12, 12);
-
-      double weight = 10.0;
-      double weightSqrt = Math.sqrt(weight);
-
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian3);
-
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weightSqrt, 0, 1, 0, omega, previousDuration, jacobian);
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weight, 0, 1, omega, previousDuration, hessian2);
-      CommonOps_DDRM.multInner(jacobian, hessian1);
-
-      EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
-      EjmlUnitTests.assertEquals(hessian1, hessian3, 1e-5);
-   }
-
 
    @Test
    public void testCoMPositionContinuityObjective2()
@@ -287,7 +263,7 @@ public class CoMTrajectoryPlannerToolsTest
 
       double weight = 10.0;
 
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(weight, 0, 1, omega, previousDuration, hessian);
       CoMTrajectoryPlannerTools.addCoMPositionObjective(weight, desiredPosition, omega, previousDuration,0, hessian, xGradient, yGradient, zGradient);
 
       MatrixTools.addDiagonal(hessian, 1e-7);
@@ -344,7 +320,7 @@ public class CoMTrajectoryPlannerToolsTest
 
       double weight = 10.0;
 
-      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjectiveDirectly(weight, 0, 1, omega, previousDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(weight, 0, 1, omega, previousDuration, hessian);
       CoMTrajectoryPlannerTools.addCoMVelocityObjective(weight, desiredVelocity, omega, previousDuration,0, hessian, xGradient, yGradient, zGradient);
 
       MatrixTools.addDiagonal(hessian, 1e-7);
@@ -383,25 +359,6 @@ public class CoMTrajectoryPlannerToolsTest
    }
 
 
-   @Test
-   public void testCoMVelocityContinuityObjective()
-   {
-      double omega = 3.0;
-      double previousDuration = 1.5;
-
-      DMatrixRMaj jacobian = new DMatrixRMaj(12, 12);
-      DMatrixRMaj hessian1 = new DMatrixRMaj(12, 12);
-      DMatrixRMaj hessian2 = new DMatrixRMaj(12, 12);
-
-      double weight = 10.0;
-      double weightSqrt = Math.sqrt(weight);
-
-      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(weightSqrt, 0, 1, 0, omega, previousDuration, jacobian);
-      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(weight, 0, 1, omega, previousDuration, hessian2);
-      CommonOps_DDRM.multInner(jacobian, hessian1);
-
-      EjmlUnitTests.assertEquals(hessian1, hessian2, 1e-5);
-   }
 
    @Test
    public void testCoMPositionObjective()
@@ -796,6 +753,357 @@ public class CoMTrajectoryPlannerToolsTest
          assertEquals(desiredVelocity.getY(), yValue, 1e-6);
          assertEquals(desiredVelocity.getZ(), zValue, 1e-6);
       }
+   }
+
+   @Test
+   public void testSimpleOneStepThreeSegments()
+   {
+      int size = 18;
+      DMatrixRMaj hessian = new DMatrixRMaj(size, size);
+      DMatrixRMaj xGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj yGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj xSolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj ySolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zSolution = new DMatrixRMaj(size, 1);
+
+      double firstDuration = 0.75;
+      double secondDuration = 1.1;
+      double thirdDuration = 0.4;
+      double omega = 3.0;
+
+      double vrpWeight = 1.0;
+
+      FramePoint3D initialVRP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.1, 0.75, 0.98);
+      FramePoint3D finalVRP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.4, 0.92, 1.05);
+
+      FrameVector3D vrpVelocity = new FrameVector3D();
+      FrameVector3D zeroVelocity = new FrameVector3D();
+      vrpVelocity.sub(finalVRP, initialVRP);
+      vrpVelocity.scale(1.0 / secondDuration);
+
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.2, 0.8, 1.01);
+
+      // initial com position objective
+      CoMTrajectoryPlannerTools.addCoMPositionObjective(1.0, startCoM, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      // constrain first vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, initialVRP, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      // continuity with next segment
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(1.0, 0, 1, omega, firstDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(1.0, 0, 1, omega, firstDuration, hessian);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, initialVRP, omega, firstDuration, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, firstDuration, 0, hessian, xGradient, yGradient, zGradient);
+
+      // constrain second vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, initialVRP, omega, 0.0, 1, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, vrpVelocity, omega, 0.0, 1, hessian, xGradient, yGradient, zGradient);
+
+
+      // continuity for last segment
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(1.0, 1, 2, omega, secondDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(1.0, 1, 2, omega, secondDuration, hessian);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, secondDuration, 1, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, vrpVelocity, omega, secondDuration, 1, hessian, xGradient, yGradient, zGradient);
+
+      // constrain third vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, 0.0, 2, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, 0.0, 2, hessian, xGradient, yGradient, zGradient);
+
+
+      CoMTrajectoryPlannerTools.addDCMPositionObjective(1.0, finalVRP, omega, thirdDuration, 2, hessian, xGradient, yGradient, zGradient);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, thirdDuration, 2, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, thirdDuration, 2, hessian, xGradient, yGradient, zGradient);
+
+
+      // solve the problem
+      solveProblem(hessian, xGradient, xSolution);
+      solveProblem(hessian, yGradient, ySolution);
+      solveProblem(hessian, zGradient, zSolution);
+
+      // assert the constraints hold
+      FramePoint3D com00 = new FramePoint3D();
+      FramePoint3D com01 = new FramePoint3D();
+      FramePoint3D com10 = new FramePoint3D();
+      FramePoint3D com11 = new FramePoint3D();
+      FramePoint3D com20 = new FramePoint3D();
+      FramePoint3D finalDCM = new FramePoint3D();
+
+      FramePoint3D vrp00 = new FramePoint3D();
+      FramePoint3D vrp01 = new FramePoint3D();
+      FramePoint3D vrp10 = new FramePoint3D();
+      FramePoint3D vrp11 = new FramePoint3D();
+      FramePoint3D vrp20 = new FramePoint3D();
+      FramePoint3D vrp21 = new FramePoint3D();
+      for (int i = 0; i < 6; i++)
+      {
+         com00.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         com00.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         com00.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         com01.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * xSolution.get(i));
+         com01.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * ySolution.get(i));
+         com01.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * zSolution.get(i));
+
+         com10.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6));
+         com10.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6));
+         com10.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6));
+
+         com11.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * xSolution.get(i + 6));
+         com11.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * ySolution.get(i + 6));
+         com11.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
+
+         com20.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 12));
+         com20.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 12));
+         com20.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 12));
+
+         vrp00.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         vrp00.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         vrp00.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         vrp01.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * xSolution.get(i));
+         vrp01.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * ySolution.get(i));
+         vrp01.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * zSolution.get(i));
+
+         vrp10.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6));
+         vrp10.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6));
+         vrp10.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6));
+
+         vrp11.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * xSolution.get(i + 6));
+         vrp11.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * ySolution.get(i + 6));
+         vrp11.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
+
+         vrp20.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 12));
+         vrp20.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 12));
+         vrp20.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 12));
+
+         vrp21.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, thirdDuration) * xSolution.get(i + 12));
+         vrp21.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, thirdDuration) * ySolution.get(i + 12));
+         vrp21.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, thirdDuration) * zSolution.get(i + 12));
+
+         finalDCM.addX(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, thirdDuration) * xSolution.get(i + 12));
+         finalDCM.addY(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, thirdDuration) * ySolution.get(i + 12));
+         finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, thirdDuration) * zSolution.get(i + 12));
+      }
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com11, com20, 1e-4);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp20, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp21, 1e-4);
+   }
+
+   @Test
+   public void testSimpleInPlaceOneSegment()
+   {
+      int size = 6;
+      DMatrixRMaj hessian = new DMatrixRMaj(size, size);
+      DMatrixRMaj xGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj yGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj xSolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj ySolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zSolution = new DMatrixRMaj(size, 1);
+
+      double duration = 0.75;
+      double omega = 3.0;
+
+      double vrpWeight = 1.0;
+
+      FramePoint3D vrp = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.1, 0.75, 0.98);
+
+      FrameVector3D zeroVelocity = new FrameVector3D();
+
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.2, 0.8, 1.01);
+
+      // initial com position objective
+      CoMTrajectoryPlannerTools.addCoMPositionObjective(1.0, startCoM, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      // constrain first vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, vrp, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, vrp, omega, duration, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, duration, 0, hessian, xGradient, yGradient, zGradient);
+
+
+      CoMTrajectoryPlannerTools.addDCMPositionObjective(1.0, vrp, omega, duration, 0, hessian, xGradient, yGradient, zGradient);
+
+
+      // solve the problem
+      solveProblem(hessian, xGradient, xSolution);
+      solveProblem(hessian, yGradient, ySolution);
+      solveProblem(hessian, zGradient, zSolution);
+
+      // assert the constraints hold
+      FramePoint3D com00 = new FramePoint3D();
+      FramePoint3D com01 = new FramePoint3D();
+      FramePoint3D finalDCM = new FramePoint3D();
+
+      FramePoint3D vrp00 = new FramePoint3D();
+      FramePoint3D vrp01 = new FramePoint3D();
+      for (int i = 0; i < 6; i++)
+      {
+         com00.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         com00.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         com00.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         com01.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, duration) * xSolution.get(i));
+         com01.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, duration) * ySolution.get(i));
+         com01.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, duration) * zSolution.get(i));
+
+         vrp00.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         vrp00.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         vrp00.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         vrp01.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, duration) * xSolution.get(i));
+         vrp01.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, duration) * ySolution.get(i));
+         vrp01.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, duration) * zSolution.get(i));
+
+         finalDCM.addX(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, duration) * xSolution.get(i));
+         finalDCM.addY(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, duration) * ySolution.get(i));
+         finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, duration) * zSolution.get(i));
+      }
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp00, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp01, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, finalDCM, 1e-4);
+   }
+
+   @Test
+   public void testSimpleOneStepTwoSegments()
+   {
+      int size = 12;
+      DMatrixRMaj hessian = new DMatrixRMaj(size, size);
+      DMatrixRMaj xGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj yGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zGradient = new DMatrixRMaj(size, 1);
+      DMatrixRMaj xSolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj ySolution = new DMatrixRMaj(size, 1);
+      DMatrixRMaj zSolution = new DMatrixRMaj(size, 1);
+
+      double firstDuration = 0.75;
+      double secondDuration = 1.1;
+      double omega = 3.0;
+
+      double vrpWeight = 1.0;
+
+      FramePoint3D initialVRP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.1, 0.75, 0.98);
+      FramePoint3D finalVRP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.4, 0.92, 1.05);
+
+      FrameVector3D vrpVelocity = new FrameVector3D();
+      FrameVector3D zeroVelocity = new FrameVector3D();
+      vrpVelocity.sub(finalVRP, initialVRP);
+      vrpVelocity.scale(1.0 / secondDuration);
+
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.2, 0.8, 1.01);
+
+      // initial com position objective
+      CoMTrajectoryPlannerTools.addCoMPositionObjective(1.0, startCoM, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      // constrain first vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, initialVRP, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, vrpVelocity, omega, 0.0, 0, hessian, xGradient, yGradient, zGradient);
+
+      // continuity with next segment
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityObjective(1.0, 0, 1, omega, firstDuration, hessian);
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityObjective(1.0, 0, 1, omega, firstDuration, hessian);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, firstDuration, 0, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, vrpVelocity, omega, firstDuration, 0, hessian, xGradient, yGradient, zGradient);
+
+      // constrain second vrp segment
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, 0.0, 1, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, 0.0, 1, hessian, xGradient, yGradient, zGradient);
+
+
+      // continuity for last segment
+      CoMTrajectoryPlannerTools.addDCMPositionObjective(1.0, finalVRP, omega, secondDuration, 1, hessian, xGradient, yGradient, zGradient);
+
+      CoMTrajectoryPlannerTools.addVRPPositionObjective(vrpWeight, finalVRP, omega, secondDuration, 1, hessian, xGradient, yGradient, zGradient);
+      CoMTrajectoryPlannerTools.addVRPVelocityObjective(vrpWeight, zeroVelocity, omega, secondDuration, 1, hessian, xGradient, yGradient, zGradient);
+
+
+
+
+
+      // solve the problem
+      solveProblem(hessian, xGradient, xSolution);
+      solveProblem(hessian, yGradient, ySolution);
+      solveProblem(hessian, zGradient, zSolution);
+
+      // assert the constraints hold
+      FramePoint3D com00 = new FramePoint3D();
+      FramePoint3D com01 = new FramePoint3D();
+      FramePoint3D com10 = new FramePoint3D();
+      FramePoint3D com11 = new FramePoint3D();
+      FramePoint3D finalDCM = new FramePoint3D();
+
+      FramePoint3D vrp00 = new FramePoint3D();
+      FramePoint3D vrp01 = new FramePoint3D();
+      FramePoint3D vrp10 = new FramePoint3D();
+      FramePoint3D vrp11 = new FramePoint3D();
+      for (int i = 0; i < 6; i++)
+      {
+         com00.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         com00.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         com00.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         com01.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * xSolution.get(i));
+         com01.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * ySolution.get(i));
+         com01.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, firstDuration) * zSolution.get(i));
+
+         com10.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6));
+         com10.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6));
+         com10.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6));
+
+         com11.addX(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * xSolution.get(i + 6));
+         com11.addY(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * ySolution.get(i + 6));
+         com11.addZ(CoMTrajectoryPlannerTools.getCoMPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
+
+
+
+         vrp00.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i));
+         vrp00.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i));
+         vrp00.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i));
+
+         vrp01.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * xSolution.get(i));
+         vrp01.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * ySolution.get(i));
+         vrp01.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, firstDuration) * zSolution.get(i));
+
+         vrp10.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * xSolution.get(i + 6));
+         vrp10.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * ySolution.get(i + 6));
+         vrp10.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, 0.0) * zSolution.get(i + 6));
+
+         vrp11.addX(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * xSolution.get(i + 6));
+         vrp11.addY(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * ySolution.get(i + 6));
+         vrp11.addZ(CoMTrajectoryPlannerTools.getVRPPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
+
+         finalDCM.addX(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, secondDuration) * xSolution.get(i + 6));
+         finalDCM.addY(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, secondDuration) * ySolution.get(i + 6));
+         finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
+      }
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, finalDCM, 1e-4);
    }
 
    private static void solveProblem(DMatrixRMaj hessian, DMatrixRMaj gradient, DMatrixRMaj coefficientSolutionToPack)

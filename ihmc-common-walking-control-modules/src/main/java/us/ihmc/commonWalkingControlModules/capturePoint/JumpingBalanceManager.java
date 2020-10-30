@@ -56,7 +56,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final OptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
+   private final ModifiedOptimizedCoMTrajectoryPlanner comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -73,9 +73,9 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new OptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+      comTrajectoryPlanner = new ModifiedOptimizedCoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
-//      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
+//      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
       copTrajectoryState = new JumpingCoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);

@@ -41,7 +41,7 @@ public class TakeOffHeightObjectivePolicyTest
 
       MatrixTools.addDiagonal(hessian, 1e-4);
 
-      TakeOffHeightObjectivePolicy policy = new TakeOffHeightObjectivePolicy(1.0);
+      TakeOffHeightObjectivePolicy policy = new TakeOffHeightObjectivePolicy(() -> 3.0, 1.0);
       policy.assessPolicy(planner, contactSequence, hessian, null, null, zGradient);
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.lu(6);

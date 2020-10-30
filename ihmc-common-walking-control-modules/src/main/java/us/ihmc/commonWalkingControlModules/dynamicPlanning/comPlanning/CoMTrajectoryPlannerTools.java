@@ -18,14 +18,14 @@ public class CoMTrajectoryPlannerTools
    public static final double sufficientlyLarge = 1.0e10;
    public static final double sufficientlyLongTime = 1.0e2;
 
-   private static final CoefficientProvider comPositionCoefficientProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientTimeFunction;
+   public static final CoefficientProvider comPositionCoefficientProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientTimeFunction;
    private static final CoefficientProvider comVelocityCoefficientProvider = CoMTrajectoryPlannerTools::getCoMVelocityCoefficientTimeFunction;
    private static final CoefficientProvider comAccelerationCoefficientProvider = CoMTrajectoryPlannerTools::getCoMAccelerationCoefficientTimeFunction;
    private static final CoefficientProvider comJerkCoefficientProvider = CoMTrajectoryPlannerTools::getCoMJerkCoefficientTimeFunction;
    private static final CoefficientProvider dcmPositionCoefficientProvider = CoMTrajectoryPlannerTools::getDCMPositionCoefficientTimeFunction;
    private static final CoefficientProvider vrpPositionCoefficientProvider = CoMTrajectoryPlannerTools::getVRPPositionCoefficientTimeFunction;
    private static final CoefficientProvider vrpVelocityCoefficientProvider = CoMTrajectoryPlannerTools::getVRPVelocityCoefficientTimeFunction;
-   private static final CoefficientSelectedProvider comPositionCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientNonZero;
+   public static final CoefficientSelectedProvider comPositionCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientNonZero;
    private static final CoefficientSelectedProvider comVelocityCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMVelocityCoefficientNonZero;
    private static final CoefficientSelectedProvider comAccelerationCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMAccelerationCoefficientNonZero;
    private static final CoefficientSelectedProvider comJerkCoefficientSelectedProvider = CoMTrajectoryPlannerTools::getCoMJerkCoefficientNonZero;
@@ -662,7 +662,7 @@ public class CoMTrajectoryPlannerTools
          {
             boolean includeCol = selectedProvider.include(col, time);
             if (!includeCol)
-               return;
+               continue;
 
             double colValue = coefficientProvider.coefficient(col, omega, time);
             double value = weight * rowValue * colValue;
@@ -719,7 +719,7 @@ public class CoMTrajectoryPlannerTools
          {
             boolean includeCol = selectedProvider.include(col, time);
             if (!includeCol)
-               return;
+               continue;
 
             double colValue = coefficientProvider.coefficient(col, omega, time);
             double value = weight * rowValue * colValue;
@@ -760,7 +760,7 @@ public class CoMTrajectoryPlannerTools
          {
             boolean includeCol = selectedProvider.include(col, time);
             if (!includeCol)
-               return;
+               continue;
 
             double colValue = coefficientProvider.coefficient(col, omega, time);
             double value = weight * rowValue * colValue;
@@ -1045,135 +1045,10 @@ public class CoMTrajectoryPlannerTools
                                                         double previousDuration,
                                                         DMatrix hessianToPack)
    {
-      // move next sequence coefficients to the left hand side
-      int previousStartIndex = 6 * previousSequence;
-      int nextStartIndex = 6 * nextSequence;
-
-      previousDuration = Math.min(previousDuration, sufficientlyLongTime);
-
-      double c00 = getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration);
-      double c01 = getCoMPositionFirstCoefficientTimeFunction(omega, previousDuration);
-      double c05 = getCoMPositionSixthCoefficientTimeFunction();
-
-      double c10 = -getCoMPositionFirstCoefficientTimeFunction(omega, 0.0);
-      double c11 = -getCoMPositionSecondCoefficientTimeFunction(omega, 0.0);
-      double c15 = -getCoMPositionSixthCoefficientTimeFunction();
-
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex, weight * c00 * c00);
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex + 1, weight * c00 * c01);
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex + 5, weight * c00 * c05);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex, weight * c00 * c10);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex + 1, weight * c00 * c11);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex + 5, weight * c00 * c15);
-
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex, weight * c01 * c00);
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 1, weight * c01 * c01);
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 5, weight * c01 * c05);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex, weight * c01 * c10);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex + 1, weight * c01 * c11);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex + 5, weight * c01 * c15);
-
-      addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex, weight * c05 * c00);
-      addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex + 1, weight * c05 * c01);
-      addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex + 5, weight * c05 * c05);
-      addEquals(hessianToPack, previousStartIndex + 5, nextStartIndex, weight * c05 * c10);
-      addEquals(hessianToPack, previousStartIndex + 5, nextStartIndex + 1, weight * c05 * c11);
-      addEquals(hessianToPack, previousStartIndex + 5, nextStartIndex + 5, weight * c05 * c15);
-
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex, weight * c10 * c00);
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex + 1, weight * c10 * c01);
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex + 5, weight * c10 * c05);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex, weight * c10 * c10);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex + 1, weight * c10 * c11);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex + 5, weight * c10 * c15);
-
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex, weight * c11 * c00);
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 1, weight * c11 * c01);
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 5, weight * c11 * c05);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex, weight * c11 * c10);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex + 1, weight * c11 * c11);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex + 5, weight * c11 * c15);
-
-      addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex, weight * c15 * c00);
-      addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 1, weight * c15 * c01);
-      addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 5, weight * c15 * c05);
-      addEquals(hessianToPack, nextStartIndex + 5, nextStartIndex, weight * c15 * c10);
-      addEquals(hessianToPack, nextStartIndex + 5, nextStartIndex + 1, weight * c15 * c11);
-      addEquals(hessianToPack, nextStartIndex + 5, nextStartIndex + 5, weight * c15 * c15);
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(previousDuration, 0.0, minDuration))
-      {
-         double c02 = getCoMPositionThirdCoefficientTimeFunction(previousDuration);
-         double c03 = getCoMPositionFourthCoefficientTimeFunction(previousDuration);
-         double c04 = getCoMPositionFifthCoefficientTimeFunction(previousDuration);
-
-         addEquals(hessianToPack, previousStartIndex, previousStartIndex + 2, weight * c00 * c02);
-         addEquals(hessianToPack, previousStartIndex, previousStartIndex + 3, weight * c00 * c03);
-         addEquals(hessianToPack, previousStartIndex, previousStartIndex + 4, weight * c00 * c04);
-
-         addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 2, weight * c01 * c02);
-         addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 3, weight * c01 * c03);
-         addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 4, weight * c01 * c04);
-
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex, weight * c02 * c00);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 1, weight * c02 * c01);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 2, weight * c02 * c02);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 3, weight * c02 * c03);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 4, weight * c02 * c04);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 5, weight * c02 * c05);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex, weight * c02 * c10);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex + 1, weight * c02 * c11);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex + 5, weight * c02 * c15);
-
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex, weight * c03 * c00);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 1, weight * c03 * c01);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 2, weight * c03 * c02);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 3, weight * c03 * c03);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 4, weight * c03 * c04);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 5, weight * c03 * c05);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex, weight * c03 * c10);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex + 1, weight * c03 * c11);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex + 5, weight * c03 * c15);
-
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex, weight * c04 * c00);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 1, weight * c04 * c01);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 2, weight * c04 * c02);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 3, weight * c04 * c03);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 4, weight * c04 * c04);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 5, weight * c04 * c05);
-         addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex, weight * c04 * c10);
-         addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex + 1, weight * c04 * c11);
-         addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex + 5, weight * c04 * c15);
-
-         addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex + 2, weight * c05 * c02);
-         addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex + 3, weight * c05 * c03);
-         addEquals(hessianToPack, previousStartIndex + 5, previousStartIndex + 4, weight * c05 * c04);
-
-         addEquals(hessianToPack, nextStartIndex, previousStartIndex + 2, weight * c10 * c02);
-         addEquals(hessianToPack, nextStartIndex, previousStartIndex + 3, weight * c10 * c03);
-         addEquals(hessianToPack, nextStartIndex, previousStartIndex + 4, weight * c10 * c04);
-
-         addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 2, weight * c11 * c02);
-         addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 3, weight * c11 * c03);
-         addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 4, weight * c11 * c04);
-
-         addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 2, weight * c15 * c02);
-         addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 3, weight * c15 * c03);
-         addEquals(hessianToPack, nextStartIndex + 5, previousStartIndex + 4, weight * c15 * c04);
-      }
-   }
-
-   public static void addCoMPositionContinuityObjectiveDirectly(double weight,
-                                                        int previousSequence,
-                                                        int nextSequence,
-                                                        double omega,
-                                                        double previousDuration,
-                                                        DMatrix hessianToPack)
-   {
       addContinuityObjective(weight, previousSequence, nextSequence, omega, previousDuration, comPositionCoefficientProvider, comPositionCoefficientSelectedProvider, hessianToPack);
    }
 
-   public static void addCoMVelocityContinuityObjectiveDirectly(double weight,
+   public static void addCoMVelocityContinuityObjective(double weight,
                                                                 int previousSequence,
                                                                 int nextSequence,
                                                                 double omega,
@@ -1264,112 +1139,6 @@ public class CoMTrajectoryPlannerTools
          addEquals(coefficientJacobianToPack, row, nextStartIndex + 2, -weight * getCoMVelocityThirdCoefficientTimeFunction(0.0));
          addEquals(coefficientJacobianToPack, row, nextStartIndex + 3, -weight * getCoMVelocityFourthCoefficientTimeFunction(0.0));
          addEquals(coefficientJacobianToPack, row, nextStartIndex + 5, -weight * getCoMVelocitySixthCoefficientTimeFunction());
-      }
-   }
-
-   public static void addCoMVelocityContinuityObjective(double weight,
-                                                        int previousSequence,
-                                                        int nextSequence,
-                                                        double omega,
-                                                        double previousDuration,
-                                                        DMatrix hessianToPack)
-   {
-      // move next sequence coefficients to the left hand side
-      int previousStartIndex = 6 * previousSequence;
-      int nextStartIndex = 6 * nextSequence;
-
-      previousDuration = Math.min(previousDuration, sufficientlyLongTime);
-
-      double c00 = getCoMVelocityFirstCoefficientTimeFunction(omega, previousDuration);
-      double c01 = getCoMVelocitySecondCoefficientTimeFunction(omega, previousDuration);
-      double c04 = getCoMVelocityFifthCoefficientTimeFunction();
-
-      double c10 = -getCoMVelocityFirstCoefficientTimeFunction(omega, 0.0);
-      double c11 = -getCoMVelocitySecondCoefficientTimeFunction(omega, 0.0);
-      double c14 = -getCoMVelocityFifthCoefficientTimeFunction();
-
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex, weight * c00 * c00);
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex + 1, weight * c00 * c01);
-      addEquals(hessianToPack, previousStartIndex, previousStartIndex + 4, weight * c00 * c04);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex, weight * c00 * c10);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex + 1, weight * c00 * c11);
-      addEquals(hessianToPack, previousStartIndex, nextStartIndex + 4, weight * c00 * c14);
-
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex, weight * c01 * c00);
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 1, weight * c01 * c01);
-      addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 4, weight * c01 * c04);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex, weight * c01 * c10);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex + 1, weight * c01 * c11);
-      addEquals(hessianToPack, previousStartIndex + 1, nextStartIndex + 4, weight * c01 * c14);
-
-      addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex, weight * c04 * c00);
-      addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 1, weight * c04 * c01);
-      addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 4, weight * c04 * c04);
-      addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex, weight * c04 * c10);
-      addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex + 1, weight * c04 * c11);
-      addEquals(hessianToPack, previousStartIndex + 4, nextStartIndex + 4, weight * c04 * c14);
-
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex, weight * c10 * c00);
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex + 1, weight * c10 * c01);
-      addEquals(hessianToPack, nextStartIndex, previousStartIndex + 4, weight * c10 * c04);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex, weight * c10 * c10);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex + 1, weight * c10 * c11);
-      addEquals(hessianToPack, nextStartIndex, nextStartIndex + 4, weight * c10 * c14);
-
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex, weight * c11 * c00);
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 1, weight * c11 * c01);
-      addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 4, weight * c11 * c04);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex, weight * c11 * c10);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex + 1, weight * c11 * c11);
-      addEquals(hessianToPack, nextStartIndex + 1, nextStartIndex + 4, weight * c11 * c14);
-
-      addEquals(hessianToPack, nextStartIndex + 4, previousStartIndex, weight * c14 * c00);
-      addEquals(hessianToPack, nextStartIndex + 4, previousStartIndex + 1, weight * c14 * c01);
-      addEquals(hessianToPack, nextStartIndex + 4, previousStartIndex + 4, weight * c14 * c04);
-      addEquals(hessianToPack, nextStartIndex + 4, nextStartIndex, weight * c14 * c10);
-      addEquals(hessianToPack, nextStartIndex + 4, nextStartIndex + 1, weight * c14 * c11);
-      addEquals(hessianToPack, nextStartIndex + 4, nextStartIndex + 4, weight * c14 * c14);
-
-      if (SET_ZERO_VALUES || !MathTools.epsilonEquals(previousDuration, 0.0, minDuration))
-      {
-         double c02 = getCoMVelocityThirdCoefficientTimeFunction(previousDuration);
-         double c03 = getCoMVelocityFourthCoefficientTimeFunction(previousDuration);
-
-         addEquals(hessianToPack, previousStartIndex, previousStartIndex + 2, weight * c00 * c02);
-         addEquals(hessianToPack, previousStartIndex, previousStartIndex + 3, weight * c00 * c03);
-
-         addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 2, weight * c01 * c02);
-         addEquals(hessianToPack, previousStartIndex + 1, previousStartIndex + 3, weight * c01 * c03);
-
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 2, weight * c04 * c02);
-         addEquals(hessianToPack, previousStartIndex + 4, previousStartIndex + 3, weight * c04 * c03);
-
-         addEquals(hessianToPack, nextStartIndex, previousStartIndex + 2, weight * c10 * c02);
-         addEquals(hessianToPack, nextStartIndex, previousStartIndex + 3, weight * c10 * c03);
-
-         addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 2, weight * c11 * c02);
-         addEquals(hessianToPack, nextStartIndex + 1, previousStartIndex + 3, weight * c11 * c03);
-
-         addEquals(hessianToPack, nextStartIndex + 4, previousStartIndex + 2, weight * c14 * c02);
-         addEquals(hessianToPack, nextStartIndex + 4, previousStartIndex + 3, weight * c14 * c03);
-
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex, weight * c02 * c00);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 1, weight * c02 * c01);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 2, weight * c02 * c02);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 3, weight * c02 * c03);
-         addEquals(hessianToPack, previousStartIndex + 2, previousStartIndex + 4, weight * c02 * c04);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex, weight * c02 * c10);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex + 1, weight * c02 * c11);
-         addEquals(hessianToPack, previousStartIndex + 2, nextStartIndex + 4, weight * c02 * c14);
-
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex, weight * c03 * c00);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 1, weight * c03 * c01);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 2, weight * c03 * c02);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 3, weight * c03 * c03);
-         addEquals(hessianToPack, previousStartIndex + 3, previousStartIndex + 4, weight * c03 * c04);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex, weight * c03 * c10);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex + 1, weight * c03 * c11);
-         addEquals(hessianToPack, previousStartIndex + 3, nextStartIndex + 4, weight * c03 * c14);
       }
    }
 
@@ -1902,6 +1671,8 @@ public class CoMTrajectoryPlannerTools
 
    public static boolean getVRPPositionCoefficientNonZero(int coefficient, double time)
    {
+      return true;
+      /*
       switch (coefficient)
       {
          case 3:
@@ -1916,10 +1687,14 @@ public class CoMTrajectoryPlannerTools
          default:
             throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
       }
+
+       */
    }
 
    public static boolean getVRPVelocityCoefficientNonZero(int coefficient, double time)
    {
+      return true;
+      /*
       switch (coefficient)
       {
          case 2:
@@ -1934,6 +1709,8 @@ public class CoMTrajectoryPlannerTools
          default:
             throw new IllegalArgumentException("Coefficient number " + coefficient + " must be less than 6.");
       }
+
+       */
    }
 
    public static double getCoMPositionCoefficientTimeFunction(int coefficient, double omega, double time)
