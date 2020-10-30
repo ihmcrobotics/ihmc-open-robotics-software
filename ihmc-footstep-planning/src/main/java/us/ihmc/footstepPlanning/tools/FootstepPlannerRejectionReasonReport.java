@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.tools;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
@@ -41,7 +40,7 @@ public class FootstepPlannerRejectionReasonReport
             FootstepPlannerEdgeData edgeData = footstepPlanningModule.getEdgeDataMap().get(edgeKey);
 
             BipedalFootstepPlannerNodeRejectionReason rejectionReason
-                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[0]);
+                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[7]);
             rejectionReasons.putIfAbsent(rejectionReason, new MutableInt());
             rejectionReasons.get(rejectionReason).increment();
             totalNumberOfRejections++;
