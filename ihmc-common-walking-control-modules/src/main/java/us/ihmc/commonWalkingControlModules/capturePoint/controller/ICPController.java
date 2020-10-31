@@ -60,8 +60,6 @@ public class ICPController
    private final YoBoolean isStationary = new YoBoolean(yoNamePrefix + "IsStationary", registry);
    private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
 
-   private final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
-
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
@@ -242,9 +240,8 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
-   public void initializeForSingleSupport(RobotSide supportSide)
+   public void initializeForSingleSupport()
    {
-      this.supportSide.set(supportSide);
       isStationary.set(false);
       isInDoubleSupport.set(false);
       integrator.reset();
