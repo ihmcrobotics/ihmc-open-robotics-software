@@ -62,6 +62,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightJerkAfterSmoothing = new YoDouble("desiredCoMHeightJerkAfterSmoothing", registry);
 
+   private final YoDouble zCurrent = new YoDouble("zCurrent", registry);
    private final YoDouble zDesired = new YoDouble("zDesired", registry);
    private final YoDouble zdDesired = new YoDouble("zdDesired", registry);
    private final YoDouble zddDesired = new YoDouble("zddDesired", registry);
@@ -107,6 +108,9 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       selectionMatrix.selectXAxis(false);
       selectionMatrix.selectYAxis(false);
       pelvisHeightControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getPelvis());
+      FramePoint3D pelvisPoint = new FramePoint3D(pelvisFrame);
+      pelvisPoint.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisHeightControlCommand.setBodyFixedPointToControl(pelvisPoint);
       pelvisHeightControlCommand.setSelectionMatrix(selectionMatrix);
       comHeightControlCommand.setSelectionMatrix(selectionMatrix);
 
@@ -342,6 +346,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredAcceleration.set(0.0, 0.0, zddFeedForward);
 
       updateGains();
+//      pelvisHeightControlCommand.setBodyFixedPointToControl(new FramePoint3D(pelvisFrame));
       pelvisHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
       comHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
 
@@ -354,6 +359,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       double epsilon = 1e-12;
       zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
+      this.zCurrent.set(zCurrent);
       this.zDesired.set(zDesired);
       this.zdDesired.set(zdDesired);
       this.zddDesired.set(zddDesired);
