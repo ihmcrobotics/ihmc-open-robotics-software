@@ -342,7 +342,7 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
             return false;
-         if (!heightControlCommand.equals(other.heightControlCommand))
+         if (heightControlCommand != null && !heightControlCommand.equals(other.heightControlCommand))
             return false;
 
          for (RobotSide robotSide : RobotSide.values)
