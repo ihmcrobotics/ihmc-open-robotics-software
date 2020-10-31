@@ -711,6 +711,14 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static FeedbackControlCommand<?> nextFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      if (random.nextBoolean())
+         return nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames);
+      else
+         return nextPointFeedbackControlCommand(random, rootBody, possibleFrames);
+   }
+
    public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       return nextPlaneContactStateCommand(random, false, rootBody, possibleFrames);
@@ -1718,6 +1726,7 @@ public class CrossRobotCommandRandomTools
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
       next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
                                                                                   nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setHeightControlCommand(nextFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
