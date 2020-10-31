@@ -30,6 +30,8 @@ public class PelvisHeightController implements HeightController<PointFeedbackCon
    private final YoSE3OffsetFrame yoControlFrame;
 
    private final FramePoint3D controlPosition = new FramePoint3D();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
    private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final Twist twist = new Twist();
@@ -63,14 +65,20 @@ public class PelvisHeightController implements HeightController<PointFeedbackCon
 
       feedForwardLinearAcceleration.setIncludingFrame(feedbackCommand.getReferenceLinearAcceleration());
 
+      desiredPosition.setIncludingFrame(feedbackCommand.getReferencePosition());
+      desiredLinearVelocity.setIncludingFrame(feedbackCommand.getReferenceLinearVelocity());
+
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
       currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardLinearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
 
+      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
       currentPelvisHeightInWorld.set(controlPosition.getZ());
-      desiredPelvisHeightInWorld.set(feedbackCommand.getReferencePosition().getZ());
+      desiredPelvisHeightInWorld.set(desiredPosition.getZ());
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
-      desiredPelvisVelocityInWorld.set(feedbackCommand.getReferenceLinearVelocity().getZ());
+      desiredPelvisVelocityInWorld.set(desiredLinearVelocity.getZ());
 
       linearMomentumZPDController.setProportionalGain(feedbackCommand.getGains().getProportionalGains()[2]);
       linearMomentumZPDController.setDerivativeGain(feedbackCommand.getGains().getDerivativeGains()[2]);
