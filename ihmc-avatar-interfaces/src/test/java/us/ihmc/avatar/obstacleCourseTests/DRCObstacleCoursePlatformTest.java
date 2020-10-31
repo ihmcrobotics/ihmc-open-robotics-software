@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
@@ -200,6 +201,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
@@ -213,6 +215,16 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
+
+      FramePoint3D desiredPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame());
+      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPosition.subZ(0.05);
+      double trajectoryTime = 1.0;
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
+                                                                                                                             desiredPosition.getZ());
+      success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
       drcSimulationTestHelper.publishToController(footstepDataList);
