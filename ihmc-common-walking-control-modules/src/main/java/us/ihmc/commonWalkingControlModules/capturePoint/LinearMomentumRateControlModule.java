@@ -126,11 +126,7 @@ public class LinearMomentumRateControlModule
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
 
-   private final YoDouble yoTime;
-
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
-
-   private RobotSide supportSide = null;
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
@@ -158,7 +154,6 @@ public class LinearMomentumRateControlModule
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
                                           WalkingControllerParameters walkingControllerParameters,
-                                          YoDouble yoTime,
                                           double gravityZ,
                                           double controlDT,
                                           YoRegistry parentRegistry,
@@ -166,7 +161,6 @@ public class LinearMomentumRateControlModule
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
-      this.yoTime = yoTime;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -258,12 +252,10 @@ public class LinearMomentumRateControlModule
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
-      this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
-      this.supportSide = input.getSupportSide();
       this.initializeForStanding = input.getInitializeForStanding();
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();
       this.initializeForTransfer = input.getInitializeForTransfer();
@@ -438,7 +430,7 @@ public class LinearMomentumRateControlModule
       }
       if (initializeForSingleSupport)
       {
-         icpController.initializeForSingleSupport(supportSide);
+         icpController.initializeForSingleSupport();
       }
       if (initializeForTransfer)
       {

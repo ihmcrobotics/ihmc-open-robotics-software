@@ -64,15 +64,6 @@ public class LinearMomentumRateControlModuleInput
 
    private FeedbackControlCommand<?> heightControlCommand;
 
-   @Deprecated // The CoM height control should be moved to the fast thread or this should use the achieved value from the last tick.
-   private double desiredCoMHeightAcceleration = 0.0;
-
-   /**
-    * Indicates which foot will be in support when stepping. Note, that this will only be used if
-    * {@link #initializeForSingleSupport} is set to {@code true}.
-    */
-   private RobotSide supportSide = null;
-
    /**
     * Flag that indicates the ICP planner has just transitioned to a standing state. This causes the ICP controller to
     * to initialize itself for standing.
@@ -159,17 +150,6 @@ public class LinearMomentumRateControlModuleInput
       return desiredCapturePointVelocity;
    }
 
-   @Deprecated // TODO: This should not be coming from the walking controller.
-   public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
-   {
-      this.desiredCoMHeightAcceleration = desiredCoMHeightAcceleration;
-   }
-
-   public double getDesiredCoMHeightAcceleration()
-   {
-      return desiredCoMHeightAcceleration;
-   }
-
    public void setHeightControlCommand(FeedbackControlCommand<?> heightControlCommand)
    {
       this.heightControlCommand = heightControlCommand;
@@ -218,16 +198,6 @@ public class LinearMomentumRateControlModuleInput
    public boolean getControlHeightWithMomentum()
    {
       return controlHeightWithMomentum;
-   }
-
-   public void setSupportSide(RobotSide supportSide)
-   {
-      this.supportSide = supportSide;
-   }
-
-   public RobotSide getSupportSide()
-   {
-      return supportSide;
    }
 
    public void setInitializeForStanding(boolean initializeForStanding)
@@ -292,8 +262,6 @@ public class LinearMomentumRateControlModuleInput
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
-      desiredCoMHeightAcceleration = other.desiredCoMHeightAcceleration;
-      supportSide = other.supportSide;
       initializeForStanding = other.initializeForStanding;
       initializeForSingleSupport = other.initializeForSingleSupport;
       initializeForTransfer = other.initializeForTransfer;
@@ -327,10 +295,6 @@ public class LinearMomentumRateControlModuleInput
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
             return false;
          if (useMomentumRecoveryMode ^ other.useMomentumRecoveryMode)
-            return false;
-         if (Double.compare(desiredCoMHeightAcceleration, other.desiredCoMHeightAcceleration) != 0)
-            return false;
-         if (supportSide != other.supportSide)
             return false;
          if (initializeForStanding ^ other.initializeForStanding)
             return false;

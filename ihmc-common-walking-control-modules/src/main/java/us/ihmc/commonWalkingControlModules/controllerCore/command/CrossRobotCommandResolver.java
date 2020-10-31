@@ -822,8 +822,6 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
-      out.setDesiredCenterOfMassHeightAcceleration(in.getDesiredCoMHeightAcceleration());
-      out.setSupportSide(in.getSupportSide());
       out.setInitializeForStanding(in.getInitializeForStanding());
       out.setInitializeForSingleSupport(in.getInitializeForSingleSupport());
       out.setInitializeForTransfer(in.getInitializeForTransfer());

@@ -398,7 +398,6 @@ public class BalanceManager
       }
 
       linearMomentumRateControlModuleInput.setHeightControlCommand(heightControlCommand);
-      linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
@@ -410,7 +409,6 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
-      linearMomentumRateControlModuleInput.setSupportSide(supportSide);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
