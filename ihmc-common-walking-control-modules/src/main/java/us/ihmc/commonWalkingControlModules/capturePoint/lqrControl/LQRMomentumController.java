@@ -281,6 +281,21 @@ public class LQRMomentumController
       return s2;
    }
 
+   public DMatrixRMaj getControlHessian()
+   {
+      return lqrCommonValues.getR1();
+   }
+
+   public DMatrixRMaj getControlJacobian()
+   {
+      return k2;
+   }
+
+   public DMatrixRMaj getStateDependentControlJacobian()
+   {
+      return lqrCommonValues.getNb();
+   }
+
    private int getSegmentNumber(double time)
    {
       double timeToStart = 0.0;

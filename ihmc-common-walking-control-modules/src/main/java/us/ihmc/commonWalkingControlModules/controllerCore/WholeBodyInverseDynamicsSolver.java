@@ -327,6 +327,9 @@ public class WholeBodyInverseDynamicsSolver
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
                break;
+            case MOMENTUM_COST:
+               optimizationControlModule.submitLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) command);
+               break;
             case PRIVILEGED_CONFIGURATION:
                optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
                break;
