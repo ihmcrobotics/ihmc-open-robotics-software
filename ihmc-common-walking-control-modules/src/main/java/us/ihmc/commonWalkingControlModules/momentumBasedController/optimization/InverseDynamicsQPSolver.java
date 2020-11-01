@@ -14,6 +14,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * It is assumed that the cost function has the form
+ *
+ * <pre>
+ * f(x) = 0.5 * x<sup>T</sup> H x + f<sup>T</sup>x
+ * </pre>
+ */
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
@@ -77,7 +84,11 @@ public class InverseDynamicsQPSolver
 
    private final double dt;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, double dt,
+   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver,
+                                  int numberOfDoFs,
+                                  int rhoSize,
+                                  boolean hasFloatingBase,
+                                  double dt,
                                   YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
@@ -254,6 +265,14 @@ public class InverseDynamicsQPSolver
       }
    }
 
+   public void addMotionInput(DirectQPInput input)
+   {
+      if (input.useWeightScalar())
+         addMotionTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeightScalar(), input.directCostHessian, input.directCostGradient);
+      else
+         addMotionTask(input.taskJacobian, input.taskConvectiveTerm, input.taskWeightMatrix, input.directCostHessian, input.directCostGradient);
+   }
+
    public void addRhoInput(QPInput input)
    {
       switch (input.getConstraintType())
@@ -305,19 +324,46 @@ public class InverseDynamicsQPSolver
     * <p>
     * min (J qddot - b)^T * W * (J qddot - b)
     * </p>
-    * 
-    * @param taskJacobian  jacobian to map qddot to the objective space. J in the above equation.
+    *
+    * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
-    *                      diagonal.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be
+    *       diagonal.
     */
    public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       if (taskJacobian.getNumCols() != numberOfDoFs)
       {
-         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
       addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
+   public void addMotionTask(DMatrixRMaj taskJacobian,
+                             DMatrixRMaj taskConvectiveTerm,
+                             double taskWeight,
+                             DMatrixRMaj directCostHessian,
+                             DMatrixRMaj directCostGradient)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight,directCostHessian, directCostGradient, 0);
+   }
+
+
+   public void addMotionTask(DMatrixRMaj taskJacobian,
+                             DMatrixRMaj taskConvectiveTerm,
+                             DMatrixRMaj taskWeight,
+                             DMatrixRMaj directCostHessian,
+                             DMatrixRMaj directCostGradient)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight, directCostHessian, directCostGradient, 0);
    }
 
    /**
@@ -325,11 +371,11 @@ public class InverseDynamicsQPSolver
     * <p>
     * min (J rho - b)^T * W * (J rho - b)
     * </p>
-    * 
-    * @param taskJacobian  jacobian to map rho to the objective space. J in the above equation.
+    *
+    * @param taskJacobian jacobian to map rho to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
-    *                      diagonal.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be
+    *       diagonal.
     */
    public void addRhoTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
@@ -345,10 +391,10 @@ public class InverseDynamicsQPSolver
     * <p>
     * min (rho - b)^T * W * (rho - b)
     * </p>
-    * 
+    *
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
-    *                      diagonal.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be
+    *       diagonal.
     */
    public void addRhoTask(DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
@@ -405,6 +451,64 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+   }
+
+   private void addTaskInternal(DMatrixRMaj taskJacobian,
+                                DMatrixRMaj taskConvectiveTerm,
+                                DMatrixRMaj taskWeight,
+                                DMatrixRMaj directCostHessian,
+                                DMatrixRMaj directCostGradient,
+                                int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      tempJtW.reshape(variables, taskSize);
+
+      // J^T Q
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
+
+      // Compute: f += J^T W g
+      MatrixTools.multAddBlock(tempJtW, directCostGradient, solverInput_f, offset, 0);
+
+      // J^T (Q + H)
+      CommonOps_DDRM.multAddTransA(taskJacobian, directCostHessian, tempJtW);
+
+      // Compute: H += J^T (H + Q) J
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
+
+      // Compute: f += J^T (Q + H) b
+      MatrixTools.multAddBlock(tempJtW, taskConvectiveTerm, solverInput_f, offset, 0);
+   }
+
+   private void addTaskInternal(DMatrixRMaj taskJacobian,
+                                DMatrixRMaj taskConvectiveTerm,
+                                double taskWeight,
+                                DMatrixRMaj directCostHessian,
+                                DMatrixRMaj directCostGradient,
+                                int offset)
+   {
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      // Compute: f += J^T W g
+      MatrixTools.multAddBlock(taskWeight, taskJacobian, directCostGradient, solverInput_f, offset, 0);
+
+      // J^T (Q + H)
+      CommonOps_DDRM.multTransA(taskWeight, taskJacobian, directCostHessian, tempJtW);
+
+      // Compute: H += J^T (H + Q) J
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
+
+      // Compute: f += J^T (Q + H) b
+      MatrixTools.multAddBlock(tempJtW, taskConvectiveTerm, solverInput_f, offset, 0);
    }
 
    public void addMotionEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
@@ -526,17 +630,20 @@ public class InverseDynamicsQPSolver
     * </p>
     *
     * @param centroidalMomentumMatrix refers to A in the equation.
-    * @param rhoJacobian              refers to Q in the equation. Q&rho; represents external wrench to
-    *                                 be optimized for.
-    * @param convectiveTerm           refers to ADot * qDot in the equation.
+    * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to
+    *       be optimized for.
+    * @param convectiveTerm refers to ADot * qDot in the equation.
     * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are
-    *                                 constant wrenches usually used for compensating for the weight of
-    *                                 an object that the robot is holding.
-    * @param gravityWrench            refers to W<sub>gravity</sub> in the equation. It the wrench
-    *                                 induced by the weight of the robot.
+    *       constant wrenches usually used for compensating for the weight of
+    *       an object that the robot is holding.
+    * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench
+    *       induced by the weight of the robot.
     */
-   public void setupWrenchesEquilibriumConstraint(DMatrixRMaj centroidalMomentumMatrix, DMatrixRMaj rhoJacobian, DMatrixRMaj convectiveTerm,
-                                                  DMatrixRMaj additionalExternalWrench, DMatrixRMaj gravityWrench)
+   public void setupWrenchesEquilibriumConstraint(DMatrixRMaj centroidalMomentumMatrix,
+                                                  DMatrixRMaj rhoJacobian,
+                                                  DMatrixRMaj convectiveTerm,
+                                                  DMatrixRMaj additionalExternalWrench,
+                                                  DMatrixRMaj gravityWrench)
    {
       if (!hasFloatingBase)
       {
