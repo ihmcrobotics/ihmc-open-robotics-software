@@ -5,9 +5,13 @@ import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.Esti
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ForceEstimatorDynamicMatrixUpdater;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -43,7 +47,10 @@ public class ContactParticleFilter implements RobotController
    private RigidBodyBasics rigidBody = null;
 
    private final YoDouble coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
-   private final YoDouble particleMotionStandardDeviation = new YoDouble("particleMotionStandardDeviation", registry);
+
+   private final YoDouble maximumSampleStandardDeviation = new YoDouble("maximumSampleStandardDeviation", registry);
+   private final YoDouble minimumSampleStandardDeviation = new YoDouble("minimumSampleStandardDeviation", registry);
+   private final YoDouble upperMotionBoundForSamplingAdjustment = new YoDouble("upperMotionBoundForSamplingAdjustment", registry);
 
    private final JointBasics[] joints;
    private final int dofs;
@@ -58,6 +65,15 @@ public class ContactParticleFilter implements RobotController
    private final FramePoint3D[] sampledContactPositions = new FramePoint3D[numberOfParticles];
    private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[numberOfParticles];
    private final YoFrameVector3D[] scaledSurfaceNormal = new YoFrameVector3D[numberOfParticles];
+
+   private final FramePoint3D previousEstimatedContactPosition = new FramePoint3D();
+   private final FramePoint3D estimatedContactPosition = new FramePoint3D();
+   private final FrameVector3D estimatedContactNormal = new FrameVector3D();
+   private final YoFramePoint3D averageParticlePosition = new YoFramePoint3D("averageParticlePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoEstimatedContactPosition = new YoFramePoint3D("estimatedContactPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoEstimatedContactNormal = new YoFrameVector3D("estimatedContactNormal", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoDouble estimatedContactPositionMovement = new YoDouble("estimatedContactPositionMovement", registry);
 
    private final double[] histogramValues = new double[numberOfParticles];
    private final int[] contactPointIndicesToSample = new int[numberOfParticles];
@@ -103,10 +119,19 @@ public class ContactParticleFilter implements RobotController
          YoGraphicVector debugContactVectorGraphic = new YoGraphicVector("cpNormVizDebug", debugContactPoint, debugSurfaceNormal, 1.0, YoAppearance.Red());
          graphicsListRegistry.registerYoGraphic(name, debugContactPointGraphic);
          graphicsListRegistry.registerYoGraphic(name, debugContactVectorGraphic);
+
+         YoGraphicPosition averageParticlePositionGraphic = new YoGraphicPosition("averageParticleViz", averageParticlePosition, 0.025, YoAppearance.Brown());
+         YoGraphicPosition estimatedContactPositionGraphic = new YoGraphicPosition("estimatedCPViz", yoEstimatedContactPosition, 0.025, YoAppearance.Green());
+         YoGraphicVector estimatedContactNormalGraphic = new YoGraphicVector("estimatedCPNormalViz", yoEstimatedContactPosition, yoEstimatedContactNormal, 0.07, YoAppearance.Green());
+         graphicsListRegistry.registerYoGraphic(name, averageParticlePositionGraphic);
+         graphicsListRegistry.registerYoGraphic(name, estimatedContactPositionGraphic);
+         graphicsListRegistry.registerYoGraphic(name, estimatedContactNormalGraphic);
       }
 
       coefficientOfFriction.set(0.5);
-      particleMotionStandardDeviation.set(0.07);
+      maximumSampleStandardDeviation.set(0.1);
+      minimumSampleStandardDeviation.set(0.005);
+      upperMotionBoundForSamplingAdjustment.set(0.1);
 
       if (parentRegistry != null)
       {
@@ -148,7 +173,8 @@ public class ContactParticleFilter implements RobotController
          pointToProject.setIncludingFrame(rigidBody.getBodyFixedFrame(), randomVector);
          pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointProjector.computeProjection(pointToProject, contactPoints[i]);
+         contactPointProjector.computeProjection(pointToProject, contactPoints[i].getContactPointPosition(), contactPoints[i].getSurfaceNormal());
+         contactPoints[i].update();
       }
    }
 
@@ -213,7 +239,7 @@ public class ContactParticleFilter implements RobotController
          boolean foundPointOutsideMesh = false;
          while (!foundPointOutsideMesh)
          {
-            Vector3D offset = generateRandomOffset();
+            Vector3D offset = generateSamplingOffset();
             FramePoint3D sampledContactPosition = sampledContactPositions[i];
             sampledContactPosition.setIncludingFrame(contactPointToSample.getContactPointFrame(), offset);
 
@@ -227,7 +253,8 @@ public class ContactParticleFilter implements RobotController
       // Project to surface
       for (int i = 0; i < numberOfParticles; i++)
       {
-         contactPointProjector.computeProjection(sampledContactPositions[i], contactPoints[i]);
+         contactPointProjector.computeProjection(sampledContactPositions[i], contactPoints[i].getContactPointPosition(), contactPoints[i].getSurfaceNormal());
+         contactPoints[i].update();
 
          contactPoints[i].getContactPointPosition().changeFrame(ReferenceFrame.getWorldFrame());
          contactPoints[i].getSurfaceNormal().changeFrame(ReferenceFrame.getWorldFrame());
@@ -236,20 +263,123 @@ public class ContactParticleFilter implements RobotController
          scaledSurfaceNormal[i].set(contactPoints[i].getSurfaceNormal());
          scaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
       }
+
+      // Recover average contact location
+      previousEstimatedContactPosition.setIncludingFrame(estimatedContactPosition);
+
+      estimatedContactPosition.setToZero(ReferenceFrame.getWorldFrame());
+      for (int i = 0; i < numberOfParticles; i++)
+      {
+         estimatedContactPosition.add(contactPointPositions[i]);
+      }
+      estimatedContactPosition.scale(1.0 / numberOfParticles);
+      averageParticlePosition.set(estimatedContactPosition);
+
+      performBinarySearchProjection();
+
+      estimatedContactPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      estimatedContactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+      yoEstimatedContactPosition.set(estimatedContactPosition);
+      yoEstimatedContactNormal.set(estimatedContactNormal);
+
+      estimatedContactPositionMovement.set(estimatedContactPosition.distance(previousEstimatedContactPosition));
    }
 
-   private Vector3D generateRandomOffset()
+   /**
+    * Projects point to mesh that might be inside the mesh. Since a joint might be composed of many meshes a simple projection isn't possible.
+    * Instead, a binary search is performed along a line with constant polar/azimuth in spherical coordinates in body-fixed frame.
+    */
+   private void performBinarySearchProjection()
    {
-      // perform sampling in spherical coordinates along a hemisphere
-      double offsetRadius = particleMotionStandardDeviation.getValue() * Math.abs(random.nextGaussian());
-      double phi = 2.0 * Math.PI * random.nextDouble();
-      double theta = Math.acos(random.nextDouble());
+      Vector3D sphericalLowerBound = new Vector3D();
+      Vector3D sphericalUpperBound = new Vector3D();
+      Vector3D sphericalQuery = new Vector3D();
 
-      double offsetX = offsetRadius * Math.cos(phi) * Math.sin(theta);
-      double offsetY = offsetRadius * Math.sin(phi) * Math.sin(theta);
-      double offsetZ = offsetRadius * Math.cos(theta);
+      estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+      transformToSphericalCoordinates(estimatedContactPosition, sphericalQuery);
+
+      boolean initialPointInside = contactPointProjector.isPointInside(estimatedContactPosition);
+      if (initialPointInside)
+         sphericalLowerBound.set(sphericalQuery);
+      else
+         sphericalUpperBound.set(sphericalQuery);
+
+      while (true)
+      {
+         sphericalQuery.setX(sphericalQuery.getX() * (initialPointInside ? 2.0 : 0.5));
+
+         estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+         transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
+
+         if (contactPointProjector.isPointInside(estimatedContactPosition) != initialPointInside)
+         {
+            if (initialPointInside)
+               sphericalUpperBound.set(sphericalQuery);
+            else
+               sphericalLowerBound.set(sphericalQuery);
+
+            break;
+         }
+      }
+
+      int iterations = 8;
+      for (int i = 0; i < iterations; i++)
+      {
+         sphericalQuery.setX(0.5 * (sphericalLowerBound.getX() + sphericalUpperBound.getX()));
+         estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+         transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
+
+         if (contactPointProjector.isPointInside(estimatedContactPosition))
+            sphericalLowerBound.set(sphericalQuery);
+         else
+            sphericalUpperBound.set(sphericalQuery);
+      }
+
+      estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+      transformToCartesianCoordinates(sphericalUpperBound, estimatedContactPosition);
+   }
+
+   private Vector3D generateSamplingOffset()
+   {
+      double clampedEstimatedPositionMotion = EuclidCoreTools.clamp(estimatedContactPositionMovement.getDoubleValue(),
+                                                                    0.0,
+                                                                    upperMotionBoundForSamplingAdjustment.getDoubleValue());
+      double standardDeviation = EuclidCoreTools.interpolate(minimumSampleStandardDeviation.getDoubleValue(),
+                                                             maximumSampleStandardDeviation.getDoubleValue(),
+                                                             clampedEstimatedPositionMotion / upperMotionBoundForSamplingAdjustment.getDoubleValue());
+
+      // perform sampling in spherical coordinates along a hemisphere
+      double offsetRadius = standardDeviation * Math.abs(random.nextGaussian());
+      double theta = 2.0 * Math.PI * random.nextDouble();
+      double phi = Math.acos(random.nextDouble());
+
+      double offsetX = offsetRadius * Math.cos(theta) * Math.sin(phi);
+      double offsetY = offsetRadius * Math.sin(theta) * Math.sin(phi);
+      double offsetZ = offsetRadius * Math.cos(phi);
 
       return new Vector3D(offsetX, offsetY, offsetZ);
+   }
+
+   private static void transformToSphericalCoordinates(Tuple3DReadOnly cartesianCoordinates, Tuple3DBasics sphericalCoordinates)
+   {
+      double r = EuclidCoreTools.norm(cartesianCoordinates.getX(), cartesianCoordinates.getY(), cartesianCoordinates.getZ());
+      double theta = Math.atan2(cartesianCoordinates.getY(), cartesianCoordinates.getX());
+      double phi = Math.acos(cartesianCoordinates.getZ() / r);
+
+      sphericalCoordinates.set(r, theta, phi);
+   }
+
+   private static void transformToCartesianCoordinates(Tuple3DReadOnly sphericalCoordinates, Tuple3DBasics cartesianCoordinates)
+   {
+      double r = sphericalCoordinates.getX();
+      double theta = sphericalCoordinates.getY();
+      double phi = sphericalCoordinates.getZ();
+
+      double x = r * Math.cos(theta) * Math.sin(phi);
+      double y = r * Math.sin(theta) * Math.sin(phi);
+      double z = r * Math.cos(phi);
+
+      cartesianCoordinates.set(x, y, z);
    }
 
    @Override
