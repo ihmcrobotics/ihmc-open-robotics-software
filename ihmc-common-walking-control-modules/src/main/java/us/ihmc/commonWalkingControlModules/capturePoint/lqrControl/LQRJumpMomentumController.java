@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -85,6 +86,8 @@ public class LQRJumpMomentumController
    private final List<S1Function> s1FunctionList = new ArrayList<>();
    private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
    private final List<S2Segment> s2FunctionList = new ArrayList<>();
+
+   private final LinearMomentumRateCostCommand momentumRateCostCommand = new LinearMomentumRateCostCommand();
 
    public LQRJumpMomentumController(DoubleProvider omega)
    {
@@ -337,6 +340,10 @@ public class LQRJumpMomentumController
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
+
+      momentumRateCostCommand.getLinearMomentumGradient().set(k2);
+      CommonOps_DDRM.multAdd(Nb, currentState, momentumRateCostCommand.getLinearMomentumGradient());
+      momentumRateCostCommand.setLinearMomentumHessian(lqrCommonValues.getR1());
    }
 
    public DMatrixRMaj getU()
@@ -429,5 +436,10 @@ public class LQRJumpMomentumController
    public FramePoint3DReadOnly getFeedbackVRPPosition()
    {
       return feedbackVRPPosition;
+   }
+
+   public LinearMomentumRateCostCommand getMomentumRateCostCommand()
+   {
+      return momentumRateCostCommand;
    }
 }

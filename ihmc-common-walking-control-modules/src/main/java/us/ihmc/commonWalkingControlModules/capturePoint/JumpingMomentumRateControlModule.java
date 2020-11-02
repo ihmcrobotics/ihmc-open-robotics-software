@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRJumpMomentumController;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
@@ -48,6 +52,7 @@ public class JumpingMomentumRateControlModule
 
    private final YoFrameVector3D controlledCoMAcceleration;
 
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
@@ -139,9 +144,12 @@ public class JumpingMomentumRateControlModule
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
    }
 
-   public MomentumRateCommand getMomentumRateCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return momentumRateCommand;
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(momentumRateCommand);
+      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
+      return inverseDynamicsCommandList;
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
@@ -158,12 +166,17 @@ public class JumpingMomentumRateControlModule
       computeDesiredAngularMomentumRateOfChange();
 
       selectionMatrix.resetSelection();
+      selectionMatrix.clearLinearSelection();
       if (!minimizeAngularMomentumRate.getBooleanValue())
-         selectionMatrix.setToLinearSelectionOnly();
+         selectionMatrix.clearAngularSelection();
 
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-      momentumRateCommand.setSelectionMatrix(selectionMatrix);
+      momentumRateCommand.setSelectionMatrixForAngularControl();
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
+
+      LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
+      momentumRateCostCommand.getSelectionMatrix().set(selectionMatrix.getLinearPart());
+      momentumRateCostCommand.setWeights(linearMomentumRateWeight);
    }
 
    public void computeAchievedCMP()
@@ -192,6 +205,10 @@ public class JumpingMomentumRateControlModule
    {
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
       lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
+
+      LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
+      CommonOps_DDRM.scale(totalMass, momentumRateCostCommand.getLinearMomentumGradient());
+      CommonOps_DDRM.scale(totalMass * totalMass, momentumRateCostCommand.getLinearMomentumHessian());
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
