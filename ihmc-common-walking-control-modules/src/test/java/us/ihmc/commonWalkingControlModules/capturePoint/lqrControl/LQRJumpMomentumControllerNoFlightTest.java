@@ -35,7 +35,7 @@ public class LQRJumpMomentumControllerNoFlightTest
    @Test
    public void testComputingS1()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -183,7 +183,7 @@ public class LQRJumpMomentumControllerNoFlightTest
    @Test
    public void testComputingS2FromSingleLinearTrajectory()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
       controller.computeS1Segments();
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
@@ -423,7 +423,7 @@ public class LQRJumpMomentumControllerNoFlightTest
    @Test
    public void testComputingS2FromSingleCubicTrajectory()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -643,7 +643,7 @@ public class LQRJumpMomentumControllerNoFlightTest
    @Test
    public void testComputingS2FromTwoLinearTrajectories()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpMiddle = new Point3D(0.6, 0.75, 1.0);
@@ -1095,7 +1095,7 @@ public class LQRJumpMomentumControllerNoFlightTest
    @Test
    public void testComputingS2FromThreeCubicTrajectories()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpMiddle = new Point3D(0.6, 0.75, 0.87);

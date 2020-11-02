@@ -28,7 +28,7 @@ public class LQRJumpMomentumControllerTest
    @Test
    public void testComputingAndS1OneContact()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -193,7 +193,7 @@ public class LQRJumpMomentumControllerTest
    @Test
    public void testCostFunctionContinuity()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       CoMTrajectoryPlanner coMTrajectoryPlanner = new CoMTrajectoryPlanner(-9.81, 1.0, null);
 

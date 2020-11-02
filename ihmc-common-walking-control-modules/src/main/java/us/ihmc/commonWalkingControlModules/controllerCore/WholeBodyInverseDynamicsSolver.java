@@ -220,7 +220,7 @@ public class WholeBodyInverseDynamicsSolver
          }
 
          if (!kinematicLoopFunctions.isEmpty())
-            throw new UnsupportedOperationException("The use of the dyncamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
+            throw new UnsupportedOperationException("The use of the dynamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
       }
       else
       {

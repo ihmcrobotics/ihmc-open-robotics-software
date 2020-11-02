@@ -472,7 +472,7 @@ public class InverseDynamicsQPSolver
       // J^T Q
       CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
 
-      // Compute: f += J^T W g
+      // Compute: f += J^T Q g
       MatrixTools.multAddBlock(tempJtW, directCostGradient, solverInput_f, offset, 0);
 
       // J^T (Q + H)

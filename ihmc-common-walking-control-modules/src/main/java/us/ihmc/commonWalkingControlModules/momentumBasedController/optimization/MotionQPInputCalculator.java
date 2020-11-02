@@ -36,10 +36,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -585,6 +582,7 @@ public class MotionQPInputCalculator
     */
    public boolean convertLinearMomentumRateCostCommand(LinearMomentumRateCostCommand commandToConvert, DirectQPInput qpInputToPack)
    {
+      tempSelectionMatrix.zero();
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
 
@@ -595,14 +593,14 @@ public class MotionQPInputCalculator
       qpInputToPack.setUseWeightScalar(false);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(3, 3);
+      tempTaskWeight.reshape(Wrench.SIZE, Wrench.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, 3);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
 
       // Compute the hessian: H = S * H * S^T
-      tempTaskWeight.set(commandToConvert.getLinearMomentumHessian());
+      tempTaskWeight.set(commandToConvert.getMomentumRateHessian());
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.directCostHessian);
 
@@ -610,11 +608,12 @@ public class MotionQPInputCalculator
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
+
       // Compute the gradient: g = S * g
-      CommonOps_DDRM.mult(tempSelectionMatrix, commandToConvert.getLinearMomentumGradient(), qpInputToPack.directCostGradient);
+      CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
 
       // Compute the task convective term: p = S * ADot qDot
-      DMatrixRMaj convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
+      DMatrixRMaj convectiveTerm = getCentroidalMomentumConvectiveTerm();
       CommonOps_DDRM.mult(tempSelectionMatrix, convectiveTerm, qpInputToPack.taskConvectiveTerm);
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
