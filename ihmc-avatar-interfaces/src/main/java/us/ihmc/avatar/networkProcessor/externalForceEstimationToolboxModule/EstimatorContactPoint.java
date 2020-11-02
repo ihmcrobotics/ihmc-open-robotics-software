@@ -100,7 +100,6 @@ public class EstimatorContactPoint
       }
       else
       {
-         contactPointFrame.update();
          contactPointJacobian.compute();
          return contactPointJacobian.getJacobianMatrix();
       }
@@ -110,6 +109,7 @@ public class EstimatorContactPoint
    {
       contactPointPosition.changeFrame(rigidBody.getParentJoint().getFrameAfterJoint());
       this.contactPointOffset.set(contactPointPosition);
+      contactPointFrame.update();
    }
 
    public void setContactPointOffset(Tuple3DReadOnly contactPointPosition)
