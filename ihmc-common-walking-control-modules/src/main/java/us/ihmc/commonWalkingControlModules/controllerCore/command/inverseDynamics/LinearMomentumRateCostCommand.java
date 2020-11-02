@@ -6,15 +6,17 @@ import org.ejml.dense.row.MatrixFeatures_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * Command is a cost function to go directly into QP. It is of the form
  *
- * u<sup>T</sup> Q u + q u
+ * 0.5 u<sup>T</sup> Q u + q u
  *
- * where u is the linear momentum rate of change
+ * where u is the momentum rate of change
  */
 public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<LinearMomentumRateCostCommand>
 {
@@ -23,27 +25,29 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
    /**
     * Q in the above equations
     */
-   private final DMatrixRMaj linearMomentumHessian = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj momentumRateHessian = new DMatrixRMaj(Momentum.SIZE, Momentum.SIZE);
 
    /**
     * q in the above equations
     */
-   private final DMatrixRMaj linearMomentumGradient = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj momentumRateGradient = new DMatrixRMaj(1, Momentum.SIZE);
 
-   private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
-   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    public LinearMomentumRateCostCommand()
    {
-      weightMatrix.setWeights(0.0, 0.0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
+      selectionMatrix.clearAngularSelection();
    }
 
    @Override
    public void set(LinearMomentumRateCostCommand other)
    {
       commandId = other.commandId;
-      linearMomentumHessian.set(other.linearMomentumHessian);
-      linearMomentumGradient.set(other.linearMomentumGradient);
+      momentumRateHessian.set(other.momentumRateHessian);
+      momentumRateGradient.set(other.momentumRateGradient);
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
    }
@@ -51,73 +55,77 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
    public void setSelectionMatrixToIdentity()
    {
       selectionMatrix.resetSelection();
+      selectionMatrix.clearAngularSelection();
    }
 
    public void setSelectionMatrixForLinearXYControl()
    {
       selectionMatrix.resetSelection();
-      selectionMatrix.selectZAxis(false);
+      selectionMatrix.clearAngularSelection();
+      selectionMatrix.selectLinearZ(false);
    }
 
    public void setWeight(double weight)
    {
-      weightMatrix.setWeights(weight, weight, weight);
+      weightMatrix.getLinearPart().setWeights(weight, weight, weight);
    }
 
    public void setWeights(double linearX, double linearY, double linearZ)
    {
-      weightMatrix.setWeights(linearX, linearY, linearZ);
+      weightMatrix.getLinearPart().setWeights(linearX, linearY, linearZ);
    }
 
    public void setWeights(Tuple3DReadOnly linear)
    {
-      weightMatrix.setWeights(linear.getX(), linear.getY(), linear.getZ());
+      weightMatrix.getLinearPart().setWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
    public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
-      weightMatrixToPack.reshape(3, 3);
+      weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
       weightMatrix.getFullWeightMatrixInFrame(ReferenceFrame.getWorldFrame(), weightMatrixToPack);
    }
 
-   public WeightMatrix3D getWeightMatrix()
+   public WeightMatrix6D getWeightMatrix()
    {
       return weightMatrix;
    }
 
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
-      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
 
-   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
       selectionMatrixToPack.set(selectionMatrix);
    }
 
-   public SelectionMatrix3D getSelectionMatrix()
+   public SelectionMatrix6D getSelectionMatrix()
    {
       return selectionMatrix;
    }
 
-   public void setLinearMomentumHessian(DMatrix linearMomentumHessian)
+   public void setLinearMomentumRateHessian(DMatrixRMaj linearMomentumRateHessian)
    {
-      this.linearMomentumHessian.set(linearMomentumHessian);
+      MatrixTools.setMatrixBlock(this.momentumRateHessian, 3, 3, linearMomentumRateHessian, 0, 0, 3, 3, 1.0);
    }
 
-   public void setLinearMomentumGradient(DMatrix linearMomentumGradient)
+   public void setLinearMomentumRateGradient(DMatrixRMaj linearMomentumRateGradient)
    {
-      this.linearMomentumGradient.set(linearMomentumGradient);
+      MatrixTools.setMatrixBlock(this.momentumRateGradient, 0, 3, linearMomentumRateGradient, 0, 0, 1, 3, 1.0);
+
+      this.momentumRateGradient.set(momentumRateGradient);
    }
 
-   public DMatrixRMaj getLinearMomentumHessian()
+   public DMatrixRMaj getMomentumRateHessian()
    {
-      return linearMomentumHessian;
+      return momentumRateHessian;
    }
 
-   public DMatrixRMaj getLinearMomentumGradient()
+   public DMatrixRMaj getMomentumRateGradient()
    {
-      return linearMomentumGradient;
+      return momentumRateGradient;
    }
 
    @Override
@@ -151,9 +159,9 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
 
          if (commandId != other.commandId)
             return false;
-         if (!MatrixFeatures_DDRM.isEquals(linearMomentumHessian, other.linearMomentumHessian))
+         if (!MatrixFeatures_DDRM.isEquals(momentumRateHessian, other.momentumRateHessian))
             return false;
-         if (!MatrixFeatures_DDRM.isEquals(linearMomentumGradient, other.linearMomentumGradient))
+         if (!MatrixFeatures_DDRM.isEquals(momentumRateGradient, other.momentumRateGradient))
             return false;
          if (!weightMatrix.equals(other.weightMatrix))
             return false;

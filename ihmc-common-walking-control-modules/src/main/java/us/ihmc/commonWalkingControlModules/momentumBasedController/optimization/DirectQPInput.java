@@ -55,7 +55,7 @@ public class DirectQPInput
       taskConvectiveTerm.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
       directCostHessian.reshape(taskSize, taskSize);
-      directCostGradient.reshape(1, taskSize);
+      directCostGradient.reshape(taskSize, 1);
    }
 
    public void setTaskJacobian(DMatrixRMaj taskJacobian)

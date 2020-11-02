@@ -2,8 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRJumpMomentumController;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -17,20 +18,18 @@ import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRCont
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -94,7 +93,7 @@ public class JumpingMomentumRateControlModule
       this.controllerToolbox = controllerToolbox;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
+      linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight1", new Vector3D(10, 10, 10), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
       minimizeAngularMomentumRate.set(true);
@@ -116,7 +115,7 @@ public class JumpingMomentumRateControlModule
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
 
-      lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), totalMass, registry);
       orientationController = new VariationalLQRController();
       orientationController.setInertia(controllerToolbox.getFullRobotModel().getChest().getInertia());
 
@@ -147,7 +146,7 @@ public class JumpingMomentumRateControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-      inverseDynamicsCommandList.addCommand(momentumRateCommand);
+//      inverseDynamicsCommandList.addCommand(momentumRateCommand);
       inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
       return inverseDynamicsCommandList;
    }
@@ -166,7 +165,7 @@ public class JumpingMomentumRateControlModule
       computeDesiredAngularMomentumRateOfChange();
 
       selectionMatrix.resetSelection();
-      selectionMatrix.clearLinearSelection();
+//      selectionMatrix.clearLinearSelection();
       if (!minimizeAngularMomentumRate.getBooleanValue())
          selectionMatrix.clearAngularSelection();
 
@@ -205,11 +204,6 @@ public class JumpingMomentumRateControlModule
    {
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
       lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
-
-      double massInverse = 1.0 / totalMass;
-      LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
-      CommonOps_DDRM.scale(massInverse, momentumRateCostCommand.getLinearMomentumGradient());
-      CommonOps_DDRM.scale(massInverse * massInverse, momentumRateCostCommand.getLinearMomentumHessian());
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
