@@ -99,7 +99,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
          throw new RuntimeException("The maximum number of contact points (" + maximumNumberOfContactPoints + ") has been reached. Increase to add more points");
 
       EstimatorContactPoint contactPoint = new EstimatorContactPoint(joints, rigidBody, assumeZeroTorque);
-      contactPoint.setContactPointOffset(contactPointOffset);
+      contactPoint.getContactPointPosition().setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), contactPointOffset);
       contactPoints.add(contactPoint);
    }
 
@@ -155,7 +155,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
          DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
 
          MovingReferenceFrame parentJointFrame = contactPoints.get(0).getRigidBody().getParentJoint().getFrameAfterJoint();
-         Tuple3DReadOnly contactPointOffset = contactPoints.get(0).getContactPointOffset();
+         Tuple3DReadOnly contactPointOffset = contactPoints.get(0).getContactPointPosition();
          FramePoint3D contactPosition = new FramePoint3D(parentJointFrame, contactPointOffset);
 
          FrameQuaternion contactPointOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), contactFrameOrientationInWorld);
@@ -198,7 +198,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
             estimatedExternalWrenches[i].set(rowOffset, estimatedExternalWrenchMatrix);
          }
 
-         tempPoint.setIncludingFrame(contactPoints.get(i).getRigidBody().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointOffset());
+         tempPoint.setIncludingFrame(contactPoints.get(i).getRigidBody().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointPosition());
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions[i].set(tempPoint);
       }
