@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
@@ -44,6 +45,10 @@ import java.util.function.ToIntFunction;
 
 public class ExternalForceEstimationToolboxController extends ToolboxController
 {
+   private final YoBoolean waitingForRobotConfigurationData = new YoBoolean("waitingForRobotConfigurationData", registry);
+   private final YoBoolean waitingForRobotControllerData = new YoBoolean("waitingForRobotControllerData", registry);
+   private final YoBoolean contactParticleFilterHasInitialized = new YoBoolean("contactParticleFilterHasInitialized", registry);
+
    private final YoBoolean estimateContactPosition = new YoBoolean("estimateContactPosition", registry);
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -150,6 +155,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    @Override
    public boolean initialize()
    {
+      waitingForRobotConfigurationData.set(true);
+      waitingForRobotControllerData.set(true);
+
       if (commandInputManager.isNewCommandAvailable(ExternalForceEstimationToolboxConfigurationCommand.class))
       {
          ExternalForceEstimationToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(
@@ -161,7 +169,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          {
             RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(0));
             contactParticleFilter.setLinkToEstimate(rigidBody);
-            contactParticleFilter.initialize();
          }
          else
          {
@@ -204,12 +211,30 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       {
          updateRobotState(robotConfigurationData, rootJoint, oneDoFJoints);
          referenceFrames.updateFrames();
+         waitingForRobotConfigurationData.set(false);
       }
 
       RobotDesiredConfigurationData desiredConfigurationData = this.robotDesiredConfigurationData.getAndSet(null);
       if (desiredConfigurationData != null)
       {
          updateRobotDesiredState(desiredConfigurationData, controllerDesiredQdd, jointNameToMatrixIndexFunction);
+         waitingForRobotControllerData.set(false);
+      }
+
+      if (waitingForRobotControllerData.getBooleanValue() || waitingForRobotConfigurationData.getBooleanValue())
+      {
+         if (DEBUG)
+         {
+            LogTools.info("Waiting for controller messages before starting estimation...");
+         }
+
+         return;
+      }
+
+      if (!contactParticleFilterHasInitialized.getBooleanValue())
+      {
+         contactParticleFilter.initialize();
+         contactParticleFilterHasInitialized.set(true);
       }
 
       dynamicsMatrixCalculator.compute();
@@ -301,7 +326,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
 
       rootJoint.getPredecessor().updateFramesRecursively();
-      rootJoint.updateFramesRecursively();
    }
 
    private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DMatrixRMaj controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
