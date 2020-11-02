@@ -1,13 +1,18 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 
@@ -17,14 +22,11 @@ import java.util.stream.IntStream;
 
 public class EstimatorContactPoint
 {
-   /** Contacting rigid body */
    private final RigidBodyBasics rigidBody;
-
-   /** Contact point position in the link's parent joint's "frame after joint" */
-   private final Vector3D contactPointOffset = new Vector3D();
-
-   /** Corresponding frame at contactPointOffset, aligned with the link's parent joint's "frame after joint */
-   private final ReferenceFrame contactPointFrame;
+   private final FramePoint3D contactPointPosition = new FramePoint3D();
+   private final FrameVector3D surfaceNormal = new FrameVector3D();
+   private final FramePose3D surfacePose = new FramePose3D();
+   private final PoseReferenceFrame contactPointFrame;
 
    /** Jacobian associated with this contact point, the jacobian's frame is contactPointFrame */
    private final GeometricJacobian contactPointJacobian;
@@ -41,8 +43,6 @@ public class EstimatorContactPoint
    /** Maps indices of this contact point's jacobian to the whole system jacobian. Column i of this jacobian maps to column indexMap[i] of the system jacobian */
    private final int[] indexMap;
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
-
    public EstimatorContactPoint(JointBasics[] joints, RigidBodyBasics rigidBody, boolean assumeZeroTorque)
    {
       this.rigidBody = rigidBody;
@@ -53,16 +53,7 @@ public class EstimatorContactPoint
       this.contactPointJacobian = new GeometricJacobian(baseLink, rigidBody, baseLink.getBodyFixedFrame());
       this.indexMap = new int[contactPointJacobian.getJacobianMatrix().getNumCols()];
 
-      this.contactPointFrame = new ReferenceFrame(rigidBody.getName() + "ContactFrame", ReferenceFrame.getWorldFrame())
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            tempPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), contactPointOffset);
-            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            transformToParent.setTranslationAndIdentityRotation(tempPoint);
-         }
-      };
+      this.contactPointFrame = new PoseReferenceFrame(rigidBody.getName() + "ContactFrame", ReferenceFrame.getWorldFrame());
 
       contactPointJacobian.changeFrame(contactPointFrame);
 
@@ -93,8 +84,8 @@ public class EstimatorContactPoint
          contactPointJacobian.changeFrame(baseFrame);
          contactPointJacobian.compute();
 
-         tempPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), contactPointOffset);
-         pointJacobian.set(contactPointJacobian, tempPoint);
+         contactPointPosition.changeFrame(contactPointFrame);
+         pointJacobian.set(contactPointJacobian, contactPointPosition);
          pointJacobian.compute();
          return pointJacobian.getJacobianMatrix();
       }
@@ -105,16 +96,14 @@ public class EstimatorContactPoint
       }
    }
 
-   public void setContactPointOffset(FramePoint3D contactPointPosition)
+   public void update()
    {
-      contactPointPosition.changeFrame(rigidBody.getParentJoint().getFrameAfterJoint());
-      this.contactPointOffset.set(contactPointPosition);
-      contactPointFrame.update();
-   }
+      contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      surfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
 
-   public void setContactPointOffset(Tuple3DReadOnly contactPointPosition)
-   {
-      this.contactPointOffset.set(contactPointPosition);
+      surfacePose.getPosition().set(contactPointPosition);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, surfaceNormal, surfacePose.getOrientation());
+      contactPointFrame.setPoseAndUpdate(surfacePose);
    }
 
    public boolean getAssumeZeroTorque()
@@ -127,9 +116,19 @@ public class EstimatorContactPoint
       return numberOfDecisionVariables;
    }
 
-   public Tuple3DReadOnly getContactPointOffset()
+   public FramePoint3D getContactPointPosition()
    {
-      return contactPointOffset;
+      return contactPointPosition;
+   }
+
+   public FrameVector3D getSurfaceNormal()
+   {
+      return surfaceNormal;
+   }
+
+   public ReferenceFrame getContactPointFrame()
+   {
+      return contactPointFrame;
    }
 
    public RigidBodyBasics getRigidBody()

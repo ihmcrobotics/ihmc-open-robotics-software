@@ -4,7 +4,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.EstimatorContactPoint;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactPointProjector;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -106,8 +108,11 @@ public class ValkyrieContactPointProjectorTest
          RigidBodyBasics rigidBody = query.getLeft();
          FramePoint3D queryPoint = query.getRight();
 
+         EstimatorContactPoint estimatorContactPoint = new EstimatorContactPoint(HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel),
+                                                                                 rigidBody,
+                                                                                 true);
          contactPointProjector.initialize(rigidBody);
-         contactPointProjector.computeProjection(queryPoint);
+         contactPointProjector.computeProjection(queryPoint, estimatorContactPoint);
 
          graphics3DObject.identity();
 
@@ -116,12 +121,12 @@ public class ValkyrieContactPointProjectorTest
          graphics3DObject.addSphere(0.012);
 
          graphics3DObject.identity();
-         graphics3DObject.translate(contactPointProjector.getSurfacePoint());
+         graphics3DObject.translate(estimatorContactPoint.getContactPointPosition());
          graphics3DObject.addSphere(0.012);
 
          graphics3DObject.identity();
 
-         RigidBodyTransform transformToWorldFrame = contactPointProjector.getSurfaceFrame().getTransformToWorldFrame();
+         RigidBodyTransform transformToWorldFrame = estimatorContactPoint.getContactPointFrame().getTransformToWorldFrame();
 
          graphics3DObject.transform(transformToWorldFrame);
          graphics3DObject.addCoordinateSystem(0.1);
