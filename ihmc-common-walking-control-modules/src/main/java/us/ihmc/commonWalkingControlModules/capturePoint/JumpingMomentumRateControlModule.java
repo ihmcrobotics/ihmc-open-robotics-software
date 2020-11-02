@@ -171,11 +171,11 @@ public class JumpingMomentumRateControlModule
          selectionMatrix.clearAngularSelection();
 
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-      momentumRateCommand.setSelectionMatrixForAngularControl();
+      momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
 
       LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
-      momentumRateCostCommand.getSelectionMatrix().set(selectionMatrix.getLinearPart());
+      momentumRateCostCommand.setSelectionMatrixToIdentity();
       momentumRateCostCommand.setWeights(linearMomentumRateWeight);
    }
 
@@ -206,15 +206,17 @@ public class JumpingMomentumRateControlModule
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
       lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
 
+      double massInverse = 1.0 / totalMass;
       LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
-      CommonOps_DDRM.scale(totalMass, momentumRateCostCommand.getLinearMomentumGradient());
-      CommonOps_DDRM.scale(totalMass * totalMass, momentumRateCostCommand.getLinearMomentumHessian());
+      CommonOps_DDRM.scale(massInverse, momentumRateCostCommand.getLinearMomentumGradient());
+      CommonOps_DDRM.scale(massInverse * massInverse, momentumRateCostCommand.getLinearMomentumHessian());
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
       else
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
 
+      // TODO double check the momentum rate command here is the same
       controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
 
       linearMomentumRateOfChange.changeFrame(worldFrame);
