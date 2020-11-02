@@ -112,7 +112,8 @@ public class ValkyrieContactPointProjectorTest
                                                                                  rigidBody,
                                                                                  true);
          contactPointProjector.initialize(rigidBody);
-         contactPointProjector.computeProjection(queryPoint, estimatorContactPoint);
+         contactPointProjector.computeProjection(queryPoint, estimatorContactPoint.getContactPointPosition(), estimatorContactPoint.getSurfaceNormal());
+         estimatorContactPoint.update();
 
          graphics3DObject.identity();
 

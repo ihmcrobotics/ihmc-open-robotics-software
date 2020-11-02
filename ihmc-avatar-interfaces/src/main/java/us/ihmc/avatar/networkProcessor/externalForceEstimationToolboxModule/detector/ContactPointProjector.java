@@ -53,13 +53,10 @@ public class ContactPointProjector
       return false;
    }
 
-   public void computeProjection(FramePoint3DBasics pointToProject, EstimatorContactPoint contactPointToSet)
+   public void computeProjection(FramePoint3DBasics pointToProject, FramePoint3D contactPointPosition, FrameVector3D surfaceNormal)
    {
       double minimumProjectionDistance = Double.MAX_VALUE;
       int minimumDistanceIndex = -1;
-
-      FramePoint3D contactPointPosition = contactPointToSet.getContactPointPosition();
-      FrameVector3D surfaceNormal = contactPointToSet.getSurfaceNormal();
 
       for (int i = 0; i < collidablesToCheck.size(); i++)
       {
@@ -97,8 +94,6 @@ public class ContactPointProjector
       FrameShape3DReadOnly shapeToProjectTo = collidablesToCheck.get(minimumDistanceIndex).getShape();
       pointToProject.changeFrame(shapeToProjectTo.getReferenceFrame());
       shapeToProjectTo.evaluatePoint3DCollision(pointToProject, contactPointPosition, surfaceNormal);
-
-      contactPointToSet.update();
    }
 
    public List<Collidable> getCollidablesToCheck()
