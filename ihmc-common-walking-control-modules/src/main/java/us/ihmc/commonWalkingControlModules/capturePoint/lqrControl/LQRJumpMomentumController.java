@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.Matrix;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
@@ -9,6 +10,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -341,8 +343,8 @@ public class LQRJumpMomentumController
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
 
-      momentumRateCostCommand.getLinearMomentumGradient().set(k2);
-      CommonOps_DDRM.multAdd(Nb, currentState, momentumRateCostCommand.getLinearMomentumGradient());
+      CommonOps_DDRM.multTransA(-2.0, k2, lqrCommonValues.getR1(), momentumRateCostCommand.getLinearMomentumGradient());
+      CommonOps_DDRM.multAddTransAB(2.0, relativeState, lqrCommonValues.getNb(), momentumRateCostCommand.getLinearMomentumGradient());
       momentumRateCostCommand.setLinearMomentumHessian(lqrCommonValues.getR1());
    }
 
