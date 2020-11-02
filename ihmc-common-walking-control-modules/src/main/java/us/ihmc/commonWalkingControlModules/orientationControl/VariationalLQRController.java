@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.orientationControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ojalgo.matrix.transformation.Rotation;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -35,7 +36,7 @@ public class VariationalLQRController
 
    private final DMatrixRMaj QR = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj Qw = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj Q = new DMatrixRMaj(12, 12);
+   private final DMatrixRMaj Q = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj R = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj RInverse = new DMatrixRMaj(3, 3);
 
@@ -136,7 +137,8 @@ public class VariationalLQRController
       CommonOps_DDRM.multTransA(B, careSolver.getP(), BTP);
       CommonOps_DDRM.mult(RInverse, BTP, K);
 
-      currentRotation.get(RB);
+      currentRotation.get(rotationMatrix);
+      rotationMatrix.get(RB);
       currentAngularVelocity.get(wB);
 
       CommonOps_DDRM.multTransA(-1.0, RB, RBd, RBerror);
