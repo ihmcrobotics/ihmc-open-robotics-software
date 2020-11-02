@@ -72,7 +72,7 @@ public class ValkyrieExternalContactEstimationSimulation
       RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
 
 //      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
-            Vector3D externalForcePointOffset = new Vector3D(0.16, 0.0, 0.25);
+      Vector3D externalForcePointOffset = new Vector3D(0.1102, 0.0771, 0.09035);
       //      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.5);
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);

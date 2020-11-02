@@ -81,8 +81,10 @@ public class ContactParticleFilter implements RobotController
    private final FramePoint3D pointToProject = new FramePoint3D();
 
    // debugging variables
+   private final Vector3D knownContactPointInParentJointFrame = new Vector3D();
    private final YoFramePoint3D debugContactPoint = new YoFramePoint3D("debugContactPoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D debugSurfaceNormal = new YoFrameVector3D("debugSurfaceNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final FramePoint3D debugPoint = new FramePoint3D();
 
    public ContactParticleFilter(JointBasics[] joints,
                                 double dt,
@@ -132,6 +134,8 @@ public class ContactParticleFilter implements RobotController
       maximumSampleStandardDeviation.set(0.1);
       minimumSampleStandardDeviation.set(0.005);
       upperMotionBoundForSamplingAdjustment.set(0.1);
+
+      knownContactPointInParentJointFrame.set(0.1102, 0.0771, 0.09035);
 
       if (parentRegistry != null)
       {
@@ -283,6 +287,10 @@ public class ContactParticleFilter implements RobotController
       yoEstimatedContactNormal.set(estimatedContactNormal);
 
       estimatedContactPositionMovement.set(estimatedContactPosition.distance(previousEstimatedContactPosition));
+
+      debugPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), knownContactPointInParentJointFrame);
+      debugPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      debugContactPoint.set(debugPoint);
    }
 
    /**
