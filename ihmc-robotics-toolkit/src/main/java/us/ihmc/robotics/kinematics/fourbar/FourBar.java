@@ -264,6 +264,27 @@ public class FourBar
    }
 
    /**
+    * Tests if this four bar represents an inverted four bar as follows:
+    *
+    * <pre>
+    *  +A------B+    +D------A+    +C------D+    +B------C+
+    *    \    /        \    /        \    /        \    /
+    *     \  /          \  /          \  /          \  /
+    *      \/     or     \/     or     \/     or     \/
+    *      /\            /\            /\            /\
+    *     /  \          /  \          /  \          /  \
+    *    /    \        /    \        /    \        /    \
+    *  -C------D-    -B------C-    -A------B-    -D------A-
+    * </pre>
+    * 
+    * @return {@code true} if this four bar is inverted, {@code false} otherwise.
+    */
+   public boolean isInverted()
+   {
+      return FourBarTools.isFourBarInverted(this);
+   }
+
+   /**
     * Calculates and update the state of this four bar linkage, i.e. computes the inner angle for every
     * vertex and the length of the diagonals.
     * 

@@ -107,6 +107,31 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    }
 
    /**
+    * Tests if this four bar represents an inverted four bar as follows:
+    *
+    * <pre>
+    *    root
+    *      |
+    *      |
+    * A O-----O B
+    *    \   /
+    *     \ /
+    *      X
+    *     / \
+    *    /   \
+    * C O-----O D
+    *      |
+    * end-effector
+    * </pre>
+    * 
+    * @return {@code true} if this four bar is inverted, {@code false} otherwise.
+    */
+   public boolean isInverted()
+   {
+      return fourBar.isInverted();
+   }
+
+   /**
     * Assuming the state of the master joint has been set, this method computes and updates the state
     * of the other joints such that the kinematic loop represents a proper four bar linkage with
     * constant side lengths.
