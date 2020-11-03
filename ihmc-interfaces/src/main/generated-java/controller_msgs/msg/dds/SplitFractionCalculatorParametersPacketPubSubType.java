@@ -42,6 +42,10 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -74,6 +78,12 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,6 +121,10 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_7(data.getCalculateSplitFractionsFromArea());
+
+      cdr.write_type_7(data.getCalculateSplitFractionsFromPositions());
+
       cdr.write_type_6(data.getDefaultTransferSplitFraction());
 
       cdr.write_type_6(data.getStepHeightForLargeStepDown());
@@ -134,6 +148,10 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    public static void read(controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
+      data.setCalculateSplitFractionsFromArea(cdr.read_type_7());
+      	
+      data.setCalculateSplitFractionsFromPositions(cdr.read_type_7());
       	
       data.setDefaultTransferSplitFraction(cdr.read_type_6());
       	
@@ -160,6 +178,8 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    public final void serialize(controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("calculate_split_fractions_from_area", data.getCalculateSplitFractionsFromArea());
+      ser.write_type_7("calculate_split_fractions_from_positions", data.getCalculateSplitFractionsFromPositions());
       ser.write_type_6("default_transfer_split_fraction", data.getDefaultTransferSplitFraction());
       ser.write_type_6("step_height_for_large_step_down", data.getStepHeightForLargeStepDown());
       ser.write_type_6("largest_step_down_height", data.getLargestStepDownHeight());
@@ -175,6 +195,8 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setCalculateSplitFractionsFromArea(ser.read_type_7("calculate_split_fractions_from_area"));
+      data.setCalculateSplitFractionsFromPositions(ser.read_type_7("calculate_split_fractions_from_positions"));
       data.setDefaultTransferSplitFraction(ser.read_type_6("default_transfer_split_fraction"));
       data.setStepHeightForLargeStepDown(ser.read_type_6("step_height_for_large_step_down"));
       data.setLargestStepDownHeight(ser.read_type_6("largest_step_down_height"));

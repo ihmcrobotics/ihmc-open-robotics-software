@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -104,6 +105,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private final CoPTrajectoryParameters copTrajectoryParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
@@ -146,6 +148,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -463,7 +466,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 capturePointPlannerParameters);
+                                                                 capturePointPlannerParameters,
+                                                                 copTrajectoryParameters);
       setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);

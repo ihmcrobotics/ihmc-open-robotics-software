@@ -15,6 +15,8 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   public boolean calculate_split_fractions_from_area_;
+   public boolean calculate_split_fractions_from_positions_;
    /**
             * Default value for the ICP plan's transfer split fraction.
             */
@@ -89,6 +91,10 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
       sequence_id_ = other.sequence_id_;
 
+      calculate_split_fractions_from_area_ = other.calculate_split_fractions_from_area_;
+
+      calculate_split_fractions_from_positions_ = other.calculate_split_fractions_from_positions_;
+
       default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
 
       step_height_for_large_step_down_ = other.step_height_for_large_step_down_;
@@ -122,6 +128,24 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setCalculateSplitFractionsFromArea(boolean calculate_split_fractions_from_area)
+   {
+      calculate_split_fractions_from_area_ = calculate_split_fractions_from_area;
+   }
+   public boolean getCalculateSplitFractionsFromArea()
+   {
+      return calculate_split_fractions_from_area_;
+   }
+
+   public void setCalculateSplitFractionsFromPositions(boolean calculate_split_fractions_from_positions)
+   {
+      calculate_split_fractions_from_positions_ = calculate_split_fractions_from_positions;
+   }
+   public boolean getCalculateSplitFractionsFromPositions()
+   {
+      return calculate_split_fractions_from_positions_;
    }
 
    /**
@@ -325,6 +349,10 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calculate_split_fractions_from_area_, other.calculate_split_fractions_from_area_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calculate_split_fractions_from_positions_, other.calculate_split_fractions_from_positions_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_split_fraction_, other.default_transfer_split_fraction_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_height_for_large_step_down_, other.step_height_for_large_step_down_, epsilon)) return false;
@@ -358,6 +386,10 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.calculate_split_fractions_from_area_ != otherMyClass.calculate_split_fractions_from_area_) return false;
+
+      if(this.calculate_split_fractions_from_positions_ != otherMyClass.calculate_split_fractions_from_positions_) return false;
+
       if(this.default_transfer_split_fraction_ != otherMyClass.default_transfer_split_fraction_) return false;
 
       if(this.step_height_for_large_step_down_ != otherMyClass.step_height_for_large_step_down_) return false;
@@ -388,6 +420,10 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       builder.append("SplitFractionCalculatorParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("calculate_split_fractions_from_area=");
+      builder.append(this.calculate_split_fractions_from_area_);      builder.append(", ");
+      builder.append("calculate_split_fractions_from_positions=");
+      builder.append(this.calculate_split_fractions_from_positions_);      builder.append(", ");
       builder.append("default_transfer_split_fraction=");
       builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
       builder.append("step_height_for_large_step_down=");

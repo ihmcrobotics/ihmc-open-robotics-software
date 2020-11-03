@@ -10,14 +10,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersPropertyReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -60,7 +59,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
    private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference;
-   private final AtomicReference<SplitFractionCalculatorParametersReadOnly> splitFractionCalculatorParametersReference;
+   private final AtomicReference<SplitFractionCalculatorParametersPropertyReadOnly> splitFractionCalculatorParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
    private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicReference<Pose3DReadOnly> goalLeftFootPose;
@@ -438,7 +437,7 @@ public class RemoteUIMessageConverter
          swingPlannerParametersPublisher.publish(swingPlannerParameters.getAsPacket());
       }
 
-      SplitFractionCalculatorParametersReadOnly splitFractionParameters = splitFractionCalculatorParametersReference.get();
+      SplitFractionCalculatorParametersPropertyReadOnly splitFractionParameters = splitFractionCalculatorParametersReference.get();
       if (splitFractionParameters != null)
       {
          splitFractionParametersPublisher.publish(splitFractionParameters.getAsPacket());

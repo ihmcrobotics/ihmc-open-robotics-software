@@ -97,7 +97,7 @@ public class SimpleBalanceManager
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
    private final FrameVector2D icpError2d = new FrameVector2D();
@@ -257,14 +257,13 @@ public class SimpleBalanceManager
       controllerToolbox.getCoP(copEstimate);
 
       desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
-      desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
-      desiredCapturePointVelocity2d.setIncludingFrame(comPlanner.getDesiredDCMVelocity());
+      desiredCoM2d.setIncludingFrame(comPlanner.getDesiredCoMPosition());
       perfectCoP2d.setIncludingFrame(comPlanner.getDesiredCOPPosition());
-      yoDesiredCoMPosition.set(comPlanner.getDesiredCoMPosition());
+      yoDesiredICPVelocity.set(comPlanner.getDesiredDCMVelocity());
       yoDesiredCoMVelocity.set(comPlanner.getDesiredCoMVelocity());
 
-      pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
+      pelvisICPBasedTranslationManager.compute(supportLeg);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
@@ -275,12 +274,12 @@ public class SimpleBalanceManager
       // ---
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
-      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
+      yoDesiredCoMPosition.set(desiredCoM2d);
       yoPerfectCoP.set(perfectCoP2d);
 
       getICPError(icpError2d);
 
-      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -298,7 +297,7 @@ public class SimpleBalanceManager
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
-      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setVRPTrajectories(comPlanner.getVRPTrajectories());
       linearMomentumRateControlModuleInput.setTimeInContactPhase(comPlanner.getTimeInContactPhase());
       linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);

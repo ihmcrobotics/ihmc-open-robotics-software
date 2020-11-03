@@ -49,12 +49,12 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix3x3 src, double scale)
+   public static void setMatrixBlock(DMatrix dest, int destStartRow, int destStartColumn, DMatrix3x3 src, double scale)
    {
       setMatrixBlock(dest, destStartRow, destStartColumn, src, 0, 0, 3, 3, scale);
    }
 
-   public static void setMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix src, int srcStartRow, int srcStartColumn,
+   public static void setMatrixBlock(DMatrix dest, int destStartRow, int destStartColumn, DMatrix src, int srcStartRow, int srcStartColumn,
                                      int numberOfRows, int numberOfColumns, double scale)
    {
       if (numberOfRows == 0 || numberOfColumns == 0)

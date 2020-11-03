@@ -110,6 +110,27 @@ public class SettableContactStateProvider implements ContactStateProvider
       return timeInterval;
    }
 
+   public void setDuration(double duration)
+   {
+      setEndTime(getTimeInterval().getStartTime() + duration);
+   }
+
+   public void setStartTime(double startTime)
+   {
+      getTimeInterval().setStartTime(startTime);
+   }
+
+   public void setEndTime(double endTime)
+   {
+      getTimeInterval().setEndTime(endTime);
+   }
+
+   public void setStartFromEnd(ContactStateProvider previousContactState)
+   {
+      setStartTime(previousContactState.getTimeInterval().getEndTime());
+      setStartCopPosition(previousContactState.getCopEndPosition());
+   }
+
    public List<String> getBodiesInContact()
    {
       return bodiesInContact;

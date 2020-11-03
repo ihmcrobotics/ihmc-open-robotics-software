@@ -12,6 +12,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -160,8 +162,10 @@ public class PrecomputedICPPlanner
       yoDesiredCMPPosition.set(desiredCMPPosition);
    }
 
-   public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
-                       FramePoint2D desiredCoP2DToPack)
+   public void compute(double time,
+                       FramePoint2DBasics desiredCapturePoint2dToPack,
+                       FrameVector2DBasics desiredCapturePointVelocity2dToPack,
+                       FramePoint2DBasics desiredCoP2DToPack)
    {
       if (isWithinInterval(time))
       {
