@@ -56,7 +56,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  *
  * Note the symbols "-" and "+" next to each vertex indicating their winding, i.e. "-" for
  * counter-clockwise and "+" for clockwise. In this example, a vertex is assumed to be convex when
- * its winding is clockwise.
+ * its winding is clockwise. Note that the edge with 2 concave vertices is flagged as being flipped.
  * </p>
  * <p>
  * This implementation does not handle the following kind of configuration:
