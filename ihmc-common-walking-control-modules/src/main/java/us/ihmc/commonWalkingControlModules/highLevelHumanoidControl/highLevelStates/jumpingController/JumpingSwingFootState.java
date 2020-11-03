@@ -9,9 +9,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -127,6 +125,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       spatialFeedbackControlCommand.setPrimaryBase(fullRobotModel.getPelvis());
       ReferenceFrame linearGainsFrame = footControlHelper.getJumpingControllerToolbox().getPelvisZUpFrame();
       spatialFeedbackControlCommand.setGainsFrames(null, linearGainsFrame);
+      spatialFeedbackControlCommand.setControlBaseFrame(centerOfMassFrame);
 
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
       FramePose3D controlFramePose = new FramePose3D(controlFrame);
@@ -154,7 +153,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
-      double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
+      double minSwingHeightFromStanceFoot = 0.0;
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -163,6 +162,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
+                                                               centerOfMassFrame,
                                                                registry,
                                                                yoGraphicsListRegistry);
 
@@ -187,22 +187,6 @@ public class JumpingSwingFootState implements JumpingFootControlState
          YoGraphicPosition desiredPosition = new YoGraphicPosition(namePrefix + "DesiredPosition", yoDesiredSolePosition, 0.015, YoAppearance.Green());
          yoGraphicsListRegistry.registerYoGraphic("Swing Foot", desiredPosition);
       }
-   }
-
-   private ReferenceFrame createToeFrame(RobotSide robotSide)
-   {
-      ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
-      ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
-      FramePoint2D toeContactPoint2d = new FramePoint2D();
-      contactableFoot.getToeOffContactPoint(toeContactPoint2d);
-      FramePoint3D toeContactPoint = new FramePoint3D();
-      toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
-      toeContactPoint.changeFrame(footFrame);
-
-      transformFromToeToAnkle.getTranslation().set(toeContactPoint);
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame",
-                                                                               footFrame,
-                                                                               transformFromToeToAnkle);
    }
 
    private void initializeTrajectory()
@@ -274,7 +258,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
       if (timeInState > swingDuration.getDoubleValue())
       {
          desiredLinearVelocity.setToZero(centerOfMassFrame);
-         desiredLinearAcceleration.setToZero(centerOfMassFrame);
+         desiredLinearAcceleration.setToZero(worldFrame);
+         desiredLinearAcceleration.setZ(-controllerToolbox.getGravityZ());
 
          desiredAngularVelocity.setToZero(worldFrame);
          desiredAngularAcceleration.setToZero(worldFrame);
@@ -287,7 +272,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       yoDesiredSolePositionInCoMFrame.setMatchingFrame(desiredPosition);
       yoDesiredSoleLinearVelocityInCoMFrame.setMatchingFrame(desiredLinearVelocity);
 
-      transformDesiredsFromSoleFrameToControlFrame();
+      transformDesiredsFromCoMFrameToControlFrame();
    }
 
    public void setFootstep(FramePose3DReadOnly footstepPoseInTouchdownCoMFrame, double swingHeight, double swingTime)
@@ -345,7 +330,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       swingTrajectoryOptimizer.initialize();
    }
 
-   private void transformDesiredsFromSoleFrameToControlFrame()
+   private void transformDesiredsFromCoMFrameToControlFrame()
    {
       desiredPosition.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);

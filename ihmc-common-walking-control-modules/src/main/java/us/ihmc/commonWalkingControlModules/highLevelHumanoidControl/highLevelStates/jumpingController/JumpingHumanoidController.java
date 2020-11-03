@@ -93,6 +93,8 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
 
       OneDoFJointBasics[] allOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
 
+      privilegedConfigurationCommand.enable();
+
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
@@ -216,6 +218,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       balanceManager.initialize();
 
       privilegedConfigurationCommand.clear();
+      privilegedConfigurationCommand.enable();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -233,8 +236,8 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
          {
             if (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).equals(privilegedConfigurationCommand.getJoint(i)))
             {
-               privilegedConfigurationCommand.setConfigurationGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKp());
-               privilegedConfigurationCommand.setVelocityGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKd());
+               privilegedConfigurationCommand.setConfigurationGain(i, 200.0);
+               privilegedConfigurationCommand.setVelocityGain(i, 20.0);
                privilegedConfigurationCommand.setWeight(i, 20.0);
             }
          }
@@ -347,7 +350,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
    {
       planeContactStateCommandPool.clear();
 
-//      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
 //      if (!limitCommandSent.getBooleanValue())
 //      {
 //         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);

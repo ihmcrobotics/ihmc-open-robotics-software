@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class PositionOptimizedTrajectoryGenerator
 {
    public static final int dimensions = 3;
-   public static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
+   public final ReferenceFrame trajectoryFrame;
 
    private final String namePrefix;
 
@@ -88,28 +88,40 @@ public class PositionOptimizedTrajectoryGenerator
 
    public PositionOptimizedTrajectoryGenerator()
    {
-      this("", null);
+      this("", null, ReferenceFrame.getWorldFrame());
    }
 
    public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints)
    {
-      this("", null, null, maxIterations, maxWaypoints);
+      this(maxIterations, maxWaypoints, ReferenceFrame.getWorldFrame());
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
+   public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints,  ReferenceFrame trajectoryFrame)
    {
-      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
+      this("", null, null, maxIterations, maxWaypoints, trajectoryFrame);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, ReferenceFrame trajectoryFrame)
    {
-      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
+      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints, trajectoryFrame);
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, ReferenceFrame trajectoryFrame)
+   {
+      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints, trajectoryFrame);
    }
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                                int maxIterations, int maxWaypoints)
    {
+      this(namePrefix, parentRegistry, graphicsListRegistry, maxIterations, maxWaypoints, ReferenceFrame.getWorldFrame());
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+                                               int maxIterations, int maxWaypoints, ReferenceFrame trajectoryFrame)
+   {
       this.namePrefix = namePrefix;
+      this.trajectoryFrame = trajectoryFrame;
 
       coefficients = new RecyclingArrayList<>(0, () ->
                                               {

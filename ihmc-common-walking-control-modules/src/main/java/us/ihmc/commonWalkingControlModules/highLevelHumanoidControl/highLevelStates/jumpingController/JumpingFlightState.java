@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JumpingFlightState extends JumpingState
 {
-   private static final double swingHeight = 0.1;
+   private static final double swingHeight = 0.01;
    private final JumpingControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 

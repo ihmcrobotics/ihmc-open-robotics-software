@@ -21,7 +21,8 @@ import java.util.List;
 public class AtlasJumpingSimulation
 {
    private static double jumpLength = 0.5;
-   private static double flightDuration = 0.2;
+   private static double flightDuration = 0.25;
+   private static double supportDuration = 0.5;
    private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public static void main(String[] args)
@@ -48,6 +49,7 @@ public class AtlasJumpingSimulation
 
                                     JumpingGoal jumpingGoal = new JumpingGoal();
                                     jumpingGoal.setGoalLength(jumpLength);
+                                    jumpingGoal.setSupportDuration(supportDuration);
                                     jumpingGoal.setFlightDuration(flightDuration);
                                     commandInputManager.submitCommand(jumpingGoal);
                                  }
