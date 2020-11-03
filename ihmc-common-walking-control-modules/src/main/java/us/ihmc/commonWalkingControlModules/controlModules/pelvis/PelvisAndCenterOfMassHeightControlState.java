@@ -51,7 +51,7 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+   void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
                                               FrameVector2DReadOnly desiredCoMVelocity,
                                               boolean isInDoubleSupport,
                                               double omega0,

@@ -114,8 +114,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final WalkingMessageHandler walkingMessageHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
-   private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
-
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
@@ -677,13 +675,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       pelvisOrientationManager.compute();
 
-      comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(balanceManager.getDesiredICPVelocity(),
-                                                                                               desiredCoMVelocityAsFrameVector,
-                                                                                               isInDoubleSupport,
-                                                                                               omega0,
-                                                                                               isRecoveringFromPush,
-                                                                                               feetManager));
+      comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
+                               desiredCoMVelocityAsFrameVector,
+                               isInDoubleSupport,
+                               omega0,
+                               isRecoveringFromPush,
+                               feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules

@@ -62,19 +62,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightJerkAfterSmoothing = new YoDouble("desiredCoMHeightJerkAfterSmoothing", registry);
 
-   private final YoDouble zCurrent = new YoDouble("zCurrent", registry);
-   private final YoDouble zDesired = new YoDouble("zDesired", registry);
-   private final YoDouble zdDesired = new YoDouble("zdDesired", registry);
-   private final YoDouble zddDesired = new YoDouble("zddDesired", registry);
-
-   private final PDControllerWithGainSetter centerOfMassHeightController;
-
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final MovingReferenceFrame pelvisFrame;
    private final BetterLookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
-
-   private final double gravity;
 
    private final FramePoint3D statusDesiredPosition = new FramePoint3D();
    private final FramePoint3D statusActualPosition = new FramePoint3D();
@@ -93,8 +84,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
-      gravity = controllerToolbox.getGravityZ();
-
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
@@ -102,11 +91,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
-      centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
 
-      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
-      selectionMatrix.selectXAxis(false);
-      selectionMatrix.selectYAxis(false);
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D(worldFrame, false, false, true);
       pelvisHeightControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getPelvis());
       FramePoint3D pelvisPoint = new FramePoint3D(pelvisFrame);
       pelvisPoint.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
@@ -247,7 +233,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+   public void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
                                                      FrameVector2DReadOnly desiredCoMVelocity,
                                                      boolean isInDoubleSupport,
                                                      double omega0,
@@ -263,7 +249,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comVelocity.changeFrame(worldFrame);
 
       double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
 
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
@@ -272,7 +257,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          zCurrent = pelvisPosition.getZ();
          pelvisFrame.getTwistOfFrame(currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...    FIXME this is likely to be a source of discrepancy
       }
 
       // TODO: use current omega0 instead of previous
@@ -349,22 +333,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 //      pelvisHeightControlCommand.setBodyFixedPointToControl(new FramePoint3D(pelvisFrame));
       pelvisHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
       comHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
-
-      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
-
-      // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
-      if (isRecoveringFromPush)
-         zddDesired = Math.min(0.0, zddDesired);
-
-      double epsilon = 1e-12;
-      zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
-
-      this.zCurrent.set(zCurrent);
-      this.zDesired.set(zDesired);
-      this.zdDesired.set(zdDesired);
-      this.zddDesired.set(zddDesired);
-
-      return zddDesired;
    }
 
    @Override
@@ -391,7 +359,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
    {
       this.gains = gains;
-      centerOfMassHeightController.setGains(gains);
       comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
    }
 

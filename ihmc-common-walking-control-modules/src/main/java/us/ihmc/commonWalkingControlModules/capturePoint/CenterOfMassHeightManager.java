@@ -109,9 +109,21 @@ public class CenterOfMassHeightManager
       doPrepareForLocomotion.set(value);
    }
 
-   public void compute()
+   public void compute(FrameVector2DReadOnly desiredICPVelocity,
+                       FrameVector2DReadOnly desiredCoMVelocity,
+                       boolean isInDoubleSupport,
+                       double omega0,
+                       boolean isRecoveringFromPush,
+                       FeetManager feetManager)
    {
       stateMachine.doActionAndTransition();
+      stateMachine.getCurrentState()
+                  .computeDesiredCoMHeightAcceleration(desiredICPVelocity,
+                                                       desiredCoMVelocity,
+                                                       isInDoubleSupport,
+                                                       omega0,
+                                                       isRecoveringFromPush,
+                                                       feetManager);
    }
 
    /**
@@ -218,23 +230,6 @@ public class CenterOfMassHeightManager
       centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                                     FrameVector2DReadOnly desiredCoMVelocity,
-                                                     boolean isInDoubleSupport,
-                                                     double omega0,
-                                                     boolean isRecoveringFromPush,
-                                                     FeetManager feetManager)
-   {
-      return stateMachine.getCurrentState()
-                         .computeDesiredCoMHeightAcceleration(desiredICPVelocity,
-                                                              desiredCoMVelocity,
-                                                              isInDoubleSupport,
-                                                              omega0,
-                                                              isRecoveringFromPush,
-                                                              feetManager);
-
-   }
-
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
@@ -263,24 +258,9 @@ public class CenterOfMassHeightManager
    }
 
    public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
-                                 DoubleProvider walkingControllerMaxComHeightVelocity,
-                                 PIDGainsReadOnly userModeComHeightGains)
+                                 DoubleProvider walkingControllerMaxComHeightVelocity)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
-   }
-
-   public void step(Point3DReadOnly stanceFootPosition, Point3DReadOnly touchdownPosition, double swingTime, RobotSide swingSide, double toeOffHeight)
-   {
-
-   }
-
-   public void transfer(Point3DReadOnly transferPosition, double transferTime)
-   {
-      transfer(transferPosition, transferTime, null, 0.0);
-   }
-
-   public void transfer(Point3DReadOnly transferPosition, double transferTime, RobotSide swingSide, double toeOffHeight)
-   {
    }
 
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
