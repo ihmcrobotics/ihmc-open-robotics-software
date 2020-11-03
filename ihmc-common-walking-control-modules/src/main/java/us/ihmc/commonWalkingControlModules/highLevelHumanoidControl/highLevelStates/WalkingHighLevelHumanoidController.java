@@ -690,11 +690,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), controlledCoMHeightAcceleration.getDoubleValue(), heightControlCommand, keepCMPInsideSupportPolygon,
-                                controlHeightWithMomentum);
+         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
       else
-         balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), heightControlCommand, keepCMPInsideSupportPolygon,
-                                controlHeightWithMomentum);
+         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
    }
 
    private void reportStatusMessages()

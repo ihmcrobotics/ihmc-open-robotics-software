@@ -343,7 +343,7 @@ public class BalanceManager
       bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
    }
 
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, FeedbackControlCommand<?> heightControlCommand,
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand,
                        boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
