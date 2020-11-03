@@ -213,9 +213,9 @@ public class JumpingMomentumRateControlModule
       MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
       centerOfMass.setToZero(chestFrame);
       centerOfMass.changeFrame(worldFrame);
-      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+//      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
-      orientationController.getDesiredTorque(angularMomentumRateOfChange);
+//      orientationController.getDesiredTorque(angularMomentumRateOfChange);
       angularMomentumRateOfChange.changeFrame(worldFrame);
    }
 
