@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
+import com.jme3.animation.Pose;
 import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -7,6 +8,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -106,6 +109,7 @@ public class JumpingFlightState extends JumpingState
             flightDuration = jumpingGoal.getFlightDuration();
          else
             flightDuration = jumpingParameters.getDefaultFlightDuration();
+
          feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
          controllerToolbox.setFootContactStateFree(robotSide);
       }
