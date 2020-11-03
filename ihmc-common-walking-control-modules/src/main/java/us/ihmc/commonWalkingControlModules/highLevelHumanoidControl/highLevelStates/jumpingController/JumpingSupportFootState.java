@@ -98,7 +98,7 @@ public class JumpingSupportFootState implements JumpingFootControlState
 
       footSwitch = footControlHelper.getJumpingControllerToolbox().getFootSwitches().get(robotSide);
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
-      loadingDuration = new DoubleParameter(prefix + "LoadingDuration", registry, 0.25);
+      loadingDuration = new DoubleParameter(prefix + "LoadingDuration", registry, 0.05);
 
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());

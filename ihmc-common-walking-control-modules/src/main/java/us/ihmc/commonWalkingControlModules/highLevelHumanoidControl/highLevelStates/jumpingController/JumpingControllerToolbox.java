@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -72,7 +73,8 @@ public class JumpingControllerToolbox
    private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
    private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
 
-   private final ReferenceFrame centerOfMassFrame;
+   private final MovingCenterOfMassReferenceFrame centerOfMassFrame;
+
    private final FullHumanoidRobotModel fullRobotModel;
    private final CapturePointCalculator capturePointCalculator;
 
@@ -135,7 +137,6 @@ public class JumpingControllerToolbox
       standingHeight.set(1.05);
       squattingHeight.set(0.6);
 
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       finalTransferTime = new YoDouble("finalTransferTime", registry);
       finalTransferTime.set(0.25);
 
@@ -145,6 +146,7 @@ public class JumpingControllerToolbox
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
 
+      centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, fullRobotModel.getElevator());
       capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, fullRobotModel.getElevator());
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -269,6 +271,7 @@ public class JumpingControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
+      centerOfMassFrame.update();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
