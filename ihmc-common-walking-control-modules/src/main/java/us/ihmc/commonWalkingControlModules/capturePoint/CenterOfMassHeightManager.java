@@ -7,11 +7,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -118,12 +115,12 @@ public class CenterOfMassHeightManager
    {
       stateMachine.doActionAndTransition();
       stateMachine.getCurrentState()
-                  .computeDesiredCoMHeightAcceleration(desiredICPVelocity,
-                                                       desiredCoMVelocity,
-                                                       isInDoubleSupport,
-                                                       omega0,
-                                                       isRecoveringFromPush,
-                                                       feetManager);
+                  .computeCoMHeightCommand(desiredICPVelocity,
+                                           desiredCoMVelocity,
+                                           isInDoubleSupport,
+                                           omega0,
+                                           isRecoveringFromPush,
+                                           feetManager);
    }
 
    /**

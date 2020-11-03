@@ -363,12 +363,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    }
 
    @Override
-   public void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                                     FrameVector2DReadOnly desiredCoMVelocity,
-                                                     boolean isInDoubleSupport,
-                                                     double omega0,
-                                                     boolean isRecoveringFromPush,
-                                                     FeetManager feetManager)
+   public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
+                                       FrameVector2DReadOnly desiredCoMVelocity,
+                                       boolean isInDoubleSupport,
+                                       double omega0,
+                                       boolean isRecoveringFromPush,
+                                       FeetManager feetManager)
    {
    }
 
