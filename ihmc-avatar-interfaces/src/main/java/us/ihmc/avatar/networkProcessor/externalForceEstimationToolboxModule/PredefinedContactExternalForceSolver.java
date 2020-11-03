@@ -34,10 +34,6 @@ public class PredefinedContactExternalForceSolver implements RobotController
    public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
 
-   private static final boolean useOptimizationSolverIfPossible = false;
-   private static final AxisAngle contactFrameOrientationInWorld = new AxisAngle(0.0, 1.0, 0.0, -0.5 * Math.PI);
-   private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
-
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
@@ -45,7 +41,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
    private final JointBasics[] joints;
    private final int dofs;
 
-   private final List<EstimatorContactPoint> contactPoints = new ArrayList<>();
+   private final List<PredefinedContactPoint> contactPoints = new ArrayList<>();
    private final JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
 
    private final YoFixedFrameSpatialVector[] estimatedExternalWrenches = new YoFixedFrameSpatialVector[maximumNumberOfContactPoints];
@@ -98,8 +94,8 @@ public class PredefinedContactExternalForceSolver implements RobotController
       if(contactPoints.size() == maximumNumberOfContactPoints)
          throw new RuntimeException("The maximum number of contact points (" + maximumNumberOfContactPoints + ") has been reached. Increase to add more points");
 
-      EstimatorContactPoint contactPoint = new EstimatorContactPoint(joints, rigidBody, assumeZeroTorque);
-      contactPoint.getContactPointPosition().setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), contactPointOffset);
+      PredefinedContactPoint contactPoint = new PredefinedContactPoint(joints, rigidBody, assumeZeroTorque);
+      contactPoint.setContactPointOffset(contactPointOffset);
       contactPoints.add(contactPoint);
    }
 
@@ -117,7 +113,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
          contactPointPositions[i].setToNaN();
       }
 
-      int decisionVariables = contactPoints.stream().mapToInt(EstimatorContactPoint::getNumberOfDecisionVariables).sum();
+      int decisionVariables = contactPoints.stream().mapToInt(PredefinedContactPoint::getNumberOfDecisionVariables).sum();
       externalWrenchJacobian = new DMatrixRMaj(decisionVariables, dofs);
       externalWrenchJacobianTranspose = new DMatrixRMaj(dofs, decisionVariables);
       estimatedExternalWrenchMatrix = new DMatrixRMaj(decisionVariables, 1);
@@ -135,7 +131,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
       CommonOps_DDRM.fill(externalWrenchJacobian, 0.0);
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         EstimatorContactPoint forceEstimatorContactPoint = contactPoints.get(i);
+         PredefinedContactPoint forceEstimatorContactPoint = contactPoints.get(i);
 
          int numberOfRows = forceEstimatorContactPoint.getNumberOfDecisionVariables();
          int rowOffset = IntStream.range(0, i).map(index -> contactPoints.get(index).getNumberOfDecisionVariables()).sum();
@@ -149,40 +145,12 @@ public class PredefinedContactExternalForceSolver implements RobotController
          }
       }
 
-      if (useOptimizationSolverIfPossible && contactPoints.size() == 1 && contactPoints.get(0).getAssumeZeroTorque())
-      {
-         contactPointEvaluator.setCoefficientOfFriction(0.5);
-         DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      // solve for external wrench
+      DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
 
-         MovingReferenceFrame parentJointFrame = contactPoints.get(0).getRigidBody().getParentJoint().getFrameAfterJoint();
-         Tuple3DReadOnly contactPointOffset = contactPoints.get(0).getContactPointPosition();
-         FramePoint3D contactPosition = new FramePoint3D(parentJointFrame, contactPointOffset);
-
-         FrameQuaternion contactPointOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), contactFrameOrientationInWorld);
-         contactPointOrientation.changeFrame(parentJointFrame);
-
-         FramePose3D contactFramePose = new FramePose3D(parentJointFrame, contactPosition, contactPointOrientation);
-         PoseReferenceFrame contactFrame = new PoseReferenceFrame("contactFrame", contactFramePose);
-
-         try
-         {
-            double cost = contactPointEvaluator.computeMaximumLikelihoodForce(observedExternalJointTorque, externalWrenchJacobian, contactFrame);
-            estimatedExternalWrenchMatrix.set(contactPointEvaluator.getEstimatedForce());
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
-      }
-      else
-      {
-         // solve for external wrench
-         DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
-
-         CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
-         forceEstimateSolver.setA(externalWrenchJacobianTranspose);
-         forceEstimateSolver.solve(observedExternalJointTorque, estimatedExternalWrenchMatrix);
-      }
+      CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
+      forceEstimateSolver.setA(externalWrenchJacobianTranspose);
+      forceEstimateSolver.solve(observedExternalJointTorque, estimatedExternalWrenchMatrix);
 
       // pack result and update graphics variables
       for (int i = 0; i < contactPoints.size(); i++)
@@ -198,7 +166,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
             estimatedExternalWrenches[i].set(rowOffset, estimatedExternalWrenchMatrix);
          }
 
-         tempPoint.setIncludingFrame(contactPoints.get(i).getRigidBody().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointPosition());
+         tempPoint.setIncludingFrame(contactPoints.get(i).getRigidBody().getParentJoint().getFrameAfterJoint(), contactPoints.get(i).getContactPointOffset());
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions[i].set(tempPoint);
       }

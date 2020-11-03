@@ -1,7 +1,8 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.EstimatorContactPoint;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ContactPointParticle;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationTools;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ForceEstimatorDynamicMatrixUpdater;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -10,8 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -47,7 +46,6 @@ public class ContactParticleFilter implements RobotController
    private RigidBodyBasics rigidBody = null;
 
    private final YoDouble coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
-
    private final YoDouble maximumSampleStandardDeviation = new YoDouble("maximumSampleStandardDeviation", registry);
    private final YoDouble minimumSampleStandardDeviation = new YoDouble("minimumSampleStandardDeviation", registry);
    private final YoDouble upperMotionBoundForSamplingAdjustment = new YoDouble("upperMotionBoundForSamplingAdjustment", registry);
@@ -60,7 +58,7 @@ public class ContactParticleFilter implements RobotController
    private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
    private final ContactPointProjector contactPointProjector;
 
-   private final EstimatorContactPoint[] contactPoints = new EstimatorContactPoint[numberOfParticles];
+   private final ContactPointParticle[] contactPointParticles = new ContactPointParticle[numberOfParticles];
    private final YoDouble[] contactPointProbabilities = new YoDouble[numberOfParticles];
    private final FramePoint3D[] sampledContactPositions = new FramePoint3D[numberOfParticles];
    private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[numberOfParticles];
@@ -81,10 +79,10 @@ public class ContactParticleFilter implements RobotController
    private final FramePoint3D pointToProject = new FramePoint3D();
 
    // debugging variables
-   private final Vector3D knownContactPointInParentJointFrame = new Vector3D();
-   private final YoFramePoint3D debugContactPoint = new YoFramePoint3D("debugContactPoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D debugSurfaceNormal = new YoFrameVector3D("debugSurfaceNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final FramePoint3D debugPoint = new FramePoint3D();
+   private final Vector3D actualContactPointInParentJointFrame = new Vector3D();
+   private final FramePoint3D actualContactPoint = new FramePoint3D();
+   private final YoFramePoint3D yoActualContactPoint = new YoFramePoint3D("debugContactPoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoActualSurfaceNormal = new YoFrameVector3D("debugSurfaceNormal", ReferenceFrame.getWorldFrame(), registry);
 
    public ContactParticleFilter(JointBasics[] joints,
                                 double dt,
@@ -117,12 +115,12 @@ public class ContactParticleFilter implements RobotController
 
       if (graphicsListRegistry != null)
       {
-         YoGraphicPosition debugContactPointGraphic = new YoGraphicPosition("cpPositionVizDebug", debugContactPoint, 0.025, YoAppearance.Red());
-         YoGraphicVector debugContactVectorGraphic = new YoGraphicVector("cpNormVizDebug", debugContactPoint, debugSurfaceNormal, 1.0, YoAppearance.Red());
-         graphicsListRegistry.registerYoGraphic(name, debugContactPointGraphic);
-         graphicsListRegistry.registerYoGraphic(name, debugContactVectorGraphic);
+         YoGraphicPosition actualContactPointGraphic = new YoGraphicPosition("cpPositionVizDebug", yoActualContactPoint, 0.025, YoAppearance.Red());
+         YoGraphicVector actualContactVectorGraphic = new YoGraphicVector("cpNormVizDebug", yoActualContactPoint, yoActualSurfaceNormal, 1.0, YoAppearance.Red());
+         graphicsListRegistry.registerYoGraphic(name, actualContactPointGraphic);
+         graphicsListRegistry.registerYoGraphic(name, actualContactVectorGraphic);
 
-         YoGraphicPosition averageParticlePositionGraphic = new YoGraphicPosition("averageParticleViz", averageParticlePosition, 0.025, YoAppearance.Brown());
+         YoGraphicPosition averageParticlePositionGraphic = new YoGraphicPosition("averageParticleViz", averageParticlePosition, 0.025, YoAppearance.DarkBlue());
          YoGraphicPosition estimatedContactPositionGraphic = new YoGraphicPosition("estimatedCPViz", yoEstimatedContactPosition, 0.025, YoAppearance.Green());
          YoGraphicVector estimatedContactNormalGraphic = new YoGraphicVector("estimatedCPNormalViz", yoEstimatedContactPosition, yoEstimatedContactNormal, 0.07, YoAppearance.Green());
          graphicsListRegistry.registerYoGraphic(name, averageParticlePositionGraphic);
@@ -135,7 +133,7 @@ public class ContactParticleFilter implements RobotController
       minimumSampleStandardDeviation.set(0.005);
       upperMotionBoundForSamplingAdjustment.set(0.1);
 
-      knownContactPointInParentJointFrame.set(0.1102, 0.0771, 0.09035);
+      actualContactPointInParentJointFrame.set(0.1102, 0.0771, 0.09035);
 
       if (parentRegistry != null)
       {
@@ -146,11 +144,11 @@ public class ContactParticleFilter implements RobotController
    public void setLinkToEstimate(RigidBodyBasics rigidBody)
    {
       this.rigidBody = rigidBody;
-      this.contactPointProjector.initialize(rigidBody);
 
       for (int i = 0; i < numberOfParticles; i++)
       {
-         contactPoints[i] = new EstimatorContactPoint(joints, rigidBody, true);
+         contactPointParticles[i] = new ContactPointParticle("particle" + i, joints);
+         contactPointParticles[i].setRigidBody(rigidBody);
       }
    }
 
@@ -177,8 +175,8 @@ public class ContactParticleFilter implements RobotController
          pointToProject.setIncludingFrame(rigidBody.getBodyFixedFrame(), randomVector);
          pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointProjector.computeProjection(pointToProject, contactPoints[i].getContactPointPosition(), contactPoints[i].getSurfaceNormal());
-         contactPoints[i].update();
+         contactPointProjector.computeProjection(pointToProject, contactPointParticles[i].getContactPointPosition(), contactPointParticles[i].getSurfaceNormal(), rigidBody);
+         contactPointParticles[i].update();
       }
    }
 
@@ -193,7 +191,7 @@ public class ContactParticleFilter implements RobotController
       // Evaluate likelihood of each point
       for (int i = 0; i < numberOfParticles; i++)
       {
-         EstimatorContactPoint contactPoint = contactPoints[i];
+         ContactPointParticle contactPoint = contactPointParticles[i];
          DMatrixRMaj contactPointJacobian = contactPoint.computeContactJacobian();
 
          for (int j = 0; j < contactPointJacobian.getNumCols(); j++)
@@ -204,7 +202,7 @@ public class ContactParticleFilter implements RobotController
 
          double likelihoodCost = contactPointEvaluator.computeMaximumLikelihoodForce(observedExternalJointTorque,
                                                                                      systemJacobian,
-                                                                                     contactPoints[i].getContactPointFrame());
+                                                                                     contactPointParticles[i].getContactPointFrame());
          double likelihoodWeight = Math.exp(-0.5 * likelihoodCost);
          contactPointProbabilities[i].set(likelihoodWeight);
          totalWeight += likelihoodWeight;
@@ -221,12 +219,11 @@ public class ContactParticleFilter implements RobotController
       // Select points to resample
       for (int i = 0; i < numberOfParticles; i++)
       {
-         // avoid edge case of sampling 1.0 and missing the end of the histogram
-         double randomDouble = random.nextDouble() * (1.0 - 1e-4);
+         double randomDouble = EuclidCoreRandomTools.nextDouble(random, ((double) i) / numberOfParticles, ((double) (i + 1)) / numberOfParticles);
 
          for (int j = 0; j < histogramValues.length; j++)
          {
-            if (histogramValues[j] > randomDouble)
+            if (j == histogramValues.length - 1 || histogramValues[j] > randomDouble)
             {
                contactPointIndicesToSample[i] = j;
                break;
@@ -238,7 +235,7 @@ public class ContactParticleFilter implements RobotController
       for (int i = 0; i < numberOfParticles; i++)
       {
          int resampleIndex = contactPointIndicesToSample[i];
-         EstimatorContactPoint contactPointToSample = contactPoints[resampleIndex];
+         ContactPointParticle contactPointToSample = contactPointParticles[resampleIndex];
 
          boolean foundPointOutsideMesh = false;
          while (!foundPointOutsideMesh)
@@ -247,7 +244,7 @@ public class ContactParticleFilter implements RobotController
             FramePoint3D sampledContactPosition = sampledContactPositions[i];
             sampledContactPosition.setIncludingFrame(contactPointToSample.getContactPointFrame(), offset);
 
-            if (!contactPointProjector.isPointInside(sampledContactPosition))
+            if (!contactPointProjector.isPointInside(sampledContactPosition, rigidBody))
             {
                foundPointOutsideMesh = true;
             }
@@ -257,14 +254,14 @@ public class ContactParticleFilter implements RobotController
       // Project to surface
       for (int i = 0; i < numberOfParticles; i++)
       {
-         contactPointProjector.computeProjection(sampledContactPositions[i], contactPoints[i].getContactPointPosition(), contactPoints[i].getSurfaceNormal());
-         contactPoints[i].update();
+         contactPointProjector.computeProjection(sampledContactPositions[i], contactPointParticles[i].getContactPointPosition(), contactPointParticles[i].getSurfaceNormal(), rigidBody);
+         contactPointParticles[i].update();
 
-         contactPoints[i].getContactPointPosition().changeFrame(ReferenceFrame.getWorldFrame());
-         contactPoints[i].getSurfaceNormal().changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointParticles[i].getContactPointPosition().changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointParticles[i].getSurfaceNormal().changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointPositions[i].set(contactPoints[i].getContactPointPosition());
-         scaledSurfaceNormal[i].set(contactPoints[i].getSurfaceNormal());
+         contactPointPositions[i].set(contactPointParticles[i].getContactPointPosition());
+         scaledSurfaceNormal[i].set(contactPointParticles[i].getSurfaceNormal());
          scaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
       }
 
@@ -288,9 +285,9 @@ public class ContactParticleFilter implements RobotController
 
       estimatedContactPositionMovement.set(estimatedContactPosition.distance(previousEstimatedContactPosition));
 
-      debugPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), knownContactPointInParentJointFrame);
-      debugPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      debugContactPoint.set(debugPoint);
+      actualContactPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), actualContactPointInParentJointFrame);
+      actualContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      yoActualContactPoint.set(actualContactPoint);
    }
 
    /**
@@ -304,9 +301,9 @@ public class ContactParticleFilter implements RobotController
       Vector3D sphericalQuery = new Vector3D();
 
       estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
-      transformToSphericalCoordinates(estimatedContactPosition, sphericalQuery);
+      ExternalForceEstimationTools.transformToSphericalCoordinates(estimatedContactPosition, sphericalQuery);
 
-      boolean initialPointInside = contactPointProjector.isPointInside(estimatedContactPosition);
+      boolean initialPointInside = contactPointProjector.isPointInside(estimatedContactPosition, rigidBody);
       if (initialPointInside)
          sphericalLowerBound.set(sphericalQuery);
       else
@@ -317,9 +314,9 @@ public class ContactParticleFilter implements RobotController
          sphericalQuery.setX(sphericalQuery.getX() * (initialPointInside ? 2.0 : 0.5));
 
          estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
-         transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
+         ExternalForceEstimationTools.transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
 
-         if (contactPointProjector.isPointInside(estimatedContactPosition) != initialPointInside)
+         if (contactPointProjector.isPointInside(estimatedContactPosition, rigidBody) != initialPointInside)
          {
             if (initialPointInside)
                sphericalUpperBound.set(sphericalQuery);
@@ -335,16 +332,16 @@ public class ContactParticleFilter implements RobotController
       {
          sphericalQuery.setX(0.5 * (sphericalLowerBound.getX() + sphericalUpperBound.getX()));
          estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
-         transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
+         ExternalForceEstimationTools.transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
 
-         if (contactPointProjector.isPointInside(estimatedContactPosition))
+         if (contactPointProjector.isPointInside(estimatedContactPosition, rigidBody))
             sphericalLowerBound.set(sphericalQuery);
          else
             sphericalUpperBound.set(sphericalQuery);
       }
 
       estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
-      transformToCartesianCoordinates(sphericalUpperBound, estimatedContactPosition);
+      ExternalForceEstimationTools.transformToCartesianCoordinates(sphericalUpperBound, estimatedContactPosition);
    }
 
    private Vector3D generateSamplingOffset()
@@ -366,28 +363,6 @@ public class ContactParticleFilter implements RobotController
       double offsetZ = offsetRadius * Math.cos(phi);
 
       return new Vector3D(offsetX, offsetY, offsetZ);
-   }
-
-   private static void transformToSphericalCoordinates(Tuple3DReadOnly cartesianCoordinates, Tuple3DBasics sphericalCoordinates)
-   {
-      double r = EuclidCoreTools.norm(cartesianCoordinates.getX(), cartesianCoordinates.getY(), cartesianCoordinates.getZ());
-      double theta = Math.atan2(cartesianCoordinates.getY(), cartesianCoordinates.getX());
-      double phi = Math.acos(cartesianCoordinates.getZ() / r);
-
-      sphericalCoordinates.set(r, theta, phi);
-   }
-
-   private static void transformToCartesianCoordinates(Tuple3DReadOnly sphericalCoordinates, Tuple3DBasics cartesianCoordinates)
-   {
-      double r = sphericalCoordinates.getX();
-      double theta = sphericalCoordinates.getY();
-      double phi = sphericalCoordinates.getZ();
-
-      double x = r * Math.cos(theta) * Math.sin(phi);
-      double y = r * Math.sin(theta) * Math.sin(phi);
-      double z = r * Math.cos(phi);
-
-      cartesianCoordinates.set(x, y, z);
    }
 
    @Override

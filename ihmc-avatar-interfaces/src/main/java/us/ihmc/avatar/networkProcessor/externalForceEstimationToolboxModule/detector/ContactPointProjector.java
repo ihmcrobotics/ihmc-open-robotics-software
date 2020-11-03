@@ -1,44 +1,37 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector;
 
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.EstimatorContactPoint;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ContactPointProjector
 {
-   private final List<Collidable> allCollidables;
-   private final List<Collidable> collidablesToCheck = new ArrayList<>();
+   private final List<RigidBodyBasics> collidableRigidBodies = new ArrayList<>();
+   private final Map<RigidBodyBasics, List<Collidable>> collidableMap = new HashMap<>();
 
    public ContactPointProjector(List<Collidable> allCollidables)
    {
-      this.allCollidables = allCollidables;
+      allCollidables.forEach(collidable -> collidableMap.computeIfAbsent(collidable.getRigidBody(), r -> new ArrayList<>()).add(collidable));
+      collidableRigidBodies.addAll(collidableMap.keySet());
    }
 
-   public void initialize(RigidBodyBasics rigidBody)
+   public boolean isPointInside(FramePoint3DBasics queryPoint, RigidBodyBasics rigidBody)
    {
-      collidablesToCheck.clear();
-      allCollidables.stream().filter(collidable -> collidable.getRigidBody() == rigidBody).forEach(collidablesToCheck::add);
-
-      if (collidablesToCheck.isEmpty())
+      if (!collidableMap.containsKey(rigidBody))
       {
-         throw new RuntimeException("The rigid body " + rigidBody + " has no collidables");
+         throw new RuntimeException(rigidBody.getName() + " does not have any collidables");
       }
-   }
 
-   public boolean isPointInside(FramePoint3DBasics queryPoint)
-   {
+      List<Collidable> collidablesToCheck = collidableMap.get(rigidBody);
+
       for (int i = 0; i < collidablesToCheck.size(); i++)
       {
          FrameShape3DReadOnly collisionShape = collidablesToCheck.get(i).getShape();
@@ -53,8 +46,15 @@ public class ContactPointProjector
       return false;
    }
 
-   public void computeProjection(FramePoint3DBasics pointToProject, FramePoint3D contactPointPosition, FrameVector3D surfaceNormal)
+   public void computeProjection(FramePoint3DBasics pointToProject, FramePoint3D contactPointPosition, FrameVector3D surfaceNormal, RigidBodyBasics rigidBody)
    {
+      if (!collidableMap.containsKey(rigidBody))
+      {
+         throw new RuntimeException(rigidBody.getName() + " does not have any collidables");
+      }
+
+      List<Collidable> collidablesToCheck = collidableMap.get(rigidBody);
+
       double minimumProjectionDistance = Double.MAX_VALUE;
       int minimumDistanceIndex = -1;
 
@@ -96,8 +96,8 @@ public class ContactPointProjector
       shapeToProjectTo.evaluatePoint3DCollision(pointToProject, contactPointPosition, surfaceNormal);
    }
 
-   public List<Collidable> getCollidablesToCheck()
+   public List<RigidBodyBasics> getCollidableRigidBodies()
    {
-      return collidablesToCheck;
+      return collidableRigidBodies;
    }
 }

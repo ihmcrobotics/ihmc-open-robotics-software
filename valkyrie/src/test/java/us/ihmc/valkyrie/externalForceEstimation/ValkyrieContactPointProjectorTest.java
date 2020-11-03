@@ -4,7 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.EstimatorContactPoint;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ContactPointParticle;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactPointProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
@@ -108,12 +109,12 @@ public class ValkyrieContactPointProjectorTest
          RigidBodyBasics rigidBody = query.getLeft();
          FramePoint3D queryPoint = query.getRight();
 
-         EstimatorContactPoint estimatorContactPoint = new EstimatorContactPoint(HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel),
-                                                                                 rigidBody,
-                                                                                 true);
-         contactPointProjector.initialize(rigidBody);
-         contactPointProjector.computeProjection(queryPoint, estimatorContactPoint.getContactPointPosition(), estimatorContactPoint.getSurfaceNormal());
-         estimatorContactPoint.update();
+         JointBasics[] orderedJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
+         ContactPointParticle contactPointParticle = new ContactPointParticle("", orderedJoints);
+         contactPointParticle.setRigidBody(rigidBody);
+
+         contactPointProjector.computeProjection(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
+         contactPointParticle.update();
 
          graphics3DObject.identity();
 
@@ -122,12 +123,12 @@ public class ValkyrieContactPointProjectorTest
          graphics3DObject.addSphere(0.012);
 
          graphics3DObject.identity();
-         graphics3DObject.translate(estimatorContactPoint.getContactPointPosition());
+         graphics3DObject.translate(contactPointParticle.getContactPointPosition());
          graphics3DObject.addSphere(0.012);
 
          graphics3DObject.identity();
 
-         RigidBodyTransform transformToWorldFrame = estimatorContactPoint.getContactPointFrame().getTransformToWorldFrame();
+         RigidBodyTransform transformToWorldFrame = contactPointParticle.getContactPointFrame().getTransformToWorldFrame();
 
          graphics3DObject.transform(transformToWorldFrame);
          graphics3DObject.addCoordinateSystem(0.1);

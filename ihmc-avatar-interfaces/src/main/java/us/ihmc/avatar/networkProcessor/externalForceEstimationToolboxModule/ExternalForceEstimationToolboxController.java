@@ -231,7 +231,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          return;
       }
 
-      if (!contactParticleFilterHasInitialized.getBooleanValue())
+      if (estimateContactPosition.getBooleanValue() && !contactParticleFilterHasInitialized.getBooleanValue())
       {
          contactParticleFilter.initialize();
          contactParticleFilterHasInitialized.set(true);
