@@ -107,12 +107,12 @@ public class SimpleCenterOfMassHeightManager
                                                      double omega0,
                                                      boolean isRecoveringFromPush)
    {
-      return centerOfMassHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity,
-                                                                                desiredCoMVelocity,
-                                                                                isInDoubleSupport,
-                                                                                omega0,
-                                                                                isRecoveringFromPush,
-                                                                                null);
+      return centerOfMassHeightControlState.computeCoMHeightCommand(desiredICPVelocity,
+                                                                    desiredCoMVelocity,
+                                                                    isInDoubleSupport,
+                                                                    omega0,
+                                                                    isRecoveringFromPush,
+                                                                    null);
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

@@ -233,12 +233,12 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                                     FrameVector2DReadOnly desiredCoMVelocity,
-                                                     boolean isInDoubleSupport,
-                                                     double omega0,
-                                                     boolean isRecoveringFromPush,
-                                                     FeetManager feetManager)
+   public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
+                                       FrameVector2DReadOnly desiredCoMVelocity,
+                                       boolean isInDoubleSupport,
+                                       double omega0,
+                                       boolean isRecoveringFromPush,
+                                       FeetManager feetManager)
    {
       solve(comHeightPartialDerivatives, isInDoubleSupport);
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());

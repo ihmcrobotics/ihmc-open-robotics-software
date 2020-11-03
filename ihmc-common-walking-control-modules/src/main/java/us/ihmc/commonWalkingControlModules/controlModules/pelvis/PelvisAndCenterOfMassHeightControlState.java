@@ -51,12 +51,12 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                              FrameVector2DReadOnly desiredCoMVelocity,
-                                              boolean isInDoubleSupport,
-                                              double omega0,
-                                              boolean isRecoveringFromPush,
-                                              FeetManager feetManager);
+   void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
+                                FrameVector2DReadOnly desiredCoMVelocity,
+                                boolean isInDoubleSupport,
+                                double omega0,
+                                boolean isRecoveringFromPush,
+                                FeetManager feetManager);
 
    default TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
