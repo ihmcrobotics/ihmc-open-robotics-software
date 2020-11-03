@@ -235,7 +235,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
             {
                privilegedConfigurationCommand.setConfigurationGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKp());
                privilegedConfigurationCommand.setVelocityGain(i, walkingControllerParameters.getLegConfigurationParameters().getBentLegGains().getJointSpaceKd());
-               privilegedConfigurationCommand.setWeight(i, 5.0);
+               privilegedConfigurationCommand.setWeight(i, 20.0);
             }
          }
       }

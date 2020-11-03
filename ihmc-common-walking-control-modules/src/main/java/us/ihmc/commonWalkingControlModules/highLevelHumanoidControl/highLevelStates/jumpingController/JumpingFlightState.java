@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,6 +56,7 @@ public class JumpingFlightState extends JumpingState
    private final FramePose3D midFootPose = new FramePose3D();
    private final FramePose3D goalPose = new FramePose3D();
    private final FramePose3D touchdownCoMPose = new FramePose3D();
+   private final PoseReferenceFrame touchdownCoMFrame = new PoseReferenceFrame("touchdownCoMFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
 
    @Override
@@ -82,6 +85,7 @@ public class JumpingFlightState extends JumpingState
 
       touchdownCoMPose.getOrientation().set(goalPose.getOrientation());
       touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
+      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -93,14 +97,16 @@ public class JumpingFlightState extends JumpingState
             width = robotSide.negateIfRightSide(0.5 * jumpingParameters.getDefaultFootWidth());
 
          footGoalPose.setY(width);
-         footGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
+         footGoalPose.changeFrame(touchdownCoMFrame);
+
+         correctTouchdownFootPose(footGoalPose);
 
          double flightDuration;
          if (!Double.isNaN(jumpingGoal.getFlightDuration()))
             flightDuration = jumpingGoal.getFlightDuration();
          else
             flightDuration = jumpingParameters.getDefaultFlightDuration();
-         feetManager.requestSwing(robotSide, footGoalPose, touchdownCoMPose, swingHeight, flightDuration);
+         feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
          controllerToolbox.setFootContactStateFree(robotSide);
       }
 
@@ -108,6 +114,16 @@ public class JumpingFlightState extends JumpingState
 //         pelvisOrientationManager.initializeStanding();
 
 //      failureDetectionControlModule.setNextFootstep(null);
+   }
+
+   private final FrameVector3D comVelocity = new FrameVector3D();
+
+   private void correctTouchdownFootPose(FramePose3D footPose)
+   {
+      comVelocity.setIncludingFrame(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
+      comVelocity.changeFrame(touchdownCoMFrame);
+      footPose.checkReferenceFrameMatch(touchdownCoMFrame);
+      footPose.setX(comVelocity.getX() / controllerToolbox.getOmega0());
    }
 
    @Override

@@ -104,13 +104,12 @@ public class JumpingFeetManager
    }
 
    public void requestSwing(RobotSide upcomingSwingSide,
-                            FramePose3DReadOnly footstepPose,
-                            FramePose3DReadOnly touchdownCoMPose,
+                            FramePose3DReadOnly footstepPoseInTouchdownCoMFrame,
                             double swingHeight,
                             double swingTime)
    {
       JumpingFootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstepPose, touchdownCoMPose, swingHeight, swingTime);
+      footControlModule.setFootstep(footstepPoseInTouchdownCoMFrame, swingHeight, swingTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 

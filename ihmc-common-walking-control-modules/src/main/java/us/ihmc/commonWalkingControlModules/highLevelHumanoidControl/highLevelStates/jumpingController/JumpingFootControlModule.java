@@ -213,9 +213,9 @@ public class JumpingFootControlModule
       return currentConstraintType == ConstraintType.FULL;
    }
 
-   public void setFootstep(FramePose3DReadOnly footstepPose, FramePose3DReadOnly touchdownCoMPose, double swingHeight, double swingTime)
+   public void setFootstep(FramePose3DReadOnly footstepPoseInTouchdownCoMFrame, double swingHeight, double swingTime)
    {
-      swingState.setFootstep(footstepPose, touchdownCoMPose, swingHeight, swingTime);
+      swingState.setFootstep(footstepPoseInTouchdownCoMFrame, swingHeight, swingTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
