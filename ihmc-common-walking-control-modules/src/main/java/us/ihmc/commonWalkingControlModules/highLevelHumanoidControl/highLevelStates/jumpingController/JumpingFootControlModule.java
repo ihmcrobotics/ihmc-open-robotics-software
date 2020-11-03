@@ -103,7 +103,7 @@ public class JumpingFootControlModule
                                                                             registry);
 
       supportState = new JumpingSupportFootState(footControlHelper, registry);
-      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, swingFootControlGains, registry);
+      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, controllerToolbox.getGravityZ(), swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
@@ -213,9 +213,9 @@ public class JumpingFootControlModule
       return currentConstraintType == ConstraintType.FULL;
    }
 
-   public void setFootstep(FramePose3DReadOnly footstepPoseInTouchdownCoMFrame, double swingHeight, double swingTime)
+   public void setFootstep(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
    {
-      swingState.setFootstep(footstepPoseInTouchdownCoMFrame, swingHeight, swingTime);
+      swingState.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

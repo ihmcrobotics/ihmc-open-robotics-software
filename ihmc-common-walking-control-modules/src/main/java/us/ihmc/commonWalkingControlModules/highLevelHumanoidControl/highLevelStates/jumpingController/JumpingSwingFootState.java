@@ -103,8 +103,11 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final PoseReferenceFrame controlFrame;
    private final PIDSE3GainsReadOnly gains;
 
+   private final double gravityZ;
+
    public JumpingSwingFootState(JumpingFootControlHelper footControlHelper,
                                 FrameVector3DReadOnly touchdownVelocity,
+                                double gravityZ,
                                 PIDSE3GainsReadOnly gains,
                                 YoRegistry registry)
    {
@@ -116,6 +119,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       robotSide = footControlHelper.getRobotSide();
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getJumpingControllerToolbox().getFullRobotModel();
 
+      this.gravityZ = gravityZ;
       this.gains = gains;
 
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -275,9 +279,9 @@ public class JumpingSwingFootState implements JumpingFootControlState
       transformDesiredsFromCoMFrameToControlFrame();
    }
 
-   public void setFootstep(FramePose3DReadOnly footstepPoseInTouchdownCoMFrame, double swingHeight, double swingTime)
+   public void setFootstep(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
    {
-      this.footstepPose.setIncludingFrame(centerOfMassFrame, footstepPoseInTouchdownCoMFrame);
+      this.footstepPose.setIncludingFrame(centerOfMassFrame, footstepPoseRelativeToTouchdownCoM);
       this.swingHeight.set(swingHeight);
 
       List<DoubleProvider> waypointProportions = defaultWaypointProportions;
@@ -343,9 +347,9 @@ public class JumpingSwingFootState implements JumpingFootControlState
       desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
 
       // change twist
-      desiredLinearVelocity.changeFrame(desiredSoleFrame);
-      desiredAngularVelocity.changeFrame(desiredSoleFrame);
-      desiredTwist.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularVelocity, desiredLinearVelocity);
+      desiredLinearVelocity.changeFrame(centerOfMassFrame);
+      desiredAngularVelocity.changeFrame(centerOfMassFrame);
+      desiredTwist.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, desiredAngularVelocity, desiredLinearVelocity);
       desiredTwist.changeFrame(desiredControlFrame);
       desiredLinearVelocity.setIncludingFrame(desiredTwist.getLinearPart());
       desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
@@ -353,9 +357,9 @@ public class JumpingSwingFootState implements JumpingFootControlState
       desiredAngularVelocity.changeFrame(worldFrame);
 
       // change spatial acceleration
-      desiredLinearAcceleration.changeFrame(desiredSoleFrame);
-      desiredAngularAcceleration.changeFrame(desiredSoleFrame);
-      desiredSpatialAcceleration.setIncludingFrame(desiredSoleFrame, worldFrame, desiredSoleFrame, desiredAngularAcceleration, desiredLinearAcceleration);
+      desiredLinearAcceleration.changeFrame(centerOfMassFrame);
+      desiredAngularAcceleration.changeFrame(centerOfMassFrame);
+      desiredSpatialAcceleration.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, desiredAngularAcceleration, desiredLinearAcceleration);
       desiredSpatialAcceleration.changeFrame(desiredControlFrame);
       desiredLinearAcceleration.setIncludingFrame(desiredSpatialAcceleration.getLinearPart());
       desiredAngularAcceleration.setIncludingFrame(desiredSpatialAcceleration.getAngularPart());
