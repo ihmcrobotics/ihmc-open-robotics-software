@@ -189,11 +189,6 @@ public abstract class TransferState extends WalkingState
       if (feetManager.canDoDoubleSupportToeOff(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
-      Footstep footstep = walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide);
-      FixedFramePoint3DBasics transferFootPosition = footstep.getFootstepPose().getPosition();
-      double transferTime = walkingMessageHandler.getNextTransferTime();
-      comHeightManager.transfer(transferFootPosition, transferTime, swingSide, extraToeOffHeight);
-
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       comHeightManager.setSupportLeg(transferToSide);

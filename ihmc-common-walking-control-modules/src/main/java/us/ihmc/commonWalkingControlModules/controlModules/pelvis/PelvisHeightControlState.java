@@ -74,14 +74,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    private final FramePoint3D tempPosition = new FramePoint3D();
 
-   private final AbstractPDController linearMomentumZPDController;
-   private final YoSE3OffsetFrame yoControlFrame;
-
-   private final YoDouble currentPelvisHeightInWorld;
-   private final YoDouble desiredPelvisHeightInWorld;
-   private final YoDouble desiredPelvisVelocityInWorld;
-   private final YoDouble currentPelvisVelocityInWorld;
-
    private final SymmetricPID3DGains symmetric3DGains = new SymmetricPID3DGains();
 
    // Used for singularity avoidance to make sure the distance between ankle and pelvis never exceeds a user defined distance.
@@ -119,12 +111,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      DoubleProvider proportionalGain = () -> symmetric3DGains.getProportionalGains()[2];
-      DoubleProvider derivativeGain = () -> symmetric3DGains.getDerivativeGains()[2];
-      linearMomentumZPDController = AbstractPDController.createPDController("pelvisHeightControlState_linearMomentumZPDController", proportionalGain,
-                                                                            derivativeGain, () -> 0.0, registry);
-      yoControlFrame = new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
-
       positionController = new RigidBodyPositionController(pelvis, elevator, elevator, pelvisFrame, baseFrame, yoTime, registry, graphicsListRegistry);
 
       defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry);
@@ -136,11 +122,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       ankleFrames = controllerToolbox.getReferenceFrames().getAnkleZUpReferenceFrames();
       adjustedDesiredForSingularity = new YoBoolean("AdjustedDesiredForSingularity", registry);
       adjustmentAmount = new YoDouble("AdjustmentAmount", registry);
-
-      currentPelvisHeightInWorld = new YoDouble("currentPelvisHeightInWorld", registry);
-      desiredPelvisHeightInWorld = new YoDouble("desiredPelvisHeightInWorld", registry);
-      desiredPelvisVelocityInWorld = new YoDouble("desiredPelvisVelocityInWorld", registry);
-      currentPelvisVelocityInWorld = new YoDouble("currentPelvisVelocityInWorld", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -294,7 +275,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
     * check that the command is valid and queue the trajectory
     *
     * @param command
-    * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
     */
    public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
@@ -358,10 +338,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       }
    }
 
-   private final FramePoint3D controlPosition = new FramePoint3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-   private final FrameVector3D currentLinearVelocity = new FrameVector3D();
-   private final Twist twist = new Twist();
 
    /**
     * returns the point feedback command for the z height of the pelvis
@@ -371,7 +348,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    {
       PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
 
-      // TODO: for some reason this is needed to avoid robot-blow up. It should be selected out by the selection matrix!
+      // TODO: for some reason this is ne`eded to avoid robot-blow up. It should be selected out by the selection matrix!
       feedForwardLinearAcceleration.setIncludingFrame(feedbackCommand.getReferenceLinearAcceleration());
       feedForwardLinearAcceleration.setX(0.0);
       feedForwardLinearAcceleration.setY(0.0);
@@ -386,31 +363,13 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    }
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+   public void computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
                                                      FrameVector2DReadOnly desiredCoMVelocity,
                                                      boolean isInDoubleSupport,
                                                      double omega0,
                                                      boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
-      PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
-
-      controlPosition.setIncludingFrame(feedbackCommand.getBodyFixedPointToControl());
-      controlPosition.changeFrame(pelvis.getBodyFixedFrame());
-      yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
-      yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
-      currentLinearVelocity.setIncludingFrame(twist.getLinearPart());
-
-      currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
-
-      currentPelvisHeightInWorld.set(controlPosition.getZ());
-      desiredPelvisHeightInWorld.set(feedbackCommand.getReferencePosition().getZ());
-      currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
-      desiredPelvisVelocityInWorld.set(feedbackCommand.getReferenceLinearVelocity().getZ());
-
-      return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
-                                                 currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());
    }
 
    @Override
@@ -419,7 +378,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       statusDesiredPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getReferencePosition());
       statusDesiredPosition.setX(Double.NaN);
       statusDesiredPosition.setY(Double.NaN);
-      statusActualPosition.setIncludingFrame(controlPosition);
+      statusActualPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getBodyFixedPointToControl());
       statusActualPosition.setX(Double.NaN);
       statusActualPosition.setY(Double.NaN);
 
