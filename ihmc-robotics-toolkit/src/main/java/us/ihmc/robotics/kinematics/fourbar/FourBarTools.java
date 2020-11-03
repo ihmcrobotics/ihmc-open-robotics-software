@@ -7,6 +7,22 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class FourBarTools
 {
+   public static boolean isFourBarInverted(FourBar fourBar)
+   {
+      return fourBar.getEdgeAB().isCrossing() && fourBar.getEdgeCD().isCrossing() || fourBar.getEdgeDA().isCrossing() && fourBar.getEdgeBC().isCrossing();
+   }
+
+   public static boolean isFourBarInverted(FourBarVertex fourBarVertex)
+   {
+      FourBarVertex A = fourBarVertex;
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = ABEdge.getNext();
+      FourBarEdge CDEdge = BCEdge.getNext();
+      FourBarEdge DAEdge = CDEdge.getNext();
+
+      return ABEdge.isCrossing() && CDEdge.isCrossing() || DAEdge.isCrossing() && BCEdge.isCrossing();
+   }
+
    public static void setToMinAngle(FourBarVertex vertex)
    {
       vertex.setToMin();
