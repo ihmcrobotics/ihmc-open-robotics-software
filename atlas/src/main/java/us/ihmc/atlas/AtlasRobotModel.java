@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -243,6 +244,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   @Override
+   public CoPTrajectoryParameters getCoPTrajectoryParameters()
+   {
+      return new AtlasCoPTrajectoryParameters();
    }
 
    @Override

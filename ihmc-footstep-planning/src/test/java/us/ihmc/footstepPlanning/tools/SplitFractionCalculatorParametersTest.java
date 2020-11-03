@@ -7,7 +7,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParameterKeys;
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersPropertyReadOnly;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
@@ -32,7 +32,7 @@ public class SplitFractionCalculatorParametersTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         SplitFractionCalculatorParametersReadOnly randomParameters = getRandomParameters(random);
+         SplitFractionCalculatorParametersPropertyReadOnly randomParameters = getRandomParameters(random);
          SplitFractionCalculatorParametersPacket packet = randomParameters.getAsPacket();
          parametersToSet.set(packet);
 
@@ -40,7 +40,7 @@ public class SplitFractionCalculatorParametersTest
       }
    }
 
-   private static void assertParametersEqual(SplitFractionCalculatorParametersReadOnly parametersA, SplitFractionCalculatorParametersReadOnly parametersB, double epsilon)
+   private static void assertParametersEqual(SplitFractionCalculatorParametersPropertyReadOnly parametersA, SplitFractionCalculatorParametersPropertyReadOnly parametersB, double epsilon)
    {
       for (StoredPropertyKey<?> key : SplitFractionCalculatorParameterKeys.keys.keys())
       {
@@ -64,7 +64,7 @@ public class SplitFractionCalculatorParametersTest
       }
    }
 
-   private static SplitFractionCalculatorParametersReadOnly getRandomParameters(Random random)
+   private static SplitFractionCalculatorParametersPropertyReadOnly getRandomParameters(Random random)
    {
       SplitFractionCalculatorParametersBasics parameters = new DefaultSplitFractionCalculatorParameters();
 

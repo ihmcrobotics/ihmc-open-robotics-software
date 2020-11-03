@@ -32,6 +32,8 @@ public class TransferToFlamingoStanceState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeFlamingoStateICPPlan();
+
       switchToToeOffIfPossible();
       super.doAction(timeInState);
    }
@@ -67,12 +69,13 @@ public class TransferToFlamingoStanceState extends TransferState
       double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
       double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
       footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
+      footstepShiftFractions.setTransferWeightDistribution(0.5);
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
       balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming, footstepShiftFractions);
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      balanceManager.initializeICPPlanForTransfer(swingTime, initialTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer();
    }
 }

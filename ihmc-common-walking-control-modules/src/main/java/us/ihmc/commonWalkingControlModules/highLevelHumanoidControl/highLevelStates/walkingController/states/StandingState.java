@@ -74,6 +74,7 @@ public class StandingState extends WalkingState
    public void doAction(double timeInState)
    {
       comHeightManager.setSupportLeg(RobotSide.LEFT);
+      balanceManager.computeICPPlan();
    }
 
    @Override

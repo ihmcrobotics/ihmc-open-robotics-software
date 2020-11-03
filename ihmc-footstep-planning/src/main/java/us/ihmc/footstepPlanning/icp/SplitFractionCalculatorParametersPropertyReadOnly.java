@@ -1,11 +1,22 @@
 package us.ihmc.footstepPlanning.icp;
 
 import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-public interface SplitFractionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
+public interface SplitFractionCalculatorParametersPropertyReadOnly extends StoredPropertySetReadOnly, SplitFractionCalculatorParametersReadOnly
 {
+   default boolean calculateSplitFractionsFromPositions()
+   {
+      return get(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromPositions);
+   }
+
+   default boolean calculateSplitFractionsFromArea()
+   {
+      return get(SplitFractionCalculatorParameterKeys.calculateSplitFractionsFromArea);
+   }
+
    /**
     * Default value for the transfer split fraction of the icp plan.
     * @see ICPPlannerParameters#getTransferSplitFraction() 
@@ -98,6 +109,8 @@ public interface SplitFractionCalculatorParametersReadOnly extends StoredPropert
    {
       SplitFractionCalculatorParametersPacket packet = new SplitFractionCalculatorParametersPacket();
 
+      packet.setCalculateSplitFractionsFromArea(calculateSplitFractionsFromArea());
+      packet.setCalculateSplitFractionsFromPositions(calculateSplitFractionsFromPositions());
       packet.setDefaultTransferSplitFraction(getDefaultTransferSplitFraction());
       packet.setStepHeightForLargeStepDown(getStepHeightForLargeStepDown());
       packet.setLargestStepDownHeight(getLargestStepDownHeight());

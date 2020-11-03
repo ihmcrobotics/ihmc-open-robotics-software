@@ -545,13 +545,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
-   private final FrameVector2D desiredICPVelocityAsFrameVector = new FrameVector2D();
    private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
 
    private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
 
    public void doAction()
    {
@@ -578,8 +576,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
          stateMachine.doTransitions();
-      // This updates the ICP plan continuously.
-      balanceManager.update();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
 
@@ -606,7 +602,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
-      balanceManager.endTick();
       firstTick = false;
    }
 
@@ -624,14 +619,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.updateCurrentICPPlan();
+      balanceManager.computeICPPlan();
    }
 
    public void updateFailureDetection()
    {
-      balanceManager.getCapturePoint(capturePoint2d);
-      balanceManager.getDesiredICP(desiredCapturePoint2d);
-      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, desiredCapturePoint2d);
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
@@ -658,10 +652,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateManagers(WalkingState currentState)
    {
-      desiredICPVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
-      desiredCoMVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
-      balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
-      balanceManager.getDesiredCoMVelocity(desiredCoMVelocityAsFrameVector);
+      desiredCoMVelocityAsFrameVector.setIncludingFrame(balanceManager.getDesiredCoMVelocity());
 
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
@@ -686,7 +677,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.compute();
 
       comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector,
+      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(balanceManager.getDesiredICPVelocity(),
                                                                                                desiredCoMVelocityAsFrameVector,
                                                                                                isInDoubleSupport,
                                                                                                omega0,

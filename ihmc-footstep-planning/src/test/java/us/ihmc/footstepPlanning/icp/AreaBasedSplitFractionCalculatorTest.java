@@ -29,6 +29,7 @@ public class AreaBasedSplitFractionCalculatorTest
       double splitFractionIfOtherFootHasNoWidth = 0.5;
       double fractionLoadIfFootHasFullSupport = 0.8;
       double splitFractionIfFootHasFullSupport = 0.9;
+      parameters.setCalculateSplitFractionsFromArea(true);
       parameters.setFractionLoadIfOtherFootHasNoWidth(fractionLoadIfOtherFootHasNoWidth);
       parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(splitFractionIfOtherFootHasNoWidth);
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
@@ -105,6 +106,7 @@ public class AreaBasedSplitFractionCalculatorTest
       double splitFractionIfOtherFootHasNoWidth = 0.9;
       double fractionLoadIfFootHasFullSupport = 0.5;
       double splitFractionIfFootHasFullSupport = 0.5;
+      parameters.setCalculateSplitFractionsFromArea(true);
       parameters.setFractionLoadIfOtherFootHasNoWidth(fractionLoadIfOtherFootHasNoWidth);
       parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(splitFractionIfOtherFootHasNoWidth);
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
@@ -180,6 +182,7 @@ public class AreaBasedSplitFractionCalculatorTest
       double splitFractionIfOtherFootHasNoWidth = 0.9;
       double fractionLoadIfFootHasFullSupport = 0.75;
       double splitFractionIfFootHasFullSupport = 0.85;
+      parameters.setCalculateSplitFractionsFromArea(true);
       parameters.setFractionLoadIfOtherFootHasNoWidth(fractionLoadIfOtherFootHasNoWidth);
       parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(splitFractionIfOtherFootHasNoWidth);
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);

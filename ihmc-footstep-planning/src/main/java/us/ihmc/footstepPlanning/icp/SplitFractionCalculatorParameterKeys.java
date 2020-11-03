@@ -1,11 +1,15 @@
 package us.ihmc.footstepPlanning.icp;
 
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKeyList;
 
 public class SplitFractionCalculatorParameterKeys
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
+
+   public static final BooleanStoredPropertyKey calculateSplitFractionsFromPositions    = keys.addBooleanKey("Calculate Split Fractions From Positions", false);
+   public static final BooleanStoredPropertyKey calculateSplitFractionsFromArea         = keys.addBooleanKey("Calculate Split Fractions From Area", false);
 
    public static final DoubleStoredPropertyKey  defaultTransferSplitFraction            = keys.addDoubleKey("Default transfer split fraction", 0.5);
    public static final DoubleStoredPropertyKey  stepHeightForLargeStepDown              = keys.addDoubleKey("Step height for large step down", 0.15);
