@@ -140,6 +140,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
       contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
+      // for deubugging
+      contactParticleFilter.setActualContactingBodyForDebugging(fullRobotModel.getChest());
+
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          jointNameMap.put(oneDoFJoints[i].getName(), oneDoFJoints[i]);
@@ -165,12 +168,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
          estimateContactPosition.set(configurationCommand.getEstimateContactLocation());
 
-         if (estimateContactPosition.getBooleanValue())
-         {
-            RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(0));
-            contactParticleFilter.setLinkToEstimate(rigidBody);
-         }
-         else
+         if (!estimateContactPosition.getBooleanValue())
          {
             predefinedContactForceSolver.clearContactPoints();
             int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
