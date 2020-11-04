@@ -22,10 +22,23 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 {
    private final WalkingControllerPreviewToolboxController controller;
 
+   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node) throws IOException
+   {
+      this(robotModel, startYoVariableServer, realtimeROS2Node, null);
+   }
+
    public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, pubSubImplementation);
+      this(robotModel, startYoVariableServer, null, pubSubImplementation);
+   }
+
+   private WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node,
+                                                 PubSubImplementation pubSubImplementation)
+         throws IOException
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, realtimeROS2Node, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
       controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
@@ -35,9 +48,10 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      {
          if (controller != null)
             controller.updateRobotConfigurationData(s.takeNextData());
       });
@@ -72,23 +86,23 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }

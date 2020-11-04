@@ -27,7 +27,14 @@ import us.ihmc.ros2.RealtimeROS2Node;
 
 public class KinematicsToolboxModule extends ToolboxModule
 {
+   private static final boolean DEFAULT_SETUP_INITIAL_CONFIGURATION = true;
+
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node)
+   {
+      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, DEFAULT_SETUP_INITIAL_CONFIGURATION, realtimeROS2Node, null);
+   }
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -37,14 +44,20 @@ public class KinematicsToolboxModule extends ToolboxModule
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds,
                                   PubSubImplementation pubSubImplementation)
    {
-      this(robotModel, startYoVariableServer, updatePeriodMilliseconds, true, pubSubImplementation);
+      this(robotModel, startYoVariableServer, updatePeriodMilliseconds, DEFAULT_SETUP_INITIAL_CONFIGURATION, pubSubImplementation);
    }
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
                                   PubSubImplementation pubSubImplementation)
    {
+      this(robotModel, startYoVariableServer, updatePeriodMilliseconds, setupInitialConfiguration, null, pubSubImplementation);
+   }
+
+   private KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
+                                   RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
+   {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            updatePeriodMilliseconds, pubSubImplementation);
+            updatePeriodMilliseconds, realtimeROS2Node, pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
