@@ -4,7 +4,21 @@ import java.io.InputStream;
 import java.util.List;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
+import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasQuadTreeFootstepPlanningParameters;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
+import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasSplitFractionCalculatorParameters;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasUIParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -422,6 +436,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public AtlasSensorSuiteManager getSensorSuiteManager()
    {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public AtlasSensorSuiteManager getSensorSuiteManager(RealtimeROS2Node realtimeROS2Node)
+   {
       if (sensorSuiteManager == null)
       {
          sensorSuiteManager = new AtlasSensorSuiteManager(getSimpleRobotName(),
@@ -431,7 +451,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                           sensorInformation,
                                                           getJointMap(),
                                                           getPhysicalProperties(),
-                                                          target);
+                                                          target,
+                                                          realtimeROS2Node);
       }
       return sensorSuiteManager;
    }

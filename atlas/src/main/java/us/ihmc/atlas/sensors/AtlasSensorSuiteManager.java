@@ -21,7 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -34,7 +34,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
+   private final boolean manageROS2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;
@@ -68,12 +69,30 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   RobotPhysicalProperties physicalProperties,
                                   RobotTarget targetDeployment)
    {
+      this(robotName, modelFactory, collisionBoxProvider, rosClockCalculator, sensorInformation, jointMap, physicalProperties, targetDeployment, null);
+   }
+
+   public AtlasSensorSuiteManager(String robotName,
+                                  FullHumanoidRobotModelFactory modelFactory,
+                                  CollisionBoxProvider collisionBoxProvider,
+                                  RobotROSClockCalculator rosClockCalculator,
+                                  HumanoidRobotSensorInformation sensorInformation,
+                                  DRCRobotJointMap jointMap,
+                                  RobotPhysicalProperties physicalProperties,
+                                  RobotTarget targetDeployment,
+                                  RealtimeROS2Node realtimeROS2Node)
+   {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
       this.rosClockCalculator = rosClockCalculator;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
+
+      manageROS2Node = realtimeROS2Node == null;
+      if (realtimeROS2Node == null)
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
+      ros2Node = realtimeROS2Node;
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)
@@ -138,8 +157,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (enableVideoPublisher)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+                                                       RobotConfigurationData.class,
+                                                       ROS2Tools.getControllerOutputTopic(robotName),
+                                                       s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
          AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
@@ -175,10 +195,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       LogTools.info("Enable depth point cloud publisher: {}", enableDepthPointCloudPublisher);
       if (enableDepthPointCloudPublisher)
       {
-         pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory,
-                                                                    ros2Node,
-                                                                    rosClockCalculator,
-                                                                    USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
+         pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory, ros2Node, rosClockCalculator, USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
          pointCloudSensorManager.setCollisionBoxProvider(collisionBoxProvider);
          pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
       }
@@ -228,6 +245,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (rosMainNode != null)
          rosMainNode.execute();
+      if (manageROS2Node)
+         ros2Node.spin();
    }
 
    @Override
@@ -249,7 +268,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          leftFishEyeCameraReceiver.closeAndDispose();
       if (rightFishEyeCameraReceiver != null)
          rightFishEyeCameraReceiver.closeAndDispose();
-      ros2Node.destroy();
+      if (manageROS2Node)
+         ros2Node.destroy();
    }
 
    private LidarScanPublisher createLidarScanPublisher()

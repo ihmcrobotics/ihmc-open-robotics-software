@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -13,21 +13,21 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
    private static final boolean DEBUG = false;
-   private final IHMCROS2Publisher<VideoPacket> publisher;
+   private final IHMCRealtimeROS2Publisher<VideoPacket> publisher;
 
    private volatile boolean enable = true;
 
-   public VideoPacketHandler(ROS2Node ros2Node)
+   public VideoPacketHandler(RealtimeROS2Node ros2Node)
    {
       this(ros2Node, ROS2Tools.VIDEO);
    }
    
-   public VideoPacketHandler(ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   public VideoPacketHandler(RealtimeROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
    {
       publisher = ROS2Tools.createPublisher(ros2Node, topic);
    }

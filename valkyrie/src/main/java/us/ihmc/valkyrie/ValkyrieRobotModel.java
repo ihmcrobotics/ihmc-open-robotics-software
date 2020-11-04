@@ -470,6 +470,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public ValkyrieSensorSuiteManager getSensorSuiteManager()
    {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public ValkyrieSensorSuiteManager getSensorSuiteManager(RealtimeROS2Node realtimeROS2Node)
+   {
       if (sensorSuiteManager == null)
       {
          sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
@@ -478,7 +484,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getROSClockCalculator(),
                                                              getSensorInformation(),
                                                              getJointMap(),
-                                                             target);
+                                                             target,
+                                                             realtimeROS2Node);
       }
       return sensorSuiteManager;
    }

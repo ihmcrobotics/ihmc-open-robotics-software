@@ -62,7 +62,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new WallTimeBasedROSClockCalculator();
    }
 
-   public abstract DRCSensorSuiteManager getSensorSuiteManager();
+   public default DRCSensorSuiteManager getSensorSuiteManager()
+   {
+      return getSensorSuiteManager(null);
+   }
+
+   public abstract DRCSensorSuiteManager getSensorSuiteManager(RealtimeROS2Node realtimeROS2Node);
 
    public default SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {

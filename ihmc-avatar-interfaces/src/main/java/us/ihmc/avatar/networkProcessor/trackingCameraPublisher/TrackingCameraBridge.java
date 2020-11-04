@@ -51,7 +51,7 @@ public class TrackingCameraBridge
 
    private final Consumer<StampedPosePacket> stampedPosePacketPublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2Node ros2Node)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, RealtimeROS2Node ros2Node)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node);
    }

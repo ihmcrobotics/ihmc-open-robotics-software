@@ -19,12 +19,12 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -42,9 +42,9 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
    private ParameterTree params;
-   private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
+   private IHMCRealtimeROS2Publisher<MultisenseParameterPacket> publisher;
 
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2Node ros2Node)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, RealtimeROS2Node ros2Node)
    {
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
