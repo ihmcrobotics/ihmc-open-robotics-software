@@ -24,7 +24,9 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,19 +64,29 @@ public class ContactParticleFilter implements RobotController
    private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[numberOfParticles];
    private final YoFrameVector3D[] scaledSurfaceNormal = new YoFrameVector3D[numberOfParticles];
 
-   private final FramePoint3D previousEstimatedContactPosition = new FramePoint3D();
    private final FramePoint3D estimatedContactPosition = new FramePoint3D();
    private final FrameVector3D estimatedContactNormal = new FrameVector3D();
-   private final YoFramePoint3D averageParticlePosition = new YoFramePoint3D("averageParticlePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoEstimatedContactPosition = new YoFramePoint3D("estimatedContactPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D yoEstimatedContactNormal = new YoFrameVector3D("estimatedContactNormal", ReferenceFrame.getWorldFrame(), registry);
-
-   private final YoDouble estimatedContactPositionMovement = new YoDouble("estimatedContactPositionMovement", registry);
 
    private final double[] histogramValues = new double[numberOfParticles];
    private final int[] contactPointIndicesToSample = new int[numberOfParticles];
 
    private final FramePoint3D pointToProject = new FramePoint3D();
+
+   // average particle data
+   private final YoFramePoint3D averageParticlePosition = new YoFramePoint3D("averageParticlePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D filteredAverageParticlePosition = new YoFramePoint3D("filteredAverageParticlePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble alphaAverageParticlePosition = new YoDouble("alphaAverageParticlePosition", registry);
+   private final YoDouble filteredAverageParticleVelocity = new YoDouble("filteredAverageParticleVelocity", registry);
+   private final FramePoint3D previousFilteredAverageParticlePosition = new FramePoint3D();
+
+   // termination conditions
+   private final YoInteger iterations = new YoInteger("iterations", registry);
+   private final YoInteger maxIterations = new YoInteger("maxIterations", registry);
+   private final YoInteger minIterations = new YoInteger("minIterations", registry);
+   private final YoDouble terminalParticleVelocity = new YoDouble("terminalParticleVelocity", registry);
+   private final YoBoolean foundSolution = new YoBoolean("terminalConditionsMet", registry);
 
    // debugging variables
    private RigidBodyBasics actualContactingBody;
@@ -82,6 +94,8 @@ public class ContactParticleFilter implements RobotController
    private final FramePoint3D actualContactPoint = new FramePoint3D();
    private final YoFramePoint3D yoActualContactPoint = new YoFramePoint3D("debugContactPoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D yoActualSurfaceNormal = new YoFrameVector3D("debugSurfaceNormal", ReferenceFrame.getWorldFrame(), registry);
+
+   private boolean firstTick = true;
 
    public ContactParticleFilter(JointBasics[] joints,
                                 double dt,
@@ -112,7 +126,7 @@ public class ContactParticleFilter implements RobotController
          graphicsListRegistry.registerYoGraphic(name, actualContactPointGraphic);
          graphicsListRegistry.registerYoGraphic(name, actualContactVectorGraphic);
 
-         YoGraphicPosition averageParticlePositionGraphic = new YoGraphicPosition("averageParticleViz", averageParticlePosition, 0.025, YoAppearance.DarkBlue());
+         YoGraphicPosition averageParticlePositionGraphic = new YoGraphicPosition("averageParticleViz", filteredAverageParticlePosition, 0.025, YoAppearance.DarkBlue());
          YoGraphicPosition estimatedContactPositionGraphic = new YoGraphicPosition("estimatedCPViz", yoEstimatedContactPosition, 0.025, YoAppearance.Green());
          YoGraphicVector estimatedContactNormalGraphic = new YoGraphicVector("estimatedCPNormalViz", yoEstimatedContactPosition, yoEstimatedContactNormal, 0.07, YoAppearance.Green());
          graphicsListRegistry.registerYoGraphic(name, averageParticlePositionGraphic);
@@ -132,7 +146,14 @@ public class ContactParticleFilter implements RobotController
       maximumSampleStandardDeviation.set(0.1);
       minimumSampleStandardDeviation.set(0.02);
       upperMotionBoundForSamplingAdjustment.set(0.1);
-      estimatedContactPositionMovement.set(upperMotionBoundForSamplingAdjustment.getDoubleValue());
+      filteredAverageParticleVelocity.set(upperMotionBoundForSamplingAdjustment.getDoubleValue());
+      alphaAverageParticlePosition.set(0.2);
+
+      double maxTime = 10.0;
+      minIterations.set(20);
+      maxIterations.set((int) (maxTime / dt));
+      terminalParticleVelocity.set(1.0e-4);
+      firstTick = true;
 
       if (parentRegistry != null)
       {
@@ -146,6 +167,9 @@ public class ContactParticleFilter implements RobotController
       jointspaceExternalContactEstimator.initialize();
       contactPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       computeInitialProjection();
+
+      iterations.set(0);
+      foundSolution.set(false);
    }
 
    public void computeInitialProjection()
@@ -255,16 +279,26 @@ public class ContactParticleFilter implements RobotController
          scaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
       }
 
-      // Recover average contact location
-      previousEstimatedContactPosition.setIncludingFrame(estimatedContactPosition);
-
       estimatedContactPosition.setToZero(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < numberOfParticles; i++)
       {
          estimatedContactPosition.add(contactPointPositions[i]);
       }
       estimatedContactPosition.scale(1.0 / numberOfParticles);
+
+      if (firstTick)
+      {
+         filteredAverageParticlePosition.set(estimatedContactPosition);
+      }
+
+      previousFilteredAverageParticlePosition.setIncludingFrame(filteredAverageParticlePosition);
       averageParticlePosition.set(estimatedContactPosition);
+      filteredAverageParticlePosition.interpolate(averageParticlePosition, alphaAverageParticlePosition.getValue());
+
+      if (!firstTick)
+      {
+         filteredAverageParticleVelocity.set(previousFilteredAverageParticlePosition.distance(filteredAverageParticlePosition));
+      }
 
 //      performBinarySearchProjection();
 
@@ -273,14 +307,15 @@ public class ContactParticleFilter implements RobotController
       yoEstimatedContactPosition.set(estimatedContactPosition);
       yoEstimatedContactNormal.set(estimatedContactNormal);
 
-      estimatedContactPositionMovement.set(estimatedContactPosition.distance(previousEstimatedContactPosition));
-
       if (actualContactingBody != null)
       {
          actualContactPoint.setIncludingFrame(actualContactingBody.getParentJoint().getFrameAfterJoint(), actualContactPointInParentJointFrame);
          actualContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
          yoActualContactPoint.set(actualContactPoint);
       }
+
+      foundSolution.set(checkTerminationConditions());
+      firstTick = false;
    }
 
    /**
@@ -336,10 +371,9 @@ public class ContactParticleFilter implements RobotController
 //      estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
 //      ExternalForceEstimationTools.transformToCartesianCoordinates(sphericalUpperBound, estimatedContactPosition);
 //   }
-
    private Vector3D generateSamplingOffset()
    {
-      double clampedEstimatedPositionMotion = EuclidCoreTools.clamp(estimatedContactPositionMovement.getDoubleValue(),
+      double clampedEstimatedPositionMotion = EuclidCoreTools.clamp(filteredAverageParticleVelocity.getDoubleValue(),
                                                                     0.0,
                                                                     upperMotionBoundForSamplingAdjustment.getDoubleValue());
       double standardDeviation = EuclidCoreTools.interpolate(minimumSampleStandardDeviation.getDoubleValue(),
@@ -370,6 +404,18 @@ public class ContactParticleFilter implements RobotController
       }
 
       this.actualContactPointInParentJointFrame.set(offsetInParentJointFrame);
+   }
+
+   private boolean checkTerminationConditions()
+   {
+      iterations.increment();
+      return iterations.getValue() > minIterations.getValue() && (iterations.getValue() >= maxIterations.getValue()
+                                                                  || filteredAverageParticleVelocity.getValue() < terminalParticleVelocity.getValue());
+   }
+
+   public boolean foundSolution()
+   {
+      return foundSolution.getBooleanValue();
    }
 
    @Override

@@ -60,11 +60,11 @@ public class ValkyrieExternalContactEstimationSimulation
       //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.156, 0.093, 0.197);
       //      String jointName = "pelvis";  Point3D offset =new Point3D(0.131, 0.000, -0.044);
       //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.113, -0.050, 0.090);
-      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
+            String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
       //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.124, -0.176, 0.259);
       //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.081, 0.020, 0.026);
       //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.076, 0.120, -0.036);
-            String jointName = "leftForearmYaw"; Point3D offset = new Point3D(-0.068, 0.170, -0.033);
+//            String jointName = "leftForearmYaw"; Point3D offset = new Point3D(-0.068, 0.170, -0.033);
       //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.071, 0.259, 0.009);
       //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.081, -0.020, 0.026);
       //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.076, -0.120, -0.036);
