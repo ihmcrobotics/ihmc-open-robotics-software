@@ -35,6 +35,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
             drcRobotModel.createFullRobotModel(),
             drcRobotModel.getLogModelProvider(),
             startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS,
             pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
