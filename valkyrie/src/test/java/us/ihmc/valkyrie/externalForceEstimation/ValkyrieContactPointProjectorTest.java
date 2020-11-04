@@ -34,6 +34,8 @@ public class ValkyrieContactPointProjectorTest
    @Test
    public void testSimpleProjection()
    {
+      boolean projectToSpecificLink = true;
+
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
 
@@ -113,7 +115,11 @@ public class ValkyrieContactPointProjectorTest
          ContactPointParticle contactPointParticle = new ContactPointParticle("", orderedJoints);
          contactPointParticle.setRigidBody(rigidBody);
 
-         contactPointProjector.computeProjection(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
+         if (projectToSpecificLink)
+            contactPointProjector.projectToSpecificLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
+         else
+            contactPointProjector.projectToClosestLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal());
+
          contactPointParticle.update();
 
          graphics3DObject.identity();
