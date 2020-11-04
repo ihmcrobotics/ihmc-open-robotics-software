@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -133,8 +134,6 @@ public class ContactParticleFilter implements RobotController
       upperMotionBoundForSamplingAdjustment.set(0.1);
       estimatedContactPositionMovement.set(upperMotionBoundForSamplingAdjustment.getDoubleValue());
 
-      actualContactPointInParentJointFrame.set(0.1102, 0.0771, 0.09035);
-
       if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
@@ -180,7 +179,6 @@ public class ContactParticleFilter implements RobotController
       for (int i = 0; i < numberOfParticles; i++)
       {
          ContactPointParticle contactPoint = contactPointParticles[i];
-         contactPointParticles[i].update();
          DMatrixRMaj contactPointJacobian = contactPoint.computeContactJacobian();
 
          for (int j = 0; j < contactPointJacobian.getNumCols(); j++)
@@ -360,9 +358,18 @@ public class ContactParticleFilter implements RobotController
       return new Vector3D(offsetX, offsetY, offsetZ);
    }
 
-   public void setActualContactingBodyForDebugging(RigidBodyBasics actualContactingBody)
+   public void setActualContactingBodyForDebugging(String parentJointName, Tuple3DReadOnly offsetInParentJointFrame)
    {
-      this.actualContactingBody = actualContactingBody;
+      for (int i = 0; i < joints.length; i++)
+      {
+         if (joints[i].getName().equals(parentJointName))
+         {
+            actualContactingBody = joints[i].getSuccessor();
+            break;
+         }
+      }
+
+      this.actualContactPointInParentJointFrame.set(offsetInParentJointFrame);
    }
 
    @Override

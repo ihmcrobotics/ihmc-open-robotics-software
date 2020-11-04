@@ -10,6 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -55,29 +56,54 @@ public class ValkyrieExternalContactEstimationSimulation
       YoRegistry scsRootRegistry = simulationStarter.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
 
       HumanoidFloatingRootJointRobot scsRobot = simulationStarter.getSDFRobot();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      // ----- Root Joint ----- //
-      //      Joint scsEndEffector = scsRobot.getRootJoint();
-      //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.156, 0.093, 0.197);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.131, 0.000, -0.044);
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.113, -0.050, 0.090);
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.124, -0.176, 0.259);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.081, 0.020, 0.026);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.076, 0.120, -0.036);
+            String jointName = "leftForearmYaw"; Point3D offset = new Point3D(-0.068, 0.170, -0.033);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.071, 0.259, 0.009);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.081, -0.020, 0.026);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.076, -0.120, -0.036);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(-0.068, -0.170, -0.033);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.071, -0.245, -0.034);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.140, 0.000, -0.100);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.100, 0.122, 0.045);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(-0.130, 0.052, -0.200);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.133, 0.000, -0.261);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.019, 0.187, -0.072);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.057, 0.192, -0.131);
+//      String jointName = "leftHipPitch"; Point3D offset = new Point3D(-0.030, 0.192, -0.235);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.144, 0.132, -0.208);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.121, 0.172, -0.242);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.048, 0.199, -0.289);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.019, -0.187, -0.072);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.057, -0.192, -0.131);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(-0.030, -0.192, -0.235);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.144, -0.132, -0.208);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.121, -0.172, -0.242);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.048, -0.199, -0.289);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.109, 0.083, -0.422);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.043, 0.161, -0.444);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(-0.044, 0.104, -0.127);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(0.084, 0.058, -0.160);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(0.079, -0.014, -0.348);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.109, -0.083, -0.422);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.043, -0.161, -0.444);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(-0.044, -0.104, -0.127);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(0.084, -0.058, -0.160);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(0.079, 0.014, -0.348);
 
-      // ----- 1DOF Joints ----- //
-                  String endEffectorName = "torsoRoll"; // Chest
-      //            String endEffectorName = "rightShoulderRoll"; // Shoulder
-//      String endEffectorName = "rightElbowPitch"; // Elbow
-      //      String endEffectorName = "rightForearmYaw"; // Forearm
-      //      String endEffectorName = "rightWristRoll"; // Wrist roll
-      //      String endEffectorName = "rightWristPitch"; // Wrist pitch
-      Joint scsEndEffector = scsRobot.getJoint(endEffectorName);
-      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
-
-//      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
-      Vector3D externalForcePointOffset = new Vector3D(0.1102, 0.0771, 0.09035);
-      //      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.5);
-
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
-      scsEndEffector.addExternalForcePoint(externalForcePoint);
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", offset, scsRobot);
+      Joint scsJoint = scsRobot.getJoint(jointName);
+      scsJoint.addExternalForcePoint(externalForcePoint);
       externalForcePoint.setForce(initialForce);
+
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getSuccessor();
 
       double forceGraphicScale = 0.05;
       AppearanceDefinition simulatedForceColor = YoAppearance.Red();
@@ -115,8 +141,6 @@ public class ValkyrieExternalContactEstimationSimulation
                                      {
                                         ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
                                         configurationMessage.setEstimatorGain(0.5);
-                                        configurationMessage.getRigidBodyHashCodes().add(endEffector.hashCode());
-                                        configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
                                         configurationMessage.setCalculateRootJointWrench(false);
                                         configurationMessage.setEstimateContactLocation(true);
                                         configurationMessagePublisher.publish(configurationMessage);

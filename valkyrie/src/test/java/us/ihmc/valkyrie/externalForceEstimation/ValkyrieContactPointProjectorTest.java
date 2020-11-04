@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -34,7 +35,8 @@ public class ValkyrieContactPointProjectorTest
    @Test
    public void testSimpleProjection()
    {
-      boolean projectToSpecificLink = true;
+      boolean projectToSpecificLink = false;
+      boolean printProjectedLocation = true;
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -116,9 +118,23 @@ public class ValkyrieContactPointProjectorTest
          contactPointParticle.setRigidBody(rigidBody);
 
          if (projectToSpecificLink)
+         {
             contactPointProjector.projectToSpecificLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
+         }
          else
-            contactPointProjector.projectToClosestLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal());
+         {
+            RigidBodyBasics closestLink = contactPointProjector.projectToClosestLink(queryPoint,
+                                                                                     contactPointParticle.getContactPointPosition(),
+                                                                                     contactPointParticle.getSurfaceNormal());
+            contactPointParticle.setRigidBody(closestLink);
+
+            if (printProjectedLocation)
+            {
+               FramePoint3D position = contactPointParticle.getContactPointPosition();
+               position.changeFrame(closestLink.getParentJoint().getFrameAfterJoint());
+               System.out.println(closestLink.getParentJoint().getName() + "\t" + EuclidCoreIOTools.getTuple3DString(position));
+            }
+         }
 
          contactPointParticle.update();
 
