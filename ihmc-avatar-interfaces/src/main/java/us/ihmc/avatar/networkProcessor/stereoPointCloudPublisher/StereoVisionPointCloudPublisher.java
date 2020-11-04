@@ -45,7 +45,7 @@ public class StereoVisionPointCloudPublisher
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(name));
    private ScheduledFuture<?> publisherTask;
 
    private final AtomicReference<PointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
@@ -84,24 +84,24 @@ public class StereoVisionPointCloudPublisher
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
    }
 
-   public StereoVisionPointCloudPublisher(String robotName,
-                                          FullRobotModel fullRobotModel,
-                                          ROS2Node ros2Node,
-                                          ROS2Topic<StereoVisionPointCloudMessage> topic)
+   public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, ROS2Node ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
       pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
    }
 
-   public StereoVisionPointCloudPublisher(String robotName,
-                                          FullRobotModel fullRobotModel,
-                                          RealtimeROS2Node realtimeROS2Node,
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, RealtimeROS2Node realtimeROS2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
+   {
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), realtimeROS2Node, topic);
+   }
+
+   public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this.robotName = robotName;
