@@ -32,6 +32,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
@@ -83,6 +84,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -113,6 +115,7 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<JoystickStepParameters> stepParametersReference;
    private final AtomicReference<Double> trajectoryDuration;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
+   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
 
    private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
@@ -179,6 +182,18 @@ public class StepGeneratorJavaFXController
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      {
+         RobotMotionStatus newStatus = RobotMotionStatus.fromByte(s.takeNextData().getRobotMotionStatus());
+         // We only want to verify that the last PauseWalking sent has been successfully executed once.
+         // Considering that the user may use a separate app to get the robot to walk, we do not want to interfere with the other app.
+         if (hasSuccessfullyStoppedWalking.get() || isWalking.get())
+            return;
+         if (newStatus == null)
+            return;
+         if (newStatus == RobotMotionStatus.STANDING)
+            hasSuccessfullyStoppedWalking.set(true);
+      });
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerOutputTopic, s ->
       {
          FootstepStatusMessage footstepStatus = s.takeNextData();
@@ -423,6 +438,7 @@ public class StepGeneratorJavaFXController
       {
          isWalking.set(true);
          continuousStepGenerator.startWalking();
+         hasSuccessfullyStoppedWalking.set(false);
       }
    }
 
@@ -465,8 +481,13 @@ public class StepGeneratorJavaFXController
       {
          footstepPublisher.publish(footstepsToSend);
       }
+
       if (!isWalking.get())
-         sendPauseMessage();
+      {
+         // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
+         if (!hasSuccessfullyStoppedWalking.get())
+            sendPauseMessage();
+      }
    }
 
    private void sendREAClearRequest()
