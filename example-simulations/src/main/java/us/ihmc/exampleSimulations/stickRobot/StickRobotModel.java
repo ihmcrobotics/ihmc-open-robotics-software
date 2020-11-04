@@ -30,6 +30,7 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -39,7 +40,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 /**
  * @author Shlok Agarwal on 7/5/17
- *
  */
 public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -137,7 +137,9 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
+                                                                                        jointMap,
+                                                                                        contactPointParameters,
                                                                                         useCollisionMeshes);
       return robotDescription;
    }
@@ -281,7 +283,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public DRCSensorSuiteManager getSensorSuiteManager(RealtimeROS2Node realtimeROS2Node)
    {
       return null;
    }

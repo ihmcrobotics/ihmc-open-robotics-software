@@ -6,7 +6,7 @@ import java.util.function.LongUnaryOperator;
 import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -27,7 +27,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    private static final boolean DEBUG = false;
 
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
-                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2Node ros2Node,
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, RealtimeROS2Node ros2Node,
                                 LongUnaryOperator robotMonotonicTimeCalculator, final RosMainNode rosMainNode)
    {
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
@@ -62,9 +62,9 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
    private static class CompressedFisheyeHandler implements CompressedVideoHandler
    {
-      private final IHMCROS2Publisher<FisheyePacket> publisher;
+      private final IHMCRealtimeROS2Publisher<FisheyePacket> publisher;
 
-      public CompressedFisheyeHandler(ROS2Node ros2Node)
+      public CompressedFisheyeHandler(RealtimeROS2Node ros2Node)
       {
          publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FisheyePacket.class, ROS2Tools.IHMC_ROOT);
       }

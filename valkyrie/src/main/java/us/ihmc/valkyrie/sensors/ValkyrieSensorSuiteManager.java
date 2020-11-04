@@ -21,8 +21,8 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -34,7 +34,8 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
+   private final boolean manageROS2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final String robotName;
    private final CollisionBoxProvider collisionBoxProvider;
@@ -58,11 +59,23 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                                      RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
                                      RobotTarget target)
    {
+      this(robotName, fullRobotModelFactory, collisionBoxProvider, rosClockCalculator, sensorInformation, jointMap, target, null);
+   }
+
+   public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
+                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
+                                     RobotTarget target, RealtimeROS2Node realtimeROS2Node)
+   {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
       this.rosClockCalculator = rosClockCalculator;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
+
+      manageROS2Node = realtimeROS2Node == null;
+      if (realtimeROS2Node == null)
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
+      ros2Node = realtimeROS2Node;
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)
@@ -86,8 +99,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       if (enableVideoPublisher)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+                                                       RobotConfigurationData.class,
+                                                       ROS2Tools.getControllerOutputTopic(robotName),
+                                                       s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
 
@@ -121,8 +135,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       if (enableVideoPublisher)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+                                                       RobotConfigurationData.class,
+                                                       ROS2Tools.getControllerOutputTopic(robotName),
+                                                       s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
          AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
@@ -178,6 +193,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          stereoVisionPointCloudPublisher.start();
       if (rosMainNode != null)
          rosMainNode.execute();
+      if (manageROS2Node)
+         ros2Node.spin();
    }
 
    private StereoVisionPointCloudPublisher createStereoPointCloudPublisher()
@@ -246,6 +263,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          multiSenseSensorManager.closeAndDispose();
       if (rosMainNode != null)
          rosMainNode.shutdown();
-      ros2Node.destroy();
+      if (manageROS2Node)
+         ros2Node.destroy();
    }
 }
