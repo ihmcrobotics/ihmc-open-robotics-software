@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.HumanoidPositionControlledRobotSimulationEndToEndTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -25,7 +26,8 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
    public static Path scriptFolderPath()
    {
       Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      folderPath = Paths.get(folderPath.toFile().getParentFile().getAbsolutePath(), "/ihmc-open-robotics-software/valkyrie/src/main/resources/multiContact/scripts");
+      folderPath = Paths.get(folderPath.toFile().getParentFile().getAbsolutePath(),
+                             "/ihmc-open-robotics-software/valkyrie/src/main/resources/multiContact/scripts");
       return folderPath;
    }
 
@@ -41,6 +43,12 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
          robotModel.setEstimatorDT(dt);
       }
       return robotModel;
+   }
+
+   @Override
+   protected DRCRobotModel getGhostRobotModel()
+   {
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
    }
 
    @Override
@@ -68,9 +76,9 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
    @Test
    public void testCrawl1ToDabScript(TestInfo testInfo) throws Exception
    {
-      runScriptTest(testInfo,
-                    new File(scriptFolderPath().toFile(), "20200930_144631_Crawl1ToDab.json"),
-                    ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
-                    new FlatGroundEnvironment());
+      runProcessedScriptTest(testInfo,
+                             new File(scriptFolderPath().toFile(), "20200930_144631_Crawl1ToDab.json"),
+                             ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
+                             new FlatGroundEnvironment());
    }
 }

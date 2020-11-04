@@ -110,6 +110,11 @@ public class MultiContactScriptReader
          return loadedMessages.get(currentMessageIndex);
    }
 
+   public List<KinematicsToolboxSnapshotDescription> getAllItems()
+   {
+      return loadedMessages;
+   }
+
    public void applyTransform(Transform transform)
    {
       for (KinematicsToolboxSnapshotDescription description : loadedMessages)

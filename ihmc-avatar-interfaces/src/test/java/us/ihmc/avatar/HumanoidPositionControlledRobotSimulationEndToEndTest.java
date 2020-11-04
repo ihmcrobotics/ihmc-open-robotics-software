@@ -3,9 +3,12 @@ package us.ihmc.avatar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +19,9 @@ import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptPostProcessor;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
@@ -29,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -41,15 +47,20 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.decode("#9e8329"), 0.25); // Some darkish orangish
    protected DRCSimulationTestHelper drcSimulationTestHelper = null;
 
    protected abstract HighLevelControllerParameters getPositionControlParameters(HighLevelControllerName positionControlState);
+
+   protected abstract DRCRobotModel getGhostRobotModel();
 
    @AfterEach
    public void tearDown()
@@ -132,10 +143,36 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    private void createSimulation(TestInfo testInfo, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                  CommonAvatarEnvironmentInterface environment)
    {
+      createSimulation(testInfo, null, initialSetup, environment);
+   }
+
+   private void createSimulation(TestInfo testInfo, Robot ghostRobot, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                 CommonAvatarEnvironmentInterface environment)
+   {
       simulationTestingParameters.setUsePefectSensors(true);
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
+      if (ghostRobot == null)
+      {
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
+      }
+      else
+      {
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new CommonAvatarEnvironmentInterface()
+         {
+            @Override
+            public List<? extends Robot> getEnvironmentRobots()
+            {
+               return Collections.singletonList(ghostRobot);
+            }
+
+            @Override
+            public TerrainObject3D getTerrainObject3D()
+            {
+               return environment.getTerrainObject3D();
+            }
+         });
+      }
 
       drcSimulationTestHelper.getSimulationStarter().registerHighLevelControllerState(createControllerFactory(HighLevelControllerName.CUSTOM1));
       if (initialSetup != null)
@@ -150,11 +187,20 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       drcSimulationTestHelper.getSimulationConstructionSet().setFastSimulate(true, 10);
    }
 
-   public void runScriptTest(TestInfo testInfo, File scriptFile, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
-                             CommonAvatarEnvironmentInterface environment)
+   public void runRawScriptTest(TestInfo testInfo, File scriptFile, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                CommonAvatarEnvironmentInterface environment)
          throws Exception
    {
-      createSimulation(testInfo, initialSetup, environment);
+      simulationTestingParameters.setKeepSCSUp(true);
+      DRCRobotModel ghostRobotModel = getGhostRobotModel();
+      ghostRobotModel.getRobotDescription().setName("Ghost");
+      KinematicsToolboxControllerTest.recursivelyModifyGraphics(ghostRobotModel.getRobotDescription().getRootJoints().get(0), ghostApperance);
+      HumanoidFloatingRootJointRobot ghostRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
+      ghostRobot.getRootJoint().setPosition(-1000.0, 0., 0.);
+      ghostRobot.setDynamic(false);
+      ghostRobot.setGravity(0);
+
+      createSimulation(testInfo, ghostRobot, initialSetup, environment);
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
       assertTrue(scriptReader.loadScript(scriptFile), "Failed to load the script");
       assertTrue(scriptReader.hasNext(), "Script is empty");
@@ -163,13 +209,51 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
 
       OneDoFJointReadOnly[] allJoints = FullRobotModelUtils.getAllJointsExcludingHands(drcSimulationTestHelper.getControllerFullRobotModel());
 
+      double itemDuration = 1.0;
+
       while (scriptReader.hasNext())
       {
          KinematicsToolboxSnapshotDescription nextItem = scriptReader.next();
-         WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, 1.0);
+         WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, itemDuration);
+         setSCSRobotConfiguration(nextItem.getIkSolution(), allJoints, ghostRobot);
          drcSimulationTestHelper.publishToController(message);
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.2));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(itemDuration + 0.1));
       }
+   }
+
+   private void setSCSRobotConfiguration(KinematicsToolboxOutputStatus ikSolution, OneDoFJointReadOnly[] allJoints, HumanoidFloatingRootJointRobot ghostRobot)
+   {
+      assertEquals(Arrays.hashCode(allJoints), ikSolution.getJointNameHash(), "Message incompatible with robot.");
+
+      ghostRobot.getRootJoint().setPosition(ikSolution.getDesiredRootTranslation());
+      ghostRobot.getRootJoint().setOrientation(ikSolution.getDesiredRootOrientation());
+
+      for (int i = 0; i < allJoints.length; i++)
+      {
+         String jointName = allJoints[i].getName();
+         float q = ikSolution.getDesiredJointAngles().get(i);
+         ghostRobot.getOneDegreeOfFreedomJoint(jointName).setQ(q);
+      }
+      ghostRobot.update();
+   }
+
+   public void runProcessedScriptTest(TestInfo testInfo, File scriptFile, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                      CommonAvatarEnvironmentInterface environment)
+         throws Exception
+   {
+      createSimulation(testInfo, initialSetup, environment);
+      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+      assertTrue(scriptReader.loadScript(scriptFile), "Failed to load the script");
+      assertTrue(scriptReader.hasNext(), "Script is empty");
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
+      WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
+
+      drcSimulationTestHelper.publishToController(message);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast()
+                                                                                   .getTime()
+            + 2.0));
    }
 
    public static WholeBodyJointspaceTrajectoryMessage toWholeBodyJointspaceTrajectoryMessage(KinematicsToolboxOutputStatus ikSolution,
