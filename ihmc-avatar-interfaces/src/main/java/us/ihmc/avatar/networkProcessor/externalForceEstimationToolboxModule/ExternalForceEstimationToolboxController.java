@@ -141,7 +141,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
       // for deubugging
-      contactParticleFilter.setActualContactingBodyForDebugging(fullRobotModel.getChest());
+      contactParticleFilter.setActualContactingBodyForDebugging("leftForearmYaw", new Point3D(-0.068, 0.170, -0.033));
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
