@@ -48,13 +48,13 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final YoBoolean waitingForRobotConfigurationData = new YoBoolean("waitingForRobotConfigurationData", registry);
    private final YoBoolean waitingForRobotControllerData = new YoBoolean("waitingForRobotControllerData", registry);
    private final YoBoolean contactParticleFilterHasInitialized = new YoBoolean("contactParticleFilterHasInitialized", registry);
-
    private final YoBoolean estimateContactPosition = new YoBoolean("estimateContactPosition", registry);
-   private final HumanoidReferenceFrames referenceFrames;
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
 
+   private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
@@ -65,10 +65,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final YoBoolean calculateRootJointWrench = new YoBoolean("calculateRootJointWrench", registry);
 
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
-
    private final DMatrixRMaj controllerDesiredQdd;
    private final DMatrixRMaj controllerDesiredTau;
-
    private final DMatrixRMaj massMatrix;
    private final DMatrixRMaj coriolisGravityMatrix;
 
@@ -141,16 +139,17 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
       // for deubugging
-      contactParticleFilter.setActualContactingBodyForDebugging("leftForearmYaw", new Point3D(-0.068, 0.170, -0.033));
+      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
+      contactParticleFilter.setActualContactingBodyForDebugging(jointName, offset);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          jointNameMap.put(oneDoFJoints[i].getName(), oneDoFJoints[i]);
       }
 
-      jointNameToMatrixIndexFunction = jointName ->
+      jointNameToMatrixIndexFunction = j ->
       {
-         OneDoFJointBasics joint = jointNameMap.get(jointName);
+         OneDoFJointBasics joint = jointNameMap.get(j);
          return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
    }
@@ -160,6 +159,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    {
       waitingForRobotConfigurationData.set(true);
       waitingForRobotControllerData.set(true);
+      isDone.set(false);
 
       if (commandInputManager.isNewCommandAvailable(ExternalForceEstimationToolboxConfigurationCommand.class))
       {
@@ -245,6 +245,11 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       if (estimateContactPosition.getBooleanValue())
       {
          contactParticleFilter.doControl();
+         if (contactParticleFilter.foundSolution())
+         {
+            isDone.set(true);
+         }
+
          // TODO pack output
       }
       else
@@ -290,7 +295,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    @Override
    public boolean isDone()
    {
-      return false;
+      return isDone.getValue();
    }
 
    public FloatingJointBasics getRootJoint()
