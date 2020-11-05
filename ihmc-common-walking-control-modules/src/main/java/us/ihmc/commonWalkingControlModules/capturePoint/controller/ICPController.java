@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
@@ -112,7 +113,8 @@ public class ICPController
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
-   private final FrameVector2D currentICPVelocity = new FrameVector2D();
+   private final FramePoint2D currentCoMPosition = new FramePoint2D();
+   private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
    private final double controlDT;
    private final double controlDTSquare;
@@ -148,7 +150,6 @@ public class ICPController
    {
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
-
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
@@ -274,10 +275,11 @@ public class ICPController
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly currentICPVelocity)
+                       FramePoint2DReadOnly currentCoMPosition,
+                       double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity);
+      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /** {@inheritDoc} */
@@ -286,7 +288,8 @@ public class ICPController
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly currentICPVelocity)
+                       FramePoint2DReadOnly currentCoMPosition,
+                       double omega0)
    {
       controllerTimer.startMeasurement();
 
@@ -294,7 +297,9 @@ public class ICPController
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
       this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
-      this.currentICPVelocity.setMatchingFrame(currentICPVelocity);
+      this.currentCoMPosition.setMatchingFrame(currentCoMPosition);
+
+      CapturePointTools.computeCenterOfMassVelocity(currentCoMPosition, currentICP, omega0, currentCoMVelocity);
 
       this.perfectCoP.setMatchingFrame(perfectCoP);
       this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
@@ -394,7 +399,7 @@ public class ICPController
       }
 
       boolean checkIfStuck = !isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue();
-      integrator.update(checkIfStuck, desiredICPVelocity, currentICPVelocity, icpError);
+      integrator.update(checkIfStuck, desiredICPVelocity, currentCoMVelocity, icpError);
 
       unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
       unconstrainedFeedbackCMP.addX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
