@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 import java.util.HashMap;
@@ -13,7 +12,6 @@ public class MPCIndexHandler
 {
    private static final int coefficientsPerRho = 4;
    private static final int comCoefficientsPerSegment = 6;
-//   private static final int orientationCoefficientsPerSegment = 2;
 
    private int comCoefficientSize = 0;
    private int orientationCoefficientSize = 0;
@@ -25,6 +23,8 @@ public class MPCIndexHandler
 
    private final TIntArrayList bodiesInContact = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
+   private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
+   private final TIntArrayList rhoBasesInSegment = new TIntArrayList();
 
    public MPCIndexHandler(Map<RigidBodyBasics, ContactStateToForceMatrixHelper> contactableMap)
    {
@@ -43,18 +43,24 @@ public class MPCIndexHandler
       totalRhoSize = 0;
       bodiesInContact.clear();
       rhoStartIndices.clear();
+      rhoCoefficientsInSegment.clear();
+      rhoBasesInSegment.clear();
 
       for (int i = 0; i < contactSequence.size(); i++)
       {
          comCoefficientSize += 6 * comCoefficientsPerSegment;
-//         orientationCoefficientSize += orientationCoefficientsPerSegment;
-         this.bodiesInContact.add(contactSequence.get(i).getNumberOfBodiesInContact());
-         List<String> bodiesInContact = contactSequence.get(i).getBodiesInContact();
+         bodiesInContact.add(contactSequence.get(i).getNumberOfBodiesInContact());
+         List<String> nameOfBodiesInContact = contactSequence.get(i).getBodiesInContact();
          rhoStartIndices.add(totalRhoSize);
-         for (int j = 0; j < bodiesInContact.size(); j++)
+         int rhoBasesInSegment = 0;
+         for (int j = 0; j < nameOfBodiesInContact.size(); j++)
          {
-            totalRhoSize += coefficientsPerRho * contactableStringMap.get(bodiesInContact.get(i)).getRhoSize();
+            rhoBasesInSegment += contactableStringMap.get(nameOfBodiesInContact.get(i)).getRhoSize();
          }
+         int rhoCoefficientsInSegment = coefficientsPerRho * rhoBasesInSegment;
+         this.rhoBasesInSegment.add(rhoBasesInSegment);
+         this.rhoCoefficientsInSegment.add(rhoCoefficientsInSegment);
+         totalRhoSize += rhoCoefficientsInSegment;
       }
 
       totalProblemSize = comCoefficientSize + orientationCoefficientSize + totalRhoSize;
