@@ -193,7 +193,7 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
-      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
          return null;
 
       // Gains
