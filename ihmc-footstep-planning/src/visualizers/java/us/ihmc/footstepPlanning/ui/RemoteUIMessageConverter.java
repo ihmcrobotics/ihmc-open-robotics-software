@@ -68,8 +68,6 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> planBodyPath;
    private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<SwingPlannerType> requestedSwingPlanner;
-   private final AtomicReference<Boolean> performPositionBasedSplitFractionCalculation;
-   private final AtomicReference<Boolean> performAreaBasedSplitFractionCalculation;
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
@@ -143,8 +141,6 @@ public class RemoteUIMessageConverter
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
       requestedSwingPlanner = messager.createInput(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.NONE);
-      performPositionBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, true);
-      performAreaBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformAreaBasedSplitFractionCalculation, false);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
@@ -294,8 +290,6 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(packet.getRequestedSwingPlanner()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, packet.getPerformPositionBasedSplitFractionCalculation());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAreaBasedSplitFractionCalculation, packet.getPerformAreaBasedSplitFractionCalculation());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, packet.getMaxIterations());
@@ -502,8 +496,6 @@ public class RemoteUIMessageConverter
       packet.setPlanBodyPath(planBodyPath.get());
       packet.setPerformAStarSearch(performAStarSearch.get());
       packet.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
-      packet.setPerformPositionBasedSplitFractionCalculation(performPositionBasedSplitFractionCalculation.get());
-      packet.setPerformAreaBasedSplitFractionCalculation(performAreaBasedSplitFractionCalculation.get());
 
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
