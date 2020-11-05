@@ -1731,9 +1731,7 @@ public class CrossRobotCommandRandomTools
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
-      next.setInitializeForSingleSupport(random.nextBoolean());
-      next.setInitializeForStanding(random.nextBoolean());
-      next.setInitializeForTransfer(random.nextBoolean());
+      next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
       next.setOmega0(random.nextDouble());
