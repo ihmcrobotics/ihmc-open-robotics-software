@@ -366,7 +366,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                             additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
@@ -380,7 +379,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters,
                                                                                                     copTrajectoryParameters);
 
       controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);

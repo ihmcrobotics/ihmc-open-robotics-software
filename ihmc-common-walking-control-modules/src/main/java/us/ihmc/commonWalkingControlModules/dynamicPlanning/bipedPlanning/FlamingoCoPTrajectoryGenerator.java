@@ -95,19 +95,18 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       DynamicPlanningFootstep footstep = state.getFootstep(0);
       PlanningTiming timings = state.getTiming(0);
-      PlanningShiftFraction shiftFraction = state.getShiftFraction(0);
       RobotSide supportSide = footstep.getRobotSide().getOppositeSide();
 
       computeEntryCoPPointLocation(tempPointForCoPCalculation, movingPolygonsInSole.get(supportSide), supportSide);
-      midfootCoP.interpolate(state.getInitialCoP(), tempPointForCoPCalculation, shiftFraction.getTransferWeightDistribution());
+      midfootCoP.interpolate(state.getInitialCoP(), tempPointForCoPCalculation, parameters.getDefaultTransferWeightDistribution());
 
-      contactStateProvider.setDuration(shiftFraction.getTransferSplitFraction() * timings.getTransferTime());
+      contactStateProvider.setDuration(parameters.getDefaultTransferSplitFraction() * timings.getTransferTime());
       contactStateProvider.setEndCopPosition(midfootCoP);
 
       SettableContactStateProvider previousContactState = contactStateProvider;
       contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
-      contactStateProvider.setDuration((1.0 - shiftFraction.getTransferSplitFraction()) * timings.getTransferTime());
+      contactStateProvider.setDuration((1.0 - parameters.getDefaultTransferSplitFraction()) * timings.getTransferTime());
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
 
       previousContactState = contactStateProvider;

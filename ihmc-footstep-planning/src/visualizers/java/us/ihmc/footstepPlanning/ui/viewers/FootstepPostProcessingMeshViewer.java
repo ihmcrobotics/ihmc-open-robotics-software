@@ -102,13 +102,6 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
             meshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
          }
 
-         if (hasInfoToRenderFootsteps && footstepDataMessage.getTransferWeightDistribution() != -1.0)
-         {
-            FramePoint3D copMidpoint = new FramePoint3D();
-            copMidpoint.interpolate(previousStanceFootPosition, stanceFootPosition, footstepDataMessage.getTransferWeightDistribution());
-            meshBuilder.addSphere(midpointRadius, copMidpoint, midpointColor);
-         }
-
          previousStanceFootPosition.set(stanceFootPosition);
          stanceFootPosition.set(footPose.getPosition());
       }

@@ -35,6 +35,11 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown = 0.0;
    private static final double defaultExitCoPForwardSafetyMarginOnToes = 1.6e-2;
 
+   private static final double defaultTransferSplitFraction = 0.5;
+   private static final double defaultSwingSplitFraction = 0.5;
+   private static final double defaultSwingDurationShiftFraction = 0.85;
+   private static final double defaultTransferWeightDistribution = 0.5;
+
    private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, -0.005);
    private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.01);
    private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.025);
@@ -71,13 +76,20 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    protected final DoubleParameter ballCMPLengthOffsetFactor;
    protected final DoubleParameter exitCMPLengthOffsetFactor;
 
+   private final DoubleParameter swingDurationShiftFraction;
+   private final DoubleParameter swingSplitFraction;
+   private final DoubleParameter transferSplitFraction;
+   private final DoubleParameter transferWeightDistribution;
+   private final DoubleParameter finalTransferSplitFraction;
+   private final DoubleParameter finalTransferWeightDistribution;
+
    protected final IntegerParameter numberOfStepsToConsider;
 
    private final DoubleParameter durationForContinuityMaintenanceSegment;
    private final DoubleParameter safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final DoubleParameter exitCoPForwardSafetyMarginOnToes;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry("CoPTrajectoryParameters");
 
    public CoPTrajectoryParameters()
    {
@@ -113,6 +125,13 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new DoubleParameter("safeDistanceFromCoPToSupportEdgesWhenSteppingDown", registry, defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown);
       exitCoPForwardSafetyMarginOnToes = new DoubleParameter("exitCoPForwardSafetyMarginOnToes", registry, defaultExitCoPForwardSafetyMarginOnToes);
 
+      swingDurationShiftFraction = new DoubleParameter("defaultSwingDurationShiftFraction", registry, defaultSwingDurationShiftFraction);
+      swingSplitFraction = new DoubleParameter("defaultSwingSplitFraction", registry, defaultSwingSplitFraction);
+      transferSplitFraction = new DoubleParameter("defaultTransferSplitFraction", registry, defaultTransferSplitFraction);
+      transferWeightDistribution = new DoubleParameter("defaultTransferWeightDistribution", registry, defaultTransferWeightDistribution);
+      finalTransferSplitFraction = new DoubleParameter("defaultFinalTransferSplitFraction", registry, defaultTransferSplitFraction);
+      finalTransferWeightDistribution = new DoubleParameter("defaultFinalTransferWeightDistribution", registry, defaultTransferWeightDistribution);
+
       registerVariableToSave(minimumDistanceInsidePolygon);
       registerVariableToSave(stepLengthToPutExitCoPOnToes);
       registerVariableToSave(stepHeightToPutExitCoPOnToesSteppingDown);
@@ -138,6 +157,12 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       registerVariableToSave(durationForContinuityMaintenanceSegment);
       registerVariableToSave(safeDistanceFromCoPToSupportEdgesWhenSteppingDown);
       registerVariableToSave(exitCoPForwardSafetyMarginOnToes);
+      registerVariableToSave(swingDurationShiftFraction);
+      registerVariableToSave(swingSplitFraction);
+      registerVariableToSave(transferSplitFraction);
+      registerVariableToSave(transferWeightDistribution);
+      registerVariableToSave(finalTransferSplitFraction);
+      registerVariableToSave(finalTransferWeightDistribution);
    }
 
    public YoRegistry getRegistry()
@@ -272,6 +297,36 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    public double getExitCoPForwardSafetyMarginOnToes()
    {
       return exitCoPForwardSafetyMarginOnToes.getValue();
+   }
+
+   public double getDefaultSwingDurationShiftFraction()
+   {
+      return swingDurationShiftFraction.getValue();
+   }
+
+   public double getDefaultSwingSplitFraction()
+   {
+      return swingSplitFraction.getValue();
+   }
+
+   public double getDefaultTransferSplitFraction()
+   {
+      return transferSplitFraction.getValue();
+   }
+
+   public double getDefaultTransferWeightDistribution()
+   {
+      return transferWeightDistribution.getValue();
+   }
+
+   public double getDefaultFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction.getValue();
+   }
+
+   public double getDefaultFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution.getValue();
    }
 
    public PlanForToeOffCalculator getPlanForToeOffCalculator()
