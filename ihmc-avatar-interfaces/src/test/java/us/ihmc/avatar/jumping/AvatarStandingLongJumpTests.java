@@ -13,12 +13,11 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class AvatarStandingLongJumpTests
 {
-   private static final double goalEpsilon = 5e-2;
+   private static final double goalEpsilon = 1e-1;
    private static final double shortJumpLength = 0.25;
    private static final double mediumJumpLength = 0.5;
    private static final double longJumpLength = 0.75;
@@ -52,23 +51,23 @@ public abstract class AvatarStandingLongJumpTests
    @Test
    public void testStandingShortJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      runTest(shortJumpLength);
+      runTest(shortJumpLength, 0.4);
    }
 
    @Test
-   public void testMediumShortJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testStandingMediumJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      runTest(mediumJumpLength);
+      runTest(mediumJumpLength, 0.3);
    }
 
    @Disabled
    @Test
-   public void testLongShortJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testStandingLongJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      runTest(longJumpLength);
+      runTest(longJumpLength, 0.3);
    }
 
-   private void runTest(double jumpLength) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   private void runTest(double jumpLength, double supportDuration) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       YoRegistry registry = testHelper.getSCS().getRootRegistry();
       YoDouble comX = ((YoDouble) registry.findVariable("centerOfMassX"));
@@ -84,12 +83,12 @@ public abstract class AvatarStandingLongJumpTests
 
       JumpingGoal jumpingGoal = new JumpingGoal();
       jumpingGoal.setGoalLength(jumpLength);
-      jumpingGoal.setSupportDuration(0.25);
-      jumpingGoal.setFlightDuration(0.4);
+      jumpingGoal.setSupportDuration(supportDuration);
+      jumpingGoal.setFlightDuration(0.25);
       testHelper.submitCommand(jumpingGoal);
 
       success &= blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
-      assertFalse(success);
+      assertTrue(success);
 
       assertEquals(jumpLength, comX.getDoubleValue(), goalEpsilon);
       assertEquals(0.0, comY.getDoubleValue(), goalEpsilon);
