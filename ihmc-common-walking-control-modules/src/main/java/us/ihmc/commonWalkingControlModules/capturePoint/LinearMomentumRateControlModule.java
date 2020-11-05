@@ -5,11 +5,8 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -18,15 +15,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
-import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.PelvisHeightController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
@@ -36,7 +30,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -57,7 +50,6 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LinearMomentumRateControlModule
 {
@@ -140,9 +132,7 @@ public class LinearMomentumRateControlModule
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
 
-   private boolean initializeForStanding;
-   private boolean initializeForSingleSupport;
-   private boolean initializeForTransfer;
+   private boolean initializeOnStateChange;
    private boolean keepCoPInsideSupportPolygon;
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
@@ -256,9 +246,7 @@ public class LinearMomentumRateControlModule
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
-      this.initializeForStanding = input.getInitializeForStanding();
-      this.initializeForSingleSupport = input.getInitializeForSingleSupport();
-      this.initializeForTransfer = input.getInitializeForTransfer();
+      this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -418,24 +406,8 @@ public class LinearMomentumRateControlModule
 
    private void updateICPControllerState()
    {
-      if ((initializeForStanding && initializeForTransfer) || (initializeForTransfer && initializeForSingleSupport) || (initializeForSingleSupport
-                                                                                                                        && initializeForStanding))
-      {
-         throw new RuntimeException("Can only initialize once per compute.");
-      }
-
-      if (initializeForStanding)
-      {
-         icpController.initializeForStanding();
-      }
-      if (initializeForSingleSupport)
-      {
-         icpController.initializeForSingleSupport();
-      }
-      if (initializeForTransfer)
-      {
-         icpController.initializeForTransfer();
-      }
+      if (initializeOnStateChange)
+         icpController.initialize();
 
       icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }

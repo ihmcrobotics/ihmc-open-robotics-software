@@ -57,9 +57,6 @@ public class ICPController
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
-   private final YoBoolean isStationary = new YoBoolean(yoNamePrefix + "IsStationary", registry);
-   private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
-
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
@@ -224,26 +221,8 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
-   public void initializeForStanding()
+   public void initialize()
    {
-      isStationary.set(true);
-      isInDoubleSupport.set(true);
-      integrator.reset();
-   }
-
-   /** {@inheritDoc} */
-   public void initializeForTransfer()
-   {
-      isInDoubleSupport.set(true);
-      isStationary.set(false);
-      integrator.reset();
-   }
-
-   /** {@inheritDoc} */
-   public void initializeForSingleSupport()
-   {
-      isStationary.set(false);
-      isInDoubleSupport.set(false);
       integrator.reset();
    }
 

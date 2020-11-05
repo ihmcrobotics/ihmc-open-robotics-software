@@ -8,8 +8,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -17,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -35,10 +32,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,9 +135,7 @@ public class BalanceManager
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
 
-   private boolean initializeForStanding = false;
-   private boolean initializeForSingleSupport = false;
-   private boolean initializeForTransfer = false;
+   private boolean initializeOnStateChange = false;
    private boolean minimizeAngularMomentumRateZ = false;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
@@ -303,7 +296,7 @@ public class BalanceManager
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
-      if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
+      if (!usingStepAdjustment || initializeOnStateChange)
       {
          return false;
       }
@@ -398,9 +391,7 @@ public class BalanceManager
       }
 
       linearMomentumRateControlModuleInput.setHeightControlCommand(heightControlCommand);
-      linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
-      linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
-      linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
+      linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
@@ -412,9 +403,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
-      initializeForStanding = false;
-      initializeForTransfer = false;
-      initializeForSingleSupport = false;
+      initializeOnStateChange = false;
 
       supportSide = null;
 
@@ -604,7 +593,7 @@ public class BalanceManager
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
-      initializeForStanding = true;
+      initializeOnStateChange = true;
       stepAdjustmentController.reset();
    }
 
@@ -627,7 +616,7 @@ public class BalanceManager
       totalStateDuration.set(currentTiming.getStepTime());
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
-      initializeForSingleSupport = true;
+      initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
 
@@ -647,7 +636,7 @@ public class BalanceManager
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
       inSingleSupport.set(false);
-      initializeForStanding = true;
+      initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
 
@@ -670,7 +659,7 @@ public class BalanceManager
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
       inSingleSupport.set(false);
-      initializeForStanding = true;
+      initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
 
@@ -699,7 +688,7 @@ public class BalanceManager
       inSingleSupport.set(false);
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
-      initializeForTransfer = true;
+      initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
 

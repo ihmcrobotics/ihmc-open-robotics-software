@@ -1,19 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import java.util.List;
-
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -70,31 +63,10 @@ public class LinearMomentumRateControlModuleInput
    private final FeedbackControlCommandList heightControlCommand = new FeedbackControlCommandList();
 
    /**
-    * Flag that indicates the ICP planner has just transitioned to a standing state. This causes the ICP controller to
-    * to initialize itself for standing.
+    * Flag that indicates the ICP planner has just transitioned in contact state.
     * <p>
-    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
-    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
     */
-   private boolean initializeForStanding;
-
-   /**
-    * Flag that indicates the ICP planner has just transitioned to a single support state. This causes the ICP
-    * controller to to initialize itself for single support.
-    * <p>
-    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
-    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
-    */
-   private boolean initializeForSingleSupport;
-
-   /**
-    * Flag that indicates the ICP planner has just transitioned to a transfer state. This causes the ICP controller to
-    * to initialize itself for transfer.
-    * <p>
-    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
-    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
-    */
-   private boolean initializeForTransfer;
+   private boolean initializeOnStateChange;
 
    /**
     * Flag that indicates to the ICP controller that the desired feedback CoP should stay within the bounds of the
@@ -209,34 +181,14 @@ public class LinearMomentumRateControlModuleInput
       return controlHeightWithMomentum;
    }
 
-   public void setInitializeForStanding(boolean initializeForStanding)
+   public void setInitializeOnStateChange(boolean initializeOnStateChange)
    {
-      this.initializeForStanding = initializeForStanding;
+      this.initializeOnStateChange = initializeOnStateChange;
    }
 
-   public boolean getInitializeForStanding()
+   public boolean getInitializeOnStateChange()
    {
-      return initializeForStanding;
-   }
-
-   public void setInitializeForSingleSupport(boolean initializeForSingleSupport)
-   {
-      this.initializeForSingleSupport = initializeForSingleSupport;
-   }
-
-   public boolean getInitializeForSingleSupport()
-   {
-      return initializeForSingleSupport;
-   }
-
-   public void setInitializeForTransfer(boolean initializeForTransfer)
-   {
-      this.initializeForTransfer = initializeForTransfer;
-   }
-
-   public boolean getInitializeForTransfer()
-   {
-      return initializeForTransfer;
+      return initializeOnStateChange;
    }
 
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
@@ -271,9 +223,7 @@ public class LinearMomentumRateControlModuleInput
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
-      initializeForStanding = other.initializeForStanding;
-      initializeForSingleSupport = other.initializeForSingleSupport;
-      initializeForTransfer = other.initializeForTransfer;
+      initializeOnStateChange = other.initializeOnStateChange;
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
       heightControlCommand.set(other.heightControlCommand);
@@ -305,11 +255,7 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (useMomentumRecoveryMode ^ other.useMomentumRecoveryMode)
             return false;
-         if (initializeForStanding ^ other.initializeForStanding)
-            return false;
-         if (initializeForSingleSupport ^ other.initializeForSingleSupport)
-            return false;
-         if (initializeForTransfer ^ other.initializeForTransfer)
+         if (initializeOnStateChange ^ other.initializeOnStateChange)
             return false;
          if (keepCoPInsideSupportPolygon ^ other.keepCoPInsideSupportPolygon)
             return false;
