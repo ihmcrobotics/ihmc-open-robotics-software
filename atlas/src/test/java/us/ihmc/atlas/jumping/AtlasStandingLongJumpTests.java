@@ -1,5 +1,6 @@
 package us.ihmc.atlas.jumping;
 
+import org.junit.jupiter.api.Tag;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
@@ -14,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+@Tag("humanoid-flat-ground")
 public class AtlasStandingLongJumpTests extends AvatarStandingLongJumpTests
 {
    @Override

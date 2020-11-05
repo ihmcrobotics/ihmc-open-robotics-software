@@ -5,8 +5,10 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.jumpingSimulation.JumpingSimulationController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingGoal;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -18,6 +20,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +32,19 @@ public class JumpingTestHelper
    private final CommandInputManager commandInputManager;
    private final SimulationConstructionSet scs;
 
-   private final  BlockingSimulationRunner blockingSimulationRunner;
+   private final BlockingSimulationRunner blockingSimulationRunner;
 
+   private final YoBoolean shouldBeSquatting;
+   private final SimulationTestingParameters simulationTestingParameters;
 
    private static final double gravityZ = 9.81;
 
-   public JumpingTestHelper(DRCRobotModel robotModel, DRCRobotInitialSetup initialSetup, String parameterResourceName)
+   public JumpingTestHelper(SimulationTestingParameters simulationTestingParameters,
+                            DRCRobotModel robotModel,
+                            DRCRobotInitialSetup initialSetup,
+                            String parameterResourceName)
    {
+      this.simulationTestingParameters = simulationTestingParameters;
       List<Class<? extends Command<?, ?>>> availableCommands = new ArrayList<>();
       availableCommands.add(JumpingGoal.class);
       commandInputManager = new CommandInputManager(availableCommands);
@@ -50,7 +60,6 @@ public class JumpingTestHelper
                                                                                          gravityZ,
                                                                                          getClass().getResourceAsStream(parameterResourceName));
       humanoidRobot.setController(simulationController);
-
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
 
@@ -68,6 +77,8 @@ public class JumpingTestHelper
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setDT(robotModel.getSimulateDT(), 1);
 
+      shouldBeSquatting = ((YoBoolean) scs.findVariable("ShouldBeSquatting"));
+
       SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
       plotterFactory.setShowOnStart(true);
       plotterFactory.setVariableNameToTrack("centerOfMass");
@@ -84,7 +95,17 @@ public class JumpingTestHelper
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationController.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
       simulationController.attachControllerFailureListener(direction -> notifyControllerHasFailed());
+   }
 
+   public void destroySimulation()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+         ThreadTools.sleepForever();
+
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+      }
    }
 
    private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
@@ -100,13 +121,23 @@ public class JumpingTestHelper
       return scs;
    }
 
+   public void startSimulation()
+   {
+      scs.startOnAThread();;
+   }
+
    public BlockingSimulationRunner getBlockingSimulationRunner()
    {
       return blockingSimulationRunner;
    }
 
-   public CommandInputManager getCommandInputManager()
+   public <C extends Command<C, ?>> void submitCommand(C command)
    {
-      return commandInputManager;
+      commandInputManager.submitCommand(command);
+   }
+
+   public void triggerSquat(boolean squat)
+   {
+      shouldBeSquatting.set(squat);
    }
 }
