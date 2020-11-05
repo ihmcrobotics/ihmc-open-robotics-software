@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
@@ -76,7 +76,7 @@ public class LookAndStepSteppingTask
          this.replanFootstepsOutput = replanFootstepsOutput;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-         footstepPlanEtcInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
+         footstepPlanEtcInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
          suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
@@ -121,17 +121,14 @@ public class LookAndStepSteppingTask
       footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
                                                       shortenedFootstepPlan,
                                                       footstepPlanEtc.getStartFootPoses(),
-                                                      footstepPlanEtc.getStartFootholds(),
-                                                      footstepPlanEtc.getSwingPlannerType(),
-                                                      true,
-                                                      true);
+                                                      footstepPlanEtc.getSwingPlannerType());
 
       // TODO: Clean this up.
       // Extract swing time calculation from the proportion swing planner
       PlannedFootstep endStep = shortenedFootstepPlan.getFootstep(0);
       Pose3DReadOnly startStep = footstepPlanEtc.getStartFootPoses().get(endStep.getRobotSide());
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
-      double maxStepZ = Math.max(footstepPlannerParameters.getMaximumLeftStepZ(), footstepPlannerParameters.getMaximumRightStepZ());
+      double maxStepZ = footstepPlannerParameters.getMaxStepZ();
       double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
       double stepDistance = startStep.getPosition().distance(endStep.getFootstepPose().getPosition());
       double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);

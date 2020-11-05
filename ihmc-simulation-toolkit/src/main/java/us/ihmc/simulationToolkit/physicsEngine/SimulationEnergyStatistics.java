@@ -22,7 +22,7 @@ public class SimulationEnergyStatistics
 
       for (String robotName : physicsEngine.getRobotNames())
       {
-         physicsEngine.addRobotPhysicsOutputReader(robotName, new RobotEnergyStatistics(robotName, gravity, registry));
+         physicsEngine.addRobotPhysicsOutputStateReader(robotName, new RobotEnergyStatistics(robotName, gravity, registry));
       }
    }
 

@@ -16,9 +16,21 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Duration of trajectory in seconds
+            */
    public double trajectory_duration_;
+   /**
+            * Target joint angles of the trajectory
+            */
    public us.ihmc.idl.IDLSequence.Double  joint_angles_;
+   /**
+            * Terminal pelvis pose in world frame
+            */
    public us.ihmc.euclid.geometry.Pose3D pelvis_pose_;
+   /**
+            * Hash of joint array
+            */
    public int joint_name_hash_;
 
    public WholeBodyMultiContactTrajectoryMessage()
@@ -61,31 +73,49 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
       return sequence_id_;
    }
 
+   /**
+            * Duration of trajectory in seconds
+            */
    public void setTrajectoryDuration(double trajectory_duration)
    {
       trajectory_duration_ = trajectory_duration;
    }
+   /**
+            * Duration of trajectory in seconds
+            */
    public double getTrajectoryDuration()
    {
       return trajectory_duration_;
    }
 
 
+   /**
+            * Target joint angles of the trajectory
+            */
    public us.ihmc.idl.IDLSequence.Double  getJointAngles()
    {
       return joint_angles_;
    }
 
 
+   /**
+            * Terminal pelvis pose in world frame
+            */
    public us.ihmc.euclid.geometry.Pose3D getPelvisPose()
    {
       return pelvis_pose_;
    }
 
+   /**
+            * Hash of joint array
+            */
    public void setJointNameHash(int joint_name_hash)
    {
       joint_name_hash_ = joint_name_hash;
    }
+   /**
+            * Hash of joint array
+            */
    public int getJointNameHash()
    {
       return joint_name_hash_;

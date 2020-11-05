@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -68,7 +70,7 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
                                     walkingScriptParameters,
-                                    new SimpleWalkingControllerStateFactory(model.getCapturePointPlannerParameters()));
+                                    new SimpleWalkingControllerStateFactory());
    }
 
 }

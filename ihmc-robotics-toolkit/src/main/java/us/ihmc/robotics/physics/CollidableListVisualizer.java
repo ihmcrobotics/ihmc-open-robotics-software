@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -48,8 +49,21 @@ public class CollidableListVisualizer
          int counter = rigidBodyCollidableCounterMap.adjustOrPutValue(collidable.getRigidBody(), 1, 0);
          name = collidable.getRigidBody().getName() + Integer.toString(counter);
       }
-      CollidableVisualizer collidableVisualizer = new CollidableVisualizer(name, groupName, collidable, appearanceDefinition, registry, yoGraphicsListRegistry);
-      collidableVisualizerMap.put(collidable, collidableVisualizer);
+
+      try
+      {
+         CollidableVisualizer collidableVisualizer = new CollidableVisualizer(name,
+                                                                              groupName,
+                                                                              collidable,
+                                                                              appearanceDefinition,
+                                                                              registry,
+                                                                              yoGraphicsListRegistry);
+         collidableVisualizerMap.put(collidable, collidableVisualizer);
+      }
+      catch (UnsupportedOperationException e)
+      {
+         LogTools.error(e.getMessage());
+      }
    }
 
    public void update(CollisionListResult collisionListResult)

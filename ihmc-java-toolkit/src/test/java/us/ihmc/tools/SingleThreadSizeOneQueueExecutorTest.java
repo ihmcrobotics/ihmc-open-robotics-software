@@ -30,8 +30,8 @@ public class SingleThreadSizeOneQueueExecutorTest
          resultTwo.set(output.toString());
       };
 
-      executor.queueExecution(runnableOne);
-      executor.queueExecution(runnableTwo);
+      executor.submitTask(runnableOne);
+      executor.submitTask(runnableTwo);
 
       resultOne.blockingPoll();
       assertEquals("a", resultOne.read());
@@ -68,9 +68,9 @@ public class SingleThreadSizeOneQueueExecutorTest
          resultThree.set(output.toString());
       };
 
-      executor.queueExecution(runnableOne);
-      executor.queueExecution(runnableTwo); // this one should get skipped
-      executor.queueExecution(runnableThree);
+      executor.submitTask(runnableOne);
+      executor.submitTask(runnableTwo); // this one should get skipped
+      executor.submitTask(runnableThree);
 
       resultOne.blockingPoll();
       assertEquals("a", resultOne.read());

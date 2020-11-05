@@ -1,7 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -21,7 +22,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker}
+    * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
     */
    default boolean checkForPathCollisions()
    {
@@ -58,6 +59,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getIdealBackStepLength()
    {
       return get(idealBackStepLength);
+   }
+
+   /**
+    * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+    * Ideal step length is linearly interpolated between {@link #getIdealFootstepLength} on flat ground and this value at max stance height
+    */
+   default double getIdealStepLengthAtMaxStepZ()
+   {
+      return get(idealStepLengthAtMaxStepZ);
    }
 
    /**
@@ -312,19 +322,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-    * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-    * {@link #getMaximumStepZWhenForwardAndDown()}.
-    *
-    * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-    * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-    */
-   default double getTranslationScaleFromGrandparentNode()
-   {
-      return get(translationScaleFromGrandparentNode);
-   }
-
-   /**
     * Maximum vertical distance between consecutive footsteps
     *
     * <p>
@@ -332,31 +329,25 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * z-up sole frame.
     * </p>
     */
-   default double getMaximumLeftStepZ()
+   default double getMaxStepZ()
    {
-      return get(maxLeftStepZ);
+      return get(maxStepZ);
    }
 
    /**
-    * Maximum vertical distance between consecutive footsteps
-    *
-    * <p>
-    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-    * z-up sole frame.
-    * </p>
+    * Maximum vertical distance between start-of-swing and touchdown
     */
-   default double getMaximumRightStepZ()
+   default double getMaxSwingZ()
    {
-      return get(maxRightStepZ);
+      return get(maxSwingZ);
    }
 
    /**
-    * Returns nominal maximum step z
-    * @return
+    * Maximum xy distance between start-of-swing and touchdown
     */
-   default double getMaximumAverageStepZ()
+   default double getMaxSwingReach()
    {
-      return EuclidCoreTools.interpolate(getMaximumLeftStepZ(), getMaximumRightStepZ(), 0.5);
+      return get(maxSwingReach);
    }
 
    /**
@@ -836,13 +827,5 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getShinHeightOffset()
    {
       return get(shinHeightOffet);
-   }
-
-   /**
-    * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
-    */
-   default RobotSide getStepOnlyWithRequestedSide()
-   {
-      return RobotSide.fromByte((byte) get(stepOnlyWithRequestedSide));
    }
 }

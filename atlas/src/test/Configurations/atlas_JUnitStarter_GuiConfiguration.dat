@@ -25,45 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.r_footWorkspaceLimiterControlModule.r_footIsSwingSingularityAvoidanceUsedOnHeight</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -91,8 +55,8 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>4.4228338508295195</Camera X>
- <Camera Y>17.344185868768136</Camera Y>
+ <Camera X>1.9490658147252036</Camera X>
+ <Camera Y>12.001075254132683</Camera Y>
  <Camera Z>3.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
@@ -117,8 +81,8 @@ null,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>2.4228338508295195</Fix X>
-<Fix Y>5.344185868768137</Fix Y>
+<Fix X>-0.050934185274796526</Fix X>
+<Fix Y>0.001075254132682485</Fix Y>
 <Fix Z>1.1</Fix Z>
 </Fix Position>
 </Canvas 1>

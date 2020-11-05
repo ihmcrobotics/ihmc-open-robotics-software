@@ -28,7 +28,7 @@ public class AtlasObjectDetectionModulalStarter
 
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), RobotTarget.SCS, false);
       }
       catch (IllegalArgumentException e)
       {

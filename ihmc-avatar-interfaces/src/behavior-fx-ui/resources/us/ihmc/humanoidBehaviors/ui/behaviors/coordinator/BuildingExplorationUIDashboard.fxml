@@ -16,6 +16,7 @@
     <ComboBox fx:id="requestedState" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
     <Button onAction="#requestStart" text="Start" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <Button onAction="#requestStop" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <Button onAction="#placeGoal" text="Place goal" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
     <Label text="Goal X" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
     <Label text="Goal Y" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
@@ -35,8 +36,9 @@
     <Text fx:id="stairsDetected" GridPane.columnIndex="5" GridPane.rowIndex="2" />
     <Text fx:id="doorDetected" GridPane.columnIndex="5" GridPane.rowIndex="3" />
     <Button text="Not debris" onAction="#ignoreDebris" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-    <Button text="Approve stairs steps" onAction="#approveStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="5" />
-    <Button text="Replan stairs steps" onAction="#replanStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+    <Button text="Confirm door" onAction="#confirmDoor" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+    <Button text="Approve stairs steps" onAction="#approveStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+    <Button text="Replan stairs steps" onAction="#replanStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="7" />
 
     <padding>
         <Insets bottom="5.0" left="5.0" right="12.0" top="12.0"/>

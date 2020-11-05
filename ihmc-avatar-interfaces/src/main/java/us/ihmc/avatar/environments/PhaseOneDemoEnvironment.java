@@ -103,8 +103,8 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       ConvexPolygon2D groundPolygon3 = new ConvexPolygon2D();
       groundPolygon3.addVertex(9.0, -1.0);
       groundPolygon3.addVertex(9.0, 1.0);
-      groundPolygon3.addVertex(13.0, -1.0);
-      groundPolygon3.addVertex(13.0, 1.0);
+      groundPolygon3.addVertex(18.0, -1.0);
+      groundPolygon3.addVertex(18.0, 1.0);
       groundPolygon3.update();
       PlanarRegion groundRegion3 = new PlanarRegion(new RigidBodyTransform(), groundPolygon3);
       addRegions(new PlanarRegionsList(groundRegion3), YoAppearance.LightGray());

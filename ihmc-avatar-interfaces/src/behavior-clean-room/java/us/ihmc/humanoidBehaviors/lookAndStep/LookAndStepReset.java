@@ -33,7 +33,7 @@ public class LookAndStepReset
    public void queueReset()
    {
       resetTimer.reset();
-      executor.queueExecution(this::performReset);
+      executor.submitTask(this::performReset);
    }
 
    private void performReset()

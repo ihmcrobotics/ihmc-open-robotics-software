@@ -1,25 +1,24 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class YoSplitFractionCalculatorParameters implements SplitFractionCalculatorParametersReadOnly
+public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState implements SplitFractionCalculatorParametersReadOnly
 {
-   private final BooleanProvider computeSplitFractionsFromPositions;
-   private final BooleanProvider computeSplitFractionsFromArea;
-   private final DoubleProvider defaultTransferSplitFraction;
-   private final DoubleProvider stepHeightForLargeStepDown;
-   private final DoubleProvider largestStepDownHeight;
-   private final DoubleProvider transferSplitFractionAtFullDepth;
-   private final DoubleProvider transferWeightDistributionatFullDepth;
-   private final DoubleProvider transferFinalWeightDistributionatFullDepth;
-   private final DoubleProvider fractionLoadIfFootHasFullSupport;
-   private final DoubleProvider fractionTimeOnFootIfFootHasFullSupport;
-   private final DoubleProvider fractionLoadIfOtherFootHasNoWidth;
-   private final DoubleProvider fractionTimeOnFootIfOtherFootHasNoWidth;
+   private final BooleanParameter computeSplitFractionsFromPositions;
+   private final BooleanParameter computeSplitFractionsFromArea;
+   private final DoubleParameter defaultTransferSplitFraction;
+   private final DoubleParameter stepHeightForLargeStepDown;
+   private final DoubleParameter largestStepDownHeight;
+   private final DoubleParameter transferSplitFractionAtFullDepth;
+   private final DoubleParameter transferWeightDistributionAtFullDepth;
+   private final DoubleParameter transferFinalWeightDistributionatFullDepth;
+   private final DoubleParameter fractionLoadIfFootHasFullSupport;
+   private final DoubleParameter fractionTimeOnFootIfFootHasFullSupport;
+   private final DoubleParameter fractionLoadIfOtherFootHasNoWidth;
+   private final DoubleParameter fractionTimeOnFootIfOtherFootHasNoWidth;
 
    public YoSplitFractionCalculatorParameters(SplitFractionCalculatorParametersReadOnly defaultParameters, YoRegistry registry)
    {
@@ -33,10 +32,10 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
       transferSplitFractionAtFullDepth = new DoubleParameter("transferSplitFractionAtFullDepth",
                                                              registry,
                                                              defaultParameters.getTransferSplitFractionAtFullDepth());
-      transferWeightDistributionatFullDepth = new DoubleParameter("transferWeightDistributionatFullDepth",
+      transferWeightDistributionAtFullDepth = new DoubleParameter("transferWeightDistributionAtFullDepth",
                                                                   registry,
                                                                   defaultParameters.getTransferWeightDistributionAtFullDepth());
-      transferFinalWeightDistributionatFullDepth = new DoubleParameter("transferFinalWeightDistributionatFullDepth",
+      transferFinalWeightDistributionatFullDepth = new DoubleParameter("transferFinalWeightDistributionAtFullDepth",
                                                                        registry,
                                                                        defaultParameters.getTransferFinalWeightDistributionAtFullDepth());
       fractionLoadIfFootHasFullSupport = new DoubleParameter("fractionLoadIfFootHasFullSupport",
@@ -51,6 +50,20 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
       fractionTimeOnFootIfOtherFootHasNoWidth = new DoubleParameter("fractionTimeOnFootIfOtherFootHasNoWidth",
                                                                     registry,
                                                                     defaultParameters.getFractionTimeOnFootIfOtherFootHasNoWidth());
+
+      registerVariableToSave(computeSplitFractionsFromArea);
+      registerVariableToSave(computeSplitFractionsFromPositions);
+      registerVariableToSave(defaultTransferSplitFraction);
+      registerVariableToSave(stepHeightForLargeStepDown);
+      registerVariableToSave(largestStepDownHeight);
+      registerVariableToSave(transferSplitFractionAtFullDepth);
+      registerVariableToSave(transferWeightDistributionAtFullDepth);
+      registerVariableToSave(transferFinalWeightDistributionatFullDepth);
+      registerVariableToSave(fractionLoadIfFootHasFullSupport);
+      registerVariableToSave(fractionTimeOnFootIfFootHasFullSupport);
+      registerVariableToSave(fractionLoadIfOtherFootHasNoWidth);
+      registerVariableToSave(fractionTimeOnFootIfOtherFootHasNoWidth);
+
    }
 
    public boolean calculateSplitFractionsFromPositions()
@@ -90,7 +103,7 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
    /** {@inheritDoc} */
    public double getTransferWeightDistributionAtFullDepth()
    {
-      return transferWeightDistributionatFullDepth.getValue();
+      return transferWeightDistributionAtFullDepth.getValue();
    }
 
    /** {@inheritDoc} */

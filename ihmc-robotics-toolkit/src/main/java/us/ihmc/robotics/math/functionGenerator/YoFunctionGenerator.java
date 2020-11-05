@@ -201,6 +201,11 @@ public class YoFunctionGenerator
    {
       return frequency.getDoubleValue();
    }
+   
+   public double getFrequencyFiltered()
+   {
+      return frequencyFiltered.getDoubleValue();
+   }
 
    public void setChirpFrequencyMaxHz(double frequencyHz)
    {
@@ -210,6 +215,11 @@ public class YoFunctionGenerator
    public double getChirpFrequencyMax()
    {
       return chirpFrequencyMax.getDoubleValue();
+   }
+   
+   public double getChirpFrequency()
+   {
+      return chirpFrequency.getDoubleValue();
    }
 
    public void setPhase(double phase)

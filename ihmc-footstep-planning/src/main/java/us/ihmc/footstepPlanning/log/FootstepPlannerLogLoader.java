@@ -12,7 +12,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -23,7 +25,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
@@ -39,7 +40,6 @@ public class FootstepPlannerLogLoader
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer  = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    private FootstepPlannerLog log = null;
@@ -183,16 +183,6 @@ public class FootstepPlannerLogLoader
             swingParametersPacketInputStream.close();
          }
 
-         // load split fraction parameters packet
-         File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
-         if (splitFractionParametersFile.exists())
-         {
-            InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
-            jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
-            log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
-            splitFractionParametersInputStream.close();
-         }
-
          // load status packet
          File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
@@ -273,14 +263,11 @@ public class FootstepPlannerLogLoader
          while (dataFileReader.readLine() != null)
          {
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
-            iterationData.setStanceNode(readNode(dataFileReader.readLine()));
-            iterationData.setIdealStep(readNode(dataFileReader.readLine()));
+            iterationData.setParentNode(readNode(dataFileReader.readLine()));
+            iterationData.setIdealChildNode(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
-            iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
-            iterationData.getStanceNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
-            iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-            iterationData.getStanceNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-            iterationData.getStanceNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
+            readSnapData(iterationData.getParentStartSnapData(), dataFileReader);
+            readSnapData(iterationData.getParentEndSnapData(), dataFileReader);
             log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
@@ -289,14 +276,10 @@ public class FootstepPlannerLogLoader
                dataFileReader.readLine();
 
                FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData(numberOfVariables);
-               edgeData.setStanceNode(iterationData.getStanceNode());
-               edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
+               edgeData.setParentNode(iterationData.getParentNode());
+               edgeData.setChildNode(readNode(dataFileReader.readLine()));
                edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getCandidateNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
+               readSnapData(edgeData.getEndStepSnapData(), dataFileReader);
 
                long[] longCSV = getLongCSV(true, dataFileReader.readLine());
                for (int j = 0; j < longCSV.length; j++)
@@ -304,8 +287,8 @@ public class FootstepPlannerLogLoader
                   edgeData.setData(j, longCSV[j]);
                }
 
-               iterationData.getChildNodes().add(edgeData.getCandidateNode());
-               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
+               iterationData.getChildNodes().add(edgeData.getChildNode());
+               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getParentNode(), edgeData.getChildNode()), edgeData);
             }
          }
 
@@ -474,10 +457,21 @@ public class FootstepPlannerLogLoader
       }
    }
 
-   private static FootstepNode readNode(String dataFileString)
+   private static FootstepGraphNode readNode(String dataFileString)
    {
       int[] csv = getIntCSV(true, dataFileString);
-      return new FootstepNode(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
+      DiscreteFootstep firstStep = new DiscreteFootstep(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
+      DiscreteFootstep secondStep = new DiscreteFootstep(csv[4], csv[5], csv[6], RobotSide.values[csv[7]]);
+      return new FootstepGraphNode(firstStep, secondStep);
+   }
+
+   private void readSnapData(FootstepSnapData footstepSnapDataToPack, BufferedReader dataFileReader) throws IOException
+   {
+      footstepSnapDataToPack.getSnapTransform().set(readTransform(dataFileReader.readLine()));
+      footstepSnapDataToPack.getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
+      footstepSnapDataToPack.getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+      footstepSnapDataToPack.setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
+      footstepSnapDataToPack.setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
    }
 
    private static RigidBodyTransform readTransform(String dataFileLine)
