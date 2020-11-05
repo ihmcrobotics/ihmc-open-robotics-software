@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -56,11 +57,11 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean controlHeightWithMomentum;
 
-   /**
-    * Command for controlling the height. Must be either {@link us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand}
-    * or {@link us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand}.
-    */
-   private final FeedbackControlCommandList heightControlCommand = new FeedbackControlCommandList();
+   private boolean usePelvisHeightCommand;
+
+   private final CenterOfMassFeedbackControlCommand comHeightControlCommand = new CenterOfMassFeedbackControlCommand();
+
+   private final PointFeedbackControlCommand pelvisHeightControlCommand = new PointFeedbackControlCommand();
 
    /**
     * Flag that indicates the ICP planner has just transitioned in contact state.
@@ -127,18 +128,34 @@ public class LinearMomentumRateControlModuleInput
       return desiredCapturePointVelocity;
    }
 
-   public void setHeightControlCommand(FeedbackControlCommand<?> heightControlCommand)
+   public void setUsePelvisHeightCommand(boolean usePelvisHeightCommand)
    {
-      this.heightControlCommand.clear();
-      this.heightControlCommand.addCommand(heightControlCommand);
+      this.usePelvisHeightCommand = usePelvisHeightCommand;
    }
 
-   public FeedbackControlCommand<?> getHeightControlCommand()
+   public void setPelvisHeightControlCommand(PointFeedbackControlCommand heightControlCommand)
    {
-      if (heightControlCommand.getNumberOfCommands() > 0)
-         return heightControlCommand.getCommand(0);
-      else
-         return null;
+      this.pelvisHeightControlCommand.set(heightControlCommand);
+   }
+
+   public void setCenterOfMassHeightControlCommand(CenterOfMassFeedbackControlCommand heightControlCommand)
+   {
+      this.comHeightControlCommand.set(heightControlCommand);
+   }
+
+   public boolean getUsePelvisHeightCommand()
+   {
+      return usePelvisHeightCommand;
+   }
+
+   public PointFeedbackControlCommand getPelvisHeightControlCommand()
+   {
+      return pelvisHeightControlCommand;
+   }
+
+   public CenterOfMassFeedbackControlCommand getCenterOfMassHeightControlCommand()
+   {
+      return comHeightControlCommand;
    }
 
    public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
@@ -226,7 +243,9 @@ public class LinearMomentumRateControlModuleInput
       initializeOnStateChange = other.initializeOnStateChange;
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
-      heightControlCommand.set(other.heightControlCommand);
+      setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
+      setPelvisHeightControlCommand(other.getPelvisHeightControlCommand());
+      setCenterOfMassHeightControlCommand(other.getCenterOfMassHeightControlCommand());
       for (RobotSide robotSide : RobotSide.values)
          contactStateCommands.get(robotSide).set(other.contactStateCommands.get(robotSide));
    }
@@ -261,7 +280,11 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
             return false;
-         if (heightControlCommand != null && !heightControlCommand.equals(other.heightControlCommand))
+         if (usePelvisHeightCommand ^ other.usePelvisHeightCommand)
+            return false;
+         if (!pelvisHeightControlCommand.equals(other.pelvisHeightControlCommand))
+            return false;
+         if (!comHeightControlCommand.equals(other.comHeightControlCommand))
             return false;
 
          for (RobotSide robotSide : RobotSide.values)

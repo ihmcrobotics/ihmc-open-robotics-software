@@ -560,15 +560,6 @@ public class CrossRobotCommandResolver
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
-   public void resolveHeightControlCommand(FeedbackControlCommand<?> in, FeedbackControlCommand<?> out)
-   {
-      if (in.getCommandType() == ControllerCoreCommandType.POINT)
-         resolvePointFeedbackControlCommand((PointFeedbackControlCommand) in, (PointFeedbackControlCommand) out);
-      else if (in.getCommandType() == ControllerCoreCommandType.MOMENTUM)
-         resolveCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) in, (CenterOfMassFeedbackControlCommand) out);
-      else
-         throw new IllegalArgumentException("Not a valid height control command.");
-   }
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
    {
       out.setCommandId(in.getCommandId());
@@ -831,7 +822,9 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
-      resolveHeightControlCommand(in.getHeightControlCommand(), out.getHeightControlCommand());
+      out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
+      resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
       out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
