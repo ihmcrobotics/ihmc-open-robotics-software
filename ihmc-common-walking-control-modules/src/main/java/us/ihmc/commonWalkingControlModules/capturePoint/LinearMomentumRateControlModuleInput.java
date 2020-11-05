@@ -4,6 +4,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -62,7 +63,11 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean controlHeightWithMomentum;
 
-   private FeedbackControlCommand<?> heightControlCommand;
+   /**
+    * Command for controlling the height. Must be either {@link us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand}
+    * or {@link us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand}.
+    */
+   private final FeedbackControlCommandList heightControlCommand = new FeedbackControlCommandList();
 
    /**
     * Flag that indicates the ICP planner has just transitioned to a standing state. This causes the ICP controller to
@@ -152,12 +157,16 @@ public class LinearMomentumRateControlModuleInput
 
    public void setHeightControlCommand(FeedbackControlCommand<?> heightControlCommand)
    {
-      this.heightControlCommand = heightControlCommand;
+      this.heightControlCommand.clear();
+      this.heightControlCommand.addCommand(heightControlCommand);
    }
 
    public FeedbackControlCommand<?> getHeightControlCommand()
    {
-      return heightControlCommand;
+      if (heightControlCommand.getNumberOfCommands() > 0)
+         return heightControlCommand.getCommand(0);
+      else
+         return null;
    }
 
    public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
@@ -267,7 +276,7 @@ public class LinearMomentumRateControlModuleInput
       initializeForTransfer = other.initializeForTransfer;
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
-      heightControlCommand = other.heightControlCommand;
+      heightControlCommand.set(other.heightControlCommand);
       for (RobotSide robotSide : RobotSide.values)
          contactStateCommands.get(robotSide).set(other.contactStateCommands.get(robotSide));
    }
