@@ -612,7 +612,7 @@ public class ModifiedOptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvi
 
    private void addFlightDynamicsObjective(double time, int sequenceId)
    {
-      CoMTrajectoryPlannerTools.addCoMAccelerationIsGravityObjective(MEDIUM_WEIGHT, sequenceId, omega.getValue(), time, -gravityZ, hessian, zGradient);
+      CoMTrajectoryPlannerTools.addCoMAccelerationIsGravityObjective(MEDIUM_WEIGHT, sequenceId, omega.getValue(), time, gravityZ, hessian, zGradient);
       CoMTrajectoryPlannerTools.addCoMJerkObjective(MEDIUM_WEIGHT, null, omega.getValue(), time, sequenceId, hessian, null, null, null);
    }
 
