@@ -3,11 +3,17 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
+import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jumpingSimulation.JumpingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingGoal;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -31,7 +37,21 @@ public class AtlasJumpingSimulation
       availableCommands.add(JumpingGoal.class);
       CommandInputManager commandInputManager = new CommandInputManager(availableCommands);
 
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS)
+      {
+         @Override
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
+            {
+               @Override
+               public MomentumOptimizationSettings getMomentumOptimizationSettings()
+               {
+                  return getTestMomentumOptimizationSettings(getJointMap(), getContactPointParameters().getNumberOfContactableBodies());
+               }
+            };
+         }
+      };
       AtlasSimInitialSetup initialSetup = new AtlasSimInitialSetup();
       JumpingSimulationFactory simulationFactory = new JumpingSimulationFactory(robotModel, initialSetup, commandInputManager);
       SimulationConstructionSet scs = simulationFactory.createSimulation(parameterResourceName);
@@ -57,6 +77,47 @@ public class AtlasJumpingSimulation
 
       scs.startOnAThread();
       scs.simulate();
+   }
+
+   private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
+   {
+      double jointAccelerationWeight = 1e-10;
+      double jointJerkWeight = 0.0;
+      double jointTorqueWeight = 0.0;
+      double maximumJointAcceleration = 1000.0;
+
+      return new AtlasMomentumOptimizationSettings(jointMap, numberOfContactableBodies)
+      {
+         @Override
+         public double getJointAccelerationWeight()
+         {
+            return jointAccelerationWeight;
+         }
+
+         @Override
+         public double getJointJerkWeight()
+         {
+            return jointJerkWeight;
+         }
+
+         @Override
+         public double getJointTorqueWeight()
+         {
+            return jointTorqueWeight;
+         }
+
+         @Override
+         public double getMaximumJointAcceleration()
+         {
+            return maximumJointAcceleration;
+         }
+
+         @Override
+         public boolean areJointVelocityLimitsConsidered()
+         {
+            return false;
+         }
+      };
    }
 
    private static void addButton(String yoVariableName, double newValue, SimulationConstructionSet scs)
