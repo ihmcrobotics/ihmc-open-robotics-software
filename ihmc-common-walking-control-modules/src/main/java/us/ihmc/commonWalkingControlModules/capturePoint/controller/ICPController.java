@@ -395,8 +395,7 @@ public class ICPController
          residualDynamicsErrorConservative.add(icpError);
       }
 
-      boolean checkIfStuck = !isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue();
-      integrator.update(checkIfStuck, desiredICPVelocity, currentCoMVelocity, icpError);
+      integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
 
       unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
       unconstrainedFeedbackCMP.addX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
