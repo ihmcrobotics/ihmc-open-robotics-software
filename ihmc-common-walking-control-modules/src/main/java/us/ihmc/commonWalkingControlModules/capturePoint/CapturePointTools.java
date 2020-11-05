@@ -313,6 +313,13 @@ public class CapturePointTools
       }
    }
 
+   public static void computeCenterOfMassVelocity(FramePoint2DReadOnly comPosition, FramePoint2DReadOnly dcmPosition, double omega0,
+                                                  FixedFrameVector2DBasics comVelocityToPack)
+   {
+      comVelocityToPack.sub(dcmPosition, comPosition);
+      comVelocityToPack.scale(omega0);
+   }
+
    public static void computeCenterOfMassVelocity(FramePoint3DReadOnly comPosition, FramePoint3DReadOnly dcmPosition, double omega0,
                                                   FixedFrameVector3DBasics comVelocityToPack)
    {

@@ -561,12 +561,12 @@ public class LinearMomentumRateControlModule
          if (perfectCoP.containsNaN())
          {
             perfectCMPDelta.setToZero();
-            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, capturePointVelocity);
+            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
          }
          else
          {
             perfectCMPDelta.sub(perfectCMP, perfectCoP);
-            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, capturePointVelocity);
+            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
          }
          icpController.getDesiredCMP(desiredCMP);
          icpController.getDesiredCoP(desiredCoP);
