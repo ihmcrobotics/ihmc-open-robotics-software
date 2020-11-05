@@ -60,10 +60,6 @@ public class MainTabController
    @FXML
    private CheckBox performAStarSearch;
    @FXML
-   private CheckBox performPositionBasedSplitFractionCalculation;
-   @FXML
-   private CheckBox performAreaBasedSplitFractionCalculation;
-   @FXML
    private CheckBox ignorePartialFootholds;
    @FXML
    private Spinner<Double> timeout;
@@ -282,8 +278,6 @@ public class MainTabController
 
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
       messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
-      messager.bindBidirectional(PerformPositionBasedSplitFractionCalculation, performPositionBasedSplitFractionCalculation.selectedProperty(), true);
-      messager.bindBidirectional(PerformAreaBasedSplitFractionCalculation, performAreaBasedSplitFractionCalculation.selectedProperty(), true);
       messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);

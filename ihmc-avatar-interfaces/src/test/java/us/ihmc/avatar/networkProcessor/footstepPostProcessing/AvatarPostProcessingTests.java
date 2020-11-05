@@ -158,7 +158,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      request.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(request);
    }
@@ -192,7 +191,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      requestPacket.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(requestPacket);
    }
