@@ -29,7 +29,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final int nContactableBodies;
 
    private final double jointAccelerationWeight = 0.005;
-   private final double jointJerkWeight = 1.6e-6;
+   private final double jointJerkWeight = 1.6E-6;
    private final double jointTorqueWeight = 0.005;
    private final Vector2D copWeight = new Vector2D(0.001, 0.002);
    private final Vector2D copRateDefaultWeight = new Vector2D(0.00000032, 0.00000032);
@@ -121,12 +121,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public double getRhoRateDefaultWeight()
    {
       return rhoRateDefaultWeight;
-   }
-
-   @Override
-   public boolean areJointVelocityLimitsConsidered()
-   {
-      return true;
    }
 
    /** @inheritDoc */
