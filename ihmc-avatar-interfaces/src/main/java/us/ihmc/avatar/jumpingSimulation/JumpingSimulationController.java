@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -51,6 +52,7 @@ public class JumpingSimulationController implements RobotController
 //   private final StateEstimatorController estimator;
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidFloatingRootJointRobot humanoidRobotModel;
+   private final JumpingControllerToolbox controllerToolbox;
    private final YoDouble time;
 
    private final SDFPerfectSimulatedSensorReader sensorReader;
@@ -156,7 +158,7 @@ public class JumpingSimulationController implements RobotController
                                                                                registry);
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(this.fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      JumpingControllerToolbox controllerToolbox = new JumpingControllerToolbox(this.fullRobotModel,
+      controllerToolbox = new JumpingControllerToolbox(this.fullRobotModel,
                                                                                 referenceFrames,
                                                                                 robotModel.getWalkingControllerParameters(),
                                                                                 footSwitches,
@@ -217,6 +219,11 @@ public class JumpingSimulationController implements RobotController
       }
 
       return footSwitches;
+   }
+
+   public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
+   {
+      controllerToolbox.attachControllerFailureListener(controllerFailureListener);
    }
 
    private boolean initialized = false;

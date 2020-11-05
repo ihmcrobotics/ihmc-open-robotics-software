@@ -1,4 +1,4 @@
-package us.ihmc.atlas.behaviors;
+package us.ihmc.atlas;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -33,10 +33,6 @@ public class AtlasJumpingSimulation
 
    public static void main(String[] args)
    {
-      List<Class<? extends Command<?, ?>> >availableCommands = new ArrayList<>();
-      availableCommands.add(JumpingGoal.class);
-      CommandInputManager commandInputManager = new CommandInputManager(availableCommands);
-
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS)
       {
          @Override
@@ -53,8 +49,9 @@ public class AtlasJumpingSimulation
          }
       };
       AtlasSimInitialSetup initialSetup = new AtlasSimInitialSetup();
-      JumpingSimulationFactory simulationFactory = new JumpingSimulationFactory(robotModel, initialSetup, commandInputManager);
+      JumpingSimulationFactory simulationFactory = new JumpingSimulationFactory(robotModel, initialSetup);
       SimulationConstructionSet scs = simulationFactory.createSimulation(parameterResourceName);
+      CommandInputManager commandInputManager = simulationFactory.getCommandInputManager();
 
       YoRegistry registry = scs.getRootRegistry();
       YoBoolean triggerJump = new YoBoolean("triggerJump", registry);
