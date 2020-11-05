@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -125,7 +124,8 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          chestFrontShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestFrontShape));
 
-         FrameBox3D chestBackShape = new FrameBox3D(torsoFrame, 0.35, 0.35, 0.4);
+         FrameSTPBox3D chestBackShape = new FrameSTPBox3D(torsoFrame, 0.35, 0.35, 0.4);
+         chestBackShape.setMargins(1.0e-5, 4.0e-4);
          chestBackShape.getPosition().set(-0.111, 0.0, 0.208);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestBackShape));
       }

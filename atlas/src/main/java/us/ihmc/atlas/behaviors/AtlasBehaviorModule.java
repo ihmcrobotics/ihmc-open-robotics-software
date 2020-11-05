@@ -26,7 +26,7 @@ public class AtlasBehaviorModule
       LogTools.info("Creating behavior module");
       BehaviorModule.createInterprocess(BehaviorRegistry.DEFAULT_BEHAVIORS, createRobotModel());
 
-      Runtime.getRuntime().addShutdownHook(ThreadTools.startAThread(this::shutdown, "Cleanup"));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Cleanup"));
    }
 
    private void footstepPlanningToolbox()

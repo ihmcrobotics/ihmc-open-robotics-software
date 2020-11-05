@@ -1,5 +1,6 @@
 package us.ihmc.simulationToolkit.controllers;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -109,12 +110,32 @@ public class JointLowLevelJointControlSimulator implements RobotController
          double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
          double desiredPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : currentPosition;
          double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-
          double desiredRate = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : 0.0;
+
          if (jointDesiredOutput.hasStiffness())
             jointPositionController.setProportionalGain(jointDesiredOutput.getStiffness());
          if (jointDesiredOutput.hasDamping())
             jointPositionController.setDerivativeGain(jointDesiredOutput.getDamping());
+
+         if (jointDesiredOutput.hasPositionFeedbackMaxError())
+         {
+            double error = desiredPosition - currentPosition;
+
+            if (Math.abs(error) > jointDesiredOutput.getPositionFeedbackMaxError())
+            {
+               currentPosition = desiredPosition - MathTools.clamp(error, jointDesiredOutput.getPositionFeedbackMaxError());
+            }
+         }
+
+         if (jointDesiredOutput.hasVelocityFeedbackMaxError())
+         {
+            double error = desiredRate - currentRate;
+
+            if (Math.abs(error) > jointDesiredOutput.getVelocityFeedbackMaxError())
+            {
+               currentRate = desiredRate - MathTools.clamp(error, jointDesiredOutput.getVelocityFeedbackMaxError());
+            }
+         }
 
          if (jointDesiredOutput.hasStiffness() || jointDesiredOutput.hasDamping())
          {

@@ -154,7 +154,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2DReadOnly actualICP)
+   public void compute(RobotSide supportLeg)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
@@ -516,11 +516,11 @@ public class PelvisICPBasedTranslationManager
 
    private final FramePoint2D originalICPToModify = new FramePoint2D();
 
-   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify, FramePoint2D desiredCoPToModify)
+   public void addICPOffset(FramePoint2D desiredICPToModify, FramePoint2D desiredCoMToModify, FramePoint2D desiredCoPToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
-      desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredCoPToModify.changeFrame(supportPolygon.getReferenceFrame());
+      desiredCoMToModify.changeFrame(supportPolygon.getReferenceFrame());
 
       originalICPToModify.setIncludingFrame(desiredICPToModify);
 
@@ -529,7 +529,7 @@ public class PelvisICPBasedTranslationManager
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
          desiredICPToModify.changeFrame(worldFrame);
-         desiredICPVelocityToModify.changeFrame(worldFrame);
+         desiredCoMToModify.changeFrame(worldFrame);
          desiredCoPToModify.changeFrame(worldFrame);
          return;
       }
@@ -549,14 +549,17 @@ public class PelvisICPBasedTranslationManager
          desiredICPOffset.setMatchingFrame(icpOffsetForFreezing);
          desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredCoPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
+         desiredCoMToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);
          desiredCoPToModify.add(icpOffsetForFreezing);
+         desiredCoMToModify.add(icpOffsetForFreezing);
       }
 
       else
       {
          desiredICPToModify.add(tempICPOffset);
          desiredCoPToModify.add(tempICPOffset);
+         desiredCoMToModify.add(tempICPOffset);
 
          convexPolygonShrinker.scaleConvexPolygon(supportPolygon, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
@@ -567,7 +570,7 @@ public class PelvisICPBasedTranslationManager
       }
 
       desiredICPToModify.changeFrame(worldFrame);
-      desiredICPVelocityToModify.changeFrame(worldFrame);
+      desiredCoMToModify.changeFrame(worldFrame);
       desiredCoPToModify.changeFrame(worldFrame);
    }
 

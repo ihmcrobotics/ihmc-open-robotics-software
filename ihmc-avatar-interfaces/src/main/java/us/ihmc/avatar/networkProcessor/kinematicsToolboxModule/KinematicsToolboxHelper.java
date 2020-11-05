@@ -219,6 +219,7 @@ public class KinematicsToolboxHelper
             OneDoFJointBasics joint = joints.get(i);
             joint.setQ(privilegedJointAngles.get(i));
             joint.setQd(0.0);
+            joint.getFrameAfterJoint().update();
          }
       }
 
@@ -228,6 +229,7 @@ public class KinematicsToolboxHelper
       {
          desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
          desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
+         desiredRootJoint.getFrameAfterJoint().update();
       }
 
       boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
@@ -236,8 +238,7 @@ public class KinematicsToolboxHelper
       {
          desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
          desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
+         desiredRootJoint.getFrameAfterJoint().update();
       }
-
-      desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
 }

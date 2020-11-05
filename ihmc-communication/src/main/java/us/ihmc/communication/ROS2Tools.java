@@ -57,6 +57,7 @@ public class ROS2Tools
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
    public static final String T265_NAME = "t265";
+   public static final String MULTISENSE_NAME = "multisense";
    public static final String INPUT = ROS2Topic.INPUT;
    public static final String OUTPUT = ROS2Topic.OUTPUT;
 
@@ -92,11 +93,16 @@ public class ROS2Tools
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<CompressedImage> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(CompressedImage.class).withSuffix("video");
+   public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+
+   public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
+         = IHMC_ROOT.withModule(MULTISENSE_NAME).withType(StereoVisionPointCloudMessage.class).withSuffix("pointcloud");
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD
+         = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
 
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    /** Output regions from Lidar (Multisense) from REA */
@@ -331,10 +337,20 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
+                                                     NewMessageListener<T> newMessageListener,
+                                                     ROS2QosProfile qosProfile,
+                                                     ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
+         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
       }
       catch (IOException e)
       {

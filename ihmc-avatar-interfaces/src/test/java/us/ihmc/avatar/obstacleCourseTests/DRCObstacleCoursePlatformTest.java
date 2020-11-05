@@ -375,9 +375,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
       footstepDataList.setDefaultSwingDuration(1.1);
       footstepDataList.setDefaultTransferDuration(0.5);
-      footstepDataList.getFootstepDataList().get(1).setTransferSplitFraction(0.01);
-      footstepDataList.getFootstepDataList().get(0).setSwingDurationShiftFraction(0.999);
-      footstepDataList.getFootstepDataList().get(0).setSwingSplitFraction(0.75);
       drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);

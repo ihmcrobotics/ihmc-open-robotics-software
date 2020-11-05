@@ -113,9 +113,21 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       }
       Path slamConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      slamConfigurationFilePath = Paths.get(slamConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SLAM_CONFIGURATION_FILE_NAME);
-      LogTools.info("Loading configuration file: {}", slamConfigurationFilePath.toAbsolutePath().normalize());
-      module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, slamConfigurationFilePath);
+      if (slamConfigurationFilePath != null)
+      {
+         slamConfigurationFilePath = Paths.get(slamConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SLAM_CONFIGURATION_FILE_NAME)
+                                          .toAbsolutePath()
+                                          .normalize();
+         LogTools.info("Loading configuration file: {}", slamConfigurationFilePath);
+      }
+      else
+      {
+         LogTools.info("Running from JAR. Saving configuration disabled. {}");
+      }
+      module = AtlasSLAMModule.createIntraprocessModule(ros2Node,
+                                                        drcRobotModel,
+                                                        slamMessager,
+                                                        slamConfigurationFilePath == null ? null : slamConfigurationFilePath.toFile());
 
       Stage secondStage = null;
       if (launchSegmentation)
@@ -127,9 +139,16 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          }
 
          Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-         segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+         if (segmentationConfigurationFilePath != null)
+         {
+            segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(),
+                                                          "/atlas/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+         }
 
-         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, ros2Node, segmentationMessager);
+         segmentationModule
+               = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath == null ? null : segmentationConfigurationFilePath.toFile(),
+                                                                   ros2Node,
+                                                                   segmentationMessager);
          module.attachOcTreeConsumer(segmentationModule);
       }
 

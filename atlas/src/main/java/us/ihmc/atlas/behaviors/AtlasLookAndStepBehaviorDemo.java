@@ -20,6 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.rtps.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -45,6 +46,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_INTERPROCESS_ROS2 = Boolean.parseBoolean(System.getProperty("use.interprocess.ros2"));
    private static boolean USE_INTERPROCESS_KRYO = Boolean.parseBoolean(System.getProperty("use.interprocess.kryo"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
+   private static boolean RUN_LIDAR_REA = Boolean.parseBoolean(System.getProperty("run.lidar.rea", "true"));
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
    private static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
    private static int ENVIRONMENT = Integer.parseInt(System.getProperty("environment", "-1"));
@@ -97,6 +99,7 @@ public class AtlasLookAndStepBehaviorDemo
                                                                                       environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                       RUN_REALSENSE_SLAM,
                                                                                       SHOW_REALSENSE_SLAM_UIS,
+                                                                                      RUN_LIDAR_REA,
                                                                                       createRobotModel()),
                                 "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
@@ -207,8 +210,7 @@ public class AtlasLookAndStepBehaviorDemo
          else
             kinematicsSimulation.destroy();
 
-         if (communicationModeROS2 == CommunicationMode.INTERPROCESS)
-            FastRTPSDomain.getInstance().stopAll();
+         DomainFactory.getDomain(communicationModeROS2.getPubSubImplementation()).stopAll();
 
          destroyed = true;
       }

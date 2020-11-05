@@ -95,7 +95,7 @@ public class SimpleLidarRobotController implements RobotController
       yoGraphicPlanarRegionsList.hideGraphicObject();
       yoGraphicsListRegistry.registerYoGraphic("Regions", yoGraphicPlanarRegionsList);
 
-      lidarScanPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override

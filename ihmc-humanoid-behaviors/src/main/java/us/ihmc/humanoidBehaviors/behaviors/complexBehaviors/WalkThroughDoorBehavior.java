@@ -99,6 +99,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
 
+   // If the goal is within this proximity, the robot won't turn towards the goal but will maintain it's initial orientation while walking
+   private static final double proximityToGoalToMaintainOrientation = 1.5;
 
    public WalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                   FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
@@ -258,6 +260,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             FramePoint3D point1 = offsetPointFromDoor(pushDoorOffsetPoint1);
             FramePoint3D point2 = offsetPointFromDoor(pushDoorOffsetPoint2);
 
+            walkToInteractableObjectBehavior.setProximityToGoalToKeepOrientation(proximityToGoalToMaintainOrientation);
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };
@@ -275,6 +278,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             FramePoint3D point1 = offsetPointFromDoor(pullDoorOffsetPoint1);
             FramePoint3D point2 = offsetPointFromDoor(pullDoorOffsetPoint2);
 
+            walkToInteractableObjectBehavior.setProximityToGoalToKeepOrientation(proximityToGoalToMaintainOrientation);
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };

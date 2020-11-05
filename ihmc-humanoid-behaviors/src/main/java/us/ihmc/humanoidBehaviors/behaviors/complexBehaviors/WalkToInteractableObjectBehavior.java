@@ -2,12 +2,14 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import com.jme3.math.Quaternion;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToInteractableObjectBehavior.WalkToObjectState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -15,6 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -27,6 +30,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    ResetRobotBehavior reset;
    private boolean succeded = true;
    private boolean behaviorComplete = false;
+   private double proximityToGoalToKeepOrientation = Double.MIN_VALUE;
 
    public enum WalkToObjectState
    {
@@ -52,7 +56,6 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       super.onBehaviorEntered();
       succeded = false;
       behaviorComplete = false;
- 
    }
 
    public boolean succeded()
@@ -77,22 +80,10 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
-            FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
-            robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
-            walkingDirection.set(walkPosition2d);
-            walkingDirection.sub(robotPosition);
-            walkingDirection.normalize();
-            float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
-
-            Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
-
-            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
-                                                       JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
+            Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading();
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
          }
       };
 
@@ -110,6 +101,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             walkingDirection.set(walkPosition2d);
             walkingDirection.sub(robotPosition);
             walkingDirection.normalize();
+
             float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
@@ -156,6 +148,40 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
       return WalkToObjectState.GET_READY_TO_WALK;
    }
+
+   private Pair<FramePose3D, Double> computeDesiredGoalAndHeading()
+   {
+      walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose3D poseToWalkTo = new FramePose3D();
+      poseToWalkTo.getPosition().set(walkToPoint1);
+
+      FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
+      FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
+      robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
+      walkingDirection.set(walkPosition2d);
+      walkingDirection.sub(robotPosition);
+      double distanceToGoal = walkPosition2d.distanceXY(robotPosition);
+      walkingDirection.normalize();
+
+      double pathToGoalYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
+
+      if (distanceToGoal < proximityToGoalToKeepOrientation)
+      {
+         double robotYaw = midZupFrame.getTransformToWorldFrame().getRotation().getYaw();
+         poseToWalkTo.getOrientation().setToYawOrientation(robotYaw);
+
+         double desiredHeading = AngleTools.computeAngleDifferenceMinusPiToPi(robotYaw, pathToGoalYaw);
+         return Pair.of(poseToWalkTo, desiredHeading);
+      }
+      else
+      {
+         Quaternion goalOrientation = new Quaternion(new float[] {0, 0, (float) pathToGoalYaw});
+         poseToWalkTo.getOrientation().set(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(goalOrientation));
+         return Pair.of(poseToWalkTo, 0.0);
+      }
+   }
    
    public boolean isDone()
    {
@@ -171,6 +197,11 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    {
       this.walkToPoint1 = walkToPoint1;
       this.walkToPoint2 = walkToPoint2;
+   }
+
+   public void setProximityToGoalToKeepOrientation(double proximityToGoalToKeepOrientation)
+   {
+      this.proximityToGoalToKeepOrientation = proximityToGoalToKeepOrientation;
    }
 
    @Override

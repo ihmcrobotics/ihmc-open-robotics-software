@@ -48,6 +48,7 @@ public class BuildingExplorationBehaviorUI
    private final PlanarRegionViewer planarRegionViewer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final BuildingExplorationFootstepVisualizer footstepVisualizer;
+   private final BuildingExplorationGoalMouseListener goalMouseListener;
    private final ROS2Node ros2Node;
 
    @FXML
@@ -66,6 +67,7 @@ public class BuildingExplorationBehaviorUI
       behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
       behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
       messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
+      messager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -85,10 +87,12 @@ public class BuildingExplorationBehaviorUI
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegions, ShowRegions);
       footstepVisualizer = new BuildingExplorationFootstepVisualizer(ros2Node);
+      goalMouseListener = new BuildingExplorationGoalMouseListener(messager, subScene);
 
       robotVisualizer.start();
       planarRegionViewer.start();
       footstepVisualizer.start();
+      goalMouseListener.start();
 
       GoalGraphic goalGraphic = new GoalGraphic();
       view3dFactory.addNodeToView(goalGraphic);

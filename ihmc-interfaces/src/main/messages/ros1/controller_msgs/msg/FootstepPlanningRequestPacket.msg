@@ -97,12 +97,6 @@ float64 status_publish_period
 # Specifies swing planner to use. See the above enumeration
 int8 requested_swing_planner
 
-# Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
-bool perform_position_based_split_fraction_calculation
-
-# Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
-bool perform_area_based_split_fraction_calculation
-
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
 bool generate_log
