@@ -734,8 +734,8 @@
                      <parameter name="feedbackPartMaxRate" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
                      <parameter name="feedbackPartMaxValueParallelToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                      <parameter name="feedbackPartMaxValueOrthogonalToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="false" />
-                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
+                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="true" />
+                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
                      <parameter name="controllerDynamicsObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="10000.0" />
                      <parameter name="controllerCMPFeedbackWeight" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
                      <parameter name="controllerLimitReachabilityFromAdjustment" type="BooleanParameter" value="false" />
