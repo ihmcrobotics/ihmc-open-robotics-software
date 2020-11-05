@@ -255,9 +255,11 @@ public class CenterOfMassHeightManager
    }
 
    public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
-                                 DoubleProvider walkingControllerMaxComHeightVelocity)
+                                 DoubleProvider walkingControllerMaxComHeightVelocity,
+                                 PIDGainsReadOnly userModeCoMHeightGains)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+      pelvisHeightControlState.setGains(userModeCoMHeightGains);
    }
 
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()

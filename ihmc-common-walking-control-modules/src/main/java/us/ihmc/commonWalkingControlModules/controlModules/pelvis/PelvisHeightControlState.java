@@ -379,6 +379,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       statusDesiredPosition.setX(Double.NaN);
       statusDesiredPosition.setY(Double.NaN);
       statusActualPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getBodyFixedPointToControl());
+      statusActualPosition.changeFrame(ReferenceFrame.getWorldFrame());
       statusActualPosition.setX(Double.NaN);
       statusActualPosition.setY(Double.NaN);
 
