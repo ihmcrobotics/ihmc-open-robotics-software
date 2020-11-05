@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -137,6 +138,11 @@ public class JavaFXRobotVisualizer
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
       newConfigurationReference.set(new Configuration(robotConfigurationData));
+   }
+
+   public void submitNewConfiguration(QuaternionReadOnly rootJointOrientation, Tuple3DReadOnly rootJointTranslation, ToDoubleFunction<String> jointAngles)
+   {
+      submitNewConfiguration(new RigidBodyTransform(rootJointOrientation, rootJointTranslation), jointAngles);
    }
 
    public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)
