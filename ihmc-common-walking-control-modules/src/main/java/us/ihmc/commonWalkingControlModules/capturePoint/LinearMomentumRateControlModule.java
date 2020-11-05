@@ -238,7 +238,10 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
-      this.heightControlCommand = input.getHeightControlCommand();
+      if (input.getUsePelvisHeightCommand())
+         heightControlCommand = input.getPelvisHeightControlCommand();
+      else
+         heightControlCommand = input.getCenterOfMassHeightControlCommand();
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
