@@ -14,6 +14,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class ModifiedOptimizedCoMTrajectoryPlannerTest
 {
    @Test
@@ -189,8 +191,8 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(gravityVector, comAcceleration10, 1e-4);
       EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(gravityVector, comAcceleration11, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp01, 1e-4);
+      assertTrue(initialVRP.distanceXY(vrp00) < 1e-4);
+      assertTrue(initialVRP.distanceXY(vrp01) < 1e-4);
       EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity00, 1e-4);
       EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, vrpVelocity01, 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp20, 1e-4);
@@ -308,8 +310,8 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
 
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, finalDCM, 1e-4);
+      assertTrue(vrp.distanceXY(vrp00) < 1e-4);
+      assertTrue(vrp.distanceXY(vrp01) < 1e-4);
+      assertTrue(vrp.distanceXY(finalDCM) < 1e-4);
    }
 }
