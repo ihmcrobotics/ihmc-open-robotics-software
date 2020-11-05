@@ -69,7 +69,6 @@ public class HighLevelControlManagerFactory
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
-   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -131,11 +130,6 @@ public class HighLevelControlManagerFactory
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
-   public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
-   {
-      this.capturePointPlannerParameters = capturePointPlannerParameters;
-   }
-
    public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.copTrajectoryParameters = copTrajectoryParameters;
@@ -150,7 +144,7 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
-      if (!hasCapturePointPlannerParameters(BalanceManager.class))
+      if (!hasCoPTrajectoryParameters(BalanceManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
@@ -327,11 +321,11 @@ public class HighLevelControlManagerFactory
       return false;
    }
 
-   private boolean hasCapturePointPlannerParameters(Class<?> managerClass)
+   private boolean hasCoPTrajectoryParameters(Class<?> managerClass)
    {
-      if (capturePointPlannerParameters != null)
+      if (copTrajectoryParameters != null)
          return true;
-      missingObjectWarning(ICPTrajectoryPlannerParameters.class, managerClass);
+      missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
       return false;
    }
 

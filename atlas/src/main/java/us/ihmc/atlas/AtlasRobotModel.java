@@ -30,7 +30,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -875,12 +874,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
    {
       return new AtlasSwingPlannerParameters(fileNameSuffix);
-   }
-
-   @Override
-   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
-   {
-      return new AtlasSplitFractionCalculatorParameters();
    }
 
    @Override

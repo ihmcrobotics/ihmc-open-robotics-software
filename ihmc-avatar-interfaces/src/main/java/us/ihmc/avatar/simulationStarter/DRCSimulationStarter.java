@@ -104,7 +104,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
@@ -147,7 +146,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
@@ -466,7 +464,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 capturePointPlannerParameters,
                                                                  copTrajectoryParameters);
       setupHighLevelStates(controllerFactory);
 

@@ -25,10 +25,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 {
    private final YoPreallocatedList<DynamicPlanningFootstep> footsteps;
    private final YoPreallocatedList<PlanningTiming> footstepTimings;
-   private final YoPreallocatedList<PlanningShiftFraction> footstepShiftFractions;
 
-   private final YoDouble finalTransferSplitFraction;
-   private final YoDouble finalTransferWeightDistribution;
    private final YoDouble finalTransferDuration;
    private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
 
@@ -42,17 +39,11 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
    {
       footsteps = new YoPreallocatedList<>(DynamicPlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
       footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, 3);
-      footstepShiftFractions = new YoPreallocatedList<>(PlanningShiftFraction.class, () -> createShiftFractions(registry), "footstepShiftFraction", registry, 3);
       registerVariableToSave(footsteps.getYoPosition());
       registerVariableToSave(footstepTimings.getYoPosition());
-      registerVariableToSave(footstepShiftFractions.getYoPosition());
 
-      finalTransferSplitFraction = new YoDouble("finalTransferSplitFraction", registry);
-      finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
       finalTransferDuration = new YoDouble("finalTransferDuration", registry);
       percentageStandingWeightDistributionOnLeftFoot = new YoDouble("percentageStandingWeightDistributionOnLeftFoot", registry);
-      registerVariableToSave(finalTransferSplitFraction);
-      registerVariableToSave(finalTransferWeightDistribution);
       registerVariableToSave(finalTransferDuration);
       registerVariableToSave(percentageStandingWeightDistributionOnLeftFoot);
 
@@ -123,11 +114,6 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       return footstepTimings.get(index);
    }
 
-   public PlanningShiftFraction getShiftFraction(int index)
-   {
-      return footstepShiftFractions.get(index);
-   }
-
    public FramePose3DReadOnly getFootPose(RobotSide robotSide)
    {
       return footPoses.get(robotSide);
@@ -143,16 +129,6 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       return finalTransferDuration.getDoubleValue();
    }
 
-   public double getFinalTransferSplitFraction()
-   {
-      return finalTransferSplitFraction.getDoubleValue();
-   }
-
-   public double getFinalTransferWeightDistribution()
-   {
-      return finalTransferWeightDistribution.getDoubleValue();
-   }
-
    public double getPercentageStandingWeightDistributionOnLeftFoot()
    {
       return percentageStandingWeightDistributionOnLeftFoot.getValue();
@@ -161,16 +137,6 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
    public void setFinalTransferDuration(double transferDuration)
    {
       finalTransferDuration.set(transferDuration);
-   }
-
-   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
-   {
-      this.finalTransferSplitFraction.set(finalTransferSplitFraction);
-   }
-
-   public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
-   {
-      this.finalTransferWeightDistribution.set(finalTransferWeightDistribution);
    }
 
    public void setPercentageStandingWeightDistributionOnLeftFoot(double percentageStandingWeightDistributionOnLeftFoot)
@@ -184,11 +150,8 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
          footsteps.get(i).clear();
       for (int i = 0; i < footstepTimings.size(); i++)
          footstepTimings.get(i).clear();
-      for (int i = 0; i < footstepShiftFractions.size(); i++)
-         footstepShiftFractions.get(i).clear();
       footsteps.clear();
       footstepTimings.clear();
-      footstepShiftFractions.clear();
    }
 
    public void addFootstep(Footstep footstep)
@@ -201,12 +164,6 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
    {
       if (footstepTimings.size() < footstepTimings.capacity())
          footstepTimings.add().set(timing);
-   }
-
-   public void addFootstepShiftFractions(FootstepShiftFractions shiftFraction)
-   {
-      if (footstepShiftFractions.size() < footstepShiftFractions.capacity())
-         footstepShiftFractions.add().set(shiftFraction);
    }
 
    public void setInitialCoP(FramePoint3DReadOnly initialCoP)

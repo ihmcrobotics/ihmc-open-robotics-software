@@ -16,10 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
-import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
@@ -88,7 +84,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            new DefaultVisibilityGraphParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
-           new DefaultSplitFractionCalculatorParameters(),
            null,
            PlannerTools.createDefaultFootPolygons());
    }
@@ -97,7 +92,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
-                                 SplitFractionCalculatorParametersBasics splitFractionParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -114,7 +108,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
       this.postProcessHandler = new FootstepPlanPostProcessHandler(footstepPlannerParameters,
                                                                    swingPlannerParameters,
-                                                                   splitFractionParameters,
                                                                    walkingControllerParameters,
                                                                    footPolygons);
       registry.addChild(postProcessHandler.getYoVariableRegistry());
@@ -345,11 +338,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return postProcessHandler.getSwingPlannerParameters();
    }
 
-   public SplitFractionCalculatorParametersBasics getSplitFractionParameters()
-   {
-      return postProcessHandler.getSplitFractionParameters();
-   }
-
    public SideDependentList<ConvexPolygon2D> getFootPolygons()
    {
       return aStarFootstepPlanner.getFootPolygons();
@@ -428,16 +416,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
       return postProcessHandler.getSwingOverPlanarRegionsTrajectoryExpander();
-   }
-
-   public AreaBasedSplitFractionCalculator getAreaBasedSplitFractionCalculator()
-   {
-      return postProcessHandler.getAreaBasedSplitFractionCalculator();
-   }
-
-   public PositionBasedSplitFractionCalculator getPositionBasedSplitFractionCalculator()
-   {
-      return postProcessHandler.getPositionBasedSplitFractionCalculator();
    }
 
    public FootstepPlanPostProcessHandler getPostProcessHandler()

@@ -68,14 +68,12 @@ public class FootstepPlannerLogger
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
-   private final SplitFractionCalculatorParametersPacket splitFractionParametersPacket = new SplitFractionCalculatorParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    public FootstepPlannerLogger(FootstepPlanningModule planner)
@@ -170,12 +168,6 @@ public class FootstepPlannerLogger
          swingPlannerParametersPacket.set(planner.getSwingPlannerParameters().getAsPacket());
          byte[] serializedSwingParameters = swingPlannerParametersPacketSerializer.serializeToBytes(swingPlannerParametersPacket);
          writeToFile(swingParametersPacketFile, serializedSwingParameters);
-
-         // log split fraction parameters packet
-         String splitFractionParametersPacketFile = sessionDirectory + splitFractionParametersFileName;
-         splitFractionParametersPacket.set(planner.getSplitFractionParameters().getAsPacket());
-         byte[] serializedSplitFractionParameters = splitFractionParametersPacketSerializer.serializeToBytes(splitFractionParametersPacket);
-         writeToFile(splitFractionParametersPacketFile, serializedSplitFractionParameters);
 
          // log status packet
          String statusPacketFile = sessionDirectory + statusPacketFileName;
