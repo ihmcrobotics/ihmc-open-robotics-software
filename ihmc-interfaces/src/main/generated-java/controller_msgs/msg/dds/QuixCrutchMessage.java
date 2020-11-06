@@ -23,6 +23,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public controller_msgs.msg.dds.QuixStairsStepTypeMessage stairs_step_type_;
    public controller_msgs.msg.dds.QuixSideStepDirectionMessage side_step_direction_;
    public controller_msgs.msg.dds.QuixSlopeStepTypeMessage slope_step_type_;
+   public boolean force_swing_side_;
 
    public QuixCrutchMessage()
    {
@@ -58,6 +59,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.staticCopy(other.stairs_step_type_, stairs_step_type_);
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.staticCopy(other.side_step_direction_, side_step_direction_);
       controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType.staticCopy(other.slope_step_type_, slope_step_type_);
+      force_swing_side_ = other.force_swing_side_;
+
    }
 
    public void setSequenceId(long sequence_id)
@@ -144,6 +147,15 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return slope_step_type_;
    }
 
+   public void setForceSwingSide(boolean force_swing_side)
+   {
+      force_swing_side_ = force_swing_side;
+   }
+   public boolean getForceSwingSide()
+   {
+      return force_swing_side_;
+   }
+
 
    public static Supplier<QuixCrutchMessagePubSubType> getPubSubType()
    {
@@ -179,6 +191,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.stairs_step_type_.epsilonEquals(other.stairs_step_type_, epsilon)) return false;
       if (!this.side_step_direction_.epsilonEquals(other.side_step_direction_, epsilon)) return false;
       if (!this.slope_step_type_.epsilonEquals(other.slope_step_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_swing_side_, other.force_swing_side_, epsilon)) return false;
+
 
       return true;
    }
@@ -209,6 +223,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.stairs_step_type_.equals(otherMyClass.stairs_step_type_)) return false;
       if (!this.side_step_direction_.equals(otherMyClass.side_step_direction_)) return false;
       if (!this.slope_step_type_.equals(otherMyClass.slope_step_type_)) return false;
+      if(this.force_swing_side_ != otherMyClass.force_swing_side_) return false;
+
 
       return true;
    }
@@ -240,7 +256,9 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       builder.append("side_step_direction=");
       builder.append(this.side_step_direction_);      builder.append(", ");
       builder.append("slope_step_type=");
-      builder.append(this.slope_step_type_);
+      builder.append(this.slope_step_type_);      builder.append(", ");
+      builder.append("force_swing_side=");
+      builder.append(this.force_swing_side_);
       builder.append("}");
       return builder.toString();
    }
