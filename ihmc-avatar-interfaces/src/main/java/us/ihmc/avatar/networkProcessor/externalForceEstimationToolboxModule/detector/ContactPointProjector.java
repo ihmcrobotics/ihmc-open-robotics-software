@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
 
@@ -24,11 +23,16 @@ public class ContactPointProjector
       collidableRigidBodies = collidableMap.keySet().toArray(new RigidBodyBasics[0]);
    }
 
-   public boolean isPointInside(FramePoint3DBasics queryPoint)
+   public boolean isPointInsideAnyRigidBody(FramePoint3DBasics queryPoint)
    {
-      for (int i = 0; i < collidableRigidBodies.length; i++)
+      return isPointInside(queryPoint, collidableRigidBodies);
+   }
+
+   public boolean isPointInside(FramePoint3DBasics queryPoint, RigidBodyBasics... rigidBodiesToCheck)
+   {
+      for (int i = 0; i < rigidBodiesToCheck.length; i++)
       {
-         List<Collidable> collidablesToCheck = collidableMap.get(collidableRigidBodies[i]);
+         List<Collidable> collidablesToCheck = collidableMap.get(rigidBodiesToCheck[i]);
 
          for (int j = 0; j < collidablesToCheck.size(); j++)
          {
@@ -43,6 +47,31 @@ public class ContactPointProjector
       }
 
       return false;
+   }
+
+   public List<RigidBodyBasics> computeCollidingRigidBodies(FramePoint3DBasics queryPoint)
+   {
+      List<RigidBodyBasics> collidingRigidBodies = new ArrayList<>();
+
+      outerLoop:
+      for (int i = 0; i < collidableRigidBodies.length; i++)
+      {
+         List<Collidable> collidablesToCheck = collidableMap.get(collidableRigidBodies[i]);
+
+         for (int j = 0; j < collidablesToCheck.size(); j++)
+         {
+            FrameShape3DReadOnly collisionShape = collidablesToCheck.get(j).getShape();
+            queryPoint.changeFrame(collisionShape.getReferenceFrame());
+
+            if (collidablesToCheck.get(j).getShape().isPointInside(queryPoint))
+            {
+               collidingRigidBodies.add(collidablesToCheck.get(j).getRigidBody());
+               continue outerLoop;
+            }
+         }
+      }
+
+      return collidingRigidBodies;
    }
 
    public void projectToSpecificLink(FramePoint3DBasics pointToProject,
@@ -60,7 +89,7 @@ public class ContactPointProjector
 
    /**
     * Projects the given point to the surface of the nearest collidable.
-    * Assumes the point isn't inside a collidable, use {@link #isPointInside} to check
+    * Assumes the point isn't inside a collidable, use {@link #isPointInsideAnyRigidBody} to check
     */
    private RigidBodyBasics projectInternal(FramePoint3DBasics pointToProject,
                                            FramePoint3D contactPointPosition,

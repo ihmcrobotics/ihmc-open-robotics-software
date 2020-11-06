@@ -35,6 +35,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +65,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final ToIntFunction<String> jointNameToMatrixIndexFunction;
    private final YoBoolean calculateRootJointWrench = new YoBoolean("calculateRootJointWrench", registry);
 
+   private final int degreesOfFreedom;
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
    private final DMatrixRMaj controllerDesiredQdd;
    private final DMatrixRMaj controllerDesiredTau;
@@ -75,6 +77,11 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    private PredefinedContactExternalForceSolver predefinedContactForceSolver;
    private ContactParticleFilter contactParticleFilter;
+
+   // Particle filter parameters
+   private final YoBoolean enableJointNoiseModel = new YoBoolean("enableJointNoiseModel", registry);
+   private final YoDouble rootJointNoise = new YoDouble("rootJointNoise", registry);
+   private final YoDouble jointNoiseMultiplier = new YoDouble("jointNoiseMultiplier", registry);
 
    public ExternalForceEstimationToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -117,7 +124,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
       this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox);
-      int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      this.degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       this.controllerDesiredQdd = new DMatrixRMaj(degreesOfFreedom, 1);
       this.controllerDesiredTau = new DMatrixRMaj(degreesOfFreedom, 1);
@@ -152,6 +159,10 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          OneDoFJointBasics joint = jointNameMap.get(j);
          return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
+
+      enableJointNoiseModel.set(false);
+      rootJointNoise.set(20.0);
+      jointNoiseMultiplier.set(0.03);
    }
 
    @Override
@@ -244,8 +255,10 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       if (estimateContactPosition.getBooleanValue())
       {
+         setModelledJointNoise();
+
          contactParticleFilter.doControl();
-         if (contactParticleFilter.foundSolution())
+         if (contactParticleFilter.hasConverged())
          {
             isDone.set(true);
          }
@@ -280,6 +293,31 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
       statusOutputManager.reportStatusMessage(outputStatus);
+   }
+
+   public void setModelledJointNoise()
+   {
+      if (enableJointNoiseModel.getBooleanValue())
+      {
+         for (int i = 0; i < 6; i++)
+         {
+            contactParticleFilter.setDoFVariance(i, rootJointNoise.getValue());
+         }
+
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            String name = oneDoFJoints[i].getName();
+            double modeledNoise = jointNoiseMultiplier.getValue() * Math.abs(oneDoFJoints[i].getEffortLimitUpper());
+            contactParticleFilter.setDoFVariance(jointNameToMatrixIndexFunction.applyAsInt(name), modeledNoise);
+         }
+      }
+      else
+      {
+         for (int i = 0; i < degreesOfFreedom; i++)
+         {
+            contactParticleFilter.setDoFVariance(i, 1.0);
+         }
+      }
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
