@@ -57,10 +57,19 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean controlHeightWithMomentum;
 
+   /**
+    * Specifies whether the momentum module should use the pelvis height control command or the CoM height control command.
+    */
    private boolean usePelvisHeightCommand;
 
+   /**
+    * Contains the feedback command information for the center of mass height. Used to compute the necessary vertical momentum.
+    */
    private final CenterOfMassFeedbackControlCommand comHeightControlCommand = new CenterOfMassFeedbackControlCommand();
 
+   /**
+    * Contains the feedback command information for the pelvis height. Used to compute the necessary vertical momentum.
+    */
    private final PointFeedbackControlCommand pelvisHeightControlCommand = new PointFeedbackControlCommand();
 
    /**
