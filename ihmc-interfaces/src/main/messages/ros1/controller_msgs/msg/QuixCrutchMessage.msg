@@ -23,4 +23,6 @@ controller_msgs/QuixSideStepDirectionMessage side_step_direction
 
 controller_msgs/QuixSlopeStepTypeMessage slope_step_type
 
+bool force_swing_side
+
 
