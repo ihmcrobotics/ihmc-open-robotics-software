@@ -20,6 +20,9 @@ public class LinearMomentumRateControlModuleOutput
     */
    private final FramePoint2D desiredCMP = new FramePoint2D();
 
+   /**
+    * This is the error that wasn't compensated for by momentum feedback. This can be used for other balance mechanisms, like step adjustment.
+    */
    private final FrameVector2D residualICPErrorForStepAdjustment = new FrameVector2D();
 
    public void setResidualICPErrorForStepAdjustment(FrameVector2DReadOnly residualICPErrorForStepAdjustment)
