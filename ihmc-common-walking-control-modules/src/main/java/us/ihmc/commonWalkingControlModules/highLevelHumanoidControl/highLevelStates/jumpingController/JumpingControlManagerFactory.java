@@ -1,15 +1,9 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.JumpingBalanceManager;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
@@ -30,6 +24,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -43,32 +38,35 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class HighLevelControlManagerFactory
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public class JumpingControlManagerFactory
 {
    public static final String weightRegistryName = "MomentumOptimizationSettings";
    public static final String jointspaceGainRegistryName = "JointspaceGains";
    public static final String rigidBodyGainRegistryName = "RigidBodyGains";
    public static final String footGainRegistryName = "FootGains";
-   public static final String comHeightGainRegistryName = "ComHeightGains";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
    private final YoRegistry jointGainRegistry = new YoRegistry(jointspaceGainRegistryName);
    private final YoRegistry bodyGainRegistry = new YoRegistry(rigidBodyGainRegistryName);
    private final YoRegistry footGainRegistry = new YoRegistry(footGainRegistryName);
-   private final YoRegistry comHeightGainRegistry = new YoRegistry(comHeightGainRegistryName);
 
-   private BalanceManager balanceManager;
-   private CenterOfMassHeightManager centerOfMassHeightManager;
-   private FeetManager feetManager;
-   private PelvisOrientationManager pelvisOrientationManager;
-   private LegConfigurationManager legConfigurationManager;
+   private JumpingFeetManager feetManager;
+   private JumpingPelvisOrientationManager pelvisOrientationManager;
+   private JumpingBalanceManager balanceManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
-   private HighLevelHumanoidControllerToolbox controllerToolbox;
+   private JumpingControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
+   private JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -82,26 +80,29 @@ public class HighLevelControlManagerFactory
    private Vector3DReadOnly loadedFootAngularWeight;
    private Vector3DReadOnly loadedFootLinearWeight;
    private PIDSE3GainsReadOnly swingFootGains;
-   private PIDSE3GainsReadOnly holdFootGains;
-   private PIDSE3GainsReadOnly toeOffFootGains;
 
-   private PIDGainsReadOnly walkingControllerComHeightGains;
-   private DoubleProvider walkingControllerMaxComHeightVelocity;
-   private PIDGainsReadOnly userModeComHeightGains;
-
-   public HighLevelControlManagerFactory(YoRegistry parentRegistry)
+   public JumpingControlManagerFactory(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);
       parentRegistry.addChild(jointGainRegistry);
       parentRegistry.addChild(bodyGainRegistry);
       parentRegistry.addChild(footGainRegistry);
-      parentRegistry.addChild(comHeightGainRegistry);
    }
 
-   public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
+   public void setHighLevelHumanoidControllerToolbox(JumpingControllerToolbox controllerToolbox)
    {
       this.controllerToolbox = controllerToolbox;
+   }
+
+   public void setCoPTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
+   {
+      this.copTrajectoryParameters = copTrajectoryParameters;
+   }
+
+   public void setJumpingCoPTrajectoryParameters(JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters)
+   {
+      this.jumpingCopTrajectoryParameters = jumpingCopTrajectoryParameters;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -122,57 +123,6 @@ public class HighLevelControlManagerFactory
       loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
 
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
-      holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
-      toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
-
-      walkingControllerComHeightGains = new ParameterizedPIDGains("WalkingControllerComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
-      walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, walkingControllerParameters.getMaximumVelocityCoMHeight());
-      userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
-   }
-
-   public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
-   {
-      this.copTrajectoryParameters = copTrajectoryParameters;
-   }
-
-   public BalanceManager getOrCreateBalanceManager()
-   {
-      if (balanceManager != null)
-         return balanceManager;
-
-      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(BalanceManager.class))
-         return null;
-      if (!hasCoPTrajectoryParameters(BalanceManager.class))
-         return null;
-      if (!hasMomentumOptimizationSettings(BalanceManager.class))
-         return null;
-
-      balanceManager = new BalanceManager(controllerToolbox,
-                                          walkingControllerParameters,
-                                          copTrajectoryParameters,
-                                          registry);
-      return balanceManager;
-   }
-
-   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager()
-   {
-      if (centerOfMassHeightManager != null)
-         return centerOfMassHeightManager;
-
-      if (!hasHighLevelHumanoidControllerToolbox(CenterOfMassHeightManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(CenterOfMassHeightManager.class))
-         return null;
-
-      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
-      centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
-      centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
-      centerOfMassHeightManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
-      centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
-      return centerOfMassHeightManager;
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame,
@@ -193,7 +143,7 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
-      if (!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
 
       // Gains
@@ -209,13 +159,12 @@ public class HighLevelControlManagerFactory
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, controlFrame, baseFrame,
                                                                     taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
-                                                                    taskspacePositionGains, contactableBody, defaultControlMode, yoTime, graphicsListRegistry, registry);
+                                                                    taskspacePositionGains, null, defaultControlMode, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
@@ -223,25 +172,22 @@ public class HighLevelControlManagerFactory
       return manager;
    }
 
-   public FeetManager getOrCreateFeetManager()
+   public JumpingFeetManager getOrCreateFeetManager()
    {
       if (feetManager != null)
          return feetManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(FeetManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(JumpingFeetManager.class))
          return null;
-      if (!hasWalkingControllerParameters(FeetManager.class))
+      if (!hasWalkingControllerParameters(JumpingFeetManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(FeetManager.class))
+      if (!hasMomentumOptimizationSettings(JumpingFeetManager.class))
          return null;
 
-      feetManager = new FeetManager(controllerToolbox,
+      feetManager = new JumpingFeetManager(controllerToolbox,
                                     walkingControllerParameters,
                                     swingFootGains,
-                                    holdFootGains,
-                                    toeOffFootGains,
-                                    registry,
-                                    controllerToolbox.getYoGraphicsListRegistry());
+                                    registry);
 
       String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
@@ -260,47 +206,40 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
-   @Deprecated
-   public LegConfigurationManager getOrCreateKneeAngleManager()
+   public JumpingBalanceManager getOrCreateBalanceManager()
    {
-      return getOrCreateLegConfigurationManager();
+      if (balanceManager != null)
+         return balanceManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(JumpingBalanceManager.class))
+         return null;
+      if (!hasCoPTrajectoryParameters(JumpingBalanceManager.class))
+         return null;
+      if (!hasJumpingCoPTrajectoryParameters(JumpingBalanceManager.class))
+         return null;
+
+      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, jumpingCopTrajectoryParameters, registry);
+
+      return balanceManager;
    }
 
-   public LegConfigurationManager getOrCreateLegConfigurationManager()
-   {
-      if (legConfigurationManager != null)
-         return legConfigurationManager;
-
-      if (!hasHighLevelHumanoidControllerToolbox(LegConfigurationManager.class))
-         return null;
-      if (!hasWalkingControllerParameters(LegConfigurationManager.class))
-         return null;
-      if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
-         return null;
-
-      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters, registry);
-      return legConfigurationManager;
-   }
-
-   public PelvisOrientationManager getOrCreatePelvisOrientationManager()
+   public JumpingPelvisOrientationManager getOrCreatePelvisOrientationManager()
    {
       if (pelvisOrientationManager != null)
          return pelvisOrientationManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(PelvisOrientationManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(JumpingPelvisOrientationManager.class))
          return null;
-      if (!hasWalkingControllerParameters(PelvisOrientationManager.class))
+      if (!hasWalkingControllerParameters(JumpingPelvisOrientationManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
+      if (!hasMomentumOptimizationSettings(JumpingPelvisOrientationManager.class))
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
-      PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
-      LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
+      pelvisOrientationManager = new JumpingPelvisOrientationManager(pelvisGains, controllerToolbox,
                                                               registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
@@ -311,7 +250,7 @@ public class HighLevelControlManagerFactory
    {
       if (controllerToolbox != null)
          return true;
-      missingObjectWarning(HighLevelHumanoidControllerToolbox.class, managerClass);
+      missingObjectWarning(JumpingControllerToolbox.class, managerClass);
       return false;
    }
 
@@ -331,6 +270,14 @@ public class HighLevelControlManagerFactory
       return false;
    }
 
+   private boolean hasJumpingCoPTrajectoryParameters(Class<?> managerClass)
+   {
+      if (jumpingCopTrajectoryParameters != null)
+         return true;
+      missingObjectWarning(JumpingCoPTrajectoryParameters.class, managerClass);
+      return false;
+   }
+
    private boolean hasMomentumOptimizationSettings(Class<?> managerClass)
    {
       if (momentumOptimizationSettings != null)
@@ -346,10 +293,6 @@ public class HighLevelControlManagerFactory
 
    public void initializeManagers()
    {
-      if (balanceManager != null)
-         balanceManager.initialize();
-      if (centerOfMassHeightManager != null)
-         centerOfMassHeightManager.initialize();
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.initialize();
 
@@ -378,8 +321,6 @@ public class HighLevelControlManagerFactory
          if (bodyManager != null)
             ret.addCommand(bodyManager.createFeedbackControlTemplate());
       }
-
-      ret.addCommand(centerOfMassHeightManager.createFeedbackControlTemplate());
 
       if (pelvisOrientationManager != null)
       {
