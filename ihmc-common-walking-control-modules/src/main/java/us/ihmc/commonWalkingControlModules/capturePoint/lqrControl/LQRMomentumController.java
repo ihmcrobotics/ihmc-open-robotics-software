@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -29,6 +30,8 @@ import java.util.List;
  */
 public class LQRMomentumController
 {
+   private final static double sufficientlyLarge = 1e3;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
@@ -123,7 +126,7 @@ public class LQRMomentumController
       relativeVRPTrajectories.clear();
 
       Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(lastTrajectory.getFinalTime());
+      lastTrajectory.compute(Math.min(sufficientlyLarge, lastTrajectory.getFinalTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 
@@ -232,6 +235,16 @@ public class LQRMomentumController
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
+   }
+
+   public FramePoint3DReadOnly getFeedbackVRPPosition()
+   {
+      return feedbackVRPPosition;
+   }
+
+   public FramePoint3DReadOnly getReferenceVRPPosition()
+   {
+      return referenceVRPPosition;
    }
 
    /**

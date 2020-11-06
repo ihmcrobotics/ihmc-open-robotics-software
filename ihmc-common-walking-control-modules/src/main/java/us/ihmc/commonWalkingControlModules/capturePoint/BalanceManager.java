@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.trajectories.OptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;

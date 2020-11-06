@@ -36,6 +36,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private final YoRegistry registry;
 
+   private final ReferenceFrame trajectoryFrame;
+
    private final YoDouble stepTime;
    private final YoDouble timeIntoStep;
    private final YoBoolean isDone;
@@ -58,7 +60,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private final FrameVector3D initialVelocityNoTimeDimension = new FrameVector3D();
    private final FrameVector3D finalVelocityNoTimeDiemension = new FrameVector3D();
-   private final FrameVector3D tempWaypointVelocity = new FrameVector3D();
+   private final FrameVector3D tempWaypointVelocity;
 
    private final FramePoint3D tempPoint3D = new FramePoint3D();
 
@@ -71,11 +73,21 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, YoRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
+                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, worldFrame, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, ReferenceFrame trajectoryFrame,
+                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
+
+      this.trajectoryFrame = trajectoryFrame;
+
+      tempWaypointVelocity = new FrameVector3D(trajectoryFrame);
 
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
@@ -98,10 +110,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       for (int i = 0; i < numberWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
 
-      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints);
+      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints, trajectoryFrame);
 
       for (int i = 0; i < numberWaypoints; i++)
-         waypointPositions.add(new FramePoint3D());
+         waypointPositions.add(new FramePoint3D(trajectoryFrame));
 
       if (yoGraphicsListRegistry != null)
          waypointViz = new BagOfBalls(numberWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
@@ -156,7 +168,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       for (int i = 0; i < numberWaypoints; i++)
       {
          waypointPositions.get(i).setIncludingFrame(waypoints.get(i));
-         waypointPositions.get(i).changeFrame(worldFrame);
+         waypointPositions.get(i).changeFrame(trajectoryFrame);
       }
    }
 
@@ -200,9 +212,9 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       timeIntoStep.set(0.0);
       isDone.set(false);
 
-      initialPosition.changeFrame(worldFrame);
-      finalPosition.changeFrame(worldFrame);
-      stanceFootPosition.changeFrame(worldFrame);
+      initialPosition.changeFrame(trajectoryFrame);
+      finalPosition.changeFrame(trajectoryFrame);
+      stanceFootPosition.changeFrame(trajectoryFrame);
 
       needToAdjustedSwingForSelfCollision.set(computeSwingAdjustment(initialPosition, finalPosition, stanceFootPosition, swingOffset));
 
@@ -290,13 +302,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, tempPoint);
       boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(tempPoint, pointA2D, pointB2D);
 
-      xyDistanceToStance.setToZero(worldFrame);
+      xyDistanceToStance.setToZero(trajectoryFrame);
       xyDistanceToStance.sub(tempPoint, stance2D);
       xyDistanceToStance.changeFrame(stanceZUpFrame);
 
       // If the nominal trajectory intersects the negative Y axis of the sole frame for a swing with the left side the step is a cross over step.
-      pointAInStance.setIncludingFrame(worldFrame, pointA2D);
-      pointBInStance.setIncludingFrame(worldFrame, pointB2D);
+      pointAInStance.setIncludingFrame(trajectoryFrame, pointA2D);
+      pointBInStance.setIncludingFrame(trajectoryFrame, pointB2D);
       pointAInStance.changeFrame(stanceZUpFrame);
       pointBInStance.changeFrame(stanceZUpFrame);
       boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0, 0.0, 0.0, 1.0, pointAInStance.getX(),
@@ -330,7 +342,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          return false;
       }
 
-      xyDistanceToStance.changeFrame(worldFrame);
+      xyDistanceToStance.changeFrame(trajectoryFrame);
       xyDistanceToStance.normalize();
       xyDistanceToStance.scale(distance);
       offsetToPack.set(xyDistanceToStance);
@@ -358,8 +370,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       if (waypointViz == null)
          return;
 
+      tempPoint3D.setToZero(worldFrame);
       for (int i = 0; i < numberWaypoints; i++)
-         waypointViz.setBall(waypointPositions.get(i), i);
+      {
+         tempPoint3D.setMatchingFrame(waypointPositions.get(i));
+         waypointViz.setBall(tempPoint3D, i);
+      }
    }
 
    @Override
@@ -450,7 +466,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       trajectory.getWaypointVelocity(waypointIndex, tempWaypointVelocity);
       tempWaypointVelocity.scale(1.0 / stepTime.getDoubleValue());
 
-      waypointDataToPack.setToNaN(worldFrame);
+      waypointDataToPack.setToNaN(trajectoryFrame);
       waypointDataToPack.setTime(waypointTime);
       waypointDataToPack.setPosition(waypointPositions.get(waypointIndex));
       waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
