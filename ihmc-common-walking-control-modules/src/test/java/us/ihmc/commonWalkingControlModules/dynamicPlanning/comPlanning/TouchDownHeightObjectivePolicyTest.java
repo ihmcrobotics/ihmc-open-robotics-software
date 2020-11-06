@@ -50,7 +50,7 @@ public class TouchDownHeightObjectivePolicyTest
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.lu(6);
       MatrixTools.addDiagonal(hessian, 1e-5);
-      CommonOps_DDRM.scale(0.5, zGradient);
+      CommonOps_DDRM.scale(-0.5, zGradient);
 
       solver.setA(hessian);
       solver.solve(zGradient, zCoefficients);
