@@ -26,11 +26,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
-public class ContactStateToForceMatrixHelper
+public class ContactStateMagnitudeToForceMatrixHelper
 {
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
-   private final int rhoSize;
+   private int rhoSize;
    private final FrameVector3D[] basisVectors;
    private final FramePoint3D[] basisVectorsOrigin;
    private final double basisVectorAngleIncrement;
@@ -46,9 +46,9 @@ public class ContactStateToForceMatrixHelper
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
    private final FrictionConeRotationCalculator coneRotationCalculator;
 
-   public ContactStateToForceMatrixHelper(int maxNumberOfContactPoints,
-                                          int numberOfBasisVectorsPerContactPoint,
-                                          FrictionConeRotationCalculator coneRotationCalculator)
+   public ContactStateMagnitudeToForceMatrixHelper(int maxNumberOfContactPoints,
+                                                   int numberOfBasisVectorsPerContactPoint,
+                                                   FrictionConeRotationCalculator coneRotationCalculator)
    {
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
@@ -93,7 +93,7 @@ public class ContactStateToForceMatrixHelper
       return basisVectorsOrigin[index];
    }
 
-   Point3D point = new Point3D();
+   private final Point3D point = new Point3D();
 
    public void computeMatrices(ConvexPolygon2DReadOnly contactPointsInPlaneFrame,
                                FramePose3DReadOnly framePose,
@@ -109,6 +109,11 @@ public class ContactStateToForceMatrixHelper
 
       // Compute the orientation of the normal contact vector and the corresponding transformation matrix
       computeNormalContactVectorRotation(normalContactVectorRotationMatrix);
+
+      rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
+      rhoMaxMatrix.reshape(rhoSize, 1);
+      rhoWeightMatrix.reshape(rhoSize, rhoSize);
+      rhoRateWeightMatrix.reshape(rhoSize, rhoSize);
 
       int rhoIndex = 0;
 
