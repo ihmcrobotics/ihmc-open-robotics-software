@@ -141,6 +141,16 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
       return selectionMatrix;
    }
 
+   public void setMomentumRateHessian(DMatrixRMaj momentumRateHessian)
+   {
+      this.momentumRateHessian.set(momentumRateHessian);
+   }
+
+   public void setMomentumRateGradient(DMatrixRMaj momentumRateGradient)
+   {
+      this.momentumRateGradient.set(momentumRateGradient);
+   }
+
    public void setLinearMomentumRateHessian(DMatrixRMaj linearMomentumRateHessian)
    {
       MatrixTools.setMatrixBlock(this.momentumRateHessian, 3, 3, linearMomentumRateHessian, 0, 0, 3, 3, 1.0);
@@ -149,8 +159,6 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
    public void setLinearMomentumRateGradient(DMatrixRMaj linearMomentumRateGradient)
    {
       MatrixTools.setMatrixBlock(this.momentumRateGradient, 0, 3, linearMomentumRateGradient, 0, 0, 1, 3, 1.0);
-
-      this.momentumRateGradient.set(momentumRateGradient);
    }
 
    public DMatrixRMaj getMomentumRateHessian()
