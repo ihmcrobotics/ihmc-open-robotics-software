@@ -819,27 +819,15 @@ public class CrossRobotCommandResolver
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
-      resolveFrameTuple2D(in.getDesiredICPAtEndOfState(), out.getDesiredICPAtEndOfState());
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
-      out.setDesiredCenterOfMassHeightAcceleration(in.getDesiredCoMHeightAcceleration());
-      out.setSupportSide(in.getSupportSide());
-      out.setTransferToSide(in.getTransferToSide());
-      out.setInitializeForStanding(in.getInitializeForStanding());
-      out.setInitializeForSingleSupport(in.getInitializeForSingleSupport());
-      out.setInitializeForTransfer(in.getInitializeForTransfer());
+      out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
+      resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
+      out.setInitializeOnStateChange(in.getInitializeOnStateChange());
       out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
-      RecyclingArrayList<SimpleFootstep> outFootsteps = out.getFootsteps();
-      RecyclingArrayList<SimpleFootstep> inFootsteps = in.getFootsteps();
-      outFootsteps.clear();
-      for (int i = 0; i < inFootsteps.size(); i++)
-         resolveSimpleAdjustableFootstep(inFootsteps.get(i), outFootsteps.add());
-      out.setSwingDurations(in.getSwingDurations());
-      out.setTransferDurations(in.getTransferDurations());
-      out.setFinalTransferDuration(in.getFinalTransferDuration());
-      out.setRemainingTimeInSwingUnderDisturbance(in.getRemainingTimeInSwingUnderDisturbance());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
    }
@@ -847,10 +835,7 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
    {
       resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
-      resolveFrameTuple3D(in.getEffectiveICPAdjustment(), out.getEffectiveICPAdjustment());
-      out.setUsingStepAdjustment(in.getUsingStepAdjustment());
-      out.setFootstepWasAdjusted(in.getFootstepWasAdjusted());
-      resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
+      resolveFrameTuple2D(in.getResidualICPErrorForStepAdjustment(), out.getResidualICPErrorForStepAdjustment());
    }
 
    public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)
