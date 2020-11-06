@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -443,7 +444,7 @@ public class WalkingControllerTest
    private void createWalkingControllerAndSetUpManagerFactory()
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
@@ -495,17 +496,10 @@ public class WalkingControllerTest
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
                                                                               defaultInitialTransferTime,
                                                                               defaultFinalTransferTime,
-                                                                              defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction,
-                                                                              defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction,
                                                                               feet,
                                                                               statusOutputManager,
                                                                               yoTime,
@@ -515,7 +509,7 @@ public class WalkingControllerTest
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager,
                                                                  statusOutputManager,

@@ -37,6 +37,14 @@ public class SettableContactStateProvider implements ContactStateProvider
       bodiesInContact.clear();
    }
 
+   public void set(ContactStateProvider other)
+   {
+      setStartCopPosition(other.getCopStartPosition());
+      setEndCopPosition(other.getCopEndPosition());
+      setTimeInterval(other.getTimeInterval());
+      setContactState(other.getContactState());
+   }
+
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
    {
       this.startCopPosition.set(startCopPosition);
@@ -100,6 +108,27 @@ public class SettableContactStateProvider implements ContactStateProvider
    public TimeIntervalBasics getTimeInterval()
    {
       return timeInterval;
+   }
+
+   public void setDuration(double duration)
+   {
+      setEndTime(getTimeInterval().getStartTime() + duration);
+   }
+
+   public void setStartTime(double startTime)
+   {
+      getTimeInterval().setStartTime(startTime);
+   }
+
+   public void setEndTime(double endTime)
+   {
+      getTimeInterval().setEndTime(endTime);
+   }
+
+   public void setStartFromEnd(ContactStateProvider previousContactState)
+   {
+      setStartTime(previousContactState.getTimeInterval().getEndTime());
+      setStartCopPosition(previousContactState.getCopEndPosition());
    }
 
    public List<String> getBodiesInContact()

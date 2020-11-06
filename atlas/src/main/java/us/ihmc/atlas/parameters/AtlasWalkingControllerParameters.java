@@ -407,7 +407,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       footSwitchFactory.setDefaultContactThresholdForce(massScale * contactThresholdForce);
       footSwitchFactory.setDefaultCoPThresholdFraction(0.02);
-      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(massScale * 220.0);
+      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(massScale * (runningOnRealRobot ? 220.0 : 180.0));
       return footSwitchFactory;
    }
 

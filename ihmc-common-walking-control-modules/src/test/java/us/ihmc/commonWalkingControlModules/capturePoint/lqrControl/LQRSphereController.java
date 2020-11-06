@@ -58,14 +58,21 @@ public class LQRSphereController implements SphereControllerInterface
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
-      lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
-      sphereRobot.getCenterOfMass().get(currentState);
-      sphereRobot.getCenterOfMassVelocity().get(3, currentState);
-      lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
+      if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
+      {
+         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
+         sphereRobot.getCenterOfMass().get(currentState);
+         sphereRobot.getCenterOfMassVelocity().get(3, currentState);
+         lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
 
-      lqrForce.set(lqrMomentumController.getU());
-      lqrForce.addZ(sphereRobot.getGravityZ());
-      lqrForce.scale(sphereRobot.getTotalMass());
+         lqrForce.set(lqrMomentumController.getU());
+         lqrForce.addZ(sphereRobot.getGravityZ());
+         lqrForce.scale(sphereRobot.getTotalMass());
+      }
+      else
+      {
+         lqrForce.setToZero();
+      }
 
       externalForcePoint.setForce(lqrForce);
 

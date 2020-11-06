@@ -498,7 +498,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
@@ -514,7 +514,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);

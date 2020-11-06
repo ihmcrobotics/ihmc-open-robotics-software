@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -31,6 +32,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
@@ -136,10 +138,17 @@ public class ExperimentalSimulation extends Simulation
       RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
 
       MultiBodySystemStateWriter controllerOutputWriter = createControllerOutputWriter(scsRobot);
-      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+      MultiBodySystemStateWriter physicsInputStateWriter = toMultiBodySystemStateWriter(scsRobot);
+      MultiBodySystemStateReader physicsOutputStateReader = createPhysicsOutputStateReader(scsRobot);
 
       rootBodies.add(rootBody);
-      physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      physicsEngine.addRobot(robotDescription.getName(),
+                             rootBody,
+                             controllerOutputWriter,
+                             robotInitialStateWriter,
+                             robotCollisionModel,
+                             physicsInputStateWriter,
+                             physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
@@ -155,10 +164,17 @@ public class ExperimentalSimulation extends Simulation
       RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
       RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
 
-      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+      MultiBodySystemStateWriter physicsInputStateWriter = toMultiBodySystemStateWriter(scsRobot);
+      MultiBodySystemStateReader physicsOutputStateReader = createPhysicsOutputStateReader(scsRobot);
 
       rootBodies.add(rootBody);
-      physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      physicsEngine.addRobot(robotDescription.getName(),
+                             rootBody,
+                             controllerOutputWriter,
+                             robotInitialStateWriter,
+                             robotCollisionModel,
+                             physicsInputStateWriter,
+                             physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
@@ -186,9 +202,16 @@ public class ExperimentalSimulation extends Simulation
       Robot scsRobot = Stream.of(getRobots()).filter(candidate -> candidate.getName().toLowerCase().equals(robotName.toLowerCase())).findFirst().get();
 
       MultiBodySystemStateWriter controllerOutputWriter = createControllerOutputWriter(scsRobot);
-      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+      MultiBodySystemStateWriter physicsInputStateWriter = toMultiBodySystemStateWriter(scsRobot);
+      MultiBodySystemStateReader physicsOutputStateReader = createPhysicsOutputStateReader(scsRobot);
       rootBodies.add(rootBody);
-      physicsEngine.addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      physicsEngine.addRobot(robotName,
+                             rootBody,
+                             controllerOutputWriter,
+                             robotInitialStateWriter,
+                             robotCollisionModel,
+                             physicsInputStateWriter,
+                             physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
@@ -300,7 +323,7 @@ public class ExperimentalSimulation extends Simulation
       super.closeAndDispose();
    }
 
-   private MultiBodySystemStateReader createPhysicsOutputWriter(Robot scsRobot)
+   private MultiBodySystemStateReader createPhysicsOutputStateReader(Robot scsRobot)
    {
       return new MultiBodySystemStateReader()
       {
@@ -348,7 +371,7 @@ public class ExperimentalSimulation extends Simulation
                      public void run()
                      {
                         scsJoint.setPosition(idJoint.getJointPose().getPosition());
-                        scsJoint.setQuaternion(idJoint.getJointPose().getOrientation());
+                        scsJoint.setOrientation(idJoint.getJointPose().getOrientation());
 
                         linearVelocity.setMatchingFrame(idJoint.getJointTwist().getLinearPart());
 
@@ -375,9 +398,10 @@ public class ExperimentalSimulation extends Simulation
          private final List<Runnable> stateCopiers = new ArrayList<>();
 
          @Override
-         public void write()
+         public boolean write()
          {
             stateCopiers.forEach(Runnable::run);
+            return true;
          }
 
          @Override
@@ -460,42 +484,69 @@ public class ExperimentalSimulation extends Simulation
                                                                                         DRCRobotJointMap jointMap)
    {
       initialSetup.accept(robot, jointMap);
+      return toMultiBodySystemStateWriter(robot);
+   }
 
+   private static MultiBodySystemStateWriter toMultiBodySystemStateWriter(Robot robot)
+   {
       return new MultiBodySystemStateWriter()
       {
          private List<? extends JointBasics> allIDJoints;
+         private final FrameVector3D linearVelocity = new FrameVector3D();
+         private final double epsilon = 1.0e-10;
 
          @Override
-         public void write()
+         public boolean write()
          {
+            boolean stateChanged = false;
+
             for (JointBasics idJoint : allIDJoints)
             {
                if (idJoint instanceof OneDoFJointBasics)
                {
-                  OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) robot.getJoint(idJoint.getName());
-                  ((OneDoFJointBasics) idJoint).setQ(scsJoint.getQ());
-                  ((OneDoFJointBasics) idJoint).setQd(scsJoint.getQD());
+                  OneDegreeOfFreedomJoint scsOneDoFJoint = (OneDegreeOfFreedomJoint) robot.getJoint(idJoint.getName());
+                  OneDoFJointBasics idOneDoFJoint = (OneDoFJointBasics) idJoint;
+
+                  if (!stateChanged)
+                     stateChanged = !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQ(), scsOneDoFJoint.getQ(), epsilon)
+                           || !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQd(), scsOneDoFJoint.getQD(), epsilon);
+
+                  idOneDoFJoint.setQ(scsOneDoFJoint.getQ());
+                  idOneDoFJoint.setQd(scsOneDoFJoint.getQD());
                }
                else if (idJoint instanceof SixDoFJointBasics)
                {
-                  FloatingJoint scsJoint = (FloatingJoint) robot.getJoint(idJoint.getName());
+                  FloatingJoint scsSixDoFJoint = (FloatingJoint) robot.getJoint(idJoint.getName());
                   SixDoFJointBasics idSixDoFJoint = (SixDoFJointBasics) idJoint;
 
                   Pose3DBasics jointPose = idSixDoFJoint.getJointPose();
-                  jointPose.getOrientation().set(scsJoint.getQuaternion());
-                  scsJoint.getPosition(jointPose.getPosition());
+                  FixedFrameTwistBasics jointTwist = idSixDoFJoint.getJointTwist();
 
-                  FrameVector3D linearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
-                  scsJoint.getVelocity(linearVelocity);
+                  if (!stateChanged)
+                     stateChanged = !jointPose.getPosition().epsilonEquals(scsSixDoFJoint.getPosition(), epsilon);
+                  if (!stateChanged)
+                     stateChanged = !jointPose.getOrientation().epsilonEquals(scsSixDoFJoint.getQuaternion(), epsilon);
+
+                  jointPose.getOrientation().set(scsSixDoFJoint.getQuaternion());
+                  scsSixDoFJoint.getPosition(jointPose.getPosition());
+
+                  scsSixDoFJoint.getVelocity(linearVelocity);
                   linearVelocity.changeFrame(idSixDoFJoint.getFrameAfterJoint());
-                  idSixDoFJoint.getJointTwist().getLinearPart().set(linearVelocity);
-                  idSixDoFJoint.getJointTwist().getAngularPart().set(scsJoint.getAngularVelocityInBody());
+
+                  if (!stateChanged)
+                     stateChanged = !jointTwist.getLinearPart().epsilonEquals(linearVelocity, epsilon);
+                  if (!stateChanged)
+                     stateChanged = !jointTwist.getAngularPart().epsilonEquals(scsSixDoFJoint.getAngularVelocityInBody(), epsilon);
+
+                  jointTwist.getLinearPart().set(linearVelocity);
+                  jointTwist.getAngularPart().set(scsSixDoFJoint.getAngularVelocityInBody());
                }
                else
                {
                   throw new UnsupportedOperationException("Unsupported joint type: " + idJoint);
                }
             }
+            return stateChanged;
          }
 
          @Override

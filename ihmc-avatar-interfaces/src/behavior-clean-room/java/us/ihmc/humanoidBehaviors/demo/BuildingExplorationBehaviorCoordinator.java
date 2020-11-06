@@ -3,6 +3,9 @@ package us.ihmc.humanoidBehaviors.demo;
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -91,17 +94,10 @@ public class BuildingExplorationBehaviorCoordinator
                                            getClass().getSimpleName(),
                                            UPDATE_RATE_MILLIS);
 
-      try
-      {
-         kryoMessager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
+      ThreadTools.startAsDaemon(() -> ExceptionTools.handle(kryoMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoConnect");
 
       teleopState = new TeleopState();
-      lookAndStepState = new LookAndStepState(robotName, ros2Node, kryoMessager, bombPosition);
+      lookAndStepState = new LookAndStepState(robotName, ros2Node, kryoMessager, bombPosition, robotConfigurationData::get);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, kryoMessager, bombPosition, robotConfigurationData::get);
 
@@ -319,6 +315,7 @@ public class BuildingExplorationBehaviorCoordinator
       private final IHMCROS2Publisher<Empty> resetPublisher;
 
       private final Point3DReadOnly bombPosition;
+      private final Pose3D bombPose = new Pose3D();
 
       private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -335,13 +332,22 @@ public class BuildingExplorationBehaviorCoordinator
       private Runnable debrisDetectedCallback = () -> {};
       private Runnable stairsDetectedCallback = () -> {};
 
-      public LookAndStepState(String robotName, ROS2Node ros2Node, KryoMessager messager, Point3DReadOnly bombPosition)
+      private Notification bodyPathPlanningStateReached = new Notification();
+      private LookAndStepBehavior.State currentState = LookAndStepBehavior.State.RESET;
+      private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
+
+      public LookAndStepState(String robotName,
+                              ROS2Node ros2Node,
+                              KryoMessager messager,
+                              Point3DReadOnly bombPosition,
+                              Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
          this.bombPosition = bombPosition;
+         this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
 
-         goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class));
-         resetPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class));
+         goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
+         resetPublisher = ROS2Tools.createPublisher(ros2Node, LookAndStepBehaviorAPI.RESET);
 
          this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
@@ -362,6 +368,14 @@ public class BuildingExplorationBehaviorCoordinator
                stepCounter.incrementAndGet();
             }
          });
+         messager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+         {
+            currentState = LookAndStepBehavior.State.valueOf(state);
+            if (currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+            {
+               bodyPathPlanningStateReached.set();
+            }
+         });
       }
 
       @Override
@@ -373,10 +387,36 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
+         if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+         {
+            LogTools.info("Waiting for BODY_PATH_PLANNING state...");
+            bodyPathPlanningStateReached.poll(); // clear it to wait for another one
+            bodyPathPlanningStateReached.blockingPoll();
+
+            ThreadTools.sleepSeconds(0.2);
+         }
+         LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
+
+         LogTools.info("Sending operator review enabled");
          messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
          ThreadTools.sleep(100);
 
-         goalPublisher.publish(new Pose3D(bombPosition, new Quaternion()));
+         Quaternion goalOrientation = new Quaternion();
+
+         if (robotConfigurationDataSupplier.get() != null)
+         {
+            Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
+            double dx = bombPosition.getX() - rootTranslation.getX();
+            double dy = bombPosition.getY() - rootTranslation.getY();
+            double yaw = Math.atan2(dy, dx);
+
+            goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
+         }
+
+         bombPose.set(bombPosition, goalOrientation);
+         LogTools.info("Publishing goal pose: {}", bombPose);
+
+         goalPublisher.publish(bombPose);
          ThreadTools.sleep(100);
 
          planarRegions.set(null);

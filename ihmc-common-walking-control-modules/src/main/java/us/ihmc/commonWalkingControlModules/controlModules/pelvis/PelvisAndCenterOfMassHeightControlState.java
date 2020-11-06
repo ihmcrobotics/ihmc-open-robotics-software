@@ -34,6 +34,8 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    FeedbackControlCommand<?> getFeedbackControlCommand();
 
+   FeedbackControlCommand<?> getHeightControlCommand();
+
    /**
     * This method is intended to reset the internal state of this control state to be identical to
     * when starting up the whole controller.
@@ -49,12 +51,12 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                              FrameVector2DReadOnly desiredCoMVelocity,
-                                              boolean isInDoubleSupport,
-                                              double omega0,
-                                              boolean isRecoveringFromPush,
-                                              FeetManager feetManager);
+   void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
+                                FrameVector2DReadOnly desiredCoMVelocity,
+                                boolean isInDoubleSupport,
+                                double omega0,
+                                boolean isRecoveringFromPush,
+                                FeetManager feetManager);
 
    default TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {

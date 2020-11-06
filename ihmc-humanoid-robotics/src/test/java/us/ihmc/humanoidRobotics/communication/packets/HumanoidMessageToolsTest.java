@@ -56,13 +56,9 @@ public class HumanoidMessageToolsTest
       message.setLiftoffDuration(RandomNumbers.nextDouble(random, 0.0, 5.0));
       message.setSwingDuration(RandomNumbers.nextDouble(random, 0.0, 5.0));
       message.setTransferDuration(RandomNumbers.nextDouble(random, 0.0, 5.0));
-      message.setSwingDurationShiftFraction(RandomNumbers.nextDouble(random, 0.0, 1.0));
       message.setSwingTrajectoryBlendDuration(RandomNumbers.nextDouble(random, 0.0, 1.0));
       message.setTouchdownDuration(RandomNumbers.nextDouble(random, 0.0, 1.0));
-      message.setTransferSplitFraction(RandomNumbers.nextDouble(random, 0.0, 1.0));
-      message.setTransferWeightDistribution(RandomNumbers.nextDouble(random, 0.0, 1.0));
       message.setSwingHeight(RandomNumbers.nextDouble(random, 0.0, 1.0));
-      message.setSwingSplitFraction(RandomNumbers.nextDouble(random, 0.0, 1.0));
       message.setRobotSide((byte) RandomNumbers.nextInt(random, 0, 1));
       message.getLocation().set(EuclidCoreRandomTools.nextPoint3D(random));
       message.getOrientation().set(EuclidCoreRandomTools.nextRotationMatrix(random));
@@ -76,13 +72,9 @@ public class HumanoidMessageToolsTest
       assertEquals(messageA.getLiftoffDuration(), messageB.getLiftoffDuration(), epsilon);
       assertEquals(messageA.getSwingDuration(), messageB.getSwingDuration(), epsilon);
       assertEquals(messageA.getTransferDuration(), messageB.getTransferDuration(), epsilon);
-      assertEquals(messageA.getSwingDurationShiftFraction(), messageB.getSwingDurationShiftFraction(), epsilon);
       assertEquals(messageA.getSwingTrajectoryBlendDuration(), messageB.getSwingTrajectoryBlendDuration(), epsilon);
       assertEquals(messageA.getTouchdownDuration(), messageB.getTouchdownDuration(), epsilon);
-      assertEquals(messageA.getTransferSplitFraction(), messageB.getTransferSplitFraction(), epsilon);
-      assertEquals(messageA.getTransferWeightDistribution(), messageB.getTransferWeightDistribution(), epsilon);
       assertEquals(messageA.getSwingHeight(), messageB.getSwingHeight(), epsilon);
-      assertEquals(messageA.getSwingSplitFraction(), messageB.getSwingSplitFraction(), epsilon);
       assertEquals(messageA.getRobotSide(), messageB.getRobotSide());
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(messageA.getLocation(), messageB.getLocation(), epsilon);
       EuclidCoreTestTools.assertQuaternionEquals(messageA.getOrientation(), messageB.getOrientation(), epsilon);

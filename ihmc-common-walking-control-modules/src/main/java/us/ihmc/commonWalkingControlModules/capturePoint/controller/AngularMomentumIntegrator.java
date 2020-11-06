@@ -19,7 +19,7 @@ public class AngularMomentumIntegrator
 
    private final BooleanProvider useSmartICPIntegrator;
    private final YoFrameVector2D feedbackCMPIntegral;
-   private final YoDouble currentICPVelocityMagnitude;
+   private final YoDouble currentCoMVelocityMagnitude;
    private final YoDouble desiredICPVelocityMagnitude;
 
 
@@ -39,7 +39,7 @@ public class AngularMomentumIntegrator
       this.feedbackGains = feedbackGains;
 
       isICPStuck = new GlitchFilteredYoBoolean(prefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
-      currentICPVelocityMagnitude = new YoDouble(prefix + "CurrentICPVelocityMagnitude", registry);
+      currentCoMVelocityMagnitude = new YoDouble(prefix + "CurrentCoMVelocityMagnitude", registry);
       desiredICPVelocityMagnitude = new YoDouble(prefix + "DesiredICPVelocityMagnitude", registry);
 
 
@@ -53,15 +53,8 @@ public class AngularMomentumIntegrator
       isICPStuck.set(false);
    }
 
-   public void update(boolean shouldntCheck, FrameVector2DReadOnly desiredICPVelocity, FrameVector2DReadOnly currentICPVelocity, FrameVector2DReadOnly icpError)
+   public void update(FrameVector2DReadOnly desiredICPVelocity, FrameVector2DReadOnly currentCoMVelocity, FrameVector2DReadOnly icpError)
    {
-      if (shouldntCheck)
-      {
-         isICPStuck.set(false);
-         feedbackCMPIntegral.setToZero();
-         return;
-      }
-
       desiredICPVelocityMagnitude.set(desiredICPVelocity.length());
       if (desiredICPVelocityMagnitude.getDoubleValue() > thresholdForStuck.getValue())
       {
@@ -70,8 +63,8 @@ public class AngularMomentumIntegrator
          return;
       }
 
-      currentICPVelocityMagnitude.set(currentICPVelocity.length());
-      if (currentICPVelocityMagnitude.getDoubleValue() < thresholdForStuck.getValue())
+      currentCoMVelocityMagnitude.set(currentCoMVelocity.length());
+      if (currentCoMVelocityMagnitude.getDoubleValue() < thresholdForStuck.getValue())
          isICPStuck.set(true);
 
       if (useSmartICPIntegrator.getValue() && isICPStuck.getBooleanValue())

@@ -95,10 +95,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -191,12 +187,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -254,10 +244,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getRequestedSwingPlanner());
 
-      cdr.write_type_7(data.getPerformPositionBasedSplitFractionCalculation());
-
-      cdr.write_type_7(data.getPerformAreaBasedSplitFractionCalculation());
-
       cdr.write_type_7(data.getGenerateLog());
 
    }
@@ -306,10 +292,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setRequestedSwingPlanner(cdr.read_type_9());
       	
-      data.setPerformPositionBasedSplitFractionCalculation(cdr.read_type_7());
-      	
-      data.setPerformAreaBasedSplitFractionCalculation(cdr.read_type_7());
-      	
       data.setGenerateLog(cdr.read_type_7());
       	
 
@@ -348,8 +330,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_6("status_publish_period", data.getStatusPublishPeriod());
       ser.write_type_9("requested_swing_planner", data.getRequestedSwingPlanner());
-      ser.write_type_7("perform_position_based_split_fraction_calculation", data.getPerformPositionBasedSplitFractionCalculation());
-      ser.write_type_7("perform_area_based_split_fraction_calculation", data.getPerformAreaBasedSplitFractionCalculation());
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
@@ -386,8 +366,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setStatusPublishPeriod(ser.read_type_6("status_publish_period"));
       data.setRequestedSwingPlanner(ser.read_type_9("requested_swing_planner"));
-      data.setPerformPositionBasedSplitFractionCalculation(ser.read_type_7("perform_position_based_split_fraction_calculation"));
-      data.setPerformAreaBasedSplitFractionCalculation(ser.read_type_7("perform_area_based_split_fraction_calculation"));
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 

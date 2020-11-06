@@ -17,10 +17,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -478,7 +475,7 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2D localDesiredCapturePoint = new FramePoint2D();
    private final YoDouble momentumGain = new YoDouble("MomentumGain", registry);
 
-   public void getAdjustedDesiredCapturePoint(FramePoint2D desiredCapturePoint, FramePoint2D adjustedDesiredCapturePoint)
+   public void getAdjustedDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint, FramePoint2DBasics adjustedDesiredCapturePointToPack)
    {
       angularMomentum.set(filteredYoAngularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
@@ -487,20 +484,25 @@ public class HighLevelHumanoidControllerToolbox
 
       double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
 
-      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
-      adjustedDesiredCapturePoint.scale(scaleFactor);
-      adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
-      adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
+      adjustedDesiredCapturePointToPack.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
+      adjustedDesiredCapturePointToPack.scale(scaleFactor);
+      adjustedDesiredCapturePointToPack.add(localDesiredCapturePoint);
+      adjustedDesiredCapturePointToPack.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
-   public void getCapturePoint(FramePoint2D capturePointToPack)
+   public void getCapturePoint(FixedFramePoint2DBasics capturePointToPack)
    {
-      capturePointToPack.setIncludingFrame(yoCapturePoint);
+      capturePointToPack.set(yoCapturePoint);
    }
 
-   public void getCapturePoint(FramePoint3D capturePointToPack)
+   public FramePoint3DReadOnly getCapturePoint()
    {
-      capturePointToPack.setIncludingFrame(yoCapturePoint);
+      return yoCapturePoint;
+   }
+
+   public void getCapturePoint(FixedFramePoint3DBasics capturePointToPack)
+   {
+      capturePointToPack.setMatchingFrame(yoCapturePoint);
    }
 
    private final FramePoint2D copDesired = new FramePoint2D();
@@ -970,7 +972,7 @@ public class HighLevelHumanoidControllerToolbox
       return omega0.getDoubleValue();
    }
    
-   public DoubleProvider getOmega0Provider()
+   public YoDouble getOmega0Provider()
    {
       return omega0;
    }

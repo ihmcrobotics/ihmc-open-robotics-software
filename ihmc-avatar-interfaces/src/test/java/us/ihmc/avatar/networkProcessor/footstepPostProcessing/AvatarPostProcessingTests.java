@@ -34,7 +34,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -159,7 +158,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      request.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(request);
    }
@@ -193,7 +191,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      requestPacket.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(requestPacket);
    }
@@ -315,8 +312,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          request.getStartFootPoses().get(side).set(footPose);
          request.getStartFootholds().get(side).set(defaultSolePolygon);
       }
-
-      footstepPlanningModule.getPositionBasedSplitFractionCalculator().computeSplitFractions(request, footstepPlan);
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                     swingDuration,

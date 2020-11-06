@@ -150,7 +150,7 @@ public class OptimizedTrajectoryGenerator
       coefficients.clear();
       coefficients.add();
 
-      waypointTimesArray.clear();
+      waypointTimesArray.reset();
       for (int i = 0; i < waypointTimes.size(); i++)
          waypointTimes.get(i).setToNaN();
    }

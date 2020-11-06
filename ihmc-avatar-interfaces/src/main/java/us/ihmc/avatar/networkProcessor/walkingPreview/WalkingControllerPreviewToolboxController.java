@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -23,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -124,7 +126,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       walkingInputManager.registerConversionHelper(commandConversionHelper);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       // Create registries to match controller so the XML gets loaded properly.
       YoRegistry drcControllerThread = new YoRegistry("DRCControllerThread");
@@ -141,7 +143,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, capturePointPlannerParameters, yoGraphicsListRegistry);
+      setupWalkingMessageHandler(walkingControllerParameters, copTrajectoryParameters, yoGraphicsListRegistry);
       rootJoint = fullRobotModel.getRootJoint();
       allOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
@@ -149,7 +151,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(walkingInputManager,
@@ -177,7 +179,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
-                                                                            yoTime,
                                                                             gravityZ,
                                                                             controlDT,
                                                                             walkingParentRegistry,
@@ -233,24 +234,17 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, ICPPlannerParameters icpPlannerParameters,
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, CoPTrajectoryParameters copTrajectoryParameters,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
                                                                               defaultInitialTransferTime,
                                                                               defaultFinalTransferTime,
-                                                                              defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction,
-                                                                              defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction,
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               previewTime,
