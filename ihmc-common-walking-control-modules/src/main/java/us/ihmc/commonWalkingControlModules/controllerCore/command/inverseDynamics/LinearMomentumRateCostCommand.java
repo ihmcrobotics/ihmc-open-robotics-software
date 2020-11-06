@@ -80,6 +80,22 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
       weightMatrix.getLinearPart().setWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrix(WeightMatrix6D weightMatrix)
+   {
+      this.weightMatrix.set(weightMatrix);
+   }
+
    public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
@@ -99,6 +115,25 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
       selectionMatrixToPack.set(selectionMatrix);
+   }
+
+   /**
+    * Sets this command's selection matrix to the given one.
+    * <p>
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
+    * </p>
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
+    * </p>
+    *
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
+    */
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public SelectionMatrix6D getSelectionMatrix()
