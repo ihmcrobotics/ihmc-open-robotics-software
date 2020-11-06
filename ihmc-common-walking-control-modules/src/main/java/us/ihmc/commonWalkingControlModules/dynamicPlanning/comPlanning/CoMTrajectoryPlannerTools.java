@@ -754,7 +754,7 @@ public class CoMTrajectoryPlannerTools
          double rowValue = coefficientProvider.coefficient(row, omega, time);
          addEquals(hessianToPack, startIndex + row, startIndex + row, weight * rowValue * rowValue);
 
-         addEquals(gradientToPack, startIndex + row, 0, -weight2 * rowValue * valueObjective);
+         addEquals(gradientToPack, startIndex + row, 0, weight2 * rowValue * valueObjective);
 
          for (int col = row + 1; col < 6; col++)
          {
