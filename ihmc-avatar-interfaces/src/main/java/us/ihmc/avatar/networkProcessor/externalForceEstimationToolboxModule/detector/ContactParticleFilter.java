@@ -6,8 +6,6 @@ import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.Forc
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -60,6 +58,12 @@ public class ContactParticleFilter implements RobotController
 
    private final FramePoint3D pointToProject = new FramePoint3D();
 
+   // debug only vv
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final YoFramePoint3D debugContactPoint = new YoFramePoint3D("debugContactPoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D debugSurfaceNormal = new YoFrameVector3D("debugSurfaceNormal", ReferenceFrame.getWorldFrame(), registry);
+   // debug only ^^
+
    public ContactParticleFilter(JointBasics[] joints,
                                 double dt,
                                 ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
@@ -81,11 +85,19 @@ public class ContactParticleFilter implements RobotController
 
          if (graphicsListRegistry != null)
          {
-            YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPositionViz_" + i, contactPointPositions[i], 0.015, YoAppearance.Red());
-            YoGraphicVector contactVectorGraphic = new YoGraphicVector("cpNormViz_" + i, contactPointPositions[i], scaledSurfaceNormal[i], 1.0, YoAppearance.Red());
+            YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPositionViz_" + i, contactPointPositions[i], 0.007, YoAppearance.Blue());
+            YoGraphicVector contactVectorGraphic = new YoGraphicVector("cpNormViz_" + i, contactPointPositions[i], scaledSurfaceNormal[i], 1.0, YoAppearance.Blue());
             graphicsListRegistry.registerYoGraphic(name, contactPointGraphic);
             graphicsListRegistry.registerYoGraphic(name, contactVectorGraphic);
          }
+      }
+
+      if (graphicsListRegistry != null)
+      {
+         YoGraphicPosition debugContactPointGraphic = new YoGraphicPosition("cpPositionVizDebug", debugContactPoint, 0.025, YoAppearance.Red());
+         YoGraphicVector debugContactVectorGraphic = new YoGraphicVector("cpNormVizDebug", debugContactPoint, debugSurfaceNormal, 1.0, YoAppearance.Red());
+         graphicsListRegistry.registerYoGraphic(name, debugContactPointGraphic);
+         graphicsListRegistry.registerYoGraphic(name, debugContactVectorGraphic);
       }
 
       coefficientOfFriction.set(0.5);
@@ -118,23 +130,43 @@ public class ContactParticleFilter implements RobotController
 
       jointspaceExternalContactEstimator.initialize();
 
-      double initialSearchRadius = 2.0;
-      for (int i = 0; i < numberOfParticles; i++)
-      {
-         Vector3D randomVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, initialSearchRadius);
-         pointToProject.setIncludingFrame(rigidBody.getBodyFixedFrame(), randomVector);
-         pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
-         contactPointProjectors[i].computeProjection(pointToProject);
+//      double initialSearchRadius = 2.0;
+//      for (int i = 0; i < numberOfParticles; i++)
+//      {
+//         Vector3D randomVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, initialSearchRadius);
+//         pointToProject.setIncludingFrame(rigidBody.getBodyFixedFrame(), randomVector);
+//         pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
+//         contactPointProjectors[i].computeProjection(pointToProject);
+//
+//         contactPoints[i].setContactPointOffset(pointToProject);
+//      }
 
-         contactPoints[i].setContactPointOffset(pointToProject);
-      }
+      updatePoints();
 
       contactPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
+   }
+
+   public void updatePoints()
+   {
+      int cpIndex = 0;
+      for (int i = 0; i < 4; i++)
+      {
+         for (int j = 0; j < 5; j++)
+         {
+            pointToProject.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.4, (i - 1.5) * 0.08, j * 0.08 + 1.15);
+            contactPointProjectors[cpIndex].computeProjection(pointToProject);
+            contactPoints[cpIndex].setContactPointOffset(pointToProject);
+
+            cpIndex++;
+         }
+      }
    }
 
    @Override
    public void doControl()
    {
+      updatePoints();
+
       jointspaceExternalContactEstimator.doControl();
       DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
 
@@ -163,10 +195,18 @@ public class ContactParticleFilter implements RobotController
       {
          contactPointProbabilities[i].mul(1.0 / totalWeight);
 
+         contactPointProjectors[i].getSurfacePoint().changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointProjectors[i].getSurfaceNormal().changeFrame(ReferenceFrame.getWorldFrame());
+
          contactPointPositions[i].set(contactPointProjectors[i].getSurfacePoint());
          scaledSurfaceNormal[i].set(contactPointProjectors[i].getSurfaceNormal());
          scaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
       }
+
+      tempPoint.setIncludingFrame(rigidBody.getParentJoint().getFrameAfterJoint(), 0.16, 0.0, 0.25);
+      tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      debugContactPoint.set(tempPoint);
+      debugSurfaceNormal.set(0.15 * 5.0, 0.0, 0.0);
    }
 
    @Override
