@@ -18,25 +18,18 @@ public class MPCIndexHandler
    private int totalRhoSize = 0;
    private int totalProblemSize = 0;
 
-   private final Map<RigidBodyBasics, ContactStateToForceMatrixHelper> contactableMap;
-   private final Map<String, ContactStateToForceMatrixHelper> contactableStringMap = new HashMap<>();
-
+   private final int numberOfBasisVectorsPerContactPoint;
    private final TIntArrayList bodiesInContact = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
    private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
    private final TIntArrayList rhoBasesInSegment = new TIntArrayList();
 
-   public MPCIndexHandler(Map<RigidBodyBasics, ContactStateToForceMatrixHelper> contactableMap)
+   public MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
-      this.contactableMap = contactableMap;
-
-      for (RigidBodyBasics rigidBody : contactableMap.keySet())
-      {
-         contactableStringMap.put(rigidBody.getName(), contactableMap.get(rigidBody));
-      }
+      this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
    }
 
-   public void initialize(List<? extends ContactStateProvider> contactSequence)
+   public void initialize(List<ContactPlaneProvider> contactSequence)
    {
       comCoefficientSize = 0;
       orientationCoefficientSize = 0;
@@ -49,13 +42,12 @@ public class MPCIndexHandler
       for (int i = 0; i < contactSequence.size(); i++)
       {
          comCoefficientSize += 6 * comCoefficientsPerSegment;
-         bodiesInContact.add(contactSequence.get(i).getNumberOfBodiesInContact());
-         List<String> nameOfBodiesInContact = contactSequence.get(i).getBodiesInContact();
+         bodiesInContact.add(contactSequence.get(i).getNumberOfContactPlanes());
          rhoStartIndices.add(totalRhoSize);
          int rhoBasesInSegment = 0;
-         for (int j = 0; j < nameOfBodiesInContact.size(); j++)
+         for (int j = 0; j < contactSequence.get(i).getNumberOfContactPlanes(); j++)
          {
-            rhoBasesInSegment += contactableStringMap.get(nameOfBodiesInContact.get(i)).getRhoSize();
+            rhoBasesInSegment += numberOfBasisVectorsPerContactPoint * contactSequence.get(i).getNumberOfContactPointsInPlane(j);
          }
          int rhoCoefficientsInSegment = coefficientsPerRho * rhoBasesInSegment;
          this.rhoBasesInSegment.add(rhoBasesInSegment);
@@ -70,5 +62,4 @@ public class MPCIndexHandler
    {
       return segmentId * comCoefficientsPerSegment + ordinal;
    }
-
 }
