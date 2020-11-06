@@ -125,13 +125,10 @@ public class SimpleBalanceManager
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
    private boolean initializeForTransfer = false;
-   private boolean footstepWasAdjusted = false;
-   private boolean usingStepAdjustment = false;
    private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
    private RobotSide transferToSide;
-   private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
@@ -218,12 +215,7 @@ public class SimpleBalanceManager
 
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
-      if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
-      {
-         return false;
-      }
-      footstep.setPose(footstepSolution);
-      return footstepWasAdjusted;
+      return false;
    }
 
    public void clearICPPlan()
@@ -561,10 +553,6 @@ public class SimpleBalanceManager
    public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
    {
       desiredCMP.set(output.getDesiredCMP());
-      effectiveICPAdjustment.set(output.getEffectiveICPAdjustment());
-      footstepSolution.set(output.getFootstepSolution());
-      footstepWasAdjusted = output.getFootstepWasAdjusted();
-      usingStepAdjustment = output.getUsingStepAdjustment();
    }
 
    public TaskspaceTrajectoryStatusMessage pollPelvisXYTranslationStatusToReport()

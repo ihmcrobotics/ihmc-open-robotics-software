@@ -89,7 +89,6 @@ public class StandingState extends WalkingState
 
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
-      balanceManager.setICPPlanTransferFromSide(null);
       balanceManager.initializeICPPlanForStanding();
 
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler

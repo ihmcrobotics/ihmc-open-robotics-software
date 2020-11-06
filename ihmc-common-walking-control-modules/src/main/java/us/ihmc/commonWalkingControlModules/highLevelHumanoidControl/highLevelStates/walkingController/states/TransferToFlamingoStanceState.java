@@ -50,10 +50,6 @@ public class TransferToFlamingoStanceState extends TransferState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
-      Footstep footstep = walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide);
-      FixedFramePoint3DBasics transferFootPosition = footstep.getFootstepPose().getPosition();
-      RobotSide swingSide = transferToSide.getOppositeSide();
-      comHeightManager.transfer(transferFootPosition, initialTransferTime, swingSide, extraToeOffHeight);
 
       // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
@@ -64,7 +60,6 @@ public class TransferToFlamingoStanceState extends TransferState
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
-      balanceManager.setICPPlanTransferToSide(transferToSide);
       balanceManager.initializeICPPlanForTransfer();
    }
 }

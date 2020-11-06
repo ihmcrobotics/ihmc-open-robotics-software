@@ -53,15 +53,8 @@ public class AngularMomentumIntegrator
       isICPStuck.set(false);
    }
 
-   public void update(boolean shouldntCheck, FrameVector2DReadOnly desiredICPVelocity, FrameVector2DReadOnly currentCoMVelocity, FrameVector2DReadOnly icpError)
+   public void update(FrameVector2DReadOnly desiredICPVelocity, FrameVector2DReadOnly currentCoMVelocity, FrameVector2DReadOnly icpError)
    {
-      if (shouldntCheck)
-      {
-         isICPStuck.set(false);
-         feedbackCMPIntegral.setToZero();
-         return;
-      }
-
       desiredICPVelocityMagnitude.set(desiredICPVelocity.length());
       if (desiredICPVelocityMagnitude.getDoubleValue() > thresholdForStuck.getValue())
       {
