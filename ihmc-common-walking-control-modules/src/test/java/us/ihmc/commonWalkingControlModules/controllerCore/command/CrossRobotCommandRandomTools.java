@@ -711,14 +711,6 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static FeedbackControlCommand<?> nextFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
-   {
-      if (random.nextBoolean())
-         return nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames);
-      else
-         return nextPointFeedbackControlCommand(random, rootBody, possibleFrames);
-   }
-
    public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       return nextPlaneContactStateCommand(random, false, rootBody, possibleFrames);
