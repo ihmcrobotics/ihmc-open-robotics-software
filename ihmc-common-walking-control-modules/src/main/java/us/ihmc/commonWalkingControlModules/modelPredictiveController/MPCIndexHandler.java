@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class MPCIndexHandler
 {
-   private static final int coefficientsPerRho = 4;
+   public static final int coefficientsPerRho = 4;
    private static final int comCoefficientsPerSegment = 6;
 
    private int comCoefficientSize = 0;
