@@ -20,6 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.rtps.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -209,8 +210,7 @@ public class AtlasLookAndStepBehaviorDemo
          else
             kinematicsSimulation.destroy();
 
-         if (communicationModeROS2 == CommunicationMode.INTERPROCESS)
-            FastRTPSDomain.getInstance().stopAll();
+         DomainFactory.getDomain(communicationModeROS2.getPubSubImplementation()).stopAll();
 
          destroyed = true;
       }

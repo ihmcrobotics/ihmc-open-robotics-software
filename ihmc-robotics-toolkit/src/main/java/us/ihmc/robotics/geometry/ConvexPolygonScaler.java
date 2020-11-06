@@ -63,7 +63,7 @@ public class ConvexPolygonScaler
     */
    public boolean scaleConvexPolygon(ConvexPolygon2DReadOnly polygonQ, double distance, ConvexPolygon2DBasics polygonToPack)
    {
-      return scaleConvexPolygon(polygonQ, distance, polygonToPack, -1);
+      return scaleConvexPolygon(polygonQ, distance, polygonToPack, null);
    }
 
 
@@ -107,12 +107,8 @@ public class ConvexPolygonScaler
 
          if (vertex0.distance(vertex1) < 2.0 * distance)
          {
-            Point2D midPoint = new Point2D(vertex0);
-            midPoint.add(vertex1);
-            midPoint.scale(0.5);
-
             polygonToPack.clear();
-            polygonToPack.addVertex(midPoint);
+            polygonToPack.addVertex(0.5 * (vertex0.getX() + vertex1.getX()), 0.5 * (vertex0.getY() + vertex1.getY()));
             polygonToPack.update();
             return false;
          }
@@ -196,7 +192,7 @@ public class ConvexPolygonScaler
 
    private static boolean containsIndex(int indexToCheck, int... indicesToCheck)
    {
-      if (indexToCheck < 0)
+      if (indicesToCheck == null || indexToCheck <= 0)
          return false;
 
       for (int i = 0; i < indicesToCheck.length; i++)

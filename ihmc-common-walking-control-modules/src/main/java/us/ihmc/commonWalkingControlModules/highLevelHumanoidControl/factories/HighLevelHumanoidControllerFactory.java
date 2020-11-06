@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerComma
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -84,7 +85,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ICPWithTimeFreezingPlannerParameters icpPlannerParameters;
+   private final CoPTrajectoryParameters copTrajectoryParameters;
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
@@ -109,14 +110,17 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                             SideDependentList<String> footForceSensorNames,
+                                             SideDependentList<String> footContactSensorNames,
+                                             SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
+                                             WalkingControllerParameters walkingControllerParameters,
+                                             CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.icpPlannerParameters = icpPlannerParameters;
+      this.copTrajectoryParameters = copTrajectoryParameters;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -134,7 +138,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       managerFactory = new HighLevelControlManagerFactory(registry);
-      managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 
@@ -401,13 +405,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction, feet, statusMessageOutputManager, yoTime,
+                                                                              defaultFinalTransferTime, feet, statusMessageOutputManager, yoTime,
                                                                               yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
@@ -419,7 +418,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
                                                                                   highLevelControllerParameters, walkingControllerParameters,
-                                                                                  icpPlannerParameters, requestedHighLevelControllerState,
+                                                                                  requestedHighLevelControllerState,
                                                                                   controllerFactoriesMap, stateTransitionFactories, managerFactory,
                                                                                   controllerToolbox, centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder, lowLevelControllerOutput);

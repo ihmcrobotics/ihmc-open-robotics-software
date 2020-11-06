@@ -101,19 +101,6 @@ public class SimpleCenterOfMassHeightManager
       centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                                     FrameVector2DReadOnly desiredCoMVelocity,
-                                                     boolean isInDoubleSupport,
-                                                     double omega0,
-                                                     boolean isRecoveringFromPush)
-   {
-      return centerOfMassHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity,
-                                                                                desiredCoMVelocity,
-                                                                                isInDoubleSupport,
-                                                                                omega0,
-                                                                                isRecoveringFromPush,
-                                                                                null);
-   }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {

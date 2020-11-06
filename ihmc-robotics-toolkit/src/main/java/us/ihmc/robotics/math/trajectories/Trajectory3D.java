@@ -537,6 +537,12 @@ public class Trajectory3D
          getTrajectory(index).setQuadraticUsingInitialAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index));
    }
 
+   public void setQuadraticUsingPositionsAndAcceleration(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf, Vector3DReadOnly zdd)
+   {
+      for (int index = 0; index < 3; index++)
+         getTrajectory(index).setQuadraticUsingPositionsAndAcceleration(t0, tFinal, z0.getElement(index), zf.getElement(index), zdd.getElement(index));
+   }
+
    public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Point3DReadOnly zIntermediate,
                                                   Point3DReadOnly zFinal)
    {

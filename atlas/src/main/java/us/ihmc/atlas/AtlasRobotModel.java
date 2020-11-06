@@ -24,12 +24,12 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -243,6 +243,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   @Override
+   public CoPTrajectoryParameters getCoPTrajectoryParameters()
+   {
+      return new AtlasCoPTrajectoryParameters();
    }
 
    @Override
@@ -868,12 +874,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
    {
       return new AtlasSwingPlannerParameters(fileNameSuffix);
-   }
-
-   @Override
-   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
-   {
-      return new AtlasSplitFractionCalculatorParameters();
    }
 
    @Override

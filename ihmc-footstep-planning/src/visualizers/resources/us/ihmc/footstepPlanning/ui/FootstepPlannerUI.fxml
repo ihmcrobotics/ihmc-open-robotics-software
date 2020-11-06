@@ -47,12 +47,6 @@
                           </content>
                       </Tab>
       
-                      <Tab text="ICP Split Fraction Parameters">
-                          <content>
-                              <fx:include fx:id="splitFractionParametersUI" source="SplitFractionParametersUI.fxml" />
-                          </content>
-                      </Tab>
-      
                       <Tab text="Log Table">
                           <content>
                               <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml" />

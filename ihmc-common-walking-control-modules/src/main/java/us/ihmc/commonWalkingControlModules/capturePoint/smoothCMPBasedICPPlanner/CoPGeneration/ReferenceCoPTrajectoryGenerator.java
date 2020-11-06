@@ -155,6 +155,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    // Visualization
    private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
+   private final SplitFractionFromPositionCalculator positionSplitFractionCalculator;
+   private final SplitFractionFromAreaCalculator areaSplitFractionCalculator;
+
+   private final FramePose3D stanceFootPose = new FramePose3D();
+
    /**
     * Creates CoP planner object. Should be followed by call to {@link #initializeParameters(ICPPlannerParameters)} ()} to
     * pass planning parameters
@@ -306,6 +311,55 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationWaypoints = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier());
       copLocationWaypoints.clear();
       copPointsConstructed = true;
+
+      positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(defaultSplitFractionParameters);
+
+      positionSplitFractionCalculator.setNumberOfStepsProvider(this::getNumberOfFootstepsRegistered);
+
+      positionSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
+      positionSplitFractionCalculator.setFinalTransferWeightDistributionProvider(finalTransferWeightDistribution::getDoubleValue);
+
+      positionSplitFractionCalculator.setTransferSplitFractionProvider((i) -> transferSplitFractions.get(i).getDoubleValue());
+      positionSplitFractionCalculator.setTransferWeightDistributionProvider((i) -> transferWeightDistributions.get(i).getDoubleValue());
+
+      positionSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
+      positionSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
+
+      positionSplitFractionCalculator.setTransferWeightDistributionConsumer((i, d) -> transferWeightDistributions.get(i).set(d));
+      positionSplitFractionCalculator.setTransferSplitFractionConsumer((i, d) -> transferSplitFractions.get(i).set(d));
+
+      positionSplitFractionCalculator.setFirstSupportPoseProvider(() ->
+                                                                  {
+                                                                     RobotSide initialStanceSide = getFootstep(0).getRobotSide().getOppositeSide();
+                                                                     stanceFootPose.setToZero(soleFrames.get(initialStanceSide));
+                                                                     stanceFootPose.changeFrame(worldFrame);
+                                                                     return stanceFootPose;
+                                                                  });
+      positionSplitFractionCalculator.setStepPoseGetter((i) -> getFootstep(i).getFootstepPose());
+
+      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(defaultSplitFractionParameters, defaultFootPolygons);
+
+      areaSplitFractionCalculator.setNumberOfStepsProvider(this::getNumberOfFootstepsRegistered);
+
+      areaSplitFractionCalculator.setFinalTransferSplitFractionProvider(finalTransferSplitFraction::getDoubleValue);
+      areaSplitFractionCalculator.setFinalTransferWeightDistributionProvider(finalTransferWeightDistribution::getDoubleValue);
+
+      areaSplitFractionCalculator.setTransferSplitFractionProvider((i) -> transferSplitFractions.get(i).getDoubleValue());
+      areaSplitFractionCalculator.setTransferWeightDistributionProvider((i) -> transferWeightDistributions.get(i).getDoubleValue());
+
+      areaSplitFractionCalculator.setFinalTransferSplitFractionConsumer(finalTransferSplitFraction::set);
+      areaSplitFractionCalculator.setFinalTransferWeightDistributionConsumer(finalTransferWeightDistribution::set);
+
+      areaSplitFractionCalculator.setTransferWeightDistributionConsumer((i, d) -> transferWeightDistributions.get(i).set(d));
+      areaSplitFractionCalculator.setTransferSplitFractionConsumer((i, d) -> transferSplitFractions.get(i).set(d));
+
+      areaSplitFractionCalculator.setFirstSupportPolygonProvider(() ->
+                                                {
+                                                   RobotSide stanceSide = getFootstep(0).getRobotSide().getOppositeSide();
+                                                   return supportFootPolygonsInSoleZUpFrames.get(stanceSide).getPolygonVerticesView();
+                                                });
+      areaSplitFractionCalculator.setStepSideProvider((i) -> getFootstep(i).getRobotSide());
+      areaSplitFractionCalculator.setStepPolygonGetter((i) -> getFootstep(i).getPredictedContactPoints());
 
       parentRegistry.addChild(registry);
       clear();
@@ -589,9 +643,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else
          isDoneWalking.set(false); // start walking
 
-      computeSplitFractionsFromPosition();
-      computeSplitFractionsFromArea();
-
+      positionSplitFractionCalculator.computeSplitFractionsFromPosition();
+      areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && (holdDesiredState.getBooleanValue() || numberOfUpcomingFootsteps == 0))
@@ -664,8 +717,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       isDoneWalking.set(false);
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
 
-      computeSplitFractionsFromPosition();
-      computeSplitFractionsFromArea();
+      positionSplitFractionCalculator.computeSplitFractionsFromPosition();
+      areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
       // compute cop waypoint location
       computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), supportSide.getOppositeSide(), false);
@@ -1530,199 +1583,4 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
 
-   private final FramePose3D stanceFootPose = new FramePose3D();
-   private final FramePose3D nextFootPose = new FramePose3D();
-
-
-
-   public void computeSplitFractionsFromPosition()
-   {
-      if (getNumberOfFootstepsRegistered() == 0 || !splitFractionParameters.calculateSplitFractionsFromPositions())
-      {
-         return;
-      }
-
-      double defaultTransferSplitFraction = splitFractionParameters.getDefaultTransferSplitFraction();
-      double defaultWeightDistribution = 0.5;
-
-      for (int stepNumber = 0; stepNumber < getNumberOfFootstepsRegistered(); stepNumber++)
-      {
-         if (stepNumber == 0)
-         {
-            RobotSide initialStanceSide = getFootstep(stepNumber).getRobotSide().getOppositeSide();
-            stanceFootPose.setToZero(soleFrames.get(initialStanceSide));
-            stanceFootPose.changeFrame(worldFrame);
-         }
-         else
-         {
-            stanceFootPose.set(getFootstep(stepNumber - 1).getFootstepPose());
-         }
-
-         nextFootPose.set(getFootstep(stepNumber).getFootstepPose());
-
-         // This step is a big step down.
-         double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
-
-         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
-         {
-            double alpha = Math.min(1.0,
-                                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
-                                          splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
-            double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
-                                                                                splitFractionParameters.getTransferSplitFractionAtFullDepth(), alpha);
-
-
-            if (stepNumber == getNumberOfFootstepsRegistered() - 1)
-            { // this is the last step
-               double currentSplitFraction = finalTransferSplitFraction.getDoubleValue();
-               double currentWeightDistribution = finalTransferWeightDistribution.getDoubleValue();
-
-               double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(), alpha);
-
-               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
-
-               finalTransferSplitFraction.set(splitFractionToSet);
-               finalTransferWeightDistribution.set(weightDistributionToSet);
-            }
-            else
-            {
-               double currentSplitFraction = transferSplitFractions.get(stepNumber + 1).getDoubleValue();
-               double currentWeightDistribution = transferWeightDistributions.get(stepNumber + 1).getDoubleValue();
-
-               double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferWeightDistributionAtFullDepth(), alpha);
-
-               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
-
-               if (weightDistributionToSet == 1.0)
-                  LogTools.info("What?");
-               transferSplitFractions.get(stepNumber + 1).set(splitFractionToSet);
-               transferWeightDistributions.get(stepNumber + 1).set(weightDistributionToSet);
-            }
-         }
-      }
-   }
-
-   private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
-   private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
-
-   private final PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
-   private final PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
-
-   public void computeSplitFractionsFromArea()
-   {
-      if (getNumberOfFootstepsRegistered() == 0|| !splitFractionParameters.calculateSplitFractionsFromArea())
-      {
-         return;
-      }
-      double defaultTransferSplitFraction = splitFractionParameters.getDefaultTransferSplitFraction();
-      double defaultWeightDistribution = 0.5;
-
-      for (int stepNumber = 0; stepNumber < getNumberOfFootstepsRegistered(); stepNumber++)
-      {
-         if (stepNumber == 0)
-         {
-            RobotSide stanceSide = getFootstep(0).getRobotSide().getOppositeSide();
-            stanceFootPose.setToZero(soleFrames.get(stanceSide));
-            stanceFootPose.changeFrame(worldFrame);
-            previousFrame.setPoseAndUpdate(stanceFootPose);
-            previousPolygon.set(supportFootPolygonsInSoleZUpFrames.get(stanceSide));
-         }
-         else
-         {
-            Footstep previousStep = getFootstep(stepNumber - 1);
-            previousFrame.setPoseAndUpdate(previousStep.getFootstepPose());
-            if (previousStep.hasPredictedContactPoints())
-            {
-               previousPolygon.clear();
-               for (int i = 0; i < previousStep.getCustomPositionWaypoints().size(); i++)
-                  previousPolygon.addVertex(previousStep.getCustomPositionWaypoints().get(i));
-               previousPolygon.update();
-            }
-            else
-            {
-               previousPolygon.set(defaultFootPolygons.get(previousStep.getRobotSide()));
-            }
-         }
-
-         Footstep currentStep = getFootstep(stepNumber);
-         currentFrame.setPoseAndUpdate(currentStep.getFootstepPose());
-         if (currentStep.hasPredictedContactPoints())
-         {
-            currentPolygon.clear();
-            for (int i = 0; i < currentStep.getCustomPositionWaypoints().size(); i++)
-               currentPolygon.addVertex(currentStep.getCustomPositionWaypoints().get(i));
-            currentPolygon.update();
-         }
-         else
-         {
-            previousPolygon.set(defaultFootPolygons.get(currentStep.getRobotSide()));
-         }
-
-         double currentArea = currentPolygon.getArea();
-         double previousArea = previousPolygon.getArea();
-
-         double totalArea = currentArea + previousArea;
-
-         double currentWidth = currentPolygon.getBoundingBoxRangeY();
-         double previousWidth = previousPolygon.getBoundingBoxRangeY();
-
-         double totalWidth = currentWidth + previousWidth;
-
-         double percentAreaOnCurrentFoot = totalArea > 0.0 ? currentArea / totalArea : 0.5;
-         double percentWidthOnCurrentFoot = totalWidth > 0.0 ? currentWidth / totalWidth : 0.5;
-
-         if (MathTools.epsilonEquals(percentAreaOnCurrentFoot, 0.5, 1.0e-2) && MathTools.epsilonEquals(percentWidthOnCurrentFoot, 0.5, 2.0e-2))
-            continue;
-
-         double transferWeightDistributionFromArea = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                          splitFractionParameters.getFractionLoadIfFootHasFullSupport(),
-                                                                                          2.0 * percentAreaOnCurrentFoot - 1.0);
-         double transferWeightDistributionFromWidth = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                           splitFractionParameters.getFractionLoadIfOtherFootHasNoWidth(),
-                                                                                           2.0 * percentWidthOnCurrentFoot - 1.0);
-
-         // lower means it spends more time shifting to the center, higher means it spends less time shifting to the center
-         // e.g., if we set the fraction to 0 and the trailing foot has no area, the split fraction should be 1 because we spend no time on the first segment
-         double transferSplitFractionFromArea = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
-                                                                                     1.0 - splitFractionParameters.getFractionTimeOnFootIfFootHasFullSupport(),
-                                                                                     2.0 * percentAreaOnCurrentFoot - 1.0);
-         double transferSplitFractionFromWidth = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
-                                                                                      1.0 - splitFractionParameters.getFractionTimeOnFootIfOtherFootHasNoWidth(),
-                                                                                      2.0 * percentWidthOnCurrentFoot - 1.0);
-
-         double transferWeightDistribution = 0.5 * (transferWeightDistributionFromArea + transferWeightDistributionFromWidth);
-         double transferSplitFraction = 0.5 * (transferSplitFractionFromArea + transferSplitFractionFromWidth);
-
-         transferWeightDistribution = MathTools.clamp(transferWeightDistribution, 0.01, 0.99);
-         transferSplitFraction = MathTools.clamp(transferSplitFraction, 0.01, 0.99);
-
-         if (stepNumber == getNumberOfFootstepsRegistered() - 1)
-         { // this is the last step
-
-            double currentSplitFraction = finalTransferSplitFraction.getDoubleValue();
-            double currentWeightDistribution = finalTransferWeightDistribution.getDoubleValue();
-
-            double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-            double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
-
-            finalTransferSplitFraction.set(splitFractionToSet);
-            finalTransferWeightDistribution.set(weightDistributionToSet);
-         }
-         else
-         {
-            double currentSplitFraction = transferSplitFractions.get(stepNumber + 1).getDoubleValue();
-            double currentWeightDistribution = transferWeightDistributions.get(stepNumber + 1).getDoubleValue();
-
-            double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-            double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
-
-            transferSplitFractions.get(stepNumber + 1).set(splitFractionToSet);
-            transferWeightDistributions.get(stepNumber + 1).set(weightDistributionToSet);
-         }
-      }
-   }
 }

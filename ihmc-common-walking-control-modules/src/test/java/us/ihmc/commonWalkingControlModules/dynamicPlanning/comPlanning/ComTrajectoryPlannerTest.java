@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
@@ -21,7 +22,9 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
 
    protected CoMTrajectoryPlannerInterface createComTrajectoryPlanner()
    {
-      return new CoMTrajectoryPlanner(gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(gravityZ, nominalHeight, registry);
+      planner.setMaintainInitialCoMVelocityContinuity(false);
+      return planner;
    }
 
    @Test
@@ -109,39 +112,39 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
       FramePoint3D fifthCoefficient = new FramePoint3D();
       FramePoint3D sixthCoefficient = new FramePoint3D();
 
-      DMatrixRMaj xCoefficientVector = planner.xCoefficientVector;
-      DMatrixRMaj yCoefficientVector = planner.yCoefficientVector;
-      DMatrixRMaj zCoefficientVector = planner.zCoefficientVector;
+      DMatrix xCoefficientVector = planner.xCoefficientVector;
+      DMatrix yCoefficientVector = planner.yCoefficientVector;
+      DMatrix zCoefficientVector = planner.zCoefficientVector;
 
       int startIndex = 0;
-      firstCoefficient.setX(xCoefficientVector.get(startIndex));
-      firstCoefficient.setY(yCoefficientVector.get(startIndex));
-      firstCoefficient.setZ(zCoefficientVector.get(startIndex));
+      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
 
       int secondCoefficientIndex = startIndex + 1;
-      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex));
-      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex));
-      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
+      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
 
       int thirdCoefficientIndex = startIndex + 2;
-      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex));
-      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex));
-      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex));
+      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
 
       int fourthCoefficientIndex = startIndex + 3;
-      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
-      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
-      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
 
       int fifthCoefficientIndex = startIndex + 4;
-      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex));
-      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex));
-      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex));
+      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
 
       int sixthCoefficientIndex = startIndex + 5;
-      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex));
-      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex));
-      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
+      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
 
       CoMTrajectoryPlannerTools
             .constructDesiredCoMPosition(assembledPreTouchdownCoMPosition, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient, sixthCoefficient, flightDuration, omega.getDoubleValue());
@@ -151,34 +154,34 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
       CoMTrajectoryPlannerTools.constructDesiredVRPPosition(assembledPreTouchdownVRPPosition, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient, sixthCoefficient, flightDuration, omega.getDoubleValue());
 
       startIndex = 6;
-      firstCoefficient.setX(xCoefficientVector.get(startIndex));
-      firstCoefficient.setY(yCoefficientVector.get(startIndex));
-      firstCoefficient.setZ(zCoefficientVector.get(startIndex));
+      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
 
       secondCoefficientIndex = startIndex + 1;
-      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex));
-      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex));
-      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex));
+      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
 
       thirdCoefficientIndex = startIndex + 2;
-      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex));
-      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex));
-      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex));
+      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
 
       fourthCoefficientIndex = startIndex + 3;
-      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex));
-      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex));
-      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex));
+      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
 
       fifthCoefficientIndex = startIndex + 4;
-      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex));
-      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex));
-      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex));
+      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
 
       sixthCoefficientIndex = startIndex + 5;
-      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex));
-      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex));
-      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
+      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
 
       CoMTrajectoryPlannerTools.constructDesiredCoMPosition(assembledPostTouchdownCoMPosition, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient, sixthCoefficient, 0.0, omega.getDoubleValue());
       CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(assembledPostTouchdownCoMVelocity, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient, sixthCoefficient, 0.0, omega.getDoubleValue());
