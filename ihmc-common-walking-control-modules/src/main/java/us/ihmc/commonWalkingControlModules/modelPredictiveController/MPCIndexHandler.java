@@ -11,7 +11,7 @@ import java.util.Map;
 public class MPCIndexHandler
 {
    public static final int coefficientsPerRho = 4;
-   private static final int comCoefficientsPerSegment = 6;
+   public static final int comCoefficientsPerSegment = 6;
 
    private int comCoefficientSize = 0;
    private int orientationCoefficientSize = 0;
