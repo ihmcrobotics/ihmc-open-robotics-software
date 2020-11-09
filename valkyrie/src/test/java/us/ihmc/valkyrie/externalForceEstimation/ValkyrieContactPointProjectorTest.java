@@ -31,11 +31,9 @@ import static us.ihmc.valkyrie.ValkyrieSDFLoadingDemo.addKinematicsCollisionGrap
 
 public class ValkyrieContactPointProjectorTest
 {
-   @Disabled
-   @Test
-   public void testSimpleProjection()
+   public ValkyrieContactPointProjectorTest()
    {
-      boolean projectToSpecificLink = false;
+      boolean projectToSpecificLink = true;
       boolean printProjectedLocation = true;
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
@@ -120,6 +118,13 @@ public class ValkyrieContactPointProjectorTest
          if (projectToSpecificLink)
          {
             contactPointProjector.projectToSpecificLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
+
+            if (printProjectedLocation)
+            {
+               FramePoint3D position = contactPointParticle.getContactPointPosition();
+               position.changeFrame(rigidBody.getParentJoint().getFrameAfterJoint());
+               System.out.println(rigidBody.getParentJoint().getName() + "\t" + EuclidCoreIOTools.getTuple3DString(position));
+            }
          }
          else
          {
@@ -166,5 +171,10 @@ public class ValkyrieContactPointProjectorTest
       scs.startOnAThread();
 
       ThreadTools.sleepForever();
+   }
+
+   public static void main(String[] args)
+   {
+      new ValkyrieContactPointProjectorTest();
    }
 }
