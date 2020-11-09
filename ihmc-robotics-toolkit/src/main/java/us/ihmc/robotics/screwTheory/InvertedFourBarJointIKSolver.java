@@ -1,9 +1,23 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 
 public interface InvertedFourBarJointIKSolver
 {
+   /**
+    * (Optional) Sets converters to use when comparing the four bar interior angles to the given
+    * &theta; angle in {@link #solve(double, FourBarVertex)}.
+    * <p>
+    * This can be particularly useful when &theta; computed from joint configuration perspective
+    * instead of four bar geometry perspective.
+    * </p>
+    * 
+    * @param converters the 4 converters to use when comparing the interior angles to &theta;. They're
+    *                   expected to be for the vertices A, B, C, and D in order.
+    */
+   void setConverters(FourBarToJointConverter[] converters);
+
    /**
     * Solve for the four bar configuration given &theta;, the angle between the two non-crossing edges,
     * more precisely from the non-flipped edge to the flipped edge.

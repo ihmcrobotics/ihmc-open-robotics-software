@@ -1,6 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.log.LogTools;
@@ -9,6 +8,7 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarEdge;
 import us.ihmc.robotics.kinematics.fourbar.FourBarTools;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 
 /**
  * Numerical solver that performs a binary search using the four bar range of motion as initial
@@ -23,6 +23,9 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
    private int iterations;
    private final FourBar fourBar = new FourBar();
    private boolean useNaiveMethod = false;
+
+   private boolean limitsInverted = false;
+   private FourBarToJointConverter[] converters = null;
 
    public InvertedFourBarJointIKBinarySolver(double tolerance)
    {
@@ -40,7 +43,15 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
       this.useNaiveMethod = useNaiveMethod;
    }
 
+   @Override
+   public void setConverters(FourBarToJointConverter[] converters)
+   {
+      this.converters = converters;
+   }
+
    private double lastTheta = Double.NaN;
+   private double thetaMin = Double.NaN;
+   private double thetaMax = Double.NaN;
    private FourBarVertex lastVertexToSolveFor = null;
    private double lastSolution = Double.NaN;
 
@@ -59,14 +70,11 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
       lastTheta = theta;
       lastVertexToSolveFor = vertexToSolveFor;
 
-      Bound limit = isThetaAtLimit(theta, vertexToSolveFor);
+      double angle = isThetaAtLimit(theta, vertexToSolveFor);
 
-      if (limit != null)
+      if (!Double.isNaN(angle))
       {
-         if (limit == Bound.MIN)
-            lastSolution = vertexToSolveFor.getMinAngle();
-         else
-            lastSolution = vertexToSolveFor.getMaxAngle();
+         lastSolution = angle;
       }
       else
       {
@@ -79,37 +87,59 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
       return lastSolution;
    }
 
-   private Bound isThetaAtLimit(double theta, FourBarVertex vertexToSolveFor)
+   private double isThetaAtLimit(double theta, FourBarVertex vertexToSolveFor)
    {
-      Bound bound = null;
+      FourBarVertex A = vertexToSolveFor;
+      boolean isNextCrossing = A.getNextEdge().isCrossing();
+      FourBarVertex B = isNextCrossing ? A.getNextVertex() : A.getPreviousVertex();
 
-      boolean isNextCrossing = vertexToSolveFor.getNextEdge().isCrossing();
-      FourBarVertex otherVertex = isNextCrossing ? vertexToSolveFor.getNextVertex() : vertexToSolveFor.getPreviousVertex();
-      double thetaMin = vertexToSolveFor.getMinAngle() + otherVertex.getMinAngle();
-      double thetaMax = vertexToSolveFor.getMaxAngle() + otherVertex.getMaxAngle();
+      double minAngleA = convert(A, A.getMinAngle());
+      double maxAngleA = convert(A, A.getMaxAngle());
 
-      if (vertexToSolveFor.isConvex() == isNextCrossing)
+      thetaMin = minAngleA + convert(B, B.getMinAngle());
+      thetaMax = maxAngleA + convert(B, B.getMaxAngle());
+
+      limitsInverted = thetaMin > thetaMax;
+
+      if (limitsInverted)
+      {
+         thetaMin = -thetaMin;
+         thetaMax = -thetaMax;
+      }
+
+      if (A.isConvex() == isNextCrossing)
       {
          if (theta <= thetaMin + tolerance)
-            bound = Bound.MIN;
+            return minAngleA;
          else if (theta >= thetaMax - tolerance)
-            bound = Bound.MAX;
+            return maxAngleA;
       }
       else
       {
          if (-theta <= thetaMin + tolerance)
-            bound = Bound.MIN;
+            return minAngleA;
          else if (-theta >= thetaMax - tolerance)
-            bound = Bound.MAX;
+            return maxAngleA;
       }
 
-      return bound;
+      return Double.NaN;
    }
 
    private double solveNaive(double theta, FourBarVertex vertexToSolveFor)
    {
       long start = System.nanoTime();
       setupFourBar(vertexToSolveFor);
+
+      FourBarToJointConverter converterA = null;
+      FourBarToJointConverter converterB = null;
+      FourBarToJointConverter converterD = null;
+
+      if (converters != null)
+      {
+         converterA = getConverter(vertexToSolveFor);
+         converterB = getConverter(vertexToSolveFor.getNextVertex());
+         converterD = getConverter(vertexToSolveFor.getPreviousVertex());
+      }
 
       FourBarVertex A = fourBar.getVertexA();
       double minDAB = A.getMinAngle();
@@ -130,32 +160,45 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
       {
          currentDAB = 0.5 * (minDAB + maxDAB);
          fourBar.update(FourBarAngle.DAB, currentDAB);
-         double actualTheta = currentDAB;
+         double actualTheta;
+         if (converterA == null)
+            actualTheta = currentDAB;
+         else
+            actualTheta = converterA.toJointAngle(currentDAB);
 
          if (fourBar.getEdgeDA().isCrossing())
          { // theta = DAB + CDA
-            actualTheta += fourBar.getAngleCDA();
+            actualTheta += convert(converterD, fourBar.getAngleCDA());
          }
          else
          { // theta = DAB + ABC
-            actualTheta += fourBar.getAngleABC();
+            actualTheta += convert(converterB, fourBar.getAngleABC());
          }
+
+         if (limitsInverted)
+            actualTheta = -actualTheta;
 
          if (EuclidCoreTools.epsilonEquals(actualTheta, theta, tolerance))
             break;
 
          if (actualTheta > theta)
+         {
             maxDAB = currentDAB;
+            thetaMax = actualTheta;
+         }
          else
+         {
             minDAB = currentDAB;
+            thetaMin = actualTheta;
+         }
 
-         if (Math.abs(maxDAB - minDAB) <= tolerance)
+         if (Math.abs(thetaMax - thetaMin) <= tolerance)
             break;
       }
 
       if (DEBUG)
          LogTools.debug("Iterations: {}, time elapsed: {}millisec", iterations, (System.nanoTime() - start) / 1.0e6);
-      return currentDAB;
+      return convert(converterA, currentDAB);
    }
 
    private void setupFourBar(FourBarVertex vertexToSolverFor)
@@ -189,6 +232,17 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
 
       double minDAB = A.getMinAngle();
       double maxDAB = A.getMaxAngle();
+
+      FourBarToJointConverter converterA = null;
+      FourBarToJointConverter converterB = null;
+      FourBarToJointConverter converterD = null;
+
+      if (converters != null)
+      {
+         converterA = getConverter(vertexToSolveFor);
+         converterB = getConverter(vertexToSolveFor.getNextVertex());
+         converterD = getConverter(vertexToSolveFor.getPreviousVertex());
+      }
 
       // The search uses the property that theta is the sum of the angles of the two vertices that are the end-points of a crossing edge.
       // Note that there are 2 sets of such vertices, while the sum of a first set is equal to theta, the other is equal to -theta.
@@ -225,6 +279,7 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
             otherAngle = Math.abs(Math.acos(cosADB * cosCDB + Math.sqrt((1.0 - cosADB * cosADB) * (1.0 - cosCDB * cosCDB))));
             if (!DAEdge.getStart().isConvex())
                otherAngle = -otherAngle;
+            otherAngle = convert(converterD, otherAngle);
          }
          else
          { // theta = DAB + ABC
@@ -235,22 +290,49 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
             otherAngle = Math.abs(Math.acos(cosABD * cosCBD + Math.sqrt((1.0 - cosABD * cosABD) * (1.0 - cosCBD * cosCBD))));
             if (!BCEdge.getStart().isConvex())
                otherAngle = -otherAngle;
+            otherAngle = convert(converterB, otherAngle);
          }
 
-         if (EuclidCoreTools.epsilonEquals(currentDAB + otherAngle, theta, tolerance))
+         double actualTheta = convert(converterA, currentDAB) + otherAngle;
+
+         if (limitsInverted)
+            actualTheta = -actualTheta;
+
+         if (EuclidCoreTools.epsilonEquals(actualTheta, theta, tolerance))
             break;
 
-         if (currentDAB + otherAngle > theta)
+         if (actualTheta > theta)
+         {
             maxDAB = currentDAB;
+            thetaMax = actualTheta;
+         }
          else
+         {
             minDAB = currentDAB;
+            thetaMin = actualTheta;
+         }
 
-         if (Math.abs(maxDAB - minDAB) <= tolerance)
+         if (Math.abs(thetaMax - thetaMin) <= tolerance)
             break;
       }
 
       if (DEBUG)
          LogTools.debug("Iterations: {}, time elapsed: {}millisec", iterations, (System.nanoTime() - start) / 1.0e6);
-      return currentDAB;
+      return convert(converterA, currentDAB);
+   }
+
+   private double convert(FourBarVertex vertex, double vertexAngle)
+   {
+      return convert(getConverter(vertex), vertexAngle);
+   }
+
+   private double convert(FourBarToJointConverter converter, double vertexAngle)
+   {
+      return converter == null ? vertexAngle : converter.toJointAngle(vertexAngle);
+   }
+
+   private FourBarToJointConverter getConverter(FourBarVertex vertex)
+   {
+      return converters[vertex.getFourBarAngle().ordinal()];
    }
 }
