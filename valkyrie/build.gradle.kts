@@ -154,8 +154,10 @@ tasks.create("deployNetworkProcessor") {
 fun deployNetworkProcessor()
 {
    val valkyrie_zelda_ip: String by project
+   val valkyrie_bronn_ip: String? by project
    val valkyrie_realtime_username: String by project
    val valkyrie_realtime_password: String by project
+   val local_bronn_ip = valkyrie_bronn_ip
 
    remote.session(valkyrie_zelda_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
    {
@@ -178,5 +180,30 @@ fun deployNetworkProcessor()
       exec("mkdir -p /home/val/.ihmc/Configurations")
       put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
       exec("ls -halp /home/val/.ihmc/Configurations")
+   }
+
+   if (local_bronn_ip != null) {
+       remote.session(local_bronn_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
+      {
+         exec("mkdir -p $directory")
+   
+         exec("rm -rf $directory/bin")
+         exec("rm -rf $directory/lib")
+   
+         put(file("build/install/valkyrie/bin").toString(), "$directory/bin")
+         exec("chmod +x $directory/bin/valkyrie-network-processor")
+         put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
+         exec("ls -halp $directory/lib")
+   
+         put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
+         put(file("launchScripts").toString(), directory)
+         exec("chmod +x $directory/runNetworkProcessor.sh")
+         exec("ls -halp $directory")
+   
+         exec("rm -rf /home/val/.ihmc/Configurations")
+         exec("mkdir -p /home/val/.ihmc/Configurations")
+         put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
+         exec("ls -halp /home/val/.ihmc/Configurations")
+      }
    }
 }
