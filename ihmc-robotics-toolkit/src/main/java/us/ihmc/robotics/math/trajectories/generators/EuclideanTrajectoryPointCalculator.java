@@ -28,7 +28,7 @@ public class EuclideanTrajectoryPointCalculator
    public void clear()
    {
       trajectoryPoints.clear();
-      times.clear();
+      times.reset();
    }
 
    public void appendTrajectoryPoint(EuclideanTrajectoryPointBasics trajectoryPoint)
