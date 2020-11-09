@@ -131,7 +131,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.write(data.getStairsStepType(), cdr);
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.write(data.getSideStepDirection(), cdr);
       controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType.write(data.getSlopeStepType(), cdr);
-      cdr.write_type_7(data.getForceSwingSide());
+      cdr.write_type_9(data.getForceSwingSide());
 
    }
 
@@ -154,7 +154,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.read(data.getStairsStepType(), cdr);	
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.read(data.getSideStepDirection(), cdr);	
       controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType.read(data.getSlopeStepType(), cdr);	
-      data.setForceSwingSide(cdr.read_type_7());
+      data.setForceSwingSide(cdr.read_type_9());
       	
 
    }
@@ -178,7 +178,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_a("slope_step_type", new controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType(), data.getSlopeStepType());
 
-      ser.write_type_7("force_swing_side", data.getForceSwingSide());
+      ser.write_type_9("force_swing_side", data.getForceSwingSide());
    }
 
    @Override
@@ -200,7 +200,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_a("slope_step_type", new controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType(), data.getSlopeStepType());
 
-      data.setForceSwingSide(ser.read_type_7("force_swing_side"));
+      data.setForceSwingSide(ser.read_type_9("force_swing_side"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuixCrutchMessage src, controller_msgs.msg.dds.QuixCrutchMessage dest)
