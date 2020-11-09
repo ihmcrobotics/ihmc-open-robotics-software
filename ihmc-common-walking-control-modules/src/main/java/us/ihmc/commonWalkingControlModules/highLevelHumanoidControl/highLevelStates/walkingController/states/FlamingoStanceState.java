@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -141,8 +142,9 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
+      Footstep footstep = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
+      balanceManager.addFootstepToPlan(footstep, footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
 

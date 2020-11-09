@@ -7,9 +7,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryBTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieICPOptimizationParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryBTest
@@ -41,6 +43,26 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
                         return true;
                      }
                   };
+               }
+
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new ValkyrieSteppingParameters(getRobotPhysicalProperties(), RobotTarget.SCS)
+                  {
+                     @Override
+                     public double getMaxStepLength()
+                     {
+                        return 0.8;
+                     }
+
+                     @Override
+                     public double getMaxStepWidth()
+                     {
+                        return 0.6;
+                     }
+                  };
+
                }
             };
 
