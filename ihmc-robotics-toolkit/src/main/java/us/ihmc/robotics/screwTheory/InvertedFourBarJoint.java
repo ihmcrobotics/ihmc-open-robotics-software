@@ -28,6 +28,8 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.robotics.kinematics.fourbar.FourBar;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
 public class InvertedFourBarJoint implements OneDoFJointBasics
@@ -35,7 +37,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    private final String name;
    private final String nameId;
    private final RigidBodyBasics predecessor;
-   private final RigidBodyBasics successor;
+   private RigidBodyBasics successor;
    private final MovingReferenceFrame beforeJointFrame;
    private final MovingReferenceFrame afterJointFrame;
 
@@ -56,11 +58,40 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    private final SpatialAcceleration unitPredecessorAcceleration = new SpatialAcceleration();
 
    private final Wrench unitJointWrench = new Wrench();
-   private final WrenchReadOnly jointWrench;
+   private WrenchReadOnly jointWrench;
 
    /** Variable to store intermediate results for garbage-free operations. */
    private final Vector3D rotationVector = new Vector3D();
 
+   /**
+    * Creates a new inverted four bar joint that is to wrap the 4 given revolute joints into a single
+    * 1-DoF joint.
+    * <p>
+    * <b>WARNING: This joint is somewhat tricky to create, as the 4 given revolute joints are only used
+    * as a template to setup this complex joint and for internal calculation.</b><br>
+    * Here are the expected construction steps of a robot system:
+    * <ol>
+    * <li>The user should create the branch of the robot up to the 4 revolute joints composing the four
+    * bar.
+    * <li>Instead of adding the successor to the last 2 joints, create a dummy rigid-body to terminate
+    * the four bar.
+    * <li>Create the {@code InvertedFourBarJoint} given the four joints.
+    * <li>Finally proceed to creating the subtree following the four bar by attaching the next
+    * successor to this new four bar joint. The transform, a.k.a. inertia pose, that is to be provided
+    * to the successor should expressed with respect to {@link #getJointD()}'s frame after joint.
+    * </ol>
+    * </p>
+    * 
+    * @param name             the name of this joint.
+    * @param fourBarJoints    the 4 revolute joints composing the four bar.
+    * @param masterJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
+    * @throws IllegalArgumentException if the given joints do not represent an inverted four bar
+    *                                  joints.
+    * @throws IllegalArgumentException if a subtree is already attached to the last two joints closing
+    *                                  the four bar.
+    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
+    *      FourBarToJointConverter[], FourBar, int, double)
+    */
    public InvertedFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex)
    {
       fourBarFunction = new FourBarKinematicLoopFunction(name, fourBarJoints, masterJointIndex);
@@ -69,8 +100,12 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       setIKSolver(new InvertedFourBarJointIKBinarySolver(1.0e-5));
 
       this.name = name;
-      predecessor = getJointA().getPredecessor(); // TODO Need to replace child of predecessor.
-      successor = getJointD().getSuccessor(); // TODO Need to re-map the parent joint of the successor.
+      predecessor = getJointA().getPredecessor();
+      // Detaching the joints A & B from the predecessor and attaching this joint.
+      predecessor.getChildrenJoints().remove(getJointA());
+      predecessor.getChildrenJoints().remove(getJointB());
+      predecessor.addChildJoint(this);
+
       beforeJointFrame = getJointA().getFrameBeforeJoint();
       afterJointFrame = getJointD().getFrameAfterJoint();
 
@@ -82,7 +117,6 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       unitTwists = Collections.singletonList(unitJointTwist);
       jointTwist = MecanoFactories.newTwistReadOnly(this::getQd, unitJointTwist);
       jointAcceleration = setupJointAcceleration();
-      jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
 
    private SpatialAccelerationReadOnly setupJointAcceleration()
@@ -96,6 +130,16 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       FrameVector3DReadOnly angularPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, wx, wy, wz);
       FrameVector3DReadOnly linearPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, vx, vy, vz);
       return MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame, beforeJointFrame, angularPart, linearPart);
+   }
+
+   @Override
+   public void setSuccessor(RigidBodyBasics successor)
+   {
+      if (this.successor != null)
+         throw new IllegalOperationException("The successor of this joint has already been set.");
+
+      this.successor = successor;
+      jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
 
    /**
@@ -443,12 +487,6 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    public WrenchReadOnly getJointWrench()
    {
       return jointWrench;
-   }
-
-   @Override
-   public void setSuccessor(RigidBodyBasics successor)
-   {
-      throw new IllegalOperationException("The successor is set at construction");
    }
 
    @Override

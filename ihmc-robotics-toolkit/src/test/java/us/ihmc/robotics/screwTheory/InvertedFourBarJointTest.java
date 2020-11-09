@@ -24,6 +24,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -930,6 +931,8 @@ public class InvertedFourBarJointTest
                                                                                                                                                  .getPredecessor(),
                                                                                                                                      fourBarJoint.getJointD()
                                                                                                                                                  .getSuccessor()));
+            expectedAcceleration.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedAcceleration.changeFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedAcceleration.scale(1.0 / fourBarJoint.getQdd());
 
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i, expectedAcceleration, fourBarJoint.getUnitSuccessorAcceleration(), SMALL_EPSILON);
@@ -967,6 +970,7 @@ public class InvertedFourBarJointTest
                                                                                                                                                  .getSuccessor(),
                                                                                                                                      fourBarJoint.getJointA()
                                                                                                                                                  .getPredecessor()));
+            expectedAcceleration.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedAcceleration.scale(1.0 / fourBarJoint.getQdd());
 
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i,
@@ -1257,6 +1261,7 @@ public class InvertedFourBarJointTest
       Point2D C = new Point2D(0.042, -0.102);
       Point2D D = new Point2D(-0.017, -0.088);
       InvertedFourBarJoint joint = new InvertedFourBarJoint(name, createInvertedFourBarJoints(A, B, C, D), masterJointIndex);
+      new RigidBody("bodyCD", joint, 0, 0, 0, 0, new Point3D());
       joint.setIKSolver(new InvertedFourBarJointIKBinarySolver(solverTolerance));
       return joint;
    }
