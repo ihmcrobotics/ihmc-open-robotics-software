@@ -23,7 +23,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public controller_msgs.msg.dds.QuixStairsStepTypeMessage stairs_step_type_;
    public controller_msgs.msg.dds.QuixSideStepDirectionMessage side_step_direction_;
    public controller_msgs.msg.dds.QuixSlopeStepTypeMessage slope_step_type_;
-   public boolean force_swing_side_;
+   public byte force_swing_side_ = (byte) 255;
 
    public QuixCrutchMessage()
    {
@@ -147,11 +147,11 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return slope_step_type_;
    }
 
-   public void setForceSwingSide(boolean force_swing_side)
+   public void setForceSwingSide(byte force_swing_side)
    {
       force_swing_side_ = force_swing_side;
    }
-   public boolean getForceSwingSide()
+   public byte getForceSwingSide()
    {
       return force_swing_side_;
    }
@@ -191,7 +191,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.stairs_step_type_.epsilonEquals(other.stairs_step_type_, epsilon)) return false;
       if (!this.side_step_direction_.epsilonEquals(other.side_step_direction_, epsilon)) return false;
       if (!this.slope_step_type_.epsilonEquals(other.slope_step_type_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_swing_side_, other.force_swing_side_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.force_swing_side_, other.force_swing_side_, epsilon)) return false;
 
 
       return true;
