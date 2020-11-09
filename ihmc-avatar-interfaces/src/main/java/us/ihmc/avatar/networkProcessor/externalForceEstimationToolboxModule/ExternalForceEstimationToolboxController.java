@@ -200,15 +200,12 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
             predefinedContactForceSolver.setSolverAlpha(configurationCommand.getSolverAlpha());
          }
 
-         predefinedContactForceSolver.initialize();
-
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
       }
-      else if (predefinedContactForceSolver == null)
-      {
-         return false;
-      }
 
+      predefinedContactForceSolver.initialize();
+      contactParticleFilterHasInitialized.set(false);
+      
       return true;
    }
 
@@ -263,7 +260,18 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
             isDone.set(true);
          }
 
-         // TODO pack output
+         RigidBodyBasics estimatedContactingBody = contactParticleFilter.getEstimatedContactingBody();
+         if (estimatedContactingBody == null)
+         {
+            outputStatus.setRigidBodyHashCode(-1);
+            outputStatus.getContactPoint().setToNaN();
+         }
+         else
+         {
+            outputStatus.setRigidBodyHashCode(estimatedContactingBody.hashCode());
+            contactParticleFilter.getEstimatedContactPosition().changeFrame(estimatedContactingBody.getParentJoint().getFrameAfterJoint());
+            outputStatus.getContactPoint().set(contactParticleFilter.getEstimatedContactPosition());
+         }
       }
       else
       {
