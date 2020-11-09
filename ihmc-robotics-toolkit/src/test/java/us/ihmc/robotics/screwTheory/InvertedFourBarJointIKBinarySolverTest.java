@@ -19,13 +19,12 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 
 public class InvertedFourBarJointIKBinarySolverTest
 {
-   private static final int ITERATIONS = 200000;
+   private static final int ITERATIONS = 50000;
    private static final double EPSILON = 1.0e-7;
 
    @Test
    public void test()
    {
-      int warmupIterations = 100000;
       Random random = new Random(4534);
       FourBar fourBar = new FourBar();
       InvertedFourBarJointIKBinarySolver defaultSolver = new InvertedFourBarJointIKBinarySolver(EPSILON);
@@ -65,19 +64,17 @@ public class InvertedFourBarJointIKBinarySolverTest
          double actualAngle = defaultSolver.solve(theta, sourceVertex);
          assertEquals(expectedAngle, actualAngle, EPSILON);
          end = System.nanoTime();
-         if (i > warmupIterations)
-            defaultMethodTotalTimeNano += end - start;
+         defaultMethodTotalTimeNano += end - start;
 
          start = System.nanoTime();
          actualAngle = naiveSolver.solve(theta, sourceVertex);
          assertEquals(expectedAngle, actualAngle, EPSILON);
          end = System.nanoTime();
-         if (i > warmupIterations)
-            naiveMethodTotalTimeNano += end - start;
+         naiveMethodTotalTimeNano += end - start;
       }
 
-      LogTools.info("Default method average solve time: {}millisec", defaultMethodTotalTimeNano / (ITERATIONS - warmupIterations) / 1.0e6);
-      LogTools.info("Naive method average solve time: {}millisec", naiveMethodTotalTimeNano / (ITERATIONS - warmupIterations) / 1.0e6);
+      LogTools.info("Default method average solve time: {}millisec", defaultMethodTotalTimeNano / ITERATIONS / 1.0e6);
+      LogTools.info("Naive method average solve time: {}millisec", naiveMethodTotalTimeNano / ITERATIONS / 1.0e6);
    }
 
 }
