@@ -1707,10 +1707,7 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setEffectiveICPAdjustment(nextFrameVector3D(random, possibleFrames));
-      next.setUsingStepAdjustment(random.nextBoolean());
-      next.setFootstepWasAdjusted(random.nextBoolean());
-      next.setFootstepSolution(nextFramePose3D(random, possibleFrames));
+      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 
@@ -1721,27 +1718,19 @@ public class CrossRobotCommandRandomTools
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
       next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
                                                                                   nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setUsePelvisHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
-      next.setDesiredICPAtEndOfState(nextFramePoint2D(random, possibleFrames));
-      next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
-      next.setFinalTransferDuration(random.nextDouble());
-      next.setFootsteps(nextRecyclingArrayList(SimpleFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
-      next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setInitializeForSingleSupport(random.nextBoolean());
-      next.setInitializeForStanding(random.nextBoolean());
-      next.setInitializeForTransfer(random.nextBoolean());
+      next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
       next.setOmega0(random.nextDouble());
       next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));
       next.setPerfectCoP(nextFramePoint2D(random, possibleFrames));
-      next.setRemainingTimeInSwingUnderDisturbance(random.nextDouble());
-      next.setSupportSide(nextElementIn(random, RobotSide.values));
-      next.setTransferToSide(nextElementIn(random, RobotSide.values));
       return next;
    }
 

@@ -17,6 +17,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -124,6 +127,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final YoBoolean maintainInitialCoMVelocityContinuity = new YoBoolean("maintainInitialComVelocityContinuity", registry);
 
    private CornerPointViewer viewer = null;
+   private BagOfBalls comTrajectoryViewer = null;
 
    private CoMContinuityCalculator comContinuityCalculator = null;
 
@@ -166,6 +170,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.viewer = viewer;
    }
 
+   public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      comTrajectoryViewer = new BagOfBalls(50, 0.01, YoAppearance.Black(), registry, yoGraphicsListRegistry);
+   }
+
    public void setComContinuityCalculator(CoMContinuityCalculator comContinuityCalculator)
    {
       this.comContinuityCalculator = comContinuityCalculator;
@@ -197,7 +206,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       resetMatrices();
 
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequence, startVRPPositions,
-                                                    endVRPPositions, false);
+                                                    endVRPPositions, true);
 
       solveForCoefficientConstraintMatrix(contactSequence);
 
@@ -259,6 +268,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          viewer.updateDCMCornerPoints(dcmCornerPoints);
          viewer.updateCoMCornerPoints(comCornerPoints);
          viewer.updateVRPWaypoints(vrpSegments);
+      }
+      if (comTrajectoryViewer != null)
+      {
+         updateCoMTrajectoryViewer();
       }
    }
 
@@ -489,6 +502,27 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;
+   }
+
+   private void updateCoMTrajectoryViewer()
+   {
+      comTrajectoryViewer.reset();
+
+      boolean verboseBefore = verbose;
+      verbose = false;
+      for (int i = 0; i < comTrajectoryViewer.getNumberOfBalls(); i++)
+      {
+         double time = 0.05 * i;
+         int segmentId = getSegmentNumber(time);
+         double timeInSegment = getTimeInSegment(segmentId, time);
+
+         compute(segmentId, timeInSegment, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+
+         comTrajectoryViewer.setBall(comPositionToThrowAway);
+      }
+
+      verbose = verboseBefore;
    }
 
    /**

@@ -179,7 +179,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
-                                                                            yoTime,
                                                                             gravityZ,
                                                                             controlDT,
                                                                             walkingParentRegistry,

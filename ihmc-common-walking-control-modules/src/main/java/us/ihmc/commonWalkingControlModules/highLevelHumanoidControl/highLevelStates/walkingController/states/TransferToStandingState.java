@@ -129,12 +129,10 @@ public class TransferToStandingState extends WalkingState
       Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
       Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
-      comHeightManager.transfer(midFootPosition, finalTransferTime);
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding();
 
       touchdownErrorCompensator.clear();
