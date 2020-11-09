@@ -8,6 +8,7 @@ import java.util.Objects;
 public class FourBarVertex
 {
    private final String name;
+   private final FourBarAngle fourBarAngle;
 
    private double angle;
    private double angleDot;
@@ -24,11 +25,13 @@ public class FourBarVertex
    /**
     * Creates a new vertex given a human readable name.
     * 
-    * @param name the name of this vertex.
+    * @param name         the name of this vertex.
+    * @param fourBarAngle the angle in the four bar which this vertex represents.
     */
-   FourBarVertex(String name)
+   FourBarVertex(String name, FourBarAngle fourBarAngle)
    {
       this.name = name;
+      this.fourBarAngle = fourBarAngle;
    }
 
    /**
@@ -46,9 +49,10 @@ public class FourBarVertex
    }
 
    /**
-    * Checks that the references to the other four bar elements have been set and that the configuration is consistent.
+    * Checks that the references to the other four bar elements have been set and that the
+    * configuration is consistent.
     * 
-    * @throws NullPointerException if any of the references has not been set.
+    * @throws NullPointerException  if any of the references has not been set.
     * @throws IllegalStateException if a problem in the configuration is detected.
     */
    void checkProperlySetup()
@@ -175,6 +179,16 @@ public class FourBarVertex
    public String getName()
    {
       return name;
+   }
+
+   /**
+    * Gets the angle in the four bar which this vertex holds onto.
+    * 
+    * @return the angle in the four bar which this vertex holds onto.
+    */
+   public FourBarAngle getFourBarAngle()
+   {
+      return fourBarAngle;
    }
 
    /**

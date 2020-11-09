@@ -78,10 +78,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  */
 public class FourBar
 {
-   private final FourBarVertex A = new FourBarVertex("A");
-   private final FourBarVertex B = new FourBarVertex("B");
-   private final FourBarVertex C = new FourBarVertex("C");
-   private final FourBarVertex D = new FourBarVertex("D");
+   private final FourBarVertex A = new FourBarVertex("A", FourBarAngle.DAB);
+   private final FourBarVertex B = new FourBarVertex("B", FourBarAngle.ABC);
+   private final FourBarVertex C = new FourBarVertex("C", FourBarAngle.BCD);
+   private final FourBarVertex D = new FourBarVertex("D", FourBarAngle.CDA);
    private final FourBarVertex[] vertices = {A, B, C, D};
 
    private final FourBarEdge AB = new FourBarEdge("AB");
