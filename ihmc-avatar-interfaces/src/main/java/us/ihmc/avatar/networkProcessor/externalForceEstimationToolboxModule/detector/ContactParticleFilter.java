@@ -84,6 +84,7 @@ public class ContactParticleFilter implements RobotController
    private final YoDouble alphaAverageParticlePosition = new YoDouble("alphaAverageParticlePosition", registry);
    private final YoDouble filteredAverageParticleVelocity = new YoDouble("filteredAverageParticleVelocity", registry);
    private final FramePoint3D previousFilteredAverageParticlePosition = new FramePoint3D();
+   private RigidBodyBasics estimatedContactingBody = null;
 
    // termination conditions
    private final YoInteger iterations = new YoInteger("iterations", registry);
@@ -180,6 +181,7 @@ public class ContactParticleFilter implements RobotController
 
       iterations.set(0);
       hasConverged.set(false);
+      filteredAverageParticleVelocity.set(upperMotionBoundForSamplingAdjustment.getValue());
    }
 
    private void computeInitialProjection()
@@ -342,14 +344,14 @@ public class ContactParticleFilter implements RobotController
       if (collidingRigidBodies.isEmpty())
       {
          pointToProject.setIncludingFrame(estimatedContactPosition);
-         contactPointProjector.projectToClosestLink(pointToProject, estimatedContactPosition, estimatedContactNormal);
+         estimatedContactingBody = contactPointProjector.projectToClosestLink(pointToProject, estimatedContactPosition, estimatedContactNormal);
       }
       else if (collidingRigidBodies.size() == 1)
       {
-         RigidBodyBasics rigidBody = collidingRigidBodies.get(0);
+         estimatedContactingBody = collidingRigidBodies.get(0);
          Vector3D sphericalQuery = new Vector3D();
 
-         estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+         estimatedContactPosition.changeFrame(estimatedContactingBody.getBodyFixedFrame());
          ExternalForceEstimationTools.transformToSphericalCoordinates(estimatedContactPosition, sphericalQuery);
 
          boolean pointIsInside = true;
@@ -358,9 +360,9 @@ public class ContactParticleFilter implements RobotController
          while (pointIsInside)
          {
             sphericalQuery.addX(radiusIncrement);
-            estimatedContactPosition.changeFrame(rigidBody.getBodyFixedFrame());
+            estimatedContactPosition.changeFrame(estimatedContactingBody.getBodyFixedFrame());
             ExternalForceEstimationTools.transformToCartesianCoordinates(sphericalQuery, estimatedContactPosition);
-            pointIsInside = contactPointProjector.isPointInside(estimatedContactPosition, rigidBody);
+            pointIsInside = contactPointProjector.isPointInside(estimatedContactPosition, estimatedContactingBody);
          }
 
          pointToProject.setIncludingFrame(estimatedContactPosition);
@@ -369,6 +371,7 @@ public class ContactParticleFilter implements RobotController
       else
       {
          // if inside inside multiple rigid bodys' meshes, don't project
+         estimatedContactingBody = null;
          return;
       }
    }
@@ -455,6 +458,16 @@ public class ContactParticleFilter implements RobotController
       pMax.set(maxProbability);
       distOfPMax.set(distanceOfMaxProbability);
       pClosestParticle.set(contactPointProbabilities[indexClosestParticle].getValue());
+   }
+
+   public FramePoint3D getEstimatedContactPosition()
+   {
+      return estimatedContactPosition;
+   }
+
+   public RigidBodyBasics getEstimatedContactingBody()
+   {
+      return estimatedContactingBody;
    }
 
    @Override
