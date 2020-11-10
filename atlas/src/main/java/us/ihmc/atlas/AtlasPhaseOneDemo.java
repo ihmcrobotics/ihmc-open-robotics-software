@@ -122,21 +122,7 @@ public class AtlasPhaseOneDemo
    {
       // Publish planar regions
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
-      PlanarRegionsList debrisRegions = environment.getDebrisRegions();
-      PlanarRegionsList environmentWithDebrisRegions = new PlanarRegionsList();
-
-      for (int i = 0; i < environmentWithoutDebrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = environmentWithoutDebrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
-      for (int i = 0; i < debrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = debrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
+      PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
