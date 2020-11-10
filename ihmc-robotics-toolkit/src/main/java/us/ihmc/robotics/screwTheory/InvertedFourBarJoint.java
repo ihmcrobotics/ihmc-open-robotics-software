@@ -198,20 +198,8 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       tempTwist.scale(J_D);
       unitJointTwist.add(tempTwist);
       unitJointTwist.scale(1.0 / (J_A + J_D));
-
-      unitSuccessorTwist.setIncludingFrame(unitJointTwist);
-      unitSuccessorTwist.setBaseFrame(predecessor.getBodyFixedFrame());
-      unitSuccessorTwist.setBodyFrame(successor.getBodyFixedFrame());
-      unitSuccessorTwist.changeFrame(successor.getBodyFixedFrame());
-
-      unitPredecessorTwist.setIncludingFrame(unitSuccessorTwist);
-      unitPredecessorTwist.invert();
-      unitPredecessorTwist.changeFrame(predecessor.getBodyFixedFrame());
-
       // Since we're ignoring the bias terms, the unit-accelerations are the same as the unit-twists.
       unitJointAcceleration.setIncludingFrame(unitJointTwist);
-      unitSuccessorAcceleration.setIncludingFrame(unitSuccessorTwist);
-      unitPredecessorAcceleration.setIncludingFrame(unitPredecessorTwist);
 
       /*
        * This next block is for computing the bias acceleration. I ended up using tests to figure out
@@ -232,14 +220,30 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       tempAcceleration.scale(-(loopConvectiveTerm.get(0) + loopConvectiveTerm.get(3)));
       jointBiasAcceleration.add((SpatialVectorReadOnly) tempAcceleration);
 
-      successorBiasAcceleration.setIncludingFrame(jointBiasAcceleration);
-      successorBiasAcceleration.setBaseFrame(getPredecessor().getBodyFixedFrame());
-      successorBiasAcceleration.setBodyFrame(getSuccessor().getBodyFixedFrame());
-      successorBiasAcceleration.changeFrame(getSuccessor().getBodyFixedFrame());
+      if (getSuccessor() != null)
+      {
+         unitSuccessorTwist.setIncludingFrame(unitJointTwist);
+         unitSuccessorTwist.setBaseFrame(predecessor.getBodyFixedFrame());
+         unitSuccessorTwist.setBodyFrame(successor.getBodyFixedFrame());
+         unitSuccessorTwist.changeFrame(successor.getBodyFixedFrame());
 
-      unitJointWrench.setIncludingFrame(fourBarFunction.getMasterJoint().getUnitJointTwist());
-      unitJointWrench.changeFrame(afterJointFrame);
-      unitJointWrench.setBodyFrame(getSuccessor().getBodyFixedFrame());
+         unitPredecessorTwist.setIncludingFrame(unitSuccessorTwist);
+         unitPredecessorTwist.invert();
+         unitPredecessorTwist.changeFrame(predecessor.getBodyFixedFrame());
+
+         // Since we're ignoring the bias terms, the unit-accelerations are the same as the unit-twists.
+         unitSuccessorAcceleration.setIncludingFrame(unitSuccessorTwist);
+         unitPredecessorAcceleration.setIncludingFrame(unitPredecessorTwist);
+
+         successorBiasAcceleration.setIncludingFrame(jointBiasAcceleration);
+         successorBiasAcceleration.setBaseFrame(getPredecessor().getBodyFixedFrame());
+         successorBiasAcceleration.setBodyFrame(getSuccessor().getBodyFixedFrame());
+         successorBiasAcceleration.changeFrame(getSuccessor().getBodyFixedFrame());
+
+         unitJointWrench.setIncludingFrame(fourBarFunction.getMasterJoint().getUnitJointTwist());
+         unitJointWrench.changeFrame(afterJointFrame);
+         unitJointWrench.setBodyFrame(getSuccessor().getBodyFixedFrame());
+      }
    }
 
    public FourBarKinematicLoopFunction getFourBarFunction()
