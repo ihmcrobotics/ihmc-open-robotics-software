@@ -106,7 +106,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       jointC = joints[2];
       jointD = joints[3];
 
-      masterVertex = fourBar.getVertex(FourBarAngle.values[masterJointIndex]);
+      masterVertex = fourBar.getVertex(FourBarAngle.values[this.masterJointIndex]);
    }
 
    /**
