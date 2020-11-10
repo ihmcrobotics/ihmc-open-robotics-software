@@ -1,8 +1,7 @@
-package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
+package us.ihmc.humanoidBehaviors.demo;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
