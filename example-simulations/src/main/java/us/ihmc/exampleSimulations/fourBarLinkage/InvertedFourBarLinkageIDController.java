@@ -319,6 +319,15 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
    static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
    {
+      JointBasics joint = createJoint(jointDescription, parentBody);
+      RigidBody successor = createRigidBody(joint, jointDescription.getLink());
+
+      for (JointDescription childJoint : jointDescription.getChildrenJoints())
+         addJointRecursive(childJoint, successor);
+   }
+
+   static JointBasics createJoint(JointDescription jointDescription, RigidBodyBasics parentBody)
+   {
       JointBasics joint;
       String name = jointDescription.getName();
       Vector3D jointOffset = new Vector3D();
@@ -352,17 +361,16 @@ public class InvertedFourBarLinkageIDController implements RobotController
       {
          throw new IllegalStateException("Joint type not handled.");
       }
+      return joint;
+   }
 
-      LinkDescription linkDescription = jointDescription.getLink();
-
+   static RigidBody createRigidBody(JointBasics joint, LinkDescription linkDescription)
+   {
       String bodyName = linkDescription.getName();
       Matrix3DReadOnly momentOfInertia = linkDescription.getMomentOfInertiaCopy();
       double mass = linkDescription.getMass();
       Tuple3DReadOnly centerOfMassOffset = linkDescription.getCenterOfMassOffset();
-      RigidBody successor = new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
-
-      for (JointDescription childJoint : jointDescription.getChildrenJoints())
-         addJointRecursive(childJoint, successor);
+      return new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
    }
 
    static void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
