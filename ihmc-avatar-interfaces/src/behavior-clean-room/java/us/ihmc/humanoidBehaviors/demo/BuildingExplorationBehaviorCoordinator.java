@@ -381,6 +381,17 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
+         if (DEBUG)
+         {
+            LogTools.info("Entering " + getClass().getSimpleName());
+         }
+
+         planarRegions.set(null);
+         bodyPath.set(null);
+         debrisDetected.set(false);
+         stairsDetected.set(false);
+         stepCounter.set(0);
+
          resetPublisher.publish(new Empty());
 
          String behaviorName = LookAndStepBehavior.DEFINITION.getName();
@@ -417,19 +428,6 @@ public class BuildingExplorationBehaviorCoordinator
          LogTools.info("Publishing goal pose: {}", bombPose);
 
          goalPublisher.publish(bombPose);
-         ThreadTools.sleep(100);
-
-         planarRegions.set(null);
-         bodyPath.set(null);
-
-         debrisDetected.set(false);
-         stairsDetected.set(false);
-         stepCounter.set(0);
-
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
       }
 
       @Override
@@ -454,15 +452,25 @@ public class BuildingExplorationBehaviorCoordinator
       {
          List<Pose3D> bodyPath = this.bodyPath.get();
          if (bodyPath == null)
+         {
+            LogTools.info("No body path received");
             return;
+         }
 
          PlanarRegionsListMessage planarRegionsMessage = this.planarRegions.get();
          if (planarRegionsMessage == null)
+         {
+            LogTools.info("No Lidar regions received");
             return;
+         }
 
          RobotConfigurationData robotConfigurationData = this.robotConfigurationData.get();
          if (robotConfigurationData == null)
+         {
+            LogTools.info("No robot configuration data received");
             return;
+         }
+
 
          PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
          Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
