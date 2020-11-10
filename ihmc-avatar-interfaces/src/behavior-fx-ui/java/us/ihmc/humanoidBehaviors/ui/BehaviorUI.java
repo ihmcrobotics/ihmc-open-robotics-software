@@ -92,10 +92,13 @@ public class BehaviorUI
 
          for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
          {
-            BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
-            behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
-            Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
-            tabPane.getTabs().add(tab);
+            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
+            {
+               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
+               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
+               Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
+               tabPane.getTabs().add(tab);
+            }
          }
 
          AnchorPane mainAnchorPane = new AnchorPane();

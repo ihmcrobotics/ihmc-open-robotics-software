@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -82,17 +82,16 @@ public class BuildingExplorationBehaviorCoordinator
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(String robotName, DomainFactory.PubSubImplementation pubSubImplementation)
+   public BuildingExplorationBehaviorCoordinator(String robotName, PubSubImplementation pubSubImplementation, BehaviorRegistry behaviorRegistry)
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, getClass().getSimpleName());
       executorService = Executors.newSingleThreadScheduledExecutor();
 
-      BehaviorRegistry behaviorRegistry = BehaviorRegistry.of(LookAndStepBehavior.DEFINITION, TraverseStairsBehavior.DEFINITION);
       kryoMessager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
-                                           "127.0.0.1",
-                                           NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
-                                           getClass().getSimpleName(),
-                                           UPDATE_RATE_MILLIS);
+                                               "127.0.0.1",
+                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                               getClass().getSimpleName(),
+                                               UPDATE_RATE_MILLIS);
 
       ThreadTools.startAsDaemon(() -> ExceptionTools.handle(kryoMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoConnect");
 
@@ -701,7 +700,9 @@ public class BuildingExplorationBehaviorCoordinator
    public static void main(String[] args)
    {
       // Start behavior coordinator
-      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator("Atlas", DomainFactory.PubSubImplementation.FAST_RTPS);
+      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator("Atlas",
+                                                                                                              PubSubImplementation.FAST_RTPS,
+                                                                                                              BehaviorRegistry.DEFAULT_BEHAVIORS);
       behaviorCoordinator.setBombPosition(new Point3D(14.2, 0.0, 0.86));
       behaviorCoordinator.requestState(BuildingExplorationStateName.LOOK_AND_STEP);
       behaviorCoordinator.start();
