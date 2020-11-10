@@ -1067,6 +1067,7 @@ public class InvertedFourBarJointTest
    @Test
    public void testSetTau()
    {
+      // TODO Should check against the InverseDynamicsCalculator.
       Random random = new Random(3453897);
 
       for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
@@ -1085,8 +1086,7 @@ public class InvertedFourBarJointTest
             fourBarJoint.setQdd(qdd);
             fourBarJoint.setTau(tau);
 
-            assertEquals(tau, fourBarJoint.getTau());
-            assertEquals(tau, fourBarJoint.getMasterJoint().getTau());
+            assertEquals(tau, fourBarJoint.getTau(), SMALL_EPSILON, "Iteration " + i);
          }
       }
    }
@@ -1117,7 +1117,6 @@ public class InvertedFourBarJointTest
             fourBarJoint.setJointTorque(jointTorque);
 
             assertEquals(tau, fourBarJoint.getTau(), SMALL_EPSILON);
-            assertEquals(tau, fourBarJoint.getMasterJoint().getTau(), SMALL_EPSILON);
          }
       }
    }
@@ -1144,13 +1143,11 @@ public class InvertedFourBarJointTest
             fourBarJoint.setQdd(qdd);
             fourBarJoint.setTau(tau);
             assertEquals(tau, fourBarJoint.getTau(), SMALL_EPSILON);
-            assertEquals(tau, fourBarJoint.getMasterJoint().getTau(), SMALL_EPSILON);
 
             // Assert this does nothing
             fourBarJoint.setJointForce(jointForce);
 
             assertEquals(tau, fourBarJoint.getTau(), SMALL_EPSILON);
-            assertEquals(tau, fourBarJoint.getMasterJoint().getTau(), SMALL_EPSILON);
          }
       }
    }
@@ -1180,7 +1177,6 @@ public class InvertedFourBarJointTest
             fourBarJoint.setQdd(qdd);
             fourBarJoint.setTau(tau);
             assertEquals(tau, fourBarJoint.getTau(), SMALL_EPSILON);
-            assertEquals(tau, fourBarJoint.getMasterJoint().getTau(), SMALL_EPSILON);
             fourBarJoint.updateFramesRecursively();
 
             Wrench jointWrench = new Wrench(fourBarJoint.getJointWrench());

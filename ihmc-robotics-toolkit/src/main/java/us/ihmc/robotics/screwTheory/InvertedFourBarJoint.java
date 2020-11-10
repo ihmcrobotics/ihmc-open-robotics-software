@@ -362,7 +362,13 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    @Override
    public double getTau()
    {
-      return getMasterJoint().getTau();
+      // TODO This method ignores potentially non-zero torques set in the other joints.
+      DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
+      fourBarFunction.updateEffort();
+      if (getMasterJoint() == getJointA() || getMasterJoint() == getJointD())
+         return getMasterJoint().getTau() / (loopJacobian.get(0) + loopJacobian.get(3));
+      else
+         return getMasterJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
    }
 
    @Override
@@ -575,7 +581,16 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    @Override
    public void setTau(double tau)
    {
-      getMasterJoint().setTau(tau);
+      getJointA().setJointTauToZero();
+      getJointB().setJointTauToZero();
+      getJointC().setJointTauToZero();
+      getJointD().setJointTauToZero();
+
+      DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
+      if (getMasterJoint() == getJointA() || getMasterJoint() == getJointD())
+         getMasterJoint().setTau((loopJacobian.get(0) + loopJacobian.get(3)) * tau);
+      else
+         getMasterJoint().setTau((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
    }
 
    @Override
