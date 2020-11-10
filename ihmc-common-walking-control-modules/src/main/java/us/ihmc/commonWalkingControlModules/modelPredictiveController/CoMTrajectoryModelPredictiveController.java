@@ -175,8 +175,6 @@ public class CoMTrajectoryModelPredictiveController
    {
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
-
-
    }
 
    /**

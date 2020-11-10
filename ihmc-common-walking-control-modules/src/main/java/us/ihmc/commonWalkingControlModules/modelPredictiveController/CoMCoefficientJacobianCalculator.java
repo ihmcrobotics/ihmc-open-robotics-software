@@ -5,6 +5,24 @@ import us.ihmc.commons.MathTools;
 
 public class CoMCoefficientJacobianCalculator
 {
+   public static void calculateJacobian(int segmentId, double time, DMatrix jacobianToPack, int derivative)
+   {
+      switch (derivative)
+      {
+         case 0:
+            calculatePositionJacobian(segmentId, time, jacobianToPack);
+            break;
+         case 1:
+            calculateVelocityJacobian(segmentId, time, jacobianToPack);
+            break;
+         case 2:
+            calculateAccelerationJacobian(segmentId, time, jacobianToPack);
+            break;
+         default:
+            throw new IllegalArgumentException("Derivative order must be less than 3.");
+      }
+   }
+
    public static void calculatePositionJacobian(int segmentId, double time, DMatrix positionJacobian)
    {
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
