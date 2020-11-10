@@ -332,9 +332,10 @@ public class BuildingExplorationBehaviorCoordinator
       private Runnable debrisDetectedCallback = () -> {};
       private Runnable stairsDetectedCallback = () -> {};
 
-      private Notification bodyPathPlanningStateReached = new Notification();
       private LookAndStepBehavior.State currentState = LookAndStepBehavior.State.RESET;
       private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
+
+      boolean lookAndStepStarted = false;
 
       public LookAndStepState(String robotName,
                               ROS2Node ros2Node,
@@ -371,10 +372,6 @@ public class BuildingExplorationBehaviorCoordinator
          messager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
          {
             currentState = LookAndStepBehavior.State.valueOf(state);
-            if (currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
-            {
-               bodyPathPlanningStateReached.set();
-            }
          });
       }
 
@@ -391,6 +388,7 @@ public class BuildingExplorationBehaviorCoordinator
          debrisDetected.set(false);
          stairsDetected.set(false);
          stepCounter.set(0);
+         lookAndStepStarted = false;
 
          resetPublisher.publish(new Empty());
 
@@ -401,38 +399,43 @@ public class BuildingExplorationBehaviorCoordinator
          if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
          {
             LogTools.info("Waiting for BODY_PATH_PLANNING state...");
-            bodyPathPlanningStateReached.poll(); // clear it to wait for another one
-            bodyPathPlanningStateReached.blockingPoll();
-
-            ThreadTools.sleepSeconds(0.2);
          }
-         LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
-
-         LogTools.info("Sending operator review enabled");
-         messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-         ThreadTools.sleep(100);
-
-         Quaternion goalOrientation = new Quaternion();
-
-         if (robotConfigurationDataSupplier.get() != null)
-         {
-            Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
-            double dx = bombPosition.getX() - rootTranslation.getX();
-            double dy = bombPosition.getY() - rootTranslation.getY();
-            double yaw = Math.atan2(dy, dx);
-
-            goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
-         }
-
-         bombPose.set(bombPosition, goalOrientation);
-         LogTools.info("Publishing goal pose: {}", bombPose);
-
-         goalPublisher.publish(bombPose);
       }
 
       @Override
       public void doAction(double timeInState)
       {
+         if (!lookAndStepStarted && currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+         {
+            lookAndStepStarted = true;
+            LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
+
+            LogTools.info("Sending operator review enabled");
+            messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+            ThreadTools.sleep(100);
+
+            Quaternion goalOrientation = new Quaternion();
+
+            if (robotConfigurationDataSupplier.get() != null)
+            {
+               Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
+               double dx = bombPosition.getX() - rootTranslation.getX();
+               double dy = bombPosition.getY() - rootTranslation.getY();
+               double yaw = Math.atan2(dy, dx);
+
+               goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+
+            bombPose.set(bombPosition, goalOrientation);
+            LogTools.info("Publishing goal pose: {}", bombPose);
+
+            goalPublisher.publish(bombPose);
+         }
+         else if (!lookAndStepStarted)
+         {
+            return;
+         }
+
          if (!debrisDetected.get() && (stepCounter.get() > numberOfStepsToIgnoreDebris))
          {
             checkForDebris();
@@ -528,6 +531,7 @@ public class BuildingExplorationBehaviorCoordinator
             LogTools.info("Exiting " + getClass().getSimpleName());
          }
 
+         lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
          resetPublisher.publish(new Empty());
       }
