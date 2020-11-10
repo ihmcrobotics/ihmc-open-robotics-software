@@ -7,7 +7,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.AtlasBehaviorModule;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;

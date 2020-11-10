@@ -16,6 +16,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -32,7 +33,7 @@ import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class BuildingExplorationBehaviorUI
 {
