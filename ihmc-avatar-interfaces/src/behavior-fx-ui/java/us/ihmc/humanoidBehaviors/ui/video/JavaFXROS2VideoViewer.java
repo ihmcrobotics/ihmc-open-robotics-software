@@ -12,8 +12,8 @@ import us.ihmc.ros2.ROS2Node;
 
 public class JavaFXROS2VideoViewer
 {
-   private static final int width = 640;
-   private static final int height = 480;
+   private static final int width = 1024;//1024, 544
+   private static final int height = 544;
    private ROS2Node ros2Node;
 
    public JavaFXROS2VideoViewer(ROS2Node ros2Node)
@@ -27,7 +27,7 @@ public class JavaFXROS2VideoViewer
    {
       Stage primaryStage = new Stage();
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, width, height, false, false);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);

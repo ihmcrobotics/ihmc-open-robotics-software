@@ -32,7 +32,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 {
-   private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = false;
+   private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = true;
 
    private static final String segmentationTimeReport = "Segmentation took: ";
    private static final String intersectionsTimeReport = "Processing intersections took: ";
