@@ -3,15 +3,13 @@ package us.ihmc.avatar.externalForceEstimationToolboxModule;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ForceEstimatorDynamicMatrixUpdater;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.PredefinedContactExternalForceSolver;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -37,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ExternalWrenchEstimatorTest
+public class PredefinedContactExternalForceSolverTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -49,7 +47,7 @@ public class ExternalWrenchEstimatorTest
    private OneDoFJointBasics[] joints;
    private ExternalForcePoint externalForcePoint;
    private Vector3D externalForcePointOffset;
-   private ExternalWrenchEstimator externalWrenchEstimator;
+   private PredefinedContactExternalForceSolver externalForceSolver;
    private BlockingSimulationRunner blockingSimulationRunner;
    private Vector3D minForce, maxForce;
 
@@ -58,7 +56,7 @@ public class ExternalWrenchEstimatorTest
    private double epsilon;
    private final int iterations = 5;
 
-   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
+   private ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    @BeforeEach
    public void setup()
@@ -77,31 +75,31 @@ public class ExternalWrenchEstimatorTest
       gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-gravity);
       CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
 
-      this.dynamicMatrixSetter = (m, c) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau) ->
       {
          m.set(massMatrixCalculator.getMassMatrix());
          gravityCoriolisExternalWrenchMatrixCalculator.compute();
-         c.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
+         cqg.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
 
-      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      externalWrenchEstimator.setEstimatorGain(5.0);
-      externalWrenchEstimator.setSolverAlpha(1e-6);
-      externalWrenchEstimator.initialize();
+      externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
+      externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
+      externalForceSolver.setEstimatorGain(5.0);
+      externalForceSolver.setSolverAlpha(1e-6);
+      externalForceSolver.initialize();
 
-      robot.setController(externalWrenchEstimator);
+      robot.setController(externalForceSolver);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       YoGraphicVector forceVector = new YoGraphicVector("forceVector",
                                                         externalForcePoint.getYoPosition(),
                                                         externalForcePoint.getYoForce(),
-                                                        ExternalWrenchEstimator.forceGraphicScale,
+                                                        PredefinedContactExternalForceSolver.forceGraphicScale,
                                                         YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.02, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
@@ -197,7 +195,7 @@ public class ExternalWrenchEstimatorTest
 
             blockingSimulationRunner.simulateAndBlock(1.5);
             blockingSimulationRunner.simulateAndBlock(estimationTime);
-            YoFrameVector3D estimatedExternalForce = externalWrenchEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
+            YoFrameVector3D estimatedExternalForce = externalForceSolver.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
             boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
 
@@ -232,7 +230,7 @@ public class ExternalWrenchEstimatorTest
       joints = null;
       externalForcePoint = null;
       externalForcePointOffset = null;
-      externalWrenchEstimator = null;
+      externalForceSolver = null;
       minForce = null;
       maxForce = null;
    }

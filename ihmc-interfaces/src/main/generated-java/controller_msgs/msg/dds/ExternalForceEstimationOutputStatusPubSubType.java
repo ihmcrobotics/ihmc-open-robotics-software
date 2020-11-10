@@ -47,6 +47,10 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -70,6 +74,11 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getEstimatedRootJointWrench(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPoint(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +92,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
           throw new RuntimeException("estimated_external_forces field exceeds the maximum length");
 
       geometry_msgs.msg.dds.WrenchPubSubType.write(data.getEstimatedRootJointWrench(), cdr);
+      cdr.write_type_2(data.getRigidBodyHashCode());
+
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getContactPoint(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data, us.ihmc.idl.CDR cdr)
@@ -91,6 +103,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
       	
       cdr.read_type_e(data.getEstimatedExternalForces());	
       geometry_msgs.msg.dds.WrenchPubSubType.read(data.getEstimatedRootJointWrench(), cdr);	
+      data.setRigidBodyHashCode(cdr.read_type_2());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getContactPoint(), cdr);	
 
    }
 
@@ -101,6 +116,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
       ser.write_type_e("estimated_external_forces", data.getEstimatedExternalForces());
       ser.write_type_a("estimated_root_joint_wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getEstimatedRootJointWrench());
 
+      ser.write_type_2("rigid_body_hash_code", data.getRigidBodyHashCode());
+      ser.write_type_a("contact_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPoint());
+
    }
 
    @Override
@@ -109,6 +127,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("estimated_external_forces", data.getEstimatedExternalForces());
       ser.read_type_a("estimated_root_joint_wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getEstimatedRootJointWrench());
+
+      data.setRigidBodyHashCode(ser.read_type_2("rigid_body_hash_code"));
+      ser.read_type_a("contact_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPoint());
 
    }
 

@@ -53,6 +53,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,6 +89,9 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPointPositions().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,6 +114,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       cdr.write_type_e(data.getContactPointPositions());else
           throw new RuntimeException("contact_point_positions field exceeds the maximum length");
 
+      cdr.write_type_7(data.getEstimateContactLocation());
+
    }
 
    public static void read(controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -123,6 +130,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       	
       cdr.read_type_e(data.getRigidBodyHashCodes());	
       cdr.read_type_e(data.getContactPointPositions());	
+      data.setEstimateContactLocation(cdr.read_type_7());
+      	
 
    }
 
@@ -135,6 +144,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       ser.write_type_7("calculate_root_joint_wrench", data.getCalculateRootJointWrench());
       ser.write_type_e("rigid_body_hash_codes", data.getRigidBodyHashCodes());
       ser.write_type_e("contact_point_positions", data.getContactPointPositions());
+      ser.write_type_7("estimate_contact_location", data.getEstimateContactLocation());
    }
 
    @Override
@@ -146,6 +156,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       data.setCalculateRootJointWrench(ser.read_type_7("calculate_root_joint_wrench"));
       ser.read_type_e("rigid_body_hash_codes", data.getRigidBodyHashCodes());
       ser.read_type_e("contact_point_positions", data.getContactPointPositions());
+      data.setEstimateContactLocation(ser.read_type_7("estimate_contact_location"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage src, controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage dest)
