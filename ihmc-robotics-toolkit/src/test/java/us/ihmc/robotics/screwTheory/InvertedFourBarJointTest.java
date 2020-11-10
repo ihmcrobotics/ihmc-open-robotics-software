@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -27,7 +28,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -63,8 +63,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4577);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
          double dt = 0.5e-6;
          DMatrixRMaj Sprev = new DMatrixRMaj(6, 1);
          DMatrixRMaj Scurr = new DMatrixRMaj(6, 1);
@@ -112,9 +113,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(348975);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          { // Test configuration
@@ -176,8 +178,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(7523);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -199,8 +202,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(7523);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          { // Assert that the method does nothing
@@ -221,9 +225,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(348975);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -256,9 +261,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -302,8 +308,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(67567);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -330,8 +337,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(7523);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          { // Assert that the method does nothing
@@ -353,9 +361,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -408,9 +417,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -435,7 +445,7 @@ public class InvertedFourBarJointTest
             fourBarJoint.getSuccessorTwist(actualTwist);
 
             // Only checking the frames by name
-            assertTwistEquals("Iteration " + i, expectedTwist, actualTwist, SMALL_EPSILON);
+            assertTwistEquals("Iteration " + i, expectedTwist, actualTwist, MID_EPSILON);
          }
       }
    }
@@ -445,9 +455,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -472,7 +483,7 @@ public class InvertedFourBarJointTest
             fourBarJoint.getPredecessorTwist(actualTwist);
 
             // Only checking the frames by name
-            assertTwistEquals("Iteration " + i, expectedTwist, actualTwist, SMALL_EPSILON);
+            assertTwistEquals("Iteration " + i, expectedTwist, actualTwist, MID_EPSILON);
          }
       }
    }
@@ -482,9 +493,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -517,9 +529,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -553,9 +566,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -589,9 +603,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          long totalTime = 0;
 
@@ -650,8 +665,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(67567);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -681,8 +697,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(7523);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          { // Assert that the method does nothing
@@ -704,9 +721,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -753,7 +771,7 @@ public class InvertedFourBarJointTest
             assertSpatialAccelerationEquals("Iteration " + i,
                                             expectedAcceleration,
                                             actualAcceleration,
-                                            Math.max(1.0, expectedAcceleration.length()) * SMALL_EPSILON);
+                                            Math.max(1.0, expectedAcceleration.length()) * MID_EPSILON);
          }
       }
    }
@@ -763,9 +781,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -809,7 +828,7 @@ public class InvertedFourBarJointTest
             assertSpatialAccelerationEquals("Iteration " + i,
                                             expectedAcceleration,
                                             actualAcceleration,
-                                            Math.max(1.0, expectedAcceleration.length()) * SMALL_EPSILON);
+                                            Math.max(1.0, expectedAcceleration.length()) * MID_EPSILON);
          }
       }
    }
@@ -819,9 +838,10 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(4754756);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
-         FourBarKinematicLoopFunction function = createKnownInvertedFourBarJoint1("copy", 0, SMALL_EPSILON).getFourBarFunction();
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
+         FourBarKinematicLoopFunction function = generator.apply("copy").getFourBarFunction();
 
          for (int i = 0; i < ITERATIONS; i++)
          { // Non-zero velocity and no-acceleration
@@ -870,7 +890,7 @@ public class InvertedFourBarJointTest
             assertSpatialAccelerationEquals("Iteration " + i,
                                             expectedAcceleration,
                                             actualAcceleration,
-                                            Math.max(1.0, expectedAcceleration.length()) * SMALL_EPSILON);
+                                            Math.max(1.0, expectedAcceleration.length()) * MID_EPSILON);
          }
 
          for (int i = 0; i < ITERATIONS; i++)
@@ -923,8 +943,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -963,8 +984,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -1002,8 +1024,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(8623435);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -1046,8 +1069,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(3453897);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -1072,8 +1096,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(3453897);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -1102,8 +1127,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(3453897);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          for (int i = 0; i < ITERATIONS; i++)
          {
@@ -1134,8 +1160,9 @@ public class InvertedFourBarJointTest
    {
       Random random = new Random(3453897);
 
+      for (Function<String, InvertedFourBarJoint> generator : createInvertedFourBarExampleGenerators())
       { // Test with known four bar
-         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         InvertedFourBarJoint fourBarJoint = generator.apply("fourBar1");
 
          GeometricJacobianCalculator jacobian = new GeometricJacobianCalculator();
          jacobian.setKinematicChain(new OneDoFJointBasics[] {fourBarJoint});
@@ -1307,14 +1334,46 @@ public class InvertedFourBarJointTest
       return new RevoluteJoint[] {jointA, jointB, jointC, jointD};
    }
 
+   private static List<Function<String, InvertedFourBarJoint>> createInvertedFourBarExampleGenerators()
+   {
+      List<Function<String, InvertedFourBarJoint>> generators = new ArrayList<>();
+      generators.add(name -> createKnownInvertedFourBarJoint1(name, 0, SMALL_EPSILON));
+      generators.add(name -> createKnownInvertedFourBarJoint2(name, 0, SMALL_EPSILON));
+      return generators;
+   }
+
    private static InvertedFourBarJoint createKnownInvertedFourBarJoint1(String name, int masterJointIndex, double solverTolerance)
    {
-      Point2D A = new Point2D(0.3, -0.380);
-      Point2D B = new Point2D(-0.021, -0.335);
-      Point2D C = new Point2D(0.042, -0.102);
-      Point2D D = new Point2D(-0.017, -0.088);
-      InvertedFourBarJoint joint = new InvertedFourBarJoint(name, createInvertedFourBarJoints(A, B, C, D), masterJointIndex);
-      new RigidBody("bodyCD", joint, 0, 0, 0, 0, new Point3D());
+      Point2D A = new Point2D(0.002, -0.189);
+      Point2D B = new Point2D(-0.019, -0.144);
+      Point2D C = new Point2D(0.023, -0.245);
+      Point2D D = new Point2D(-0.015, -0.278);
+      return createInvertedFourBarJoint(name, A, B, C, D, masterJointIndex, solverTolerance);
+   }
+
+   private static InvertedFourBarJoint createKnownInvertedFourBarJoint2(String name, int masterJointIndex, double solverTolerance)
+   {
+      Point2D A = new Point2D(0.227, 0.1);
+      Point2D B = new Point2D(0.227, -0.1);
+      Point2D C = new Point2D(0.427, 0.1);
+      Point2D D = new Point2D(0.427, -0.1);
+      return createInvertedFourBarJoint(name, A, B, C, D, masterJointIndex, solverTolerance);
+   }
+
+   private static InvertedFourBarJoint createInvertedFourBarJoint(String name, Point2D A, Point2D B, Point2D C, Point2D D, int masterJointIndex,
+                                                                  double solverTolerance)
+   {
+      RevoluteJoint[] fourBarJoints = createInvertedFourBarJoints(A, B, C, D);
+      InvertedFourBarJoint joint = new InvertedFourBarJoint(name, fourBarJoints, masterJointIndex);
+
+      FramePoint3D offset = new FramePoint3D();
+      if (fourBarJoints[3] != joint.getJointD())
+      {
+         joint.updateFramesRecursively();
+         offset.setToZero(joint.getJointC().getFrameAfterJoint());
+         offset.changeFrame(joint.getFrameAfterJoint());
+      }
+      new RigidBody("bodyCD", joint, 0, 0, 0, 0, offset);
       joint.setIKSolver(new InvertedFourBarJointIKBinarySolver(solverTolerance));
       return joint;
    }
@@ -1328,7 +1387,7 @@ public class InvertedFourBarJointTest
       AC.sub(C, A);
       AD.sub(D, A);
 
-      FramePoint3D jointAPosition = new FramePoint3D(worldFrame);
+      FramePoint3D jointAPosition = new FramePoint3D(worldFrame, A);
       ReferenceFrame fourBarLocalFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("LocalFrame",
                                                                                                jointAPosition,
                                                                                                Axis3D.Z,
