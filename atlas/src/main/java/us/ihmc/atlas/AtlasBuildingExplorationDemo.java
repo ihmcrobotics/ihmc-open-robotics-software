@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.atlas.behaviors.coordinator.AtlasBuildingExplorationBehaviorUI;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;
@@ -13,6 +14,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
@@ -23,8 +25,6 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 {
    private static boolean START_LOOK_AND_STEP_UI = Boolean.parseBoolean(System.getProperty("start.look.and.step.ui"));
+   private static boolean USE_KINEMATICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.kinematics.simulation"));
    private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "0"))];
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
@@ -57,6 +58,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
                                                                STARTING_LOCATION.getPose().getYaw(),
                                                                STARTING_LOCATION.getPose().getX(),
                                                                STARTING_LOCATION.getPose().getY()));
+      selectEnvironment();
    }
 
    public AtlasBuildingExplorationDemo()
@@ -74,7 +76,6 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 
       AtlasRobotModel robotModel = createRobotModel();
 
-
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
@@ -82,9 +83,12 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       simulationStarter.getSCSInitialSetup().setTimePerRecordTick(50 * robotModel.getControllerDT());
       simulationStarter.getSCSInitialSetup().setSimulationDataBufferSize(10);
       List<DRCSimulationTools.Modules> modulesToStart = new ArrayList<>();
-      modulesToStart.add(DRCSimulationTools.Modules.SIMULATION);
+      if (!USE_KINEMATICS_SIMULATION)
+      {
+         modulesToStart.add(DRCSimulationTools.Modules.SIMULATION);
+         modulesToStart.add(DRCSimulationTools.Modules.SENSOR_MODULE);
+      }
       modulesToStart.add(DRCSimulationTools.Modules.NETWORK_PROCESSOR);
-      modulesToStart.add(DRCSimulationTools.Modules.SENSOR_MODULE);
       modulesToStart.add(DRCSimulationTools.Modules.FIDUCIAL_DETECTOR);
       modulesToStart.add(DRCSimulationTools.Modules.OBJECT_DETECTOR);
       modulesToStart.add(DRCSimulationTools.Modules.BEHAVIOR_MODULE);
@@ -94,18 +98,28 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       String[] args = {"-m " + robotModel.getAtlasVersion().name()};
       DRCSimulationTools.startSimulation(simulationStarter, null, args, null, modulesToStart);
 
-      JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
-      ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
-      simulationStarter.getSimulationConstructionSet().addButton(ignoreDebrisButton);
+      if (USE_KINEMATICS_SIMULATION)
+      {
+         ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
+         kinematicSimulation();
+      }
+      else
+      {
+         JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
+         ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
+         simulationStarter.getSimulationConstructionSet().addButton(ignoreDebrisButton);
+      }
 
       // Start Look and Step behavior
-      BehaviorRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, TraverseStairsBehavior.DEFINITION);
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
       BehaviorModule.createInterprocess(behaviorRegistry, robotModel);
 
       if (START_LOOK_AND_STEP_UI)
       {
-         BehaviorUI.createInterprocess(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION), robotModel, "127.0.0.1");
+         BehaviorUI.createInterprocess(behaviorRegistry, robotModel, "127.0.0.1");
       }
+
+      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation(), behaviorRegistry);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
       wakeUpToolboxes(robotModel);
@@ -114,7 +128,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
    private void wakeUpToolboxes(AtlasRobotModel robotModel)
    {
       // Start object detector toolbox
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "toolboxes");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE_ROS2.getPubSubImplementation(), "toolboxes");
       String robotName = robotModel.getSimpleRobotName();
       IHMCROS2Publisher<ToolboxStateMessage> fiducialDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                             ToolboxStateMessage.class,
@@ -139,7 +153,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
       PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE_ROS2.getPubSubImplementation(), ROS2Tools.REA_NODE_NAME);
 
       PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
 
@@ -167,8 +181,22 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       }).start();
    }
 
+   @Override
+   protected boolean destroy()
+   {
+      boolean destroy = super.destroy();
+
+      if (destroy)
+      {
+         // TODO
+         // destroy stuff
+      }
+
+      return destroy;
+   }
+
    public static void main(final String[] args)
    {
-      new AtlasBuildingExplorationDemo();
+      AtlasSimulationBasics.runOrLogToFile(AtlasBuildingExplorationDemo.class);
    }
 }

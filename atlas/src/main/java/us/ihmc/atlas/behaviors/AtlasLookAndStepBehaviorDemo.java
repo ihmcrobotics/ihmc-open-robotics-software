@@ -51,13 +51,9 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
    private BehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
-   private SCSLidarAndCameraSimulator lidarAndCameraSimulator;
 
    public AtlasLookAndStepBehaviorDemo()
    {
-
-      JavaFXApplicationCreator.createAJavaFXApplication();
-
       ThreadTools.startAsDaemon(() -> perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE_ROS2,
                                                                                       environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                       RUN_REALSENSE_SLAM,
@@ -93,13 +89,6 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DestroyViaKill"));
    }
 
-   private void lidarAndCameraSimulator()
-   {
-      lidarAndCameraSimulator = new SCSLidarAndCameraSimulator(COMMUNICATION_MODE_ROS2.getPubSubImplementation(),
-                                                               createCommonAvatarEnvironment(),
-                                                               createRobotModel());
-   }
-
    @Override
    protected boolean destroy()
    {
@@ -110,8 +99,6 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
          behaviorUI.closeMessager();
          behaviorModule.destroy();
          perceptionStack.destroy();
-         if (RUN_LIDAR_AND_CAMERA_SIMULATION)
-            lidarAndCameraSimulator.destroy();
       }
 
       return destroy;

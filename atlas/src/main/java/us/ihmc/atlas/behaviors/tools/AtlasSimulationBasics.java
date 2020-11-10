@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.AtlasDynamicsSimulation;
 import us.ihmc.atlas.behaviors.AtlasKinematicSimulation;
+import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
@@ -53,6 +54,7 @@ public class AtlasSimulationBasics
    protected HumanoidKinematicsSimulation kinematicsSimulation;
 
    protected boolean destroyed = false;
+   protected SCSLidarAndCameraSimulator lidarAndCameraSimulator;
 
    protected void selectEnvironment()
    {
@@ -60,7 +62,7 @@ public class AtlasSimulationBasics
       environmentInitialSetup = environmentInitialSetups.get(ENVIRONMENT >= 0 ? ENVIRONMENT : random.nextInt(environmentInitialSetups.size()));
    }
 
-   private void dynamicsSimulation()
+   protected void dynamicsSimulation()
    {
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
@@ -78,7 +80,7 @@ public class AtlasSimulationBasics
       dynamicSimulation.simulate();
    }
 
-   private void kinematicSimulation()
+   protected void kinematicSimulation()
    {
       LogTools.info("Creating kinematics simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
@@ -127,6 +129,13 @@ public class AtlasSimulationBasics
       }
    }
 
+   protected void lidarAndCameraSimulator()
+   {
+      lidarAndCameraSimulator = new SCSLidarAndCameraSimulator(COMMUNICATION_MODE_ROS2.getPubSubImplementation(),
+                                                               createCommonAvatarEnvironment(),
+                                                               createRobotModel());
+   }
+
    protected boolean destroy()
    {
       if (!destroyed)
@@ -136,6 +145,9 @@ public class AtlasSimulationBasics
             dynamicSimulation.destroy();
          else
             kinematicsSimulation.destroy();
+
+         if (lidarAndCameraSimulator != null)
+            lidarAndCameraSimulator.destroy();
 
          DomainFactory.getDomain(COMMUNICATION_MODE_ROS2.getPubSubImplementation()).stopAll();
 
