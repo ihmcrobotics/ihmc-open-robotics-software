@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commons.MathTools;
@@ -21,34 +22,51 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 public class CoefficientJacobianMatrixHelper
 {
    private final int maxNumberOfContactPoints;
+   private final int numberOfContactPointsInContact;
    private final int numberOfBasisVectorsPerContactPoint;
 
    private final DMatrixRMaj positionJacobianMatrix;
    private final DMatrixRMaj velocityJacobianMatrix;
    private final DMatrixRMaj accelerationJacobianMatrix;
+
+   private int totalSize;
+   private double currentTime = Double.NaN;
    
    public CoefficientJacobianMatrixHelper(int maxNumberOfContactPoints, int numberOfBasisVectorsPerContactPoint)
    {
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
+      this.numberOfContactPointsInContact = maxNumberOfContactPoints;
 
       int rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
 
-      positionJacobianMatrix = new DMatrixRMaj(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
-      velocityJacobianMatrix = new DMatrixRMaj(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
-      accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
+      totalSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
+      positionJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
+      velocityJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
+      accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
    }
 
-   public void computeMatrices(int numberOfContactPointsInContact, double timeOfContact, double omega)
+   public void reshape(int numberOfContactPointsInContact)
+   {
+      int rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
+      totalSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
+      positionJacobianMatrix.reshape(rhoSize, totalSize);
+      velocityJacobianMatrix.reshape(rhoSize, totalSize);
+      accelerationJacobianMatrix.reshape(rhoSize, totalSize);
+   }
+
+   public int getTotalSize()
+   {
+      return totalSize;
+   }
+
+   public void computeMatrices(double timeOfContact, double omega)
    {
       if (numberOfContactPointsInContact > maxNumberOfContactPoints)
          throw new RuntimeException("Unhandled number of contact points: " + numberOfContactPointsInContact);
 
-
-      int rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
-      positionJacobianMatrix.reshape(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
-      velocityJacobianMatrix.reshape(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
-      accelerationJacobianMatrix.reshape(rhoSize, rhoSize * MPCIndexHandler.coefficientsPerRho);
+      if (MathTools.epsilonEquals(currentTime, timeOfContact, 1e-5))
+         return;
 
       int rhoIndex = 0;
       double t2 = timeOfContact * timeOfContact;
@@ -95,6 +113,36 @@ public class CoefficientJacobianMatrixHelper
          }
       }
 
+      currentTime = timeOfContact;
    }
 
+   public DMatrixRMaj getJacobianMatrix(int derivativeOrder)
+   {
+      switch (derivativeOrder)
+      {
+         case 0:
+            return getPositionJacobianMatrix();
+         case 1:
+            return getVelocityJacobianMatrix();
+         case 2:
+            return getAccelerationJacobianMatrix();
+         default:
+            throw new IllegalArgumentException("Derivative order must be less than 3.");
+      }
+   }
+
+   public DMatrixRMaj getPositionJacobianMatrix()
+   {
+      return positionJacobianMatrix;
+   }
+
+   public DMatrixRMaj getVelocityJacobianMatrix()
+   {
+      return velocityJacobianMatrix;
+   }
+
+   public DMatrixRMaj getAccelerationJacobianMatrix()
+   {
+      return accelerationJacobianMatrix;
+   }
 }
