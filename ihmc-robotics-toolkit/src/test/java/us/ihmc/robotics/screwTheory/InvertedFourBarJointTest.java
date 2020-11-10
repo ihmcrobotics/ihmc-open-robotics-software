@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.Random;
 import java.util.function.Function;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -28,6 +31,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -53,6 +57,55 @@ public class InvertedFourBarJointTest
    private static final double SMALL_EPSILON = 1.0e-10;
    private static final double MID_EPSILON = 1.0e-7;
    private static final double LARGE_EPSILON = 1.0e-5;
+
+   @Test
+   public void testMotionSubspaceDot()
+   {
+      Random random = new Random(4577);
+
+      { // Test with known four bar
+         InvertedFourBarJoint fourBarJoint = createKnownInvertedFourBarJoint1("fourBar1", 0, SMALL_EPSILON);
+         double dt = 0.5e-6;
+         DMatrixRMaj Sprev = new DMatrixRMaj(6, 1);
+         DMatrixRMaj Scurr = new DMatrixRMaj(6, 1);
+         DMatrixRMaj actualSPrime = new DMatrixRMaj(6, 1);
+         DMatrixRMaj expectedSPrime = new DMatrixRMaj(6, 1);
+         DMatrixRMaj errorSPrime = new DMatrixRMaj(6, 1);
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            double qMin = fourBarJoint.getJointLimitLower();
+            double qMax = fourBarJoint.getJointLimitUpper();
+            double qRange = qMax - qMin;
+            qMin += 0.05 * qRange;
+            qMax -= 0.05 * qRange;
+            double q = EuclidCoreRandomTools.nextDouble(random, qMin, qMax);
+            double qd = EuclidCoreRandomTools.nextDouble(random, 10.0);
+
+            fourBarJoint.setQ(q);
+            fourBarJoint.setQd(qd);
+            fourBarJoint.updateFramesRecursively();
+
+            fourBarJoint.getMotionSubspace(Sprev);
+            fourBarJoint.getMotionSubspaceDot(actualSPrime);
+
+            q += qd * dt;
+            fourBarJoint.setQ(q);
+            fourBarJoint.updateFramesRecursively();
+            fourBarJoint.getMotionSubspace(Scurr);
+
+            MatrixTools.numericallyDifferentiate(expectedSPrime, Sprev, Scurr, dt);
+
+            CommonOps_DDRM.subtract(expectedSPrime, actualSPrime, errorSPrime);
+            assertTrue(MatrixFeatures_DDRM.isEquals(expectedSPrime, actualSPrime, 1.0e-4),
+                       String.format("Iteration: %d\nExpected:\n%s\nwas:\n%s\nDifference:\n%s",
+                                     i,
+                                     expectedSPrime.toString(),
+                                     actualSPrime.toString(),
+                                     errorSPrime.toString()));
+         }
+      }
+   }
 
    @Test
    public void testSetQ()
@@ -762,7 +815,7 @@ public class InvertedFourBarJointTest
    }
 
    @Test
-   public void testGetBiasJointAcceleration()
+   public void testGetJointBiasAcceleration()
    {
       Random random = new Random(4754756);
 
@@ -812,7 +865,7 @@ public class InvertedFourBarJointTest
             expectedAcceleration.setBodyFrame(function.getJointD().getFrameAfterJoint());
             expectedAcceleration.changeFrame(function.getJointD().getFrameAfterJoint());
 
-            SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getBiasJointAcceleration();
+            SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getJointBiasAcceleration();
 
             assertSpatialAccelerationEquals("Iteration " + i,
                                             expectedAcceleration,
@@ -855,7 +908,7 @@ public class InvertedFourBarJointTest
                                                                                function.getJointA().getFrameBeforeJoint(),
                                                                                function.getJointD().getFrameAfterJoint());
 
-            SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getBiasJointAcceleration();
+            SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getJointBiasAcceleration();
 
             assertSpatialAccelerationEquals("Iteration " + i,
                                             expectedAcceleration,
