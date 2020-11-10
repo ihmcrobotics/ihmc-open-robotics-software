@@ -74,8 +74,6 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 
       AtlasRobotModel robotModel = createRobotModel();
 
-      JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
-      ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setRunMultiThreaded(true);
@@ -96,6 +94,8 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       String[] args = {"-m " + robotModel.getAtlasVersion().name()};
       DRCSimulationTools.startSimulation(simulationStarter, null, args, null, modulesToStart);
 
+      JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
+      ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
       simulationStarter.getSimulationConstructionSet().addButton(ignoreDebrisButton);
 
       // Start Look and Step behavior
@@ -137,21 +137,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
    {
       // Publish planar regions
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
-      PlanarRegionsList debrisRegions = environment.getDebrisRegions();
-      PlanarRegionsList environmentWithDebrisRegions = new PlanarRegionsList();
-
-      for (int i = 0; i < environmentWithoutDebrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = environmentWithoutDebrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
-      for (int i = 0; i < debrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = debrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
+      PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
