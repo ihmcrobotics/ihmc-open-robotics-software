@@ -1,8 +1,6 @@
 package us.ihmc.atlas;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.atlas.behaviors.coordinator.AtlasBuildingExplorationBehaviorUI;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
