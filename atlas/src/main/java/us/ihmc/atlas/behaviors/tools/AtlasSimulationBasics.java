@@ -33,7 +33,10 @@ public class AtlasSimulationBasics
    protected static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
    protected static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
    protected static boolean RUN_LIDAR_AND_CAMERA_SIMULATION = Boolean.parseBoolean(System.getProperty("run.lidar.and.camera.simulation"));
-   protected static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
+   protected boolean CREATE_MORE_FOOT_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("create.more.foot.contact.points"));
+   protected boolean CREATE_HAND_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("create.hand.contact.points"));
+   protected int numberOfContactPointsX = 8;
+   protected int numberOfContactPointsY = 3;
    private static boolean USE_INTERPROCESS_ROS2 = Boolean.parseBoolean(System.getProperty("use.interprocess.ros2"));
    private static boolean USE_INTERPROCESS_KRYO = Boolean.parseBoolean(System.getProperty("use.interprocess.kryo"));
 
@@ -109,14 +112,18 @@ public class AtlasSimulationBasics
 
    protected AtlasRobotModel createRobotModel()
    {
-      if (USE_ADDITIONAL_CONTACT_POINTS)
+      if (CREATE_MORE_FOOT_CONTACT_POINTS)
       {
-         FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+         FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values,
+                                                                                                        numberOfContactPointsX,
+                                                                                                        numberOfContactPointsY,
+                                                                                                        true,
+                                                                                                        true);
+         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints, CREATE_HAND_CONTACT_POINTS);
       }
       else
       {
-         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
+         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, CREATE_HAND_CONTACT_POINTS);
       }
    }
 

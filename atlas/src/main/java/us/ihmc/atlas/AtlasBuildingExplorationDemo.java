@@ -1,7 +1,7 @@
 package us.ihmc.atlas;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
@@ -21,25 +21,23 @@ import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AtlasPhaseOneDemo
+public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 {
    private static boolean START_LOOK_AND_STEP_UI = Boolean.parseBoolean(System.getProperty("start.look.and.step.ui"));
-   private static int STARTING_LOCATION = Integer.parseInt(System.getProperty("starting.location", "0"));
+   private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "0"))];
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
    private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "false"));
@@ -51,13 +49,30 @@ public class AtlasPhaseOneDemo
    private final PhaseOneDemoEnvironment environment;
    private boolean lastIgnoreDebrisValueUsedByRealsense = true;
 
-   public AtlasPhaseOneDemo()
    {
-      StartingLocation startingLocation = StartingLocation.values()[STARTING_LOCATION];
+      environment = new PhaseOneDemoEnvironment(CREATE_PUSH_DOOR, CREATE_PULL_DOOR, CREATE_DEBRIS, CREATE_BARREL, CREATE_STAIRS, CREATE_CINDER_BLOCK_FIELD);
+      environmentInitialSetups.add(new EnvironmentInitialSetup(environment::getDebrisRegions,
+                                                               environment,
+                                                               STARTING_LOCATION.getPose().getZ(),
+                                                               STARTING_LOCATION.getPose().getYaw(),
+                                                               STARTING_LOCATION.getPose().getX(),
+                                                               STARTING_LOCATION.getPose().getY()));
+   }
+
+   public AtlasBuildingExplorationDemo()
+   {
+      if (CREATE_STAIRS)
+      {
+         CREATE_MORE_FOOT_CONTACT_POINTS = true;
+         numberOfContactPointsX = 4;
+         numberOfContactPointsY = 3;
+      }
+      if (CREATE_PUSH_DOOR || CREATE_PULL_DOOR || CREATE_BARREL)
+      {
+         CREATE_HAND_CONTACT_POINTS = true;
+      }
 
       AtlasRobotModel robotModel = createRobotModel();
-
-      environment = new PhaseOneDemoEnvironment(CREATE_PUSH_DOOR, CREATE_PULL_DOOR, CREATE_DEBRIS, CREATE_BARREL, CREATE_STAIRS, CREATE_CINDER_BLOCK_FIELD);
 
       JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
       ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
@@ -65,7 +80,7 @@ public class AtlasPhaseOneDemo
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocationOffset(startingLocation.getPose().getPosition(), startingLocation.getPose().getYaw());
+      simulationStarter.setStartingLocationOffset(STARTING_LOCATION.getPose().getPosition(), STARTING_LOCATION.getPose().getYaw());
       simulationStarter.getSCSInitialSetup().setTimePerRecordTick(50 * robotModel.getControllerDT());
       simulationStarter.getSCSInitialSetup().setSimulationDataBufferSize(10);
       List<DRCSimulationTools.Modules> modulesToStart = new ArrayList<>();
@@ -166,23 +181,8 @@ public class AtlasPhaseOneDemo
       }).start();
    }
 
-   private AtlasRobotModel createRobotModel()
-   {
-      FootContactPoints<RobotSide> simulationContactPoints = null;
-      boolean createAdditionalContactPoints = false;
-      if (CREATE_STAIRS)
-         simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 4, 3, false, false);
-      if (CREATE_PUSH_DOOR || CREATE_PULL_DOOR || CREATE_BARREL)
-         createAdditionalContactPoints = true;
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
-                                 RobotTarget.SCS,
-                                 false,
-                                 simulationContactPoints,
-                                 createAdditionalContactPoints);
-   }
-
    public static void main(final String[] args)
    {
-      new AtlasPhaseOneDemo();
+      new AtlasBuildingExplorationDemo();
    }
 }
