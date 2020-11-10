@@ -98,6 +98,8 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    {
       this.name = name;
 
+      // Copy the array so it cannot modified externally and the argument doesn't get modified. 
+      joints = Arrays.copyOf(joints, joints.length);
       this.masterJointIndex = FourBarKinematicLoopFunctionTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
       actuatedJointIndices = new int[] {this.masterJointIndex};
       this.joints = Arrays.asList(joints);
