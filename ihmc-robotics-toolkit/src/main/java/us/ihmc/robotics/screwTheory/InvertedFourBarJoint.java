@@ -51,8 +51,8 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    private final List<TwistReadOnly> unitTwists;
 
    private final SpatialAccelerationReadOnly jointAcceleration;
-   private final SpatialAcceleration biasJointAcceleration = new SpatialAcceleration();
-   private final SpatialAcceleration biasSuccessorAcceleration = new SpatialAcceleration();
+   private final SpatialAcceleration jointBiasAcceleration = new SpatialAcceleration();
+   private final SpatialAcceleration successorBiasAcceleration = new SpatialAcceleration();
    private final SpatialAcceleration unitJointAcceleration = new SpatialAcceleration();
    private final SpatialAcceleration unitSuccessorAcceleration = new SpatialAcceleration();
    private final SpatialAcceleration unitPredecessorAcceleration = new SpatialAcceleration();
@@ -81,7 +81,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
     * to the successor should expressed with respect to {@link #getJointD()}'s frame after joint.
     * </ol>
     * </p>
-    * 
+    *
     * @param name             the name of this joint.
     * @param fourBarJoints    the 4 revolute joints composing the four bar.
     * @param masterJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
@@ -121,12 +121,12 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
 
    private SpatialAccelerationReadOnly setupJointAcceleration()
    {
-      DoubleSupplier wx = () -> getQdd() * unitJointAcceleration.getAngularPartX() + biasJointAcceleration.getAngularPartX();
-      DoubleSupplier wy = () -> getQdd() * unitJointAcceleration.getAngularPartY() + biasJointAcceleration.getAngularPartY();
-      DoubleSupplier wz = () -> getQdd() * unitJointAcceleration.getAngularPartZ() + biasJointAcceleration.getAngularPartZ();
-      DoubleSupplier vx = () -> getQdd() * unitJointAcceleration.getLinearPartX() + biasJointAcceleration.getLinearPartX();
-      DoubleSupplier vy = () -> getQdd() * unitJointAcceleration.getLinearPartY() + biasJointAcceleration.getLinearPartY();
-      DoubleSupplier vz = () -> getQdd() * unitJointAcceleration.getLinearPartZ() + biasJointAcceleration.getLinearPartZ();
+      DoubleSupplier wx = () -> getQdd() * unitJointAcceleration.getAngularPartX() + jointBiasAcceleration.getAngularPartX();
+      DoubleSupplier wy = () -> getQdd() * unitJointAcceleration.getAngularPartY() + jointBiasAcceleration.getAngularPartY();
+      DoubleSupplier wz = () -> getQdd() * unitJointAcceleration.getAngularPartZ() + jointBiasAcceleration.getAngularPartZ();
+      DoubleSupplier vx = () -> getQdd() * unitJointAcceleration.getLinearPartX() + jointBiasAcceleration.getLinearPartX();
+      DoubleSupplier vy = () -> getQdd() * unitJointAcceleration.getLinearPartY() + jointBiasAcceleration.getLinearPartY();
+      DoubleSupplier vz = () -> getQdd() * unitJointAcceleration.getLinearPartZ() + jointBiasAcceleration.getLinearPartZ();
       FrameVector3DReadOnly angularPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, wx, wy, wz);
       FrameVector3DReadOnly linearPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, vx, vy, vz);
       return MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame, beforeJointFrame, angularPart, linearPart);
@@ -145,7 +145,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    /**
     * Sets the solver to use for computing the four bar configuration given the joint angle via
     * {@link #setQ(double)}.
-    * 
+    *
     * @param ikSolver the solver to use.
     */
    public void setIKSolver(InvertedFourBarJointIKSolver ikSolver)
@@ -208,45 +208,34 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessor.getBodyFixedFrame());
 
-      unitJointAcceleration.setIncludingFrame(jointA.getUnitJointAcceleration());
-      unitJointAcceleration.scale(J_A);
-      unitJointAcceleration.setBodyFrame(jointD.getFrameBeforeJoint());
-      unitJointAcceleration.changeFrame(jointD.getFrameAfterJoint());
-      tempAcceleration.setIncludingFrame(jointD.getUnitJointAcceleration());
-      tempAcceleration.scale(J_D);
-      unitJointAcceleration.add(tempAcceleration);
-      unitJointAcceleration.scale(1.0 / (J_A + J_D));
+      // Since we're ignoring the bias terms, the unit-accelerations are the same as the unit-twists.
+      unitJointAcceleration.setIncludingFrame(unitJointTwist);
+      unitSuccessorAcceleration.setIncludingFrame(unitSuccessorTwist);
+      unitPredecessorAcceleration.setIncludingFrame(unitPredecessorTwist);
 
-      unitSuccessorAcceleration.setIncludingFrame(unitJointAcceleration);
-      unitSuccessorAcceleration.setBaseFrame(predecessor.getBodyFixedFrame());
-      unitSuccessorAcceleration.setBodyFrame(successor.getBodyFixedFrame());
-      unitSuccessorAcceleration.changeFrame(successor.getBodyFixedFrame());
-
-      unitPredecessorAcceleration.setIncludingFrame(unitSuccessorAcceleration);
-      unitPredecessorAcceleration.invert();
-      unitPredecessorAcceleration.changeFrame(getPredecessor().getBodyFixedFrame());
-
+      /*
+       * This next block is for computing the bias acceleration. I ended up using tests to figure out
+       * exactly what it should, but I feel that it can be simplified.
+       */
       jointD.getFrameAfterJoint().getTwistRelativeToOther(jointA.getFrameAfterJoint(), deltaTwist);
       jointD.getFrameBeforeJoint().getTwistRelativeToOther(jointA.getFrameBeforeJoint(), bodyTwist);
-
       deltaTwist.changeFrame(jointD.getFrameAfterJoint());
       bodyTwist.changeFrame(jointD.getFrameAfterJoint());
-      biasJointAcceleration.setIncludingFrame(jointA.getUnitJointAcceleration());
-      biasJointAcceleration.scale(loopConvectiveTerm.get(0));
-      biasJointAcceleration.setBodyFrame(jointD.getFrameBeforeJoint());
-      biasJointAcceleration.changeFrame(jointD.getFrameAfterJoint(), deltaTwist, bodyTwist);
+      jointBiasAcceleration.setIncludingFrame(jointA.getUnitJointAcceleration());
+      jointBiasAcceleration.scale(loopConvectiveTerm.get(0));
+      jointBiasAcceleration.setBodyFrame(jointD.getFrameBeforeJoint());
+      jointBiasAcceleration.changeFrame(jointD.getFrameAfterJoint(), deltaTwist, bodyTwist);
       tempAcceleration.setIncludingFrame(jointD.getUnitJointAcceleration());
       tempAcceleration.scale(loopConvectiveTerm.get(3));
-      biasJointAcceleration.add(tempAcceleration);
-
+      jointBiasAcceleration.add(tempAcceleration);
       tempAcceleration.setIncludingFrame(unitJointAcceleration);
       tempAcceleration.scale(-(loopConvectiveTerm.get(0) + loopConvectiveTerm.get(3)));
-      biasJointAcceleration.add((SpatialVectorReadOnly) tempAcceleration);
+      jointBiasAcceleration.add((SpatialVectorReadOnly) tempAcceleration);
 
-      biasSuccessorAcceleration.setIncludingFrame(biasJointAcceleration);
-      biasSuccessorAcceleration.setBaseFrame(getPredecessor().getBodyFixedFrame());
-      biasSuccessorAcceleration.setBodyFrame(getSuccessor().getBodyFixedFrame());
-      biasSuccessorAcceleration.changeFrame(getSuccessor().getBodyFixedFrame());
+      successorBiasAcceleration.setIncludingFrame(jointBiasAcceleration);
+      successorBiasAcceleration.setBaseFrame(getPredecessor().getBodyFixedFrame());
+      successorBiasAcceleration.setBodyFrame(getSuccessor().getBodyFixedFrame());
+      successorBiasAcceleration.changeFrame(getSuccessor().getBodyFixedFrame());
 
       unitJointWrench.setIncludingFrame(fourBarFunction.getMasterJoint().getUnitJointTwist());
       unitJointWrench.changeFrame(afterJointFrame);
@@ -310,6 +299,12 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    public RigidBodyBasics getSuccessor()
    {
       return successor;
+   }
+
+   @Override
+   public boolean isMotionSubspaceVariable()
+   {
+      return true;
    }
 
    @Override
@@ -462,23 +457,30 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       return jointAcceleration;
    }
 
-   public SpatialAccelerationReadOnly getBiasJointAcceleration()
+   @Override
+   public SpatialAccelerationReadOnly getJointBiasAcceleration()
    {
-      return biasJointAcceleration;
+      return jointBiasAcceleration;
    }
 
    @Override
-   public void getSuccessorAcceleration(SpatialAccelerationBasics accelerationToPack)
+   public SpatialAccelerationReadOnly getSuccessorBiasAcceleration()
    {
-      accelerationToPack.setIncludingFrame(unitSuccessorAcceleration);
-      accelerationToPack.scale(getQdd());
-      accelerationToPack.add((SpatialVectorReadOnly) biasSuccessorAcceleration);
+      return successorBiasAcceleration;
    }
 
    @Override
    public void getPredecessorAcceleration(SpatialAccelerationBasics accelerationToPack)
    {
       // OneDoFJointReadOnly.getPredecessorAcceleration(...) was not used when creating this joint.
+      // Implementing it would require extra calculation in the updateMotionSubspace().
+      throw new UnsupportedOperationException("Implement me!");
+   }
+
+   @Override
+   public SpatialAccelerationReadOnly getPredecessorBiasAcceleration()
+   {
+      // OneDoFJointReadOnly.getPredecessorBiasAcceleration() was not used when creating this joint.
       // Implementing it would require extra calculation in the updateMotionSubspace().
       throw new UnsupportedOperationException("Implement me!");
    }
@@ -618,7 +620,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       String qdAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getQd());
       String qddAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getQdd());
       String tauAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getTau());
-      return super.toString() + ", q: " + qAsString + ", qd: " + qdAsString + ", qdd: " + qddAsString + ", tau: " + tauAsString;
+      return getClass().getSimpleName() + " " + getName() + ", q: " + qAsString + ", qd: " + qdAsString + ", qdd: " + qddAsString + ", tau: " + tauAsString;
    }
 
    /**
