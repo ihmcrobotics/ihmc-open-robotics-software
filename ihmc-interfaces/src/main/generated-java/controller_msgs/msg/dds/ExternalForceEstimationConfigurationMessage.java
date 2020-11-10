@@ -37,6 +37,10 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
             * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  contact_point_positions_;
+   /**
+            * (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
+            */
+   public boolean estimate_contact_location_;
 
    public ExternalForceEstimationConfigurationMessage()
    {
@@ -64,6 +68,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       rigid_body_hash_codes_.set(other.rigid_body_hash_codes_);
       contact_point_positions_.set(other.contact_point_positions_);
+      estimate_contact_location_ = other.estimate_contact_location_;
+
    }
 
    /**
@@ -145,6 +151,21 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       return contact_point_positions_;
    }
 
+   /**
+            * (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
+            */
+   public void setEstimateContactLocation(boolean estimate_contact_location)
+   {
+      estimate_contact_location_ = estimate_contact_location;
+   }
+   /**
+            * (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
+            */
+   public boolean getEstimateContactLocation()
+   {
+      return estimate_contact_location_;
+   }
+
 
    public static Supplier<ExternalForceEstimationConfigurationMessagePubSubType> getPubSubType()
    {
@@ -180,6 +201,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
          {  if (!this.contact_point_positions_.get(i).epsilonEquals(other.contact_point_positions_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.estimate_contact_location_, other.estimate_contact_location_, epsilon)) return false;
+
 
       return true;
    }
@@ -203,6 +226,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if (!this.rigid_body_hash_codes_.equals(otherMyClass.rigid_body_hash_codes_)) return false;
       if (!this.contact_point_positions_.equals(otherMyClass.contact_point_positions_)) return false;
+      if(this.estimate_contact_location_ != otherMyClass.estimate_contact_location_) return false;
+
 
       return true;
    }
@@ -224,7 +249,9 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       builder.append("rigid_body_hash_codes=");
       builder.append(this.rigid_body_hash_codes_);      builder.append(", ");
       builder.append("contact_point_positions=");
-      builder.append(this.contact_point_positions_);
+      builder.append(this.contact_point_positions_);      builder.append(", ");
+      builder.append("estimate_contact_location=");
+      builder.append(this.estimate_contact_location_);
       builder.append("}");
       return builder.toString();
    }
