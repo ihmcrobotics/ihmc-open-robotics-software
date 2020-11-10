@@ -333,6 +333,6 @@ public class InvertedFourBarJointIKBinarySolver implements InvertedFourBarJointI
 
    private FourBarToJointConverter getConverter(FourBarVertex vertex)
    {
-      return converters[vertex.getFourBarAngle().ordinal()];
+      return converters == null ? null : converters[vertex.getFourBarAngle().ordinal()];
    }
 }
