@@ -1,8 +1,7 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.log;
+package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.*;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;

@@ -1,11 +1,9 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ContactPointParticle;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactPointProjector;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactPointParticle;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactPointProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

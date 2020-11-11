@@ -1,7 +1,6 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector.ContactParticleFilter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
