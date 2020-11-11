@@ -38,17 +38,24 @@ public class ROS2NetworkTest
          startTime = now.plusSeconds(5);
          String formattedStartTime = startTime.format(dateTimeFormatter);
 
-         // use SSHJ to remote execute this class with arguments
-         // TODO
 
 
-         // wait until they are all started
-         // start YoVariableClients
          // TODO
          for (String remoteHostname : profile.getRemoteHostnames())
          {
+            // use SSHJ to remote execute this class with arguments
+            // TODO
+
+
             // connect to server at hostname
+            RemoteSSHTools.session(remoteHostname, "TODO", connection ->
+            {
+               // find deploy directory and start the script
+            });
          }
+
+         // wait until they are all started
+         // start YoVariableClients
       }
       else
       {
