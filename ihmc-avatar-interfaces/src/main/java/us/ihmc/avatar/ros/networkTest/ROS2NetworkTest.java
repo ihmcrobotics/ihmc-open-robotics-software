@@ -16,13 +16,17 @@ public class ROS2NetworkTest
 {
    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-   private final HashMap<String, Runnable> profiles = new HashMap<>();
+   private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
    {
       addProfile(IntegersAt1HzNetworkTestProfile.class);
    }
 
    public ROS2NetworkTest(List<String> args)
    {
+      String profileName = args.get(args.indexOf("--profile") + 1);
+      ROS2NetworkTestProfile profile = profiles.get(profileName);
+      LogTools.info("Running profile: {}", profileName);
+
       LocalDateTime now = LocalDateTime.now();
       LocalDateTime startTime;
 
@@ -39,8 +43,12 @@ public class ROS2NetworkTest
 
 
          // wait until they are all started
+         // start YoVariableClients
          // TODO
-
+         for (String remoteHostname : profile.getRemoteHostnames())
+         {
+            // connect to server at hostname
+         }
       }
       else
       {
@@ -51,6 +59,8 @@ public class ROS2NetworkTest
 
          String startTimeString = args.get(args.indexOf("--startTime") + 1);
          startTime = LocalDateTime.parse(startTimeString, dateTimeFormatter);
+
+         // start YoVariableServer
       }
 
       if (!args.contains("--profile"))
@@ -62,15 +72,12 @@ public class ROS2NetworkTest
       ThreadTools.sleep(LocalDateTime.now().until(startTime, ChronoUnit.MILLIS));
 
 
-      String profileName = args.get(args.indexOf("--profile") + 1);
-      Runnable profile = profiles.get(profileName);
-      LogTools.info("Running profile: {}", profileName);
-      profile.run();
+      profile.runExperiment();
    }
 
-   private void addProfile(Class<?> clazz)
+   private void addProfile(Class<? extends ROS2NetworkTestProfile> clazz)
    {
-      profiles.put(clazz.getSimpleName(), () -> ExceptionTools.handle(clazz::newInstance, DefaultExceptionHandler.RUNTIME_EXCEPTION));
+      profiles.put(clazz.getSimpleName(), ExceptionTools.handle(clazz::newInstance, DefaultExceptionHandler.RUNTIME_EXCEPTION));
    }
 
    public static void main(String[] args)
