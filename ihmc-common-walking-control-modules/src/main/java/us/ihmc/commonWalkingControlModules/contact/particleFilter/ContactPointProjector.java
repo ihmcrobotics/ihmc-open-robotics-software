@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;

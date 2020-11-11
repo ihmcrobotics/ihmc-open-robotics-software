@@ -1,4 +1,4 @@
-package us.ihmc.avatar.externalForceEstimationToolboxModule;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -10,10 +10,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
-
-import java.util.function.IntUnaryOperator;
-import java.util.function.ToIntFunction;
-import java.util.stream.IntStream;
 
 /**
  * Contact point object used by {@link PredefinedContactExternalForceSolver}

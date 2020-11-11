@@ -1,9 +1,8 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.log;
+package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

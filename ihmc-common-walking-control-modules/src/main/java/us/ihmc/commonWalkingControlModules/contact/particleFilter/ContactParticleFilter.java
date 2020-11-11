@@ -1,11 +1,7 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.detector;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ContactPointParticle;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationTools;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ForceEstimatorDynamicMatrixUpdater;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.JointspaceExternalContactEstimator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
