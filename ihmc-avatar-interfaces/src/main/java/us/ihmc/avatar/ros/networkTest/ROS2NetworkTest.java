@@ -2,15 +2,20 @@ package us.ihmc.avatar.ros.networkTest;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class ROS2NetworkTest
 {
+   private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
    private final HashMap<String, Runnable> profiles = new HashMap<>();
    {
       addProfile(IntegersAt1HzNetworkTestProfile.class);
@@ -18,18 +23,23 @@ public class ROS2NetworkTest
 
    public ROS2NetworkTest(List<String> args)
    {
+      LocalDateTime now = LocalDateTime.now();
+      LocalDateTime startTime;
 
       if (args.contains("--host"))
       {
          LogTools.info("Running as host. Starting other nodes.");
 
-         // TODO
          // decide time to start
+         startTime = now.plusSeconds(5);
+         String formattedStartTime = startTime.format(dateTimeFormatter);
 
-         // TODO
          // use SSHJ to remote execute this class with arguments
          // TODO
+
+
          // wait until they are all started
+         // TODO
 
       }
       else
@@ -39,19 +49,17 @@ public class ROS2NetworkTest
             throw new RuntimeException("Client mode requires a time to start specified with --startTime");
          }
 
-         // TODO
-         // wait until start time
+         String startTimeString = args.get(args.indexOf("--startTime") + 1);
+         startTime = LocalDateTime.parse(startTimeString, dateTimeFormatter);
       }
-
-      LocalDateTime now = LocalDateTime.now();
 
       if (!args.contains("--profile"))
       {
          throw new RuntimeException("Must select a profile with --profile");
       }
 
-      // TODO
       // wait until decided time
+      ThreadTools.sleep(LocalDateTime.now().until(startTime, ChronoUnit.MILLIS));
 
 
       String profileName = args.get(args.indexOf("--profile") + 1);
