@@ -3,6 +3,8 @@ package us.ihmc.avatar.ros.networkTest;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -25,5 +27,20 @@ public class ROS2NetworkTestTest
       long millis = nowOther.until(inFive, ChronoUnit.MILLIS);
       LogTools.info("Millis: {}", millis);
       assertEquals(5000, millis);
+   }
+
+   @Test
+   public void testGetHostname()
+   {
+      InetAddress localHost = null;
+      try
+      {
+         localHost = InetAddress.getLocalHost();
+         LogTools.info("Hostname: {}", localHost.getHostName());
+      }
+      catch (UnknownHostException e)
+      {
+         e.printStackTrace();
+      }
    }
 }

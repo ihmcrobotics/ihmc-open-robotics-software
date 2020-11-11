@@ -10,17 +10,36 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class IntegersAt1HzNetworkTestProfile
+import java.util.ArrayList;
+import java.util.List;
+
+public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
    private final ROS2Topic<Int64> topic = ROS2Tools.IHMC_ROOT.withModule("tester").withType(Int64.class).withSuffix("ints1hz");
    private final MutableInt number = new MutableInt();
+   private final IHMCROS2Publisher<Int64> publisher;
 
    public IntegersAt1HzNetworkTestProfile()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "profile");
 
-      IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, topic);
+      publisher = ROS2Tools.createPublisher(ros2Node, topic);
+   }
 
+   @Override
+   public List<String> getHostnames()
+   {
+      ArrayList<String> hostnames = new ArrayList<>();
+      hostnames.add(localHostName);
+      hostnames.add("cpu0");
+      hostnames.add("cpu1");
+      hostnames.add("cpu4");
+      return hostnames;
+   }
+
+   @Override
+   public void runExperiment()
+   {
       new PausablePeriodicThread(getClass().getSimpleName(), 1.0, () ->
       {
          Int64 message = new Int64();
