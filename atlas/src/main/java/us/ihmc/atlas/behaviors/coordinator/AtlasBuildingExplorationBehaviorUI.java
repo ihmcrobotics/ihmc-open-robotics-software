@@ -7,6 +7,9 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.AtlasBehaviorModule;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.communication.CommunicationMode;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -22,7 +25,8 @@ public class AtlasBuildingExplorationBehaviorUI extends Application
 
       messager.startMessager();
 
-      new JavaProcessSpawner(true).spawn(AtlasBehaviorModule.class);
+//      new JavaProcessSpawner(true).spawn(AtlasBehaviorModule.class);
+      new BehaviorModule(BehaviorRegistry.DEFAULT_BEHAVIORS, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTERPROCESS);
 
       BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(stage, messager, robotModel);
 
