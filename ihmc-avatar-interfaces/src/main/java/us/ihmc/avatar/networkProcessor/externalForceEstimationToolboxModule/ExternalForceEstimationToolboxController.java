@@ -241,7 +241,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       if (estimateContactPosition.getBooleanValue() && !contactParticleFilterHasInitialized.getBooleanValue())
       {
-         contactParticleFilter.initialize();
+         contactParticleFilter.initializeJointspaceEstimator();
+         contactParticleFilter.initializeParticleFilter();
          contactParticleFilterHasInitialized.set(true);
       }
 
@@ -256,7 +257,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       {
          setModelledJointNoise();
 
-         contactParticleFilter.doControl();
+         contactParticleFilter.computeJointspaceDisturbance();
+         contactParticleFilter.computeParticleFilterEstimation();
          if (contactParticleFilter.hasConverged())
          {
             isDone.set(true);
