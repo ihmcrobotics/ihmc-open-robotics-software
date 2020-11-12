@@ -86,9 +86,20 @@ public class BehaviorModule
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
       {
+         boolean selectedOne = false;
          for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
          {
-            behavior.getRight().setEnabled(behavior.getLeft().getName().equals(selection));
+            boolean selected = behavior.getLeft().getName().equals(selection);
+            if (selected)
+            {
+               LogTools.info("Behavior selected: {}", behavior.getLeft().getName());
+               selectedOne = true;
+            }
+            behavior.getRight().setEnabled(selected);
+         }
+         if (!selectedOne)
+         {
+            LogTools.info("All behaviors disabled.");
          }
       });
 
