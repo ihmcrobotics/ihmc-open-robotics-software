@@ -94,8 +94,8 @@ public class BuildingExplorationBehaviorCoordinator
       behaviorMessager = RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
 
       teleopState = new TeleopState();
-      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
-      lookAndStepState = new LookAndStepState(robotName, behaviorIntraprocessROS2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
+//      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
+      lookAndStepState = new LookAndStepState(robotName, ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
 
@@ -332,6 +332,7 @@ public class BuildingExplorationBehaviorCoordinator
       private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
       private final IHMCROS2Publisher<Empty> resetPublisher;
+      private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
 
       private final Point3DReadOnly bombPosition;
       private final Pose3D bombPose = new Pose3D();
@@ -368,6 +369,7 @@ public class BuildingExplorationBehaviorCoordinator
 
          goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
          resetPublisher = ROS2Tools.createPublisher(ros2Node, LookAndStepBehaviorAPI.RESET);
+         goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
          this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
@@ -397,6 +399,32 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
+         double trajectoryTime = 3.5;
+
+         GoHomeMessage homeLeftArm = new GoHomeMessage();
+         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+         homeLeftArm.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeLeftArm);
+
+         GoHomeMessage homeRightArm = new GoHomeMessage();
+         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+         homeRightArm.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeRightArm);
+
+         GoHomeMessage homePelvis = new GoHomeMessage();
+         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+         homePelvis.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homePelvis);
+
+         GoHomeMessage homeChest = new GoHomeMessage();
+         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+         homeChest.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeChest);
+
+         ThreadTools.sleepSeconds(trajectoryTime);
+
          if (DEBUG)
          {
             LogTools.info("Entering " + getClass().getSimpleName());

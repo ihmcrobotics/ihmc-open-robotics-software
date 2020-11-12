@@ -25,8 +25,8 @@ public class AtlasBuildingExplorationBehaviorUI extends Application
 
       messager.startMessager();
 
-//      new JavaProcessSpawner(true).spawn(AtlasBehaviorModule.class);
-      new BehaviorModule(BehaviorRegistry.DEFAULT_BEHAVIORS, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTERPROCESS);
+      new JavaProcessSpawner(true).spawn(AtlasBehaviorModule.class);
+//      new BehaviorModule(BehaviorRegistry.DEFAULT_BEHAVIORS, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTERPROCESS);
 
       BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(stage, messager, robotModel);
 
