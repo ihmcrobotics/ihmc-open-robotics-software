@@ -3,11 +3,20 @@ package us.ihmc.avatar.ros.networkTest;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +24,7 @@ import java.util.List;
 public class ROS2NetworkTest
 {
    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
 
    private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
    {
@@ -32,30 +42,51 @@ public class ROS2NetworkTest
 
       if (args.contains("--host"))
       {
-         LogTools.info("Running as host. Starting other nodes.");
+         LogTools.info("Running as host. Starting SCS.");
+
+         // start SCS
+         SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
+                                                                         new NullGraphics3DAdapter(),
+                                                                         new SimulationConstructionSetParameters());
+         scs.addYoRegistry(yoRegistry);
 
          // decide time to start
-         startTime = now.plusSeconds(5);
+         startTime = now.plusSeconds(15);
          String formattedStartTime = startTime.format(dateTimeFormatter);
+         LogTools.info("Starting nodes at {}", formattedStartTime);
 
-
-
-         // TODO
-         for (String remoteHostname : profile.getRemoteHostnames())
+         ArrayList<YoVariableClient> yoVariableClients = new ArrayList<>();
+         Object variableSynchronizer = new Object();
+         for (ROS2NetworkTestMachine remoteMachine : profile.getRemoteMachines())
          {
             // use SSHJ to remote execute this class with arguments
-            // TODO
-
-
             // connect to server at hostname
-            RemoteSSHTools.session(remoteHostname, "TODO", connection ->
+            RemoteSSHTools.session(remoteMachine.getHostname(), remoteMachine.getUsername(), connection ->
             {
                // find deploy directory and start the script
+               connection.exec(remoteMachine.getDeployDirectory() + "ROS2NetworkTest"
+                               + " --profile " + profileName
+                               + " --startTime " + formattedStartTime
+               );
             });
+
+            // start YoVariableClient
+            YoVariableClient yoVariableClient = new YoVariableClient(new ROS2NetworkTestYoVariablesUpdatedListener());
+            yoVariableClient.start(remoteMachine.getHostname(), DataServerSettings.DEFAULT_PORT);
+            yoVariableClient.setVariableSynchronizer(variableSynchronizer);
+            yoVariableClients.add(yoVariableClient);
          }
 
          // wait until they are all started
-         // start YoVariableClients
+
+         // spin up SCS thread to tick it at some frequency
+         new PausablePeriodicThread("SCSUpdater", 0.01, () ->
+         {
+            synchronized (variableSynchronizer)
+            {
+               scs.tickAndUpdate();
+            }
+         });
       }
       else
       {
