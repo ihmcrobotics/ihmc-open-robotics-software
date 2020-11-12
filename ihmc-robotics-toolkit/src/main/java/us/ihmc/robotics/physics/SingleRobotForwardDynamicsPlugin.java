@@ -6,8 +6,11 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.List;
 
 public class SingleRobotForwardDynamicsPlugin
 {
@@ -66,6 +69,15 @@ public class SingleRobotForwardDynamicsPlugin
    public void resetExternalWrenches()
    {
       forwardDynamicsCalculator.setExternalWrenchesToZero();
+   }
+
+   public void applyExternalWrenches(List<ExternalWrenchProvider> externalWrenchProviders)
+   {
+      RigidBodyReadOnly rootBody = forwardDynamicsCalculator.getInput().getRootBody();
+      for (int i = 0; i < externalWrenchProviders.size(); i++)
+      {
+         externalWrenchProviders.get(i).applyExternalWrenches(rootBody, forwardDynamicsCalculator::getExternalWrench);
+      }
    }
 
    public ForwardDynamicsCalculator getForwardDynamicsCalculator()
