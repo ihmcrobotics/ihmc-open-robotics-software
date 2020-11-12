@@ -1,4 +1,4 @@
-package us.ihmc.avatar.externalForceEstimationToolboxModule;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;

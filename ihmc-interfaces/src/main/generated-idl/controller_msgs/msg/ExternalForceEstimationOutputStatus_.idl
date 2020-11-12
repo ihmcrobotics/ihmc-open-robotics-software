@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__ExternalForceEstimationOutputStatus__idl__
 #define __controller_msgs__msg__ExternalForceEstimationOutputStatus__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 #include "geometry_msgs/msg/./Wrench_.idl"
 module controller_msgs
@@ -29,6 +30,14 @@ module controller_msgs
          * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
          */
         geometry_msgs::msg::dds::Wrench estimated_root_joint_wrench;
+        /**
+         * Estimated contacting rigid body hashcode, if configured with estimate_contact_location=true
+         */
+        long rigid_body_hash_code;
+        /**
+         * Estimated contact point in parent joint frame, if configured with estimate_contact_location=true
+         */
+        geometry_msgs::msg::dds::Point contact_point;
       };
     };
   };

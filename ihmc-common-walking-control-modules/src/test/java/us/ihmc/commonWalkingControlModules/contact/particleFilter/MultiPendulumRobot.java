@@ -1,4 +1,4 @@
-package us.ihmc.avatar.externalForceEstimationToolboxModule;
+package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
