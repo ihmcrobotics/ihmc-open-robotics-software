@@ -7,12 +7,10 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,6 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
@@ -31,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -64,7 +64,7 @@ public class BuildingExplorationBehaviorCoordinator
    private final ROS2Node ros2Node;
    private final YoEnum<BuildingExplorationStateName> requestedState = new YoEnum<>("requestedState", "", registry, BuildingExplorationStateName.class, true);
    private final StateMachine<BuildingExplorationStateName, State> stateMachine;
-   private final KryoMessager kryoMessager;
+   private final Messager behaviorMessager;
 
    private final AtomicBoolean isRunning = new AtomicBoolean();
    private final AtomicBoolean stopRequested = new AtomicBoolean();
@@ -91,18 +91,13 @@ public class BuildingExplorationBehaviorCoordinator
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       BehaviorRegistry behaviorRegistry = BehaviorRegistry.of(LookAndStepBehavior.DEFINITION, TraverseStairsBehavior.DEFINITION);
-      kryoMessager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
-                                           "127.0.0.1",
-                                           NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
-                                           getClass().getSimpleName(),
-                                           UPDATE_RATE_MILLIS);
-
-      ThreadTools.startAsDaemon(() -> ExceptionTools.handle(kryoMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoConnect");
+      behaviorMessager = RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
 
       teleopState = new TeleopState();
-      lookAndStepState = new LookAndStepState(robotName, ros2Node, kryoMessager, bombPosition, robotConfigurationData::get);
+      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
+      lookAndStepState = new LookAndStepState(robotName, behaviorIntraprocessROS2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
-      traverseStairsState = new TraverseStairsState(ros2Node, kryoMessager, bombPosition, robotConfigurationData::get);
+      traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
@@ -334,7 +329,7 @@ public class BuildingExplorationBehaviorCoordinator
       private static final double debrisCheckBodyBoxBaseZ = 0.5;
       private static final int numberOfStepsToIgnoreDebrisAfterClearing = 4;
 
-      private final KryoMessager messager;
+      private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
       private final IHMCROS2Publisher<Empty> resetPublisher;
 
@@ -363,7 +358,7 @@ public class BuildingExplorationBehaviorCoordinator
 
       public LookAndStepState(String robotName,
                               ROS2Node ros2Node,
-                              KryoMessager messager,
+                              Messager messager,
                               Point3DReadOnly bombPosition,
                               Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
@@ -405,6 +400,11 @@ public class BuildingExplorationBehaviorCoordinator
          if (DEBUG)
          {
             LogTools.info("Entering " + getClass().getSimpleName());
+         }
+
+         if (!messager.isMessagerOpen())
+         {
+            LogTools.error("Behavior messager not open!");
          }
 
          planarRegions.set(null);
@@ -650,7 +650,7 @@ public class BuildingExplorationBehaviorCoordinator
 
    private static class TraverseStairsState implements State
    {
-      private final KryoMessager messager;
+      private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
 
       private final IHMCROS2Publisher<Empty> startPublisher;
@@ -660,7 +660,7 @@ public class BuildingExplorationBehaviorCoordinator
       private final Point3DReadOnly bombPosition;
       private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
-      public TraverseStairsState(ROS2Node ros2Node, KryoMessager messager, Point3DReadOnly bombPosition, Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
+      public TraverseStairsState(ROS2Node ros2Node, Messager messager, Point3DReadOnly bombPosition, Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
 
@@ -729,9 +729,9 @@ public class BuildingExplorationBehaviorCoordinator
       }
    }
 
-   public KryoMessager getKryoMessager()
+   public Messager getBehaviorMessager()
    {
-      return kryoMessager;
+      return behaviorMessager;
    }
 
    public static void main(String[] args)
