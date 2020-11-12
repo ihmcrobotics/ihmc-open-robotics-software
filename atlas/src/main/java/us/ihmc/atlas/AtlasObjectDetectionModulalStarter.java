@@ -48,25 +48,5 @@ public class AtlasObjectDetectionModulalStarter
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
       new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider(),pubSubImplementation);
-
-      // Start object detector toolbox
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "toolboxes");
-      String robotName = robotModel.getSimpleRobotName();
-      IHMCROS2Publisher<ToolboxStateMessage> fiducialDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                            ToolboxStateMessage.class,
-                                                                                                            FiducialDetectorToolboxModule.getInputTopic(
-                                                                                                                  robotName));
-      IHMCROS2Publisher<ToolboxStateMessage> objectDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                          ToolboxStateMessage.class,
-                                                                                                          ObjectDetectorToolboxModule.getInputTopic(robotName));
-
-      new PausablePeriodicThread("ToolboxWaker", 1.0, () ->
-      {
-         ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
-         wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
-         fiducialDetectorPublisher.publish(wakeUpMessage);
-         objectDetectorPublisher.publish(wakeUpMessage);
-      }).start();
-
    }
 }
