@@ -27,14 +27,14 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
    }
 
    @Override
-   public List<String> getHostnames()
+   public List<ROS2NetworkTestMachine> getMachines()
    {
-      ArrayList<String> hostnames = new ArrayList<>();
-      hostnames.add(localHostName);
-      hostnames.add("cpu0");
-      hostnames.add("cpu1");
-      hostnames.add("cpu4");
-      return hostnames;
+      ArrayList<ROS2NetworkTestMachine> machines = new ArrayList<>();
+      machines.add(new ROS2NetworkTestMachine(localHostname, "robotlab", "unused"));
+      machines.add(new ROS2NetworkTestMachine("cpu0", "shadylady", "/usr/local/bin/mission_control/bin"));
+      machines.add(new ROS2NetworkTestMachine("cpu1", "shadylady", "/usr/local/bin/mission_control/bin"));
+      machines.add(new ROS2NetworkTestMachine("cpu4", "shadylady", "/usr/local/bin/mission_control/bin"));
+      return machines;
    }
 
    @Override

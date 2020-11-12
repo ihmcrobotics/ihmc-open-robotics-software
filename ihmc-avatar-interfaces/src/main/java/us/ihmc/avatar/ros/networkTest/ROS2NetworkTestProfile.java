@@ -9,22 +9,22 @@ import java.util.List;
 
 public abstract class ROS2NetworkTestProfile
 {
-   protected String localHostName = ExceptionTools.handle(() -> InetAddress.getLocalHost().getHostName(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   protected String localHostname = ExceptionTools.handle(() -> InetAddress.getLocalHost().getHostName(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   public abstract List<String> getHostnames();
+   public abstract List<ROS2NetworkTestMachine> getMachines();
 
    public abstract void runExperiment();
 
-   public List<String> getRemoteHostnames()
+   public List<ROS2NetworkTestMachine> getRemoteMachines()
    {
-      ArrayList<String> remoteHostnames = new ArrayList<>();
-      for (String hostname : getHostnames())
+      ArrayList<ROS2NetworkTestMachine> remoteMachines = new ArrayList<>();
+      for (ROS2NetworkTestMachine machines : getMachines())
       {
-         if (!hostname.equals(localHostName))
+         if (!machines.getHostname().equals(localHostname))
          {
-            remoteHostnames.add(hostname);
+            remoteMachines.add(machines);
          }
       }
-      return remoteHostnames;
+      return remoteMachines;
    }
 }
