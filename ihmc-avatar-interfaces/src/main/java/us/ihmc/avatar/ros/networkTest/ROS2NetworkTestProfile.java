@@ -2,6 +2,7 @@ package us.ihmc.avatar.ros.networkTest;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ public abstract class ROS2NetworkTestProfile
    public abstract List<ROS2NetworkTestMachine> getMachines();
 
    public abstract void runExperiment();
+
+   public abstract YoRegistry getYoRegistry();
 
    public List<ROS2NetworkTestMachine> getRemoteMachines()
    {

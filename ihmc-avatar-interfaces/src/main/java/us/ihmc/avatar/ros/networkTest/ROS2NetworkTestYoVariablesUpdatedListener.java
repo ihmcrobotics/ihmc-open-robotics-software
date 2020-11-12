@@ -11,6 +11,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 class ROS2NetworkTestYoVariablesUpdatedListener implements YoVariablesUpdatedListener
 {
    private YoVariableClientInterface yoVariableClientInterface;
+   private YoRegistry parentRegistry;
+   private YoRegistry yoRegistry;
+
+   public ROS2NetworkTestYoVariablesUpdatedListener(YoRegistry parentRegistry)
+   {
+
+      this.parentRegistry = parentRegistry;
+   }
 
    @Override
    public boolean updateYoVariables()
@@ -32,7 +40,8 @@ class ROS2NetworkTestYoVariablesUpdatedListener implements YoVariablesUpdatedLis
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
 
-      YoRegistry yoRegistry = handshakeParser.getRootRegistry();
+      yoRegistry = handshakeParser.getRootRegistry();
+      parentRegistry.addChild(yoRegistry);
    }
 
    @Override
