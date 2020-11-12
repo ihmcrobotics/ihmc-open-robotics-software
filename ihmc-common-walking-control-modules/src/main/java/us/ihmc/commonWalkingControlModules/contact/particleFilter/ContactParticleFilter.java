@@ -15,11 +15,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -35,7 +35,7 @@ import java.util.Random;
  * Implementation of the particle-filter based external contact estimator presented here:
  * http://groups.csail.mit.edu/robotics-center/public_papers/Manuelli16.pdf
  */
-public class ContactParticleFilter implements RobotController
+public class ContactParticleFilter
 {
    private static final int numberOfParticles = 150;
    private static final int estimationVariables = 3;
@@ -54,6 +54,9 @@ public class ContactParticleFilter implements RobotController
    private final JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
    private final DMatrixRMaj systemJacobian;
    private final DMatrixRMaj jointNoiseVariance;
+   private final DMatrixRMaj jointNoiseVarianceInv;
+   private final DMatrixRMaj jointspaceResidualMagnitude = new DMatrixRMaj(1, 1);
+   private final YoDouble yoJointspaceResidualMagnitude = new YoDouble("jointspaceResidualMagnitude", registry);
 
    private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
    private final ContactPointProjector contactPointProjector;
@@ -115,6 +118,7 @@ public class ContactParticleFilter implements RobotController
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
       this.systemJacobian = new DMatrixRMaj(estimationVariables, dofs);
       this.jointNoiseVariance = CommonOps_DDRM.identity(dofs);
+      this.jointNoiseVarianceInv = CommonOps_DDRM.identity(dofs);
       this.contactPointProjector = new ContactPointProjector(collidables);
 
       for (int i = 0; i < numberOfParticles; i++)
@@ -168,13 +172,15 @@ public class ContactParticleFilter implements RobotController
       }
    }
 
-   @Override
-   public void initialize()
+   public void initializeJointspaceEstimator()
    {
       jointspaceExternalContactEstimator.initialize();
       contactPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
-      computeInitialProjection();
+   }
 
+   public void initializeParticleFilter()
+   {
+      computeInitialProjection();
       iterations.set(0);
       hasConverged.set(false);
       filteredAverageParticleVelocity.set(upperMotionBoundForSamplingAdjustment.getValue());
@@ -199,10 +205,18 @@ public class ContactParticleFilter implements RobotController
       }
    }
 
-   @Override
-   public void doControl()
+   public double computeJointspaceDisturbance()
    {
       jointspaceExternalContactEstimator.doControl();
+
+      DMatrixRMaj jointspaceResidual = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      NativeCommonOps.multQuad(jointspaceResidual, jointNoiseVarianceInv, jointspaceResidualMagnitude);
+      yoJointspaceResidualMagnitude.set(jointspaceResidualMagnitude.get(0, 0));
+      return yoJointspaceResidualMagnitude.getValue();
+   }
+
+   public void computeParticleFilterEstimation()
+   {
       DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
 
       double totalWeight = 0.0;
@@ -328,6 +342,7 @@ public class ContactParticleFilter implements RobotController
    public void setDoFVariance(int dofIndex, double variance)
    {
       jointNoiseVariance.set(dofIndex, dofIndex, variance);
+      jointNoiseVarianceInv.set(dofIndex, dofIndex, 1.0 / variance);
    }
 
    /**
@@ -466,9 +481,8 @@ public class ContactParticleFilter implements RobotController
       return estimatedContactingBody;
    }
 
-   @Override
-   public YoRegistry getYoRegistry()
+   public DMatrixRMaj getJointResiduals()
    {
-      return registry;
+      return jointspaceExternalContactEstimator.getObservedExternalJointTorque();
    }
 }
