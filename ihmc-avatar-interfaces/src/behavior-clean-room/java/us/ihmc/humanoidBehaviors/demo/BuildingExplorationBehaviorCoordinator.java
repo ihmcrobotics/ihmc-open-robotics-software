@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.demo;
 
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -37,6 +39,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -120,6 +123,25 @@ public class BuildingExplorationBehaviorCoordinator
       }
 
       stateMachine.addStateChangedListener((from, to) -> stateChangedCallback.accept(to));
+   }
+
+   private void startWakeUpToolboxesThread(String robotName)
+   {
+      IHMCROS2Publisher<ToolboxStateMessage> fiducialDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                            ToolboxStateMessage.class,
+                                                                                                            FiducialDetectorToolboxModule.getInputTopic(
+                                                                                                                  robotName));
+      IHMCROS2Publisher<ToolboxStateMessage> objectDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                          ToolboxStateMessage.class,
+                                                                                                          ObjectDetectorToolboxModule.getInputTopic(robotName));
+
+      new PausablePeriodicThread("ToolboxWaker", 1.0, () ->
+      {
+         ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
+         wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
+         fiducialDetectorPublisher.publish(wakeUpMessage);
+         objectDetectorPublisher.publish(wakeUpMessage);
+      }).start();
    }
 
    public void setBombPosition(Point3DReadOnly bombPosition)
