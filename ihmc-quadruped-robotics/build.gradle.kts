@@ -29,7 +29,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-description:0.20.1")
    api("us.ihmc:ihmc-robot-data-logger:0.20.1")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.0")
+   api("us.ihmc:ihmc-convex-optimization:0.17.1")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-quadruped-basics:source")
    api("us.ihmc:ihmc-quadruped-communication:source")
