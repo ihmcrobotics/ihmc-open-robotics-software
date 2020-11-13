@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
@@ -58,15 +59,30 @@ public class BehaviorUI
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
-      return new BehaviorUI(behaviorUIRegistry,
-                            RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress),
-                            robotModel,
-                            PubSubImplementation.FAST_RTPS);
+      return create(behaviorUIRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS, behaviorModuleAddress, null);
    }
 
    public static BehaviorUI createIntraprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
    {
-      return new BehaviorUI(behaviorUIRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
+      return create(behaviorUIRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, null, behaviorSharedMemoryMessager);
+   }
+
+   public static BehaviorUI create(BehaviorUIRegistry behaviorUIRegistry,
+                                   DRCRobotModel robotModel,
+                                   CommunicationMode ros2CommunicationMode,
+                                   CommunicationMode messagerCommunicationMode,
+                                   String behaviorModuleAddress,
+                                   Messager behaviorSharedMemoryMessager)
+   {
+
+      if (messagerCommunicationMode == CommunicationMode.INTRAPROCESS && behaviorSharedMemoryMessager == null)
+         throw new RuntimeException("Must pass shared Messager for Messager intraprocess mode.");
+      else if (messagerCommunicationMode == CommunicationMode.INTERPROCESS && behaviorModuleAddress == null)
+         throw new RuntimeException("Must pass address for Messager interprocess mode.");
+
+      Messager messager = messagerCommunicationMode == CommunicationMode.INTRAPROCESS
+            ? behaviorSharedMemoryMessager : RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress);
+      return new BehaviorUI(behaviorUIRegistry, messager, robotModel, ros2CommunicationMode.getPubSubImplementation());
    }
 
    public BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)

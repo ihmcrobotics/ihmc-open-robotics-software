@@ -1,20 +1,15 @@
 package us.ihmc.atlas.behaviors;
 
-import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.CommunicationMode;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 
 import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;
 
@@ -71,16 +66,12 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
 
       LogTools.info("Creating behavior user interface");
-      Messager behaviorMessager;
-      if (COMMUNICATION_MODE_KRYO == CommunicationMode.INTERPROCESS)
-      {
-         behaviorMessager = RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
-      }
-      else
-      {
-         behaviorMessager = behaviorModule.getMessager();
-      }
-      behaviorUI = new BehaviorUI(behaviorRegistry, behaviorMessager, createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation());
+      behaviorUI = BehaviorUI.create(behaviorRegistry,
+                                     createRobotModel(),
+                                     COMMUNICATION_MODE_ROS2,
+                                     COMMUNICATION_MODE_KRYO,
+                                     "localhost",
+                                     behaviorModule.getMessager());
       behaviorUI.addOnCloseRequestListener(() -> ThreadTools.startAThread(() -> {
          destroy();
          Runtime.getRuntime().exit(0);
