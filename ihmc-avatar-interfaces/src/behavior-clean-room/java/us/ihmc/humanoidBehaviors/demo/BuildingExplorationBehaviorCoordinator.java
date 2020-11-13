@@ -135,7 +135,7 @@ public class BuildingExplorationBehaviorCoordinator
                                                                                                           ToolboxStateMessage.class,
                                                                                                           ObjectDetectorToolboxModule.getInputTopic(robotName));
 
-      new PausablePeriodicThread("ToolboxWaker", 1.0, () ->
+      new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
       {
          ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
          wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);

@@ -12,12 +12,17 @@ public class PausablePeriodicThread
 
    public PausablePeriodicThread(String name, double period, Runnable runnable)
    {
-      this(name, period, 0, false, runnable);
+      this(name, period, false, runnable);
    }
 
    public PausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, Runnable runnable)
    {
       this(name, period, crashesBeforeGivingUp, false, runnable);
+   }
+
+   public PausablePeriodicThread(String name, double period, boolean runAsDaemon, Runnable runnable)
+   {
+      this(name, period, 0, runAsDaemon, runnable);
    }
 
    public PausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, boolean runAsDaemon, Runnable runnable)
