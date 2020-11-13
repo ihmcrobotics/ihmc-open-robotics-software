@@ -113,6 +113,8 @@ public class BuildingExplorationBehaviorCoordinator
                                                     s -> robotConfigurationData.set(s.takeNextData()));
       abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
+      startWakeUpToolboxesThread(robotName);
+
       try
       {
          stateMachine = buildStateMachine();
