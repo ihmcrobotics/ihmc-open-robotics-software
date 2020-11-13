@@ -1,33 +1,24 @@
 package us.ihmc.atlas;
 
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.atlas.behaviors.coordinator.AtlasBuildingExplorationBehaviorUI;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;
-import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
-import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -114,11 +105,11 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 
       // Start Look and Step behavior
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
-      BehaviorModule.createInterprocess(behaviorRegistry, robotModel);
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
 
       if (START_LOOK_AND_STEP_UI)
       {
-         BehaviorUI.createInterprocess(behaviorRegistry, robotModel, "127.0.0.1");
+         BehaviorUI.create(behaviorRegistry, robotModel, COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO, "localhost", behaviorModule.getMessager());
       }
 
       AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation(), behaviorRegistry);
