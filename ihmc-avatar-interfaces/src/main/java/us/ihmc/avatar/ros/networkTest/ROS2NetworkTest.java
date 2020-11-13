@@ -110,6 +110,7 @@ public class ROS2NetworkTest
          SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
                                                                        new NullGraphics3DAdapter(),
                                                                        new SimulationConstructionSetParameters());
+         yoRegistry.addChild(profile.getYoRegistry()); // add this node's profile variables
          scs.addYoRegistry(yoRegistry);
          scs.setDT(UPDATE_PERIOD, 1);
          scs.setupGraph("t");
