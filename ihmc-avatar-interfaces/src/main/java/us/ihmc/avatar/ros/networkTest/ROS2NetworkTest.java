@@ -127,13 +127,11 @@ public class ROS2NetworkTest
          });
          scs.addButton(pauseButton);
 
-         for (YoVariable variable : profile.getYoRegistry().getVariables())
+         for (String[] graph : profile.getGraphsToSetup())
          {
-            LogTools.info("Setting up graph for: {}", variable.getFullName());
-            scs.setupGraph(variable.getName());
+            LogTools.info("Setting up graph: {}", Arrays.toString(graph));
+            scs.setupGraph(graph);
          }
-         scs.setupGraph("cpu1Sent");
-         scs.setupGraph("cpu1Received");
 
          scs.startOnAThread();
          while (!scs.hasSimulationThreadStarted())

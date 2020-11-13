@@ -88,6 +88,15 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
    }
 
    @Override
+   public List<String[]> getGraphsToSetup()
+   {
+      ArrayList<String[]> graphsToSetup = new ArrayList<>();
+      graphsToSetup.add(new String[] {"cpu1Sent", "atlas-ocuReceived"});
+      graphsToSetup.add(new String[] {"atlas-ocuSent", "cpu1Received"});
+      return graphsToSetup;
+   }
+
+   @Override
    public void destroy()
    {
       if (experimentThread != null)

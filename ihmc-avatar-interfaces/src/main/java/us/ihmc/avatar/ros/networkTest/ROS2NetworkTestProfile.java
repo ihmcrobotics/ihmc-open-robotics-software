@@ -20,6 +20,8 @@ public abstract class ROS2NetworkTestProfile
 
    public abstract void destroy();
 
+   public abstract List<String[]> getGraphsToSetup();
+
    public List<ROS2NetworkTestMachine> getRemoteMachines()
    {
       ArrayList<ROS2NetworkTestMachine> remoteMachines = new ArrayList<>();
