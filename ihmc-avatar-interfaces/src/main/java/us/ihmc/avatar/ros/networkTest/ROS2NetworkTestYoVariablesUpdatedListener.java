@@ -12,7 +12,7 @@ class ROS2NetworkTestYoVariablesUpdatedListener implements YoVariablesUpdatedLis
 {
    private YoVariableClientInterface yoVariableClientInterface;
    private YoRegistry parentRegistry;
-   private YoRegistry yoRegistry;
+   private YoRegistry clientRootRegistry;
    private boolean handshakeComplete;
 
    public ROS2NetworkTestYoVariablesUpdatedListener(YoRegistry parentRegistry)
@@ -41,8 +41,10 @@ class ROS2NetworkTestYoVariablesUpdatedListener implements YoVariablesUpdatedLis
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
 
-      yoRegistry = handshakeParser.getRootRegistry();
-      parentRegistry.addChild(yoRegistry);
+      clientRootRegistry = handshakeParser.getRootRegistry();
+      YoRegistry serverRegistry = new YoRegistry(yoVariableClientInterface.getServerName() + "Container");
+      serverRegistry.addChild(clientRootRegistry);
+      parentRegistry.addChild(serverRegistry);
 
       handshakeComplete = true;
    }
