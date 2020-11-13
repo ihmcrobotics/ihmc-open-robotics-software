@@ -108,6 +108,8 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
          JToggleButton ignoreDebrisButton = new JToggleButton("Ignore debris");
          ignoreDebrisButton.addChangeListener(e -> ignoreDebris.set(ignoreDebrisButton.isSelected()));
          simulationStarter.getSimulationConstructionSet().addButton(ignoreDebrisButton);
+         simulationStarter.getSimulationConstructionSet().skipLoadingDefaultConfiguration();
+         simulationStarter.getSimulationConstructionSet().setupGraph("t");
       }
 
       // Start Look and Step behavior
@@ -122,29 +124,6 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation(), behaviorRegistry);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
-      wakeUpToolboxes(robotModel);
-   }
-
-   private void wakeUpToolboxes(AtlasRobotModel robotModel)
-   {
-      // Start object detector toolbox
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE_ROS2.getPubSubImplementation(), "toolboxes");
-      String robotName = robotModel.getSimpleRobotName();
-      IHMCROS2Publisher<ToolboxStateMessage> fiducialDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                            ToolboxStateMessage.class,
-                                                                                                            FiducialDetectorToolboxModule.getInputTopic(
-                                                                                                                  robotName));
-      IHMCROS2Publisher<ToolboxStateMessage> objectDetectorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                          ToolboxStateMessage.class,
-                                                                                                          ObjectDetectorToolboxModule.getInputTopic(robotName));
-
-      new PausablePeriodicThread("ToolboxWaker", 1.0, () ->
-      {
-         ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
-         wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
-         fiducialDetectorPublisher.publish(wakeUpMessage);
-         objectDetectorPublisher.publish(wakeUpMessage);
-      }).start();
    }
 
    private void startPerceptionStack()
