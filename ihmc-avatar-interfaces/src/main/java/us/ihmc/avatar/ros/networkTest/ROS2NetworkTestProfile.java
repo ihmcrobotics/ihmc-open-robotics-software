@@ -1,16 +1,13 @@
 package us.ihmc.avatar.ros.networkTest;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ROS2NetworkTestProfile
 {
-   protected String localHostname = ExceptionTools.handle(() -> InetAddress.getLocalHost().getHostName(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   private final ROS2NetworkTestMachine LOCAL_MACHINE = ROS2NetworkTestMachine.getLocalMachine();
 
    public abstract List<ROS2NetworkTestMachine> getMachines();
 
@@ -25,13 +22,28 @@ public abstract class ROS2NetworkTestProfile
    public List<ROS2NetworkTestMachine> getRemoteMachines()
    {
       ArrayList<ROS2NetworkTestMachine> remoteMachines = new ArrayList<>();
-      for (ROS2NetworkTestMachine machines : getMachines())
+      for (ROS2NetworkTestMachine machine : getMachines())
       {
-         if (!machines.getHostname().equals(localHostname))
+         if (machine != getLocalMachine())
          {
-            remoteMachines.add(machines);
+            remoteMachines.add(machine);
          }
       }
       return remoteMachines;
+   }
+
+   public ROS2NetworkTestMachine getLocalMachine()
+   {
+      return LOCAL_MACHINE;
+   }
+
+   public String getMachineName()
+   {
+      return getLocalMachine().name().toLowerCase();
+   }
+
+   public String getLocalHostname()
+   {
+      return ROS2NetworkTestMachine.LOCAL_HOSTNAME;
    }
 }
