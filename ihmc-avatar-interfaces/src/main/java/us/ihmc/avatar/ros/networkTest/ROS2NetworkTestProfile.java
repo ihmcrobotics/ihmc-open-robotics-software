@@ -18,6 +18,8 @@ public abstract class ROS2NetworkTestProfile
 
    public abstract YoRegistry getYoRegistry();
 
+   public abstract void destroy();
+
    public List<ROS2NetworkTestMachine> getRemoteMachines()
    {
       ArrayList<ROS2NetworkTestMachine> remoteMachines = new ArrayList<>();
