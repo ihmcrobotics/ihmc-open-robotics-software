@@ -39,7 +39,6 @@ public class ROS2NetworkTest
    private boolean paused;
 
    private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
-
    {
       addProfile(IntegersAt1HzNetworkTestProfile.class);
    }
@@ -55,14 +54,7 @@ public class ROS2NetworkTest
 
       if (!args.contains("--startTime"))
       {
-         LogTools.info("Running as host. Starting SCS.");
-
-         // start SCS
-         SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
-                                                                       new NullGraphics3DAdapter(),
-                                                                       new SimulationConstructionSetParameters());
-         scs.addYoRegistry(yoRegistry);
-         scs.setDT(UPDATE_PERIOD, 1);
+         LogTools.info("Running as host.");
 
          // decide time to start
          startTime = now.plusSeconds(15);
@@ -70,6 +62,7 @@ public class ROS2NetworkTest
          LogTools.info("Starting nodes at {}", formattedStartTime);
 
          ArrayList<YoVariableClient> yoVariableClients = new ArrayList<>();
+         ArrayList<ROS2NetworkTestYoVariablesUpdatedListener> clientUpdateListeners = new ArrayList<>();
          Object variableSynchronizer = new Object();
          for (ROS2NetworkTestMachine remoteMachine : profile.getRemoteMachines())
          {
@@ -90,19 +83,40 @@ public class ROS2NetworkTest
             ThreadTools.sleepSeconds(5.0);
 
             // start YoVariableClient
-            yoVariableClient = new YoVariableClient(new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry));
+            ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener = new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry);
+            yoVariableClient = new YoVariableClient(clientUpdateListener);
             yoVariableClient.start(remoteMachine.getHostname(), DataServerSettings.DEFAULT_PORT);
             yoVariableClient.setVariableSynchronizer(variableSynchronizer);
+            clientUpdateListeners.add(clientUpdateListener);
             yoVariableClients.add(yoVariableClient);
          }
 
          // wait until they are all started
+         for (ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener : clientUpdateListeners)
+         {
+            if (!clientUpdateListener.isHandshakeComplete())
+               LogTools.info("Waiting for handshake...");
+            while (!clientUpdateListener.isHandshakeComplete())
+            {
+               ThreadTools.sleep(100);
+            }
+            LogTools.info("Handshake complete.");
+         }
 
          // spin up SCS thread to tick it at some frequency
+
+         // start SCS
+         LogTools.info("Starting SCS");
+         SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
+                                                                       new NullGraphics3DAdapter(),
+                                                                       new SimulationConstructionSetParameters());
+         scs.addYoRegistry(yoRegistry);
+         scs.setDT(UPDATE_PERIOD, 1);
          scs.setupGraph("t");
          scs.skipLoadingDefaultConfiguration();
          scs.hideViewport();
          scs.changeBufferSize(8096);
+         scs.getGUI().getFrame().setSize(1600, 900);
          scs.setScrollGraphsEnabled(false);
          JToggleButton pauseButton = new JToggleButton("Pause/End"); // TODO Fix up
          pauseButton.addActionListener(e ->
@@ -114,8 +128,11 @@ public class ROS2NetworkTest
 
          for (YoVariable variable : profile.getYoRegistry().getVariables())
          {
+            LogTools.info("Setting up graph for: {}", variable.getFullName());
             scs.setupGraph(variable.getName());
          }
+         scs.setupGraph("cpu1Sent");
+         scs.setupGraph("cpu1Received");
 
          scs.startOnAThread();
          while (!scs.hasSimulationThreadStarted())
@@ -123,9 +140,12 @@ public class ROS2NetworkTest
 
          new PausablePeriodicThread("SCSUpdater", UPDATE_PERIOD, () ->
          {
-            synchronized (variableSynchronizer)
+            if (!paused)
             {
-               scs.tickAndUpdate();
+               synchronized (variableSynchronizer)
+               {
+                  scs.tickAndUpdate();
+               }
             }
          }).start();
       }
@@ -170,6 +190,7 @@ public class ROS2NetworkTest
       ThreadTools.sleepSeconds(10.0);
 
       LogTools.info("Stopping experiment...");
+      paused = true;
 
       if (yoServerUpdateThread != null)
          yoServerUpdateThread.destroy();
