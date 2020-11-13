@@ -7,6 +7,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -16,6 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import javax.swing.*;
 import java.time.LocalDateTime;
@@ -31,9 +33,13 @@ public class ROS2NetworkTest
    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
    public static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private PausablePeriodicThread yoServerUpdateThread;
+   private YoVariableClient yoVariableClient;
+   private YoVariableServer yoVariableServer;
    private boolean paused;
 
    private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
+
    {
       addProfile(IntegersAt1HzNetworkTestProfile.class);
    }
@@ -53,8 +59,8 @@ public class ROS2NetworkTest
 
          // start SCS
          SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
-                                                                         new NullGraphics3DAdapter(),
-                                                                         new SimulationConstructionSetParameters());
+                                                                       new NullGraphics3DAdapter(),
+                                                                       new SimulationConstructionSetParameters());
          scs.addYoRegistry(yoRegistry);
          scs.setDT(UPDATE_PERIOD, 1);
 
@@ -67,19 +73,24 @@ public class ROS2NetworkTest
          Object variableSynchronizer = new Object();
          for (ROS2NetworkTestMachine remoteMachine : profile.getRemoteMachines())
          {
-            // use SSHJ to remote execute this class with arguments
-            // connect to server at hostname
-            RemoteSSHTools.session(remoteMachine.getHostname(), remoteMachine.getUsername(), connection ->
+            ThreadTools.startAThread(() ->
             {
-               // find deploy directory and start the script
-               connection.exec(remoteMachine.getDeployDirectory() + "/ROS2NetworkTest"
-                               + " --profile " + profileName
-                               + " --startTime " + formattedStartTime
-               );
-            });
+               // use SSHJ to remote execute this class with arguments
+               // connect to server at hostname
+               RemoteSSHTools.session(remoteMachine.getHostname(), remoteMachine.getUsername(), connection ->
+               {
+                  // find deploy directory and start the script
+                  connection.exec(remoteMachine.getDeployDirectory() + "/ROS2NetworkTest" +
+                                  " --profile " + profileName +
+                                  " --startTime " + formattedStartTime
+                  );
+               });
+            }, "RemoteTestExecutor");
+
+            ThreadTools.sleepSeconds(5.0);
 
             // start YoVariableClient
-            YoVariableClient yoVariableClient = new YoVariableClient(new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry));
+            yoVariableClient = new YoVariableClient(new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry));
             yoVariableClient.start(remoteMachine.getHostname(), DataServerSettings.DEFAULT_PORT);
             yoVariableClient.setVariableSynchronizer(variableSynchronizer);
             yoVariableClients.add(yoVariableClient);
@@ -100,6 +111,12 @@ public class ROS2NetworkTest
             scs.setScrollGraphsEnabled(paused);
          });
          scs.addButton(pauseButton);
+
+         for (YoVariable variable : profile.getYoRegistry().getVariables())
+         {
+            scs.setupGraph(variable.getName());
+         }
+
          scs.startOnAThread();
          while (!scs.hasSimulationThreadStarted())
             ThreadTools.sleep(200);
@@ -120,18 +137,22 @@ public class ROS2NetworkTest
          }
 
          String startTimeString = args.get(args.indexOf("--startTime") + 1);
+         LogTools.info("Start time: {}", startTimeString);
          startTime = LocalDateTime.parse(startTimeString, dateTimeFormatter);
 
          // start YoVariableServer
-         YoVariableServer yoVariableServer = new YoVariableServer(profileName, null, new DataServerSettings(false), UPDATE_PERIOD);
+         yoVariableServer = new YoVariableServer(profileName, null, new DataServerSettings(false), UPDATE_PERIOD);
          yoVariableServer.setMainRegistry(profile.getYoRegistry(), null, null);
+         LogTools.info("Starting YoVariableServer...");
          yoVariableServer.start();
 
+         LogTools.info("Starting server update thread...");
          MutableLong timestamp = new MutableLong();
-         new PausablePeriodicThread("YoServerUpdate", UPDATE_PERIOD, () ->
+         yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", UPDATE_PERIOD, () ->
          {
             yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(UPDATE_PERIOD)));
-         }).start();
+         });
+         yoServerUpdateThread.start();
       }
 
       if (!args.contains("--profile"))
@@ -140,10 +161,23 @@ public class ROS2NetworkTest
       }
 
       // wait until decided time
+      LogTools.info("Waiting to start test...");
       ThreadTools.sleep(LocalDateTime.now().until(startTime, ChronoUnit.MILLIS));
-
+      LogTools.info("Starting test");
 
       profile.runExperiment();
+
+      ThreadTools.sleepSeconds(10.0);
+
+      LogTools.info("Stopping experiment...");
+
+      if (yoServerUpdateThread != null)
+         yoServerUpdateThread.destroy();
+      if (yoVariableServer != null)
+         yoVariableServer.close();
+      if (yoVariableClient != null)
+         yoVariableClient.stop();
+      profile.destroy();
    }
 
    private void addProfile(Class<? extends ROS2NetworkTestProfile> clazz)
