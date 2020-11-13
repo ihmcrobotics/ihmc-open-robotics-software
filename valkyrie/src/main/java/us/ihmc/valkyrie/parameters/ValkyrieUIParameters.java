@@ -4,9 +4,11 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieCollisionBasedSelectionModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.UIParameters;
 
 public class ValkyrieUIParameters implements UIParameters
@@ -100,5 +102,20 @@ public class ValkyrieUIParameters implements UIParameters
    public RobotCollisionModel getSelectionModel()
    {
       return new ValkyrieCollisionBasedSelectionModel(jointMap);
+   }
+
+   @Override
+   public RigidBodyTransform getHandControlFramePose(RobotSide side)
+   {
+      if (jointMap.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+      {
+         RigidBodyTransform pose = new RigidBodyTransform();
+         pose.getTranslation().set(0.0, side.negateIfRightSide(0.30), 0.0);
+         return pose;
+      }
+      else
+      {
+         return null;
+      }
    }
 }
