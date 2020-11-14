@@ -19,6 +19,11 @@ public abstract class ROS2NetworkTestProfile
 
    public abstract List<String[]> getGraphsToSetup();
 
+   public void updateDerivativeVariables(YoRegistry syncedRegistry)
+   {
+      // not required
+   }
+
    public List<ROS2NetworkTestMachine> getRemoteMachines()
    {
       ArrayList<ROS2NetworkTestMachine> remoteMachines = new ArrayList<>();

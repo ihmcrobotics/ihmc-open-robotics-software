@@ -2,6 +2,7 @@ package us.ihmc.avatar.ros.networkTest;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Int64;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -96,6 +97,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
       // TODO
       // start subscribing and logging expected vs actual
 
+      ThreadTools.sleepSeconds(10.0);
    }
 
    @Override
