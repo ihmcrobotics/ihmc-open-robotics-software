@@ -44,11 +44,6 @@ public abstract class ROS2NetworkTestProfile
 
    public String getMachineName()
    {
-      return getLocalMachine().name().toLowerCase();
-   }
-
-   public String getLocalHostname()
-   {
-      return ROS2NetworkTestMachine.LOCAL_HOSTNAME;
+      return getLocalMachine().getMachineName();
    }
 }

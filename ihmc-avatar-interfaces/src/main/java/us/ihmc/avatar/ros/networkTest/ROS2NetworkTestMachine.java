@@ -68,4 +68,9 @@ public enum ROS2NetworkTestMachine
    {
       return ipAddress;
    }
+
+   public String getMachineName()
+   {
+      return name().toLowerCase();
+   }
 }
