@@ -1,7 +1,9 @@
-package us.ihmc.avatar.ros.networkTest;
+package us.ihmc.avatar.ros.networkTest.profiles;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Int64;
+import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestMachine;
+import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;

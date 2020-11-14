@@ -1,4 +1,4 @@
-package us.ihmc.avatar.ros.networkTest.highFrequency;
+package us.ihmc.avatar.ros.networkTest.profiles;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Int64;
