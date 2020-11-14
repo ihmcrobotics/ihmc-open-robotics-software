@@ -11,6 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -76,14 +77,14 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         new IHMCROS2Callback<>(ros2Node, TO_OCU, message ->
+         new IHMCROS2Callback<>(ros2Node, TO_OCU, ROS2QosProfile.BEST_EFFORT(), message ->
          {
             messagesReceived.add(1);
          });
       }
       else
       {
-         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU);
+         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU, ROS2QosProfile.BEST_EFFORT());
          experimentThread = new PausablePeriodicThread(getClass().getSimpleName(), UnitConversions.hertzToSeconds(100.0), () ->
          {
             if (messagesSent.getValue() < 1500)
