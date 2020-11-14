@@ -1,6 +1,7 @@
 package us.ihmc.avatar.ros.networkTest;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.avatar.ros.networkTest.highFrequency.IntegersAt100HzNetworkTestProfile;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -40,6 +41,7 @@ public class ROS2NetworkTest
    private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
    {
       addProfile(IntegersAt1HzNetworkTestProfile.class);
+      addProfile(IntegersAt100HzNetworkTestProfile.class);
    }
 
    public ROS2NetworkTest(List<String> args)
@@ -82,11 +84,10 @@ public class ROS2NetworkTest
                   });
                }, "RemoteTestExecutor");
 
-               ThreadTools.sleepSeconds(5.0);
+               ThreadTools.sleepSeconds(10.0);
 
                // start YoVariableClient
-               ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener = new ROS2NetworkTestYoVariablesUpdatedListener(
-                     yoRegistry);
+               ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener = new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry);
                YoVariableClient yoVariableClient = new YoVariableClient(clientUpdateListener);
                LogTools.info("Connecting to {}:{}", remoteMachine.getIPAddress(), DataServerSettings.DEFAULT_PORT);
                yoVariableClient.start(remoteMachine.getIPAddress(), DataServerSettings.DEFAULT_PORT);
@@ -154,6 +155,7 @@ public class ROS2NetworkTest
             {
                synchronized (variableSynchronizer)
                {
+                  profile.updateDerivativeVariables(yoRegistry);
                   scs.tickAndUpdate();
                }
             }
@@ -198,8 +200,8 @@ public class ROS2NetworkTest
       LogTools.info("Starting test");
 
       profile.runExperiment();
-
-      ThreadTools.sleepSeconds(10.0);
+      LogTools.info("Experiment finished.");
+      ThreadTools.sleepSeconds(10.0); // allow those last messages to come in
 
       LogTools.info("Stopping experiment...");
       paused = true;
