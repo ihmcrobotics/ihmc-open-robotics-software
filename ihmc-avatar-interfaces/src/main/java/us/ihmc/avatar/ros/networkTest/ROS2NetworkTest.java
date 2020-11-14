@@ -1,7 +1,8 @@
 package us.ihmc.avatar.ros.networkTest;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.avatar.ros.networkTest.highFrequency.IntegersAt100HzNetworkTestProfile;
+import us.ihmc.avatar.ros.networkTest.profiles.IntegersAt100HzNetworkTestProfile;
+import us.ihmc.avatar.ros.networkTest.profiles.IntegersAt1HzNetworkTestProfile;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
