@@ -23,19 +23,32 @@ import java.util.List;
 
 import static us.ihmc.avatar.ros.networkTest.ROS2NetworkTestMachine.*;
 
+/**
+ * This profile can show "overshooting" resending messages in reliable mode.
+ * The issue goes away in best effort mode.
+ */
 public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
+   public static final ROS2QosProfile PUBLISHER_QOS_PROFILE = ROS2QosProfile.DEFAULT();
+   public static final ROS2QosProfile SUBSCRIBER_QOS_PROFILE = ROS2QosProfile.DEFAULT();
+
    private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class);
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
+   public static final double PUBLISH_FREQUENCY = 50.0;
+   public static final double EXPERIMENT_DURATION = 10.0;
    private final MutableInt number = new MutableInt();
 
    private final YoRegistry yoRegistry = new YoRegistry(getMachineName() + getClass().getSimpleName());
    private final YoLong messagesSent = new YoLong(getMachineName() + "Sent", yoRegistry);
    private final YoLong messagesReceived = new YoLong(getMachineName() + "Received", yoRegistry);
 
-   private YoLong totalSent;
+   private long lastReceived = -1;
 
-   private PausablePeriodicThread experimentThread;
+   private YoLong totalSent;
+   private YoLong messagesReceivedOutOfOrder;
+   private YoLong lastReceivedNumber;
+
+   private PausablePeriodicThread publishThread;
    private final ROS2Node ros2Node;
 
    public IntegersAt100HzNetworkTestProfile()
@@ -47,6 +60,8 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
       if (getLocalMachine() == OCU)
       {
          totalSent = new YoLong("totalSent", yoRegistry);
+         messagesReceivedOutOfOrder = new YoLong("ocuReceivedOutOfOrder", yoRegistry);
+         lastReceivedNumber = new YoLong("lastReceivedNumber", yoRegistry);
       }
    }
 
@@ -56,9 +71,8 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
       YoLong cpu0Sent = (YoLong) syncedRegistry.findVariable("cpu0Sent");
       YoLong cpu1Sent = (YoLong) syncedRegistry.findVariable("cpu1Sent");
       YoLong cpu4Sent = (YoLong) syncedRegistry.findVariable("cpu4Sent");
-
-//      System.out.println(" " + cpu0Sent + cpu1Sent + cpu4Sent + totalSent + " ");
       totalSent.set(cpu0Sent.getValue() + cpu1Sent.getValue() + cpu4Sent.getValue());
+      lastReceivedNumber.set(lastReceived);
    }
 
    @Override
@@ -77,29 +91,48 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         new IHMCROS2Callback<>(ros2Node, TO_OCU, ROS2QosProfile.BEST_EFFORT(), message ->
+         new IHMCROS2Callback<>(ros2Node, TO_OCU, SUBSCRIBER_QOS_PROFILE, message ->
          {
+            long messageNumber = message.getData();
+            if (messageNumber - 1 != lastReceived)
+               messagesReceivedOutOfOrder.add(1);
+            lastReceived = messageNumber;
             messagesReceived.add(1);
          });
       }
       else
       {
-         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU, ROS2QosProfile.BEST_EFFORT());
-         experimentThread = new PausablePeriodicThread(getClass().getSimpleName(), UnitConversions.hertzToSeconds(100.0), () ->
+         int numberOfRemoteMachines = getRemoteMachines().size();
+         double publishPeriod = UnitConversions.hertzToSeconds(PUBLISH_FREQUENCY);
+         if (getLocalMachine() == CPU1)
          {
-            if (messagesSent.getValue() < 1500)
+            ThreadTools.sleepSeconds(publishPeriod / numberOfRemoteMachines);
+            number.add(1);
+         }
+         else if (getLocalMachine() == CPU4)
+         {
+            number.add(2);
+            ThreadTools.sleepSeconds(2.0 * publishPeriod / numberOfRemoteMachines);
+         }
+
+         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU, PUBLISHER_QOS_PROFILE);
+         publishThread = new PausablePeriodicThread(getClass().getSimpleName(), publishPeriod, () ->
+         {
+            if (messagesSent.getValue() < PUBLISH_FREQUENCY * EXPERIMENT_DURATION)
             {
                Int64 message = new Int64();
-               message.setData(number.getAndIncrement());
+               message.setData(number.getAndAdd(numberOfRemoteMachines));
                messagesSent.add(1);
                publisher.publish(message);
             }
          });
-         experimentThread.start();
-
+         publishThread.start();
       }
 
-      ThreadTools.sleepSeconds(10.0);
+      ThreadTools.sleepSeconds(EXPERIMENT_DURATION);
+
+      if (getLocalMachine() != OCU)
+         publishThread.stop();
    }
 
    @Override
@@ -107,15 +140,16 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       ArrayList<String[]> graphsToSetup = new ArrayList<>();
       graphsToSetup.add(new String[] {"cpu0Sent", "cpu1Sent", "cpu4Sent"});
-      graphsToSetup.add(new String[] {"totalSent", "ocuReceived"});
+      graphsToSetup.add(new String[] {"totalSent", "ocuReceived", "lastReceivedNumber"});
+      graphsToSetup.add(new String[] {"ocuReceivedOutOfOrder"});
       return graphsToSetup;
    }
 
    @Override
    public void destroy()
    {
-      if (experimentThread != null)
-         experimentThread.destroy();
+      if (publishThread != null)
+         publishThread.destroy();
    }
 
    @Override

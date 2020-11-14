@@ -18,6 +18,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import javax.swing.*;
 import java.time.LocalDateTime;
@@ -37,7 +39,10 @@ public class ROS2NetworkTest
    private PausablePeriodicThread yoServerUpdateThread;
    private ConcurrentLinkedDeque<YoVariableClient> yoVariableClients = new ConcurrentLinkedDeque<>();
    private YoVariableServer yoVariableServer;
+   private SimulationConstructionSet scs;
    private boolean paused;
+
+   private YoDouble experimentTime;
 
    private final HashMap<String, ROS2NetworkTestProfile> profiles = new HashMap<>();
    {
@@ -50,6 +55,8 @@ public class ROS2NetworkTest
       String profileName = args.get(args.indexOf("--profile") + 1);
       ROS2NetworkTestProfile profile = profiles.get(profileName);
       LogTools.info("Running profile: {}", profileName);
+
+      experimentTime = new YoDouble(ROS2NetworkTestMachine.getLocalMachine().getMachineName() + "Time", profile.getYoRegistry());
 
       LocalDateTime now = LocalDateTime.now();
       LocalDateTime startTime;
@@ -120,13 +127,14 @@ public class ROS2NetworkTest
 
          // start SCS
          LogTools.info("Starting SCS");
-         SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("robot"),
-                                                                       new NullGraphics3DAdapter(),
-                                                                       new SimulationConstructionSetParameters());
+         scs = new SimulationConstructionSet(new Robot("robot"),
+                                             new NullGraphics3DAdapter(),
+                                             new SimulationConstructionSetParameters());
          yoRegistry.addChild(profile.getYoRegistry()); // add this node's profile variables
          scs.addYoRegistry(yoRegistry);
+         YoDouble yoTime = (YoDouble) scs.getRootRegistry().findVariable("t");
          scs.setDT(UPDATE_PERIOD, 1);
-         scs.setupGraph("t");
+         scs.setupGraph(yoTime.getName());
          scs.skipLoadingDefaultConfiguration();
          scs.hideViewport();
          scs.changeBufferSize(8096);
@@ -140,6 +148,14 @@ public class ROS2NetworkTest
          });
          scs.addButton(pauseButton);
 
+         List<ROS2NetworkTestMachine> remoteMachines = profile.getRemoteMachines();
+         String[] nanoTimeGraphs = new String[remoteMachines.size() + 1];
+         nanoTimeGraphs[0] = experimentTime.getName();
+         for (int i = 0; i < remoteMachines.size(); i++)
+         {
+            nanoTimeGraphs[i + 1] = remoteMachines.get(i).getMachineName() + "Time";
+         }
+         scs.setupGraph(nanoTimeGraphs);
          for (String[] graph : profile.getGraphsToSetup())
          {
             LogTools.info("Setting up graph: {}", Arrays.toString(graph));
@@ -154,8 +170,10 @@ public class ROS2NetworkTest
          {
             if (!paused)
             {
+               yoTime.add(UPDATE_PERIOD);
                synchronized (variableSynchronizer)
                {
+                  experimentTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
                   profile.updateDerivativeVariables(yoRegistry);
                   scs.tickAndUpdate();
                }
@@ -185,6 +203,7 @@ public class ROS2NetworkTest
          MutableLong timestamp = new MutableLong();
          yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", UPDATE_PERIOD, () ->
          {
+            experimentTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
             yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(UPDATE_PERIOD)));
          });
          yoServerUpdateThread.start();
@@ -202,11 +221,13 @@ public class ROS2NetworkTest
 
       profile.runExperiment();
       LogTools.info("Experiment finished.");
-      ThreadTools.sleepSeconds(10.0); // allow those last messages to come in
+      ThreadTools.sleepSeconds(7.0); // allow those last messages to come in
 
       LogTools.info("Stopping experiment...");
       paused = true;
 
+      if (scs != null)
+         scs.setScrollGraphsEnabled(true);
       if (yoServerUpdateThread != null)
          yoServerUpdateThread.destroy();
       if (yoVariableServer != null)
