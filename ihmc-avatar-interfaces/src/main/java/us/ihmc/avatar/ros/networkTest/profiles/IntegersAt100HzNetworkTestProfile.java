@@ -35,7 +35,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class);
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
    public static final double PUBLISH_FREQUENCY = 100.0;
-   public static final double EXPERIMENT_DURATION = 10.0;
+   public static final double EXPERIMENT_DURATION = 100.0;
    private final MutableInt number = new MutableInt();
 
    private final YoRegistry yoRegistry = new YoRegistry(getMachineName() + getClass().getSimpleName());

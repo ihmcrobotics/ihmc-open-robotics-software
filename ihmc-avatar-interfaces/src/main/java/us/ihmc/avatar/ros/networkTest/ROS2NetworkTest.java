@@ -137,7 +137,7 @@ public class ROS2NetworkTest
          scs.setupGraph(yoTime.getName());
          scs.skipLoadingDefaultConfiguration();
          scs.hideViewport();
-         scs.changeBufferSize(8096);
+         scs.changeBufferSize(4096);
          scs.getGUI().getFrame().setSize(1600, 900);
          scs.setScrollGraphsEnabled(false);
          JToggleButton pauseButton = new JToggleButton("Pause/End"); // TODO Fix up
@@ -175,6 +175,14 @@ public class ROS2NetworkTest
                {
                   experimentTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
                   profile.updateDerivativeVariables(yoRegistry);
+
+                  // dynamically resize buffer
+                  int bufferSize = scs.getDataBuffer().getBufferSize();
+                  if (scs.getDataBuffer().getCurrentIndex() == bufferSize - 2)
+                  {
+                     scs.changeBufferSize(bufferSize + bufferSize / 2);
+                  }
+
                   scs.tickAndUpdate();
                }
             }
