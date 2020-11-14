@@ -53,7 +53,7 @@ public class SCSROS2Visualizer
       scs.setupGraph(numberOfEndpoints.getName());
       scs.skipLoadingDefaultConfiguration();
       scs.hideViewport();
-      scs.changeBufferSize(4096); // TODO: Dynamically allocate buffer like ArrayList
+      scs.changeBufferSize(200);
       scs.setScrollGraphsEnabled(false);
       scs.getGUI().getFrame().setSize(1200, 800);
       JToggleButton pauseButton = new JToggleButton("Pause");
@@ -117,7 +117,14 @@ public class SCSROS2Visualizer
       timeElapsed.set(stopwatch.totalElapsed());
 
       if (!paused)
+      {
+         int bufferSize = scs.getDataBuffer().getBufferSize();
+         if (scs.getDataBuffer().getCurrentIndex() == bufferSize - 2)
+         {
+            scs.changeBufferSize(bufferSize + bufferSize / 2);
+         }
          scs.tickAndUpdate();
+      }
    }
 
    public static void main(String[] args)
