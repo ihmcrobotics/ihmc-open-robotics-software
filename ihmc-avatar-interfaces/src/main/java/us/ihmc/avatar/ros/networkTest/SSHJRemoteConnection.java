@@ -38,6 +38,7 @@ public class SSHJRemoteConnection
          Session finalSession = session;
          Session.Command sshjCommand = ExceptionTools.handle(() -> finalSession.exec(command), DefaultExceptionHandler.RUNTIME_EXCEPTION);
          LogTools.info(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getInputStream()), DefaultExceptionHandler.RUNTIME_EXCEPTION).toString());
+         LogTools.error(ExceptionTools.handle(() -> IOUtils.readFully(sshjCommand.getErrorStream()), DefaultExceptionHandler.RUNTIME_EXCEPTION).toString());
          ExceptionTools.handle(() -> sshjCommand.join((long) (timeout * 1e9), TimeUnit.NANOSECONDS), DefaultExceptionHandler.RUNTIME_EXCEPTION);
          LogTools.info("** exit status: {}", sshjCommand.getExitStatus());
       }
