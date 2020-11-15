@@ -36,7 +36,7 @@ mainDependencies {
       setChanging(true)
    }
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.20.6")
+   api("us.ihmc:simulation-construction-set:0.21.1")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-robot-description:0.20.1")
    api("us.ihmc:ihmc-communication:source")
