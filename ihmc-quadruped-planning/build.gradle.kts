@@ -26,7 +26,7 @@ mainDependencies {
     api("us.ihmc:ihmc-quadruped-basics:source")
     api("us.ihmc:robot-environment-awareness:source")
     api("us.ihmc:simulation-construction-set-tools-test:source")
-    api("us.ihmc:ihmc-robot-data-logger:0.20.1")
+    api("us.ihmc:ihmc-robot-data-logger:0.20.3")
     api("us.ihmc:ihmc-path-planning:source")
 }
 

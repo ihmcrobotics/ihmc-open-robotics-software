@@ -35,7 +35,7 @@ mainDependencies {
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-communication:source")
