@@ -38,7 +38,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
 }
 
 benchmarksDependencies {
@@ -46,7 +46,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-convex-optimization:0.17.0")
+   api("us.ihmc:ihmc-convex-optimization:0.17.1")
 }
 
 remotes {
