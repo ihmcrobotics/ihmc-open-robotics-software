@@ -1,11 +1,6 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.swing.JButton;
-
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -15,6 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -35,12 +31,14 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ValkyrieExternalForceEstimationSimulation
+import javax.swing.*;
+
+public class ValkyrieExternalContactEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
    private static final Vector3D initialForce = new Vector3D(0.0, 0.0, 0.0);
 
-   public ValkyrieExternalForceEstimationSimulation()
+   public ValkyrieExternalContactEstimationSimulation()
    {
       ValkyrieRobotVersion version = ValkyrieRobotVersion.FINGERLESS;
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
@@ -58,33 +56,57 @@ public class ValkyrieExternalForceEstimationSimulation
       YoRegistry scsRootRegistry = simulationStarter.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
 
       HumanoidFloatingRootJointRobot scsRobot = simulationStarter.getSDFRobot();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      // ----- Root Joint ----- //
-      //      Joint scsEndEffector = scsRobot.getRootJoint();
-      //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.156, 0.093, 0.197);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.131, 0.000, -0.044);
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.113, -0.050, 0.090);
+            String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
+      //      String jointName = "torsoRoll"; Point3D offset = new Point3D(0.124, -0.176, 0.259);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.081, 0.020, 0.026);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.076, 0.120, -0.036);
+//            String jointName = "leftForearmYaw"; Point3D offset = new Point3D(-0.068, 0.170, -0.033);
+      //      String jointName = "leftForearmYaw"; Point3D offset = new Point3D(0.071, 0.259, 0.009);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.081, -0.020, 0.026);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.076, -0.120, -0.036);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(-0.068, -0.170, -0.033);
+      //      String jointName = "rightForearmYaw"; Point3D offset = new Point3D(0.071, -0.245, -0.034);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.140, 0.000, -0.100);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.100, 0.122, 0.045);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(-0.130, 0.052, -0.200);
+      //      String jointName = "pelvis";  Point3D offset =new Point3D(0.133, 0.000, -0.261);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.019, 0.187, -0.072);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.057, 0.192, -0.131);
+//      String jointName = "leftHipPitch"; Point3D offset = new Point3D(-0.030, 0.192, -0.235);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.144, 0.132, -0.208);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.121, 0.172, -0.242);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.048, 0.199, -0.289);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.019, -0.187, -0.072);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.057, -0.192, -0.131);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(-0.030, -0.192, -0.235);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.144, -0.132, -0.208);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.121, -0.172, -0.242);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.048, -0.199, -0.289);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.109, 0.083, -0.422);
+      //      String jointName = "leftHipPitch"; Point3D offset = new Point3D(0.043, 0.161, -0.444);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(-0.044, 0.104, -0.127);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(0.084, 0.058, -0.160);
+      //      String jointName = "leftKneePitch"; Point3D offset = new Point3D(0.079, -0.014, -0.348);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.109, -0.083, -0.422);
+      //      String jointName = "rightHipPitch"; Point3D offset = new Point3D(0.043, -0.161, -0.444);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(-0.044, -0.104, -0.127);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(0.084, -0.058, -0.160);
+      //      String jointName = "rightKneePitch"; Point3D offset = new Point3D(0.079, 0.014, -0.348);
 
-      // ----- 1DOF Joints ----- //
-//            String endEffectorName = "torsoRoll"; // Chest
-//            String endEffectorName = "rightShoulderRoll"; // Shoulder
-      String endEffectorName = "rightElbowPitch"; // Elbow
-      //      String endEffectorName = "rightForearmYaw"; // Forearm
-      //      String endEffectorName = "rightWristRoll"; // Wrist roll
-      //      String endEffectorName = "rightWristPitch"; // Wrist pitch
-      Joint scsEndEffector = scsRobot.getJoint(endEffectorName);
-      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
-
-      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
-//      Vector3D externalForcePointOffset = new Vector3D(0.3, 0.0, 0.5);
-//      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.5);
-
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
-      scsEndEffector.addExternalForcePoint(externalForcePoint);
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", offset, scsRobot);
+      Joint scsJoint = scsRobot.getJoint(jointName);
+      scsJoint.addExternalForcePoint(externalForcePoint);
       externalForcePoint.setForce(initialForce);
+
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getSuccessor();
 
       double forceGraphicScale = 0.05;
       AppearanceDefinition simulatedForceColor = YoAppearance.Red();
-      AppearanceDefinition estimatedForceColor = YoAppearance.Green();
       YoFrameVector3D estimatedForce = new YoFrameVector3D("estimatedForce", ReferenceFrame.getWorldFrame(), scsRootRegistry);
 
       YoGraphicVector simulatedForceVector = new YoGraphicVector("simulatedForceVector",
@@ -93,17 +115,10 @@ public class ValkyrieExternalForceEstimationSimulation
                                                                  forceGraphicScale,
                                                                  simulatedForceColor);
 
-      YoGraphicVector estimatedForceVector = new YoGraphicVector("estimatedForceVector",
-                                                                 externalForcePoint.getYoPosition(),
-                                                                 estimatedForce,
-                                                                 forceGraphicScale,
-                                                                 estimatedForceColor);
-
       YoGraphicPosition simulatedForcePoint = new YoGraphicPosition("simulatedForcePoint", externalForcePoint.getYoPosition(), 0.025, simulatedForceColor);
 
       YoGraphicsList externalForcePointViz = new YoGraphicsList("simulatedExternalForce");
       externalForcePointViz.add(simulatedForceVector);
-      externalForcePointViz.add(estimatedForceVector);
       externalForcePointViz.add(simulatedForcePoint);
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);
 
@@ -113,22 +128,21 @@ public class ValkyrieExternalForceEstimationSimulation
       IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                 ToolboxStateMessage.class,
                                                                                                                 ExternalForceEstimationToolboxModule.getInputTopic(
-                                                                                                             robotModel.getSimpleRobotName()));
+                                                                                                                      robotModel.getSimpleRobotName()));
 
       IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                                                 ExternalForceEstimationConfigurationMessage.class,
                                                                                                                                                 ExternalForceEstimationToolboxModule
-                                                                                                                                             .getInputTopic(
-                                                                                                                                                   robotModel.getSimpleRobotName()));
+                                                                                                                                                      .getInputTopic(
+                                                                                                                                                            robotModel.getSimpleRobotName()));
 
       JButton wakeupButton = new JButton("Start estimation");
       wakeupButton.addActionListener(e ->
                                      {
                                         ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
                                         configurationMessage.setEstimatorGain(0.5);
-                                        configurationMessage.getRigidBodyHashCodes().add(endEffector.hashCode());
-                                        configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
                                         configurationMessage.setCalculateRootJointWrench(false);
+                                        configurationMessage.setEstimateContactLocation(true);
                                         configurationMessagePublisher.publish(configurationMessage);
 
                                         ThreadTools.sleep(1);
@@ -151,19 +165,6 @@ public class ValkyrieExternalForceEstimationSimulation
 
       new ExternalForceEstimationToolboxModule(robotModel, true, PubSubImplementation.FAST_RTPS);
 
-      AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    ExternalForceEstimationOutputStatus.class,
-                                                    ExternalForceEstimationToolboxModule.getOutputTopic(robotModel.getSimpleRobotName()),
-                                           s -> toolboxOutputStatus.set(s.takeNextData()));
-
-      simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addScript(t ->
-                                                                                       {
-                                                                                          if (toolboxOutputStatus.get() != null)
-                                                                                             estimatedForce.set(toolboxOutputStatus.get()
-                                                                                                                                   .getEstimatedExternalForces()
-                                                                                                                                   .get(0));
-                                                                                       });
       simulationStarter.getAvatarSimulation().start();
       simulationStarter.getAvatarSimulation().simulate();
       ros2Node.spin();
@@ -171,6 +172,7 @@ public class ValkyrieExternalForceEstimationSimulation
 
    public static void main(String[] args)
    {
-      new ValkyrieExternalForceEstimationSimulation();
+      new ValkyrieExternalContactEstimationSimulation();
    }
 }
+

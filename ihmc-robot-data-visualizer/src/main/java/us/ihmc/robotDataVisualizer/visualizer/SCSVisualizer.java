@@ -424,6 +424,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoRegistry registry)
    {
+      scs.setFastSimulate(true);
    }
 
    /**
