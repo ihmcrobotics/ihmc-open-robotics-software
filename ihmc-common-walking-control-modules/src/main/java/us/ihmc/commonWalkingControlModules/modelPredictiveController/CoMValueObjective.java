@@ -13,6 +13,31 @@ public class CoMValueObjective
    private double timeOfObjective;
    private double omega;
 
+   public void setJacobianMatrixHelper(CoefficientJacobianMatrixHelper jacobianMatrixHelper)
+   {
+      this.jacobianMatrixHelper = jacobianMatrixHelper;
+   }
+
+   public void setDerivativeOrder(int derivativeOrder)
+   {
+      this.derivativeOrder = derivativeOrder;
+   }
+
+   public void setSegmentNumber(int segmentNumber)
+   {
+      this.segmentNumber = segmentNumber;
+   }
+
+   public void setTimeOfObjective(double timeOfObjective)
+   {
+      this.timeOfObjective = timeOfObjective;
+   }
+
+   public void setOmega(double omega)
+   {
+      this.omega = omega;
+   }
+
    public int getSegmentNumber()
    {
       return segmentNumber;
