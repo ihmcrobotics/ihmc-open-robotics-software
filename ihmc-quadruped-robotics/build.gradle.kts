@@ -47,8 +47,8 @@ mainDependencies {
 testDependencies {
    api("com.google.caliper:caliper:1.0-beta-2")
 
-   api("us.ihmc:simulation-construction-set:0.20.6")
-   api("us.ihmc:simulation-construction-set-test:0.20.6")
+   api("us.ihmc:simulation-construction-set:0.21.1")
+   api("us.ihmc:simulation-construction-set-test:0.21.1")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
