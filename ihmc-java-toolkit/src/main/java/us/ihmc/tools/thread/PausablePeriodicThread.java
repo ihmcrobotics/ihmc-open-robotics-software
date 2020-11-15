@@ -44,6 +44,12 @@ public class PausablePeriodicThread
       }
    }
 
+   public void destroy()
+   {
+      stop();
+      scheduler.shutdown();
+   }
+
    public void setRunning(boolean running)
    {
       if (running)
