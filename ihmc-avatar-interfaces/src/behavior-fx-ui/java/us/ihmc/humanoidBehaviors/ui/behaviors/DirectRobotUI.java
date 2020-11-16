@@ -44,7 +44,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.tools.string.StringTools;
 
-public class DirectRobotUIController extends Group
+public class DirectRobotUI extends Group
 {
    private static final double MIN_PELVIS_HEIGHT = 0.52;
    private static final double MAX_PELVIS_HEIGHT = 0.90;
