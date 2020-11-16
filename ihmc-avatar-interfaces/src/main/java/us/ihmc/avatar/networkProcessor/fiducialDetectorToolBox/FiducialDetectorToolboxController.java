@@ -22,6 +22,7 @@ import boofcv.struct.image.ImageType;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -40,12 +41,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FiducialDetectorToolboxController extends ToolboxController
 {
-   /** Toggle this when running on the real robot vs sim */
-   private static final boolean USE_SIM_PARAMETERS = false;
-
    private static final RescaleOp imageRescalingForSim = new RescaleOp(3.5f, 35, null);
    private static final RescaleOp imageRescalingForRealRobot = new RescaleOp(1.5f, 35, null);
-   private static final RescaleOp imageRescalingOperation = USE_SIM_PARAMETERS ? imageRescalingForSim : imageRescalingForRealRobot;
+   private static RescaleOp imageRescalingOperation;
 
    private final AtomicReference<VideoPacket> videoPacket = new AtomicReference<VideoPacket>();
 
@@ -76,10 +74,14 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private AtomicReference<Boolean> inProcessingThread = new AtomicReference<Boolean>();
 
    public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel,
+                                            RobotTarget target,
                                             StatusMessageOutputManager statusOutputManager,
                                             YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      imageRescalingOperation = target == RobotTarget.REAL_ROBOT ? imageRescalingForRealRobot : imageRescalingForSim;
+
       inProcessingThread.set(false);
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize), ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),
                                               GrayF32.class);
