@@ -5,30 +5,18 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 public class BuildingExplorationFootstepVisualizer
 {

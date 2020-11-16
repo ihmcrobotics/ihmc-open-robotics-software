@@ -197,7 +197,8 @@ public class LookAndStepBehavior implements BehaviorInterface
                   localization.acceptBodyPathPlan(bodyPathPlan);
                }
             },
-            approvalNotification
+            approvalNotification,
+            helper.getRobotModel().getTarget()
       );
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);

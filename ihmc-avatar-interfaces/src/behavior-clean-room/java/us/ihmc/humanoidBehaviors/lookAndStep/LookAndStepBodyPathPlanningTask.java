@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -80,7 +81,8 @@ public class LookAndStepBodyPathPlanningTask
                              Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              ControllerStatusTracker controllerStatusTracker,
                              Consumer<List<? extends Pose3DReadOnly>> output,
-                             TypedNotification<Boolean> approvalNotification)
+                             TypedNotification<Boolean> approvalNotification,
+                             RobotTarget robotTarget)
       {
          this.statusLogger = statusLogger;
          this.uiPublisher = uiPublisher;
@@ -102,16 +104,20 @@ public class LookAndStepBodyPathPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
-         suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
-                                 () -> neckTrajectoryTimerSnapshot.isRunning());
-         suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchTolerance,
-                                           () ->
-                                           {
-                                              commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
-                                              neckTrajectoryTimer.reset();
-                                           }));
+         if (robotTarget == RobotTarget.SCS)
+         {
+            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.");
+            suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
+                                    () -> neckTrajectoryTimerSnapshot.isRunning());
+            suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
+                                                                                  lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
+                                                                                  lookAndStepBehaviorParameters::getNeckPitchTolerance,
+                                              () ->
+                                              {
+                                                 commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
+                                                 neckTrajectoryTimer.reset();
+                                              }));
+         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
                                  () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));

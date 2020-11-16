@@ -120,15 +120,29 @@ public class DirectRobotUI
 
    @FXML public void homeAll()
    {
+      double trajectoryTime = 3.5;
+
       GoHomeMessage homeLeftArm = new GoHomeMessage();
       homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
       homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      homeLeftArm.setTrajectoryTime(trajectoryTime);
       goHomePublisher.publish(homeLeftArm);
 
       GoHomeMessage homeRightArm = new GoHomeMessage();
       homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
       homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+      homeRightArm.setTrajectoryTime(trajectoryTime);
       goHomePublisher.publish(homeRightArm);
+
+      GoHomeMessage homePelvis = new GoHomeMessage();
+      homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+      homePelvis.setTrajectoryTime(trajectoryTime);
+      goHomePublisher.publish(homePelvis);
+
+      GoHomeMessage homeChest = new GoHomeMessage();
+      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+      homeChest.setTrajectoryTime(trajectoryTime);
+      goHomePublisher.publish(homeChest);
    }
 
    @FXML public void freeze()
