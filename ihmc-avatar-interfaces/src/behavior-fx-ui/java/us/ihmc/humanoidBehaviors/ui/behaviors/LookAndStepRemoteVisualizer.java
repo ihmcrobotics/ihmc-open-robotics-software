@@ -16,13 +16,13 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 public class LookAndStepRemoteVisualizer
 {
    private Stage primaryStage;
 
-   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, ROS2Node ros2Node, Messager behaviorMessager)
+   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, Messager behaviorMessager)
    {
       LogTools.info("Launching...");
       JavaFXApplicationCreator.createAJavaFXApplication();
@@ -47,7 +47,9 @@ public class LookAndStepRemoteVisualizer
          mainAnchorPane.getChildren().add(view3DStackPane);
 
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
-         view3DFactory.addNodeToView(new LookAndStepVisualizationGroup(behaviorMessager));
+         LookAndStepVisualizationGroup lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
+         lookAndStepVisualizationGroup.setEnabled(true);
+         view3DFactory.addNodeToView(lookAndStepVisualizationGroup);
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
 
