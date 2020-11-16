@@ -143,7 +143,17 @@ public class FourBarTools
       double CD = CDEdge.getLength();
       double DA = DAEdge.getLength();
       double AC = ACDiag.getLength();
+      if (Double.isNaN(AC))
+      {
+         AC = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, BC, B.getAngle());
+         ACDiag.setLength(AC);
+      }
       double BD = BDDiag.getLength();
+      if (Double.isNaN(BD))
+      {
+         BD = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, DA, A.getAngle());
+         BDDiag.setLength(BD);
+      }
 
       A.setAngleDot(angleDot);
       double BDDt = DA * AB * Math.sin(A.getAngle()) * angleDot / BD;
