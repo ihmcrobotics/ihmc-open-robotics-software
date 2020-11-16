@@ -36,7 +36,7 @@ mainDependencies {
       setChanging(true)
    }
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.20.6")
+   api("us.ihmc:simulation-construction-set:0.21.1")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-robot-description:0.20.1")
    api("us.ihmc:ihmc-communication:source")
@@ -46,7 +46,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-perception:source")
