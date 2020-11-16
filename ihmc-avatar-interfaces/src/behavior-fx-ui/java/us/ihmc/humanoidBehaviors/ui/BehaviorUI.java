@@ -16,7 +16,7 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
-import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUI;
+import us.ihmc.humanoidBehaviors.ui.behaviors.BehaviorDirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
@@ -55,7 +55,7 @@ public class BehaviorUI
    @FXML private ChoiceBox<String> behaviorSelector;
    @FXML private Button startRecording;
    @FXML private Button stopRecording;
-   private DirectRobotUI directRobotUI;
+   private BehaviorDirectRobotUI behaviorDirectRobotUI;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
@@ -117,9 +117,8 @@ public class BehaviorUI
             }
          }
 
-         directRobotUI = new DirectRobotUI();
-         AnchorPane directRobotAnchorPane = JavaFXMissingTools.loadFromFXML(directRobotUI);
-         bottom.setRight(directRobotAnchorPane);
+         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
+         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
 
          AnchorPane mainAnchorPane = new AnchorPane();
 
@@ -158,8 +157,8 @@ public class BehaviorUI
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUI.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
-         view3DFactory.addNodeToView(directRobotUI);
+         behaviorDirectRobotUI.init(mainAnchorPane, ros2Node, robotModel);
+         view3DFactory.addNodeToView(behaviorDirectRobotUI);
          robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
          view3DFactory.addNodeToView(robotVisualizer);
 
@@ -268,7 +267,7 @@ public class BehaviorUI
       {
          behaviorUIInterface.destroy();
       }
-      directRobotUI.destroy();
+      behaviorDirectRobotUI.destroy();
       ros2Node.destroy();
    }
 }
