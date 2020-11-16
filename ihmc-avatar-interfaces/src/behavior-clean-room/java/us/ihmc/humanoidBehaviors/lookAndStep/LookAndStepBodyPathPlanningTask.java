@@ -102,16 +102,16 @@ public class LookAndStepBodyPathPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
-         suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
-                                 () -> neckTrajectoryTimerSnapshot.isRunning());
-         suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchTolerance,
-                                           () ->
-                                           {
-                                              commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
-                                              neckTrajectoryTimer.reset();
-                                           }));
+//         suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
+//                                 () -> neckTrajectoryTimerSnapshot.isRunning());
+//         suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
+//                                                                               lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
+//                                                                               lookAndStepBehaviorParameters::getNeckPitchTolerance,
+//                                           () ->
+//                                           {
+//                                              commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
+//                                              neckTrajectoryTimer.reset();
+//                                           }));
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
                                  () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));

@@ -57,6 +57,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    public enum StartingLocation
    {
       STARTING_BLOCK(-2.0, -1.0, 0.3, Math.toRadians(20.0)),
+      IN_FRONT_OF_PLATFORM(0.7, 0.0, 0.0, 0.0),
       DEBRIS_PLATFORM(3.0, 0.0, 0.575, 0.0),
       PUSH_DOOR(6.3, 0.0, 0.0, 0.0),
       PULL_DOOR(8.8, 0.0, 0.0, 0.0),

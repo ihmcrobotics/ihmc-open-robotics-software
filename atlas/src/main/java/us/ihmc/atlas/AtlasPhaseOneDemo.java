@@ -39,10 +39,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AtlasPhaseOneDemo
 {
    private static boolean START_LOOK_AND_STEP_UI = Boolean.parseBoolean(System.getProperty("start.look.and.step.ui"));
-   private static int STARTING_LOCATION = Integer.parseInt(System.getProperty("starting.location", "0"));
+   private static int STARTING_LOCATION = Integer.parseInt(System.getProperty("starting.location", "1"));
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
-   private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "false"));
+   private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "true"));
    private static boolean CREATE_BARREL = Boolean.parseBoolean(System.getProperty("create.barrel", "false"));
    private static boolean CREATE_STAIRS = Boolean.parseBoolean(System.getProperty("create.stairs", "true"));
    private static boolean CREATE_CINDER_BLOCK_FIELD = Boolean.parseBoolean(System.getProperty("create.cinder.block.field", "true"));

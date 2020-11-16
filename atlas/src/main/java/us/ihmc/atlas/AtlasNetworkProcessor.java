@@ -16,7 +16,7 @@ public class AtlasNetworkProcessor
    private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
    private static final Application STAIRS = AtlasNetworkProcessor::stairsNetworkProcessor;
 
-   private static final Application APPLICATION = DEFAULT;
+   private static final Application APPLICATION = VR;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -101,7 +101,8 @@ public class AtlasNetworkProcessor
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
-      
+
+
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
@@ -117,6 +118,10 @@ public class AtlasNetworkProcessor
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
+
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableDepthPointCloudPublisher(false);

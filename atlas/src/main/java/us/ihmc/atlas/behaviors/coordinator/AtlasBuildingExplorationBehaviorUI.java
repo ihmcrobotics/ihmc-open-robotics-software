@@ -7,8 +7,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.CommunicationMode;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
+import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -42,6 +44,7 @@ public class AtlasBuildingExplorationBehaviorUI
    public static void main(String[] args)
    {
       new JavaProcessSpawner(true).spawn(AtlasBehaviorModule.class);
+//      new BehaviorModule(BehaviorRegistry.DEFAULT_BEHAVIORS, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTERPROCESS);
 
       AtlasBuildingExplorationBehaviorUI.start();
    }

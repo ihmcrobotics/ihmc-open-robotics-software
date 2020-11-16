@@ -41,7 +41,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class FiducialDetectorToolboxController extends ToolboxController
 {
    /** Toggle this when running on the real robot vs sim */
-   private static final boolean USE_SIM_PARAMETERS = true;
+   private static final boolean USE_SIM_PARAMETERS = false;
 
    private static final RescaleOp imageRescalingForSim = new RescaleOp(3.5f, 35, null);
    private static final RescaleOp imageRescalingForRealRobot = new RescaleOp(1.5f, 35, null);
