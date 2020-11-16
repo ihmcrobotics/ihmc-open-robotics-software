@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
+import controller_msgs.msg.dds.VideoPacket;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -9,16 +10,26 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 
 public class JavaFXROS2VideoViewer
 {
-   private static final int width = 1024;//1024, 544
-   private static final int height = 544;
    private ROS2Node ros2Node;
+   private final ROS2Topic<?> topic;
+   private final int width;
+   private final int height;
 
-   public JavaFXROS2VideoViewer(ROS2Node ros2Node)
+   public JavaFXROS2VideoViewer(ROS2Topic<?> topic, int width, int height)
+   {
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"), topic, width, height);
+   }
+
+   public JavaFXROS2VideoViewer(ROS2Node ros2Node, ROS2Topic<?> topic, int width, int height)
    {
       this.ros2Node = ros2Node;
+      this.topic = topic;
+      this.width = width;
+      this.height = height;
       JavaFXApplicationCreator.createAJavaFXApplication();
       Platform.runLater(this::buildAndStartUI);
    }
@@ -48,6 +59,6 @@ public class JavaFXROS2VideoViewer
 
    public static void main(String[] args)
    {
-      new JavaFXROS2VideoViewer(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
+      new JavaFXROS2VideoViewer(ROS2Tools.VIDEO, 1024, 544);
    }
 }
