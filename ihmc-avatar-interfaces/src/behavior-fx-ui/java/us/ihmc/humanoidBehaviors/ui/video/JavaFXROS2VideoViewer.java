@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
-import controller_msgs.msg.dds.VideoPacket;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -38,7 +37,7 @@ public class JavaFXROS2VideoViewer
    {
       Stage primaryStage = new Stage();
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, width, height, false, false);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, topic, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);
