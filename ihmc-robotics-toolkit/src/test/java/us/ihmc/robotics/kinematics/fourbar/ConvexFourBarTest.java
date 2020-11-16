@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
@@ -452,6 +453,48 @@ public class ConvexFourBarTest
          double minCDA = calculator.getMinCDA();
          assertEquals(2.0 * Math.PI, maxDAB + minABC + maxBCD + minCDA, EPSILON, "Iteration " + i);
       }
+   }
+
+   @Disabled // Just to do benchmark.
+   @Test
+   public void testBenchmark() throws Throwable
+   {
+      Random random = new Random(345);
+      FourBar fourBar = new FourBar();
+
+      List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+      if (random.nextBoolean())
+         Collections.reverse(vertices);
+      Point2D A = vertices.get(0);
+      Point2D B = vertices.get(1);
+      Point2D C = vertices.get(2);
+      Point2D D = vertices.get(3);
+      fourBar.setup(A, B, C, D);
+
+      for (int i = 0; i < 100000; i++)
+      { // Warmup for the JIT to do its job
+         double nextAngle = EuclidCoreRandomTools.nextDouble(random, fourBar.getVertexA().getMinAngle(), fourBar.getVertexA().getMaxAngle());
+         double nextAngleDot = random.nextDouble();
+         double nextAngleDDot = Double.NaN;
+
+         fourBar.update(FourBarAngle.DAB, nextAngle, nextAngleDot, nextAngleDDot);
+      }
+
+      long total = 0;
+      int iter = 1000000;
+
+      for (int i = 0; i < iter; i++)
+      {
+         double nextAngle = EuclidCoreRandomTools.nextDouble(random, fourBar.getVertexA().getMinAngle(), fourBar.getVertexA().getMaxAngle());
+         double nextAngleDot = random.nextDouble();
+         double nextAngleDDot = random.nextDouble();
+
+         long start = System.nanoTime();
+         fourBar.update(FourBarAngle.DAB, nextAngle, nextAngleDot, nextAngleDDot);
+         total += System.nanoTime() - start;
+      }
+
+      System.out.println("Average time in millisec: " + total / 1.0e3 / iter);
    }
 
    @Test
