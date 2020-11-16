@@ -22,6 +22,20 @@ public class FourBarToolsTest
    private static final double FD_DDOT_EPSILON = 5.0e-4;
 
    @Test
+   public void testFastAcos()
+   {
+      for (double x = -1.0; x < 1.0; x += 1.0e-6)
+      {
+         double expected = Math.acos(x);
+         double actual = FourBarTools.fastAcos(x);
+         assertEquals(expected, actual, 1.0e-14, "x=" + x);
+      }
+
+      assertEquals(Math.acos(-1.0), FourBarTools.fastAcos(-1.0), 1.0e-14, "x=" + (-1.0));
+      assertEquals(Math.acos(1.0), FourBarTools.fastAcos(1.0), 1.0e-14, "x=" + (1.0));
+   }
+
+   @Test
    public void testAngleWithCosineLaw()
    {
       Random random = new Random(4643675);
