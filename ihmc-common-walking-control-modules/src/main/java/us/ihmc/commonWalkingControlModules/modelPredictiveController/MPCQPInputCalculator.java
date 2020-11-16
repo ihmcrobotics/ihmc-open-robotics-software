@@ -64,7 +64,23 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
    }
 
-   public void calculateCoMValueObjective(QPInput inputToPack, CoMValueObjective objective, double weight)
+   public void calculateValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   {
+      switch (objective.getValueType())
+      {
+         case COM:
+            calculateCoMValueObjective(inputToPack, objective, weight);
+            break;
+         case VRP:
+            calculateVRPValueObjective(inputToPack, objective, weight);
+            break;
+         case DCM:
+            calculateDCMValueObjective(inputToPack, objective, weight);
+            break;
+      }
+   }
+
+   private void calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -93,8 +109,7 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
    }
 
-
-   public void calculateDCMValueObjective(QPInput inputToPack, CoMValueObjective objective, double weight)
+   private void calculateDCMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -125,7 +140,7 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
    }
 
-   public void calculateVRPValueObjective(QPInput inputToPack, CoMValueObjective objective, double weight)
+   private void calculateVRPValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 

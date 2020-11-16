@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
    private final List<ConvexPolygon2DBasics> contactPointsInBodyFrame = new ArrayList<>();
-   private final List<FramePose3D> contactPose = new ArrayList<>();
+   private final List<FramePose3D> contactPoses = new ArrayList<>();
 
    public ContactPlaneProvider()
    {
@@ -137,5 +137,15 @@ public class ContactPlaneProvider implements ContactStateProvider
    public int getNumberOfContactPointsInPlane(int contactPlane)
    {
       return contactPointsInBodyFrame.get(contactPlane).getNumberOfVertices();
+   }
+
+   public ConvexPolygon2DReadOnly getContactsInBodyFrame(int contactPlane)
+   {
+      return contactPointsInBodyFrame.get(contactPlane);
+   }
+
+   public FramePose3DReadOnly getContactPose(int contactPlane)
+   {
+      return contactPoses.get(contactPlane);
    }
 }
