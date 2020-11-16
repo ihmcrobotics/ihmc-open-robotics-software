@@ -3,19 +3,28 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CoMValueObjective
 {
    private final FramePoint3D objective = new FramePoint3D();
-   private CoefficientJacobianMatrixHelper jacobianMatrixHelper;
+   private final List<CoefficientJacobianMatrixHelper> jacobianMatrixHelpers = new ArrayList<>();
+   private final List<ContactStateMagnitudeToForceMatrixHelper> rhoToForceMatrixHelpers = new ArrayList<>();
 
    private int derivativeOrder;
    private int segmentNumber;
    private double timeOfObjective;
    private double omega;
 
-   public void setJacobianMatrixHelper(CoefficientJacobianMatrixHelper jacobianMatrixHelper)
+   public void addRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper helper)
    {
-      this.jacobianMatrixHelper = jacobianMatrixHelper;
+      rhoToForceMatrixHelpers.add(helper);
+   }
+
+   public void addJacobianMatrixHelper(CoefficientJacobianMatrixHelper jacobianMatrixHelper)
+   {
+      jacobianMatrixHelpers.add(jacobianMatrixHelper);
    }
 
    public void setDerivativeOrder(int derivativeOrder)
@@ -63,8 +72,18 @@ public class CoMValueObjective
       return objective;
    }
 
-   public CoefficientJacobianMatrixHelper getJacobianMatrixHelper()
+   public CoefficientJacobianMatrixHelper getCoefficientJacobianMatrixHelper(int i)
    {
-      return jacobianMatrixHelper;
+      return jacobianMatrixHelpers.get(i);
+   }
+
+   public int getNumberOfContacts()
+   {
+      return rhoToForceMatrixHelpers.size();
+   }
+
+   public ContactStateMagnitudeToForceMatrixHelper getRhoToForceMatrixHelper(int i)
+   {
+      return rhoToForceMatrixHelpers.get(i);
    }
 }

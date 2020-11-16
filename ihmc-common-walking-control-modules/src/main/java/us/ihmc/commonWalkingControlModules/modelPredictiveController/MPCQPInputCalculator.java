@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -7,7 +9,8 @@ public class MPCQPInputCalculator
 {
    private final MPCIndexHandler indexHandler;
 
-   // FIXME this need to use the {@link #ContactStateMagnitudeToForceMatrixHelper} class to get the actual forces out of the coefficient jacobian helpers
+   private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);
+
    public MPCQPInputCalculator(MPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
@@ -21,34 +24,39 @@ public class MPCQPInputCalculator
       int secondSegmentNumber = firstSegmentNumber + 1;
       double firstSegmentDuration = objective.getFirstSegmentDuration();
       double omega = objective.getOmega();
-      CoefficientJacobianMatrixHelper firstSegmentJacobianMatrixHelper = objective.getFirstSegmentJacobianMatrixHelper();
-      CoefficientJacobianMatrixHelper secondSegmentJacobianMatrixHelper = objective.getSecondSegmentJacobianMatrixHelper();
-      firstSegmentJacobianMatrixHelper.computeMatrices(firstSegmentDuration, omega);
-      secondSegmentJacobianMatrixHelper.computeMatrices(0.0, omega);
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstSegmentNumber, firstSegmentDuration, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondSegmentNumber, secondSegmentNumber, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
 
-      int firstSegmentStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
-      int secondSegmentStartIndex = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 firstSegmentStartIndex,
-                                 firstSegmentJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()),
-                                 0,
-                                 0,
-                                 3,
-                                 firstSegmentJacobianMatrixHelper.getTotalSize(),
-                                 1.0);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 secondSegmentStartIndex,
-                                 secondSegmentJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()),
-                                 0,
-                                 0,
-                                 3,
-                                 secondSegmentJacobianMatrixHelper.getTotalSize(),
-                                 -1.0);
+      int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getFirstSegmentCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(firstSegmentDuration, omega);
+
+         DMatrixRMaj rhoToLinearForceJacobian = objective.getFirstSegmentRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+
+         tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / omega, coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+
+         MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
+         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+      }
+
+      startCol = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+      for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getSecondSegmentCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(0.0, omega);
+
+         DMatrixRMaj rhoToLinearForceJacobian = objective.getSecondSegmentRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+
+         tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / omega, coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+
+         MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
+         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+      }
 
       inputToPack.getTaskJacobian().zero();
 
@@ -63,26 +71,28 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
-      CoefficientJacobianMatrixHelper jacobianMatrixHelper = objective.getJacobianMatrixHelper();
-      jacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(segmentNumber, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
-      int startIndex = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 startIndex,
-                                 jacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()),
-                                 0,
-                                 0,
-                                 3,
-                                 jacobianMatrixHelper.getTotalSize(),
-                                 1.0);
+
+      int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
+
+         DMatrixRMaj rhoToLinearForceJacobian = objective.getRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+         DMatrixRMaj coefficientToRhoForceJacobian = coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder());
+
+         MatrixTools.multAddBlock(rhoToLinearForceJacobian, coefficientToRhoForceJacobian, inputToPack.getTaskJacobian(), 0, startCol);
+         startCol += coefficientToRhoForceJacobian.getNumCols();
+      }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
    }
+
 
    public void calculateDCMValueObjective(QPInput inputToPack, CoMValueObjective objective, double weight)
    {
@@ -91,29 +101,23 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
-      CoefficientJacobianMatrixHelper jacobianMatrixHelper = objective.getJacobianMatrixHelper();
-      jacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
 
       CoMCoefficientJacobianCalculator.calculateDCMJacobian(segmentNumber, omega, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
-      int startIndex = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 startIndex,
-                                 jacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()),
-                                 0,
-                                 0,
-                                 3,
-                                 jacobianMatrixHelper.getTotalSize(),
-                                 1.0);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 startIndex,
-                                 jacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1),
-                                 0,
-                                 0,
-                                 3,
-                                 jacobianMatrixHelper.getTotalSize(),
-                                 -1.0 / omega);
+
+      int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
+
+         DMatrixRMaj rhoToLinearForceJacobian = objective.getRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+
+         tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / omega, coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+
+         MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
+         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+      }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
 
@@ -128,29 +132,24 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
-      CoefficientJacobianMatrixHelper jacobianMatrixHelper = objective.getJacobianMatrixHelper();
-      jacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
 
       CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber, omega, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
-      int startIndex = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 startIndex,
-                                 jacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()),
-                                 0,
-                                 0,
-                                 3,
-                                 jacobianMatrixHelper.getTotalSize(),
-                                 1.0);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 startIndex,
-                                 jacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 2),
-                                 0,
-                                 0,
-                                 3,
-                                 jacobianMatrixHelper.getTotalSize(),
-                                 -1.0 / (omega * omega));
+
+      int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
+
+         DMatrixRMaj rhoToLinearForceJacobian = objective.getRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+
+         tempCoefficientJacobian.reshape(coefficientJacobianMatrixHelper.getRhoSize(), coefficientJacobianMatrixHelper.getCoefficientSize());
+         tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / (omega * omega), coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+
+         MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
+         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+      }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
 
