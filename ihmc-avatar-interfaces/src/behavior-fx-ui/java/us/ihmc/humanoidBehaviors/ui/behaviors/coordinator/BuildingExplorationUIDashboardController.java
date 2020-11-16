@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -10,6 +9,7 @@ import javafx.scene.text.Text;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -17,7 +17,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.ros2.ROS2Node;
 
-import static us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class BuildingExplorationUIDashboardController
 {
