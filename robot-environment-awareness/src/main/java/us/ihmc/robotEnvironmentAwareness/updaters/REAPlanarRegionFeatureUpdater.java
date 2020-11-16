@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
@@ -32,7 +31,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 {
-   private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = true;
+   private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = false;
 
    private static final String segmentationTimeReport = "Segmentation took: ";
    private static final String intersectionsTimeReport = "Processing intersections took: ";
