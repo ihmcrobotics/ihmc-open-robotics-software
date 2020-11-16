@@ -444,6 +444,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.getTarget(),
                                                                               robotModel.createFullRobotModel(),
                                                                               robotModel.getLogModelProvider(),
                                                                               pubSubImplementation);

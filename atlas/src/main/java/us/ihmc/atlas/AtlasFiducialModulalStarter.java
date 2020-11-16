@@ -10,6 +10,10 @@ public class AtlasFiducialModulalStarter
    {
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS);
-      new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider(),pubSubImplementation);
+      new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                        robotModel.getTarget(),
+                                        robotModel.createFullRobotModel(),
+                                        robotModel.getLogModelProvider(),
+                                        pubSubImplementation);
    }
 }
