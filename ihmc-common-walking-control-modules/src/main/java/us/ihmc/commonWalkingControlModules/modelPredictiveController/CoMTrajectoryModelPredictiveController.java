@@ -1,25 +1,14 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import org.ejml.data.DGrowArray;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
-import org.ejml.data.IGrowArray;
-import org.ejml.interfaces.linsol.LinearSolverSparse;
-import org.ejml.sparse.FillReducing;
-import org.ejml.sparse.csc.CommonOps_DSCC;
-import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -29,38 +18,41 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * <p>
- *    This is the main class of the trajectory-based CoM Trajectory Planner.
+ * This is the main class of the trajectory-based CoM Trajectory Planner.
  * </p>
  * <p>
- *    This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
- *    This means that the final VRP is the terminal DCM location
- *  </p>
- *  <p>
- *     The CoM has the following definitions:
- *     <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
- *     c<sub>4</sub> t + c<sub>5</sub></li>
- *     <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
- *     2 c<sub>3</sub> t+ c<sub>4</sub>
- *     <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup>
- *     + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
- *  </p>
+ * This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
+ * This means that the final VRP is the terminal DCM location
+ * </p>
+ * <p>
+ * The CoM has the following definitions:
+ * <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
+ * c<sub>4</sub> t + c<sub>5</sub></li>
+ * <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
+ * 2 c<sub>3</sub> t+ c<sub>4</sub>
+ * <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega;
+ * t</sup>
+ * + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
+ * </p>
  *
  *
- *    <p> From this, it follows that the VRP has the trajectory
- *    <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> + c<sub>5</sub></li>
- *    </p>
+ * <p> From this, it follows that the VRP has the trajectory
+ * <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> +
+ * c<sub>5</sub></li>
+ * </p>
  */
 public class CoMTrajectoryModelPredictiveController
 {
    private static boolean verbose = false;
+   private static final boolean includeVelocityObjective = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfBasisVectorsPerContactPoint = 4;
@@ -71,6 +63,11 @@ public class CoMTrajectoryModelPredictiveController
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
+
+   private static final double mu = 0.8;
+   private static final double rhoWeight = 1e-5;
+   private static final double rhoRateWeight = 1e-8;
+   public static final double MEDIUM_WEIGHT = 1e1;
 
    private final MPCIndexHandler indexHandler;
 
@@ -88,7 +85,6 @@ public class CoMTrajectoryModelPredictiveController
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
-
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
 
@@ -98,6 +94,12 @@ public class CoMTrajectoryModelPredictiveController
    private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
    private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+
+   private final RecyclingArrayList<RecyclingArrayList<ContactStateMagnitudeToForceMatrixHelper>> rhoJacobianHelperPool;
+   private final RecyclingArrayList<RecyclingArrayList<CoefficientJacobianMatrixHelper>> coefficientJacobianHelperPool;
+
+   private final RecyclingArrayList<MPCValueObjective> comValueObjectivePool = new RecyclingArrayList<>(MPCValueObjective::new);
+   private final RecyclingArrayList<CoMContinuityObjective> comContinuityObjectivePool = new RecyclingArrayList<>(CoMContinuityObjective::new);
 
    private CornerPointViewer viewer = null;
    private BagOfBalls comTrajectoryViewer = null;
@@ -113,9 +115,16 @@ public class CoMTrajectoryModelPredictiveController
 
       indexHandler = new MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
+      FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
+      Supplier<ContactStateMagnitudeToForceMatrixHelper> rhoJacobianProvider = () -> new ContactStateMagnitudeToForceMatrixHelper(6,
+                                                                                                                                  numberOfBasisVectorsPerContactPoint,
+                                                                                                                                  coneRotationCalculator);
+      Supplier<CoefficientJacobianMatrixHelper> coefficientJacobianProvider = () -> new CoefficientJacobianMatrixHelper(6, numberOfBasisVectorsPerContactPoint);
+      rhoJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(rhoJacobianProvider));
+      coefficientJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(coefficientJacobianProvider));
+
       parentRegistry.addChild(registry);
    }
-
 
    public void setCornerPointViewer(CornerPointViewer viewer)
    {
@@ -127,19 +136,25 @@ public class CoMTrajectoryModelPredictiveController
       comTrajectoryViewer = new BagOfBalls(50, 0.01, YoAppearance.Black(), registry, yoGraphicsListRegistry);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
       this.comHeight.set(nominalCoMHeight);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public double getNominalCoMHeight()
    {
       return comHeight.getDoubleValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public void solveForTrajectory(List<ContactPlaneProvider> contactSequence)
    {
       if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
@@ -149,10 +164,16 @@ public class CoMTrajectoryModelPredictiveController
 
       resetMatrices();
 
-      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequence, startVRPPositions,
-                                                    endVRPPositions, true);
-
-      solveForCoefficientConstraintMatrix(contactSequence);
+      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
+                                                    gravityZ,
+                                                    omega.getValue(),
+                                                    currentCoMVelocity,
+                                                    contactSequence,
+                                                    startVRPPositions,
+                                                    endVRPPositions,
+                                                    true);
+      computeMatrixHelpers(contactSequence);
+      computeObjectives(contactSequence);
 
       updateCornerPoints(contactSequence);
 
@@ -168,13 +189,132 @@ public class CoMTrajectoryModelPredictiveController
       }
    }
 
-   private final IGrowArray gw = new IGrowArray();
-   private final DGrowArray gx = new DGrowArray();
+   private void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
+   {
+      rhoJacobianHelperPool.clear();
+      coefficientJacobianHelperPool.clear();
 
-   private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
+      for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
+      {
+         ContactPlaneProvider contact = contactSequence.get(sequenceId);
+
+         RecyclingArrayList<ContactStateMagnitudeToForceMatrixHelper> rhoJacobians = rhoJacobianHelperPool.add();
+         RecyclingArrayList<CoefficientJacobianMatrixHelper> coefficientJacobians = coefficientJacobianHelperPool.add();
+         rhoJacobians.clear();
+         coefficientJacobians.clear();
+
+         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
+         {
+            ContactStateMagnitudeToForceMatrixHelper rhoJacobian = rhoJacobians.add();
+            CoefficientJacobianMatrixHelper coefficientJacobian = coefficientJacobians.add();
+
+            rhoJacobian.computeMatrices(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), rhoWeight, rhoRateWeight, mu);
+            coefficientJacobian.reshape(contact.getNumberOfContactPointsInPlane(contactId));
+         }
+      }
+   }
+
+   private void computeObjectives(List<ContactPlaneProvider> contactSequence)
    {
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
+
+      comValueObjectivePool.clear();
+      comContinuityObjectivePool.clear();
+
+      computeInitialCoMPositionObjective(comValueObjectivePool.add());
+      if (includeVelocityObjective)
+         computeInitialCoMVelocityObjective(comValueObjectivePool.add());
+      if (contactSequence.get(0).getContactState().isLoadBearing())
+      {
+         double duration = contactSequence.get(0).getTimeInterval().getDuration();
+         computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(0), 0, duration, 0.0);
+      }
+
+      for (int transition = 0; transition < numberOfTransitions; transition++)
+      {
+         int nextSequence = transition + 1;
+         // TODO continuity objectives
+
+         if (contactSequence.get(transition).getContactState().isLoadBearing())
+         {
+            double duration = contactSequence.get(transition).getTimeInterval().getDuration();
+            computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), endVRPPositions.get(transition), transition, duration, duration);
+         }
+         if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
+         {
+            double duration = contactSequence.get(nextSequence).getTimeInterval().getDuration();
+            computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(nextSequence), nextSequence, duration, 0.0);
+         }
+      }
+   }
+
+   private void computeInitialCoMPositionObjective(MPCValueObjective objectiveToPack)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setValueType(MPCValueType.COM);
+      objectiveToPack.setDerivativeOrder(0);
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(0);
+      objectiveToPack.setTimeOfObjective(0.0);
+      objectiveToPack.setObjective(currentCoMPosition);
+      for (int i = 0; i < rhoJacobianHelperPool.get(0).size(); i++)
+      {
+         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
+         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
+      }
+   }
+
+   private void computeInitialCoMVelocityObjective(MPCValueObjective objectiveToPack)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setValueType(MPCValueType.COM);
+      objectiveToPack.setDerivativeOrder(1);
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(0);
+      objectiveToPack.setTimeOfObjective(0.0);
+      objectiveToPack.setObjective(currentCoMVelocity);
+      for (int i = 0; i < rhoJacobianHelperPool.get(0).size(); i++)
+      {
+         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
+         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
+      }
+   }
+
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+
+   private void computeVRPSegmentObjective(MPCValueObjective positionObjectiveToPack,
+                                           MPCValueObjective velocityObjectiveToPack,
+                                           FramePoint3DReadOnly desiredVRPPosition,
+                                           int segmentNumber,
+                                           double segmentDuration,
+                                           double constraintTime)
+   {
+      desiredVelocity.sub(endVRPPositions.get(segmentNumber), startVRPPositions.get(segmentNumber));
+      desiredVelocity.scale(1.0 / segmentDuration);
+
+      computeVRPObjective(positionObjectiveToPack, segmentNumber, 0, constraintTime, desiredVRPPosition);
+      computeVRPObjective(velocityObjectiveToPack, segmentNumber, 1, constraintTime, desiredVelocity);
+   }
+
+   private void computeVRPObjective(MPCValueObjective objectiveToPack,
+                                    int segmentNumber,
+                                    int derivativeOrder,
+                                    double constraintTime,
+                                    FrameTuple3DReadOnly objective)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setValueType(MPCValueType.VRP);
+      objectiveToPack.setDerivativeOrder(derivativeOrder);
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(constraintTime);
+      objectiveToPack.setObjective(objective);
+      for (int i = 0; i < rhoJacobianHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(segmentNumber).get(i));
+      }
    }
 
    /**
@@ -212,7 +352,6 @@ public class CoMTrajectoryModelPredictiveController
       return time;
    }
 
-
    private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
    private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
 
@@ -242,14 +381,30 @@ public class CoMTrajectoryModelPredictiveController
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
          duration = Math.min(duration, CoMTrajectoryPlannerTools.sufficientlyLongTime);
-         compute(segmentId, 0.0, comCornerPoints.add(), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.add(),
-                 dcmVelocityToThrowAway, vrpStartPosition, vrpStartVelocity, ecmpPositionToThrowAway);
-         compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpEndPosition, vrpEndVelocity, ecmpPositionToThrowAway);
+         compute(segmentId,
+                 0.0,
+                 comCornerPoints.add(),
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmCornerPoints.add(),
+                 dcmVelocityToThrowAway,
+                 vrpStartPosition,
+                 vrpStartVelocity,
+                 ecmpPositionToThrowAway);
+         compute(segmentId,
+                 duration,
+                 comPositionToThrowAway,
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway,
+                 vrpEndPosition,
+                 vrpEndVelocity,
+                 ecmpPositionToThrowAway);
 
          Trajectory3D trajectory3D = vrpTrajectoryPool.add();
          trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
-//         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
+         //         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
          vrpTrajectories.add(trajectory3D);
 
          vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
@@ -270,8 +425,15 @@ public class CoMTrajectoryModelPredictiveController
          int segmentId = getSegmentNumber(time);
          double timeInSegment = getTimeInSegment(segmentId, time);
 
-         compute(segmentId, timeInSegment, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+         compute(segmentId,
+                 timeInSegment,
+                 comPositionToThrowAway,
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway,
+                 vrpStartPosition,
+                 ecmpPositionToThrowAway);
 
          comTrajectoryViewer.setBall(comPositionToThrowAway);
       }
@@ -279,11 +441,20 @@ public class CoMTrajectoryModelPredictiveController
       verbose = verboseBefore;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public void compute(int segmentId, double timeInPhase)
    {
-      compute(segmentId, timeInPhase, desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration, desiredDCMPosition, desiredDCMVelocity,
-              desiredVRPPosition, desiredECMPPosition);
+      compute(segmentId,
+              timeInPhase,
+              desiredCoMPosition,
+              desiredCoMVelocity,
+              desiredCoMAcceleration,
+              desiredDCMPosition,
+              desiredDCMVelocity,
+              desiredVRPPosition,
+              desiredECMPPosition);
 
       if (verbose)
       {
@@ -291,62 +462,95 @@ public class CoMTrajectoryModelPredictiveController
       }
    }
 
-   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
-                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
-                       FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
+   public void compute(int segmentId,
+                       double timeInPhase,
+                       FixedFramePoint3DBasics comPositionToPack,
+                       FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack,
+                       FixedFramePoint3DBasics dcmPositionToPack,
+                       FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack,
+                       FixedFramePoint3DBasics ecmpPositionToPack)
    {
-      compute(segmentId, timeInPhase, comPositionToPack, comVelocityToPack, comAccelerationToPack, dcmPositionToPack, dcmVelocityToPack,
-              vrpPositionToPack, vrpVelocityToThrowAway, ecmpPositionToPack);
+      compute(segmentId,
+              timeInPhase,
+              comPositionToPack,
+              comVelocityToPack,
+              comAccelerationToPack,
+              dcmPositionToPack,
+              dcmVelocityToPack,
+              vrpPositionToPack,
+              vrpVelocityToThrowAway,
+              ecmpPositionToPack);
    }
 
-   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
-                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
-                       FixedFramePoint3DBasics vrpPositionToPack, FixedFrameVector3DBasics vrpVelocityToPack, FixedFramePoint3DBasics ecmpPositionToPack)
+   public void compute(int segmentId,
+                       double timeInPhase,
+                       FixedFramePoint3DBasics comPositionToPack,
+                       FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack,
+                       FixedFramePoint3DBasics dcmPositionToPack,
+                       FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack,
+                       FixedFrameVector3DBasics vrpVelocityToPack,
+                       FixedFramePoint3DBasics ecmpPositionToPack)
    {
       if (segmentId < 0)
          throw new IllegalArgumentException("time is invalid.");
-
-
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
       this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
       return desiredDCMPosition;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FrameVector3DReadOnly getDesiredDCMVelocity()
    {
       return desiredDCMVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
       return desiredCoMPosition;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
       return desiredCoMVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FrameVector3DReadOnly getDesiredCoMAcceleration()
    {
       return desiredCoMAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
@@ -357,14 +561,13 @@ public class CoMTrajectoryModelPredictiveController
       return desiredVRPVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;
    }
-
-
-
 
    public List<Trajectory3D> getVRPTrajectories()
    {
