@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -13,18 +12,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.util.List;
 
 public class ContactStateMagnitudeToForceMatrixHelper
 {
@@ -42,7 +33,8 @@ public class ContactStateMagnitudeToForceMatrixHelper
 
    private final DMatrixRMaj maxContactForces;
 
-   private final DMatrixRMaj wrenchJacobianInWorldFrame;
+   private final DMatrixRMaj totalJacobianInWorldFrame;
+   private final DMatrixRMaj linearJacobianInWorldFrame;
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
    private final FrictionConeRotationCalculator coneRotationCalculator;
 
@@ -69,7 +61,8 @@ public class ContactStateMagnitudeToForceMatrixHelper
       basisVectorsOrigin = new FramePoint3D[rhoSize];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
-      wrenchJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, rhoSize);
+      totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, rhoSize);
+      linearJacobianInWorldFrame = new DMatrixRMaj(3, rhoSize);
 
       for (int i = 0; i < rhoSize; i++)
       {
@@ -141,7 +134,7 @@ public class ContactStateMagnitudeToForceMatrixHelper
          }
       }
 
-      computeWrenchJacobianInFrame(ReferenceFrame.getWorldFrame(), wrenchJacobianInWorldFrame);
+      computeWrenchJacobianInFrame(ReferenceFrame.getWorldFrame(), totalJacobianInWorldFrame, linearJacobianInWorldFrame);
 
       // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
       for (; rhoIndex < rhoSize; rhoIndex++)
@@ -187,9 +180,10 @@ public class ContactStateMagnitudeToForceMatrixHelper
 
    private final SpatialForce unitSpatialForceVector = new SpatialForce();
 
-   public void computeWrenchJacobianInFrame(ReferenceFrame frame, DMatrixRMaj matrixToPack)
+   public void computeWrenchJacobianInFrame(ReferenceFrame frame, DMatrixRMaj wrenchMatrixToPack, DMatrixRMaj forceMatrixToPack)
    {
-      matrixToPack.reshape(Wrench.SIZE, rhoSize);
+      wrenchMatrixToPack.reshape(Wrench.SIZE, rhoSize);
+      forceMatrixToPack.reshape(3, rhoSize);
       for (int rhoIndex = 0; rhoIndex < rhoSize; rhoIndex++)
       {
          FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
@@ -197,7 +191,13 @@ public class ContactStateMagnitudeToForceMatrixHelper
          basisVectorOrigin.changeFrame(frame);
          basisVector.changeFrame(frame);
          unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
-         unitSpatialForceVector.get(0, rhoIndex, matrixToPack);
+         unitSpatialForceVector.get(0, rhoIndex, wrenchMatrixToPack);
+         unitSpatialForceVector.getLinearPart().get(0, rhoIndex, forceMatrixToPack);
       }
+   }
+
+   public DMatrixRMaj getLinearJacobianInWorldFrame()
+   {
+      return linearJacobianInWorldFrame;
    }
 }

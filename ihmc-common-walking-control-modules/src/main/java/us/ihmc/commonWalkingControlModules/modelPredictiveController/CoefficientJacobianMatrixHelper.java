@@ -1,23 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class CoefficientJacobianMatrixHelper
 {
@@ -29,7 +13,8 @@ public class CoefficientJacobianMatrixHelper
    private final DMatrixRMaj velocityJacobianMatrix;
    private final DMatrixRMaj accelerationJacobianMatrix;
 
-   private int totalSize;
+   private int rhoSize;
+   private int coefficientsSize;
    private double currentTime = Double.NaN;
    
    public CoefficientJacobianMatrixHelper(int maxNumberOfContactPoints, int numberOfBasisVectorsPerContactPoint)
@@ -38,26 +23,31 @@ public class CoefficientJacobianMatrixHelper
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
       this.numberOfContactPointsInContact = maxNumberOfContactPoints;
 
-      int rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
+      rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
+      coefficientsSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
 
-      totalSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
-      positionJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
-      velocityJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
-      accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, totalSize);
+      positionJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
+      velocityJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
+      accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
    }
 
    public void reshape(int numberOfContactPointsInContact)
    {
-      int rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
-      totalSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
-      positionJacobianMatrix.reshape(rhoSize, totalSize);
-      velocityJacobianMatrix.reshape(rhoSize, totalSize);
-      accelerationJacobianMatrix.reshape(rhoSize, totalSize);
+      rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
+      coefficientsSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
+      positionJacobianMatrix.reshape(rhoSize, coefficientsSize);
+      velocityJacobianMatrix.reshape(rhoSize, coefficientsSize);
+      accelerationJacobianMatrix.reshape(rhoSize, coefficientsSize);
    }
 
-   public int getTotalSize()
+   public int getCoefficientSize()
    {
-      return totalSize;
+      return coefficientsSize;
+   }
+
+   public int getRhoSize()
+   {
+      return rhoSize;
    }
 
    public void computeMatrices(double timeOfContact, double omega)
