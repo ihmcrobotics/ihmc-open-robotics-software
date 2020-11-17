@@ -5,8 +5,6 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -20,8 +18,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
@@ -31,13 +27,11 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -61,7 +55,7 @@ public class BuildingExplorationBehaviorCoordinator
    private static final double xyProximityToDoorToStopWalking = 1.6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
    private final YoEnum<BuildingExplorationStateName> requestedState = new YoEnum<>("requestedState", "", registry, BuildingExplorationStateName.class, true);
    private final StateMachine<BuildingExplorationStateName, State> stateMachine;
    private final Messager behaviorMessager;
@@ -85,12 +79,14 @@ public class BuildingExplorationBehaviorCoordinator
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(String robotName, PubSubImplementation pubSubImplementation, BehaviorRegistry behaviorRegistry)
+   public BuildingExplorationBehaviorCoordinator(String robotName,
+                                                 ROS2NodeInterface ros2Node,
+                                                 Messager behaviorMessager)
    {
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, getClass().getSimpleName());
       executorService = Executors.newSingleThreadScheduledExecutor();
 
-      behaviorMessager = RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
+      this.ros2Node = ros2Node;
+      this.behaviorMessager = behaviorMessager;
 
       teleopState = new TeleopState();
 //      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
@@ -357,7 +353,7 @@ public class BuildingExplorationBehaviorCoordinator
       boolean lookAndStepStarted = false;
 
       public LookAndStepState(String robotName,
-                              ROS2Node ros2Node,
+                              ROS2NodeInterface ros2Node,
                               Messager messager,
                               Point3DReadOnly bombPosition,
                               Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
@@ -596,7 +592,7 @@ public class BuildingExplorationBehaviorCoordinator
       final AtomicBoolean receivedOperatorConfirmation = new AtomicBoolean();
       final AtomicBoolean hasStartedBehavior = new AtomicBoolean();
 
-      public WalkThroughDoorState(String robotName, ROS2Node ros2Node)
+      public WalkThroughDoorState(String robotName, ROS2NodeInterface ros2Node)
       {
          ROS2Topic<?> inputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
          ROS2Topic<?> outputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
@@ -687,7 +683,10 @@ public class BuildingExplorationBehaviorCoordinator
       private final Point3DReadOnly bombPosition;
       private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
-      public TraverseStairsState(ROS2Node ros2Node, Messager messager, Point3DReadOnly bombPosition, Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
+      public TraverseStairsState(ROS2NodeInterface ros2Node,
+                                 Messager messager,
+                                 Point3DReadOnly bombPosition,
+                                 Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
 
@@ -759,16 +758,5 @@ public class BuildingExplorationBehaviorCoordinator
    public Messager getBehaviorMessager()
    {
       return behaviorMessager;
-   }
-
-   public static void main(String[] args)
-   {
-      // Start behavior coordinator
-      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator("Atlas",
-                                                                                                              PubSubImplementation.FAST_RTPS,
-                                                                                                              BehaviorRegistry.DEFAULT_BEHAVIORS);
-      behaviorCoordinator.setBombPosition(new Point3D(14.2, 0.0, 0.86));
-      behaviorCoordinator.requestState(BuildingExplorationStateName.LOOK_AND_STEP);
-      behaviorCoordinator.start();
    }
 }

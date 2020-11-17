@@ -8,12 +8,10 @@ import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
@@ -27,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 {
-   private static boolean START_LOOK_AND_STEP_UI = Boolean.parseBoolean(System.getProperty("start.look.and.step.ui"));
    private static boolean USE_KINEMATICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.kinematics.simulation"));
    private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "0"))];
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
@@ -105,14 +102,8 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 
       // Start Look and Step behavior
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
-      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
 
-      if (START_LOOK_AND_STEP_UI)
-      {
-         BehaviorUI.create(behaviorRegistry, robotModel, COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO, "localhost", behaviorModule.getMessager());
-      }
-
-      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation(), behaviorRegistry);
+      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, behaviorRegistry, COMMUNICATION_MODE_KRYO);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
    }

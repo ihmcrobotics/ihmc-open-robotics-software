@@ -17,7 +17,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
@@ -33,7 +32,6 @@ import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,16 +54,17 @@ public class BuildingExplorationBehaviorUI
    public BuildingExplorationBehaviorUI(Stage primaryStage,
                                         JavaFXMessager messager,
                                         DRCRobotModel robotModel,
-                                        PubSubImplementation pubSubImplementation,
-                                        BehaviorRegistry behaviorRegistry) throws Exception
+                                        ROS2Node ros2Node,
+                                        Messager behaviorMessager) throws Exception
    {
       this.primaryStage = primaryStage;
+      this.ros2Node = ros2Node;
       primaryStage.setTitle(getClass().getSimpleName());
 
       BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel.getSimpleRobotName(),
-                                                                                                              pubSubImplementation,
-                                                                                                              behaviorRegistry);
-      ros2Node = createMessageBindings(pubSubImplementation, robotModel.getSimpleRobotName(), messager, behaviorCoordinator);
+                                                                                                              ros2Node,
+                                                                                                              behaviorMessager);
+      createMessageBindings(ros2Node, robotModel.getSimpleRobotName(), messager, behaviorCoordinator);
       behaviorCoordinator.setStateChangedCallback(newState -> messager.submitMessage(CurrentState, newState));
       behaviorCoordinator.setDebrisDetectedCallback(() -> messager.submitMessage(DebrisDetected, true));
       behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
@@ -160,12 +159,8 @@ public class BuildingExplorationBehaviorUI
       }
    }
 
-   private static ROS2Node createMessageBindings(PubSubImplementation pubSubImplementation,
-                                                 String robotName,
-                                                 Messager messager,
-                                                 BuildingExplorationBehaviorCoordinator behaviorCoordinator)
+   private static void createMessageBindings(ROS2Node ros2Node, String robotName, Messager messager, BuildingExplorationBehaviorCoordinator behaviorCoordinator)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "BuildingExplorationBehaviorUI");
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.LIDAR_REA_REGIONS,
                                            s -> messager.submitMessage(BuildingExplorationBehaviorAPI.PlanarRegions,
@@ -188,7 +183,5 @@ public class BuildingExplorationBehaviorUI
          behaviorCoordinator.start();
       });
       messager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
-
-      return ros2Node;
    }
 }
