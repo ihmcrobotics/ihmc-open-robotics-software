@@ -90,7 +90,7 @@ public class BuildingExplorationBehaviorUI
 
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegions, ShowRegions);
-      footstepPlanGraphic = new FootstepPlanGraphic();
+      footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
       goalMouseListener = new BuildingExplorationGoalMouseListener(messager, subScene);
