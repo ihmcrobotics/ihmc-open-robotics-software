@@ -97,9 +97,7 @@ public class MinimalFootstep
          }
          foothold.update();
          Pose3D pose = new Pose3D(footstep.getLocation(), footstep.getOrientation());
-         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()),
-                                                  pose,
-                                                  foothold.getNumberOfVertices() > 0 ? foothold : null));
+         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold));
       }
       return minimalFootsteps;
    }

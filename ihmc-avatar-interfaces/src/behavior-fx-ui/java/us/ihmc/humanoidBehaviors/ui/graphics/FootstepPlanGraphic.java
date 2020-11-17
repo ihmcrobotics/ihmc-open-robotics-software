@@ -101,7 +101,7 @@ public class FootstepPlanGraphic extends Group
          minimalFootstep.getSolePoseInWorld().get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-         if (minimalFootstep.getFoothold() != null)
+         if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
             foothold.set(minimalFootstep.getFoothold());
          else if (defaultContactPoints.containsKey(minimalFootstep.getSide()))
             foothold.set(defaultContactPoints.get(minimalFootstep.getSide()));
