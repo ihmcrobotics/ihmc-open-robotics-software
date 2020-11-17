@@ -4,273 +4,24 @@
       <registry name="DRCMomentumBasedController">
          <registry name="HumanoidHighLevelControllerManager">
             <registry name="HighLevelHumanoidControllerFactory">
-               <registry name="HighLevelControlManagerFactory">
-                  <registry name="FeetManager">
-                     <registry name="leftFootControlModule">
-                        <registry name="leftFootLegSingularityAndKneeCollapseAvoidanceControlModule">
-                           <parameter name="leftFootMinLegLength" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                           <parameter name="leftFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
-                           <parameter name="leftFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
-                        </registry>
-                        <registry name="leftFootSupportState">
-                           <parameter name="leftFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootHoldFlatOrientation" type="BooleanParameter" value="false" />
-                        </registry>
-                        <registry name="leftFootTaskspaceControlModule">
-                           <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                        </registry>
-                        <registry name="FootLeapOfFaithModule">
-                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
-                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
-                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
-                        </registry>
-                        <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="leftFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
-                        <parameter name="leftFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                        <parameter name="leftFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
-                        <parameter name="leftFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="leftFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                        <parameter name="leftFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
-                        <parameter name="leftFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
-                        <parameter name="leftFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                        <parameter name="leftFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                        <parameter name="leftFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="leftFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                     </registry>
-                     <registry name="rightFootControlModule">
-                        <registry name="rightFootLegSingularityAndKneeCollapseAvoidanceControlModule">
-                           <parameter name="rightFootMinLegLength" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                           <parameter name="rightFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
-                           <parameter name="rightFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
-                        </registry>
-                        <registry name="rightFootSupportState">
-                           <parameter name="rightFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootHoldFlatOrientation" type="BooleanParameter" value="false" />
-                        </registry>
-                        <registry name="rightFootTaskspaceControlModule">
-                           <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                        </registry>
-                        <registry name="FootLeapOfFaithModule">
-                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
-                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
-                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
-                        </registry>
-                        <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="rightFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
-                        <parameter name="rightFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                        <parameter name="rightFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
-                        <parameter name="rightFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="rightFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                        <parameter name="rightFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
-                        <parameter name="rightFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
-                        <parameter name="rightFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                        <parameter name="rightFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                        <parameter name="rightFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="rightFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                     </registry>
-                     <registry name="ToeOffManager">
-                        <parameter name="doToeOffIfPossibleInDoubleSupport" type="BooleanParameter" value="true" />
-                        <parameter name="doToeOffIfPossibleInSingleSupport" type="BooleanParameter" value="false" />
-                        <parameter name="doToeOffWhenHittingAnkleLimit" type="BooleanParameter" value="true" />
-                        <parameter name="doToeOffWhenHittingLeadingKneeUpperLimit" type="BooleanParameter" value="false" />
-                        <parameter name="doToeOffWhenHittingRearKneeLowerLimit" type="BooleanParameter" value="false" />
-                        <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="kneeUpperLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="1.2" />
-                        <parameter name="kneeLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="icpPercentOfStanceForDSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="icpPercentOfStanceForSSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="ecmpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                        <parameter name="copProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
-                        <parameter name="checkECMPForToeOff" type="BooleanParameter" value="true" />
-                        <parameter name="checkCoPForToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="extraCoMMaxHeightWithToes" type="DoubleParameter" min="0.0" max="1.0" value="0.08" />
-                        <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                        <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                        <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="useToeLineContactInSwing" type="BooleanParameter" value="true" />
-                        <parameter name="useToeLineContactInTransfer" type="BooleanParameter" value="false" />
-                        <parameter name="updateLineContactDuringToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="updatePointContactDuringToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="icpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="false" />
-                     </registry>
-                     <registry name="FootRotationDetectorParameters">
-                        <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
-                        <parameter name="decayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="filterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
-                     </registry>
-                     <registry name="SupportStateParameters">
-                        <parameter name="avoidFootRotations" type="BooleanParameter" value="false" />
-                        <parameter name="dampFootRotations" type="BooleanParameter" value="false" />
-                        <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                     </registry>
-                     <registry name="FootControlModuleParameters">
-                        <parameter name="CoefficientOfFriction" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                     </registry>
-                     <parameter name="blindFootstepsHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
-                  </registry>
-                  <registry name="CenterOfMassHeightManager">
-                     <registry name="PelvisHeightControlState">
-                        <registry name="pelvisTaskspaceControlModule">
-                           <parameter name="pelvisPositionTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                        </registry>
-                        <parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                        <parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                        <parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
-                        <parameter name="PelvisHeightControlStateMinHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="PelvisHeightControlStateOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                     </registry>
-                     <registry name="CenterOfMassHeightControlState">
-                        <registry name="LookAheadCoMHeightTrajectoryGenerator">
-                           <parameter name="ProcessGoHome" type="BooleanParameter" value="false" />
-                        </registry>
-                     </registry>
-                  </registry>
-                  <registry name="PelvisOrientationManager">
-                     <registry name="ControllerPelvisOrientationManager">
-                        <registry name="PelvisLeapOfFaithModule">
-                           <parameter name="leapOfFaithUsePelvisRotationForReaching" type="BooleanParameter" value="false" />
-                           <parameter name="leapOfFaithRelaxPelvisWeight" type="BooleanParameter" value="false" />
-                           <parameter name="leapOfFaithPelvisReachingYawGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                           <parameter name="leapOfFaithPelvisReachingRollGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                           <parameter name="leapOfFaithPelvisReachingMaxYaw" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
-                           <parameter name="leapOfFaithPelvisReachingMaxRoll" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-                           <parameter name="leapOfFaithPelvisReachingFractionOfSwing" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
-                           <parameter name="leapOfFaithPelvisWeightRelaxationRate" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
-                           <parameter name="leapOfFaithPelvisMinimumWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        </registry>
-                        <parameter name="UseManualPelvisRotation" type="BooleanParameter" value="false" />
-                        <parameter name="UserDesiredYawOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="UserDesiredPitchOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="UserDesiredRollOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                     </registry>
-                     <registry name="UserPelvisOrientationManager">
-                        <registry name="pelvisTaskspaceControlModule">
-                           <parameter name="pelvisOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                        </registry>
-                     </registry>
-                  </registry>
-                  <registry name="torsoTaskspaceControlModule">
-                     <parameter name="torsoOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                  </registry>
-                  <registry name="torsoManager">
-                     <parameter name="torsoManagerDefaultControlMode" type="EnumParameter" value="TASKSPACE">
-                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
-                     </parameter>
-                  </registry>
-                  <registry name="upperNeckPitchLinkTaskspaceControlModule">
-                     <parameter name="upperNeckPitchLinkOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                  </registry>
-                  <registry name="upperNeckPitchLinkManager">
-                     <parameter name="upperNeckPitchLinkManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
-                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
-                     </parameter>
-                  </registry>
-                  <registry name="leftPalmManager">
-                     <registry name="leftPalmTaskspaceControlModule">
-                        <parameter name="leftPalmTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                     </registry>
-                     <parameter name="leftPalmManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
-                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
-                     </parameter>
-                  </registry>
-                  <registry name="rightPalmManager">
-                     <registry name="rightPalmTaskspaceControlModule">
-                        <parameter name="rightPalmTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
-                     </registry>
-                     <parameter name="rightPalmManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
-                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
-                     </parameter>
-                  </registry>
-                  <registry name="BalanceManager">
-                     <registry name="PrecomputedICPPlanner">
-                        <parameter name="PrecomputedICPVelocityFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                     </registry>
-                     <registry name="PelvisICPBasedTranslationManager">
-                        <parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.0531" />
-                        <parameter name="userDesiredICPOffsetX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="userDesiredICPOffsetY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="manualModeICPOffset" type="BooleanParameter" value="false" />
-                     </registry>
-                     <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                  </registry>
-               </registry>
-               <registry name="RigidBodyGains">
-                  <parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="kpZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="90.0" />
-                  <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0" />
-                  <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0" />
-                  <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                  <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                  <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="maxDerivativeErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maxProportionalErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="12.0" />
-                  <parameter name="maximumFeedbackRateChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="360.0" />
-                  <parameter name="kpXHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  <parameter name="kpYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
-                  <parameter name="zetaXHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                  <parameter name="zetaYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                  <parameter name="maxDerivativeErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maxProportionalErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="18.0" />
-                  <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="270.0" />
-                  <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
-                  <parameter name="maxDerivativeErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maxProportionalErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
-                  <parameter name="maximumFeedbackRateHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                  <parameter name="maxDerivativeErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maxProportionalErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0" />
-                  <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="zetaXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
-                  <parameter name="maxDerivativeErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maxProportionalErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="maximumFeedbackHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
-                  <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+               <registry name="ComHeightGains">
+                  <parameter name="kpWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
+                  <parameter name="zetaWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
+                  <parameter name="maximumFeedbackWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="4.905" />
+                  <parameter name="maximumFeedbackRateWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="98.1" />
+                  <parameter name="positionDeadbandWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="integralLeakRatioWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="MaximumVelocityWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.25" />
+                  <parameter name="kpUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
+                  <parameter name="zetaUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
+                  <parameter name="maximumFeedbackUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="4.905" />
+                  <parameter name="maximumFeedbackRateUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="98.1" />
+                  <parameter name="positionDeadbandUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="integralLeakRatioUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                </registry>
                <registry name="FootGains">
                   <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
@@ -326,11 +77,261 @@
                   <parameter name="maximumFeedbackToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                   <parameter name="maximumFeedbackRateToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0" />
                </registry>
-               <registry name="WalkingMessageHandler">
-                  <parameter name="MaxStepDistance" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
-                  <parameter name="MaxStepHeightChange" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
-                  <parameter name="MaxSwingDistance" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-                  <parameter name="MinimumPauseTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               <registry name="HighLevelControlManagerFactory">
+                  <registry name="BalanceManager">
+                     <registry name="PelvisICPBasedTranslationManager">
+                        <parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.0531" />
+                        <parameter name="userDesiredICPOffsetX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="userDesiredICPOffsetY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="manualModeICPOffset" type="BooleanParameter" value="false" />
+                     </registry>
+                     <registry name="PrecomputedICPPlanner">
+                        <parameter name="PrecomputedICPVelocityFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                     </registry>
+                     <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                  </registry>
+                  <registry name="CenterOfMassHeightManager">
+                     <registry name="CenterOfMassHeightControlState">
+                        <registry name="LookAheadCoMHeightTrajectoryGenerator">
+                           <parameter name="ProcessGoHome" type="BooleanParameter" value="false" />
+                        </registry>
+                     </registry>
+                     <registry name="PelvisHeightControlState">
+                        <registry name="pelvisTaskspaceControlModule">
+                           <parameter name="pelvisPositionTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                        </registry>
+                        <parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                        <parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                        <parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
+                        <parameter name="PelvisHeightControlStateMinHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="PelvisHeightControlStateOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     </registry>
+                  </registry>
+                  <registry name="FeetManager">
+                     <registry name="FootControlModuleParameters">
+                        <parameter name="CoefficientOfFriction" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                     </registry>
+                     <registry name="FootRotationDetectorParameters">
+                        <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
+                        <parameter name="decayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        <parameter name="filterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        <parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
+                     </registry>
+                     <registry name="SupportStateParameters">
+                        <parameter name="avoidFootRotations" type="BooleanParameter" value="false" />
+                        <parameter name="dampFootRotations" type="BooleanParameter" value="false" />
+                        <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     </registry>
+                     <registry name="ToeOffManager">
+                        <parameter name="doToeOffIfPossibleInDoubleSupport" type="BooleanParameter" value="true" />
+                        <parameter name="doToeOffIfPossibleInSingleSupport" type="BooleanParameter" value="false" />
+                        <parameter name="doToeOffWhenHittingAnkleLimit" type="BooleanParameter" value="true" />
+                        <parameter name="doToeOffWhenHittingLeadingKneeUpperLimit" type="BooleanParameter" value="false" />
+                        <parameter name="doToeOffWhenHittingRearKneeLowerLimit" type="BooleanParameter" value="false" />
+                        <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
+                        <parameter name="kneeUpperLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="1.2" />
+                        <parameter name="kneeLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="icpPercentOfStanceForDSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="icpPercentOfStanceForSSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="ecmpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                        <parameter name="copProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
+                        <parameter name="checkECMPForToeOff" type="BooleanParameter" value="true" />
+                        <parameter name="checkCoPForToeOff" type="BooleanParameter" value="false" />
+                        <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false" />
+                        <parameter name="extraCoMMaxHeightWithToes" type="DoubleParameter" min="0.0" max="1.0" value="0.08" />
+                        <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
+                        <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
+                        <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                        <parameter name="useToeLineContactInSwing" type="BooleanParameter" value="true" />
+                        <parameter name="useToeLineContactInTransfer" type="BooleanParameter" value="false" />
+                        <parameter name="updateLineContactDuringToeOff" type="BooleanParameter" value="false" />
+                        <parameter name="updatePointContactDuringToeOff" type="BooleanParameter" value="false" />
+                        <parameter name="icpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="false" />
+                     </registry>
+                     <registry name="leftFootControlModule">
+                        <registry name="FootLeapOfFaithModule">
+                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
+                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
+                        </registry>
+                        <registry name="leftFootLegSingularityAndKneeCollapseAvoidanceControlModule">
+                           <parameter name="leftFootMinLegLength" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                           <parameter name="leftFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
+                           <parameter name="leftFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
+                        </registry>
+                        <registry name="leftFootSupportState">
+                           <parameter name="leftFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
+                           <parameter name="leftFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
+                           <parameter name="leftFootNeverHoldRotation" type="BooleanParameter" value="false" />
+                           <parameter name="leftFootNeverHoldPosition" type="BooleanParameter" value="false" />
+                           <parameter name="leftFootHoldFlatOrientation" type="BooleanParameter" value="false" />
+                        </registry>
+                        <registry name="leftFootTaskspaceControlModule">
+                           <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                        </registry>
+                        <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        <parameter name="leftFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
+                        <parameter name="leftFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
+                        <parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
+                        <parameter name="leftFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
+                        <parameter name="leftFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
+                        <parameter name="leftFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                        <parameter name="leftFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                        <parameter name="leftFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
+                        <parameter name="leftFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
+                        <parameter name="leftFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
+                        <parameter name="leftFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                        <parameter name="leftFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
+                        <parameter name="leftFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                        <parameter name="leftFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                        <parameter name="leftFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+                     </registry>
+                     <registry name="rightFootControlModule">
+                        <registry name="FootLeapOfFaithModule">
+                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
+                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
+                        </registry>
+                        <registry name="rightFootLegSingularityAndKneeCollapseAvoidanceControlModule">
+                           <parameter name="rightFootMinLegLength" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                           <parameter name="rightFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
+                           <parameter name="rightFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
+                        </registry>
+                        <registry name="rightFootSupportState">
+                           <parameter name="rightFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
+                           <parameter name="rightFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
+                           <parameter name="rightFootNeverHoldRotation" type="BooleanParameter" value="false" />
+                           <parameter name="rightFootNeverHoldPosition" type="BooleanParameter" value="false" />
+                           <parameter name="rightFootHoldFlatOrientation" type="BooleanParameter" value="false" />
+                        </registry>
+                        <registry name="rightFootTaskspaceControlModule">
+                           <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                        </registry>
+                        <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        <parameter name="rightFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
+                        <parameter name="rightFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
+                        <parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
+                        <parameter name="rightFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
+                        <parameter name="rightFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
+                        <parameter name="rightFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                        <parameter name="rightFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                        <parameter name="rightFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
+                        <parameter name="rightFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
+                        <parameter name="rightFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
+                        <parameter name="rightFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                        <parameter name="rightFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
+                        <parameter name="rightFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                        <parameter name="rightFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                        <parameter name="rightFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+                     </registry>
+                     <parameter name="blindFootstepsHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
+                  </registry>
+                  <registry name="PelvisOrientationManager">
+                     <registry name="ControllerPelvisOrientationManager">
+                        <registry name="PelvisLeapOfFaithModule">
+                           <parameter name="leapOfFaithUsePelvisRotationForReaching" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithRelaxPelvisWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithPelvisReachingYawGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                           <parameter name="leapOfFaithPelvisReachingRollGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                           <parameter name="leapOfFaithPelvisReachingMaxYaw" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
+                           <parameter name="leapOfFaithPelvisReachingMaxRoll" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+                           <parameter name="leapOfFaithPelvisReachingFractionOfSwing" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
+                           <parameter name="leapOfFaithPelvisWeightRelaxationRate" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                           <parameter name="leapOfFaithPelvisMinimumWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        </registry>
+                        <parameter name="UseManualPelvisRotation" type="BooleanParameter" value="false" />
+                        <parameter name="UserDesiredYawOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="UserDesiredPitchOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="UserDesiredRollOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     </registry>
+                     <registry name="UserPelvisOrientationManager">
+                        <registry name="pelvisTaskspaceControlModule">
+                           <parameter name="pelvisOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                        </registry>
+                     </registry>
+                  </registry>
+                  <registry name="leftPalmManager">
+                     <registry name="leftPalmTaskspaceControlModule">
+                        <parameter name="leftPalmTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                     </registry>
+                     <parameter name="leftPalmManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
+                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
+                     </parameter>
+                  </registry>
+                  <registry name="rightPalmManager">
+                     <registry name="rightPalmTaskspaceControlModule">
+                        <parameter name="rightPalmTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                     </registry>
+                     <parameter name="rightPalmManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
+                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
+                     </parameter>
+                  </registry>
+                  <registry name="torsoManager">
+                     <parameter name="torsoManagerDefaultControlMode" type="EnumParameter" value="TASKSPACE">
+                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
+                     </parameter>
+                  </registry>
+                  <registry name="torsoTaskspaceControlModule">
+                     <parameter name="torsoOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                  </registry>
+                  <registry name="upperNeckPitchLinkManager">
+                     <parameter name="upperNeckPitchLinkManagerDefaultControlMode" type="EnumParameter" value="JOINTSPACE">
+                        <description>WARNING: only JOINTSPACE or TASKSPACE possible!</description>
+                     </parameter>
+                  </registry>
+                  <registry name="upperNeckPitchLinkTaskspaceControlModule">
+                     <parameter name="upperNeckPitchLinkOrientationTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                  </registry>
+               </registry>
+               <registry name="JointspaceGains">
+                  <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
+                  <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+                  <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
+                  <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="positionDeadbandSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="integralLeakRatioSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kpNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
+                  <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
+                  <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="18.0" />
+                  <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="270.0" />
+                  <parameter name="positionDeadbandNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="integralLeakRatioNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
+                  <parameter name="zetaArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="maximumFeedbackArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="maximumFeedbackRateArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="2000.0" />
+                  <parameter name="positionDeadbandArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="integralLeakRatioArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                </registry>
                <registry name="MomentumOptimizationSettings">
                   <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
@@ -390,388 +391,53 @@
                   <parameter name="LoadedFootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
                   <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
                </registry>
-               <registry name="JointspaceGains">
-                  <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
-                  <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-                  <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
-                  <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="positionDeadbandSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kiSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="maxIntegralErrorSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="integralLeakRatioSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kpNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
-                  <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
-                  <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="18.0" />
-                  <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="270.0" />
-                  <parameter name="positionDeadbandNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kiNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="maxIntegralErrorNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="integralLeakRatioNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
-                  <parameter name="zetaArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="maximumFeedbackArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
-                  <parameter name="maximumFeedbackRateArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="2000.0" />
-                  <parameter name="positionDeadbandArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kiArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="maxIntegralErrorArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="integralLeakRatioArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               <registry name="RigidBodyGains">
+                  <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0" />
+                  <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0" />
+                  <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                  <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                  <parameter name="maxDerivativeErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maxProportionalErrorChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="12.0" />
+                  <parameter name="maximumFeedbackRateChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="360.0" />
+                  <parameter name="kpXHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                  <parameter name="kpYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
+                  <parameter name="zetaXHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                  <parameter name="zetaYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                  <parameter name="maxDerivativeErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maxProportionalErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="18.0" />
+                  <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="270.0" />
+                  <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
+                  <parameter name="maxDerivativeErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maxProportionalErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
+                  <parameter name="maximumFeedbackRateHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="kpZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="90.0" />
+                  <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                  <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="maxDerivativeErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maxProportionalErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0" />
+                  <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="zetaXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
+                  <parameter name="maxDerivativeErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maxProportionalErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
+                  <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                </registry>
-               <registry name="ComHeightGains">
-                  <parameter name="kpWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
-                  <parameter name="zetaWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
-                  <parameter name="maximumFeedbackWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="4.905" />
-                  <parameter name="maximumFeedbackRateWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="98.1" />
-                  <parameter name="positionDeadbandWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kiWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="maxIntegralErrorWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="integralLeakRatioWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="MaximumVelocityWalkingControllerComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.25" />
-                  <parameter name="kpUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
-                  <parameter name="zetaUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001" />
-                  <parameter name="maximumFeedbackUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="4.905" />
-                  <parameter name="maximumFeedbackRateUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="98.1" />
-                  <parameter name="positionDeadbandUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="kiUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="maxIntegralErrorUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="integralLeakRatioUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+               <registry name="WalkingMessageHandler">
+                  <parameter name="MinimumPauseTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="MaxStepDistance" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
+                  <parameter name="MaxStepHeightChange" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
+                  <parameter name="MaxSwingDistance" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
                </registry>
                <parameter name="ContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
                <parameter name="CoPThresholdFraction" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
                <parameter name="SecondContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="75.0" />
-            </registry>
-            <registry name="WalkingControllerState">
-               <registry name="WalkingHighLevelHumanoidController">
-                  <registry name="ControllerCoreOptimizationSettings">
-                     <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
-                  </registry>
-                  <registry name="ToWalkingLeftSupport">
-                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
-                  </registry>
-                  <registry name="ToWalkingRightSupport">
-                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
-                  </registry>
-                  <registry name="WalkingLeftSupport">
-                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
-                  </registry>
-                  <registry name="WalkingRightSupport">
-                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
-                  </registry>
-                  <parameter name="MinimumTransferTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-               </registry>
-               <registry name="WalkingJointSettings">
-                  <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.2" />
-                  <parameter name="NoLoadhipPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadkneePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
-                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
-                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
-                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
-                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
-                  <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5" />
-                  <parameter name="NoLoadhipYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.08" />
-                  <parameter name="NoLoadhipPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
-                  <parameter name="NoLoadhipRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
-                  <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadkneePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadanklePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadanklePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadankleRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadankleRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadspineYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoadspineYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspinePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoadspinePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspineRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoadspineRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadelbowRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.00795854300889478" />
-                  <parameter name="NoLoadelbowRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.919780134430234" />
-                  <parameter name="NoLoadfirstWristPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
-                  <parameter name="NoLoadfirstWristPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadwristRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
-                  <parameter name="NoLoadwristRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadproximalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoadproximalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoaddistalNeckYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
-                  <parameter name="NoLoaddistalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoadHipYawControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
-                  <parameter name="NoLoadHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadHipRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
-                  <parameter name="NoLoadHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadHipPitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadHipPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadHipPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadKneePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadKneePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadKneePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadAnklePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
-                  <parameter name="NoLoadAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
-                  <parameter name="NoLoadAnklePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadAnklePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadAnkleRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
-                  <parameter name="NoLoadAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
-                  <parameter name="NoLoadAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderPitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadShoulderPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadShoulderPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadShoulderPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadShoulderRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadShoulderRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadShoulderRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderYawControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadShoulderYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadShoulderYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadShoulderYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadShoulderYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadElbowPitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadElbowPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadElbowPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadElbowPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadElbowPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpineYawControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpineYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
-                  <parameter name="NoLoadSpineYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadSpineYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpineYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpinePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
-                  <parameter name="NoLoadSpinePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadSpinePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpinePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpineRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
-                  <parameter name="NoLoadSpineRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
-                  <parameter name="NoLoadSpineRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadSpineRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadElbowRollControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadElbowRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadElbowRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadElbowRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadWristRollControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadWristRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
-                  <parameter name="NoLoadWristRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.3" />
-                  <parameter name="NoLoadWristRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadWristRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadFirstWristPitchControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadFirstWristPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
-                  <parameter name="NoLoadFirstWristPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.3" />
-                  <parameter name="NoLoadFirstWristPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadFirstWristPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadDistalNeckPitchControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadDistalNeckPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadProximalNeckPitchControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadProximalNeckPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadProximalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadProximalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadProximalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadDistalNeckYawControlMode" type="EnumParameter" value="POSITION" />
-                  <parameter name="NoLoadDistalNeckYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadDistalNeckYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadDistalNeckYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadDistalNeckYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipYawControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="LoadedHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
-                  <parameter name="LoadedHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="LoadedHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
-                  <parameter name="LoadedHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipPitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="LoadedHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
-                  <parameter name="LoadedHipPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedHipPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedKneePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="LoadedKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="2.0" />
-                  <parameter name="LoadedKneePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedKneePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedAnklePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
-                  <parameter name="LoadedAnklePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedAnklePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedAnkleRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="LoadedAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
-                  <parameter name="LoadedAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="LoadedAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="NoLoadhipYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadhipPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadhipRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadkneePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadkneePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadanklePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadanklePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadankleRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadankleRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadspineYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadspinePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspinePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadspineRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
-                  <parameter name="NoLoadelbowRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadelbowRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoadfirstWristPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadfirstWristPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoadwristRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadwristRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoadproximalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadproximalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoaddistalNeckYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoaddistalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
-                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-                  <parameter name="LoadedAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
-               </registry>
-               <registry name="WholeBodyControllerCore">
-                  <registry name="WholeBodyFeedbackController">
-                     <registry name="FeedbackControllerToolbox">
-                        <parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
-                        <parameter name="pelvisErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
-                        <parameter name="footErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="16.0" />
-                        <parameter name="armJointsErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
-                     </registry>
-                  </registry>
-               </registry>
-               <registry name="LinearMomentumRateControlModule">
-                  <registry name="ICPOptimizationController">
-                     <parameter name="controllerMaxNumberOfIterations" type="IntegerParameter" min="-10" max="10" value="100" />
-                     <parameter name="controllerDynamicsObjectiveDoubleSupportWeightModifier" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                     <parameter name="controllerUseFootstepRate" type="BooleanParameter" value="true" />
-                     <parameter name="controllerUseFeedbackRate" type="BooleanParameter" value="true" />
-                     <parameter name="controllerAllowStepAdjustment" type="BooleanParameter" value="false" />
-                     <parameter name="controllerUseCMPFeedback" type="BooleanParameter" value="true" />
-                     <parameter name="controllerUseAngularMomentum" type="BooleanParameter" value="false" />
-                     <parameter name="controllerScaleStepRateWeightWithTime" type="BooleanParameter" value="false" />
-                     <parameter name="controllerScaleFeedbackWeightWithGain" type="BooleanParameter" value="true" />
-                     <parameter name="controllerMinICPErrorForStepAdjustment" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                     <parameter name="controllerFractionThroughSwingForAdjustment" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                     <parameter name="controllerFootstepAdjustmentSafetyFactor" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                     <parameter name="controllerForwardFootstepWeight" type="DoubleParameter" min="0.0" max="1.0" value="7.5" />
-                     <parameter name="controllerLateralFootstepWeight" type="DoubleParameter" min="0.0" max="1.0" value="7.5" />
-                     <parameter name="controllerFootstepRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="4.0E-7" />
-                     <parameter name="controllerCoPFeedbackForwardWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                     <parameter name="controllerCoPFeedbackLateralWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                     <parameter name="controllerCoPCMPFeedbackRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                     <parameter name="controllerFeedbackRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-8" />
-                     <parameter name="captureKpParallel" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
-                     <parameter name="captureKpOrthogonal" type="DoubleParameter" min="0.0" max="1.0" value="1.9" />
-                     <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                     <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97" />
-                     <parameter name="captureMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
-                     <parameter name="feedbackPartMaxRate" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
-                     <parameter name="feedbackPartMaxValueParallelToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                     <parameter name="feedbackPartMaxValueOrthogonalToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="false" />
-                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
-                     <parameter name="controllerDynamicsObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="10000.0" />
-                     <parameter name="controllerCMPFeedbackWeight" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
-                     <parameter name="controllerLimitReachabilityFromAdjustment" type="BooleanParameter" value="false" />
-                     <parameter name="controllerTransferDurationSplitFraction" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                     <parameter name="controllerUseAngularMomentumIntegrator" type="BooleanParameter" value="false" />
-                     <parameter name="controllerAngularMomentumIntegratorGain" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
-                     <parameter name="controllerAngularMomentumIntegratorLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
-                     <parameter name="controllerUseICPControlPolygons" type="BooleanParameter" value="true" />
-                     <parameter name="controllerSafeCoPDistanceToEdge" type="DoubleParameter" min="0.0" max="1.0" value="0.001" />
-                     <parameter name="controllerMaxAllowedDistanceCMPSupport" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
-                     <parameter name="controllerMinimumTimeRemaining" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-4" />
-                     <parameter name="controllerMinimumFootstepMultiplier" type="DoubleParameter" min="0.0" max="1.0" value="0.33" />
-                     <parameter name="controllerMaximumTimeFromTransfer" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                     <parameter name="controllerConsiderAngularMomentumInAdjustment" type="BooleanParameter" value="true" />
-                     <parameter name="controllerConsiderFeedbackInAdjustment" type="BooleanParameter" value="true" />
-                     <parameter name="controllerFootstepDeadband" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="controllerFootstepSolutionResolution" type="DoubleParameter" min="0.0" max="1.0" value="0.015" />
-                     <parameter name="controllerMaxReachabilityLength" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                     <parameter name="controllerMaxReachabilityBackwardLength" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                     <parameter name="controllerMaxReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.165" />
-                     <parameter name="controllerMinReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                     <parameter name="controllerForwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                     <parameter name="controllerBackwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                     <parameter name="controllerInwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                     <parameter name="controllerOutwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  </registry>
-                  <parameter name="capturePointVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="26.5" />
-                  <parameter name="CenterOfPressureObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
-                  <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
-                  <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
-                  <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-               </registry>
-               <parameter name="UseCenterOfPressureObjectiveFromPlanner" type="BooleanParameter" value="false" />
             </registry>
             <registry name="StandPrepControllerState">
                <registry name="StandPrepStateJointSettings">
@@ -1079,8 +745,8 @@
                   <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
             </registry>
-            <registry name="toWalkingSmoothTransitionControllerState">
-               <registry name="StandTransitionStateJointSettings">
+            <registry name="ValkyrieCalibrationControllerState">
+               <registry name="CalibrationJointSettings">
                   <parameter name="NoLoadShoulderPitchControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="NoLoadShoulderPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
                   <parameter name="NoLoadShoulderPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
@@ -1137,12 +803,12 @@
                   <parameter name="NoLoadSpineYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
+                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
                   <parameter name="NoLoadSpinePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpinePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
+                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
                   <parameter name="NoLoadSpineRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpineRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
@@ -1215,7 +881,340 @@
                   <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
-               <parameter name="toWalkingTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
+            </registry>
+            <registry name="WalkingControllerState">
+               <registry name="LinearMomentumRateControlModule">
+                  <registry name="ICPOptimizationController">
+                     <parameter name="controllerMaxNumberOfIterations" type="IntegerParameter" min="-10" max="10" value="100" />
+                     <parameter name="controllerDynamicsObjectiveDoubleSupportWeightModifier" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                     <parameter name="controllerUseFootstepRate" type="BooleanParameter" value="true" />
+                     <parameter name="controllerUseFeedbackRate" type="BooleanParameter" value="true" />
+                     <parameter name="controllerAllowStepAdjustment" type="BooleanParameter" value="false" />
+                     <parameter name="controllerUseCMPFeedback" type="BooleanParameter" value="true" />
+                     <parameter name="controllerUseAngularMomentum" type="BooleanParameter" value="false" />
+                     <parameter name="controllerScaleStepRateWeightWithTime" type="BooleanParameter" value="false" />
+                     <parameter name="controllerScaleFeedbackWeightWithGain" type="BooleanParameter" value="true" />
+                     <parameter name="controllerMinICPErrorForStepAdjustment" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
+                     <parameter name="controllerFractionThroughSwingForAdjustment" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="controllerFootstepAdjustmentSafetyFactor" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                     <parameter name="controllerForwardFootstepWeight" type="DoubleParameter" min="0.0" max="1.0" value="7.5" />
+                     <parameter name="controllerLateralFootstepWeight" type="DoubleParameter" min="0.0" max="1.0" value="7.5" />
+                     <parameter name="controllerFootstepRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="4.0E-7" />
+                     <parameter name="controllerCoPFeedbackForwardWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                     <parameter name="controllerCoPFeedbackLateralWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                     <parameter name="controllerCoPCMPFeedbackRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="controllerFeedbackRateWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-8" />
+                     <parameter name="captureKpParallel" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                     <parameter name="captureKpOrthogonal" type="DoubleParameter" min="0.0" max="1.0" value="1.9" />
+                     <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                     <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97" />
+                     <parameter name="captureMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
+                     <parameter name="feedbackPartMaxRate" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
+                     <parameter name="feedbackPartMaxValueParallelToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                     <parameter name="feedbackPartMaxValueOrthogonalToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="false" />
+                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
+                     <parameter name="controllerDynamicsObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="10000.0" />
+                     <parameter name="controllerCMPFeedbackWeight" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
+                     <parameter name="controllerLimitReachabilityFromAdjustment" type="BooleanParameter" value="false" />
+                     <parameter name="controllerTransferDurationSplitFraction" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                     <parameter name="controllerUseAngularMomentumIntegrator" type="BooleanParameter" value="false" />
+                     <parameter name="controllerAngularMomentumIntegratorGain" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
+                     <parameter name="controllerAngularMomentumIntegratorLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
+                     <parameter name="controllerUseICPControlPolygons" type="BooleanParameter" value="true" />
+                     <parameter name="controllerSafeCoPDistanceToEdge" type="DoubleParameter" min="0.0" max="1.0" value="0.001" />
+                     <parameter name="controllerMaxAllowedDistanceCMPSupport" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
+                     <parameter name="controllerMinimumTimeRemaining" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-4" />
+                     <parameter name="controllerMinimumFootstepMultiplier" type="DoubleParameter" min="0.0" max="1.0" value="0.33" />
+                     <parameter name="controllerMaximumTimeFromTransfer" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                     <parameter name="controllerConsiderAngularMomentumInAdjustment" type="BooleanParameter" value="true" />
+                     <parameter name="controllerConsiderFeedbackInAdjustment" type="BooleanParameter" value="true" />
+                     <parameter name="controllerFootstepDeadband" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="controllerFootstepSolutionResolution" type="DoubleParameter" min="0.0" max="1.0" value="0.015" />
+                     <parameter name="controllerMaxReachabilityLength" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                     <parameter name="controllerMaxReachabilityBackwardLength" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                     <parameter name="controllerMaxReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.165" />
+                     <parameter name="controllerMinReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                     <parameter name="controllerForwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                     <parameter name="controllerBackwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                     <parameter name="controllerInwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                     <parameter name="controllerOutwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                  </registry>
+                  <parameter name="capturePointVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="26.5" />
+                  <parameter name="CenterOfPressureObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
+                  <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
+                  <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
+                  <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+               </registry>
+               <registry name="WalkingHighLevelHumanoidController">
+                  <registry name="ControllerCoreOptimizationSettings">
+                     <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                  </registry>
+                  <registry name="ToWalkingLeftSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
+                  </registry>
+                  <registry name="ToWalkingRightSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
+                  </registry>
+                  <registry name="WalkingLeftSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
+                  </registry>
+                  <registry name="WalkingRightSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
+                  </registry>
+                  <parameter name="MinimumTransferTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+               </registry>
+               <registry name="WalkingJointSettings">
+                  <parameter name="NoLoadhipYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.08" />
+                  <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.2" />
+                  <parameter name="NoLoadhipYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadhipPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
+                  <parameter name="NoLoadhipPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
+                  <parameter name="NoLoadhipPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadhipRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
+                  <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
+                  <parameter name="NoLoadhipRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadkneePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
+                  <parameter name="NoLoadkneePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
+                  <parameter name="NoLoadkneePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadkneePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadanklePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
+                  <parameter name="NoLoadanklePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
+                  <parameter name="NoLoadanklePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadanklePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadankleRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
+                  <parameter name="NoLoadankleRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
+                  <parameter name="NoLoadankleRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadankleRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspineYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoadspineYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
+                  <parameter name="NoLoadspineYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspineYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspinePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoadspinePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
+                  <parameter name="NoLoadspinePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspinePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspineRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoadspineRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
+                  <parameter name="NoLoadspineRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspineRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadelbowRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.00795854300889478" />
+                  <parameter name="NoLoadelbowRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.919780134430234" />
+                  <parameter name="NoLoadelbowRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadelbowRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadfirstWristPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
+                  <parameter name="NoLoadfirstWristPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
+                  <parameter name="NoLoadfirstWristPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadfirstWristPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadwristRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
+                  <parameter name="NoLoadwristRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
+                  <parameter name="NoLoadwristRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadwristRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadproximalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoadproximalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
+                  <parameter name="NoLoadproximalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadproximalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoaddistalNeckYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoaddistalNeckYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
+                  <parameter name="NoLoaddistalNeckYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoaddistalNeckYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoaddistalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
+                  <parameter name="NoLoaddistalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
+                  <parameter name="NoLoaddistalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoaddistalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadHipYawControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
+                  <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
+                  <parameter name="NoLoadHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
+                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadHipPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
+                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadKneePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadKneePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
+                  <parameter name="NoLoadAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="NoLoadAnklePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadAnklePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
+                  <parameter name="NoLoadAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="NoLoadAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadShoulderPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadShoulderPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadShoulderRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadShoulderRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadShoulderRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadShoulderYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadShoulderYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadShoulderYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadElbowPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadElbowPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadElbowPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadElbowPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5" />
+                  <parameter name="NoLoadElbowRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadElbowRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadElbowRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadWristRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
+                  <parameter name="NoLoadWristRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.3" />
+                  <parameter name="NoLoadWristRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadWristRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadFirstWristPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="20.0" />
+                  <parameter name="NoLoadFirstWristPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.3" />
+                  <parameter name="NoLoadFirstWristPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadFirstWristPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadSpineYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
+                  <parameter name="NoLoadSpineYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadSpineYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpineYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
+                  <parameter name="NoLoadSpinePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadSpinePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpinePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="30.0" />
+                  <parameter name="NoLoadSpineRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.0" />
+                  <parameter name="NoLoadSpineRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpineRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadDistalNeckPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadProximalNeckPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadProximalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadProximalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawControlMode" type="EnumParameter" value="POSITION" />
+                  <parameter name="NoLoadDistalNeckYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadDistalNeckYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="NoLoadDistalNeckYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadDistalNeckYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipYawControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="LoadedHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
+                  <parameter name="LoadedHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="LoadedHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
+                  <parameter name="LoadedHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipPitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="LoadedHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
+                  <parameter name="LoadedHipPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedKneePitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="LoadedKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="2.0" />
+                  <parameter name="LoadedKneePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedKneePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnklePitchControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="LoadedAnklePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="LoadedAnklePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedAnklePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnkleRollControlMode" type="EnumParameter" value="EFFORT" />
+                  <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
+                  <parameter name="LoadedAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
+                  <parameter name="LoadedAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LoadedAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+               </registry>
+               <registry name="WholeBodyControllerCore">
+                  <registry name="WholeBodyFeedbackController">
+                     <registry name="FeedbackControllerToolbox">
+                        <parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
+                        <parameter name="pelvisErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
+                        <parameter name="footErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="16.0" />
+                        <parameter name="armJointsErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0" />
+                     </registry>
+                  </registry>
+               </registry>
+               <parameter name="UseCenterOfPressureObjectiveFromPlanner" type="BooleanParameter" value="false" />
             </registry>
             <registry name="exitWalkingSmoothTransitionControllerState">
                <registry name="ExitWalkingJointSettings">
@@ -1355,8 +1354,8 @@
                </registry>
                <parameter name="exitWalkingTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
             </registry>
-            <registry name="ValkyrieCalibrationControllerState">
-               <registry name="CalibrationJointSettings">
+            <registry name="toWalkingSmoothTransitionControllerState">
+               <registry name="StandTransitionStateJointSettings">
                   <parameter name="NoLoadShoulderPitchControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="NoLoadShoulderPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
                   <parameter name="NoLoadShoulderPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
@@ -1413,12 +1412,12 @@
                   <parameter name="NoLoadSpineYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
+                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
                   <parameter name="NoLoadSpinePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpinePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
+                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
                   <parameter name="NoLoadSpineRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpineRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
@@ -1491,6 +1490,7 @@
                   <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                   <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
+               <parameter name="toWalkingTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
             </registry>
             <parameter name="jointDesiredOutputBroadcastFrequency" type="IntegerParameter" min="-10" max="10" value="10" />
          </registry>
@@ -1504,33 +1504,6 @@
          <registry name="DRCKinematicsBasedStateEstimator">
             <registry name="IMUBasedPelvisRotationalStateUpdater">
                <parameter name="zeroEstimatedRootYawAtInitialization" type="BooleanParameter" value="true" />
-            </registry>
-            <registry name="PelvisLinearStateUpdater">
-               <registry name="PelvisKinematicsBasedLinearStateCalculator">
-                  <parameter name="assumeTrustedFootAtZeroHeight" type="BooleanParameter" value="false" />
-                  <parameter name="FootToRootJointPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                  <parameter name="alphaRootJointLinearVelocityNewTwist" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                  <parameter name="trustCoPAsNonSlippingContactPoint" type="BooleanParameter" value="true" />
-                  <parameter name="useControllerDesiredCoP" type="BooleanParameter" value="false" />
-                  <parameter name="CopFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="4.0" />
-                  <parameter name="correctTrustedFeetPositions" type="BooleanParameter" value="false" />
-               </registry>
-               <registry name="PelvisIMUBasedLinearStateCalculator">
-                  <parameter name="useAccelerometerForEstimation" type="BooleanParameter" value="true" />
-               </registry>
-               <parameter name="zeroRootXYPositionAtInitialization" type="BooleanParameter" value="true" />
-               <parameter name="TrustOnlyLowestFoot" type="BooleanParameter" value="false" />
-               <parameter name="LowestFootWindowSize" type="IntegerParameter" min="-10" max="10" value="0" />
-               <parameter name="zeroFootHeightAtInitialization" type="BooleanParameter" value="true" />
-               <parameter name="imuAgainstKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.0146195328088035" />
-               <parameter name="grfAgainstIMUAndKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.4261" />
-               <parameter name="imuAgainstKinematicsForPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="11.7893" />
-               <parameter name="delayTimeBeforeTrustingFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-               <parameter name="optimalNumberOfTrustedFeet" type="IntegerParameter" min="-10" max="10" value="2" />
-               <parameter name="forceZInPercentThresholdToTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-               <parameter name="forceZInPercentThresholdToNotTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
-               <parameter name="trustImuWhenNoFeetAreInContact" type="BooleanParameter" value="false" />
-               <parameter name="useGRFToComputeCoMVelocity" type="BooleanParameter" value="false" />
             </registry>
             <registry name="IMUBiasStateEstimator">
                <parameter name="imuBiasEstimatorAlwaysTrustFeet" type="BooleanParameter" value="false" />
@@ -1552,6 +1525,33 @@
                <parameter name="imuBasedJointVelocityEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
                <parameter name="imuBasedJointVelocityEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
                <parameter name="imuBasedJointVelocityEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+            </registry>
+            <registry name="PelvisLinearStateUpdater">
+               <registry name="PelvisIMUBasedLinearStateCalculator">
+                  <parameter name="useAccelerometerForEstimation" type="BooleanParameter" value="true" />
+               </registry>
+               <registry name="PelvisKinematicsBasedLinearStateCalculator">
+                  <parameter name="assumeTrustedFootAtZeroHeight" type="BooleanParameter" value="false" />
+                  <parameter name="FootToRootJointPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="alphaRootJointLinearVelocityNewTwist" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                  <parameter name="trustCoPAsNonSlippingContactPoint" type="BooleanParameter" value="true" />
+                  <parameter name="useControllerDesiredCoP" type="BooleanParameter" value="false" />
+                  <parameter name="CopFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="4.0" />
+                  <parameter name="correctTrustedFeetPositions" type="BooleanParameter" value="false" />
+               </registry>
+               <parameter name="TrustOnlyLowestFoot" type="BooleanParameter" value="false" />
+               <parameter name="LowestFootWindowSize" type="IntegerParameter" min="-10" max="10" value="0" />
+               <parameter name="zeroRootXYPositionAtInitialization" type="BooleanParameter" value="true" />
+               <parameter name="zeroFootHeightAtInitialization" type="BooleanParameter" value="true" />
+               <parameter name="imuAgainstKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.0146195328088035" />
+               <parameter name="grfAgainstIMUAndKinematicsForVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.4261" />
+               <parameter name="imuAgainstKinematicsForPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="11.7893" />
+               <parameter name="delayTimeBeforeTrustingFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+               <parameter name="optimalNumberOfTrustedFeet" type="IntegerParameter" min="-10" max="10" value="2" />
+               <parameter name="forceZInPercentThresholdToTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+               <parameter name="forceZInPercentThresholdToNotTrustFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+               <parameter name="trustImuWhenNoFeetAreInContact" type="BooleanParameter" value="false" />
+               <parameter name="useGRFToComputeCoMVelocity" type="BooleanParameter" value="false" />
             </registry>
             <parameter name="cancelGravityFromAccelerationMeasurement" type="BooleanParameter" value="true" />
          </registry>
@@ -1630,104 +1630,32 @@
             <parameter name="armJointPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
             <parameter name="fingerPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
          </registry>
-         <registry name="leftHipYaw">
-            <parameter name="leftHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
-         </registry>
-         <registry name="rightHipYaw">
-            <parameter name="rightHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
-         </registry>
-         <registry name="torsoYaw">
-            <parameter name="torsoYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
-         </registry>
-         <registry name="leftHipRoll">
-            <parameter name="leftHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="rightHipRoll">
-            <parameter name="rightHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="leftHipPitch">
-            <parameter name="leftHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="rightHipPitch">
-            <parameter name="rightHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="leftKneePitch">
-            <parameter name="leftKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="rightKneePitch">
-            <parameter name="rightKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="leftShoulderPitch">
-            <parameter name="leftShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
-         </registry>
-         <registry name="rightShoulderPitch">
-            <parameter name="rightShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
-         </registry>
          <registry name="leftAnklePitch">
             <parameter name="leftAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="leftShoulderRoll">
-            <parameter name="leftShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="rightShoulderRoll">
-            <parameter name="rightShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
-         </registry>
-         <registry name="leftShoulderYaw">
-            <parameter name="leftShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
-         </registry>
-         <registry name="rightShoulderYaw">
-            <parameter name="rightShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
-         </registry>
-         <registry name="leftElbowPitch">
-            <parameter name="leftElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
-         </registry>
-         <registry name="rightElbowPitch">
-            <parameter name="rightElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
-         </registry>
-         <registry name="torsoPitch">
-            <parameter name="torsoPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="torsoRoll">
-            <parameter name="torsoRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="rightAnklePitch">
-            <parameter name="rightAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
          <registry name="leftAnkleRoll">
             <parameter name="leftAnkleRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
-         <registry name="rightAnkleRoll">
-            <parameter name="rightAnkleRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftElbowPitch">
+            <parameter name="leftElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
          </registry>
          <registry name="leftForearmYaw">
             <parameter name="leftForearmYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
-         <registry name="rightForearmYaw">
-            <parameter name="rightForearmYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftHipPitch">
+            <parameter name="leftHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
          </registry>
-         <registry name="leftWristRoll">
-            <parameter name="leftWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftHipRoll">
+            <parameter name="leftHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
          </registry>
-         <registry name="rightWristRoll">
-            <parameter name="rightWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="leftWristPitch">
-            <parameter name="leftWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="rightWristPitch">
-            <parameter name="rightWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="leftThumbMotorRoll">
-            <parameter name="leftThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="leftThumbMotorPitch1">
-            <parameter name="leftThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-         </registry>
-         <registry name="leftThumbMotorPitch2">
-            <parameter name="leftThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftHipYaw">
+            <parameter name="leftHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
          </registry>
          <registry name="leftIndexFingerMotorPitch1">
             <parameter name="leftIndexFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftKneePitch">
+            <parameter name="leftKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
          </registry>
          <registry name="leftMiddleFingerMotorPitch1">
             <parameter name="leftMiddleFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
@@ -1735,17 +1663,56 @@
          <registry name="leftPinkyMotorPitch1">
             <parameter name="leftPinkyMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
-         <registry name="rightThumbMotorRoll">
-            <parameter name="rightThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftShoulderPitch">
+            <parameter name="leftShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
          </registry>
-         <registry name="rightThumbMotorPitch1">
-            <parameter name="rightThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftShoulderRoll">
+            <parameter name="leftShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
          </registry>
-         <registry name="rightThumbMotorPitch2">
-            <parameter name="rightThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         <registry name="leftShoulderYaw">
+            <parameter name="leftShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="leftThumbMotorPitch1">
+            <parameter name="leftThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftThumbMotorPitch2">
+            <parameter name="leftThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftThumbMotorRoll">
+            <parameter name="leftThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftWristPitch">
+            <parameter name="leftWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftWristRoll">
+            <parameter name="leftWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightAnklePitch">
+            <parameter name="rightAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightAnkleRoll">
+            <parameter name="rightAnkleRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightElbowPitch">
+            <parameter name="rightElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightForearmYaw">
+            <parameter name="rightForearmYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightHipPitch">
+            <parameter name="rightHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipRoll">
+            <parameter name="rightHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipYaw">
+            <parameter name="rightHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
          </registry>
          <registry name="rightIndexFingerMotorPitch1">
             <parameter name="rightIndexFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightKneePitch">
+            <parameter name="rightKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
          </registry>
          <registry name="rightMiddleFingerMotorPitch1">
             <parameter name="rightMiddleFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
@@ -1753,10 +1720,42 @@
          <registry name="rightPinkyMotorPitch1">
             <parameter name="rightPinkyMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
+         <registry name="rightShoulderPitch">
+            <parameter name="rightShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="rightShoulderRoll">
+            <parameter name="rightShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightShoulderYaw">
+            <parameter name="rightShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightThumbMotorPitch1">
+            <parameter name="rightThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightThumbMotorPitch2">
+            <parameter name="rightThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightThumbMotorRoll">
+            <parameter name="rightThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightWristPitch">
+            <parameter name="rightWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightWristRoll">
+            <parameter name="rightWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="torsoPitch">
+            <parameter name="torsoPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="torsoRoll">
+            <parameter name="torsoRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="torsoYaw">
+            <parameter name="torsoYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
       </registry>
       <parameter name="ContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="120.0" />
       <parameter name="CoPThresholdFraction" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
       <parameter name="SecondContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
    </registry>
-   <registry name="JVMStatistics" />
 </parameters>
