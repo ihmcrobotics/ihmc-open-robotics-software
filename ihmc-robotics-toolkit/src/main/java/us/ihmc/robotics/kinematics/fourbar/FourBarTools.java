@@ -93,6 +93,12 @@ public class FourBarTools
       double cosDBC = Double.NaN;
       double cosABD = Double.NaN;
       double cosABC = Double.NaN;
+      double sinABDSquare = Double.NaN;
+      double sinABD = Double.NaN;
+      double sinDBCSquare = Double.NaN;
+      double sinDBC = Double.NaN;
+      double sinBCDSquare = Double.NaN;
+      double sinBCD = Double.NaN;
 
       if (angle <= A.getMinAngle())
       {
@@ -110,12 +116,18 @@ public class FourBarTools
       {
          A.setAngle(angle);
          cosDAB = EuclidCoreTools.cos(angle);
-         BD = EuclidCoreTools.squareRoot(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
+         BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
          BDDiag.setLength(BD);
          cosBCD = cosineAngleWithCosineLaw(BC, CD, BD);
-         C.setAngle(fastAcos(cosBCD));
+         sinBCDSquare = 1.0 - cosBCD * cosBCD;
+         sinBCD = Math.sqrt(sinBCDSquare);
+         C.setAngle(fastAcos(cosBCD, sinBCD));
          cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
          cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
+         sinABDSquare = 1 - cosABD * cosABD;
+         sinABD = Math.sqrt(sinABDSquare);
+         sinDBCSquare = 1 - cosDBC * cosDBC;
+         sinDBC = Math.sqrt(sinDBCSquare);
 
          if (ABEdge.isCrossing() || BCEdge.isCrossing())
          { // Inverted four bar
@@ -133,19 +145,20 @@ public class FourBarTools
              */
             if (!C.isConvex())
                C.setAngle(-C.getAngle());
-            B.setAngle(Math.abs(fastAcos(cosABD * cosDBC + Math.sqrt((1.0 - cosABD * cosABD) * (1.0 - cosDBC * cosDBC)))));
+            cosABC = MathTools.clamp(cosABD * cosDBC + sinABD * sinDBC, 1.0);
+            B.setAngle(Math.abs(fastAcos(cosABC)));
             if (!B.isConvex())
                B.setAngle(-B.getAngle());
             D.setAngle(-A.getAngle() - B.getAngle() - C.getAngle());
          }
          else
          { // Assume the four bar is convex.
-            B.setAngle(Math.abs(fastAcos(cosABD * cosDBC - Math.sqrt((1.0 - cosABD * cosABD) * (1.0 - cosDBC * cosDBC)))));
+            cosABC = MathTools.clamp(cosABD * cosDBC - sinABD * sinDBC, 1.0);
+            B.setAngle(Math.abs(fastAcos(cosABC)));
             D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
          }
 
-         cosABC = EuclidCoreTools.cos(B.getAngle());
-         AC = EuclidCoreTools.squareRoot(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
+         AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
          ACDiag.setLength(AC);
       }
 
@@ -158,11 +171,17 @@ public class FourBarTools
          cosABC = EuclidCoreTools.cos(B.getAngle());
          cosDAB = EuclidCoreTools.cos(A.getAngle());
          cosBCD = Math.cos(C.getAngle());
+         sinBCDSquare = 1.0 - cosBCD * cosBCD;
+         sinBCD = Math.sqrt(sinBCDSquare);
          cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
          cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
+         sinABDSquare = 1 - cosABD * cosABD;
+         sinABD = Math.sqrt(sinABDSquare);
+         sinDBCSquare = 1 - cosDBC * cosDBC;
+         sinDBC = Math.sqrt(sinDBCSquare);
 
-         AC = EuclidCoreTools.squareRoot(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
-         BD = EuclidCoreTools.squareRoot(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
+         AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
+         BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
          ACDiag.setLength(AC);
          BDDiag.setLength(BD);
       }
@@ -172,20 +191,14 @@ public class FourBarTools
       A.setAngleDot(angleDot);
       double BDDt = DA * AB * sinDAB * angleDot / BD;
       BDDiag.setLengthDot(BDDt);
-      double sinBCDSquare = 1.0 - cosBCD * cosBCD;
-      double sinBCD = Math.sqrt(sinBCDSquare);
       double cosBCDDot = cosineAngleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
       C.setAngleDot(-cosBCDDot / sinBCD);
 
       if (!C.isConvex())
          C.setAngleDot(-C.getAngleDot());
 
-      double sinABDSquare = 1 - cosABD * cosABD;
-      double sinABD = Math.sqrt(sinABDSquare);
       double cosABDDot = cosineAngleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
       double angleDtABD = -cosABDDot / sinABD;
-      double sinDBCSquare = 1 - cosDBC * cosDBC;
-      double sinDBC = Math.sqrt(sinDBCSquare);
       double cosDBCDot = cosineAngleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
       double angleDtDBC = -cosDBCDot / sinDBC;
 
@@ -515,17 +528,38 @@ public class FourBarTools
     * Variation of {@link Math#acos(double)} function that relies on the following identity:
     *
     * <pre>
-    * acos(x) = 2 atan2(&Sqrt;(1 - x<sup>2</sup>), 1 + x)
+    * acos(cosX) = 2 atan2(&Sqrt;(1 - cosX<sup>2</sup>), 1 + cosX)
     * </pre>
     *
-    * @param x the value whose arc cosine is to be returned.
+    * @param cosX the value whose arc cosine is to be returned. The value is clamped to be within [-1,
+    *             1].
     * @return the arc cosine of the argument.
     */
-   public static double fastAcos(double x)
+   public static double fastAcos(double cosX)
    {
-      if (x == -1.0)
+      if (cosX == -1.0)
          return Math.PI;
       else
-         return 2.0 * Math.atan2(Math.sqrt(1.0 - x * x), 1.0 + x);
+         return 2.0 * Math.atan2(Math.sqrt(1.0 - cosX * cosX), 1.0 + cosX);
+   }
+
+   /**
+    * Variation of {@link Math#acos(double)} function that relies on the following identity:
+    *
+    * <pre>
+    * acos(cosX) = 2 atan2(&Sqrt;(1 - cosX<sup>2</sup>), 1 + cosX) = 2 atan2(sinX, 1 + cosX)
+    * </pre>
+    *
+    * @param cosX the value whose arc cosine is to be returned. The value is clamped to be within [-1,
+    *             1].
+    * @param sinX the precomputed value of <tt>&Sqrt;(1 - cosX<sup>2</sup>)</tt>.
+    * @return the arc cosine of the argument.
+    */
+   public static double fastAcos(double cosX, double sinX)
+   {
+      if (cosX == -1.0)
+         return Math.PI;
+      else
+         return 2.0 * Math.atan2(sinX, 1.0 + cosX);
    }
 }
