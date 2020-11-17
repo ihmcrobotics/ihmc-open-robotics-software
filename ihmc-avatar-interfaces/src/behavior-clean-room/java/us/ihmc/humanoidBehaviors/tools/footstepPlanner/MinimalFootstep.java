@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -30,6 +31,16 @@ public class MinimalFootstep
       description = null;
    }
 
+   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld)
+   {
+      this(side, solePoseInWorld, null, null);
+   }
+
+   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold)
+   {
+      this(side, solePoseInWorld, foothold, null);
+   }
+
    public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold, String description)
    {
       this.side = side;
@@ -56,6 +67,16 @@ public class MinimalFootstep
    public ConvexPolygon2DReadOnly getFoothold()
    {
       return foothold;
+   }
+
+   public static ArrayList<MinimalFootstep> convertPairListToMinimalFoostepList(ArrayList<Pair<RobotSide, Pose3D>> pairList)
+   {
+      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+      for (Pair<RobotSide, Pose3D> pair : pairList)
+      {
+         minimalFootsteps.add(new MinimalFootstep(pair.getLeft(), pair.getRight()));
+      }
+      return minimalFootsteps;
    }
 
    public static ArrayList<MinimalFootstep> reduceFootstepsForUIMessager(SideDependentList<PlannedFootstepReadOnly> footsteps)
