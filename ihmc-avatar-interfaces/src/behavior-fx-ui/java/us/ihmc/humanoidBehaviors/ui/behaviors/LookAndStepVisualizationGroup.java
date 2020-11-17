@@ -7,7 +7,7 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanWithTextGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,9 +22,9 @@ public class LookAndStepVisualizationGroup extends Group
 {
    private boolean reviewingBodyPath = true;
 
-   private FootstepPlanWithTextGraphic footstepPlanGraphic;
-   private FootstepPlanWithTextGraphic commandedFootsteps;
-   private FootstepPlanWithTextGraphic startAndGoalFootPoses;
+   private FootstepPlanGraphic footstepPlanGraphic;
+   private FootstepPlanGraphic commandedFootsteps;
+   private FootstepPlanGraphic startAndGoalFootPoses;
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
@@ -33,19 +33,19 @@ public class LookAndStepVisualizationGroup extends Group
 
    public LookAndStepVisualizationGroup(ROS2NodeInterface ros2Node, Messager behaviorMessager)
    {
-      startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
+      startAndGoalFootPoses = new FootstepPlanGraphic();
       startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootPoses.setTransparency(0.4);
       behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-      footstepPlanGraphic = new FootstepPlanWithTextGraphic();
+      footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footsteps ->
       {
          reviewingBodyPath = false;
          footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
       });
-      commandedFootsteps = new FootstepPlanWithTextGraphic();
+      commandedFootsteps = new FootstepPlanGraphic();
       behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(false);

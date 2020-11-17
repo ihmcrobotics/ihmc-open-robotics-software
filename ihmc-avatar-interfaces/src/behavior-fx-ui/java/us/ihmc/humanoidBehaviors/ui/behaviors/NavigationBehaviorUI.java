@@ -5,6 +5,7 @@ import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
@@ -28,9 +29,10 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    {
       this.behaviorMessager = behaviorMessager;
 
-      footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+      footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       getChildren().add(footstepPlanGraphic);
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
+      behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlan ->
+            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan)));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
       getChildren().add(bodyPathPlanGraphic);
