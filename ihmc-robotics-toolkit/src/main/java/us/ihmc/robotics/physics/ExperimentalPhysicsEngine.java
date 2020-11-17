@@ -53,6 +53,7 @@ public class ExperimentalPhysicsEngine
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robotMap = new HashMap<>();
    private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
    private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
+   private final List<ExternalWrenchProvider> externalWrenchProviders = new ArrayList<>();
    private final List<InertialMeasurementReader> inertialMeasurementReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
@@ -150,6 +151,11 @@ public class ExperimentalPhysicsEngine
       externalWrenchReaders.add(externalWrenchReader);
    }
 
+   public void addExternalWrenchProvider(ExternalWrenchProvider externalWrenchProvider)
+   {
+      externalWrenchProviders.add(externalWrenchProvider);
+   }
+
    public void addInertialMeasurementReader(InertialMeasurementReader reader)
    {
       inertialMeasurementReaders.add(reader);
@@ -205,6 +211,7 @@ public class ExperimentalPhysicsEngine
       {
          SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
          forwardDynamicsPlugin.resetExternalWrenches();
+         forwardDynamicsPlugin.applyExternalWrenches(externalWrenchProviders);
          forwardDynamicsPlugin.applyControllerOutput();
          if (robotPlugin.notifyPhysicsInputStateWriters())
             robotPlugin.updateFrames();

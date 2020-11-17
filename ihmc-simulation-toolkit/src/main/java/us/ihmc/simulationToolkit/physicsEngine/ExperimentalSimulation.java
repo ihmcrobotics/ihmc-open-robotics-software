@@ -82,6 +82,7 @@ public class ExperimentalSimulation extends Simulation
 
    private final ExperimentalPhysicsEngine physicsEngine = new ExperimentalPhysicsEngine();
    private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
+   private final SCSRobotExternalForcePointWrapper externalForcePointWrapper = new SCSRobotExternalForcePointWrapper();
    private final SCSRobotIMUSensorReader imuSensorReader = new SCSRobotIMUSensorReader();
    private final SCSRobotTransformUpdater robotTransformUpdater = new SCSRobotTransformUpdater();
 
@@ -105,6 +106,7 @@ public class ExperimentalSimulation extends Simulation
    {
       super(robotArray, dataBufferSize);
       physicsEngine.addExternalWrenchReader(externalWrenchReader);
+      physicsEngine.addExternalWrenchProvider(externalForcePointWrapper);
       physicsEngine.addInertialMeasurementReader(imuSensorReader);
    }
 
@@ -150,6 +152,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsInputStateWriter,
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
+      externalForcePointWrapper.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
@@ -176,6 +179,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsInputStateWriter,
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
+      externalForcePointWrapper.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
@@ -213,6 +217,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsInputStateWriter,
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
+      externalForcePointWrapper.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
       robotTransformUpdater.addRobot(rootBody, scsRobot);
    }
