@@ -1108,6 +1108,16 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
+   public static ValkyrieMutableInitialSetup newStand1(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(0.0, 0.0, -0.468, 1.025, -0.557, 0.0);
+      initialSetup.setArmJointQs(-0.080, -1.160, 0.019, -1.460);
+      initialSetup.setRootJointPose(0.0, 0.0, 1.0586, 0.0, 0.0, 0.0);
+
+      return initialSetup;
+   }
+
    public static void main(String[] args)
    {
       String input =
