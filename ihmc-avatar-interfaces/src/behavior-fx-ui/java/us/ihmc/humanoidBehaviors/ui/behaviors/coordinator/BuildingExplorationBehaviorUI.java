@@ -12,6 +12,7 @@ import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -20,6 +21,9 @@ import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
+import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -42,7 +46,7 @@ public class BuildingExplorationBehaviorUI
    private final BorderPane mainPane;
    private final PlanarRegionViewer planarRegionViewer;
    private final JavaFXRobotVisualizer robotVisualizer;
-   private final BuildingExplorationFootstepVisualizer footstepVisualizer;
+   private final FootstepPlanGraphic footstepPlanGraphic;
    private final BuildingExplorationGoalMouseListener goalMouseListener;
    private final ROS2Node ros2Node;
 
@@ -86,12 +90,13 @@ public class BuildingExplorationBehaviorUI
 
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegions, ShowRegions);
-      footstepVisualizer = new BuildingExplorationFootstepVisualizer(ros2Node);
+      footstepPlanGraphic = new FootstepPlanGraphic();
+      new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
+            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
       goalMouseListener = new BuildingExplorationGoalMouseListener(messager, subScene);
 
       robotVisualizer.start();
       planarRegionViewer.start();
-      footstepVisualizer.start();
       goalMouseListener.start();
 
       GoalGraphic goalGraphic = new GoalGraphic();
@@ -107,7 +112,7 @@ public class BuildingExplorationBehaviorUI
       messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
-      view3dFactory.addNodeToView(footstepVisualizer.getRoot());
+      view3dFactory.addNodeToView(footstepPlanGraphic);
 
       buildingExplorationUIDashboardController.bindControls(messager, ros2Node);
       mainPane.setCenter(subScene);
@@ -129,7 +134,7 @@ public class BuildingExplorationBehaviorUI
       planarRegionViewer.stop();
       robotVisualizer.stop();
       ros2Node.destroy();
-      footstepVisualizer.stop();
+      footstepPlanGraphic.destroy();
    }
 
    private static class GoalGraphic extends Group
