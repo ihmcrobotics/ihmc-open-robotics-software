@@ -2,13 +2,17 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
@@ -75,6 +79,27 @@ public class MinimalFootstep
       for (Pair<RobotSide, Pose3D> pair : pairList)
       {
          minimalFootsteps.add(new MinimalFootstep(pair.getLeft(), pair.getRight()));
+      }
+      return minimalFootsteps;
+   }
+
+   public static ArrayList<MinimalFootstep> convertFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
+   {
+      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+      int size = footstepDataListMessage.getFootstepDataList().size();
+      for (int i = 0; i < size; i++)
+      {
+         FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         for (Point3D contactPoint : footstep.getPredictedContactPoints2d())
+         {
+            foothold.addVertex(contactPoint);
+         }
+         foothold.update();
+         Pose3D pose = new Pose3D(footstep.getLocation(), footstep.getOrientation());
+         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()),
+                                                  pose,
+                                                  foothold.getNumberOfVertices() > 0 ? foothold : null));
       }
       return minimalFootsteps;
    }
