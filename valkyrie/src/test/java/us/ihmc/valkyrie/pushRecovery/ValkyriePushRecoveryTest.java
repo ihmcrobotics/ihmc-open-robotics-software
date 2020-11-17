@@ -20,7 +20,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    @Override
    public double getForceScale()
    {
-      return 0.5;
+      return 1.0;
    }
 
    @Tag("humanoid-push-recovery-slow")
