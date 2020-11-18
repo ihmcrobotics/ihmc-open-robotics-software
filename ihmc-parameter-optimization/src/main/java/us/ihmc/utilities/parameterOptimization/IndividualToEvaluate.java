@@ -17,6 +17,8 @@ public abstract class IndividualToEvaluate
 
    public abstract double computeFitness();
    
+   public abstract void replay();
+
    public String getName()
    {
       return name;
@@ -65,4 +67,5 @@ public abstract class IndividualToEvaluate
       fitnessAlreadyComputed = true;
       cachedFitness = fitness;
    }
+
 }
