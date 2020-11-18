@@ -37,6 +37,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FiducialDetectorToolboxController extends ToolboxController
@@ -46,6 +47,8 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private static RescaleOp imageRescalingOperation;
 
    private final AtomicReference<VideoPacket> videoPacket = new AtomicReference<VideoPacket>();
+
+   private final Timer statusTimer = new Timer();
 
    //debugging only
    private boolean DEBUG = false;
@@ -211,6 +214,12 @@ public class FiducialDetectorToolboxController extends ToolboxController
          packet.fiducial_id_ = detector.getId(i);
 
          Pose3D pose = new Pose3D(reportedFiducialPoseInWorldFrame.getPosition(), reportedFiducialPoseInWorldFrame.getOrientation());
+
+         if (!statusTimer.isRunning(5.0))
+         {
+            LogTools.info("Found fiducial: id: {} pose: {}", packet.getFiducialId(), pose);
+            statusTimer.reset();
+         }
 
          packet.fiducial_transform_to_world_ = pose;
 
