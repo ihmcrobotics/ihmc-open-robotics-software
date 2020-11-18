@@ -82,7 +82,7 @@ public class GeneticAlgorithmGUI implements GeneticAlgorithmChangedListener, Sel
 
       geneticAlgorithmProgressPanel = new GeneticAlgorithmProgressPanel(ga);
       contentPane.add(geneticAlgorithmProgressPanel);
-
+ 
       individualSummaryPanel = new IndividualSummaryPanel(this);
       individualSummaryScrollPane = new JScrollPane(individualSummaryPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -92,7 +92,7 @@ public class GeneticAlgorithmGUI implements GeneticAlgorithmChangedListener, Sel
       gaStatisticsScrollPane = new JScrollPane(gaStatisticsPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       gaStatisticsScrollPane.setBorder(new TitledBorder("Statistics"));
 
-      JSplitPane panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, gaStatisticsPanel, individualSummaryPanel);
+      JSplitPane panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, gaStatisticsPanel, individualSummaryScrollPane);
       contentPane.add(panel);
 
 
