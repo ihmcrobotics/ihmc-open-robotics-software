@@ -36,6 +36,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
       controller = new KinematicsStreamingToolboxController(commandInputManager,
@@ -51,7 +52,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
       controller.setOutputPublisher(outputPublisher::publish);
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
       if (yoVariableServer != null)
       {
