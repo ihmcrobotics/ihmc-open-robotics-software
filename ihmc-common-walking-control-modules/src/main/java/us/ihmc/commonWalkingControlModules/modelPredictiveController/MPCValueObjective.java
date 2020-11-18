@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCValueObjective
+public class MPCValueObjective implements MPCCommand<MPCValueObjective>
 {
    private final FramePoint3D objective = new FramePoint3D();
    private final List<CoefficientJacobianMatrixHelper> jacobianMatrixHelpers = new ArrayList<>();
@@ -19,6 +19,11 @@ public class MPCValueObjective
    private double omega;
 
    private MPCValueType valueType = MPCValueType.COM;
+
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.VALUE;
+   }
 
    public void clear()
    {
