@@ -2,14 +2,21 @@ package us.ihmc.humanoidBehaviors.demo;
 
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -22,6 +29,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -32,6 +40,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -79,19 +88,20 @@ public class BuildingExplorationBehaviorCoordinator
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(String robotName,
+   public BuildingExplorationBehaviorCoordinator(DRCRobotModel robotModel,
                                                  ROS2NodeInterface ros2Node,
                                                  Messager behaviorMessager)
    {
+      String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       this.ros2Node = ros2Node;
       this.behaviorMessager = behaviorMessager;
 
-      teleopState = new TeleopState();
+      teleopState = new TeleopState(robotModel,ros2Node);
 //      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
-      lookAndStepState = new LookAndStepState(robotName, ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
-      walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
+      lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
+      walkThroughDoorState = new WalkThroughDoorState(robotModel, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
@@ -263,14 +273,18 @@ public class BuildingExplorationBehaviorCoordinator
 
    private static class TeleopState implements State
    {
+      private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
+
+      public TeleopState(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+      {
+         goHomePublisher = ROS2Tools.createPublisher(ros2Node, ControllerAPIDefinition.getTopic(GoHomeMessage.class, robotModel.getSimpleRobotName()));
+      }
+
       @Override
       public void onEntry()
       {
          // do nothing, this is an idle state where the operator sends commands from the VR UI
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
       }
 
       @Override
@@ -282,10 +296,30 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onExit(double timeInState)
       {
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
+
+         double trajectoryTime = 3.5;
+         GoHomeMessage homeLeftArm = new GoHomeMessage();
+         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+         homeLeftArm.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeLeftArm);
+
+         GoHomeMessage homeRightArm = new GoHomeMessage();
+         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+         homeRightArm.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeRightArm);
+
+         GoHomeMessage homePelvis = new GoHomeMessage();
+         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+         homePelvis.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homePelvis);
+
+         GoHomeMessage homeChest = new GoHomeMessage();
+         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+         homeChest.setTrajectoryTime(trajectoryTime);
+         goHomePublisher.publish(homeChest);
       }
    }
 
@@ -327,7 +361,6 @@ public class BuildingExplorationBehaviorCoordinator
       private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
       private final IHMCROS2Publisher<Empty> resetPublisher;
-      private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
 
       private final Point3DReadOnly bombPosition;
       private final Pose3D bombPose = new Pose3D();
@@ -342,6 +375,8 @@ public class BuildingExplorationBehaviorCoordinator
       private final AtomicBoolean stairsDetected = new AtomicBoolean();
 
       private final AtomicInteger stepCounter = new AtomicInteger();
+      private final RemoteSyncedRobotModel syncedRobot;
+      private final IHMCROS2Publisher<ChestTrajectoryMessage> chestTrajectoryPublisher;
       private int numberOfStepsToIgnoreDebris = 0;
 
       private Runnable debrisDetectedCallback = () -> {};
@@ -352,7 +387,7 @@ public class BuildingExplorationBehaviorCoordinator
 
       boolean lookAndStepStarted = false;
 
-      public LookAndStepState(String robotName,
+      public LookAndStepState(DRCRobotModel robotModel,
                               ROS2NodeInterface ros2Node,
                               Messager messager,
                               Point3DReadOnly bombPosition,
@@ -361,16 +396,20 @@ public class BuildingExplorationBehaviorCoordinator
          this.messager = messager;
          this.bombPosition = bombPosition;
          this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
+         String robotName = robotModel.getSimpleRobotName();
 
          goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
          resetPublisher = ROS2Tools.createPublisher(ros2Node, LookAndStepBehaviorAPI.RESET);
-         goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
          this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
          this.footstepPlannerParameters.setBodyBoxWidth(debrisCheckBodyBoxDepth);
          this.footstepPlannerParameters.setBodyBoxHeight(debrisCheckBodyBoxHeight);
          this.footstepPlannerParameters.setBodyBoxBaseZ(debrisCheckBodyBoxBaseZ);
+
+         syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+
+         chestTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ControllerAPIDefinition.getTopic(ChestTrajectoryMessage.class, robotName));
 
          bodyPath = messager.createInput(LookAndStepBehaviorAPI.BodyPathPlanForUI);
          ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, s -> planarRegions.set(s.takeNextData()));
@@ -394,31 +433,7 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
-         double trajectoryTime = 3.5;
-
-         GoHomeMessage homeLeftArm = new GoHomeMessage();
-         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-         homeLeftArm.setTrajectoryTime(trajectoryTime);
-         goHomePublisher.publish(homeLeftArm);
-
-         GoHomeMessage homeRightArm = new GoHomeMessage();
-         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-         homeRightArm.setTrajectoryTime(trajectoryTime);
-         goHomePublisher.publish(homeRightArm);
-
-         GoHomeMessage homePelvis = new GoHomeMessage();
-         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-         homePelvis.setTrajectoryTime(trajectoryTime);
-         goHomePublisher.publish(homePelvis);
-
-         GoHomeMessage homeChest = new GoHomeMessage();
-         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-         homeChest.setTrajectoryTime(trajectoryTime);
-         goHomePublisher.publish(homeChest);
-
-         ThreadTools.sleepSeconds(trajectoryTime);
+         pitchChestToSeeDoor(syncedRobot, chestTrajectoryPublisher);
 
          if (DEBUG)
          {
@@ -448,6 +463,8 @@ public class BuildingExplorationBehaviorCoordinator
             LogTools.info("Waiting for BODY_PATH_PLANNING state...");
          }
       }
+
+
 
       @Override
       public void doAction(double timeInState)
@@ -584,6 +601,32 @@ public class BuildingExplorationBehaviorCoordinator
       }
    }
 
+   private static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, IHMCROS2Publisher<ChestTrajectoryMessage> publisher)
+   {
+      syncedRobot.update();
+
+      double desiredChestPitch = -0.017;
+      double trajectoryTime = 2.0;
+
+      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      frameChestYawPitchRoll.setPitch(desiredChestPitch);
+      frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+      message.getSo3Trajectory()
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
+                                                                  frameChestYawPitchRoll,
+                                                                  EuclidCoreTools.zeroVector3D,
+                                                                  ReferenceFrame.getWorldFrame()));
+      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+      publisher.publish(message);
+
+      ThreadTools.sleepSeconds(trajectoryTime);
+   }
+
    private static class WalkThroughDoorState implements State
    {
       final IHMCROS2Publisher<BehaviorControlModePacket> behaviorModePublisher;
@@ -591,14 +634,21 @@ public class BuildingExplorationBehaviorCoordinator
       final AtomicBoolean isDone = new AtomicBoolean();
       final AtomicBoolean receivedOperatorConfirmation = new AtomicBoolean();
       final AtomicBoolean hasStartedBehavior = new AtomicBoolean();
+      private final RemoteSyncedRobotModel syncedRobot;
+      private final IHMCROS2Publisher<ChestTrajectoryMessage> chestTrajectoryPublisher;
 
-      public WalkThroughDoorState(String robotName, ROS2NodeInterface ros2Node)
+      public WalkThroughDoorState(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
       {
+         String robotName = robotModel.getSimpleRobotName();
          ROS2Topic<?> inputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
          ROS2Topic<?> outputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
+         syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+         chestTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ControllerAPIDefinition.getTopic(ChestTrajectoryMessage.class, robotName));
+
          behaviorModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModePacket.class, inputTopic);
          behaviorTypePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HumanoidBehaviorTypePacket.class, inputTopic);
+
 
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopic, s ->
          {
@@ -614,6 +664,8 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
+         pitchChestToSeeDoor(syncedRobot, chestTrajectoryPublisher);
+
          receivedOperatorConfirmation.set(false);
          hasStartedBehavior.set(false);
          isDone.set(false);
