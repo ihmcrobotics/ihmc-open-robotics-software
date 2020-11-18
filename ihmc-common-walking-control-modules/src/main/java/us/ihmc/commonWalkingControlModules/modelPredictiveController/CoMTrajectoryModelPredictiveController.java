@@ -100,6 +100,7 @@ public class CoMTrajectoryModelPredictiveController
 
    private final RecyclingArrayList<MPCValueObjective> comValueObjectivePool = new RecyclingArrayList<>(MPCValueObjective::new);
    private final RecyclingArrayList<CoMContinuityObjective> comContinuityObjectivePool = new RecyclingArrayList<>(CoMContinuityObjective::new);
+   private final MPCCommandList mpcCommands = new MPCCommandList();
 
    private CornerPointViewer viewer = null;
    private BagOfBalls comTrajectoryViewer = null;
@@ -221,14 +222,15 @@ public class CoMTrajectoryModelPredictiveController
 
       comValueObjectivePool.clear();
       comContinuityObjectivePool.clear();
+      mpcCommands.clear();
 
-      computeInitialCoMPositionObjective(comValueObjectivePool.add());
+      mpcCommands.addCommand(computeInitialCoMPositionObjective(comValueObjectivePool.add()));
       if (includeVelocityObjective)
-         computeInitialCoMVelocityObjective(comValueObjectivePool.add());
+         mpcCommands.addCommand(computeInitialCoMVelocityObjective(comValueObjectivePool.add()));
       if (contactSequence.get(0).getContactState().isLoadBearing())
       {
          double duration = contactSequence.get(0).getTimeInterval().getDuration();
-         computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(0), 0, duration, 0.0);
+         mpcCommands.addCommand(computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(0), 0, duration, 0.0));
       }
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
@@ -239,17 +241,17 @@ public class CoMTrajectoryModelPredictiveController
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
             double duration = contactSequence.get(transition).getTimeInterval().getDuration();
-            computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), endVRPPositions.get(transition), transition, duration, duration);
+            mpcCommands.addCommand(computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), endVRPPositions.get(transition), transition, duration, duration));
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
             double duration = contactSequence.get(nextSequence).getTimeInterval().getDuration();
-            computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(nextSequence), nextSequence, duration, 0.0);
+            mpcCommands.addCommand(computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), startVRPPositions.get(nextSequence), nextSequence, duration, 0.0));
          }
       }
    }
 
-   private void computeInitialCoMPositionObjective(MPCValueObjective objectiveToPack)
+   private MPCCommand<?> computeInitialCoMPositionObjective(MPCValueObjective objectiveToPack)
    {
       objectiveToPack.clear();
       objectiveToPack.setValueType(MPCValueType.COM);
@@ -263,9 +265,11 @@ public class CoMTrajectoryModelPredictiveController
          objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
          objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
       }
+
+      return objectiveToPack;
    }
 
-   private void computeInitialCoMVelocityObjective(MPCValueObjective objectiveToPack)
+   private MPCCommand<?> computeInitialCoMVelocityObjective(MPCValueObjective objectiveToPack)
    {
       objectiveToPack.clear();
       objectiveToPack.setValueType(MPCValueType.COM);
@@ -279,11 +283,14 @@ public class CoMTrajectoryModelPredictiveController
          objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
          objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
       }
+
+      return objectiveToPack;
    }
 
    private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final MPCCommandList segmentObjectiveList = new MPCCommandList();
 
-   private void computeVRPSegmentObjective(MPCValueObjective positionObjectiveToPack,
+   private MPCCommand<?> computeVRPSegmentObjective(MPCValueObjective positionObjectiveToPack,
                                            MPCValueObjective velocityObjectiveToPack,
                                            FramePoint3DReadOnly desiredVRPPosition,
                                            int segmentNumber,
@@ -293,11 +300,14 @@ public class CoMTrajectoryModelPredictiveController
       desiredVelocity.sub(endVRPPositions.get(segmentNumber), startVRPPositions.get(segmentNumber));
       desiredVelocity.scale(1.0 / segmentDuration);
 
-      computeVRPObjective(positionObjectiveToPack, segmentNumber, 0, constraintTime, desiredVRPPosition);
-      computeVRPObjective(velocityObjectiveToPack, segmentNumber, 1, constraintTime, desiredVelocity);
+      segmentObjectiveList.clear();
+      segmentObjectiveList.addCommand(computeVRPObjective(positionObjectiveToPack, segmentNumber, 0, constraintTime, desiredVRPPosition));
+      segmentObjectiveList.addCommand(computeVRPObjective(velocityObjectiveToPack, segmentNumber, 1, constraintTime, desiredVelocity));
+
+      return segmentObjectiveList;
    }
 
-   private void computeVRPObjective(MPCValueObjective objectiveToPack,
+   private MPCCommand<?> computeVRPObjective(MPCValueObjective objectiveToPack,
                                     int segmentNumber,
                                     int derivativeOrder,
                                     double constraintTime,
@@ -315,6 +325,8 @@ public class CoMTrajectoryModelPredictiveController
          objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(segmentNumber).get(i));
          objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(segmentNumber).get(i));
       }
+
+      return objectiveToPack;
    }
 
    /**

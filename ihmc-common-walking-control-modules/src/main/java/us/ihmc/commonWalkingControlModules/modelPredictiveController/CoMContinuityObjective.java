@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoMContinuityObjective
+public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective>
 {
    private final FramePoint3D objective = new FramePoint3D();
    private final List<CoefficientJacobianMatrixHelper> firstSegmentJacobianMatrixHelpers = new ArrayList<>();
@@ -19,6 +19,11 @@ public class CoMContinuityObjective
    private int firstSegmentNumber;
    private double firstSegmentDuration;
    private double omega;
+
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.CONTINUITY;
+   }
 
    public void addFirstSegmentJacobianMatrixHelper(CoefficientJacobianMatrixHelper firstSegmentJacobianMatrixHelper)
    {
