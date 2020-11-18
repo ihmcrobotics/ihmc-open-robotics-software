@@ -61,7 +61,7 @@ public class BuildingExplorationBehaviorUI
       this.ros2Node = ros2Node;
       primaryStage.setTitle(getClass().getSimpleName());
 
-      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel.getSimpleRobotName(),
+      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel,
                                                                                                               ros2Node,
                                                                                                               behaviorMessager);
       createMessageBindings(ros2Node, robotModel.getSimpleRobotName(), messager, behaviorCoordinator);
