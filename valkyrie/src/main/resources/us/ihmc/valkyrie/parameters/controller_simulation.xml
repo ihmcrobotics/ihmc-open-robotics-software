@@ -132,7 +132,7 @@
                         <parameter name="controllerMaxReachabilityLength" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
                         <parameter name="controllerMaxReachabilityBackwardLength" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
                         <parameter name="controllerMinReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="controllerMaxReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                        <parameter name="controllerMaxReachabilityWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
                         <parameter name="controllerForwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                         <parameter name="controllerBackwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                         <parameter name="controllerInwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
@@ -161,6 +161,7 @@
                      <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="ICPVelocityDecayDurationWhenDone" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   </registry>
                   <registry name="CenterOfMassHeightManager">
                      <registry name="CenterOfMassHeightControlState">
@@ -555,7 +556,7 @@
                      <parameter name="controllerUseICPControlPolygons" type="BooleanParameter" value="true" />
                      <parameter name="controllerSafeCoPDistanceToEdge" type="DoubleParameter" min="0.0" max="1.0" value="0.001" />
                      <parameter name="controllerMaxAllowedDistanceCMPSupport" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                     <parameter name="controllerUseSmartICPIntegrator" type="BooleanParameter" value="false" />
+                     <parameter name="controllerUseSmartICPIntegrator" type="BooleanParameter" value="true" />
                      <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
                   </registry>
                   <parameter name="capturePointVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="26.5" />
