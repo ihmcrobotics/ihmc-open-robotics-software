@@ -468,12 +468,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.SETUP_ROBOT);
-      factory.addState(WalkThroughDoorBehaviorState.SETUP_ROBOT, resetRobot);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT, resetRobot, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
+      factory.addState(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar);
 
       //PUSH ******************
 
-      factory.addTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT,
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR,
                             WalkThroughDoorBehaviorState.WALKING_TO_PUSH_DOOR,
                             t -> searchForDoorFar.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT);
 
@@ -488,7 +488,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       //PULL ******************
 
-      factory.addTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT,
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR,
                             WalkThroughDoorBehaviorState.WALKING_TO_PULL_DOOR,
                             t -> searchForDoorFar.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT);
 
@@ -559,7 +559,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
       });
 
-      return WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR;
+      return WalkThroughDoorBehaviorState.SETUP_ROBOT;
    }
 
    private FramePoint3D offsetPointFromDoor(Vector3D32 point)
