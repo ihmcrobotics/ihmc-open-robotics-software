@@ -82,4 +82,9 @@ public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
       return listOfParametersToOptimize;
    }
 
+   @Override
+   public void replay()
+   {      
+   }
+
 }
