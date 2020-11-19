@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane prefHeight="242.0" prefWidth="652.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+	<children>
+		<GridPane layoutX="15.0" layoutY="15.0" prefHeight="220.0" prefWidth="629.0">
+			<children>
+
+                <Label style="-fx-font-weight: bold" text="Arms" GridPane.rowIndex="0" />
+                <Button onAction="#sendLeftArmIn" text="Left Arm In" GridPane.rowIndex="1" />
+                <Button onAction="#sendRightArmIn" text="Right Arm In" GridPane.rowIndex="2" />
+
+                <Label style="-fx-font-weight: bold" text="Kinematics control" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <ToggleButton fx:id="enableIK" text="Enable" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Button fx:id="resetIK" onAction="#resetIKOffset" text="Reset" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="IK Mode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="x" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label text="y" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Label text="z" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <Label text="yaw" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <Label text="pitch" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                <Label text="roll" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+
+                <Button onAction="#sendJointspaceTrajectory" text="Send jointspace trajectory" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                <Button onAction="#sendTaskspaceTrajectory" text="Send taskspace trajectory" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                <ComboBox fx:id="ikMode" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                <Slider blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" fx:id="xIKSlider" />
+                <Slider fx:id="yIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="5" GridPane.rowIndex="5" />
+                <Slider fx:id="zIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="6" GridPane.rowIndex="6" />
+                <Slider fx:id="yawIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="7" GridPane.rowIndex="7" />
+                <Slider fx:id="pitchIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="8" GridPane.rowIndex="8" />
+                <Slider fx:id="rollIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="2" GridPane.columnSpan="9" GridPane.rowIndex="9" />
+
+            </children>
+            <columnConstraints>
+                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="130.0" />
+                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="156.0" />
+                <ColumnConstraints maxWidth="339.0" minWidth="10.0" prefWidth="339.0" />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            </rowConstraints>
+        </GridPane>
+    </children>
+</AnchorPane>
