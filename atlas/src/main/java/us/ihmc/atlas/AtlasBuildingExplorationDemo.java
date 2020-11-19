@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 {
    private static boolean USE_KINEMATICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.kinematics.simulation"));
-   private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "0"))];
+   private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "1"))];
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
    private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "false"));
