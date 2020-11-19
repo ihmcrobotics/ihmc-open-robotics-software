@@ -1,29 +1,32 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCValueObjective implements MPCCommand<MPCValueObjective>
+public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
 {
    private final FramePoint3D objective = new FramePoint3D();
    private final List<CoefficientJacobianMatrixHelper> jacobianMatrixHelpers = new ArrayList<>();
    private final List<ContactStateMagnitudeToForceMatrixHelper> rhoToForceMatrixHelpers = new ArrayList<>();
 
-   private int derivativeOrder;
    private int segmentNumber;
    private double timeOfObjective;
    private double omega;
-
-   private MPCValueType valueType = MPCValueType.COM;
 
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.VALUE;
    }
+
+   public abstract int getDerivativeOrder();
+
+   public abstract MPCValueType getValueType();
 
    public void clear()
    {
@@ -41,19 +44,9 @@ public class MPCValueObjective implements MPCCommand<MPCValueObjective>
       jacobianMatrixHelpers.add(jacobianMatrixHelper);
    }
 
-   public void setValueType(MPCValueType valueType)
-   {
-      this.valueType = valueType;
-   }
-
    public void setObjective(FrameTuple3DReadOnly objective)
    {
       this.objective.set(objective);
-   }
-
-   public void setDerivativeOrder(int derivativeOrder)
-   {
-      this.derivativeOrder = derivativeOrder;
    }
 
    public void setSegmentNumber(int segmentNumber)
@@ -71,19 +64,9 @@ public class MPCValueObjective implements MPCCommand<MPCValueObjective>
       this.omega = omega;
    }
 
-   public MPCValueType getValueType()
-   {
-      return valueType;
-   }
-
    public int getSegmentNumber()
    {
       return segmentNumber;
-   }
-
-   public int getDerivativeOrder()
-   {
-      return derivativeOrder;
    }
 
    public double getTimeOfObjective()

@@ -1,12 +1,13 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective>
+public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCommand>
 {
    private final List<CoefficientJacobianMatrixHelper> firstSegmentJacobianMatrixHelpers = new ArrayList<>();
    private final List<CoefficientJacobianMatrixHelper> secondSegmentJacobianMatrixHelpers = new ArrayList<>();
@@ -14,7 +15,6 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
    private final List<ContactStateMagnitudeToForceMatrixHelper> firstRhoToForceMatrixHelpers = new ArrayList<>();
    private final List<ContactStateMagnitudeToForceMatrixHelper> secondRhoToForceMatrixHelpers = new ArrayList<>();
 
-   private int derivativeOrder;
    private int firstSegmentNumber;
    private double firstSegmentDuration;
    private double omega;
@@ -23,6 +23,8 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
    {
       return MPCCommandType.CONTINUITY;
    }
+
+   public abstract int getDerivativeOrder();
 
    public void clear()
    {
@@ -52,11 +54,6 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
    {
       secondSegmentJacobianMatrixHelpers.add(secondSegmentJacobianMatrixHelper);
    }
-   
-   public void setDerivativeOrder(int derivativeOrder)
-   {
-      this.derivativeOrder = derivativeOrder;
-   }
 
    public void setFirstSegmentNumber(int firstSegmentNumber)
    {
@@ -76,11 +73,6 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
    public int getFirstSegmentNumber()
    {
       return firstSegmentNumber;
-   }
-
-   public int getDerivativeOrder()
-   {
-      return derivativeOrder;
    }
 
    public double getFirstSegmentDuration()

@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -18,7 +20,7 @@ public class MPCQPInputCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
-   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityObjective objective, double weight)
+   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -70,7 +72,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   public boolean calculateValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
    {
       switch (objective.getValueType())
       {
@@ -85,7 +87,7 @@ public class MPCQPInputCalculator
       }
    }
 
-   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -117,7 +119,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -152,7 +154,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
    {
       inputToPack.reshape(3);
 

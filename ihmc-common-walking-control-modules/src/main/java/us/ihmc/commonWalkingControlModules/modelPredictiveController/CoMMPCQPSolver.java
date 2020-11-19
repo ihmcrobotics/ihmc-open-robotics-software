@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -228,10 +230,10 @@ public class CoMMPCQPSolver
          switch (command.getCommandType())
          {
             case VALUE:
-               submitMPCValueObjective((MPCValueObjective) command, weight);
+               submitMPCValueObjective((MPCValueCommand) command, weight);
                break;
             case CONTINUITY:
-               submitCoMContinuityObjective((CoMContinuityObjective) command, weight);
+               submitCoMContinuityObjective((CoMContinuityCommand) command, weight);
                break;
             case LIST:
                submitMPCCommandList((MPCCommandList) command, weight);
@@ -242,14 +244,14 @@ public class CoMMPCQPSolver
       }
    }
 
-   private void submitMPCValueObjective(MPCValueObjective command, double weight)
+   private void submitMPCValueObjective(MPCValueCommand command, double weight)
    {
       boolean success = inputCalculator.calculateValueObjective(qpInput, command, weight);
       if (success)
          addInput(qpInput);
    }
 
-   private void submitCoMContinuityObjective(CoMContinuityObjective command, double weight)
+   private void submitCoMContinuityObjective(CoMContinuityCommand command, double weight)
    {
       boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command, weight);
       if (success)
