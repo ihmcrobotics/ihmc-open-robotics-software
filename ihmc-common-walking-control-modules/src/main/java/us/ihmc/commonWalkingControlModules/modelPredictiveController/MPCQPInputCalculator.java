@@ -16,7 +16,7 @@ public class MPCQPInputCalculator
       this.indexHandler = indexHandler;
    }
 
-   public void calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityObjective objective, double weight)
+   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -62,25 +62,26 @@ public class MPCQPInputCalculator
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
+
+      return true;
    }
 
-   public void calculateValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   public boolean calculateValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       switch (objective.getValueType())
       {
          case COM:
-            calculateCoMValueObjective(inputToPack, objective, weight);
-            break;
+            return calculateCoMValueObjective(inputToPack, objective, weight);
          case VRP:
-            calculateVRPValueObjective(inputToPack, objective, weight);
-            break;
+            return calculateVRPValueObjective(inputToPack, objective, weight);
          case DCM:
-            calculateDCMValueObjective(inputToPack, objective, weight);
-            break;
+            return calculateDCMValueObjective(inputToPack, objective, weight);
+         default:
+            return false;
       }
    }
 
-   private void calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -107,9 +108,11 @@ public class MPCQPInputCalculator
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
+
+      return true;
    }
 
-   private void calculateDCMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -138,9 +141,11 @@ public class MPCQPInputCalculator
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
+
+      return true;
    }
 
-   private void calculateVRPValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
+   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
 
@@ -170,5 +175,7 @@ public class MPCQPInputCalculator
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
+
+      return true;
    }
 }
