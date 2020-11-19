@@ -14,7 +14,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
@@ -24,11 +23,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
-import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
+import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
@@ -47,12 +42,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
    private ROS2PublisherMap ros2Publisher;
    private LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
-   private PoseGraphic goalGraphic;
-
-   private SnappedPositionEditor snappedPositionEditor;
-   private OrientationYawEditor orientationYawEditor;
-
-   private FXUIActionMap placeGoalActionMap;
+   private WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
 
    @FXML private Button placeGoalButton;
    @FXML private Button publishSupportRegions;
@@ -81,7 +71,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
       getChildren().add(lookAndStepVisualizationGroup);
-      goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
 
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
@@ -97,31 +86,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
       behaviorMessager.registerTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
-      snappedPositionEditor = new SnappedPositionEditor(sceneNode);
-      orientationYawEditor = new OrientationYawEditor(sceneNode);
-
-      placeGoalActionMap = new FXUIActionMap(startAction ->
-      {
-         placeGoalButton.setDisable(true);
-         snappedPositionEditor.edit(EditMode.BOTH, goalGraphic, exitType ->
-         {
-            placeGoalActionMap.triggerAction(exitType);
-         });
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         orientationYawEditor.edit(goalGraphic, exitType -> placeGoalActionMap.triggerAction(exitType));
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
-      {
-         ros2Publisher.publish(GOAL_INPUT, new Pose3D(goalGraphic.getPose()));
-
-         placeGoalButton.setDisable(false);
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
-      {
-         placeGoalButton.setDisable(false);
-      });
+      walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_INPUT, placedGoal));
 
       behaviorMessager.registerTopicListener(ResetForUI, message -> lookAndStepVisualizationGroup.clearGraphics());
 
@@ -134,11 +99,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       lookAndStepVisualizationGroup.setEnabled(enabled);
       if (!enabled)
       {
-         Platform.runLater(() -> getChildren().remove(goalGraphic));
+         Platform.runLater(() -> getChildren().remove(walkingGoalPlacementEditor));
       }
       else
       {
-         Platform.runLater(() -> getChildren().add(goalGraphic));
+         Platform.runLater(() -> getChildren().add(walkingGoalPlacementEditor));
       }
    }
 
@@ -161,7 +126,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void placeGoalButton()
    {
-      placeGoalActionMap.start();
+      walkingGoalPlacementEditor.startGoalPlacement();
    }
 
    @FXML public void approve()
