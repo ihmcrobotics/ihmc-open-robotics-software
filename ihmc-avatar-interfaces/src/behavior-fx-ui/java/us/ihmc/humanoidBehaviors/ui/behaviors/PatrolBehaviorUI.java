@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
@@ -85,7 +86,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    {
       this.behaviorMessager = behaviorMessager;
 
-      footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+      footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       getChildren().add(footstepPlanGraphic);
 
       upDownGoalGraphic = new UpDownGoalGraphic();
@@ -95,7 +96,8 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
-      behaviorMessager.registerTopicListener(CurrentFootstepPlan, footstepPlanGraphic::generateMeshesAsynchronously);
+      behaviorMessager.registerTopicListener(CurrentFootstepPlan, footstepPlan ->
+            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan)));
       behaviorMessager.registerTopicListener(UpDownGoalPoses, result -> Platform.runLater(() -> upDownGoalGraphic.setResult(result)));
 
       Platform.runLater(() ->
