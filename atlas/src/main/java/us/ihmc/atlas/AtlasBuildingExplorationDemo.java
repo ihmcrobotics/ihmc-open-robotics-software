@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 {
-   private static boolean USE_KINEMATICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.kinematics.simulation"));
+   private static boolean USE_KINEMATICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.kinematics.simulation", "false"));
    private static StartingLocation STARTING_LOCATION = StartingLocation.values()[Integer.parseInt(System.getProperty("starting.location", "1"))];
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
@@ -79,8 +79,8 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       modulesToStart.add(DRCSimulationTools.Modules.NETWORK_PROCESSOR);
       modulesToStart.add(DRCSimulationTools.Modules.FIDUCIAL_DETECTOR);
       modulesToStart.add(DRCSimulationTools.Modules.OBJECT_DETECTOR);
-      modulesToStart.add(DRCSimulationTools.Modules.BEHAVIOR_MODULE);
-      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
+//      modulesToStart.add(DRCSimulationTools.Modules.BEHAVIOR_MODULE);
+//      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
       LogTools.info("Starting simulation modules");
 
       String[] args = {"-m " + robotModel.getAtlasVersion().name()};
