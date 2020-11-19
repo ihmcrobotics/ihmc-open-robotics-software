@@ -17,10 +17,10 @@ public class CoMCoefficientJacobianCalculator
             calculateVelocityJacobian(segmentId, time, jacobianToPack, scale);
             break;
          case 2:
-            calculateAccelerationJacobian(segmentId, time, jacobianToPack, scale);
+            calculateAccelerationJacobian();
             break;
          case 3:
-            calculateJerkJacobian(segmentId, jacobianToPack, scale);
+            calculateJerkJacobian();
          default:
             throw new IllegalArgumentException("Derivative order must be less than 4.");
       }
@@ -43,8 +43,8 @@ public class CoMCoefficientJacobianCalculator
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
       {
          int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
-         double c1 = scale * time * time;
-         double c0 = scale * time * c1;
+         double c1 = scale;
+         double c0 = time * c1;
          add(positionJacobianToPack, 0, startIndex, c0);
          add(positionJacobianToPack, 0, startIndex + 1, c1);
          add(positionJacobianToPack, 1, startIndex + 2, c0);
@@ -59,42 +59,18 @@ public class CoMCoefficientJacobianCalculator
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
       {
          int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
-         double c0 = 3.0 * scale * time * time;
-         double c1 = 2.0 * scale * time;
-         add(velocityJacobianToPack, 0, startIndex, c0);
-         add(velocityJacobianToPack, 0, startIndex + 1, c1);
-         add(velocityJacobianToPack, 1, startIndex + 2, c0);
-         add(velocityJacobianToPack, 1, startIndex + 3, c1);
-         add(velocityJacobianToPack, 2, startIndex + 4, c0);
-         add(velocityJacobianToPack, 2, startIndex + 5, c1);
+         add(velocityJacobianToPack, 0, startIndex, scale);
+         add(velocityJacobianToPack, 1, startIndex + 2, scale);
+         add(velocityJacobianToPack, 2, startIndex + 4, scale);
       }
    }
 
-   public static void calculateAccelerationJacobian(int segmentId, double time, DMatrix accelerationJacobianToPack, double scale)
+   public static void calculateAccelerationJacobian()
    {
-      int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
-      double c1 = 2.0 * scale;
-      add(accelerationJacobianToPack, 0, startIndex + 1, c1);
-      add(accelerationJacobianToPack, 1, startIndex + 3, c1);
-      add(accelerationJacobianToPack, 2, startIndex + 5, c1);
-
-      if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
-      {
-         double c0 = 6.0 * time * scale;
-         add(accelerationJacobianToPack, 0, startIndex, c0);
-         add(accelerationJacobianToPack, 1, startIndex + 2, c0);
-         add(accelerationJacobianToPack, 2, startIndex + 4, c0);
-      }
    }
 
-   public static void calculateJerkJacobian(int segmentId, DMatrix jerkJacobianToPack, double scale)
+   public static void calculateJerkJacobian()
    {
-      int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
-
-      double c0 = 6.0 * scale;
-      add(jerkJacobianToPack, 0, startIndex, c0);
-      add(jerkJacobianToPack, 1, startIndex + 2, c0);
-      add(jerkJacobianToPack, 2, startIndex + 4, c0);
    }
 
    private static void add(DMatrix matrixToPack, int row, int col, double value)
