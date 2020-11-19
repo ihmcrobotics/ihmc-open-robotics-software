@@ -17,6 +17,7 @@ public class AtlasNetworkProcessor
    {
       DEFAULT(AtlasNetworkProcessor::defaultNetworkProcessor),
       VR(AtlasNetworkProcessor::vrNetworkProcessor),
+      BEHAVIOR(AtlasNetworkProcessor::behaviorNetworkProcessor),
       MINIMAL(AtlasNetworkProcessor::minimalNetworkProcessor),
       STAIRS(AtlasNetworkProcessor::stairsNetworkProcessor),
       ;
@@ -129,15 +130,30 @@ public class AtlasNetworkProcessor
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
 
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
+      
+      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBehaviorModule(false, false, 0);
+   }
+
+   private static void behaviorNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
-      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
-      
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
-      networkProcessor.setupBehaviorModule(false, false, 0);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
    }
 
    private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)

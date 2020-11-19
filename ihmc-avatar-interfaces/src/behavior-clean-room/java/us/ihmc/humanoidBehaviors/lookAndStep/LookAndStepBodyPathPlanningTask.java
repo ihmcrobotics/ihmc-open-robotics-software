@@ -106,7 +106,7 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
          if (robotTarget == RobotTarget.SCS)
          {
-            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.");
+            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.", robotTarget);
             suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
                                     () -> neckTrajectoryTimerSnapshot.isRunning());
             suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,

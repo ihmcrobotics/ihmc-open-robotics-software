@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
@@ -52,7 +53,7 @@ public class RobotAndMapViewer
 //         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+         footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
          view3dFactory.addNodeToView(footstepPlanGraphic);
 
          bodyPathPlanGraphic = new BodyPathPlanGraphic();
@@ -97,7 +98,7 @@ public class RobotAndMapViewer
          footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
-      footstepPlanGraphic.generateMeshesAsynchronously(footstepLocations);
+      footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepLocations));
    }
 
    public void setBodyPathPlanToVisualize(List<Point3DReadOnly> bodyPath)

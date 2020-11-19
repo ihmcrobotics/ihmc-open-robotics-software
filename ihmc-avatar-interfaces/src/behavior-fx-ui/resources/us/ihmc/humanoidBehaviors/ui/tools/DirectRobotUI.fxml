@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
 	<children>
       <BorderPane>
          <center>
@@ -35,10 +26,10 @@
                      <font>
                         <Font size="11.0" />
                      </font></Label>
+                  <Button fx:id="clearSLAM" mnemonicParsing="false" onAction="#clearSLAM" text="Clear SLAM" GridPane.columnIndex="1" GridPane.rowIndex="3" />
       				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
       				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-      				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-      				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                   <BorderPane GridPane.rowIndex="5">
                      <left>
                         <Label text="PSI" BorderPane.alignment="CENTER" />
@@ -51,6 +42,36 @@
                         </ComboBox>
                      </right>
                   </BorderPane>
+                  <CheckBox fx:id="showRealsenseRegions" mnemonicParsing="false" onAction="#showRealsenseRegions" text="Realsense regions" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showMapRegions" mnemonicParsing="false" onAction="#showMapRegions" text="Map regions" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showSupportRegions" mnemonicParsing="false" onAction="#showSupportRegions" text="Support reigons" GridPane.columnIndex="2" GridPane.rowIndex="6">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showLidarRegions" mnemonicParsing="false" onAction="#showLidarRegions" text="Lidar regions" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showMultisenseVideo" mnemonicParsing="false" onAction="#showMultisenseVideo" text="Multisense video" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                     <font>
+                        <Font size="9.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showRealsenseVideo" mnemonicParsing="false" onAction="#showRealsenseVideo" text="Realsense video" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                     <font>
+                        <Font size="9.0" />
+                     </font>
+                  </CheckBox>
       			</children>
                <columnConstraints>
                   <ColumnConstraints />
