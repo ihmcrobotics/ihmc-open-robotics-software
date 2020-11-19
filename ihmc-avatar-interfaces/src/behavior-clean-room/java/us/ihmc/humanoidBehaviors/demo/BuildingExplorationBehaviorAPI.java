@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.demo;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class BuildingExplorationBehaviorAPI
 {
@@ -12,8 +11,6 @@ public class BuildingExplorationBehaviorAPI
    private static final MessagerAPIFactory.CategoryTheme DemoCoordinator = apiFactory.createCategoryTheme("DemoCoordinator");
 
    public static final MessagerAPIFactory.Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegions = topic("PlanarRegions");
-   public static final MessagerAPIFactory.Topic<Boolean> ShowRegions = topic("ShowRegions");
 
    public static final MessagerAPIFactory.Topic<BuildingExplorationStateName> RequestedState = topic("RequestedState");
    public static final MessagerAPIFactory.Topic<BuildingExplorationStateName> CurrentState = topic("CurrentState");
