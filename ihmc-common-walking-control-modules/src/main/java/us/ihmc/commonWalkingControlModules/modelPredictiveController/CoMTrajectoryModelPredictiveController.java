@@ -132,7 +132,7 @@ public class CoMTrajectoryModelPredictiveController
       rhoJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(rhoJacobianProvider));
       coefficientJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(coefficientJacobianProvider));
 
-      qpSolver = new CoMMPCQPSolver(indexHandler, dt, registry);
+      qpSolver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, registry);
 
       parentRegistry.addChild(registry);
    }

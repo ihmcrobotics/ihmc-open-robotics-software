@@ -67,13 +67,13 @@ public class CoMMPCQPSolver
 
    private final double dt;
 
-   public CoMMPCQPSolver(MPCIndexHandler indexHandler, double dt, YoRegistry parentRegistry)
+   public CoMMPCQPSolver(MPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
-      inputCalculator = new MPCQPInputCalculator(indexHandler);
+      inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
