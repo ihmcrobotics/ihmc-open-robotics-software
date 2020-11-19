@@ -49,9 +49,7 @@ public class LookAndStepVisualizationGroup extends Group
       behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
-         planarRegionsGraphic.acceptPlanarRegions(planarRegions);
-      });
+      behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
       new IHMCROS2Callback<>(ros2Node, GOAL_INPUT, goal ->
