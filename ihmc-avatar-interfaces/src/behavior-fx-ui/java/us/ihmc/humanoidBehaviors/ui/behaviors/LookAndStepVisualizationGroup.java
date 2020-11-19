@@ -22,14 +22,14 @@ public class LookAndStepVisualizationGroup extends Group
 {
    private boolean reviewingBodyPath = true;
 
-   private FootstepPlanGraphic footstepPlanGraphic;
-   private FootstepPlanGraphic commandedFootsteps;
-   private FootstepPlanGraphic startAndGoalFootPoses;
-   private PoseGraphic closestPointAlongPathGraphic;
-   private PoseGraphic subGoalGraphic;
-   private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private LivePlanarRegionsGraphic planarRegionsGraphic;
-   private PoseGraphic goalGraphic;
+   private final FootstepPlanGraphic footstepPlanGraphic;
+   private final FootstepPlanGraphic commandedFootsteps;
+   private final FootstepPlanGraphic startAndGoalFootPoses;
+   private final PoseGraphic closestPointAlongPathGraphic;
+   private final PoseGraphic subGoalGraphic;
+   private final BodyPathPlanGraphic bodyPathPlanGraphic;
+   private final LivePlanarRegionsGraphic planarRegionsGraphic;
+   private final PoseGraphic goalGraphic;
 
    public LookAndStepVisualizationGroup(ROS2NodeInterface ros2Node, Messager behaviorMessager)
    {
