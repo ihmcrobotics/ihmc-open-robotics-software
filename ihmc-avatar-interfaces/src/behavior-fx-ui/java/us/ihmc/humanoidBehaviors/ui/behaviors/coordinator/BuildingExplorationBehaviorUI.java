@@ -77,6 +77,7 @@ public class BuildingExplorationBehaviorUI
 
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
+      lookAndStepVisualizationGroup.setEnabled(true);
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
