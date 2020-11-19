@@ -35,8 +35,11 @@ public class ContactStateMagnitudeToForceMatrixHelper
 
    private final DMatrixRMaj totalJacobianInWorldFrame;
    private final DMatrixRMaj linearJacobianInWorldFrame;
+
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
    private final FrictionConeRotationCalculator coneRotationCalculator;
+
+   private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
    public ContactStateMagnitudeToForceMatrixHelper(int maxNumberOfContactPoints,
                                                    int numberOfBasisVectorsPerContactPoint,
@@ -52,6 +55,8 @@ public class ContactStateMagnitudeToForceMatrixHelper
       rhoMaxMatrix = new DMatrixRMaj(rhoSize, 1);
       rhoWeightMatrix = new DMatrixRMaj(rhoSize, rhoSize);
       rhoRateWeightMatrix = new DMatrixRMaj(rhoSize, rhoSize);
+
+      contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
 
       maxContactForces = new DMatrixRMaj(maxNumberOfContactPoints, 1);
       for (int i = 0; i < maxNumberOfContactPoints; i++)
@@ -199,5 +204,26 @@ public class ContactStateMagnitudeToForceMatrixHelper
    public DMatrixRMaj getLinearJacobianInWorldFrame()
    {
       return linearJacobianInWorldFrame;
+   }
+
+   public void computeContactForceCoefficientMatrix(DMatrixRMaj solutionVector, int solutionStartIdx)
+   {
+      int startIdx = solutionStartIdx;
+      for (int rhoIndex = 0; rhoIndex < rhoSize; rhoIndex++)
+      {
+         FrameVector3D basisVector = basisVectors[rhoIndex];
+         for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
+         {
+            double rhoCoeff = solutionVector.get(startIdx++, 0);
+            contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);
+            contactWrenchCoefficientMatrix.add(1, coeffIdx, basisVector.getY() * rhoCoeff);
+            contactWrenchCoefficientMatrix.add(2, coeffIdx, basisVector.getZ() * rhoCoeff);
+         }
+      }
+   }
+
+   public DMatrixRMaj getContactWrenchCoefficientMatrix()
+   {
+      return contactWrenchCoefficientMatrix;
    }
 }

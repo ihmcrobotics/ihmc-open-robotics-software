@@ -63,6 +63,11 @@ public class MPCIndexHandler
       return segmentId * comCoefficientsPerSegment + ordinal;
    }
 
+   public int getRhoBasisStartIndex(int segmentId)
+   {
+      return rhoBasesInSegment.get(segmentId);
+   }
+
    public int getRhoCoefficientStartIndex(int segmentId)
    {
       return rhoStartIndices.get(segmentId);

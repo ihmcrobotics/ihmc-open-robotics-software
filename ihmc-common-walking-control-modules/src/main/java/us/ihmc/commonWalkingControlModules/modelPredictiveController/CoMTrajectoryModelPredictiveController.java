@@ -380,6 +380,17 @@ public class CoMTrajectoryModelPredictiveController
       }
 
       DMatrixRMaj fullCoefficientMatrix = qpSolver.getSolution();
+      for (int sequence = 0; sequence < rhoJacobianHelperPool.size(); sequence++)
+      {
+         int rhoNumber = indexHandler.getRhoCoefficientStartIndex(sequence);
+
+         for (int contact = 0; contact < rhoJacobianHelperPool.get(sequence).size(); contact++)
+         {
+            ContactStateMagnitudeToForceMatrixHelper rhoJacobianHelper = rhoJacobianHelperPool.get(sequence).get(contact);
+            rhoJacobianHelper.computeContactForceCoefficientMatrix(fullCoefficientMatrix, rhoNumber);
+            rhoNumber += rhoJacobianHelper.getRhoSize() * MPCIndexHandler.coefficientsPerRho;
+         }
+      }
 
       xCoefficientVector.zero();
       yCoefficientVector.zero();
@@ -389,47 +400,38 @@ public class CoMTrajectoryModelPredictiveController
       {
          int vectorStart = 6 * i;
 
-         xCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
-         yCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
-         zCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
+         xCoefficientVector.set(vectorStart + 4, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
+         yCoefficientVector.set(vectorStart + 4, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
+         zCoefficientVector.set(vectorStart + 4, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
 
-         xCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
-         yCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
-         zCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
+         xCoefficientVector.set(vectorStart + 5, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
+         yCoefficientVector.set(vectorStart + 5, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
+         zCoefficientVector.set(vectorStart + 5, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
 
-         int rhoNumber = 0;
          for (int contactIdx = 0; contactIdx < rhoJacobianHelperPool.get(i).size(); contactIdx++)
          {
             ContactStateMagnitudeToForceMatrixHelper rhoJacobianHelper = rhoJacobianHelperPool.get(i).get(contactIdx);
-            for (int rhoIdx = 0; rhoIdx < rhoJacobianHelper.getRhoSize(); rhoIdx++)
-            {
-               FrameVector3DReadOnly basisVector = rhoJacobianHelper.getBasisVector(rhoIdx);
-               int startIdx = indexHandler.getRhoCoefficientStartIndex(i) + rhoNumber;
+            DMatrixRMaj contactForceMatrix = rhoJacobianHelper.getContactWrenchCoefficientMatrix();
 
-               double c0 = fullCoefficientMatrix.get(startIdx, 0);
-               double c1 = fullCoefficientMatrix.get(startIdx + 1, 0);
-               double c2 = fullCoefficientMatrix.get(startIdx + 2, 0);
-               double c3 = fullCoefficientMatrix.get(startIdx + 3, 0);
-               xCoefficientVector.add(vectorStart + 2, 0, basisVector.getX() * c0);
-               yCoefficientVector.add(vectorStart + 2, 0, basisVector.getY() * c0);
-               zCoefficientVector.add(vectorStart + 2, 0, basisVector.getZ() * c0);
+            xCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(0, 0));
+            yCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(1, 0));
+            zCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(2, 0));
 
-               xCoefficientVector.add(vectorStart + 3, 0, basisVector.getX() * c1);
-               yCoefficientVector.add(vectorStart + 3, 0, basisVector.getY() * c1);
-               zCoefficientVector.add(vectorStart + 3, 0, basisVector.getZ() * c1);
+            xCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(0, 1));
+            yCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(1, 1));
+            zCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(2, 1));
 
-               xCoefficientVector.add(vectorStart + 4, 0, basisVector.getX() * c2);
-               yCoefficientVector.add(vectorStart + 4, 0, basisVector.getY() * c2);
-               zCoefficientVector.add(vectorStart + 4, 0, basisVector.getZ() * c2);
+            xCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(0, 2));
+            yCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(1, 2));
+            zCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(2, 2));
 
-               xCoefficientVector.add(vectorStart + 5, 0, basisVector.getX() * c3);
-               yCoefficientVector.add(vectorStart + 5, 0, basisVector.getY() * c3);
-               zCoefficientVector.add(vectorStart + 5, 0, basisVector.getZ() * c3);
-            }
+            xCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(0, 3));
+            yCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(1, 3));
+            zCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(2, 3));
          }
 
          // TODO for the time squared coefficient, add in gravity
-         zCoefficientVector.add(vectorStart + 1, 0, -0.5 * gravityZ);
+         zCoefficientVector.add(vectorStart + 3, 0, -0.5 * gravityZ);
       }
 
    }
