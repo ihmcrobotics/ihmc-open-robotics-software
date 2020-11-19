@@ -79,22 +79,22 @@ public class ContactPointProjector
                                      FrameVector3D surfaceNormal,
                                      RigidBodyBasics rigidBody)
    {
-      projectInternal(pointToProject, contactPointPosition, surfaceNormal, rigidBody);
+      projectPoint(pointToProject, contactPointPosition, surfaceNormal, rigidBody);
    }
 
    public RigidBodyBasics projectToClosestLink(FramePoint3DBasics pointToProject, FramePoint3D contactPointPosition, FrameVector3D surfaceNormal)
    {
-      return projectInternal(pointToProject, contactPointPosition, surfaceNormal, collidableRigidBodies);
+      return projectPoint(pointToProject, contactPointPosition, surfaceNormal, collidableRigidBodies);
    }
 
    /**
     * Projects the given point to the surface of the nearest collidable.
     * Assumes the point isn't inside a collidable, use {@link #isPointInsideAnyRigidBody} to check
     */
-   private RigidBodyBasics projectInternal(FramePoint3DBasics pointToProject,
-                                           FramePoint3D contactPointPosition,
-                                           FrameVector3D surfaceNormal,
-                                           RigidBodyBasics... rigidBodiesToCheck)
+   public RigidBodyBasics projectPoint(FramePoint3DBasics pointToProject,
+                                       FramePoint3D contactPointPosition,
+                                       FrameVector3D surfaceNormal,
+                                       RigidBodyBasics... rigidBodiesToCheck)
    {
       double minimumProjectionDistance = Double.MAX_VALUE;
       RigidBodyBasics minimumDistanceBody = null;

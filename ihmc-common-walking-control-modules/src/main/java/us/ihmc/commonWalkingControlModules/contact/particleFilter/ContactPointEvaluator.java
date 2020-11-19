@@ -21,7 +21,7 @@ public class ContactPointEvaluator
 
    private final double convergenceThreshold = 1e-10;
    private final int maximumNumberOfIterations = 500;
-   private final double dampingTerm = 1e-4;
+   private final double dampingTerm = 1e-5;
 
    private final Vector3D[] polyhedraBasisVectors = new Vector3D[4];
    private final FrameVector3D[] polyhedraFrameBasisVectors = new FrameVector3D[4];
