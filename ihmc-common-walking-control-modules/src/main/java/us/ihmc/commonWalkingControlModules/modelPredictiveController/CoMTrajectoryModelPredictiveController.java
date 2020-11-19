@@ -236,12 +236,15 @@ public class CoMTrajectoryModelPredictiveController
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int nextSequence = transition + 1;
-         // TODO continuity objectives
+
+         double firstSegmentDuration = contactSequence.get(transition).getTimeInterval().getDuration();
+
+         mpcCommands.addCommand(computeContinuityObjective(comContinuityObjectivePool.add(), transition, firstSegmentDuration, 0));
+         mpcCommands.addCommand(computeContinuityObjective(comContinuityObjectivePool.add(), transition, firstSegmentDuration, 1));
 
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
-            double duration = contactSequence.get(transition).getTimeInterval().getDuration();
-            mpcCommands.addCommand(computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), endVRPPositions.get(transition), transition, duration, duration));
+            mpcCommands.addCommand(computeVRPSegmentObjective(comValueObjectivePool.add(), comValueObjectivePool.add(), endVRPPositions.get(transition), transition, firstSegmentDuration, firstSegmentDuration));
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
@@ -287,15 +290,42 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private MPCCommand<?> computeContinuityObjective(CoMContinuityObjective continuityObjectiveToPack,
+                                                    int firstSegmentNumber,
+                                                    double firstSegmentDuration,
+                                                    int derivativeOrder)
+   {
+      continuityObjectiveToPack.clear();
+      continuityObjectiveToPack.setDerivativeOrder(0);
+      continuityObjectiveToPack.setOmega(omega.getValue());
+      continuityObjectiveToPack.setFirstSegmentNumber(firstSegmentNumber);
+      continuityObjectiveToPack.setFirstSegmentDuration(firstSegmentDuration);
+      continuityObjectiveToPack.setDerivativeOrder(derivativeOrder);
+
+      for (int i = 0; i < rhoJacobianHelperPool.get(firstSegmentNumber).size(); i++)
+      {
+         continuityObjectiveToPack.addFirstSegmentRhoToForceMatrixHelper(rhoJacobianHelperPool.get(firstSegmentNumber).get(i));
+         continuityObjectiveToPack.addFirstSegmentJacobianMatrixHelper(coefficientJacobianHelperPool.get(firstSegmentNumber).get(i));
+      }
+
+      for (int i = 0; i < rhoJacobianHelperPool.get(firstSegmentNumber + 1).size(); i++)
+      {
+         continuityObjectiveToPack.addSecondSegmentRhoToForceMatrixHelper(rhoJacobianHelperPool.get(firstSegmentNumber + 1).get(i));
+         continuityObjectiveToPack.addSecondSegmentJacobianMatrixHelper(coefficientJacobianHelperPool.get(firstSegmentNumber + 1).get(i));
+      }
+
+      return continuityObjectiveToPack;
+   }
+
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final MPCCommandList segmentObjectiveList = new MPCCommandList();
 
    private MPCCommand<?> computeVRPSegmentObjective(MPCValueObjective positionObjectiveToPack,
-                                           MPCValueObjective velocityObjectiveToPack,
-                                           FramePoint3DReadOnly desiredVRPPosition,
-                                           int segmentNumber,
-                                           double segmentDuration,
-                                           double constraintTime)
+                                                    MPCValueObjective velocityObjectiveToPack,
+                                                    FramePoint3DReadOnly desiredVRPPosition,
+                                                    int segmentNumber,
+                                                    double segmentDuration,
+                                                    double constraintTime)
    {
       desiredVelocity.sub(endVRPPositions.get(segmentNumber), startVRPPositions.get(segmentNumber));
       desiredVelocity.scale(1.0 / segmentDuration);
@@ -328,6 +358,8 @@ public class CoMTrajectoryModelPredictiveController
 
       return objectiveToPack;
    }
+
+
 
    /**
     * Resets and resizes the internal matrices.

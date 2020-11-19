@@ -67,4 +67,9 @@ public class MPCIndexHandler
    {
       return rhoStartIndices.get(segmentId);
    }
+
+   public int getTotalProblemSize()
+   {
+      return totalProblemSize;
+   }
 }

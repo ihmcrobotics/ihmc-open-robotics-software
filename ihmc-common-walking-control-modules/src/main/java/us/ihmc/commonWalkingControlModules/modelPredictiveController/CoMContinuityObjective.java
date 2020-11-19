@@ -8,12 +8,11 @@ import java.util.List;
 
 public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective>
 {
-   private final FramePoint3D objective = new FramePoint3D();
    private final List<CoefficientJacobianMatrixHelper> firstSegmentJacobianMatrixHelpers = new ArrayList<>();
    private final List<CoefficientJacobianMatrixHelper> secondSegmentJacobianMatrixHelpers = new ArrayList<>();
 
-   private final List<ContactStateMagnitudeToForceMatrixHelper> firstRhoToForceMatrixHelper = new ArrayList<>();
-   private final List<ContactStateMagnitudeToForceMatrixHelper> secondRhoToForceMatrixHelper = new ArrayList<>();
+   private final List<ContactStateMagnitudeToForceMatrixHelper> firstRhoToForceMatrixHelpers = new ArrayList<>();
+   private final List<ContactStateMagnitudeToForceMatrixHelper> secondRhoToForceMatrixHelpers = new ArrayList<>();
 
    private int derivativeOrder;
    private int firstSegmentNumber;
@@ -23,6 +22,25 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.CONTINUITY;
+   }
+
+   public void clear()
+   {
+      firstSegmentJacobianMatrixHelpers.clear();
+      secondSegmentJacobianMatrixHelpers.clear();
+
+      firstRhoToForceMatrixHelpers.clear();
+      secondRhoToForceMatrixHelpers.clear();
+   }
+
+   public void addFirstSegmentRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper firstRhoToForceMatrixHelper)
+   {
+      firstRhoToForceMatrixHelpers.add(firstRhoToForceMatrixHelper);
+   }
+
+   public void addSecondSegmentRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper secondRhoToForceMatrixHelper)
+   {
+      secondRhoToForceMatrixHelpers.add(secondRhoToForceMatrixHelper);
    }
 
    public void addFirstSegmentJacobianMatrixHelper(CoefficientJacobianMatrixHelper firstSegmentJacobianMatrixHelper)
@@ -75,14 +93,9 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
       return omega;
    }
 
-   public FramePoint3DReadOnly getObjective()
-   {
-      return objective;
-   }
-
    public int getFirstSegmentNumberOfContacts()
    {
-      return firstRhoToForceMatrixHelper.size();
+      return firstRhoToForceMatrixHelpers.size();
    }
 
    public CoefficientJacobianMatrixHelper getFirstSegmentCoefficientJacobianMatrixHelper(int i)
@@ -92,12 +105,12 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
 
    public ContactStateMagnitudeToForceMatrixHelper getFirstSegmentRhoToForceMatrixHelper(int i)
    {
-      return firstRhoToForceMatrixHelper.get(i);
+      return firstRhoToForceMatrixHelpers.get(i);
    }
 
    public int getSecondSegmentNumberOfContacts()
    {
-      return secondRhoToForceMatrixHelper.size();
+      return secondRhoToForceMatrixHelpers.size();
    }
 
    public CoefficientJacobianMatrixHelper getSecondSegmentCoefficientJacobianMatrixHelper(int i)
@@ -107,6 +120,6 @@ public class CoMContinuityObjective implements MPCCommand<CoMContinuityObjective
 
    public ContactStateMagnitudeToForceMatrixHelper getSecondSegmentRhoToForceMatrixHelper(int i)
    {
-      return secondRhoToForceMatrixHelper.get(i);
+      return secondRhoToForceMatrixHelpers.get(i);
    }
 }
