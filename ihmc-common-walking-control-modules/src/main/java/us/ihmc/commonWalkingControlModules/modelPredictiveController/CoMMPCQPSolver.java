@@ -27,7 +27,6 @@ public class CoMMPCQPSolver
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
 
-
    private final DMatrixRMaj solverInput_Aeq;
    private final DMatrixRMaj solverInput_beq;
    private final DMatrixRMaj solverInput_Ain;
@@ -347,5 +346,10 @@ public class CoMMPCQPSolver
       solverInput_ub_previous.set(solverInput_ub);
 
       return true;
+   }
+
+   public DMatrixRMaj getSolution()
+   {
+      return solverOutput;
    }
 }

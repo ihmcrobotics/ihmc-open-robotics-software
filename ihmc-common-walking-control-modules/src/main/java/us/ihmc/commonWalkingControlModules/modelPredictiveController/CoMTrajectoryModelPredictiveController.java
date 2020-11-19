@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.DMatrixSparseCSC;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -102,10 +105,15 @@ public class CoMTrajectoryModelPredictiveController
    private final RecyclingArrayList<CoMContinuityObjective> comContinuityObjectivePool = new RecyclingArrayList<>(CoMContinuityObjective::new);
    private final MPCCommandList mpcCommands = new MPCCommandList();
 
+   final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
+
+   private final CoMMPCQPSolver qpSolver;
    private CornerPointViewer viewer = null;
    private BagOfBalls comTrajectoryViewer = null;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
+   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
@@ -123,6 +131,8 @@ public class CoMTrajectoryModelPredictiveController
       Supplier<CoefficientJacobianMatrixHelper> coefficientJacobianProvider = () -> new CoefficientJacobianMatrixHelper(6, numberOfBasisVectorsPerContactPoint);
       rhoJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(rhoJacobianProvider));
       coefficientJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(coefficientJacobianProvider));
+
+      qpSolver = new CoMMPCQPSolver(indexHandler, dt, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -163,8 +173,6 @@ public class CoMTrajectoryModelPredictiveController
 
       indexHandler.initialize(contactSequence);
 
-      resetMatrices();
-
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
                                                     gravityZ,
                                                     omega.getValue(),
@@ -175,6 +183,7 @@ public class CoMTrajectoryModelPredictiveController
                                                     true);
       computeMatrixHelpers(contactSequence);
       computeObjectives(contactSequence);
+      solveQP(contactSequence.size());
 
       updateCornerPoints(contactSequence);
 
@@ -360,17 +369,68 @@ public class CoMTrajectoryModelPredictiveController
    }
 
 
-
-   /**
-    * Resets and resizes the internal matrices.
-    */
-   private void resetMatrices()
+   private void solveQP(int numberOfPhases)
    {
+      qpSolver.initialize();
+      qpSolver.submitMPCCommandList(mpcCommands, MEDIUM_WEIGHT);
+      if (!qpSolver.solve())
+      {
+         LogTools.info("Failed to find solution");
+         return;
+      }
 
-   }
+      DMatrixRMaj fullCoefficientMatrix = qpSolver.getSolution();
 
-   private void computeContacts()
-   {
+      xCoefficientVector.zero();
+      yCoefficientVector.zero();
+      zCoefficientVector.zero();
+
+      for (int i = 0; i < numberOfPhases; i++)
+      {
+         int vectorStart = 6 * i;
+
+         xCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
+         yCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
+         zCoefficientVector.set(vectorStart, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
+
+         xCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
+         yCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
+         zCoefficientVector.set(vectorStart + 1, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
+
+         int rhoNumber = 0;
+         for (int contactIdx = 0; contactIdx < rhoJacobianHelperPool.get(i).size(); contactIdx++)
+         {
+            ContactStateMagnitudeToForceMatrixHelper rhoJacobianHelper = rhoJacobianHelperPool.get(i).get(contactIdx);
+            for (int rhoIdx = 0; rhoIdx < rhoJacobianHelper.getRhoSize(); rhoIdx++)
+            {
+               FrameVector3DReadOnly basisVector = rhoJacobianHelper.getBasisVector(rhoIdx);
+               int startIdx = indexHandler.getRhoCoefficientStartIndex(i) + rhoNumber;
+
+               double c0 = fullCoefficientMatrix.get(startIdx, 0);
+               double c1 = fullCoefficientMatrix.get(startIdx + 1, 0);
+               double c2 = fullCoefficientMatrix.get(startIdx + 2, 0);
+               double c3 = fullCoefficientMatrix.get(startIdx + 3, 0);
+               xCoefficientVector.add(vectorStart + 2, 0, basisVector.getX() * c0);
+               yCoefficientVector.add(vectorStart + 2, 0, basisVector.getY() * c0);
+               zCoefficientVector.add(vectorStart + 2, 0, basisVector.getZ() * c0);
+
+               xCoefficientVector.add(vectorStart + 3, 0, basisVector.getX() * c1);
+               yCoefficientVector.add(vectorStart + 3, 0, basisVector.getY() * c1);
+               zCoefficientVector.add(vectorStart + 3, 0, basisVector.getZ() * c1);
+
+               xCoefficientVector.add(vectorStart + 4, 0, basisVector.getX() * c2);
+               yCoefficientVector.add(vectorStart + 4, 0, basisVector.getY() * c2);
+               zCoefficientVector.add(vectorStart + 4, 0, basisVector.getZ() * c2);
+
+               xCoefficientVector.add(vectorStart + 5, 0, basisVector.getX() * c3);
+               yCoefficientVector.add(vectorStart + 5, 0, basisVector.getY() * c3);
+               zCoefficientVector.add(vectorStart + 5, 0, basisVector.getZ() * c3);
+            }
+         }
+
+         // TODO for the time squared coefficient, add in gravity
+         zCoefficientVector.add(vectorStart + 1, 0, -0.5 * gravityZ);
+      }
 
    }
 
@@ -528,6 +588,13 @@ public class CoMTrajectoryModelPredictiveController
               ecmpPositionToPack);
    }
 
+   private final FramePoint3D firstCoefficient = new FramePoint3D();
+   private final FramePoint3D secondCoefficient = new FramePoint3D();
+   private final FramePoint3D thirdCoefficient = new FramePoint3D();
+   private final FramePoint3D fourthCoefficient = new FramePoint3D();
+   private final FramePoint3D fifthCoefficient = new FramePoint3D();
+   private final FramePoint3D sixthCoefficient = new FramePoint3D();
+
    public void compute(int segmentId,
                        double timeInPhase,
                        FixedFramePoint3DBasics comPositionToPack,
@@ -541,6 +608,55 @@ public class CoMTrajectoryModelPredictiveController
    {
       if (segmentId < 0)
          throw new IllegalArgumentException("time is invalid.");
+
+      int startIndex = 6 * segmentId;
+      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
+      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
+
+      int secondCoefficientIndex = startIndex + 1;
+      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
+      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
+
+      int thirdCoefficientIndex = startIndex + 2;
+      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
+      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
+
+      int fourthCoefficientIndex = startIndex + 3;
+      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
+      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
+
+      int fifthCoefficientIndex = startIndex + 4;
+      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
+
+      int sixthCoefficientIndex = startIndex + 5;
+      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
+
+      double omega = this.omega.getValue();
+
+      CoMTrajectoryPlannerTools.constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+                                                            sixthCoefficient, timeInPhase, omega);
+      CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+                                                            sixthCoefficient, timeInPhase, omega);
+      CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+                                                                sixthCoefficient, timeInPhase, omega);
+
+      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
+                                                            sixthCoefficient, timeInPhase, omega);
+
+      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
+      CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
+      CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
+
+      ecmpPositionToPack.set(vrpPositionToPack);
+      ecmpPositionToPack.subZ(comHeight.getDoubleValue());
    }
 
    /**
