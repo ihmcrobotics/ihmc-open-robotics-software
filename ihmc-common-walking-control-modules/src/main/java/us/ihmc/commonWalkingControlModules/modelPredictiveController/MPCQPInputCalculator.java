@@ -16,6 +16,7 @@ public class MPCQPInputCalculator
       this.indexHandler = indexHandler;
    }
 
+   // TODO add in gravity
    public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityObjective objective, double weight)
    {
       inputToPack.reshape(3);
@@ -81,6 +82,7 @@ public class MPCQPInputCalculator
       }
    }
 
+   // TODO add in gravity
    private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);

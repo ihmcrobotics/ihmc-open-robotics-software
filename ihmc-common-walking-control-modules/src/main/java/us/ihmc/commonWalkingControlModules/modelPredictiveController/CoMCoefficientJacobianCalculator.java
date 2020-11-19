@@ -5,6 +5,7 @@ import us.ihmc.commons.MathTools;
 
 public class CoMCoefficientJacobianCalculator
 {
+   // TODO add in gravity
    public static void calculateCoMJacobian(int segmentId, double time, DMatrix jacobianToPack, int derivative, double scale)
    {
       switch (derivative)
