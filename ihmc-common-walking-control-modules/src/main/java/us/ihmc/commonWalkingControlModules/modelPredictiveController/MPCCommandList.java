@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandType;
 
 import java.util.ArrayList;
 import java.util.List;
