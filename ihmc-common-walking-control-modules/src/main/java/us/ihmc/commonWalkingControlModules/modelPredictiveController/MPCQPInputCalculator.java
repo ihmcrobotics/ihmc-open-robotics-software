@@ -10,13 +10,14 @@ public class MPCQPInputCalculator
    private final MPCIndexHandler indexHandler;
 
    private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);
+   private final double gravityZ;
 
-   public MPCQPInputCalculator(MPCIndexHandler indexHandler)
+   public MPCQPInputCalculator(MPCIndexHandler indexHandler, double gravityZ)
    {
       this.indexHandler = indexHandler;
+      this.gravityZ = -Math.abs(gravityZ);
    }
 
-   // TODO add in gravity
    public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityObjective objective, double weight)
    {
       inputToPack.reshape(3);
@@ -59,7 +60,9 @@ public class MPCQPInputCalculator
          startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
       }
 
-      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+      inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder(), 0.0));
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), firstSegmentDuration));
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -82,7 +85,6 @@ public class MPCQPInputCalculator
       }
    }
 
-   // TODO add in gravity
    private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueObjective objective, double weight)
    {
       inputToPack.reshape(3);
@@ -107,6 +109,7 @@ public class MPCQPInputCalculator
       }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -140,6 +143,8 @@ public class MPCQPInputCalculator
       }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
+      inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 1, timeOfObjective) / omega);
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -174,10 +179,29 @@ public class MPCQPInputCalculator
       }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
+      inputToPack.getTaskJacobian().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
+      inputToPack.getTaskJacobian().add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 1, timeOfObjective) / (omega * omega));
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
 
       return true;
+   }
+
+   private double getGravityZObjective(int derivativeOrder, double time)
+   {
+      switch (derivativeOrder)
+      {
+         case 0:
+            return 0.5 * time * time * gravityZ;
+         case 1:
+            return time * gravityZ;
+         case 2:
+            return gravityZ;
+         case 3:
+            return 0.0;
+         default:
+            throw new IllegalArgumentException("Derivative order must be less than 4.");
+      }
    }
 }
