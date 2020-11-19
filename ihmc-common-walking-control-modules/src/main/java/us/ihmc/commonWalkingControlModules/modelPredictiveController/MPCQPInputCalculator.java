@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -29,8 +30,16 @@ public class MPCQPInputCalculator
       double firstSegmentDuration = objective.getFirstSegmentDuration();
       double omega = objective.getOmega();
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstSegmentNumber, firstSegmentDuration, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondSegmentNumber, secondSegmentNumber, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstSegmentNumber,
+                                                            firstSegmentDuration,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondSegmentNumber,
+                                                            secondSegmentNumber,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            -1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
@@ -127,7 +136,12 @@ public class MPCQPInputCalculator
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
 
-      CoMCoefficientJacobianCalculator.calculateDCMJacobian(segmentNumber, omega, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
+      CoMCoefficientJacobianCalculator.calculateDCMJacobian(segmentNumber,
+                                                            omega,
+                                                            timeOfObjective,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
@@ -162,7 +176,12 @@ public class MPCQPInputCalculator
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
 
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber, omega, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber,
+                                                            omega,
+                                                            timeOfObjective,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
@@ -174,7 +193,9 @@ public class MPCQPInputCalculator
 
          tempCoefficientJacobian.reshape(coefficientJacobianMatrixHelper.getRhoSize(), coefficientJacobianMatrixHelper.getCoefficientSize());
          tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
-         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / (omega * omega), coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian,
+                                  -1.0 / (omega * omega),
+                                  coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
 
          MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
          startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
@@ -186,6 +207,52 @@ public class MPCQPInputCalculator
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
+
+      return true;
+   }
+
+   public boolean calculateRhoValueCommand(QPInput inputToPack, RhoValueObjectiveCommand command, double weight)
+   {
+      int problemSize = 0;
+
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = command.getCoefficientJacobianMatrixHelper(i);
+         problemSize += coefficientJacobianMatrixHelper.getRhoSize();
+      }
+
+      if (problemSize < 1)
+         return false;
+
+      inputToPack.reshape(problemSize);
+
+      int segmentNumber = command.getSegmentNumber();
+      double timeOfObjective = command.getTimeOfObjective();
+      double omega = command.getOmega();
+
+      int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = command.getCoefficientJacobianMatrixHelper(i);
+         coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
+
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
+                                    0,
+                                    startCol,
+                                    coefficientJacobianMatrixHelper.getJacobianMatrix(2),
+                                    0,
+                                    0,
+                                    problemSize,
+                                    coefficientJacobianMatrixHelper.getCoefficientSize(),
+                                    1.0);
+         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+      }
+
+      for (int i = 0; i < problemSize; i++)
+      {
+         inputToPack.getTaskObjective().set(i, 0, command.getObjective());
+      }
+      inputToPack.setConstraintType(command.getConstraintType());
 
       return true;
    }
