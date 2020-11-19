@@ -547,13 +547,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
       switch (target)
       {
          case SCS:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+            return getClass().getResourceAsStream(getSimulationParameterResourceName());
          case GAZEBO:
          case REAL_ROBOT:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+            return getClass().getResourceAsStream(getHardwareParameterResourceName());
          default:
             throw new UnsupportedOperationException("Unsupported target: " + target);
       }
+   }
+
+   public static String getSimulationParameterResourceName()
+   {
+      return "/us/ihmc/valkyrie/parameters/controller_simulation.xml";
+   }
+   
+   public static String getHardwareParameterResourceName()
+   {
+      return "/us/ihmc/valkyrie/parameters/controller_hardware.xml";
    }
 
    @Override
