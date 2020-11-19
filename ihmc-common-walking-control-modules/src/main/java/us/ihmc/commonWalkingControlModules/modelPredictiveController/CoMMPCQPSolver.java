@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -242,6 +243,13 @@ public class CoMMPCQPSolver
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+   }
+
+   private void submitRhoValueCommand(RhoValueObjectiveCommand command, double weight)
+   {
+      boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command, weight);
+      if (success)
+         addInput(qpInput);
    }
 
    private void submitMPCValueObjective(MPCValueCommand command, double weight)
