@@ -39,6 +39,7 @@ public class RobotOperationTabController
    {
    }
 
+   /** Called by JavaFX via reflection */
    public void initialize()
    {
       AnchorPane robotIKUIPane = JavaFXMissingTools.loadFromFXML(robotIKUI);

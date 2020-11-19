@@ -219,9 +219,9 @@ public class RobotIKUI
                                                            parameterChangePenalty));
    }
 
+   /** Called by JavaFX via reflection */
    public void initialize()
    {
-
       ikMode.setItems(FXCollections.observableArrayList(UserInterfaceIKMode.values()));
       ikMode.setValue(UserInterfaceIKMode.LEFT_ARM);
       ikMode.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> initializeIKFlag.set(true));
