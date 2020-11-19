@@ -25,7 +25,7 @@ public class AtlasBuildingExplorationBehaviorUI
       start(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false),
             CommunicationMode.INTERPROCESS,
             BehaviorRegistry.DEFAULT_BEHAVIORS,
-            CommunicationMode.INTERPROCESS);
+            CommunicationMode.INTRAPROCESS);
    }
 
    public static void start(DRCRobotModel robotModel,
