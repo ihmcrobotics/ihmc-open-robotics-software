@@ -8,7 +8,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -74,7 +74,7 @@ public class AtlasBuildingExplorationBehaviorUI
             BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel,
                                                                                                                     ros2Node,
                                                                                                                     behaviorMessager);
-            AtomicReference<Point3D> goal = messager.createInput(Goal);
+            AtomicReference<Pose3D> goal = messager.createInput(Goal);
 
             messager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
             AtomicReference<BuildingExplorationStateName> requestedState = messager.createInput(RequestedState);
@@ -82,7 +82,7 @@ public class AtlasBuildingExplorationBehaviorUI
             messager.registerTopicListener(Start, s ->
             {
                LogTools.debug("Start requested in UI... starting behavior coordinator");
-               behaviorCoordinator.setBombPosition(goal.get());
+               behaviorCoordinator.setBombPose(goal.get());
                behaviorCoordinator.requestState(requestedState.get());
                behaviorCoordinator.start();
             });
