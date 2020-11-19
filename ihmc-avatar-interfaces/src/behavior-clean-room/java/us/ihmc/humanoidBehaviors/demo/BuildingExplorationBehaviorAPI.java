@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.demo;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
 
 public class BuildingExplorationBehaviorAPI
@@ -24,8 +24,7 @@ public class BuildingExplorationBehaviorAPI
 
    public static final MessagerAPIFactory.Topic<Boolean> Start = topic("Start");
    public static final MessagerAPIFactory.Topic<Boolean> Stop = topic("Stop");
-   public static final MessagerAPIFactory.Topic<Point3D> Goal = topic("Goal");
-   public static final MessagerAPIFactory.Topic<Boolean> PlaceGoal = topic("PlaceGoal");
+   public static final MessagerAPIFactory.Topic<Pose3D> Goal = topic("Goal");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

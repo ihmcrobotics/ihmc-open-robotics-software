@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.SubScene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -12,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
@@ -19,34 +23,27 @@ import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
-public class BuildingExplorationUIDashboardController
+public class BuildingExplorationUIDashboardController extends Group
 {
-   @FXML
-   private ComboBox<BuildingExplorationStateName> requestedState;
-
-   @FXML
-   private Spinner<Double> goalX;
-   @FXML
-   private Spinner<Double> goalY;
-   @FXML
-   private Spinner<Double> goalZ;
-
-   @FXML
-   private Text currentState;
-   @FXML
-   private Text debrisDetected;
-   @FXML
-   private Text stairsDetected;
-   @FXML
-   private Text doorDetected;
+   @FXML private ComboBox<BuildingExplorationStateName> requestedState;
+   @FXML private Spinner<Double> goalX;
+   @FXML private Spinner<Double> goalY;
+   @FXML private Spinner<Double> goalZ;
+   @FXML private Text currentState;
+   @FXML private Text debrisDetected;
+   @FXML private Text stairsDetected;
+   @FXML private Text doorDetected;
+   @FXML private Button placeGoal;
 
    private Messager messager;
    private final Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D());
 
+   private WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
+
    private IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
    private IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
 
-   public void bindControls(JavaFXMessager messager, ROS2Node ros2Node)
+   public void bindControls(SubScene sceneNode, JavaFXMessager messager, ROS2Node ros2Node)
    {
       this.messager = messager;
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
@@ -55,7 +52,7 @@ public class BuildingExplorationUIDashboardController
       goalY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
       goalZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
-      messager.bindBidirectional(Goal, goalProperty, false);
+//      messager.bindBidirectional(Goal, goalProperty, false);
       goalProperty.bindBidirectionalX(goalX.getValueFactory().valueProperty());
       goalProperty.bindBidirectionalY(goalY.getValueFactory().valueProperty());
       goalProperty.bindBidirectionalZ(goalZ.getValueFactory().valueProperty());
@@ -93,6 +90,9 @@ public class BuildingExplorationUIDashboardController
 
       executeStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.EXECUTE_STEPS);
       replanStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.REPLAN);
+
+      walkingGoalPlacementEditor.init(sceneNode, placeGoal, placedGoal -> messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
+      getChildren().add(walkingGoalPlacementEditor);
    }
 
    @FXML
@@ -110,7 +110,7 @@ public class BuildingExplorationUIDashboardController
    @FXML
    public void placeGoal()
    {
-      messager.submitMessage(BuildingExplorationBehaviorAPI.PlaceGoal, true);
+      walkingGoalPlacementEditor.startGoalPlacement();
    }
 
    @FXML
