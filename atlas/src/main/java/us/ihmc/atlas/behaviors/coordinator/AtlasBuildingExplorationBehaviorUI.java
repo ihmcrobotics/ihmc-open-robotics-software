@@ -10,13 +10,16 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.messager.Messager;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasBuildingExplorationBehaviorUI
 {
@@ -33,6 +36,20 @@ public class AtlasBuildingExplorationBehaviorUI
                             BehaviorRegistry behaviorRegistry,
                             CommunicationMode behaviorMessagerCommunicationMode)
    {
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+      ExceptionTools.handle(() ->
+      {
+         new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
+                                         robotModel.getFootstepPlannerParameters(),
+                                         robotModel,
+                                         robotModel,
+                                         logModelProvider,
+                                         false,
+                                         sensorInformation);
+
+      }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+
       BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
       ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "building_exploration");
       Messager behaviorMessager = behaviorMessagerCommunicationMode == CommunicationMode.INTRAPROCESS
