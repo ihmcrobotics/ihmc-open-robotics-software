@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
+import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -20,7 +22,8 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyP
 
 public class LookAndStepVisualizationGroup extends Group
 {
-   private boolean reviewingBodyPath = true;
+   private final ManagedROS2Node ros2Node;
+   private final ManagedMessager messager;
 
    private final FootstepPlanGraphic footstepPlanGraphic;
    private final FootstepPlanGraphic commandedFootsteps;
@@ -31,25 +34,30 @@ public class LookAndStepVisualizationGroup extends Group
    private final LivePlanarRegionsGraphic planarRegionsGraphic;
    private final PoseGraphic goalGraphic;
 
-   public LookAndStepVisualizationGroup(ROS2NodeInterface ros2Node, Messager behaviorMessager)
+   private boolean reviewingBodyPath = true;
+
+   public LookAndStepVisualizationGroup(ROS2NodeInterface parentROS2Node, Messager parentMessager)
    {
+      ros2Node = new ManagedROS2Node(parentROS2Node);
+      messager = new ManagedMessager(parentMessager);
+
       startAndGoalFootPoses = new FootstepPlanGraphic();
       startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootPoses.setTransparency(0.4);
-      behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
+      messager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footsteps ->
+      messager.registerTopicListener(FootstepPlanForUI, footsteps ->
       {
          reviewingBodyPath = false;
          footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
       });
       commandedFootsteps = new FootstepPlanGraphic();
-      behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
+      messager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
+      messager.registerTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
       new IHMCROS2Callback<>(ros2Node, GOAL_INPUT, goal ->
@@ -58,12 +66,12 @@ public class LookAndStepVisualizationGroup extends Group
       });
 
       closestPointAlongPathGraphic = new PoseGraphic("Closest", Color.BLUE, 0.027);
-      behaviorMessager.registerTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
+      messager.registerTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
       subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
-      behaviorMessager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
+      messager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
-      behaviorMessager.registerTopicListener(BodyPathPlanForUI, bodyPathPlan ->
+      messager.registerTopicListener(BodyPathPlanForUI, bodyPathPlan ->
       {
          reviewingBodyPath = true;
          ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
@@ -77,6 +85,8 @@ public class LookAndStepVisualizationGroup extends Group
 
    public void setEnabled(boolean enabled)
    {
+      ros2Node.setEnabled(enabled);
+      messager.setEnabled(enabled);
       if (!enabled)
       {
          clearGraphics();
