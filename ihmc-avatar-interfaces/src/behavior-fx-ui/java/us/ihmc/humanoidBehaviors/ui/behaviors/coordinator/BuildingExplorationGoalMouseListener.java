@@ -5,11 +5,15 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.eventHandlers.PlanarRegionSelector;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,12 +31,13 @@ public class BuildingExplorationGoalMouseListener extends AnimationTimer
    private final Messager messager;
    private final Node sceneNode;
 
-   public BuildingExplorationGoalMouseListener(Messager messager, Node sceneNode)
+   public BuildingExplorationGoalMouseListener(ROS2NodeInterface ros2Node, Messager messager, Node sceneNode)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      messager.registerTopicListener(BuildingExplorationBehaviorAPI.PlanarRegions, planarRegionSelector::setPlanarRegionsList);
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.LIDAR_REA_REGIONS,
+                             message -> planarRegionSelector.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message)));
       messager.registerTopicListener(BuildingExplorationBehaviorAPI.PlaceGoal, p -> placingGoal.set(true));
 
       leftClickInterceptor = mouseEvent ->

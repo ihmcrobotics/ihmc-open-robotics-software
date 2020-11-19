@@ -14,13 +14,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -28,7 +28,6 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
@@ -37,7 +36,7 @@ public class BuildingExplorationBehaviorUI
 {
    private final Stage primaryStage;
    private final BorderPane mainPane;
-   private final PlanarRegionViewer planarRegionViewer;
+   private final LivePlanarRegionsGraphic reaPlanarRegionsGraphic;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final FootstepPlanGraphic footstepPlanGraphic;
    private final BuildingExplorationGoalMouseListener goalMouseListener;
@@ -56,10 +55,6 @@ public class BuildingExplorationBehaviorUI
       this.ros2Node = ros2Node;
       primaryStage.setTitle(getClass().getSimpleName());
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.LIDAR_REA_REGIONS,
-                                           s -> messager.submitMessage(BuildingExplorationBehaviorAPI.PlanarRegions,
-                                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     controller_msgs.msg.dds.RobotConfigurationData.class,
                                                     ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()),
@@ -81,14 +76,14 @@ public class BuildingExplorationBehaviorUI
       view3dFactory.addNodeToView(worldCoordinateSystem);
 
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
-      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegions, ShowRegions);
+      reaPlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, reaPlanarRegionsGraphic::acceptPlanarRegions);
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
-      goalMouseListener = new BuildingExplorationGoalMouseListener(messager, subScene);
+      goalMouseListener = new BuildingExplorationGoalMouseListener(ros2Node, messager, subScene);
 
       robotVisualizer.start();
-      planarRegionViewer.start();
       goalMouseListener.start();
 
       GoalGraphic goalGraphic = new GoalGraphic();
@@ -102,7 +97,7 @@ public class BuildingExplorationBehaviorUI
       });
 
       messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(reaPlanarRegionsGraphic);
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       view3dFactory.addNodeToView(footstepPlanGraphic);
 
@@ -123,7 +118,7 @@ public class BuildingExplorationBehaviorUI
 
    public void stop()
    {
-      planarRegionViewer.stop();
+      reaPlanarRegionsGraphic.destroy();
       robotVisualizer.stop();
       ros2Node.destroy();
       footstepPlanGraphic.destroy();
