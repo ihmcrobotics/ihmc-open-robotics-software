@@ -14,12 +14,9 @@ public class StepInPlaceBehaviorUI extends BehaviorUIInterface
 {
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(StepInPlaceBehavior.DEFINITION, StepInPlaceBehaviorUI::new);
 
-   private Messager behaviorMessager;
-
-   @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public StepInPlaceBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
    }
 
    @Override
@@ -30,12 +27,12 @@ public class StepInPlaceBehaviorUI extends BehaviorUIInterface
 
    @FXML public void startStepping()
    {
-      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
+      getBehaviorMessager().submitMessage(StepInPlaceBehavior.API.Stepping, true);
    }
 
    @FXML public void pauseStepping()
    {
-      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
+      getBehaviorMessager().submitMessage(StepInPlaceBehavior.API.Stepping, false);
    }
 
    @Override
