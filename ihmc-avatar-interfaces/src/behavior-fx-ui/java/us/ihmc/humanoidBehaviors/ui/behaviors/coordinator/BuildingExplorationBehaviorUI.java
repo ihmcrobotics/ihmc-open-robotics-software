@@ -28,6 +28,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
@@ -140,42 +141,49 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    @FXML
    public void requestStart()
    {
+      LogTools.info("Requesting start");
       getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, true);
    }
 
    @FXML
    public void requestStop()
    {
+      LogTools.info("Requesting stop");
       getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
    }
 
    @FXML
    public void placeGoal()
    {
+      LogTools.info("Placing goal");
       walkingGoalPlacementEditor.startGoalPlacement();
    }
 
    @FXML
    public void ignoreDebris()
    {
+      LogTools.info("Ignore debris pressed");
       getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
    }
 
    @FXML
    public void confirmDoor()
    {
+      LogTools.info("Confirm door pressed");
       getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
    }
 
    @FXML
    public void approveStairsSteps()
    {
+      LogTools.info("Approve stairs pressed");
       executeStairsStepsPublisher.publish(new Empty());
    }
 
    @FXML
    public void replanStairsSteps()
    {
+      LogTools.info("Replan stairs pressed");
       replanStairsStepsPublisher.publish(new Empty());
    }
 
