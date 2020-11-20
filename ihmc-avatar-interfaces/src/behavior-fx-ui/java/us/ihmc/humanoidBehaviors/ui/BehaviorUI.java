@@ -103,23 +103,6 @@ public class BehaviorUI
       {
          mainPane = JavaFXMissingTools.loadFromFXML(this);
 
-         BorderPane bottom = (BorderPane) mainPane.getBottom();
-         TabPane tabPane = (TabPane) bottom.getCenter();
-
-         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
-         {
-            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
-            {
-               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
-               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
-               Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
-               tabPane.getTabs().add(tab);
-            }
-         }
-
-         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
-         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
-
          AnchorPane mainAnchorPane = new AnchorPane();
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
@@ -137,6 +120,28 @@ public class BehaviorUI
 
          VBox sideVisualizationArea = new VBox();
 
+         BorderPane bottom = (BorderPane) mainPane.getBottom();
+         TabPane tabPane = (TabPane) bottom.getCenter();
+
+         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
+         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
+
+         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         {
+            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
+            {
+               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().create(subScene3D,
+                                                                                                          sideVisualizationArea,
+                                                                                                          ros2Node,
+                                                                                                          behaviorMessager,
+                                                                                                          robotModel);
+               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
+               Tab tab = new Tab(uiDefinitionEntry.getName(), behaviorUIInterface.getPane());
+               tabPane.getTabs().add(tab);
+               view3DFactory.addNodeToView(behaviorUIInterface.get3DGroup());
+            }
+         }
+
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
 
          stopRecording.setDisable(true);
@@ -147,12 +152,6 @@ public class BehaviorUI
          for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
             behaviorSelector.getItems().add(behaviorDefinition.getName());
-         }
-
-         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
-         {
-            behaviorUIInterface.init(subScene3D, sideVisualizationArea, ros2Node, behaviorMessager, robotModel);
-            view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);

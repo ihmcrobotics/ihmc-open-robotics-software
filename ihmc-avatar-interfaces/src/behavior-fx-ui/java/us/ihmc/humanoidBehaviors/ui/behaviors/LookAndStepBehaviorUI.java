@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -25,6 +26,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -36,13 +38,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(LookAndStepBehavior.DEFINITION, LookAndStepBehaviorUI::new);
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
-   private SwingPlannerParametersBasics swingPlannerParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
 
-   private Messager behaviorMessager;
-   private ROS2PublisherMap ros2Publisher;
-   private LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
-   private WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
+   private final ROS2PublisherMap ros2Publisher;
+   private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
+   private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
 
    @FXML private Button placeGoalButton;
    @FXML private Button publishSupportRegions;
@@ -52,10 +53,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView footstepPlannerParameterTable;
    @FXML private TableView swingPlannerParameterTable;
 
-   @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public LookAndStepBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
       ros2Publisher = new ROS2PublisherMap(ros2Node);
 
       View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
@@ -70,7 +70,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       view2DGroup.getChildren().add(rectangle);
 
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
-      getChildren().add(lookAndStepVisualizationGroup);
+      get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
 
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
@@ -99,11 +99,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       lookAndStepVisualizationGroup.setEnabled(enabled);
       if (!enabled)
       {
-         Platform.runLater(() -> getChildren().remove(walkingGoalPlacementEditor));
+         Platform.runLater(() -> get3DGroup().getChildren().remove(walkingGoalPlacementEditor));
       }
       else
       {
-         Platform.runLater(() -> getChildren().add(walkingGoalPlacementEditor));
+         Platform.runLater(() -> get3DGroup().getChildren().add(walkingGoalPlacementEditor));
       }
    }
 
@@ -116,12 +116,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private void publishFootstepPlanningParameters()
    {
-      behaviorMessager.submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
    }
 
    private void publishSwingPlanningParameters()
    {
-      behaviorMessager.submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
    }
 
    @FXML public void placeGoalButton()
@@ -131,12 +131,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void approve()
    {
-      behaviorMessager.submitMessage(ReviewApproval, true);
+      getBehaviorMessager().submitMessage(ReviewApproval, true);
    }
 
    @FXML public void reject()
    {
-      behaviorMessager.submitMessage(ReviewApproval, false);
+      getBehaviorMessager().submitMessage(ReviewApproval, false);
       if (lookAndStepVisualizationGroup.isReviewingBodyPath())
          lookAndStepVisualizationGroup.clearBodyPathPlanGraphic();
       else
@@ -160,12 +160,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void publishSupportRegions()
    {
-      behaviorMessager.submitMessage(PublishSupportRegions, new Object());
+      getBehaviorMessager().submitMessage(PublishSupportRegions, new Object());
    }
 
    @FXML public void operatorReviewCheckBox()
    {
-      behaviorMessager.submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
+      getBehaviorMessager().submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
    }
 
    @FXML public void reset()
