@@ -87,6 +87,8 @@ public class ROS2Tools
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
+   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
+
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
          = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);

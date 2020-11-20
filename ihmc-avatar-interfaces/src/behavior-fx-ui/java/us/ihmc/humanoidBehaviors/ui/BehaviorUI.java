@@ -154,7 +154,7 @@ public class BehaviorUI
 
          bottom.setCenter(uisPane);
 
-         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager, ros2Node);
 
          stopRecording.setDisable(true);
 
