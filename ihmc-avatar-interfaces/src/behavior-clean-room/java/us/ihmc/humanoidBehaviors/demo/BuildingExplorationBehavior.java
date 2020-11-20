@@ -95,7 +95,6 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    private final LookAndStepState lookAndStepState;
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
-   private boolean enabled = false;
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -112,7 +111,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      lookAndStepBehavior = new LookAndStepBehavior(helper);
+      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, ros2Node));
 
       teleopState = new TeleopState(robotModel,ros2Node);
       lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
@@ -183,13 +182,9 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      if (this.enabled != enabled)
-      {
-         this.enabled = enabled;
-         helper.setCommunicationCallbacksEnabled(enabled);
-         if (!enabled)
-            lookAndStepBehavior.setEnabled(false);
-      }
+      helper.setCommunicationCallbacksEnabled(enabled);
+      if (!enabled)
+         lookAndStepBehavior.setEnabled(false);
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)

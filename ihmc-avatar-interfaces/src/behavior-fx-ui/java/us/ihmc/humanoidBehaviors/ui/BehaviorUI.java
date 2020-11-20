@@ -45,6 +45,7 @@ public class BehaviorUI
    private final Messager behaviorMessager;
    private final ROS2Node ros2Node;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private final Map<String, Boolean> enabledUIs = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
    private LocalParameterServer parameterServer;
@@ -232,13 +233,11 @@ public class BehaviorUI
 
       for (String behaviorName : behaviorUIInterfaces.keySet())
       {
-         if (newValue.equals(behaviorName))
+         boolean enabled = newValue.equals(behaviorName);
+
+         if (enabledUIs.computeIfAbsent(behaviorName, key -> false) != enabled)
          {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(true);
-         }
-         else
-         {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(false);
+            behaviorUIInterfaces.get(behaviorName).setEnabled(enabled);
          }
       }
    }

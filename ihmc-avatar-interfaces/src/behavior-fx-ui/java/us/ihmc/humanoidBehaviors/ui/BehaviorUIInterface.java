@@ -1,12 +1,15 @@
 package us.ihmc.humanoidBehaviors.ui;
 
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
+
+import java.util.function.Consumer;
 
 public abstract class BehaviorUIInterface
 {
@@ -35,6 +38,16 @@ public abstract class BehaviorUIInterface
    public Group get3DGroup()
    {
       return group3D;
+   }
+
+   protected void enable3DGroup(boolean enabled, Node... nodes)
+   {
+      Consumer<Node> operation = enabled ? group3D.getChildren()::add : group3D.getChildren()::remove;
+
+      for (Node node : nodes)
+      {
+         operation.accept(node);
+      }
    }
 
    public Pane getPane()

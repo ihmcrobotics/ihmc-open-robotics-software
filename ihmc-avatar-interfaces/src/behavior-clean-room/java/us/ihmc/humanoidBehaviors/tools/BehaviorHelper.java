@@ -23,17 +23,13 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -85,8 +81,7 @@ public class BehaviorHelper
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2Node ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2NodeInterface ros2Node)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);

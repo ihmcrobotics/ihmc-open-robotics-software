@@ -25,6 +25,9 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.lists.PairList;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
@@ -32,6 +35,7 @@ public class BehaviorModule
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
+   private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
    private final ROS2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
@@ -95,7 +99,11 @@ public class BehaviorModule
                LogTools.info("Behavior selected: {}", behavior.getLeft().getName());
                selectedOne = true;
             }
-            behavior.getRight().setEnabled(selected);
+
+            if (enabledBehaviors.computeIfAbsent(behavior.getLeft().getName(), key -> false) != selected)
+            {
+               behavior.getRight().setEnabled(selected);
+            }
          }
          if (!selectedOne)
          {
