@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui;
 
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.ui.behaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
@@ -17,7 +18,7 @@ public class BehaviorUIRegistry extends BehaviorRegistry
       DEFAULT_BEHAVIORS.register(LookAndStepBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(new BehaviorUIDefinition(TraverseStairsBehavior.DEFINITION, null));
       BUILDING_EXPLORATION_BEHAVIORS.register(BuildingExplorationBehaviorUI.DEFINITION);
-      BUILDING_EXPLORATION_BEHAVIORS.register(LookAndStepBehaviorUI.DEFINITION);
+      BUILDING_EXPLORATION_BEHAVIORS.register(new BehaviorUIDefinition(LookAndStepBehavior.DEFINITION, null));
       BUILDING_EXPLORATION_BEHAVIORS.register(new BehaviorUIDefinition(TraverseStairsBehavior.DEFINITION, null));
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehaviorUI.DEFINITION);
       ARCHIVED_BEHAVIORS.register(PatrolBehaviorUI.DEFINITION);
@@ -27,6 +28,8 @@ public class BehaviorUIRegistry extends BehaviorRegistry
    }
 
    private final LinkedHashSet<BehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
+   private int numberOfUIs = 0;
+   private String nameOfOnlyUIBehavior;
 
    public static BehaviorUIRegistry of(BehaviorUIDefinition... entries)
    {
@@ -42,10 +45,26 @@ public class BehaviorUIRegistry extends BehaviorRegistry
    {
       super.register(definition);
       uiDefinitionEntries.add(definition);
+
+      if (definition.getBehaviorUISupplier() != null)
+      {
+         ++numberOfUIs;
+         nameOfOnlyUIBehavior = definition.getName();
+      }
    }
 
    public LinkedHashSet<BehaviorUIDefinition> getUIDefinitionEntries()
    {
       return uiDefinitionEntries;
+   }
+
+   public int getNumberOfUIs()
+   {
+      return numberOfUIs;
+   }
+
+   public String getNameOfOnlyUIBehavior()
+   {
+      return nameOfOnlyUIBehavior;
    }
 }

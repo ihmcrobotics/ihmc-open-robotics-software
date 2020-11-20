@@ -122,7 +122,8 @@ public class BehaviorUI
          VBox sideVisualizationArea = new VBox();
 
          BorderPane bottom = (BorderPane) mainPane.getBottom();
-         TabPane tabPane = (TabPane) bottom.getCenter();
+         TabPane uiTabPane = new TabPane();
+         Node uisPane = uiTabPane;
 
          behaviorDirectRobotUI = new BehaviorDirectRobotUI();
          bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
@@ -137,11 +138,21 @@ public class BehaviorUI
                                                                                                           behaviorMessager,
                                                                                                           robotModel);
                behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
-               Tab tab = new Tab(uiDefinitionEntry.getName(), behaviorUIInterface.getPane());
-               tabPane.getTabs().add(tab);
+
+               if (behaviorUIRegistry.getNumberOfUIs() == 1)
+               {
+                  uisPane = behaviorUIInterface.getPane();
+               }
+               else
+               {
+                  Tab tab = new Tab(uiDefinitionEntry.getName(), behaviorUIInterface.getPane());
+                  uiTabPane.getTabs().add(tab);
+               }
                view3DFactory.addNodeToView(behaviorUIInterface.get3DGroup());
             }
          }
+
+         bottom.setCenter(uisPane);
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
 
@@ -195,6 +206,11 @@ public class BehaviorUI
             shutdownPublisher.publish(new Empty());
             destroy();
          });
+
+         if (behaviorUIRegistry.getNumberOfUIs() == 1)
+         {
+            behaviorSelector.valueProperty().setValue(behaviorUIRegistry.getNameOfOnlyUIBehavior());
+         }
 
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
