@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Disabled // TODO Since the PR #1678 about switching to a new ICP planner, the feature tested here is not available.
 @Tag("humanoid-flat-ground-slow-2")
 public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkingTest
 {

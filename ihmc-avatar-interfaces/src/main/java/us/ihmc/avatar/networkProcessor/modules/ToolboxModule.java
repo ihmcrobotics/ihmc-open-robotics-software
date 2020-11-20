@@ -49,6 +49,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public abstract class ToolboxModule implements CloseableAndDisposable
 {
+   protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -219,7 +220,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             {
                if (toolboxTaskScheduled == null)
                {
-                  LogTools.info(name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
+                  if (DEBUG)
+                     LogTools.info(name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
                   return false;
                }
                else
@@ -255,7 +257,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    public void receivedPacket(ToolboxStateMessage message)
    {
-      LogTools.debug("Received a state message.");
+      if (DEBUG)
+         LogTools.info("Received a state message.");
 
       ToolboxState requestedState = ToolboxState.fromByte(message.getRequestedToolboxState());
       if(requestedState == null)
@@ -284,11 +287,13 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
       if (toolboxTaskScheduled != null)
       {
-         LogTools.error("{}: This toolbox is already running.", name);
+         if (DEBUG)
+            LogTools.error("This toolbox is already running.");
          return;
       }
 
-      LogTools.info("{}: Waking up", name);
+      if (DEBUG)
+         LogTools.debug("Waking up");
 
       reinitialize();
       receivedInput.set(true);
@@ -304,7 +309,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    public void sleep()
    {
-      LogTools.info("{}: Going to sleep", name);
+
+      if (DEBUG)
+         LogTools.debug("Going to sleep");
 
       getToolboxController().notifyToolboxStateChange(ToolboxState.SLEEP);
 
@@ -312,7 +319,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       if (toolboxTaskScheduled == null)
       {
-         LogTools.error("{}: There is no task running.", name);
+         if (DEBUG)
+            LogTools.error("There is no task running.");
          return;
       }
 
@@ -368,14 +376,16 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       }
       realtimeROS2Node.destroy();
 
-      LogTools.info("{}: Destroyed", name);
+      if (DEBUG)
+         LogTools.debug("Destroyed");
    }
 
    private void createToolboxRunnable()
    {
       if (toolboxRunnable != null)
       {
-         LogTools.error("{}: toolboxRunnable is not null.", name);
+         if (DEBUG)
+            LogTools.error("toolboxRunnable is not null.");
          return;
       }
 

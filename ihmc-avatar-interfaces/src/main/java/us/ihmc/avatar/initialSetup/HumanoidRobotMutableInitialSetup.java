@@ -91,4 +91,24 @@ public class HumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<Hu
    public void getOffset(Vector3D offsetToPack)
    {
    }
+
+   public double getJointPosition(String jointName)
+   {
+      return jointPositions.get(jointName);
+   }
+
+   public Map<String, Double> getJointPositions()
+   {
+      return jointPositions;
+   }
+
+   public Point3D getRootJointPosition()
+   {
+      return rootJointPosition;
+   }
+
+   public Quaternion getRootJointOrientation()
+   {
+      return rootJointOrientation;
+   }
 }
