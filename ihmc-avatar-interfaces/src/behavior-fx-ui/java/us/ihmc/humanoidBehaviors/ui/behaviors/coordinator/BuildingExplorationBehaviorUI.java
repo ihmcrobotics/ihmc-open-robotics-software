@@ -3,18 +3,14 @@ package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
-import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -31,12 +27,9 @@ import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
@@ -53,45 +46,30 @@ public class BuildingExplorationBehaviorUI extends Group
    @FXML private Text doorDetected;
    @FXML private Button placeGoal;
 
-   private final Stage primaryStage;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
    private final FootstepPlanGraphic footstepPlanGraphic;
    private final ROS2Node ros2Node;
    private final Messager messager;
-   private final Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D());
    private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
    private final IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
    private final IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
 
-   public BuildingExplorationBehaviorUI(Stage primaryStage,
+   private final GridPane gridPane = JavaFXMissingTools.loadFromFXML(this);
+
+   public BuildingExplorationBehaviorUI(SubScene subScene,
                                         JavaFXMessager messager,
                                         DRCRobotModel robotModel,
                                         ROS2Node ros2Node,
-                                        Messager behaviorMessager) throws Exception
+                                        Messager behaviorMessager)
    {
-      this.primaryStage = primaryStage;
       this.ros2Node = ros2Node;
       this.messager = messager;
-      primaryStage.setTitle(getClass().getSimpleName());
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     controller_msgs.msg.dds.RobotConfigurationData.class,
                                                     ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()),
                                                     s -> messager.submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData, s.takeNextData()));
-
-      BorderPane mainPane = new BorderPane();
-      GridPane thisPane = JavaFXMissingTools.loadFromFXML(this);
-
-      View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
-      view3dFactory.addDefaultLighting();
-
-      Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
-
-      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-      worldCoordinateSystem.setMouseTransparent(true);
-      view3dFactory.addNodeToView(worldCoordinateSystem);
 
       robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
@@ -103,14 +81,14 @@ public class BuildingExplorationBehaviorUI extends Group
       robotVisualizer.start();
 
       PositionGraphic goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
-      view3dFactory.addNodeToView(goalGraphic.getNode());
+      getChildren().add(goalGraphic.getNode());
       goalGraphic.setMouseTransparent(true);
       messager.registerTopicListener(Goal, newGoal -> goalGraphic.setPosition(newGoal.getPosition()));
 
       messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
-      view3dFactory.addNodeToView(robotVisualizer.getRootNode());
-      view3dFactory.addNodeToView(lookAndStepVisualizationGroup);
-      view3dFactory.addNodeToView(footstepPlanGraphic);
+      getChildren().add(robotVisualizer.getRootNode());
+      getChildren().add(lookAndStepVisualizationGroup);
+      getChildren().add(footstepPlanGraphic);
 
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
 
@@ -118,10 +96,13 @@ public class BuildingExplorationBehaviorUI extends Group
       goalY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
       goalZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
-      //      messager.bindBidirectional(Goal, goalProperty, false);
-      goalProperty.bindBidirectionalX(goalX.getValueFactory().valueProperty());
-      goalProperty.bindBidirectionalY(goalY.getValueFactory().valueProperty());
-      goalProperty.bindBidirectionalZ(goalZ.getValueFactory().valueProperty());
+      goalZ.valueProperty().addListener((observable, oldValue, newValue) ->
+      {
+         Point3D updatedPosition = new Point3D(goalGraphic.getPose().getPosition());
+         updatedPosition.setZ(newValue);
+         goalGraphic.setPosition(updatedPosition);
+         goalGraphic.update();
+      });
 
       goalX.getValueFactory().setValue(14.2);
       goalZ.getValueFactory().setValue(0.86);
@@ -157,20 +138,13 @@ public class BuildingExplorationBehaviorUI extends Group
       executeStairsStepsPublisher = new IHMCROS2Publisher<>(this.ros2Node, TraverseStairsBehaviorAPI.EXECUTE_STEPS);
       replanStairsStepsPublisher = new IHMCROS2Publisher<>(this.ros2Node, TraverseStairsBehaviorAPI.REPLAN);
 
-      walkingGoalPlacementEditor.init(view3dFactory.getSubScene(), placeGoal, placedGoal -> this.messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
+      walkingGoalPlacementEditor.init(subScene, placeGoal, placedGoal -> this.messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
       getChildren().add(walkingGoalPlacementEditor);
+   }
 
-      mainPane.setBottom(thisPane);
-
-      view3dFactory.addNodeToView(this);
-
-      mainPane.setCenter(subScene);
-
-      Scene mainScene = new Scene(mainPane);
-      primaryStage.setScene(mainScene);
-      primaryStage.setWidth(1400);
-      primaryStage.setHeight(950);
-      primaryStage.setOnCloseRequest(event -> stop());
+   public GridPane getGridPane()
+   {
+      return gridPane;
    }
 
    @FXML
@@ -215,12 +189,7 @@ public class BuildingExplorationBehaviorUI extends Group
       replanStairsStepsPublisher.publish(new Empty());
    }
 
-   public void show()
-   {
-      primaryStage.show();
-   }
-
-   public void stop()
+   public void destroy()
    {
       robotVisualizer.stop();
       lookAndStepVisualizationGroup.destroy();
