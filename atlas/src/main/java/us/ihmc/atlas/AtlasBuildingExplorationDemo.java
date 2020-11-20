@@ -80,7 +80,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       modulesToStart.add(DRCSimulationTools.Modules.FIDUCIAL_DETECTOR);
       modulesToStart.add(DRCSimulationTools.Modules.OBJECT_DETECTOR);
 //      modulesToStart.add(DRCSimulationTools.Modules.BEHAVIOR_MODULE);
-//      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
+      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
       LogTools.info("Starting simulation modules");
 
       String[] args = {"-m " + robotModel.getAtlasVersion().name()};
