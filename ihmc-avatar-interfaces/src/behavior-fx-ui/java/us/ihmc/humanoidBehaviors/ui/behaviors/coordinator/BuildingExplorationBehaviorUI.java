@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
+import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
@@ -13,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -27,6 +30,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
+import us.ihmc.humanoidBehaviors.ui.graphics.DoorGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.log.LogTools;
@@ -57,6 +61,7 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    private final IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
    private final IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
    private final PositionGraphic goalGraphic;
+   private final DoorGraphic doorGraphic;
 
    public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager messager, DRCRobotModel robotModel)
    {
@@ -83,7 +88,17 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
 
       goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       goalGraphic.setMouseTransparent(true);
-      messager.registerTopicListener(Goal, newGoal -> goalGraphic.setPosition(newGoal.getPosition()));
+      messager.registerTopicListener(Goal, newGoal -> Platform.runLater(() -> goalGraphic.setPosition(newGoal.getPosition())));
+
+      doorGraphic = new DoorGraphic(new Color(0.8, 0.8, 0.8, 0.3));
+      doorGraphic.setMouseTransparent(true);
+      new IHMCROS2Callback<>(ros2Node,
+                             ObjectDetectorToolboxModule.getOutputTopic(robotName).withTypeName(DoorLocationPacket.class),
+                             doorLocationPacket -> Platform.runLater(() ->
+                             {
+                                doorGraphic.getPose().set(doorLocationPacket.getDoorTransformToWorld());
+                                doorGraphic.update();
+                             }));
 
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
 
@@ -144,7 +159,8 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
                     stairsFootstepPlanGraphic,
                     controllerFootstepPlanGraphic,
                     goalGraphic.getNode(),
-                    walkingGoalPlacementEditor);
+                    walkingGoalPlacementEditor,
+                    doorGraphic.getNode());
    }
 
    @FXML
