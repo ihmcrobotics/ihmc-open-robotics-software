@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui;
 
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.ui.behaviors.*;
 
@@ -9,11 +10,15 @@ import java.util.LinkedHashSet;
 public class BehaviorUIRegistry extends BehaviorRegistry
 {
    public static final BehaviorUIRegistry DEFAULT_BEHAVIORS = new BehaviorUIRegistry();
+   public static final BehaviorUIRegistry BUILDING_EXPLORATION_BEHAVIORS = new BehaviorUIRegistry();
    public static final BehaviorUIRegistry ARCHIVED_BEHAVIORS = new BehaviorUIRegistry();
    static
    {
       DEFAULT_BEHAVIORS.register(LookAndStepBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(new BehaviorUIDefinition(TraverseStairsBehavior.DEFINITION, null));
+      BUILDING_EXPLORATION_BEHAVIORS.register(LookAndStepBehaviorUI.DEFINITION);
+      BUILDING_EXPLORATION_BEHAVIORS.register(new BehaviorUIDefinition(TraverseStairsBehavior.DEFINITION, null));
+      BUILDING_EXPLORATION_BEHAVIORS.register(new BehaviorUIDefinition(BuildingExplorationBehaviorCoordinator.DEFINITION, null));
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehaviorUI.DEFINITION);
       ARCHIVED_BEHAVIORS.register(PatrolBehaviorUI.DEFINITION);
       ARCHIVED_BEHAVIORS.register(FancyPosesBehaviorUI.DEFINITION);
