@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 
 import com.sun.javafx.collections.ImmutableObservableList;
 import controller_msgs.msg.dds.*;
+import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -349,37 +351,37 @@ public class DirectRobotUI
 
    public void setShowLidarRegionsConsumer(Consumer<Boolean> showLidarRegionsConsumer)
    {
-      showLidarRegions.setDisable(false);
+      Platform.runLater(() -> showLidarRegions.setDisable(false));
       this.showLidarRegionsConsumer = showLidarRegionsConsumer;
    }
 
    public void setShowRealsenseRegionsConsumer(Consumer<Boolean> showRealsenseRegionsConsumer)
    {
-      showRealsenseRegions.setDisable(false);
+      Platform.runLater(() -> showRealsenseRegions.setDisable(false));
       this.showRealsenseRegionsConsumer = showRealsenseRegionsConsumer;
    }
 
    public void setShowMapRegionsConsumer(Consumer<Boolean> showMapRegionsConsumer)
    {
-      showMapRegions.setDisable(false);
+      Platform.runLater(() -> showMapRegions.setDisable(false));
       this.showMapRegionsConsumer = showMapRegionsConsumer;
    }
 
    public void setShowSupportRegionsConsumer(Consumer<Boolean> showSupportRegionsConsumer)
    {
-      showSupportRegions.setDisable(false);
+      Platform.runLater(() -> showSupportRegions.setDisable(false));
       this.showSupportRegionsConsumer = showSupportRegionsConsumer;
    }
 
    public void setShowMultisenseVideoConsumer(Consumer<Boolean> showMultisenseVideoConsumer)
    {
-      showMultisenseVideo.setDisable(false);
+      Platform.runLater(() -> showMultisenseVideo.setDisable(false));
       this.showMultisenseVideoConsumer = showMultisenseVideoConsumer;
    }
 
    public void setShowRealsenseVideoConsumer(Consumer<Boolean> showRealsenseVideoConsumer)
    {
-      showRealsenseVideo.setDisable(false);
+      Platform.runLater(() -> showRealsenseVideo.setDisable(false));
       this.showRealsenseVideoConsumer = showRealsenseVideoConsumer;
    }
 }
