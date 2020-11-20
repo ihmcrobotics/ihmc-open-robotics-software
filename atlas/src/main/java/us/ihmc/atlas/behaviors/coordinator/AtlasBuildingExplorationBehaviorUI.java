@@ -1,5 +1,8 @@
 package us.ihmc.atlas.behaviors.coordinator;
 
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -18,6 +21,8 @@ import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -64,7 +69,7 @@ public class AtlasBuildingExplorationBehaviorUI
       Messager behaviorMessager = behaviorMessagerCommunicationMode == CommunicationMode.INTRAPROCESS
             ? behaviorModule.getMessager() : RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
 
-      JavaFXApplicationCreator.buildJavaFXApplication(stage ->
+      JavaFXApplicationCreator.buildJavaFXApplication(primaryStage ->
       {
          SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(BuildingExplorationBehaviorAPI.API);
          messager.startMessager();
@@ -93,8 +98,35 @@ public class AtlasBuildingExplorationBehaviorUI
             behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
             messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
             messager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
-            BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(stage, messager, robotModel, ros2Node, behaviorMessager);
-            ui.show();
+
+            primaryStage.setTitle(AtlasBuildingExplorationBehaviorUI.class.getSimpleName());
+            BorderPane mainPane = new BorderPane();
+
+            View3DFactory view3dFactory = View3DFactory.createSubscene();
+            view3dFactory.addCameraController(true);
+            view3dFactory.addDefaultLighting();
+
+            Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
+
+            JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
+            worldCoordinateSystem.setMouseTransparent(true);
+            view3dFactory.addNodeToView(worldCoordinateSystem);
+
+            BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(view3dFactory.getSubScene(), messager, robotModel, ros2Node, behaviorMessager);
+
+            view3dFactory.addNodeToView(ui);
+
+            mainPane.setCenter(subScene);
+            mainPane.setBottom(ui.getGridPane());
+
+            Scene mainScene = new Scene(mainPane);
+            primaryStage.setScene(mainScene);
+            primaryStage.setWidth(1400);
+            primaryStage.setHeight(950);
+            primaryStage.setOnCloseRequest(event -> ui.destroy());
+
+            primaryStage.show();
+
          }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
       });
    }
