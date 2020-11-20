@@ -66,7 +66,6 @@ public class BuildingExplorationBehavior implements BehaviorInterface
                                                                               BuildingExplorationBehavior::new,
                                                                               BuildingExplorationBehaviorAPI.API);
 
-   private static final boolean DEBUG = true;
    private static final int UPDATE_RATE_MILLIS = 50;
    private static final double xyProximityToDoorToStopWalking = 1.6;
 
@@ -86,6 +85,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
    private final ScheduledExecutorService executorService;
    private final LookAndStepBehavior lookAndStepBehavior;
+   private final BehaviorHelper helper;
    private ScheduledFuture<?> stateMachineTask = null;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
@@ -95,9 +95,11 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    private final LookAndStepState lookAndStepState;
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
+   private boolean enabled = false;
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
+      this.helper = helper;
       DRCRobotModel robotModel = helper.getRobotModel();
       ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
       Messager behaviorMessager = helper.getManagedMessager();
@@ -122,7 +124,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       behaviorMessager.registerTopicListener(Start, s ->
       {
-         LogTools.debug("Start requested in UI... starting behavior coordinator");
+         LogTools.info("Starting");
          setBombPose(goal.get());
          requestState(requestedState.get());
          start();
@@ -181,7 +183,13 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      lookAndStepBehavior.setEnabled(enabled);
+      if (this.enabled != enabled)
+      {
+         this.enabled = enabled;
+         helper.setCommunicationCallbacksEnabled(enabled);
+         if (!enabled)
+            lookAndStepBehavior.setEnabled(false);
+      }
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)
@@ -229,7 +237,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    {
       if (!isRunning.getAndSet(true))
       {
-         LogTools.debug("Starting behavior coordinator");
+         LogTools.info("Starting behavior coordinator");
 
          doorLocationPacket.set(null);
          robotConfigurationData.set(null);
@@ -238,7 +246,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       }
       else
       {
-         LogTools.debug("Start called but module is already running");
+         LogTools.info("Start called but module is already running");
       }
    }
 
@@ -246,7 +254,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    {
       if (isRunning.get())
       {
-         LogTools.debug("Stop requested. Shutting down on next update");
+         LogTools.info("Stop requested. Shutting down on next update");
          stopRequested.set(true);
       }
    }
@@ -383,7 +391,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       return doorDetected;
    }
 
-   private static class LookAndStepState implements State
+   private class LookAndStepState implements State
    {
       private static final double horizonFromDebrisToStop = 0.8;
       private static final double horizonForStairs = 1.0;
@@ -471,10 +479,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       {
          pitchChestToSeeDoor(syncedRobot, chestTrajectoryPublisher);
 
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
 
          if (!messager.isMessagerOpen())
          {
@@ -490,8 +495,8 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
          resetPublisher.publish(new Empty());
 
-         String behaviorName = LookAndStepBehavior.DEFINITION.getName();
-         messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
+         LogTools.info("Enabling look and step behavior");
+         lookAndStepBehavior.setEnabled(true);
          ThreadTools.sleep(100);
 
          if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
@@ -614,10 +619,9 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       @Override
       public void onExit(double timeInState)
       {
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
+
+         lookAndStepBehavior.setEnabled(false);
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
@@ -694,10 +698,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          hasStartedBehavior.set(false);
          isDone.set(false);
 
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
       }
 
       private void startBehavior()
@@ -715,10 +716,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
             startBehavior();
             hasStartedBehavior.set(true);
 
-            if (DEBUG)
-            {
-               LogTools.info("Sent packet to start " + HumanoidBehaviorType.WALK_THROUGH_DOOR);
-            }
+            LogTools.info("Sent packet to start " + HumanoidBehaviorType.WALK_THROUGH_DOOR);
          }
       }
 
@@ -729,10 +727,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          behaviorControlModePacket.setBehaviorControlModeEnumRequest(BehaviorControlModeEnum.STOP.toByte());
          behaviorModePublisher.publish(behaviorControlModePacket);
 
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
       }
 
       @Override
@@ -779,10 +774,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       @Override
       public void onEntry()
       {
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
 
          isDone.set(false);
 
@@ -804,10 +796,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       @Override
       public void onExit(double timeInState)
       {
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
 
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, "null");
       }
