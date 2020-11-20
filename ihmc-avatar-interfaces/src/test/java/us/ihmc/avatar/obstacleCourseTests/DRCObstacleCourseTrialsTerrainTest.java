@@ -134,8 +134,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
       ThreadTools.sleep(1000);
-      YoBoolean useSmartIntegrator = (YoBoolean) drcSimulationTestHelper.getYoVariableRegistry().findVariable("useSmartICPIntegrator");
-      useSmartIntegrator.set(true);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
