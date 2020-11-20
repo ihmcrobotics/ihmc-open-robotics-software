@@ -112,12 +112,12 @@ public class AtlasBuildingExplorationBehaviorUI
             worldCoordinateSystem.setMouseTransparent(true);
             view3dFactory.addNodeToView(worldCoordinateSystem);
 
-            BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(view3dFactory.getSubScene(), messager, robotModel, ros2Node, behaviorMessager);
+            BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(view3dFactory.getSubScene(), null, robotModel, ros2Node, behaviorMessager);
 
-            view3dFactory.addNodeToView(ui);
+            view3dFactory.addNodeToView(ui.get3DGroup());
 
             mainPane.setCenter(subScene);
-            mainPane.setBottom(ui.getGridPane());
+            mainPane.setBottom(ui.getPane());
 
             Scene mainScene = new Scene(mainPane);
             primaryStage.setScene(mainScene);
