@@ -101,7 +101,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       }
 
       // Start Look and Step behavior
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS;
 
       AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, behaviorRegistry, COMMUNICATION_MODE_KRYO);
 

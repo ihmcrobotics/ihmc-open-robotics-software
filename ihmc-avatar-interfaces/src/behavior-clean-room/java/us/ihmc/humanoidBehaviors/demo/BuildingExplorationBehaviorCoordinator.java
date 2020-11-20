@@ -22,11 +22,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
@@ -54,8 +57,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class BuildingExplorationBehaviorCoordinator
+public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
+                                                                              BuildingExplorationBehaviorCoordinator::new,
+                                                                              BuildingExplorationBehaviorAPI.API);
+
    private static final boolean DEBUG = true;
    private static final int UPDATE_RATE_MILLIS = 50;
    private static final double xyProximityToDoorToStopWalking = 1.6;
@@ -85,10 +92,12 @@ public class BuildingExplorationBehaviorCoordinator
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(DRCRobotModel robotModel,
-                                                 ROS2NodeInterface ros2Node,
-                                                 Messager behaviorMessager)
+   public BuildingExplorationBehaviorCoordinator(BehaviorHelper helper)
    {
+      DRCRobotModel robotModel = helper.getRobotModel();
+      ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
+      Messager behaviorMessager = helper.getManagedMessager();
+
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -142,6 +151,12 @@ public class BuildingExplorationBehaviorCoordinator
          fiducialDetectorPublisher.publish(wakeUpMessage);
          objectDetectorPublisher.publish(wakeUpMessage);
       }).start();
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)

@@ -16,11 +16,12 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -41,7 +42,7 @@ public class AtlasBuildingExplorationBehaviorUI
    {
       start(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false),
             CommunicationMode.INTERPROCESS,
-            BehaviorRegistry.DEFAULT_BEHAVIORS,
+            BehaviorRegistry.of(LookAndStepBehavior.DEFINITION, TraverseStairsBehavior.DEFINITION, BuildingExplorationBehaviorCoordinator.DEFINITION),
             CommunicationMode.INTRAPROCESS);
    }
 
@@ -71,33 +72,31 @@ public class AtlasBuildingExplorationBehaviorUI
 
       JavaFXApplicationCreator.buildJavaFXApplication(primaryStage ->
       {
-         SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(BuildingExplorationBehaviorAPI.API);
-         messager.startMessager();
-
          ExceptionTools.handle(() ->
          {
-            BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel,
-                                                                                                                    ros2Node,
-                                                                                                                    behaviorMessager);
-            AtomicReference<Pose3D> goal = messager.createInput(Goal);
+            BehaviorHelper helper = new BehaviorHelper(robotModel, behaviorMessager, ros2Node);
 
-            messager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
-            AtomicReference<BuildingExplorationStateName> requestedState = messager.createInput(RequestedState);
+            BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(helper);
 
-            messager.registerTopicListener(Start, s ->
+            AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
+
+            behaviorMessager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
+            AtomicReference<BuildingExplorationStateName> requestedState = behaviorMessager.createInput(RequestedState);
+
+            behaviorMessager.registerTopicListener(Start, s ->
             {
                LogTools.debug("Start requested in UI... starting behavior coordinator");
                behaviorCoordinator.setBombPose(goal.get());
                behaviorCoordinator.requestState(requestedState.get());
                behaviorCoordinator.start();
             });
-            messager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
-            behaviorCoordinator.setStateChangedCallback(newState -> messager.submitMessage(CurrentState, newState));
-            behaviorCoordinator.setDebrisDetectedCallback(() -> messager.submitMessage(DebrisDetected, true));
-            behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
-            behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
-            messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
-            messager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
+            behaviorMessager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
+            behaviorCoordinator.setStateChangedCallback(newState -> behaviorMessager.submitMessage(CurrentState, newState));
+            behaviorCoordinator.setDebrisDetectedCallback(() -> behaviorMessager.submitMessage(DebrisDetected, true));
+            behaviorCoordinator.setStairsDetectedCallback(() -> behaviorMessager.submitMessage(StairsDetected, true));
+            behaviorCoordinator.setDoorDetectedCallback(() -> behaviorMessager.submitMessage(DoorDetected, true));
+            behaviorMessager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
+            behaviorMessager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
 
             primaryStage.setTitle(AtlasBuildingExplorationBehaviorUI.class.getSimpleName());
             BorderPane mainPane = new BorderPane();
