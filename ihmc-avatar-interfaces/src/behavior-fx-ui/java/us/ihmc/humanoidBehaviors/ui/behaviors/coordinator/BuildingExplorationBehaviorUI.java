@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
@@ -50,35 +51,39 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    @FXML private Button placeGoal;
 
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
-   private final FootstepPlanGraphic footstepPlanGraphic;
+   private final FootstepPlanGraphic stairsFootstepPlanGraphic;
+   private final FootstepPlanGraphic controllerFootstepPlanGraphic;
    private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
    private final IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
    private final IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
+   private final PositionGraphic goalGraphic;
 
    public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager messager, DRCRobotModel robotModel)
    {
       super(subScene, visualizationPane, ros2Node, messager, robotModel);
 
+      String robotName = robotModel.getSimpleRobotName();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     controller_msgs.msg.dds.RobotConfigurationData.class,
-                                                    ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()),
+                                                    ControllerAPIDefinition.getOutputTopic(robotName),
                                                     s -> getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData,
                                                                                              s.takeNextData()));
 
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, messager);
       lookAndStepVisualizationGroup.setEnabled(true);
-      footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      stairsFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      stairsFootstepPlanGraphic.setTransparency(0.5);
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
-            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
+            stairsFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
 
+      controllerFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage ->
+            controllerFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
 
-      PositionGraphic goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
-      get3DGroup().getChildren().add(goalGraphic.getNode());
+      goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       goalGraphic.setMouseTransparent(true);
       messager.registerTopicListener(Goal, newGoal -> goalGraphic.setPosition(newGoal.getPosition()));
-
-      get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
-      get3DGroup().getChildren().add(footstepPlanGraphic);
 
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
 
@@ -129,13 +134,17 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
       replanStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.REPLAN);
 
       walkingGoalPlacementEditor.init(subScene, placeGoal, placedGoal -> messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
-      get3DGroup().getChildren().add(walkingGoalPlacementEditor);
    }
 
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      enable3DGroup(enabled,
+                    lookAndStepVisualizationGroup,
+                    stairsFootstepPlanGraphic,
+                    controllerFootstepPlanGraphic,
+                    goalGraphic.getNode(),
+                    walkingGoalPlacementEditor);
    }
 
    @FXML
@@ -191,6 +200,6 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    public void destroy()
    {
       lookAndStepVisualizationGroup.destroy();
-      footstepPlanGraphic.destroy();
+      stairsFootstepPlanGraphic.destroy();
    }
 }
