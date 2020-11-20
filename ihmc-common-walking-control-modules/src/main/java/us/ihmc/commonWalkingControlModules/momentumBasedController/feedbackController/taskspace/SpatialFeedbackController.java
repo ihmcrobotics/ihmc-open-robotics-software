@@ -41,6 +41,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -448,6 +449,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredAngularAcceleration.changeFrame(controlFrame);
       desiredAngularAcceleration.add(feedForwardAngularAction);
+      
+      proccessInverseDynamicsDesiredAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
 
       yoDesiredAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
       yoDesiredAcceleration.changeFrame(trajectoryFrame);
@@ -901,6 +904,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearAccelerationToModify.changeFrame(controlFrame);
       linearAccelerationToModify.sub(biasLinearAcceleration);
       linearAccelerationToModify.changeFrame(originalFrame);
+   }
+   
+   /**
+    * This function can add post-processing to the desired accelerations from the inverse dynamics calculator.
+    * 
+    * This is done before the coriolis acceleration is calculated. The default implementation is a no-op.
+    * 
+    * @param controlFrame
+    * @param desiredAngularAcceleration
+    * @param desiredLinearAcceleration
+    */
+   protected void proccessInverseDynamicsDesiredAcceleration(MovingReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration, FrameVector3D desiredLinearAcceleration)
+   {
    }
 
    @Override
