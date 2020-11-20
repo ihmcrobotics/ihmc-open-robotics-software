@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -100,10 +99,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
          simulationStarter.getSimulationConstructionSet().setupGraph("t");
       }
 
-      // Start Look and Step behavior
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS;
-
-      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, behaviorRegistry, COMMUNICATION_MODE_KRYO);
+      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
    }

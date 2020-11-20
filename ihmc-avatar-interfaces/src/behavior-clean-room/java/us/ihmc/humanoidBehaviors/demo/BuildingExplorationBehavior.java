@@ -57,10 +57,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
+
+public class BuildingExplorationBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehaviorCoordinator::new,
+                                                                              BuildingExplorationBehavior::new,
                                                                               BuildingExplorationBehaviorAPI.API);
 
    private static final boolean DEBUG = true;
@@ -82,6 +85,7 @@ public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
 
    private final ScheduledExecutorService executorService;
+   private final LookAndStepBehavior lookAndStepBehavior;
    private ScheduledFuture<?> stateMachineTask = null;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
@@ -92,7 +96,7 @@ public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(BehaviorHelper helper)
+   public BuildingExplorationBehavior(BehaviorHelper helper)
    {
       DRCRobotModel robotModel = helper.getRobotModel();
       ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
@@ -104,11 +108,32 @@ public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
       this.ros2Node = ros2Node;
       this.behaviorMessager = behaviorMessager;
 
+      AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
+
+      lookAndStepBehavior = new LookAndStepBehavior(helper);
+
       teleopState = new TeleopState(robotModel,ros2Node);
-//      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
       lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
       walkThroughDoorState = new WalkThroughDoorState(robotModel, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
+
+      behaviorMessager.registerTopicListener(RequestedState, this::requestState);
+      AtomicReference<BuildingExplorationStateName> requestedState = behaviorMessager.createInput(RequestedState);
+
+      behaviorMessager.registerTopicListener(Start, s ->
+      {
+         LogTools.debug("Start requested in UI... starting behavior coordinator");
+         setBombPose(goal.get());
+         requestState(requestedState.get());
+         start();
+      });
+      behaviorMessager.registerTopicListener(Stop, s -> stop());
+      setStateChangedCallback(newState -> behaviorMessager.submitMessage(CurrentState, newState));
+      setDebrisDetectedCallback(() -> behaviorMessager.submitMessage(DebrisDetected, true));
+      setStairsDetectedCallback(() -> behaviorMessager.submitMessage(StairsDetected, true));
+      setDoorDetectedCallback(() -> behaviorMessager.submitMessage(DoorDetected, true));
+      behaviorMessager.registerTopicListener(IgnoreDebris, ignore -> ignoreDebris());
+      behaviorMessager.registerTopicListener(ConfirmDoor, confirm -> proceedWithDoorBehavior());
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
@@ -156,7 +181,7 @@ public class BuildingExplorationBehaviorCoordinator implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      lookAndStepBehavior.setEnabled(enabled);
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)
