@@ -32,10 +32,10 @@
     <Label text="Stairs detected" GridPane.columnIndex="4" GridPane.rowIndex="2" />
     <Label text="Door detected" GridPane.columnIndex="4" GridPane.rowIndex="3" />
 
-    <Text fx:id="currentState" GridPane.columnIndex="5" GridPane.rowIndex="0" />
-    <Text fx:id="debrisDetected" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-    <Text fx:id="stairsDetected" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-    <Text fx:id="doorDetected" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+    <Text fx:id="currentState" layoutX="100.0" layoutY="30.0" wrappingWidth="140.0" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+    <Text fx:id="debrisDetected" layoutX="100.0" layoutY="30.0" wrappingWidth="140.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+    <Text fx:id="stairsDetected" layoutX="100.0" layoutY="30.0" wrappingWidth="140.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+    <Text fx:id="doorDetected" layoutX="100.0" layoutY="30.0" wrappingWidth="140.0" GridPane.columnIndex="5" GridPane.rowIndex="3" />
     <Button onAction="#ignoreDebris" text="Not debris" GridPane.columnIndex="5" GridPane.rowIndex="4" />
     <Button onAction="#confirmDoor" text="Confirm door" GridPane.columnIndex="5" GridPane.rowIndex="5" />
     <Button onAction="#approveStairsSteps" text="Approve stairs steps" GridPane.columnIndex="5" GridPane.rowIndex="6" />
