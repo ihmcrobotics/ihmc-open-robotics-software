@@ -63,7 +63,6 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-4;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -310,7 +309,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Would be nicer to check desired values but we currently have so many difference height control schemes that that would not be easy.
       referenceFrames.updateFrames();
       double finalPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
-      assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-5);
+      assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-3);
    }
 
    @Test
