@@ -287,7 +287,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          this.enabled = enabled;
          helper.setCommunicationCallbacksEnabled(enabled);
-         statusLogger.info("Look and step behavior selected = {}", enabled);
+         statusLogger.info("Look and step behavior {}.", enabled ? "enabled" : "disabled");
          behaviorStateReference.broadcast();
          reset.queueReset();
       }

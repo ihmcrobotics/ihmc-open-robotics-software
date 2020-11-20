@@ -18,9 +18,11 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
@@ -28,12 +30,15 @@ import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
 {
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+                                                                                  BuildingExplorationBehaviorUI::new);
+
    @FXML private ComboBox<BuildingExplorationStateName> requestedState;
    @FXML private Spinner<Double> goalX;
    @FXML private Spinner<Double> goalY;
@@ -51,7 +56,7 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    private final IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
    private final IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
 
-   public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, DRCRobotModel robotModel, ROS2Node ros2Node, Messager messager)
+   public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager messager, DRCRobotModel robotModel)
    {
       super(subScene, visualizationPane, ros2Node, messager, robotModel);
 
