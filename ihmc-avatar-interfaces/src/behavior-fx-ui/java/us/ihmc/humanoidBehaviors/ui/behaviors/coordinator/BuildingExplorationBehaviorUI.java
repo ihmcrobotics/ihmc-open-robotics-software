@@ -28,7 +28,6 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
@@ -49,7 +48,6 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    @FXML private Text doorDetected;
    @FXML private Button placeGoal;
 
-   private final JavaFXRobotVisualizer robotVisualizer;
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
    private final FootstepPlanGraphic footstepPlanGraphic;
    private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
@@ -66,22 +64,18 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
                                                     s -> getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData,
                                                                                              s.takeNextData()));
 
-      robotVisualizer = new JavaFXRobotVisualizer(robotModel);
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, messager);
       lookAndStepVisualizationGroup.setEnabled(true);
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
 
-      robotVisualizer.start();
 
       PositionGraphic goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       get3DGroup().getChildren().add(goalGraphic.getNode());
       goalGraphic.setMouseTransparent(true);
       messager.registerTopicListener(Goal, newGoal -> goalGraphic.setPosition(newGoal.getPosition()));
 
-      messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
-      get3DGroup().getChildren().add(robotVisualizer.getRootNode());
       get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
       get3DGroup().getChildren().add(footstepPlanGraphic);
 
@@ -188,7 +182,6 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    @Override
    public void destroy()
    {
-      robotVisualizer.stop();
       lookAndStepVisualizationGroup.destroy();
       footstepPlanGraphic.destroy();
    }
