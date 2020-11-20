@@ -96,8 +96,7 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
                              ObjectDetectorToolboxModule.getOutputTopic(robotName).withTypeName(DoorLocationPacket.class),
                              doorLocationPacket -> Platform.runLater(() ->
                              {
-                                doorGraphic.getPose().set(doorLocationPacket.getDoorTransformToWorld());
-                                doorGraphic.update();
+                                doorGraphic.setPose(doorLocationPacket.getDoorTransformToWorld());
                              }));
 
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
