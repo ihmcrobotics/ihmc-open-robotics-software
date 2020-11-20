@@ -231,6 +231,12 @@ public class FeedbackControllerTemplate
       enableCenterOfMassFeedbackController = true;
    }
 
+   /**
+    * Sets the factory to use for creating the feedback controllers in
+    * {@link WholeBodyFeedbackController}.
+    * 
+    * @param feedbackControllerFactory the new factory.
+    */
    public void setFeedbackControllerFactory(FeedbackControllerFactory feedbackControllerFactory)
    {
       this.feedbackControllerFactory = feedbackControllerFactory;
