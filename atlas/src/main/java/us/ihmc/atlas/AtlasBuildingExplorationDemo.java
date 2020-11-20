@@ -64,6 +64,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       AtlasRobotModel robotModel = createRobotModel();
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+      simulationStarter.setPubSubImplementation(COMMUNICATION_MODE_ROS2.getPubSubImplementation());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setStartingLocationOffset(STARTING_LOCATION.getPose().getPosition(), STARTING_LOCATION.getPose().getYaw());
