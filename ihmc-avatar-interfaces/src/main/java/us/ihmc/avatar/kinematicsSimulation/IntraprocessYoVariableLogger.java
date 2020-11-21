@@ -54,7 +54,7 @@ public class IntraprocessYoVariableLogger
       Path incomingLogsDirectory;
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
-         incomingLogsDirectory = Paths.get("/opt/ihmc/BambooVideos")
+         incomingLogsDirectory = Paths.get(System.getProperty("user.home")).resolve(".ihmc/bamboo-logs")
                                       .resolve(System.getenv("bamboo_planKey"))
                                       .resolve(System.getenv("bamboo_buildResultKey"));
       }
