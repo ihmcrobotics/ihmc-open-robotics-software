@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
@@ -43,7 +44,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-   /** package-private */ static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   /** package-private */ static final String defaultLogsDirectory;
+   static
+   {
+      String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         incomingLogsDirectory = incomingLogsDirectory + "bamboo-logs" + File.separator
+                                                       + System.getenv("bamboo_planKey") + File.separator
+                                                       + System.getenv("bamboo_buildResultKey") + File.separator;
+      }
+      else
+      {
+         incomingLogsDirectory = incomingLogsDirectory + "logs" + File.separator;
+      }
+      defaultLogsDirectory = incomingLogsDirectory;
+   }
    /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
