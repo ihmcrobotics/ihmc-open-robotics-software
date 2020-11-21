@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
@@ -217,8 +218,6 @@ public class CoMTrajectoryModelPredictiveController
          rhoJacobians.clear();
          coefficientJacobians.clear();
 
-         RhoValueObjectiveCommand rhoEndValueMin = commandProvider.getNextRhoValueObjectiveCommand();
-
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
             ContactStateMagnitudeToForceMatrixHelper rhoJacobian = rhoJacobians.add();
@@ -268,12 +267,19 @@ public class CoMTrajectoryModelPredictiveController
             mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
          }
       }
+
+      // set terminal constraint
+      ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
+      double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
+      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), endVRPPositions.getLast(), numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(numberOfPhases - 1), numberOfPhases - 1, finalDuration, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(MEDIUM_WEIGHT);
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
@@ -290,6 +296,7 @@ public class CoMTrajectoryModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(MEDIUM_WEIGHT);
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
@@ -308,6 +315,7 @@ public class CoMTrajectoryModelPredictiveController
    {
       continuityObjectiveToPack.clear();
       continuityObjectiveToPack.setOmega(omega.getValue());
+      continuityObjectiveToPack.setWeight(MEDIUM_WEIGHT);
       continuityObjectiveToPack.setFirstSegmentNumber(firstSegmentNumber);
       continuityObjectiveToPack.setFirstSegmentDuration(firstSegmentDuration);
 
@@ -334,6 +342,7 @@ public class CoMTrajectoryModelPredictiveController
       valueObjective.setOmega(omega.getValue());
       valueObjective.setTimeOfObjective(constraintTime);
       valueObjective.setSegmentNumber(segmentNumber);
+      valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       valueObjective.setObjective(minRhoValue);
       for (int i = 0; i < coefficientJacobianHelperPool.get(segmentNumber).size(); i++)
       {
@@ -370,6 +379,7 @@ public class CoMTrajectoryModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(MEDIUM_WEIGHT);
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(constraintTime);
       objectiveToPack.setObjective(objective);
@@ -382,11 +392,30 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private MPCCommand<?> computeDCMPositionObjective(DCMPositionCommand objectiveToPack,
+                                                     FramePoint3DReadOnly desiredPosition,
+                                                     int segmentNumber,
+                                                     double timeOfObjective)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(MEDIUM_WEIGHT);
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(desiredPosition);
+      for (int i = 0; i < rhoJacobianHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
 
    private void solveQP(int numberOfPhases)
    {
       qpSolver.initialize();
-      qpSolver.submitMPCCommandList(mpcCommands, MEDIUM_WEIGHT);
+      qpSolver.submitMPCCommandList(mpcCommands);
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");

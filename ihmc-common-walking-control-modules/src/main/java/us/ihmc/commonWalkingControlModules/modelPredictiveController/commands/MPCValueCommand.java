@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
@@ -18,6 +19,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    private int segmentNumber;
    private double timeOfObjective;
    private double omega;
+   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
 
    public MPCCommandType getCommandType()
    {
@@ -32,6 +34,11 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    {
       rhoToForceMatrixHelpers.clear();
       jacobianMatrixHelpers.clear();
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
    }
 
    public void addRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper helper)
@@ -67,6 +74,11 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    public int getSegmentNumber()
    {
       return segmentNumber;
+   }
+
+   public double getWeight()
+   {
+      return weight;
    }
 
    public double getTimeOfObjective()

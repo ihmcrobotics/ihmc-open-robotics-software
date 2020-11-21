@@ -21,7 +21,7 @@ public class MPCQPInputCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
-   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective, double weight)
+   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective)
    {
       inputToPack.reshape(3);
 
@@ -29,6 +29,7 @@ public class MPCQPInputCalculator
       int secondSegmentNumber = firstSegmentNumber + 1;
       double firstSegmentDuration = objective.getFirstSegmentDuration();
       double omega = objective.getOmega();
+      double weight = objective.getWeight();
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstSegmentNumber,
                                                             firstSegmentDuration,
@@ -81,28 +82,29 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
+   public boolean calculateValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       switch (objective.getValueType())
       {
          case COM:
-            return calculateCoMValueObjective(inputToPack, objective, weight);
+            return calculateCoMValueObjective(inputToPack, objective);
          case VRP:
-            return calculateVRPValueObjective(inputToPack, objective, weight);
+            return calculateVRPValueObjective(inputToPack, objective);
          case DCM:
-            return calculateDCMValueObjective(inputToPack, objective, weight);
+            return calculateDCMValueObjective(inputToPack, objective);
          default:
             return false;
       }
    }
 
-   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
+   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
+      double weight = objective.getWeight();
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(segmentNumber, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
 
@@ -128,13 +130,14 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
+   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
+      double weight = objective.getWeight();
 
       CoMCoefficientJacobianCalculator.calculateDCMJacobian(segmentNumber,
                                                             omega,
@@ -168,13 +171,14 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueCommand objective, double weight)
+   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
+      double weight = objective.getWeight();
 
       CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber,
                                                             omega,
@@ -211,7 +215,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateRhoValueCommand(QPInput inputToPack, RhoValueObjectiveCommand command, double weight)
+   public boolean calculateRhoValueCommand(QPInput inputToPack, RhoValueObjectiveCommand command)
    {
       int problemSize = 0;
 
