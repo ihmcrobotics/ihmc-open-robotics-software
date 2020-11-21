@@ -279,15 +279,15 @@ public class CoMMPCQPSolver
             else
                throw new IllegalArgumentException("Not yet implemented.");
             break;
-//         case EQUALITY:
-//            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
-//            break;
-//         case LEQ_INEQUALITY:
-//            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-//            break;
-//         case GEQ_INEQUALITY:
-//            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-//            break;
+         case EQUALITY:
+            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case LEQ_INEQUALITY:
+            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case GEQ_INEQUALITY:
+            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
@@ -300,6 +300,30 @@ public class CoMMPCQPSolver
          throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
       addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
+   public void addMotionEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   {
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
+   }
+
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
+   }
+
+   private void addMotionInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, 0);
    }
 
    private void addTaskInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, int offset)
@@ -315,6 +339,45 @@ public class CoMMPCQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+   }
+
+   private void addEqualityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      int previousSize = solverInput_beq.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_beq.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, offset);
+      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, offset);
+   }
+
+
+   private void addInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign, int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      int previousSize = solverInput_bin.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_bin.reshape(previousSize + taskSize, 1, true);
+
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, offset, taskJacobian, 0, 0, taskSize, variables, sign);
+      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public boolean solve()
