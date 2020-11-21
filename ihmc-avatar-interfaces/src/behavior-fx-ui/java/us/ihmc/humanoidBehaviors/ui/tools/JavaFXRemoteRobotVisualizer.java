@@ -3,8 +3,11 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 import javafx.scene.Group;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -23,6 +26,8 @@ public class JavaFXRemoteRobotVisualizer extends Group
    private GraphicsRobot graphicsRobot;
    private JavaFXGraphics3DNode robotRootNode;
    private Activator robotLoadedActivator = new Activator();
+   private boolean trackRobot = false;
+   private FocusBasedCameraMouseEventHandler cameraForOptionalTracking;
 
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
 
@@ -34,6 +39,12 @@ public class JavaFXRemoteRobotVisualizer extends Group
       executor.submit(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()));
 
       animationTimer.start();
+   }
+
+   public void setTrackRobot(FocusBasedCameraMouseEventHandler camera, boolean trackRobot)
+   {
+      this.trackRobot = trackRobot;
+      this.cameraForOptionalTracking = camera;
    }
 
    private void handle(long now)
@@ -49,6 +60,15 @@ public class JavaFXRemoteRobotVisualizer extends Group
 
          graphicsRobot.update();
          robotRootNode.update();
+
+         if (trackRobot)
+         {
+            FramePose3DReadOnly walkingFrame = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+
+            cameraForOptionalTracking.getTranslate().setX(walkingFrame.getPosition().getX());
+            cameraForOptionalTracking.getTranslate().setY(walkingFrame.getPosition().getY());
+            cameraForOptionalTracking.getTranslate().setZ(walkingFrame.getPosition().getZ());
+         }
       }
    }
 

@@ -18,6 +18,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.BehaviorDirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -49,11 +50,13 @@ public class BehaviorUI
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
    private LocalParameterServer parameterServer;
+   private FocusBasedCameraMouseEventHandler camera;
    private JavaFXRemoteRobotVisualizer robotVisualizer;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
-   @FXML private ChoiceBox<String> behaviorSelector;
+   @FXML private ChoiceBox<String> behaviorSelector;;
+   @FXML private CheckBox trackRobot;
    @FXML private Button startRecording;
    @FXML private Button stopRecording;
    private BehaviorDirectRobotUI behaviorDirectRobotUI;
@@ -107,7 +110,7 @@ public class BehaviorUI
          AnchorPane mainAnchorPane = new AnchorPane();
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
-         view3DFactory.addCameraController(0.05, 2000.0, true);
+         camera = view3DFactory.addCameraController(0.05, 2000.0, true);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
@@ -171,6 +174,7 @@ public class BehaviorUI
          behaviorDirectRobotUI.init(mainAnchorPane, ros2Node, robotModel);
          view3DFactory.addNodeToView(behaviorDirectRobotUI);
          robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
+         robotVisualizer.setTrackRobot(camera, true);
          view3DFactory.addNodeToView(robotVisualizer);
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
@@ -215,6 +219,11 @@ public class BehaviorUI
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
       });
+   }
+
+   @FXML public void trackRobot()
+   {
+      robotVisualizer.setTrackRobot(camera, trackRobot.isSelected());
    }
 
    @FXML public void startRecording()
