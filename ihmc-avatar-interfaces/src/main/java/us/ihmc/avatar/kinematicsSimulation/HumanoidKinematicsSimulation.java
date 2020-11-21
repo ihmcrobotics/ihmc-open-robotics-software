@@ -291,22 +291,13 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          Path incomingLogsDirectory;
-         if (kinematicsSimulationParameters.getIncomingLogsDirectory() == null)
-         {
-            incomingLogsDirectory = IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY;
-         }
-         else
-         {
-            incomingLogsDirectory = kinematicsSimulationParameters.getIncomingLogsDirectory();
-         }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
                                                                          100000,
-                                                                         0.01,
-                                                                         incomingLogsDirectory);
+                                                                         0.01);
          intraprocessYoVariableLogger.start();
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
