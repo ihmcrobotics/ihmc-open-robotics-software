@@ -372,8 +372,7 @@ public class AvatarSimulationFactory
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
                                                                          100000,
-                                                                         robotModel.getEstimatorDT(),
-                                                                         IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY);
+                                                                         robotModel.getEstimatorDT());
          estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
       }
 

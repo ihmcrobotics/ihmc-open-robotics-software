@@ -360,7 +360,7 @@ public class AtlasLookAndStepBehaviorTest
                                                           COMMUNICATION_MODE.getPubSubImplementation(),
                                                           recordFrequencySpeedup,
                                                           scsDataBufferSize,
-                                                          !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+                                                          true);
       dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();
@@ -371,11 +371,7 @@ public class AtlasLookAndStepBehaviorTest
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(COMMUNICATION_MODE.getPubSubImplementation());
-      kinematicsSimulationParameters.setLogToFile(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-      {
-         kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos")); // TODO: Get logging on Bamboo working
-      }
+      kinematicsSimulationParameters.setLogToFile(true);
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
       kinematicsSimulationParameters.setInitialGroundHeight(environment.getGroundZ());
       kinematicsSimulationParameters.setInitialRobotYaw(environment.getInitialYaw());
