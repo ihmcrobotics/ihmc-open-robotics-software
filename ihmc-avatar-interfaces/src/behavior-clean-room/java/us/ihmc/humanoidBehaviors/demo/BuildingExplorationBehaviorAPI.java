@@ -1,9 +1,8 @@
 package us.ihmc.humanoidBehaviors.demo;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class BuildingExplorationBehaviorAPI
 {
@@ -12,8 +11,6 @@ public class BuildingExplorationBehaviorAPI
    private static final MessagerAPIFactory.CategoryTheme DemoCoordinator = apiFactory.createCategoryTheme("DemoCoordinator");
 
    public static final MessagerAPIFactory.Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegions = topic("PlanarRegions");
-   public static final MessagerAPIFactory.Topic<Boolean> ShowRegions = topic("ShowRegions");
 
    public static final MessagerAPIFactory.Topic<BuildingExplorationStateName> RequestedState = topic("RequestedState");
    public static final MessagerAPIFactory.Topic<BuildingExplorationStateName> CurrentState = topic("CurrentState");
@@ -27,8 +24,7 @@ public class BuildingExplorationBehaviorAPI
 
    public static final MessagerAPIFactory.Topic<Boolean> Start = topic("Start");
    public static final MessagerAPIFactory.Topic<Boolean> Stop = topic("Stop");
-   public static final MessagerAPIFactory.Topic<Point3D> Goal = topic("Goal");
-   public static final MessagerAPIFactory.Topic<Boolean> PlaceGoal = topic("PlaceGoal");
+   public static final MessagerAPIFactory.Topic<Pose3D> Goal = topic("Goal");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

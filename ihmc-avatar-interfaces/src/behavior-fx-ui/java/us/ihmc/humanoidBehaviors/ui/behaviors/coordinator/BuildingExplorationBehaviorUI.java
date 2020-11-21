@@ -1,187 +1,220 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
+import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.SubScene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.MeshView;
-import javafx.stage.Stage;
+import javafx.scene.text.Text;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepVisualizationGroup;
+import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
+import us.ihmc.humanoidBehaviors.ui.graphics.DoorGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.ros2.ROS2Node;
-
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
-public class BuildingExplorationBehaviorUI
+public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
 {
-   private final Stage primaryStage;
-   private final BorderPane mainPane;
-   private final PlanarRegionViewer planarRegionViewer;
-   private final JavaFXRobotVisualizer robotVisualizer;
-   private final FootstepPlanGraphic footstepPlanGraphic;
-   private final BuildingExplorationGoalMouseListener goalMouseListener;
-   private final ROS2Node ros2Node;
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+                                                                                  BuildingExplorationBehaviorUI::new);
 
-   @FXML
-   private BuildingExplorationUIDashboardController buildingExplorationUIDashboardController;
+   @FXML private ComboBox<BuildingExplorationStateName> requestedState;
+   @FXML private Spinner<Double> goalX;
+   @FXML private Spinner<Double> goalY;
+   @FXML private Spinner<Double> goalZ;
+   @FXML private Text currentState;
+   @FXML private Text debrisDetected;
+   @FXML private Text stairsDetected;
+   @FXML private Text doorDetected;
+   @FXML private Button placeGoal;
 
-   public BuildingExplorationBehaviorUI(Stage primaryStage,
-                                        JavaFXMessager messager,
-                                        DRCRobotModel robotModel,
-                                        ROS2Node ros2Node,
-                                        Messager behaviorMessager) throws Exception
+   private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
+   private final FootstepPlanGraphic stairsFootstepPlanGraphic;
+   private final FootstepPlanGraphic controllerFootstepPlanGraphic;
+   private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
+   private final IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
+   private final IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
+   private final PositionGraphic goalGraphic;
+   private final DoorGraphic doorGraphic;
+
+   public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager messager, DRCRobotModel robotModel)
    {
-      this.primaryStage = primaryStage;
-      this.ros2Node = ros2Node;
-      primaryStage.setTitle(getClass().getSimpleName());
+      super(subScene, visualizationPane, ros2Node, messager, robotModel);
 
-      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel,
-                                                                                                              ros2Node,
-                                                                                                              behaviorMessager);
-      createMessageBindings(ros2Node, robotModel.getSimpleRobotName(), messager, behaviorCoordinator);
-      behaviorCoordinator.setStateChangedCallback(newState -> messager.submitMessage(CurrentState, newState));
-      behaviorCoordinator.setDebrisDetectedCallback(() -> messager.submitMessage(DebrisDetected, true));
-      behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
-      behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
-      messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
-      messager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
+      String robotName = robotModel.getSimpleRobotName();
 
-      FXMLLoader loader = new FXMLLoader();
-      loader.setController(this);
-      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-      mainPane = loader.load();
-
-      View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
-      view3dFactory.addDefaultLighting();
-
-      Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
-
-      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-      worldCoordinateSystem.setMouseTransparent(true);
-      view3dFactory.addNodeToView(worldCoordinateSystem);
-
-      robotVisualizer = new JavaFXRobotVisualizer(robotModel);
-      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegions, ShowRegions);
-      footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
-            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
-      goalMouseListener = new BuildingExplorationGoalMouseListener(messager, subScene);
-
-      robotVisualizer.start();
-      planarRegionViewer.start();
-      goalMouseListener.start();
-
-      GoalGraphic goalGraphic = new GoalGraphic();
-      view3dFactory.addNodeToView(goalGraphic);
-      goalGraphic.setMouseTransparent(true);
-      messager.registerTopicListener(Goal, newGoal ->
-      {
-         goalGraphic.setTranslateX(newGoal.getX());
-         goalGraphic.setTranslateY(newGoal.getY());
-         goalGraphic.setTranslateZ(newGoal.getZ());
-      });
-
-      messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
-      view3dFactory.addNodeToView(robotVisualizer.getRootNode());
-      view3dFactory.addNodeToView(footstepPlanGraphic);
-
-      buildingExplorationUIDashboardController.bindControls(messager, ros2Node);
-      mainPane.setCenter(subScene);
-
-      Scene mainScene = new Scene(mainPane);
-      primaryStage.setScene(mainScene);
-      primaryStage.setWidth(1400);
-      primaryStage.setHeight(950);
-      primaryStage.setOnCloseRequest(event -> stop());
-   }
-
-   public void show()
-   {
-      primaryStage.show();
-   }
-
-   public void stop()
-   {
-      planarRegionViewer.stop();
-      robotVisualizer.stop();
-      ros2Node.destroy();
-      footstepPlanGraphic.destroy();
-   }
-
-   private static class GoalGraphic extends Group
-   {
-      public GoalGraphic()
-      {
-         TextureColorPalette1D colorPalette = new TextureColorPalette1D();
-         colorPalette.setHueBased(1.0, 1.0);
-         JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
-
-         meshBuilder.addSphere(0.1f, Color.rgb(50, 50, 50));
-         MeshView goalSphere = new MeshView(meshBuilder.generateMesh());
-         goalSphere.setMaterial(meshBuilder.generateMaterial());
-         goalSphere.setMaterial(new PhongMaterial( Color.rgb(50, 50, 50)));
-         getChildren().add(goalSphere);
-
-         meshBuilder.clear();
-         meshBuilder.addCylinder(0.14f, 0.014, new Point3D(), new AxisAngle(1.0, 0.0, 0.0, 0.4), Color.RED);
-         MeshView goalFuse = new MeshView(meshBuilder.generateMesh());
-         goalFuse.setMaterial(meshBuilder.generateMaterial());
-         goalFuse.setMaterial(new PhongMaterial(Color.RED));
-         getChildren().add(goalFuse);
-      }
-   }
-
-   private static void createMessageBindings(ROS2Node ros2Node, String robotName, Messager messager, BuildingExplorationBehaviorCoordinator behaviorCoordinator)
-   {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.LIDAR_REA_REGIONS,
-                                           s -> messager.submitMessage(BuildingExplorationBehaviorAPI.PlanarRegions,
-                                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     controller_msgs.msg.dds.RobotConfigurationData.class,
                                                     ControllerAPIDefinition.getOutputTopic(robotName),
-                                                    s -> messager.submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData, s.takeNextData()));
+                                                    s -> getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData,
+                                                                                             s.takeNextData()));
 
-      AtomicReference<Point3D> goal = messager.createInput(Goal);
+      lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, messager);
+      lookAndStepVisualizationGroup.setEnabled(true);
+      stairsFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      stairsFootstepPlanGraphic.setTransparency(0.5);
+      new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
+            stairsFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
 
-      messager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
-      AtomicReference<BuildingExplorationStateName> requestedState = messager.createInput(RequestedState);
+      controllerFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage ->
+            controllerFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
 
-      messager.registerTopicListener(Start, s ->
+      goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
+      goalGraphic.setMouseTransparent(true);
+      messager.registerTopicListener(Goal, newGoal -> Platform.runLater(() -> goalGraphic.setPosition(newGoal.getPosition())));
+
+      doorGraphic = new DoorGraphic(new Color(0.8, 0.8, 0.8, 0.3));
+      doorGraphic.setMouseTransparent(true);
+      new IHMCROS2Callback<>(ros2Node,
+                             ObjectDetectorToolboxModule.getOutputTopic(robotName).withTypeName(DoorLocationPacket.class),
+                             doorLocationPacket -> Platform.runLater(() ->
+                             {
+                                doorGraphic.setPose(doorLocationPacket.getDoorTransformToWorld());
+                             }));
+
+      requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
+
+      goalX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      goalY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      goalZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+
+      goalZ.valueProperty().addListener((observable, oldValue, newValue) ->
       {
-         LogTools.debug("Start requested in UI... starting behavior coordinator");
-         behaviorCoordinator.setBombPosition(goal.get());
-         behaviorCoordinator.requestState(requestedState.get());
-         behaviorCoordinator.start();
+         Point3D updatedPosition = new Point3D(goalGraphic.getPose().getPosition());
+         updatedPosition.setZ(newValue);
+         goalGraphic.setPosition(updatedPosition);
+         goalGraphic.update();
       });
-      messager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
+
+      goalX.getValueFactory().setValue(14.2);
+      goalZ.getValueFactory().setValue(0.86);
+
+      currentState.setText("----");
+      debrisDetected.setText("No");
+      stairsDetected.setText("No");
+      doorDetected.setText("No");
+
+      messager.registerTopicListener(CurrentState, state ->
+      {
+         currentState.setText(state.toString());
+         if (state == BuildingExplorationStateName.LOOK_AND_STEP)
+         {
+            debrisDetected.setText("No");
+            stairsDetected.setText("No");
+         }
+
+         if (state != BuildingExplorationStateName.WALK_THROUGH_DOOR)
+         {
+            doorDetected.setText("No");
+         }
+      });
+
+      messager.registerTopicListener(DebrisDetected, d -> debrisDetected.setText("Yes"));
+      messager.registerTopicListener(StairsDetected, d -> stairsDetected.setText("Yes"));
+      messager.registerTopicListener(DoorDetected, d -> doorDetected.setText("Yes"));
+
+      requestedState.getSelectionModel()
+                    .selectedItemProperty()
+                    .addListener((observable, oldState, newState) -> messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, newState));
+
+      executeStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.EXECUTE_STEPS);
+      replanStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.REPLAN);
+
+      walkingGoalPlacementEditor.init(subScene, placeGoal, placedGoal -> messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+      enable3DGroup(enabled,
+                    lookAndStepVisualizationGroup,
+                    stairsFootstepPlanGraphic,
+                    controllerFootstepPlanGraphic,
+                    goalGraphic.getNode(),
+                    walkingGoalPlacementEditor,
+                    doorGraphic.getNode());
+   }
+
+   @FXML
+   public void requestStart()
+   {
+      LogTools.info("Requesting start");
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, true);
+   }
+
+   @FXML
+   public void requestStop()
+   {
+      LogTools.info("Requesting stop");
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
+   }
+
+   @FXML
+   public void placeGoal()
+   {
+      LogTools.info("Placing goal");
+      walkingGoalPlacementEditor.startGoalPlacement();
+   }
+
+   @FXML
+   public void ignoreDebris()
+   {
+      LogTools.info("Ignore debris pressed");
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
+   }
+
+   @FXML
+   public void confirmDoor()
+   {
+      LogTools.info("Confirm door pressed");
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
+   }
+
+   @FXML
+   public void approveStairsSteps()
+   {
+      LogTools.info("Approve stairs pressed");
+      executeStairsStepsPublisher.publish(new Empty());
+   }
+
+   @FXML
+   public void replanStairsSteps()
+   {
+      LogTools.info("Replan stairs pressed");
+      replanStairsStepsPublisher.publish(new Empty());
+   }
+
+   @Override
+   public void destroy()
+   {
+      lookAndStepVisualizationGroup.destroy();
+      stairsFootstepPlanGraphic.destroy();
    }
 }

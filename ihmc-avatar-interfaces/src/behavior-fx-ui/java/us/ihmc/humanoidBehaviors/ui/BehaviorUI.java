@@ -45,6 +45,7 @@ public class BehaviorUI
    private final Messager behaviorMessager;
    private final ROS2Node ros2Node;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private final Map<String, Boolean> enabledUIs = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
    private LocalParameterServer parameterServer;
@@ -103,23 +104,6 @@ public class BehaviorUI
       {
          mainPane = JavaFXMissingTools.loadFromFXML(this);
 
-         BorderPane bottom = (BorderPane) mainPane.getBottom();
-         TabPane tabPane = (TabPane) bottom.getCenter();
-
-         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
-         {
-            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
-            {
-               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
-               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
-               Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
-               tabPane.getTabs().add(tab);
-            }
-         }
-
-         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
-         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
-
          AnchorPane mainAnchorPane = new AnchorPane();
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
@@ -137,7 +121,40 @@ public class BehaviorUI
 
          VBox sideVisualizationArea = new VBox();
 
-         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
+         BorderPane bottom = (BorderPane) mainPane.getBottom();
+         TabPane uiTabPane = new TabPane();
+         Node uisPane = uiTabPane;
+
+         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
+         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
+
+         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         {
+            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
+            {
+               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().create(subScene3D,
+                                                                                                          sideVisualizationArea,
+                                                                                                          ros2Node,
+                                                                                                          behaviorMessager,
+                                                                                                          robotModel);
+               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
+
+               if (behaviorUIRegistry.getNumberOfUIs() == 1)
+               {
+                  uisPane = behaviorUIInterface.getPane();
+               }
+               else
+               {
+                  Tab tab = new Tab(uiDefinitionEntry.getName(), behaviorUIInterface.getPane());
+                  uiTabPane.getTabs().add(tab);
+               }
+               view3DFactory.addNodeToView(behaviorUIInterface.get3DGroup());
+            }
+         }
+
+         bottom.setCenter(uisPane);
+
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager, ros2Node);
 
          stopRecording.setDisable(true);
 
@@ -147,12 +164,6 @@ public class BehaviorUI
          for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
             behaviorSelector.getItems().add(behaviorDefinition.getName());
-         }
-
-         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
-         {
-            behaviorUIInterface.init(subScene3D, sideVisualizationArea, ros2Node, behaviorMessager, robotModel);
-            view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
@@ -196,6 +207,11 @@ public class BehaviorUI
             destroy();
          });
 
+         if (behaviorUIRegistry.getNumberOfUIs() == 1)
+         {
+            behaviorSelector.valueProperty().setValue(behaviorUIRegistry.getNameOfOnlyUIBehavior());
+         }
+
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
       });
@@ -233,13 +249,11 @@ public class BehaviorUI
 
       for (String behaviorName : behaviorUIInterfaces.keySet())
       {
-         if (newValue.equals(behaviorName))
+         boolean enabled = newValue.equals(behaviorName);
+
+         if (enabledUIs.computeIfAbsent(behaviorName, key -> false) != enabled)
          {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(true);
-         }
-         else
-         {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(false);
+            behaviorUIInterfaces.get(behaviorName).setEnabled(enabled);
          }
       }
    }

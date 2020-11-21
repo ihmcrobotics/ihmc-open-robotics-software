@@ -64,16 +64,14 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    @FXML private Button replan;
    @FXML private Button sendPlan;
 
-   private Messager behaviorMessager;
-
    private WaypointManager waypointManager;
-   private HashMap<Long, PatrolWaypointGraphic> waypointGraphics = new HashMap<>(); // map unique id to graphic
-   private FootstepPlanGraphic footstepPlanGraphic;
-   private UpDownGoalGraphic upDownGoalGraphic;
-   private PositionGraphic upDownCenterGraphic = new PositionGraphic(Color.AZURE, 0.03);
+   private final HashMap<Long, PatrolWaypointGraphic> waypointGraphics = new HashMap<>(); // map unique id to graphic
+   private final FootstepPlanGraphic footstepPlanGraphic;
+   private final UpDownGoalGraphic upDownGoalGraphic;
+   private final PositionGraphic upDownCenterGraphic = new PositionGraphic(Color.AZURE, 0.03);
 
-   private SnappedPositionEditor snappedPositionEditor;
-   private OrientationYawEditor orientationYawEditor;
+   private final SnappedPositionEditor snappedPositionEditor;
+   private final OrientationYawEditor orientationYawEditor;
 
    private FXUIActionMap waypointPlacementActionMap;
    private FXUIActionMap waypointInsertActionMap;
@@ -81,17 +79,16 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
 
    private int currentInsertIndex; // TODO this should be in extracted functionality
 
-   @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public PatrolBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      getChildren().add(footstepPlanGraphic);
+      get3DGroup().getChildren().add(footstepPlanGraphic);
 
       upDownGoalGraphic = new UpDownGoalGraphic();
-      getChildren().addAll(upDownGoalGraphic.getNodes());
-      getChildren().add(upDownCenterGraphic.getNode());
+      get3DGroup().getChildren().addAll(upDownGoalGraphic.getNodes());
+      get3DGroup().getChildren().add(upDownCenterGraphic.getNode());
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
@@ -140,7 +137,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
                graphic.setOrientation(waypointManager.getPoseFromIndex(i).getOrientation());
                graphic.getOrientationGraphic().getNode().setVisible(true);
                waypointGraphics.put(waypointManager.idFromIndex(i), graphic);
-               getChildren().add(graphic);
+               get3DGroup().getChildren().add(graphic);
             }
          });
       });
@@ -284,7 +281,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
             {
                event.consume();
                upDownCenterGraphic.clear();
-               behaviorMessager.submitMessage(UpDownCenter, new Point3D(upDownCenterGraphic.getPose().getPosition()));
+               getBehaviorMessager().submitMessage(UpDownCenter, new Point3D(upDownCenterGraphic.getPose().getPosition()));
             }
          }
 
@@ -378,7 +375,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
       Waypoint createdWaypoint = waypointManager.appendNewWaypoint();
       PatrolWaypointGraphic createdWaypointGraphic = new PatrolWaypointGraphic(waypointManager.indexOfId(createdWaypoint.getUniqueId()));
       waypointGraphics.put(createdWaypoint.getUniqueId(), createdWaypointGraphic);
-      getChildren().add(createdWaypointGraphic);
+      get3DGroup().getChildren().add(createdWaypointGraphic);
       return createdWaypointGraphic;
    }
 
@@ -387,7 +384,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
       Waypoint insertedWaypoint = waypointManager.insertNewWaypoint(index);
       PatrolWaypointGraphic insertedWaypointGraphic = new PatrolWaypointGraphic(index);
       waypointGraphics.put(insertedWaypoint.getUniqueId(), insertedWaypointGraphic);
-      getChildren().add(insertedWaypointGraphic);
+      get3DGroup().getChildren().add(insertedWaypointGraphic);
       redrawIndexNumbers();
       return insertedWaypointGraphic;
    }
@@ -399,7 +396,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
 
    private void removeWaypointGraphicById(long id)
    {
-      getChildren().remove(waypointGraphics.get(id));
+      get3DGroup().getChildren().remove(waypointGraphics.get(id));
       waypointGraphics.remove(id);
       waypointManager.remove(id);
       redrawIndexNumbers();
@@ -416,7 +413,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    private void removeAllWaypointGraphics()
    {
       LogTools.debug("Removing all waypoint graphics.");
-      waypointGraphics.values().forEach(graphic -> getChildren().remove(graphic));
+      waypointGraphics.values().forEach(graphic -> get3DGroup().getChildren().remove(graphic));
       waypointGraphics.clear();
    }
 
@@ -424,14 +421,14 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    {
       long lastId = waypointManager.lastId();
 
-      getChildren().remove(waypointGraphics.get(lastId));
+      get3DGroup().getChildren().remove(waypointGraphics.get(lastId));
       waypointGraphics.remove(lastId);
       waypointManager.remove(lastId);
    }
 
    public void publishPerceiveDuration()
    {
-      behaviorMessager.submitMessage(PerceiveDuration, perceiveDuration.getValue());
+      getBehaviorMessager().submitMessage(PerceiveDuration, perceiveDuration.getValue());
    }
 
    @FXML
@@ -443,53 +440,53 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    @FXML public void goToWaypoint()
    {
       waypointManager.setNextFromIndex(waypointIndex.getValue()); // this might not be necessary
-      behaviorMessager.submitMessage(GoToWaypoint, waypointIndex.getValue());
+      getBehaviorMessager().submitMessage(GoToWaypoint, waypointIndex.getValue());
    }
 
    @FXML public void cancelPlanning2()
    {
-      behaviorMessager.submitMessage(CancelPlanning, new Object());
+      getBehaviorMessager().submitMessage(CancelPlanning, new Object());
    }
 
    @FXML public void skip()
    {
-      behaviorMessager.submitMessage(SkipPerceive, new Object());
+      getBehaviorMessager().submitMessage(SkipPerceive, new Object());
    }
 
    @FXML public void stopWalking()
    {
-      behaviorMessager.submitMessage(Stop, new Object());
+      getBehaviorMessager().submitMessage(Stop, new Object());
    }
 
    @FXML public void loopThroughWaypoints()
    {
-      behaviorMessager.submitMessage(Loop, loopThroughWaypoints.isSelected());
+      getBehaviorMessager().submitMessage(Loop, loopThroughWaypoints.isSelected());
    }
 
    @FXML public void swingOverPlanarRegions()
    {
-      behaviorMessager.submitMessage(SwingOvers, swingOverPlanarRegions.isSelected());
+      getBehaviorMessager().submitMessage(SwingOvers, swingOverPlanarRegions.isSelected());
    }
 
    @FXML public void operatorPlanReview()
    {
-      behaviorMessager.submitMessage(PlanReviewEnabled, operatorPlanReview.isSelected());
+      getBehaviorMessager().submitMessage(PlanReviewEnabled, operatorPlanReview.isSelected());
    }
 
    @FXML public void replan()
    {
-      behaviorMessager.submitMessage(PlanReviewResult, OperatorPlanReviewResult.REPLAN);
+      getBehaviorMessager().submitMessage(PlanReviewResult, OperatorPlanReviewResult.REPLAN);
    }
 
    @FXML public void sendPlan()
    {
-      behaviorMessager.submitMessage(PlanReviewResult, OperatorPlanReviewResult.WALK);
+      getBehaviorMessager().submitMessage(PlanReviewResult, OperatorPlanReviewResult.WALK);
    }
 
    @FXML public void upDownExploration()
    {
       placeWaypoints.setDisable(upDownExploration.isSelected());
-      behaviorMessager.submitMessage(UpDownExplorationEnabled, upDownExploration.isSelected());
+      getBehaviorMessager().submitMessage(UpDownExplorationEnabled, upDownExploration.isSelected());
    }
 
    @FXML public void placeUpDownCenter()

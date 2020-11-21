@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -65,6 +64,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       AtlasRobotModel robotModel = createRobotModel();
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+      simulationStarter.setPubSubImplementation(COMMUNICATION_MODE_ROS2.getPubSubImplementation());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setStartingLocationOffset(STARTING_LOCATION.getPose().getPosition(), STARTING_LOCATION.getPose().getYaw());
@@ -80,7 +80,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       modulesToStart.add(DRCSimulationTools.Modules.FIDUCIAL_DETECTOR);
       modulesToStart.add(DRCSimulationTools.Modules.OBJECT_DETECTOR);
 //      modulesToStart.add(DRCSimulationTools.Modules.BEHAVIOR_MODULE);
-//      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
+      modulesToStart.add(DRCSimulationTools.Modules.FOOTSTEP_PLANNING_TOOLBOX);
       LogTools.info("Starting simulation modules");
 
       String[] args = {"-m " + robotModel.getAtlasVersion().name()};
@@ -100,10 +100,8 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
          simulationStarter.getSimulationConstructionSet().setupGraph("t");
       }
 
-      // Start Look and Step behavior
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
-
-      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, behaviorRegistry, COMMUNICATION_MODE_KRYO);
+      LogTools.info("Starting building exploration behavior");
+      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
    }

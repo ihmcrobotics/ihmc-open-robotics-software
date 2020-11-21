@@ -44,19 +44,18 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @FXML private TextField stateTextField;
    @FXML private TableView parameterTable;
 
-   private Messager behaviorMessager;
-
    private PlanarRegionsGraphic planarRegionsGraphic = null;
 
-   private ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
+   private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
 
-   private HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
-   private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
-   private HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
+   private final HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
+   private final HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
+   private final HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public ExploreAreaBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
+
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
                                              result -> Platform.runLater(() -> displayObservationPosition(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
@@ -89,31 +88,31 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
    private void publishParameters()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());
    }
 
    @FXML
    public void exploreArea()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }
 
    @FXML
    public void randomPoseUpdate()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
    }
 
    @FXML
    public void doSlamButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.DoSlam, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.DoSlam, true);
    }
 
    @FXML
    public void clearMapButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ClearMap, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.ClearMap, true);
    }
 
    @FXML
@@ -122,11 +121,11 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       parameters.save();
    }
 
-   private BunchOfPointsDisplayer observationPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfBoundingBoxesDisplayer boundingBoxesDisplayer = new BunchOfBoundingBoxesDisplayer(this);
+   private BunchOfPointsDisplayer observationPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
+   private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(get3DGroup());
+   private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
+   private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
+   private BunchOfBoundingBoxesDisplayer boundingBoxesDisplayer = new BunchOfBoundingBoxesDisplayer(get3DGroup());
 
    public void displayObservationPosition(Point3D observationPosition)
    {
@@ -168,7 +167,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    {
       if (planarRegionsGraphic != null)
       {
-         getChildren().remove(planarRegionsGraphic);
+         get3DGroup().getChildren().remove(planarRegionsGraphic);
       }
       planarRegionsGraphic = null;
 
@@ -182,7 +181,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    {
       if (planarRegionsGraphic != null)
       {
-         getChildren().remove(planarRegionsGraphic);
+         get3DGroup().getChildren().remove(planarRegionsGraphic);
       }
 
       planarRegionsGraphic = new PlanarRegionsGraphic(false);
@@ -205,7 +204,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
       planarRegionsGraphic.generateMeshes(planarRegionsList);
       planarRegionsGraphic.update();
-      getChildren().add(planarRegionsGraphic);
+      get3DGroup().getChildren().add(planarRegionsGraphic);
    }
 
    public void addPlanarRegionToMap(TemporaryPlanarRegionMessage planarRegionMessage)
