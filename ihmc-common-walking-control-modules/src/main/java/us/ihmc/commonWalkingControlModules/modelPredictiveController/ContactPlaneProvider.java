@@ -24,8 +24,8 @@ public class ContactPlaneProvider implements ContactStateProvider
    private final FramePoint3D endCopPosition = new FramePoint3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
-   private final List<ConvexPolygon2DBasics> contactPointsInBodyFrame = new ArrayList<>();
-   private final List<FramePose3D> contactPoses = new ArrayList<>();
+   private final List<ConvexPolygon2DReadOnly> contactPointsInBodyFrame = new ArrayList<>();
+   private final List<FramePose3DReadOnly> contactPoses = new ArrayList<>();
 
    public ContactPlaneProvider()
    {
@@ -123,10 +123,10 @@ public class ContactPlaneProvider implements ContactStateProvider
       getTimeInterval().setEndTime(endTime);
    }
 
-   public void setStartFromEnd(ContactStateProvider previousContactState)
+   public void addContact(FramePose3DReadOnly contactPose, ConvexPolygon2DReadOnly contactPointsInBodyFrame)
    {
-      setStartTime(previousContactState.getTimeInterval().getEndTime());
-      setStartCopPosition(previousContactState.getCopEndPosition());
+      this.contactPoses.add(contactPose);
+      this.contactPointsInBodyFrame.add(contactPointsInBodyFrame);
    }
 
    public int getNumberOfContactPlanes()

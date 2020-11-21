@@ -222,7 +222,7 @@ public class CoMMPCQPSolver
       }
    }
 
-   public void submitMPCCommandList(MPCCommandList commandList, double weight)
+   public void submitMPCCommandList(MPCCommandList commandList)
    {
       for (int i = 0; i < commandList.getNumberOfCommands(); i++)
       {
@@ -231,13 +231,16 @@ public class CoMMPCQPSolver
          switch (command.getCommandType())
          {
             case VALUE:
-               submitMPCValueObjective((MPCValueCommand) command, weight);
+               submitMPCValueObjective((MPCValueCommand) command);
                break;
             case CONTINUITY:
-               submitCoMContinuityObjective((CoMContinuityCommand) command, weight);
+               submitCoMContinuityObjective((CoMContinuityCommand) command);
                break;
             case LIST:
-               submitMPCCommandList((MPCCommandList) command, weight);
+               submitMPCCommandList((MPCCommandList) command);
+               break;
+            case RHO_VALUE:
+               submitRhoValueCommand((RhoValueObjectiveCommand) command);
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
@@ -245,23 +248,23 @@ public class CoMMPCQPSolver
       }
    }
 
-   private void submitRhoValueCommand(RhoValueObjectiveCommand command, double weight)
+   private void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command, weight);
+      boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
       if (success)
          addInput(qpInput);
    }
 
-   private void submitMPCValueObjective(MPCValueCommand command, double weight)
+   private void submitMPCValueObjective(MPCValueCommand command)
    {
-      boolean success = inputCalculator.calculateValueObjective(qpInput, command, weight);
+      boolean success = inputCalculator.calculateValueObjective(qpInput, command);
       if (success)
          addInput(qpInput);
    }
 
-   private void submitCoMContinuityObjective(CoMContinuityCommand command, double weight)
+   private void submitCoMContinuityObjective(CoMContinuityCommand command)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command, weight);
+      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command);
       if (success)
          addInput(qpInput);
    }

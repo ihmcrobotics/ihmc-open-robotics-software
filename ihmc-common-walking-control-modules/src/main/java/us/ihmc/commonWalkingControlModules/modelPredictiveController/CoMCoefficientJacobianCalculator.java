@@ -21,6 +21,7 @@ public class CoMCoefficientJacobianCalculator
             break;
          case 3:
             calculateJerkJacobian();
+            break;
          default:
             throw new IllegalArgumentException("Derivative order must be less than 4.");
       }

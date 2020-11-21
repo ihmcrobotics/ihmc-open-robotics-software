@@ -6,8 +6,9 @@ import us.ihmc.commons.MathTools;
 public class CoefficientJacobianMatrixHelper
 {
    private final int maxNumberOfContactPoints;
-   private final int numberOfContactPointsInContact;
    private final int numberOfBasisVectorsPerContactPoint;
+
+   private int numberOfContactPointsInContact;
 
    private final DMatrixRMaj positionJacobianMatrix;
    private final DMatrixRMaj velocityJacobianMatrix;
@@ -37,6 +38,7 @@ public class CoefficientJacobianMatrixHelper
 
    public void reshape(int numberOfContactPointsInContact)
    {
+      this.numberOfContactPointsInContact = numberOfContactPointsInContact;
       rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
       coefficientsSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
       positionJacobianMatrix.reshape(rhoSize, coefficientsSize);

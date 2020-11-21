@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
@@ -18,6 +19,7 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
    private int firstSegmentNumber;
    private double firstSegmentDuration;
    private double omega;
+   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
 
    public MPCCommandType getCommandType()
    {
@@ -70,6 +72,11 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
       this.omega = omega;
    }
 
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+
    public int getFirstSegmentNumber()
    {
       return firstSegmentNumber;
@@ -83,6 +90,11 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
    public double getOmega()
    {
       return omega;
+   }
+
+   public double getWeight()
+   {
+      return weight;
    }
 
    public int getFirstSegmentNumberOfContacts()
