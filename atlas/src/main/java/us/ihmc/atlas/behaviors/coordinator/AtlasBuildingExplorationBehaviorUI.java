@@ -7,18 +7,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
-import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
-import us.ihmc.messager.Messager;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasBuildingExplorationBehaviorUI
@@ -27,19 +21,16 @@ public class AtlasBuildingExplorationBehaviorUI
    {
       start(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false),
             CommunicationMode.INTERPROCESS,
-            BehaviorRegistry.DEFAULT_BEHAVIORS,
             CommunicationMode.INTRAPROCESS);
    }
 
-   public static void start(DRCRobotModel robotModel,
-                            CommunicationMode ros2CommunicationMode,
-                            BehaviorRegistry behaviorRegistry,
-                            CommunicationMode behaviorMessagerCommunicationMode)
+   public static void start(DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, CommunicationMode behaviorMessagerCommunicationMode)
    {
-      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+      LogTools.info("Starting humanoid behavior manager");
       ExceptionTools.handle(() ->
       {
+         HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+         LogModelProvider logModelProvider = robotModel.getLogModelProvider();
          new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
                                          robotModel.getFootstepPlannerParameters(),
                                          robotModel,
@@ -47,25 +38,20 @@ public class AtlasBuildingExplorationBehaviorUI
                                          logModelProvider,
                                          false,
                                          sensorInformation);
-
       }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS;
+
+      LogTools.info("Starting behavior module");
       BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "building_exploration");
-      Messager behaviorMessager = behaviorMessagerCommunicationMode == CommunicationMode.INTRAPROCESS
-            ? behaviorModule.getMessager() : RemoteBehaviorInterface.createForUI(behaviorRegistry, "localhost");
 
-      JavaFXApplicationCreator.buildJavaFXApplication(stage ->
-      {
-         SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(BuildingExplorationBehaviorAPI.API);
-         messager.startMessager();
-
-         ExceptionTools.handle(() ->
-         {
-            BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(stage, messager, robotModel, ros2Node, behaviorMessager);
-            ui.show();
-         }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      });
+      LogTools.info("Starting behavior UI");
+      BehaviorUI.create(BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS,
+                        robotModel,
+                        ros2CommunicationMode,
+                        behaviorMessagerCommunicationMode,
+                        "localhost",
+                        behaviorModule.getMessager());
    }
 
    public static void main(String[] args)

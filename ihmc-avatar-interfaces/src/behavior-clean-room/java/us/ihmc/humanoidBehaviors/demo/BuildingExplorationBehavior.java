@@ -14,21 +14,22 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
@@ -40,7 +41,6 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -57,9 +57,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class BuildingExplorationBehaviorCoordinator
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
+
+public class BuildingExplorationBehavior implements BehaviorInterface
 {
-   private static final boolean DEBUG = true;
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
+                                                                              BuildingExplorationBehavior::new,
+                                                                              BuildingExplorationBehaviorAPI.API);
+
    private static final int UPDATE_RATE_MILLIS = 50;
    private static final double xyProximityToDoorToStopWalking = 1.6;
 
@@ -74,10 +80,12 @@ public class BuildingExplorationBehaviorCoordinator
 
    private final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
-   private final Point3D bombPosition = new Point3D();
+   private final Pose3D bombPose = new Pose3D();
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
 
    private final ScheduledExecutorService executorService;
+   private final LookAndStepBehavior lookAndStepBehavior;
+   private final BehaviorHelper helper;
    private ScheduledFuture<?> stateMachineTask = null;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
@@ -88,21 +96,45 @@ public class BuildingExplorationBehaviorCoordinator
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
 
-   public BuildingExplorationBehaviorCoordinator(DRCRobotModel robotModel,
-                                                 ROS2NodeInterface ros2Node,
-                                                 Messager behaviorMessager)
+   public BuildingExplorationBehavior(BehaviorHelper helper)
    {
+      this.helper = helper;
+      DRCRobotModel robotModel = helper.getRobotModel();
+      ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
+      Messager behaviorMessager = helper.getManagedMessager();
+
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       this.ros2Node = ros2Node;
       this.behaviorMessager = behaviorMessager;
 
+      AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
+
+      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, ros2Node));
+
       teleopState = new TeleopState(robotModel,ros2Node);
-//      ROS2Node behaviorIntraprocessROS2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "behavior_intraprocess");
-      lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
+      lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
       walkThroughDoorState = new WalkThroughDoorState(robotModel, ros2Node);
-      traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPosition, robotConfigurationData::get);
+      traverseStairsState = new TraverseStairsState(ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
+
+      behaviorMessager.registerTopicListener(RequestedState, this::requestState);
+      AtomicReference<BuildingExplorationStateName> requestedState = behaviorMessager.createInput(RequestedState);
+
+      behaviorMessager.registerTopicListener(Start, s ->
+      {
+         LogTools.info("Starting");
+         setBombPose(goal.get());
+         requestState(requestedState.get());
+         start();
+      });
+      behaviorMessager.registerTopicListener(Stop, s -> stop());
+      setStateChangedCallback(newState -> behaviorMessager.submitMessage(CurrentState, newState));
+      setDebrisDetectedCallback(() -> behaviorMessager.submitMessage(DebrisDetected, true));
+      setStairsDetectedCallback(() -> behaviorMessager.submitMessage(StairsDetected, true));
+      setDoorDetectedCallback(() -> behaviorMessager.submitMessage(DoorDetected, true));
+      behaviorMessager.registerTopicListener(IgnoreDebris, ignore -> ignoreDebris());
+      behaviorMessager.registerTopicListener(ConfirmDoor, confirm -> proceedWithDoorBehavior());
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
@@ -147,9 +179,17 @@ public class BuildingExplorationBehaviorCoordinator
       }).start();
    }
 
-   public void setBombPosition(Point3DReadOnly bombPosition)
+   @Override
+   public void setEnabled(boolean enabled)
    {
-      this.bombPosition.set(bombPosition);
+      helper.setCommunicationCallbacksEnabled(enabled);
+      if (!enabled)
+         lookAndStepBehavior.setEnabled(false);
+   }
+
+   public void setBombPose(Pose3DReadOnly bombPose)
+   {
+      this.bombPose.set(bombPose);
    }
 
    public void requestState(BuildingExplorationStateName requestedState)
@@ -192,7 +232,7 @@ public class BuildingExplorationBehaviorCoordinator
    {
       if (!isRunning.getAndSet(true))
       {
-         LogTools.debug("Starting behavior coordinator");
+         LogTools.info("Starting behavior coordinator");
 
          doorLocationPacket.set(null);
          robotConfigurationData.set(null);
@@ -201,7 +241,7 @@ public class BuildingExplorationBehaviorCoordinator
       }
       else
       {
-         LogTools.debug("Start called but module is already running");
+         LogTools.info("Start called but module is already running");
       }
    }
 
@@ -209,7 +249,7 @@ public class BuildingExplorationBehaviorCoordinator
    {
       if (isRunning.get())
       {
-         LogTools.debug("Stop requested. Shutting down on next update");
+         LogTools.info("Stop requested. Shutting down on next update");
          stopRequested.set(true);
       }
    }
@@ -346,7 +386,7 @@ public class BuildingExplorationBehaviorCoordinator
       return doorDetected;
    }
 
-   private static class LookAndStepState implements State
+   private class LookAndStepState implements State
    {
       private static final double horizonFromDebrisToStop = 0.8;
       private static final double horizonForStairs = 1.0;
@@ -362,8 +402,7 @@ public class BuildingExplorationBehaviorCoordinator
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
       private final IHMCROS2Publisher<Empty> resetPublisher;
 
-      private final Point3DReadOnly bombPosition;
-      private final Pose3D bombPose = new Pose3D();
+      private final Pose3DReadOnly bombPose;
 
       private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -390,11 +429,11 @@ public class BuildingExplorationBehaviorCoordinator
       public LookAndStepState(DRCRobotModel robotModel,
                               ROS2NodeInterface ros2Node,
                               Messager messager,
-                              Point3DReadOnly bombPosition,
+                              Pose3DReadOnly bombPose,
                               Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
-         this.bombPosition = bombPosition;
+         this.bombPose = bombPose;
          this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
          String robotName = robotModel.getSimpleRobotName();
 
@@ -435,10 +474,7 @@ public class BuildingExplorationBehaviorCoordinator
       {
          pitchChestToSeeDoor(syncedRobot, chestTrajectoryPublisher);
 
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
 
          if (!messager.isMessagerOpen())
          {
@@ -454,8 +490,8 @@ public class BuildingExplorationBehaviorCoordinator
 
          resetPublisher.publish(new Empty());
 
-         String behaviorName = LookAndStepBehavior.DEFINITION.getName();
-         messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
+         LogTools.info("Enabling look and step behavior");
+         lookAndStepBehavior.setEnabled(true);
          ThreadTools.sleep(100);
 
          if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
@@ -474,26 +510,14 @@ public class BuildingExplorationBehaviorCoordinator
             lookAndStepStarted = true;
             LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
 
-            LogTools.info("Sending operator review enabled");
-            messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+            boolean operatorReviewEnabled = false;
+            LogTools.info("Sending operator review enabled: {}", operatorReviewEnabled);
+            messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, operatorReviewEnabled);
             ThreadTools.sleep(100);
 
-            Quaternion goalOrientation = new Quaternion();
-
-            if (robotConfigurationDataSupplier.get() != null)
-            {
-               Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
-               double dx = bombPosition.getX() - rootTranslation.getX();
-               double dy = bombPosition.getY() - rootTranslation.getY();
-               double yaw = Math.atan2(dy, dx);
-
-               goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
-            }
-
-            bombPose.set(bombPosition, goalOrientation);
             LogTools.info("Publishing goal pose: {}", bombPose);
 
-            goalPublisher.publish(bombPose);
+            goalPublisher.publish(new Pose3D(bombPose));
          }
          else if (!lookAndStepStarted)
          {
@@ -590,10 +614,9 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onExit(double timeInState)
       {
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
+
+         lookAndStepBehavior.setEnabled(false);
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
@@ -670,10 +693,7 @@ public class BuildingExplorationBehaviorCoordinator
          hasStartedBehavior.set(false);
          isDone.set(false);
 
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
       }
 
       private void startBehavior()
@@ -691,10 +711,7 @@ public class BuildingExplorationBehaviorCoordinator
             startBehavior();
             hasStartedBehavior.set(true);
 
-            if (DEBUG)
-            {
-               LogTools.info("Sent packet to start " + HumanoidBehaviorType.WALK_THROUGH_DOOR);
-            }
+            LogTools.info("Sent packet to start " + HumanoidBehaviorType.WALK_THROUGH_DOOR);
          }
       }
 
@@ -705,10 +722,7 @@ public class BuildingExplorationBehaviorCoordinator
          behaviorControlModePacket.setBehaviorControlModeEnumRequest(BehaviorControlModeEnum.STOP.toByte());
          behaviorModePublisher.publish(behaviorControlModePacket);
 
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
       }
 
       @Override
@@ -732,12 +746,12 @@ public class BuildingExplorationBehaviorCoordinator
       private final IHMCROS2Publisher<Empty> stopPublisher;
 
       private final AtomicBoolean isDone = new AtomicBoolean();
-      private final Point3DReadOnly bombPosition;
+      private final Pose3DReadOnly bombPose;
       private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
       public TraverseStairsState(ROS2NodeInterface ros2Node,
                                  Messager messager,
-                                 Point3DReadOnly bombPosition,
+                                 Pose3DReadOnly bombPose,
                                  Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
@@ -746,7 +760,7 @@ public class BuildingExplorationBehaviorCoordinator
          this.startPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.START);
          this.stopPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.STOP);
 
-         this.bombPosition = bombPosition;
+         this.bombPose = bombPose;
          this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
 
          ROS2Tools.createCallbackSubscription(ros2Node, TraverseStairsBehaviorAPI.COMPLETED, s -> isDone.set(true));
@@ -755,10 +769,7 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
-         if (DEBUG)
-         {
-            LogTools.info("Entering " + getClass().getSimpleName());
-         }
+         LogTools.info("Entering " + getClass().getSimpleName());
 
          isDone.set(false);
 
@@ -766,19 +777,7 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
-         Quaternion goalOrientation = new Quaternion();
-
-         if (robotConfigurationDataSupplier.get() != null)
-         {
-            Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
-            double dx = bombPosition.getX() - rootTranslation.getX();
-            double dy = bombPosition.getY() - rootTranslation.getY();
-            double yaw = Math.atan2(dy, dx);
-
-            goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
-         }
-
-         goalPublisher.publish(new Pose3D(bombPosition, goalOrientation));
+         goalPublisher.publish(new Pose3D(bombPose));
          ThreadTools.sleep(100);
 
          startPublisher.publish(new Empty());
@@ -792,10 +791,7 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onExit(double timeInState)
       {
-         if (DEBUG)
-         {
-            LogTools.info("Exiting " + getClass().getSimpleName());
-         }
+         LogTools.info("Exiting " + getClass().getSimpleName());
 
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, "null");
       }

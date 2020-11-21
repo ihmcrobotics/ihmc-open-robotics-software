@@ -148,6 +148,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupFiducialDetectorToolboxModule();
       networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();

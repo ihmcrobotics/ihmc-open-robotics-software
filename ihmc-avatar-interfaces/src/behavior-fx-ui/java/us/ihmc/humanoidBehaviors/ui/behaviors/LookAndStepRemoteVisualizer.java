@@ -51,7 +51,7 @@ public class LookAndStepRemoteVisualizer
          lookAndStepVisualizationGroup.setEnabled(true);
          view3DFactory.addNodeToView(lookAndStepVisualizationGroup);
 
-         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager, ros2Node);
 
          SplitPane mainSplitPane = new SplitPane();
          mainSplitPane.getItems().add(mainAnchorPane);
