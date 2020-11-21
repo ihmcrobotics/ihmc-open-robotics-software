@@ -67,6 +67,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       simulationStarter.setPubSubImplementation(COMMUNICATION_MODE_ROS2.getPubSubImplementation());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
+      simulationStarter.setLogToFile(LOG_TO_FILE);
       simulationStarter.setStartingLocationOffset(STARTING_LOCATION.getPose().getPosition(), STARTING_LOCATION.getPose().getYaw());
       simulationStarter.getSCSInitialSetup().setTimePerRecordTick(50 * robotModel.getControllerDT());
       simulationStarter.getSCSInitialSetup().setSimulationDataBufferSize(10);
