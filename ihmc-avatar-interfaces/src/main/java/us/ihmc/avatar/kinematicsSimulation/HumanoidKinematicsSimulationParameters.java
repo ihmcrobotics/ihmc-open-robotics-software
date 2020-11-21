@@ -9,7 +9,6 @@ public class HumanoidKinematicsSimulationParameters
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
    private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-   private Path incomingLogsDirectory;
    private double initialGroundHeight = 0.0;
    private double initialRobotYaw = 0.0;
    private double initialRobotX = 0.0;
@@ -73,16 +72,6 @@ public class HumanoidKinematicsSimulationParameters
    public boolean getLogToFile()
    {
       return logToFile;
-   }
-
-   public void setIncomingLogsDirectory(Path incomingLogsDirectory)
-   {
-      this.incomingLogsDirectory = incomingLogsDirectory;
-   }
-
-   public Path getIncomingLogsDirectory()
-   {
-      return incomingLogsDirectory;
    }
 
    public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
