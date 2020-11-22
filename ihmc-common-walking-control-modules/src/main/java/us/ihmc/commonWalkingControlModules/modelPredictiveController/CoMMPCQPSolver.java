@@ -75,6 +75,9 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
+      comCoefficientRegularization.set(1e-5);
+      rhoCoefficientRegularization.set(1e-7);
+
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
@@ -251,8 +254,8 @@ public class CoMMPCQPSolver
    private void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
       boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
-//      if (success)
-//         addInput(qpInput);
+      if (success)
+         addInput(qpInput);
    }
 
    private void submitMPCValueObjective(MPCValueCommand command)

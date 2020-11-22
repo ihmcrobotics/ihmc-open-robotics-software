@@ -104,7 +104,7 @@ public class CoMTrajectoryModelPredictiveController
    private final RecyclingArrayList<RecyclingArrayList<CoefficientJacobianMatrixHelper>> coefficientJacobianHelperPool;
 
    private final CommandProvider commandProvider = new CommandProvider();
-   private final MPCCommandList mpcCommands = new MPCCommandList();
+   final MPCCommandList mpcCommands = new MPCCommandList();
 
    final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
@@ -435,6 +435,9 @@ public class CoMTrajectoryModelPredictiveController
          }
       }
 
+      xCoefficientVector.reshape(6 * numberOfPhases, 1);
+      yCoefficientVector.reshape(6 * numberOfPhases, 1);
+      zCoefficientVector.reshape(6 * numberOfPhases, 1);
       xCoefficientVector.zero();
       yCoefficientVector.zero();
       zCoefficientVector.zero();
