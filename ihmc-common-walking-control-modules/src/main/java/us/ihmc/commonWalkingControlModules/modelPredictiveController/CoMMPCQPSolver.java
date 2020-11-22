@@ -251,8 +251,8 @@ public class CoMMPCQPSolver
    private void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
       boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
-      if (success)
-         addInput(qpInput);
+//      if (success)
+//         addInput(qpInput);
    }
 
    private void submitMPCValueObjective(MPCValueCommand command)

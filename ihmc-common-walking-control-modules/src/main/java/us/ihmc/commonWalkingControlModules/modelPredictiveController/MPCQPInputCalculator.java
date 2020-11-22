@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
@@ -24,6 +25,7 @@ public class MPCQPInputCalculator
    public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective)
    {
       inputToPack.reshape(3);
+      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       int firstSegmentNumber = objective.getFirstSegmentNumber();
       int secondSegmentNumber = firstSegmentNumber + 1;
@@ -101,6 +103,7 @@ public class MPCQPInputCalculator
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
+      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -135,6 +138,7 @@ public class MPCQPInputCalculator
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
+      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -177,6 +181,7 @@ public class MPCQPInputCalculator
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
+      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
