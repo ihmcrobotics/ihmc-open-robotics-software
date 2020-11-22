@@ -15,8 +15,6 @@ public class CoMTrajectoryModelPredictiveControllerTest
    @Test
    public void testSimpleStanding()
    {
-      double footLength = 0.22;
-      double footWidth = 0.12;
       double gravityZ = -9.81;
       double dt = 0.001;
       double nominalHeight = 1.0;

@@ -19,6 +19,7 @@ public class CoefficientJacobianMatrixHelperTest
          DMatrixRMaj positionExpected = new DMatrixRMaj(4, 16);
          DMatrixRMaj velocityExpected = new DMatrixRMaj(4, 16);
          DMatrixRMaj accelerationExpected = new DMatrixRMaj(4, 16);
+         DMatrixRMaj jerkExpected = new DMatrixRMaj(4, 16);
 
          double c0 = Math.exp(omega * time);
          double c1 = Math.exp(-omega * time);
@@ -34,6 +35,10 @@ public class CoefficientJacobianMatrixHelperTest
          double c1Ddot = omega * omega * Math.exp(-omega * time);
          double c2Ddot = 6 * time;
          double c3Ddot = 2;
+
+         double c0Dddot = omega * omega * omega * Math.exp(omega * time);
+         double c1Dddot = -omega * omega * omega * Math.exp(-omega * time);
+         double c2Dddot = 6.0;
 
          for (int i = 0; i < 4; i++)
          {
@@ -51,11 +56,17 @@ public class CoefficientJacobianMatrixHelperTest
             accelerationExpected.set(i, 4 * i + 1, c1Ddot);
             accelerationExpected.set(i, 4 * i + 2, c2Ddot);
             accelerationExpected.set(i, 4 * i + 3, c3Ddot);
+
+            jerkExpected.set(i, 4 * i, c0Dddot);
+            jerkExpected.set(i, 4 * i + 1, c1Dddot);
+            jerkExpected.set(i, 4 * i + 2, c2Dddot);
+            jerkExpected.set(i, 4 * i + 3, 0.0);
          }
 
          EjmlUnitTests.assertEquals(positionExpected, helper.getPositionJacobianMatrix(), 1e-4);
          EjmlUnitTests.assertEquals(velocityExpected, helper.getVelocityJacobianMatrix(), 1e-4);
          EjmlUnitTests.assertEquals(accelerationExpected, helper.getAccelerationJacobianMatrix(), 1e-4);
+         EjmlUnitTests.assertEquals(jerkExpected, helper.getJerkJacobianMatrix(), 1e-4);
       }
    }
 
@@ -72,6 +83,7 @@ public class CoefficientJacobianMatrixHelperTest
          DMatrixRMaj positionExpected = new DMatrixRMaj(4 * 4, 4 * 16);
          DMatrixRMaj velocityExpected = new DMatrixRMaj(4 * 4, 4 * 16);
          DMatrixRMaj accelerationExpected = new DMatrixRMaj(4 * 4, 4 * 16);
+         DMatrixRMaj jerkExpected = new DMatrixRMaj(4 * 4, 4 * 16);
 
          double c0 = Math.exp(omega * time);
          double c1 = Math.exp(-omega * time);
@@ -87,6 +99,11 @@ public class CoefficientJacobianMatrixHelperTest
          double c1Ddot = omega * omega * Math.exp(-omega * time);
          double c2Ddot = 6 * time;
          double c3Ddot = 2;
+
+         double c0Dddot = omega * omega * omega * Math.exp(omega * time);
+         double c1Dddot = -omega * omega * omega * Math.exp(-omega * time);
+         double c2Dddot = 6.0;
+         double c3Dddot = 0;
 
          for (int i = 0; i < 16; i++)
          {
@@ -104,11 +121,17 @@ public class CoefficientJacobianMatrixHelperTest
             accelerationExpected.set(i, 4 * i + 1, c1Ddot);
             accelerationExpected.set(i, 4 * i + 2, c2Ddot);
             accelerationExpected.set(i, 4 * i + 3, c3Ddot);
+
+            jerkExpected.set(i, 4 * i, c0Dddot);
+            jerkExpected.set(i, 4 * i + 1, c1Dddot);
+            jerkExpected.set(i, 4 * i + 2, c2Dddot);
+            jerkExpected.set(i, 4 * i + 3, c3Dddot);
          }
 
          EjmlUnitTests.assertEquals(positionExpected, helper.getPositionJacobianMatrix(), 1e-4);
          EjmlUnitTests.assertEquals(velocityExpected, helper.getVelocityJacobianMatrix(), 1e-4);
          EjmlUnitTests.assertEquals(accelerationExpected, helper.getAccelerationJacobianMatrix(), 1e-4);
+         EjmlUnitTests.assertEquals(jerkExpected, helper.getJerkJacobianMatrix(), 1e-4);
       }
    }
 }

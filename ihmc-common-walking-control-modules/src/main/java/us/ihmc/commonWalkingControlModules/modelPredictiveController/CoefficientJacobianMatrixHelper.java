@@ -13,6 +13,7 @@ public class CoefficientJacobianMatrixHelper
    private final DMatrixRMaj positionJacobianMatrix;
    private final DMatrixRMaj velocityJacobianMatrix;
    private final DMatrixRMaj accelerationJacobianMatrix;
+   private final DMatrixRMaj jerkJacobianMatrix;
    private final DMatrixRMaj accelerationIntegrationHessian;
    private final DMatrixRMaj jerkIntegrationHessian;
 
@@ -32,6 +33,7 @@ public class CoefficientJacobianMatrixHelper
       positionJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       velocityJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
+      jerkJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
    }
@@ -44,6 +46,7 @@ public class CoefficientJacobianMatrixHelper
       positionJacobianMatrix.reshape(rhoSize, coefficientsSize);
       velocityJacobianMatrix.reshape(rhoSize, coefficientsSize);
       accelerationJacobianMatrix.reshape(rhoSize, coefficientsSize);
+      jerkJacobianMatrix.reshape(rhoSize, coefficientsSize);
       accelerationIntegrationHessian.reshape(coefficientsSize, coefficientsSize);
       jerkIntegrationHessian.reshape(coefficientsSize, coefficientsSize);
    }
@@ -75,6 +78,8 @@ public class CoefficientJacobianMatrixHelper
       double secondVelocityCoefficient = -omega * negativeExponential;
       double firstAccelerationCoefficient = omega * firstVelocityCoefficient;
       double secondAccelerationCoefficient = -omega * secondVelocityCoefficient;
+      double firstJerkCoefficient = omega * firstAccelerationCoefficient;
+      double secondJerkCoefficient = -omega * secondAccelerationCoefficient;
       boolean setTimeCoefficients = !MathTools.epsilonEquals(timeOfContact, 0.0, 1e-4);
       double thirdVelocityCoefficient = 3 * t2;
       double fourthVelocityCoefficient = 2 * timeOfContact;
@@ -95,6 +100,10 @@ public class CoefficientJacobianMatrixHelper
             accelerationJacobianMatrix.set(rhoIndex, startColumn, firstAccelerationCoefficient);
             accelerationJacobianMatrix.set(rhoIndex, startColumn + 1, secondAccelerationCoefficient);
             accelerationJacobianMatrix.set(rhoIndex, startColumn + 3, 2.0);
+
+            jerkJacobianMatrix.set(rhoIndex, startColumn, firstJerkCoefficient);
+            jerkJacobianMatrix.set(rhoIndex, startColumn + 1, secondJerkCoefficient);
+            jerkJacobianMatrix.set(rhoIndex, startColumn + 2, 6.0);
 
             if (setTimeCoefficients)
             {
@@ -124,8 +133,10 @@ public class CoefficientJacobianMatrixHelper
             return getVelocityJacobianMatrix();
          case 2:
             return getAccelerationJacobianMatrix();
+         case 3:
+            return getJerkJacobianMatrix();
          default:
-            throw new IllegalArgumentException("Derivative order must be less than 3.");
+            throw new IllegalArgumentException("Derivative order must be less than 4.");
       }
    }
 
@@ -142,6 +153,11 @@ public class CoefficientJacobianMatrixHelper
    public DMatrixRMaj getAccelerationJacobianMatrix()
    {
       return accelerationJacobianMatrix;
+   }
+
+   public DMatrixRMaj getJerkJacobianMatrix()
+   {
+      return jerkJacobianMatrix;
    }
 
    public void computeAccelerationIntegrationMatrix(double duration, double omega)
