@@ -41,9 +41,8 @@ public class MPCIndexHandler
 
       for (int i = 0; i < contactSequence.size(); i++)
       {
-         comCoefficientSize += 6 * comCoefficientsPerSegment;
+         comCoefficientSize += comCoefficientsPerSegment;
          bodiesInContact.add(contactSequence.get(i).getNumberOfContactPlanes());
-         rhoStartIndices.add(totalRhoSize);
          int rhoBasesInSegment = 0;
          for (int j = 0; j < contactSequence.get(i).getNumberOfContactPlanes(); j++)
          {
@@ -52,7 +51,12 @@ public class MPCIndexHandler
          int rhoCoefficientsInSegment = coefficientsPerRho * rhoBasesInSegment;
          this.rhoBasesInSegment.add(rhoBasesInSegment);
          this.rhoCoefficientsInSegment.add(rhoCoefficientsInSegment);
-         totalRhoSize += rhoCoefficientsInSegment;
+      }
+
+      for (int i = 0; i < contactSequence.size(); i++)
+      {
+         rhoStartIndices.add(totalRhoSize + comCoefficientSize);
+         totalRhoSize += rhoCoefficientsInSegment.get(i);
       }
 
       totalProblemSize = comCoefficientSize + orientationCoefficientSize + totalRhoSize;
@@ -60,7 +64,7 @@ public class MPCIndexHandler
 
    public int getComCoefficientStartIndex(int segmentId, int ordinal)
    {
-      return segmentId * comCoefficientsPerSegment + ordinal;
+      return segmentId * comCoefficientsPerSegment + 2 * ordinal;
    }
 
    public int getRhoBasisStartIndex(int segmentId)
