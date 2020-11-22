@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
@@ -88,7 +88,14 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
 
       goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       goalGraphic.setMouseTransparent(true);
-      messager.registerTopicListener(Goal, newGoal -> Platform.runLater(() -> goalGraphic.setPosition(newGoal.getPosition())));
+      messager.registerTopicListener(Goal, newGoal -> Platform.runLater(() ->
+      {
+         goalGraphic.getPose().set(newGoal);
+         goalGraphic.update();
+         goalX.getValueFactory().setValue(newGoal.getX());
+         goalY.getValueFactory().setValue(newGoal.getY());
+         goalZ.getValueFactory().setValue(newGoal.getZ());
+      }));
 
       doorGraphic = new DoorGraphic(new Color(0.8, 0.8, 0.8, 0.3));
       doorGraphic.setMouseTransparent(true);
@@ -105,12 +112,23 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
       goalY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
       goalZ.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
+      goalX.valueProperty().addListener((observable, oldValue, newValue) ->
+      {
+         goalGraphic.getPose().setX(newValue);
+         goalGraphic.update();
+         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
+      });
+      goalY.valueProperty().addListener((observable, oldValue, newValue) ->
+      {
+         goalGraphic.getPose().setY(newValue);
+         goalGraphic.update();
+         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
+      });
       goalZ.valueProperty().addListener((observable, oldValue, newValue) ->
       {
-         Point3D updatedPosition = new Point3D(goalGraphic.getPose().getPosition());
-         updatedPosition.setZ(newValue);
-         goalGraphic.setPosition(updatedPosition);
+         goalGraphic.getPose().setZ(newValue);
          goalGraphic.update();
+         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
 
       goalX.getValueFactory().setValue(14.2);
