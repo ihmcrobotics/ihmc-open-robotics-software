@@ -100,6 +100,7 @@ public class MPCQPInputCalculator
    private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
+      inputToPack.getTaskJacobian().zero();
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -133,6 +134,7 @@ public class MPCQPInputCalculator
    private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
+      inputToPack.getTaskJacobian().zero();
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -155,7 +157,7 @@ public class MPCQPInputCalculator
          DMatrixRMaj rhoToLinearForceJacobian = objective.getRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
 
          tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
-         CommonOps_DDRM.addEquals(tempCoefficientJacobian, -1.0 / omega, coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+         CommonOps_DDRM.addEquals(tempCoefficientJacobian, 1.0 / omega, coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
 
          MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
          startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
@@ -163,7 +165,7 @@ public class MPCQPInputCalculator
 
       objective.getObjective().get(inputToPack.getTaskObjective());
       inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
-      inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 1, timeOfObjective) / omega);
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder() + 1, timeOfObjective) / omega);
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -174,11 +176,13 @@ public class MPCQPInputCalculator
    private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
+      inputToPack.getTaskJacobian().zero();
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
       double weight = objective.getWeight();
+      double omega2 = omega * omega;
 
       CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber,
                                                             omega,
@@ -198,16 +202,16 @@ public class MPCQPInputCalculator
          tempCoefficientJacobian.reshape(coefficientJacobianMatrixHelper.getRhoSize(), coefficientJacobianMatrixHelper.getCoefficientSize());
          tempCoefficientJacobian.set(coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder()));
          CommonOps_DDRM.addEquals(tempCoefficientJacobian,
-                                  -1.0 / (omega * omega),
-                                  coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 1));
+                                  -1.0 / omega2,
+                                  coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder() + 2));
 
          MatrixTools.multAddBlock(rhoToLinearForceJacobian, tempCoefficientJacobian, inputToPack.getTaskJacobian(), 0, startCol);
          startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
       }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
-      inputToPack.getTaskJacobian().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
-      inputToPack.getTaskJacobian().add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 1, timeOfObjective) / (omega * omega));
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
+      inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 2, timeOfObjective) / omega2);
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
