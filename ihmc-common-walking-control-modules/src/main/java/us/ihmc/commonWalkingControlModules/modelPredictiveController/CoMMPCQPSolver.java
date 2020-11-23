@@ -25,7 +25,7 @@ public class CoMMPCQPSolver
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
 
    final DMatrixRMaj solverInput_H;
-   private final DMatrixRMaj solverInput_f;
+   final DMatrixRMaj solverInput_f;
 
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
@@ -63,7 +63,7 @@ public class CoMMPCQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   private final QPInput qpInput = new QPInput(0);
+   final QPInput qpInput = new QPInput(0);
 
    private final MPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
@@ -256,7 +256,7 @@ public class CoMMPCQPSolver
          addInput(qpInput);
    }
 
-   private void submitMPCValueObjective(MPCValueCommand command)
+   public void submitMPCValueObjective(MPCValueCommand command)
    {
       boolean success = inputCalculator.calculateValueObjective(qpInput, command);
       if (success)
