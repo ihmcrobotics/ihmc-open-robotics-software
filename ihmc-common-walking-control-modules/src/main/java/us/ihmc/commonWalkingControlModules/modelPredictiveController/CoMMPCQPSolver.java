@@ -75,7 +75,7 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
-      comCoefficientRegularization.set(1e-5);
+      comCoefficientRegularization.set(1e-6);
       rhoCoefficientRegularization.set(1e-7);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
@@ -199,13 +199,11 @@ public class CoMMPCQPSolver
 
    private void addValueRegularization()
    {
-      double comCoefficientFactor = dt * dt / comCoefficientRegularization.getDoubleValue();
-      double rhoCoefficientFactor = dt * dt / rhoCoefficientRegularization.getDoubleValue();
       int i = 0;
       for (; i < indexHandler.getRhoCoefficientStartIndex(0); i++)
-         solverInput_H.add(i, i, 1.0 / comCoefficientFactor);
+         solverInput_H.add(i, i, comCoefficientRegularization.getDoubleValue());
       for (; i < problemSize; i++)
-         solverInput_H.add(i, i, 1.0 / rhoCoefficientFactor);
+         solverInput_H.add(i, i, rhoCoefficientRegularization.getDoubleValue());
    }
 
    private void addRateRegularization()
