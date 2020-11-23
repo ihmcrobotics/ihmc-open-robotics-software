@@ -20,7 +20,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -237,7 +237,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
+      String namespace = HeightOffsetHandler.class.getSimpleName();
       YoDouble offsetHeight = (YoDouble) scs.findVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
