@@ -633,11 +633,15 @@ public class ICPControllerQPSolver
       if (!Double.isFinite(cmpConstraintBound))
          return;
 
+      int originalConstraintSize = cmpLocationConstraint.getInequalityConstraintSize();
       cmpLocationConstraint.setPositionOffset(desiredCMP);
       cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
       cmpLocationConstraint.formulateConstraint();
-
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
+
+      if (originalConstraintSize != constraintSize)
+         return; // FIXME Seems to occur at extremely rare occasions at initialization. The size of the cmpLocationConstraint changes from reshape() to here.
+
       MatrixTools.setMatrixBlock(solverInput_Aineq,
                                  currentInequalityConstraintIndex,
                                  copFeedbackIndex,
