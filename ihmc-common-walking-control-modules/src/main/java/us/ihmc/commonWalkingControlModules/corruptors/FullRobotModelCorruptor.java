@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -101,27 +100,27 @@ public class FullRobotModelCorruptor
       {
          for (LegJointName legJointName : legJointNames)
          {
-            RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getLegJoint(robotSide, legJointName);
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) fullRobotModel.getLegJoint(robotSide, legJointName);
             createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
          }
 
          for (ArmJointName armJointName : armJointNames)
          {
-            RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getArmJoint(robotSide, armJointName);
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) fullRobotModel.getArmJoint(robotSide, armJointName);
             createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
          }
       }
 
       for (SpineJointName spineJointName : spineJointNames)
       {
-         RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getSpineJoint(spineJointName);
+         OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) fullRobotModel.getSpineJoint(spineJointName);
          createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
       }
 
       parentRegistry.addChild(registry);
    }
 
-   private void createJointAngleCorruptor(String namePrefix, String name, RevoluteJoint oneDoFJoint)
+   private void createJointAngleCorruptor(String namePrefix, String name, OneDoFJointBasics oneDoFJoint)
    {
 //      name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
 //      final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
