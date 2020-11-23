@@ -118,7 +118,9 @@ public class MPCQPInputCalculator
          CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = objective.getCoefficientJacobianMatrixHelper(i);
          coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
 
-         DMatrixRMaj rhoToLinearForceJacobian = objective.getRhoToForceMatrixHelper(i).getLinearJacobianInWorldFrame();
+         ContactStateMagnitudeToForceMatrixHelper rhoHelper = objective.getRhoToForceMatrixHelper(i);
+
+         DMatrixRMaj rhoToLinearForceJacobian = rhoHelper.getLinearJacobianInWorldFrame();
          DMatrixRMaj coefficientToRhoForceJacobian = coefficientJacobianMatrixHelper.getJacobianMatrix(objective.getDerivativeOrder());
 
          MatrixTools.multAddBlock(rhoToLinearForceJacobian, coefficientToRhoForceJacobian, inputToPack.getTaskJacobian(), 0, startCol);
