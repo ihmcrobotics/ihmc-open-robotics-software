@@ -24,7 +24,7 @@ public class CoMMPCQPSolver
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
 
-   private final DMatrixRMaj solverInput_H;
+   final DMatrixRMaj solverInput_H;
    private final DMatrixRMaj solverInput_f;
 
    private final DMatrixRMaj solverInput_H_previous;
@@ -75,8 +75,8 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
-      comCoefficientRegularization.set(1e-6);
-      rhoCoefficientRegularization.set(1e-7);
+//      comCoefficientRegularization.set(1e-6);
+//      rhoCoefficientRegularization.set(1e-7);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
