@@ -8,6 +8,7 @@ import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionCommon_DDRM;
 import org.ejml.dense.row.decomposition.lu.LUDecompositionBase_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -120,7 +121,7 @@ public class GenericQuadrupedAllocationTest
       testInternal(() -> conductor.simulate());
    }
 
-
+   @Disabled
    @Test
    public void testForAllocationStepping()
    {
