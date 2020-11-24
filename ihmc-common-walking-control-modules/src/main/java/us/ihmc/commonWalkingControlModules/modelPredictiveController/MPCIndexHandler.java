@@ -41,7 +41,7 @@ public class MPCIndexHandler
       totalProblemSize = comCoefficientsPerSegment * numberOfContacts;
       for (int i = 0; i < numberOfContacts; i++)
       {
-         int rhoCoefficients = coefficientsPerRho * numberOfBasisVectorsPerContactPoint * pointsInContact.applyAsInt(numberOfContacts);
+         int rhoCoefficients = coefficientsPerRho * numberOfBasisVectorsPerContactPoint * pointsInContact.applyAsInt(i);
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
          rhoCoefficientsInSegment.add(rhoCoefficients);
