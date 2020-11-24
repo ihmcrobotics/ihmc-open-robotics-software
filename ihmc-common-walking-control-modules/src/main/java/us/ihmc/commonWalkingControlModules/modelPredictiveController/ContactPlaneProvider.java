@@ -27,6 +27,8 @@ public class ContactPlaneProvider implements ContactStateProvider
    private final List<ConvexPolygon2DReadOnly> contactPointsInBodyFrame = new ArrayList<>();
    private final List<FramePose3DReadOnly> contactPoses = new ArrayList<>();
 
+   private int totalContactPoints = 0;
+
    public ContactPlaneProvider()
    {
       startCopPosition.setToNaN();
@@ -37,6 +39,9 @@ public class ContactPlaneProvider implements ContactStateProvider
    {
       startCopPosition.setToNaN();
       endCopPosition.setToNaN();
+      totalContactPoints = 0;
+      contactPointsInBodyFrame.clear();
+      contactPoses.clear();
    }
 
    public void set(ContactStateProvider other)
@@ -127,11 +132,17 @@ public class ContactPlaneProvider implements ContactStateProvider
    {
       this.contactPoses.add(contactPose);
       this.contactPointsInBodyFrame.add(contactPointsInBodyFrame);
+      totalContactPoints += contactPointsInBodyFrame.getNumberOfVertices();
    }
 
    public int getNumberOfContactPlanes()
    {
       return contactPointsInBodyFrame.size();
+   }
+
+   public int getTotalNumberOfPointsInContact()
+   {
+      return totalContactPoints;
    }
 
    public int getNumberOfContactPointsInPlane(int contactPlane)

@@ -43,20 +43,11 @@ public class CoMVelocityCommandTest
 
       FramePose3D contactPose = new FramePose3D();
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
-
-      ContactPlaneProvider contact = new ContactPlaneProvider();
-      contact.getTimeInterval().setInterval(0.0, 1.0);
-      contact.addContact(contactPose, contactPolygon);
-      contact.setStartCopPosition(new FramePoint3D());
-      contact.setEndCopPosition(new FramePoint3D());
 
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
 
-      contactProviders.add(contact);
-
-      indexHandler.initialize(contactProviders);
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
 
       double timeOfConstraint = 0.7;
 
@@ -101,12 +92,7 @@ public class CoMVelocityCommandTest
       objectiveVelocity.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -timeOfConstraint * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 6 + rhoHelper.getRhoSize() * 4);
-      taskJacobianExpected.set(0, 0, 1.0);
-      taskJacobianExpected.set(1, 2, 1.0);
-      taskJacobianExpected.set(2, 4, 1.0);
-
-
+      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMVelocityJacobian(timeOfConstraint, omega, rhoHelper);
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
@@ -118,19 +104,6 @@ public class CoMVelocityCommandTest
 
          assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
          solvedVelocityAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedVelocityAtConstraint);
-
-         taskJacobianExpected.set(0, startIdx, rhoHelper.getBasisVector(rhoIdx).getX() * omega * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getX() * -omega * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getX() * 3.0 * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(0, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getX() * 2.0 * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx, rhoHelper.getBasisVector(rhoIdx).getY() * omega * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getY() * -omega * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getY() * 3.0 * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getY() * 2.0 * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx, rhoHelper.getBasisVector(rhoIdx).getZ() * omega * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getZ() * -omega * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getZ() * 3.0 * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getZ() * 2.0 * timeOfConstraint);
       }
       solvedVelocityAtConstraint.scaleAdd(timeOfConstraint, gravityVector, solvedVelocityAtConstraint);
 
