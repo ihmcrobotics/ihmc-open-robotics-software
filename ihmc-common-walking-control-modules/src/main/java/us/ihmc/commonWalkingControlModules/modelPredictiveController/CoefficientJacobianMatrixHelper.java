@@ -69,6 +69,11 @@ public class CoefficientJacobianMatrixHelper
       if (MathTools.epsilonEquals(currentTime, timeOfContact, 1e-5))
          return;
 
+      positionJacobianMatrix.zero();
+      velocityJacobianMatrix.zero();
+      accelerationJacobianMatrix.zero();
+      jerkJacobianMatrix.zero();
+
       int rhoIndex = 0;
       double t2 = timeOfContact * timeOfContact;
       double t3 = timeOfContact * t2;
