@@ -40,7 +40,7 @@ mainDependencies {
 
 testDependencies {
 
-   api("us.ihmc:ihmc-commons-testing:0.30.3")
+   api("us.ihmc:ihmc-commons-testing:0.30.4")
    api("us.ihmc:simulation-construction-set:0.21.1")
    api("us.ihmc:simulation-construction-set-test:0.21.1")
    api("us.ihmc:simulation-construction-set-tools-test:source")
