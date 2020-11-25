@@ -327,9 +327,6 @@ public class ICPControllerQPSolver
       int problemSize = useAngularMomentum.getBooleanValue() ? 4 : 2;
       int numberOfInequalityConstraints;
 
-      copLocationConstraint.setPolygon();
-      cmpLocationConstraint.setPolygon();
-
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
       if (useAngularMomentum.getBooleanValue() && Double.isFinite(cmpSafeDistanceFromEdge))
       {
@@ -499,7 +496,6 @@ public class ICPControllerQPSolver
    public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP, FrameVector2DReadOnly desiredCMPOffset)
    {
       reset();
-      reshape();
 
       currentICPError.checkReferenceFrameMatch(worldFrame);
       desiredCoP.checkReferenceFrameMatch(worldFrame);
@@ -509,6 +505,14 @@ public class ICPControllerQPSolver
       desiredCoP.get(this.desiredCoP);
       desiredCMPOffset.get(this.desiredCMPOffset);
       CommonOps_DDRM.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
+
+      // Formulate the CoP and CMP location constraints before reshape() to ensure the right size for solverInput_Aineq and solverInput_bineq.
+      formulateCoPConstraint();
+
+      if (useAngularMomentum.getValue())
+         formulateCMPConstraint();
+
+      reshape();
 
       addCoPFeedbackTask();
 
@@ -596,10 +600,6 @@ public class ICPControllerQPSolver
     */
    private void addCoPLocationConstraint()
    {
-      copLocationConstraint.setPositionOffset(desiredCoP);
-      copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
-      copLocationConstraint.formulateConstraint();
-
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq,
                                  currentInequalityConstraintIndex,
@@ -615,6 +615,14 @@ public class ICPControllerQPSolver
       currentInequalityConstraintIndex += constraintSize;
    }
 
+   private void formulateCoPConstraint()
+   {
+      copLocationConstraint.setPolygon();
+      copLocationConstraint.setPositionOffset(desiredCoP);
+      copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
+      copLocationConstraint.formulateConstraint();
+   }
+
    /**
     * Adds the convex CMP location constraint that requires the CMP to be within some distance of in the support polygon.
     *
@@ -624,23 +632,7 @@ public class ICPControllerQPSolver
     */
    private void addCMPLocationConstraint()
    {
-      double cmpConstraintBound;
-      if (useAngularMomentum.getBooleanValue())
-         cmpConstraintBound = -cmpSafeDistanceFromEdge;
-      else
-         cmpConstraintBound = copSafeDistanceToEdge;
-
-      if (!Double.isFinite(cmpConstraintBound))
-         return;
-
-      int originalConstraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      cmpLocationConstraint.setPositionOffset(desiredCMP);
-      cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
-      cmpLocationConstraint.formulateConstraint();
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-
-      if (originalConstraintSize != constraintSize)
-         return; // FIXME Seems to occur at extremely rare occasions at initialization. The size of the cmpLocationConstraint changes from reshape() to here.
 
       MatrixTools.setMatrixBlock(solverInput_Aineq,
                                  currentInequalityConstraintIndex,
@@ -663,6 +655,23 @@ public class ICPControllerQPSolver
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
+   }
+
+   private void formulateCMPConstraint()
+   {
+      double cmpConstraintBound;
+      if (useAngularMomentum.getBooleanValue())
+         cmpConstraintBound = -cmpSafeDistanceFromEdge;
+      else
+         cmpConstraintBound = copSafeDistanceToEdge;
+
+      if (!Double.isFinite(cmpConstraintBound))
+         return;
+
+      cmpLocationConstraint.setPolygon();
+      cmpLocationConstraint.setPositionOffset(desiredCMP);
+      cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
+      cmpLocationConstraint.formulateConstraint();
    }
 
    /**
