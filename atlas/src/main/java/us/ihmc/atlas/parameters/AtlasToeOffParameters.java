@@ -70,6 +70,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
    @Override
    public double getKneeUpperLimitToTriggerToeOff()
    {
-      return 1.6;
+      return 2.0;
    }
 }
