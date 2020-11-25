@@ -63,6 +63,10 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
    private final PositionGraphic goalGraphic;
    private final DoorGraphic doorGraphic;
 
+   private boolean goalXUpdateBlock = false;
+   private boolean goalYUpdateBlock = false;
+   private boolean goalZUpdateBlock = false;
+
    public BuildingExplorationBehaviorUI(SubScene subScene, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager messager, DRCRobotModel robotModel)
    {
       super(subScene, visualizationPane, ros2Node, messager, robotModel);
@@ -92,6 +96,9 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
       {
          goalGraphic.getPose().set(newGoal);
          goalGraphic.update();
+         goalXUpdateBlock = true;
+         goalYUpdateBlock = true;
+         goalZUpdateBlock = true;
          goalX.getValueFactory().setValue(newGoal.getX());
          goalY.getValueFactory().setValue(newGoal.getY());
          goalZ.getValueFactory().setValue(newGoal.getZ());
@@ -114,18 +121,33 @@ public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
 
       goalX.valueProperty().addListener((observable, oldValue, newValue) ->
       {
+         if (goalXUpdateBlock)
+         {
+            goalXUpdateBlock = false;
+            return;
+         }
          goalGraphic.getPose().setX(newValue);
          goalGraphic.update();
          messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
       goalY.valueProperty().addListener((observable, oldValue, newValue) ->
       {
+         if (goalYUpdateBlock)
+         {
+            goalYUpdateBlock = false;
+            return;
+         }
          goalGraphic.getPose().setY(newValue);
          goalGraphic.update();
          messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
       goalZ.valueProperty().addListener((observable, oldValue, newValue) ->
       {
+         if (goalZUpdateBlock)
+         {
+            goalZUpdateBlock = false;
+            return;
+         }
          goalGraphic.getPose().setZ(newValue);
          goalGraphic.update();
          messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
