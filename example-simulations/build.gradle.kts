@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.ihmc-ci") version "6.8"
-   id("us.ihmc.ihmc-cd") version "1.14"
+   id("us.ihmc.ihmc-build") version "0.23.0"
+   id("us.ihmc.ihmc-ci") version "7.3"
+   id("us.ihmc.ihmc-cd") version "1.17"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
@@ -42,7 +42,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.30.3")
+   api("us.ihmc:ihmc-commons-testing:0.30.4")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-quadruped-robotics-test:source")
    api("us.ihmc:ihmc-quadruped-planning-test:source")
