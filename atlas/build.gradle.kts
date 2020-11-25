@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.ihmc-ci") version "7.1"
-   id("us.ihmc.ihmc-cd") version "1.16"
+   id("us.ihmc.ihmc-ci") version "6.8"
+   id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
@@ -18,7 +18,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
    api("org.apache.xmlgraphics:batik-dom:1.7")
    api("org.apache.ant:ant:1.9.0")
-   api("org.apache.commons:commons-lang3:3.11")
+   api("org.apache.commons:commons-lang3:3.8.1")
    api("com.martiansoftware:jsap:2.1")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -73,7 +73,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
-   api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:ihmc-commons-testing:0.30.3")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
