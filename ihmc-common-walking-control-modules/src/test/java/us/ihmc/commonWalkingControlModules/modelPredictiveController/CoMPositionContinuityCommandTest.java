@@ -49,12 +49,12 @@ public class CoMPositionContinuityCommandTest
       rhoHelper1.computeMatrices(contactPolygon, contactPose1, 1e-8, 1e-10, mu);
       rhoHelper2.computeMatrices(contactPolygon, contactPose2, 1e-8, 1e-10, mu);
 
-      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
-      double timeOfConstraint = 0.7;
+      double duration1 = 0.7;
 
       CoMPositionContinuityCommand command = new CoMPositionContinuityCommand();
-      command.setFirstSegmentDuration(timeOfConstraint);
+      command.setFirstSegmentDuration(duration1);
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
@@ -71,10 +71,11 @@ public class CoMPositionContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj();
+      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
       FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
-      DMatrixRMaj valueEndOf1 = new DMatrixRMaj(3, 1);
-      DMatrixRMaj valueStartOf2 = new DMatrixRMaj(3, 1);
+
+      FramePoint3D valueEndOf1 = new FramePoint3D();
+      FramePoint3D valueStartOf2 = new FramePoint3D();
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj((rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1);
@@ -83,42 +84,55 @@ public class CoMPositionContinuityCommandTest
 
       CommonOps_DDRM.mult(solver.qpInput.taskJacobian, solution, solvedObjectivePosition);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedObjectivePositionTuple);
+      solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       objectivePosition.get(taskObjectiveExpected);
-      taskObjectiveExpected.add(2, 0, -0.5 * timeOfConstraint * timeOfConstraint * -Math.abs(gravityZ));
+      taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 0, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 0, -1.0);
 
+      // FIXME this is just the rhos
+      helper.computeMatrices(duration1, omega);
+      MatrixTools.setMatrixBlock(taskJacobianExpected, 0, 12, helper.getPositionJacobianMatrix(), 0, 0, 3, 4 * rhoHelper1.getRhoSize(), 1.0);
+      helper.computeMatrices(0.0, omega);
+      MatrixTools.setMatrixBlock(taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize(), helper.getPositionJacobianMatrix(), 0, 0, 3, 4 * rhoHelper2.getRhoSize(), -1.0);
 
+      valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
+      valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
+      valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
 
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
+      valueStartOf2.setX(0.0 * solution.get(6, 0) + solution.get(7, 0));
+      valueStartOf2.setY(0.0 * solution.get(8, 0) + solution.get(9, 0));
+      valueStartOf2.setZ(0.0 * solution.get(10, 0) + solution.get(11, 0));
+
+      for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 6 + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * timeOfConstraint) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * timeOfConstraint) * solution.get(startIdx + 1, 0);
-         rhoValue += timeOfConstraint * timeOfConstraint * timeOfConstraint * solution.get(startIdx + 2, 0);
-         rhoValue += timeOfConstraint * timeOfConstraint * solution.get(startIdx + 3, 0);
+         int startIdx = 12 + 4 * rhoIdx;
+         double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
+         rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
+         rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);
+         rhoValue += duration1 * duration1 * solution.get(startIdx + 3, 0);
 
-         assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
-         solvedPositionAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedPositionAtConstraint);
-
-         taskJacobianExpected.set(0, startIdx, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(0, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint);
+         valueEndOf1.scaleAdd(rhoValue, rhoHelper1.getBasisVector(rhoIdx), valueEndOf1);
       }
-      solvedPositionAtConstraint.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedPositionAtConstraint);
+      valueEndOf1.scaleAdd(0.5 * duration1 * duration1, gravityVector, valueEndOf1);
+
+
+      for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
+      {
+         int startIdx = 12 + 4 * rhoIdx;
+         double rhoValue = Math.exp(omega * 0.0) * solution.get(startIdx, 0);
+         rhoValue += Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
+         rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);
+         rhoValue += 0.0 * 0.0 * solution.get(startIdx + 3, 0);
+
+         valueStartOf2.scaleAdd(rhoValue, rhoHelper2.getBasisVector(rhoIdx), valueStartOf2);
+      }
+      valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0, gravityVector, valueStartOf2);
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInput.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInput.taskObjective, 1e-5);
@@ -137,9 +151,8 @@ public class CoMPositionContinuityCommandTest
       EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
-
+      EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
    }
 
 
