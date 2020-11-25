@@ -618,9 +618,12 @@ public class ICPControllerQPSolver
    private void formulateCoPConstraint()
    {
       copLocationConstraint.setPolygon();
-      copLocationConstraint.setPositionOffset(desiredCoP);
-      copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
-      copLocationConstraint.formulateConstraint();
+      if (copLocationConstraint.getInequalityConstraintSize() > 0)
+      {
+         copLocationConstraint.setPositionOffset(desiredCoP);
+         copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
+         copLocationConstraint.formulateConstraint();
+      }
    }
 
    /**
@@ -659,6 +662,11 @@ public class ICPControllerQPSolver
 
    private void formulateCMPConstraint()
    {
+      cmpLocationConstraint.setPolygon();
+
+      if (cmpLocationConstraint.getInequalityConstraintSize() == 0)
+         return;
+
       double cmpConstraintBound;
       if (useAngularMomentum.getBooleanValue())
          cmpConstraintBound = -cmpSafeDistanceFromEdge;
@@ -666,9 +674,11 @@ public class ICPControllerQPSolver
          cmpConstraintBound = copSafeDistanceToEdge;
 
       if (!Double.isFinite(cmpConstraintBound))
+      {
+         cmpLocationConstraint.reset();
          return;
+      }
 
-      cmpLocationConstraint.setPolygon();
       cmpLocationConstraint.setPositionOffset(desiredCMP);
       cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
       cmpLocationConstraint.formulateConstraint();
