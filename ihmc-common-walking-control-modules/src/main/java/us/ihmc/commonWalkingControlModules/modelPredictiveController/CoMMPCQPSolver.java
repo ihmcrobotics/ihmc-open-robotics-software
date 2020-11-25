@@ -75,8 +75,8 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
-//      comCoefficientRegularization.set(1e-6);
-//      rhoCoefficientRegularization.set(1e-7);
+      comCoefficientRegularization.set(1e-5);
+      rhoCoefficientRegularization.set(1e-5);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
@@ -263,7 +263,7 @@ public class CoMMPCQPSolver
          addInput(qpInput);
    }
 
-   private void submitCoMContinuityObjective(CoMContinuityCommand command)
+   public void submitCoMContinuityObjective(CoMContinuityCommand command)
    {
       boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command);
       if (success)
