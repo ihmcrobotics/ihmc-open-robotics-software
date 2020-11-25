@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.ihmc-ci") version "6.8"
-   id("us.ihmc.ihmc-cd") version "1.14"
+   id("us.ihmc.ihmc-ci") version "7.0"
+   id("us.ihmc.ihmc-cd") version "1.16"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
@@ -18,7 +18,7 @@ mainDependencies {
    api("us.ihmc:ihmc-realtime:1.3.0")
    api("us.ihmc:ihmc-video-codecs:2.1.5")
    api("org.boofcv:boofcv-geo:0.36")
-   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.apache.commons:commons-lang3:3.11")
    api("com.google.guava:guava:18.0")
    api("org.reflections:reflections:0.9.10")
    api("commons-net:commons-net:3.6")
