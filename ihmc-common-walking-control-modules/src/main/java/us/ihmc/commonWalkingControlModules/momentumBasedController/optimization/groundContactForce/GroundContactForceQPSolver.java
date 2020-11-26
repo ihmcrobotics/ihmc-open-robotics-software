@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
@@ -101,7 +101,7 @@ public class GroundContactForceQPSolver
       CommonOps_DDRM.addEquals(solverInput_H, regularizationMatrix);
    }
 
-   public void addMotionInput(QPInput input)
+   public void addMotionInput(QPInputTypeA input)
    {
       switch (input.getConstraintType())
       {

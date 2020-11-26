@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
-public class DirectQPInput
+public class QPInputTypeB
 {
    private static final int initialTaskSize = 6;
 
@@ -20,7 +20,7 @@ public class DirectQPInput
 
    /**
     * <p>
-    * Direct input into the QP solver. Must be in the form
+    * Direct input into the QP solver. This is only an objective cost function Must be in the form
     * </p>
     * <p>
     * g * Q * u + 0.5 * u^T * (H + Q) * u
@@ -43,7 +43,7 @@ public class DirectQPInput
     * f(x) = 0.5 * x<sup>T</sup> * A<sup>T</sup> * Q * A * x - b<sup>T </sup> Q * A * x
     * </pre>
     */
-   public DirectQPInput(int numberOfVariables)
+   public QPInputTypeB(int numberOfVariables)
    {
       this.numberOfVariables = numberOfVariables;
       reshape(initialTaskSize);

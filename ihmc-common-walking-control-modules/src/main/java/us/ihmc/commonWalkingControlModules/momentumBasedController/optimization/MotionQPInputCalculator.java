@@ -169,7 +169,7 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.submitPrivilegedVelocities(command);
    }
 
-   public boolean computePrivilegedJointAccelerations(QPInput qpInputToPack)
+   public boolean computePrivilegedJointAccelerations(QPInputTypeA qpInputToPack)
    {
       if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
@@ -206,7 +206,7 @@ public class MotionQPInputCalculator
       return robotTaskSize > 0;
    }
 
-   public boolean computePrivilegedJointVelocities(QPInput qpInputToPack)
+   public boolean computePrivilegedJointVelocities(QPInputTypeA qpInputToPack)
    {
       if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
@@ -292,7 +292,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link SpatialAccelerationCommand} into a {@link QPInput}.
+    * Converts a {@link SpatialAccelerationCommand} into a {@link QPInputTypeA}.
     * <p>
     * The idea is to convert the information held in the {@code commandToConvert} such that it ends up
     * being formulated as follows:<br>
@@ -304,7 +304,7 @@ public class MotionQPInputCalculator
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       commandToConvert.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.
@@ -409,7 +409,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link SpatialVelocityCommand} into a {@link QPInput}.
+    * Converts a {@link SpatialVelocityCommand} into a {@link QPInputTypeA}.
     * <p>
     * The idea is to convert the information held in the {@code commandToConvert} such that it ends up
     * being formulated as follows:<br>
@@ -421,7 +421,7 @@ public class MotionQPInputCalculator
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       // Gets the M-by-6 selection matrix S.
       commandToConvert.getControlFrame(controlFrame);
@@ -532,11 +532,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link MomentumRateCommand} into a {@link QPInput}.
+    * Converts a {@link MomentumRateCommand} into a {@link QPInputTypeA}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -576,11 +576,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link LinearMomentumRateCostCommand} into a {@link DirectQPInput}.
+    * Converts a {@link LinearMomentumRateCostCommand} into a {@link QPInputTypeB}.
     *
     * @return true if the command was successfully converted.
     */
-   public boolean convertLinearMomentumRateCostCommand(LinearMomentumRateCostCommand commandToConvert, DirectQPInput qpInputToPack)
+   public boolean convertLinearMomentumRateCostCommand(LinearMomentumRateCostCommand commandToConvert, QPInputTypeB qpInputToPack)
    {
       tempSelectionMatrix.zero();
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
@@ -622,11 +622,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link MomentumCommand} into a {@link QPInput}.
+    * Converts a {@link MomentumCommand} into a {@link QPInputTypeA}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertMomentumCommand(MomentumCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertMomentumCommand(MomentumCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -668,7 +668,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link LinearMomentumConvexConstraint2DCommand} into a {@link QPInput} intended to be
+    * Converts a {@link LinearMomentumConvexConstraint2DCommand} into a {@link QPInputTypeA} intended to be
     * consumed by {@link InverseKinematicsQPSolver}.
     * <p>
     * The resulting output is an {@link ConstraintType#LEQ_INEQUALITY} constraining the x and y
@@ -681,7 +681,7 @@ public class MotionQPInputCalculator
     * @param qpInputToPack the result of the conversion. Modified.
     * @return {@code true} if the command was successfully converted, {@code false} otherwise.
     */
-   public boolean convertLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand command, QPInput qpInputToPack)
+   public boolean convertLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand command, QPInputTypeA qpInputToPack)
    {
       List<Vector2D> vertices = command.getLinearMomentumConstraintVertices();
 
@@ -727,7 +727,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Sets up the {@link QPInput#taskJacobian} and {@link QPInput#taskObjective} to formulate a
+    * Sets up the {@link QPInputTypeA#taskJacobian} and {@link QPInputTypeA#taskObjective} to formulate a
     * constraint with respect to 2D line going through {@code firstPointOnLine} and
     * {@code secondPointOnLine}.
     * <p>
@@ -754,7 +754,7 @@ public class MotionQPInputCalculator
     *                                         {@code qpInputToPack.taskObjective}. Modified.
     */
    private void setupLineConstraint(int constraintIndex, Tuple2DReadOnly firstPointOnLine, Tuple2DReadOnly secondPointOnLine,
-                                    DMatrixRMaj centroidalMomemtumMatrixLinearXY, QPInput qpInputToPack)
+                                    DMatrixRMaj centroidalMomemtumMatrixLinearXY, QPInputTypeA qpInputToPack)
    {
       double directionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double directionY = secondPointOnLine.getY() - firstPointOnLine.getY();
@@ -772,11 +772,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link JointspaceAccelerationCommand} into a {@link QPInput}.
+    * Converts a {@link JointspaceAccelerationCommand} into a {@link QPInputTypeA}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
@@ -812,11 +812,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link JointspaceVelocityCommand} into a {@link QPInput}.
+    * Converts a {@link JointspaceVelocityCommand} into a {@link QPInputTypeA}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInput qpInputToPack)
+   public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
 
