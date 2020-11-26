@@ -415,6 +415,13 @@ public class CoMTrajectoryModelPredictiveController
 
    private void solveQP(int numberOfPhases)
    {
+      xCoefficientVector.reshape(6 * numberOfPhases, 1);
+      yCoefficientVector.reshape(6 * numberOfPhases, 1);
+      zCoefficientVector.reshape(6 * numberOfPhases, 1);
+      xCoefficientVector.zero();
+      yCoefficientVector.zero();
+      zCoefficientVector.zero();
+
       qpSolver.initialize();
       qpSolver.submitMPCCommandList(mpcCommands);
       if (!qpSolver.solve())
@@ -435,13 +442,6 @@ public class CoMTrajectoryModelPredictiveController
             rhoNumber += rhoJacobianHelper.getRhoSize() * MPCIndexHandler.coefficientsPerRho;
          }
       }
-
-      xCoefficientVector.reshape(6 * numberOfPhases, 1);
-      yCoefficientVector.reshape(6 * numberOfPhases, 1);
-      zCoefficientVector.reshape(6 * numberOfPhases, 1);
-      xCoefficientVector.zero();
-      yCoefficientVector.zero();
-      zCoefficientVector.zero();
 
       for (int i = 0; i < numberOfPhases; i++)
       {

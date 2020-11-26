@@ -179,6 +179,9 @@ public class CoMMPCQPSolver
          solverOutput.reshape(problemSize, 1);
          tempJtW.reshape(problemSize, problemSize);
 
+         CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+         CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+
          resetRateRegularization();
          notifyResetActiveSet();
       }
