@@ -143,6 +143,95 @@ public class MPCQPInputCalculatorTest
    }
 
    @Test
+   public void testCoMObjectiveTwoSegment()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
+
+      FramePose3D contactPose = new FramePose3D();
+      contactPose.getPosition().set(0.3, 0.7, 0.0);
+
+      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      int rhoSize = 16;
+      int rhoCoefficients = 2 * 4 * rhoSize;
+      int comCoefficients = 2 * 6;
+      QPInput comPositionQPInput = new QPInput(rhoCoefficients + comCoefficients);
+      QPInput comVelocityQPInput = new QPInput(rhoCoefficients + comCoefficients);
+
+      Random random = new Random(1738L);
+
+      for (double time = 0.0; time < 2.0; time += 0.01)
+      {
+         helper.reshape(contactPolygon.getNumberOfVertices());
+         helper.computeMatrices(time, omega);
+
+         rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+         DMatrixRMaj rhoMagnitudesJacobian = MPCTestHelper.getCoMPositionJacobian(time, omega, rhoHelper);
+         DMatrixRMaj rhoRatesJacobian = MPCTestHelper.getCoMVelocityJacobian(time, omega, rhoHelper);
+
+
+         DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
+         DMatrixRMaj comVelocityJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
+
+         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 6, rhoMagnitudesJacobian, 0, 0, 3, 6, 1.0);
+         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 6, rhoRatesJacobian, 0, 0, 3, 6, 1.0);
+         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 12 + 4 * rhoSize, rhoMagnitudesJacobian, 0, 6, 3, 4 * rhoSize, 1.0);
+         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 12 + 4 * rhoSize, rhoRatesJacobian, 0, 6, 3, 4 * rhoSize, 1.0);
+
+         FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+         CoMPositionCommand comPositionCommand = new CoMPositionCommand();
+         comPositionCommand.addJacobianMatrixHelper(helper);
+         comPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comPositionCommand.setOmega(omega);
+         comPositionCommand.setSegmentNumber(1);
+         comPositionCommand.setTimeOfObjective(time);
+         comPositionCommand.setObjective(comPositionObjective);
+
+         CoMVelocityCommand comVelocityCommand = new CoMVelocityCommand();
+         comVelocityCommand.addJacobianMatrixHelper(helper);
+         comVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comVelocityCommand.setOmega(omega);
+         comVelocityCommand.setSegmentNumber(1);
+         comVelocityCommand.setTimeOfObjective(time);
+         comVelocityCommand.setObjective(comVelocityObjective);
+
+         inputCalculator.calculateValueObjective(comPositionQPInput, comPositionCommand);
+         inputCalculator.calculateValueObjective(comVelocityQPInput, comVelocityCommand);
+
+         EjmlUnitTests.assertEquals(comPositionJacobian, comPositionQPInput.getTaskJacobian(), 1e-4);
+         EjmlUnitTests.assertEquals(comVelocityJacobian, comVelocityQPInput.getTaskJacobian(), 1e-4);
+
+         DMatrixRMaj expectedPositionObjective = new DMatrixRMaj(3, 1);
+         DMatrixRMaj expectedVelocityObjective = new DMatrixRMaj(3, 1);
+
+         comPositionObjective.scaleAdd(-0.5 * time * time, gravityVector, comPositionObjective);
+         comPositionObjective.get(expectedPositionObjective);
+
+         comVelocityObjective.scaleAdd(-time, gravityVector, comVelocityObjective);
+         comVelocityObjective.get(expectedVelocityObjective);
+
+         EjmlUnitTests.assertEquals(expectedPositionObjective, comPositionQPInput.getTaskObjective(), 1e-4);
+         EjmlUnitTests.assertEquals(expectedVelocityObjective, comVelocityQPInput.getTaskObjective(), 1e-4);
+      }
+   }
+
+   
+
+   @Test
    public void testDCMObjectiveOneSegment()
    {
       double gravityZ = -9.81;

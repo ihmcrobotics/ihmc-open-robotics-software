@@ -4,8 +4,8 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMVelocityContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,9 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class CoMPositionContinuityCommandTest
+public class CoMVelocityContinuityCommandTest
 {
    @Test
    public void testCommandOptimize()
@@ -53,7 +51,7 @@ public class CoMPositionContinuityCommandTest
 
       double duration1 = 0.7;
 
-      CoMPositionContinuityCommand command = new CoMPositionContinuityCommand();
+      CoMVelocityContinuityCommand command = new CoMVelocityContinuityCommand();
       command.setFirstSegmentDuration(duration1);
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
@@ -71,60 +69,60 @@ public class CoMPositionContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
-      FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
+      DMatrixRMaj solvedObjectiveVelocity = new DMatrixRMaj(3, 1);
+      FrameVector3D solvedObjectiveVelocityTuple = new FrameVector3D();
 
-      FramePoint3D valueEndOf1 = new FramePoint3D();
-      FramePoint3D valueStartOf2 = new FramePoint3D();
+      FrameVector3D valueEndOf1 = new FrameVector3D();
+      FrameVector3D valueStartOf2 = new FrameVector3D();
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj((rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1);
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, (rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1, 1.0);
 
-      CommonOps_DDRM.mult(solver.qpInput.taskJacobian, solution, solvedObjectivePosition);
-      solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
+      CommonOps_DDRM.mult(solver.qpInput.taskJacobian, solution, solvedObjectiveVelocity);
+      solvedObjectiveVelocityTuple.set(solvedObjectiveVelocity);
+      solvedObjectiveVelocityTuple.scaleAdd(duration1, gravityVector, solvedObjectiveVelocityTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
-      taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
+      taskObjectiveExpected.add(2, 0, -duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 0, -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 1, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 1, -1.0);
 
       helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12);
+      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 12);
       helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
+      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
 
-      valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
-      valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
-      valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
+      valueEndOf1.setX(solution.get(0, 0));
+      valueEndOf1.setY(solution.get(2, 0));
+      valueEndOf1.setZ(solution.get(4, 0) );
 
-      valueStartOf2.setX(0.0 * solution.get(6, 0) + solution.get(7, 0));
-      valueStartOf2.setY(0.0 * solution.get(8, 0) + solution.get(9, 0));
-      valueStartOf2.setZ(0.0 * solution.get(10, 0) + solution.get(11, 0));
+      valueStartOf2.setX(solution.get(6, 0));
+      valueStartOf2.setY(solution.get(8, 0));
+      valueStartOf2.setZ(solution.get(10, 0));
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
          int startIdx = 12 + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
-         rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);
-         rhoValue += duration1 * duration1 * solution.get(startIdx + 3, 0);
+         double rhoValue = omega * Math.exp(omega * duration1) * solution.get(startIdx, 0);
+         rhoValue += -omega * Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
+         rhoValue += 3.0 * duration1 * duration1 * solution.get(startIdx + 2, 0);
+         rhoValue += 2.0 * duration1 * solution.get(startIdx + 3, 0);
 
          valueEndOf1.scaleAdd(rhoValue, rhoHelper1.getBasisVector(rhoIdx), valueEndOf1);
       }
-      valueEndOf1.scaleAdd(0.5 * duration1 * duration1, gravityVector, valueEndOf1);
+      valueEndOf1.scaleAdd(duration1, gravityVector, valueEndOf1);
 
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
       {
          int startIdx = 12 + 4 * rhoHelper1.getRhoSize() + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * 0.0) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
+         double rhoValue = omega * Math.exp(omega * 0.0) * solution.get(startIdx, 0);
+         rhoValue += -omega * Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
          rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);
          rhoValue += 0.0 * 0.0 * solution.get(startIdx + 3, 0);
 
@@ -149,9 +147,8 @@ public class CoMPositionContinuityCommandTest
       EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
-      FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredValue, solvedObjectivePositionTuple, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(new FrameVector3D(), solvedObjectiveVelocityTuple, 1e-4);
    }
 
 

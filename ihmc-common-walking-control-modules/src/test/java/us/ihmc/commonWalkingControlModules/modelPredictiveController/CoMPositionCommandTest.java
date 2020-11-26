@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -15,11 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -265,5 +259,7 @@ public class CoMPositionCommandTest
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
    }
+
+
 
 }
