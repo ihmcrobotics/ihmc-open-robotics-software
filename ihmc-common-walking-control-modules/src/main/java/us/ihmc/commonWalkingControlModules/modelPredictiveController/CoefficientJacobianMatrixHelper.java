@@ -15,6 +15,7 @@ public class CoefficientJacobianMatrixHelper
    private final DMatrixRMaj accelerationJacobianMatrix;
    private final DMatrixRMaj jerkJacobianMatrix;
    private final DMatrixRMaj accelerationIntegrationHessian;
+   private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private int rhoSize;
@@ -35,6 +36,7 @@ public class CoefficientJacobianMatrixHelper
       accelerationJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       jerkJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
+      accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
    }
 
@@ -48,6 +50,7 @@ public class CoefficientJacobianMatrixHelper
       accelerationJacobianMatrix.reshape(rhoSize, coefficientsSize);
       jerkJacobianMatrix.reshape(rhoSize, coefficientsSize);
       accelerationIntegrationHessian.reshape(coefficientsSize, coefficientsSize);
+      accelerationIntegrationGradient.reshape(coefficientsSize, 1);
       jerkIntegrationHessian.reshape(coefficientsSize, coefficientsSize);
    }
 
@@ -165,7 +168,7 @@ public class CoefficientJacobianMatrixHelper
       return jerkJacobianMatrix;
    }
 
-   public void computeAccelerationIntegrationMatrix(double duration, double omega)
+   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValue)
    {
       int rhoIndex = 0;
 
@@ -189,32 +192,43 @@ public class CoefficientJacobianMatrixHelper
       double c23 = 6.0 * duration2;
       double c33 = 4.0 * duration;
 
+      double g0 = omega * (positiveExponential - 1.0);
+      double g1 = -omega * (negativeExponential - 1.0);
+      double g2 = 3.0 * duration2;
+      double g3 = 2.0 * duration;
+
       for (int contactPointIndex = 0; contactPointIndex < numberOfContactPointsInContact; contactPointIndex++)
       {
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            int startColumn = rhoIndex * MPCIndexHandler.coefficientsPerRho;
+            int startIdx = rhoIndex * MPCIndexHandler.coefficientsPerRho;
 
-            accelerationIntegrationHessian.set(startColumn, startColumn, c00);
-            accelerationIntegrationHessian.set(startColumn, startColumn + 1, c01);
-            accelerationIntegrationHessian.set(startColumn, startColumn + 2, c02);
-            accelerationIntegrationHessian.set(startColumn, startColumn + 2, c03);
-            accelerationIntegrationHessian.set(startColumn + 1, startColumn, c01);
-            accelerationIntegrationHessian.set(startColumn + 1, startColumn + 1, c11);
-            accelerationIntegrationHessian.set(startColumn + 1, startColumn + 2, c12);
-            accelerationIntegrationHessian.set(startColumn + 1, startColumn + 3, c13);
-            accelerationIntegrationHessian.set(startColumn + 2, startColumn, c02);
-            accelerationIntegrationHessian.set(startColumn + 2, startColumn + 1, c12);
-            accelerationIntegrationHessian.set(startColumn + 2, startColumn + 2, c22);
-            accelerationIntegrationHessian.set(startColumn + 2, startColumn + 3, c23);
-            accelerationIntegrationHessian.set(startColumn + 3, startColumn, c03);
-            accelerationIntegrationHessian.set(startColumn + 3, startColumn + 1, c13);
-            accelerationIntegrationHessian.set(startColumn + 3, startColumn + 2, c23);
-            accelerationIntegrationHessian.set(startColumn + 3, startColumn + 3, c33);
+            accelerationIntegrationHessian.set(startIdx, startIdx, c00);
+            accelerationIntegrationHessian.set(startIdx, startIdx + 1, c01);
+            accelerationIntegrationHessian.set(startIdx, startIdx + 2, c02);
+            accelerationIntegrationHessian.set(startIdx, startIdx + 2, c03);
+            accelerationIntegrationHessian.set(startIdx + 1, startIdx, c01);
+            accelerationIntegrationHessian.set(startIdx + 1, startIdx + 1, c11);
+            accelerationIntegrationHessian.set(startIdx + 1, startIdx + 2, c12);
+            accelerationIntegrationHessian.set(startIdx + 1, startIdx + 3, c13);
+            accelerationIntegrationHessian.set(startIdx + 2, startIdx, c02);
+            accelerationIntegrationHessian.set(startIdx + 2, startIdx + 1, c12);
+            accelerationIntegrationHessian.set(startIdx + 2, startIdx + 2, c22);
+            accelerationIntegrationHessian.set(startIdx + 2, startIdx + 3, c23);
+            accelerationIntegrationHessian.set(startIdx + 3, startIdx, c03);
+            accelerationIntegrationHessian.set(startIdx + 3, startIdx + 1, c13);
+            accelerationIntegrationHessian.set(startIdx + 3, startIdx + 2, c23);
+            accelerationIntegrationHessian.set(startIdx + 3, startIdx + 3, c33);
+
+            accelerationIntegrationGradient.set(startIdx, 0, g0);
+            accelerationIntegrationGradient.set(startIdx + 1, 0, g1);
+            accelerationIntegrationGradient.set(startIdx + 2, 0, g2);
+            accelerationIntegrationGradient.set(startIdx + 3, 0, g3);
 
             rhoIndex++;
          }
       }
+
    }
 
    public void computeJerkIntegrationMatrix(double duration, double omega)
