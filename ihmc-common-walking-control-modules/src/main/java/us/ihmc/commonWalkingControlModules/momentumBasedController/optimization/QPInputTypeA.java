@@ -5,7 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
 
-public class QPInput
+public class QPInputTypeA
 {
    private static final int initialTaskSize = 6;
 
@@ -22,7 +22,9 @@ public class QPInput
 
    /**
     * <p>
-    * Input into the QP solver. Must be in the form
+    * Input into the QP solver.
+    *
+    * If formulated as an objective, it tries to minimize the squared difference function in the form
     * </p>
     * <p>
     * A * x - b
@@ -36,12 +38,34 @@ public class QPInput
     * where the overall desire is minimize the objective.
     * </p>
     *
-    * This cost function is then expanded out as
-    * <pre>
+    * <p>
+    * If specified as an objective using {@code constraintType}, the cost function is then expanded out as
+    * </p>
+    * <p>
     * f(x) = 0.5 * x<sup>T</sup> * A<sup>T</sup> * Q * A * x - b<sup>T </sup> Q * A * x
-    * </pre>
+    * </p>
+    *
+    * <p>
+    * If formulated as a equality, it is in the form
+    * </p>
+    * <p>
+    *    A * x = b
+    * </p>
+    *
+    * <p>
+    *    If formulated as a greater than/equal inequality, it is in the form
+    * </p>
+    * <p>
+    *    A * x >= b
+    * </p>
+    * <p>
+    * If formulated as a less than/equal inequality, it is in the form
+    * </p>
+    * <p>
+    *    A * x <= b
+    * </p>
     */
-   public QPInput(int numberOfVariables)
+   public QPInputTypeA(int numberOfVariables)
    {
       this.numberOfVariables = numberOfVariables;
       reshape(initialTaskSize);
