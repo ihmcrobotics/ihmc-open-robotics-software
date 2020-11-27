@@ -34,7 +34,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
+   private final ROS2Node ros2Node;
 
    private final String robotName;
    private final CollisionBoxProvider collisionBoxProvider;
@@ -54,15 +54,22 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private boolean enableLidarScanPublisher = true;
    private boolean enableStereoVisionPointCloudPublisher = true;
 
-   public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
-                                     RobotTarget target)
+   public ValkyrieSensorSuiteManager(String robotName,
+                                     FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                     CollisionBoxProvider collisionBoxProvider,
+                                     RobotROSClockCalculator rosClockCalculator,
+                                     HumanoidRobotSensorInformation sensorInformation,
+                                     ValkyrieJointMap jointMap,
+                                     RobotTarget target,
+                                     PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
       this.rosClockCalculator = rosClockCalculator;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
+
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_valkyrie_sensor_suite_node");
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)

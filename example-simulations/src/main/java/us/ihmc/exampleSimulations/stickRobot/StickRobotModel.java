@@ -27,6 +27,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -288,7 +289,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public DRCSensorSuiteManager getSensorSuiteManager(PubSubImplementation pubSubImplementation)
    {
       return null;
    }
