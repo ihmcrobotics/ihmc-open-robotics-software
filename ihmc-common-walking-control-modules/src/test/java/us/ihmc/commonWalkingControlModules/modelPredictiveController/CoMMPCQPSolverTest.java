@@ -44,7 +44,8 @@ public class CoMMPCQPSolverTest
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -54,6 +55,7 @@ public class CoMMPCQPSolverTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
+      contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
 
@@ -64,8 +66,7 @@ public class CoMMPCQPSolverTest
       vrpStartPositionCommand.setSegmentNumber(0);
       vrpStartPositionCommand.setOmega(omega);
       vrpStartPositionCommand.setWeight(1.0);
-      vrpStartPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
-      vrpStartPositionCommand.addJacobianMatrixHelper(helper);
+      vrpStartPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
       VRPVelocityCommand vrpStartVelocityCommand = new VRPVelocityCommand();
       vrpStartVelocityCommand.setObjective(new FrameVector3D());
@@ -73,8 +74,7 @@ public class CoMMPCQPSolverTest
       vrpStartVelocityCommand.setSegmentNumber(0);
       vrpStartVelocityCommand.setOmega(omega);
       vrpStartVelocityCommand.setWeight(1.0);
-      vrpStartVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
-      vrpStartVelocityCommand.addJacobianMatrixHelper(helper);
+      vrpStartVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
 
       VRPPositionCommand vrpEndPositionCommand = new VRPPositionCommand();
       vrpEndPositionCommand.setObjective(dcmObjective);
@@ -82,8 +82,7 @@ public class CoMMPCQPSolverTest
       vrpEndPositionCommand.setSegmentNumber(0);
       vrpEndPositionCommand.setOmega(omega);
       vrpEndPositionCommand.setWeight(1.0);
-      vrpEndPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
-      vrpEndPositionCommand.addJacobianMatrixHelper(helper);
+      vrpEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
       VRPVelocityCommand vrpEndVelocityCommand = new VRPVelocityCommand();
       vrpEndVelocityCommand.setObjective(new FrameVector3D());
@@ -91,8 +90,7 @@ public class CoMMPCQPSolverTest
       vrpEndVelocityCommand.setSegmentNumber(0);
       vrpEndVelocityCommand.setOmega(omega);
       vrpEndVelocityCommand.setWeight(1.0);
-      vrpEndVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
-      vrpEndVelocityCommand.addJacobianMatrixHelper(helper);
+      vrpEndVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
 
 
       CoMPositionCommand comStartPositionCommand = new CoMPositionCommand();
@@ -101,8 +99,7 @@ public class CoMMPCQPSolverTest
       comStartPositionCommand.setSegmentNumber(0);
       comStartPositionCommand.setOmega(omega);
       comStartPositionCommand.setWeight(1.0);
-      comStartPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
-      comStartPositionCommand.addJacobianMatrixHelper(helper);
+      comStartPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
 
       CoMVelocityCommand comStartVelocityCommand = new CoMVelocityCommand();
@@ -111,8 +108,7 @@ public class CoMMPCQPSolverTest
       comStartVelocityCommand.setSegmentNumber(0);
       comStartVelocityCommand.setOmega(omega);
       comStartVelocityCommand.setWeight(1.0);
-      comStartVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
-      comStartVelocityCommand.addJacobianMatrixHelper(helper);
+      comStartVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
 
       DCMPositionCommand dcmEndPositionCommand = new DCMPositionCommand();
       dcmEndPositionCommand.setObjective(dcmObjective);
@@ -120,8 +116,7 @@ public class CoMMPCQPSolverTest
       dcmEndPositionCommand.setSegmentNumber(0);
       dcmEndPositionCommand.setOmega(omega);
       dcmEndPositionCommand.setWeight(1.0);
-      dcmEndPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
-      dcmEndPositionCommand.addJacobianMatrixHelper(helper);
+      dcmEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
 
       DMatrixRMaj solverH_Expected = new DMatrixRMaj(6 + 4 * rhoHelper.getRhoSize(), 6 + 4 * rhoHelper.getRhoSize());

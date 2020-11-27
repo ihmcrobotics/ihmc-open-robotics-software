@@ -92,6 +92,8 @@ public class CoMTrajectoryModelPredictiveController
 
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
+   private final YoFramePoint3D initialCoMPosition = new YoFramePoint3D("initialCoMPosition", worldFrame, registry);
+   private final YoFrameVector3D initialCoMVelocity = new YoFrameVector3D("initialCoMVelocity", worldFrame, registry);
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
@@ -102,6 +104,7 @@ public class CoMTrajectoryModelPredictiveController
 
    private final RecyclingArrayList<RecyclingArrayList<ContactStateMagnitudeToForceMatrixHelper>> rhoJacobianHelperPool;
    private final RecyclingArrayList<RecyclingArrayList<CoefficientJacobianMatrixHelper>> coefficientJacobianHelperPool;
+   private final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
@@ -130,7 +133,9 @@ public class CoMTrajectoryModelPredictiveController
                                                                                                                                   numberOfBasisVectorsPerContactPoint,
                                                                                                                                   coneRotationCalculator);
       Supplier<CoefficientJacobianMatrixHelper> coefficientJacobianProvider = () -> new CoefficientJacobianMatrixHelper(6, numberOfBasisVectorsPerContactPoint);
+      Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       rhoJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(rhoJacobianProvider));
+      contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
       coefficientJacobianHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(coefficientJacobianProvider));
 
       qpSolver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, registry);
@@ -208,23 +213,19 @@ public class CoMTrajectoryModelPredictiveController
    {
       rhoJacobianHelperPool.clear();
       coefficientJacobianHelperPool.clear();
+      contactPlaneHelperPool.clear();
 
       for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
       {
          ContactPlaneProvider contact = contactSequence.get(sequenceId);
 
-         RecyclingArrayList<ContactStateMagnitudeToForceMatrixHelper> rhoJacobians = rhoJacobianHelperPool.add();
-         RecyclingArrayList<CoefficientJacobianMatrixHelper> coefficientJacobians = coefficientJacobianHelperPool.add();
-         rhoJacobians.clear();
-         coefficientJacobians.clear();
+         RecyclingArrayList<ContactPlaneHelper> contactPlaneHelpers = contactPlaneHelperPool.add();
+         contactPlaneHelpers.clear();
 
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
-            ContactStateMagnitudeToForceMatrixHelper rhoJacobian = rhoJacobians.add();
-            CoefficientJacobianMatrixHelper coefficientJacobian = coefficientJacobians.add();
-
-            rhoJacobian.computeMatrices(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), rhoWeight, rhoRateWeight, mu);
-            coefficientJacobian.reshape(contact.getNumberOfContactPointsInPlane(contactId));
+            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.add();
+            contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
          }
       }
    }
@@ -242,7 +243,7 @@ public class CoMTrajectoryModelPredictiveController
       {
          double duration = contactSequence.get(0).getTimeInterval().getDuration();
          mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(0), 0, duration, 0.0));
-//         mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+         mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
       }
 
 
@@ -258,13 +259,13 @@ public class CoMTrajectoryModelPredictiveController
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), endVRPPositions.get(transition), transition, firstSegmentDuration, firstSegmentDuration));
-//            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
             double duration = contactSequence.get(nextSequence).getTimeInterval().getDuration();
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(nextSequence), nextSequence, duration, 0.0));
-//            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
          }
       }
 
@@ -273,7 +274,7 @@ public class CoMTrajectoryModelPredictiveController
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
       mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), endVRPPositions.getLast(), numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(numberOfPhases - 1), numberOfPhases - 1, finalDuration, finalDuration));
-//      mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -284,10 +285,9 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
-      for (int i = 0; i < rhoJacobianHelperPool.get(0).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
-         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
-         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
       }
 
       return objectiveToPack;
@@ -301,10 +301,9 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
-      for (int i = 0; i < rhoJacobianHelperPool.get(0).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
-         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(0).get(i));
-         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(0).get(i));
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
       }
 
       return objectiveToPack;
@@ -320,16 +319,14 @@ public class CoMTrajectoryModelPredictiveController
       continuityObjectiveToPack.setFirstSegmentNumber(firstSegmentNumber);
       continuityObjectiveToPack.setFirstSegmentDuration(firstSegmentDuration);
 
-      for (int i = 0; i < rhoJacobianHelperPool.get(firstSegmentNumber).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber).size(); i++)
       {
-         continuityObjectiveToPack.addFirstSegmentRhoToForceMatrixHelper(rhoJacobianHelperPool.get(firstSegmentNumber).get(i));
-         continuityObjectiveToPack.addFirstSegmentJacobianMatrixHelper(coefficientJacobianHelperPool.get(firstSegmentNumber).get(i));
+         continuityObjectiveToPack.addFirstSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber).get(i));
       }
 
-      for (int i = 0; i < rhoJacobianHelperPool.get(firstSegmentNumber + 1).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber + 1).size(); i++)
       {
-         continuityObjectiveToPack.addSecondSegmentRhoToForceMatrixHelper(rhoJacobianHelperPool.get(firstSegmentNumber + 1).get(i));
-         continuityObjectiveToPack.addSecondSegmentJacobianMatrixHelper(coefficientJacobianHelperPool.get(firstSegmentNumber + 1).get(i));
+         continuityObjectiveToPack.addSecondSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber + 1).get(i));
       }
 
       return continuityObjectiveToPack;
@@ -384,10 +381,9 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(constraintTime);
       objectiveToPack.setObjective(objective);
-      for (int i = 0; i < rhoJacobianHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(segmentNumber).get(i));
-         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
       }
 
       return objectiveToPack;
@@ -404,10 +400,9 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
-      for (int i = 0; i < rhoJacobianHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         objectiveToPack.addRhoToForceMatrixHelper(rhoJacobianHelperPool.get(segmentNumber).get(i));
-         objectiveToPack.addJacobianMatrixHelper(coefficientJacobianHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
       }
 
       return objectiveToPack;
@@ -431,15 +426,16 @@ public class CoMTrajectoryModelPredictiveController
       }
 
       DMatrixRMaj fullCoefficientMatrix = qpSolver.getSolution();
-      for (int sequence = 0; sequence < rhoJacobianHelperPool.size(); sequence++)
+      // FIXME do something here
+      for (int sequence = 0; sequence < contactPlaneHelperPool.size(); sequence++)
       {
          int rhoNumber = indexHandler.getRhoCoefficientStartIndex(sequence);
 
-         for (int contact = 0; contact < rhoJacobianHelperPool.get(sequence).size(); contact++)
+         for (int contact = 0; contact < contactPlaneHelperPool.get(sequence).size(); contact++)
          {
-            ContactStateMagnitudeToForceMatrixHelper rhoJacobianHelper = rhoJacobianHelperPool.get(sequence).get(contact);
-            rhoJacobianHelper.computeContactForceCoefficientMatrix(fullCoefficientMatrix, rhoNumber);
-            rhoNumber += rhoJacobianHelper.getRhoSize() * MPCIndexHandler.coefficientsPerRho;
+            ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(sequence).get(contact);
+            contactPlaneHelper.computeContactForceCoefficientMatrix(fullCoefficientMatrix, rhoNumber);
+            rhoNumber += contactPlaneHelper.getRhoSize() * MPCIndexHandler.coefficientsPerRho;
          }
       }
 
@@ -455,26 +451,26 @@ public class CoMTrajectoryModelPredictiveController
          yCoefficientVector.set(vectorStart + 5, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
          zCoefficientVector.set(vectorStart + 5, 0, fullCoefficientMatrix.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
 
-         for (int contactIdx = 0; contactIdx < rhoJacobianHelperPool.get(i).size(); contactIdx++)
+         for (int contactIdx = 0; contactIdx < contactPlaneHelperPool.get(i).size(); contactIdx++)
          {
-            ContactStateMagnitudeToForceMatrixHelper rhoJacobianHelper = rhoJacobianHelperPool.get(i).get(contactIdx);
-            DMatrixRMaj contactForceMatrix = rhoJacobianHelper.getContactWrenchCoefficientMatrix();
+            ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(i).get(contactIdx);
+            DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
 
-            xCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(0, 0));
-            yCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(1, 0));
-            zCoefficientVector.add(vectorStart, 0, contactForceMatrix.get(2, 0));
+            xCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(0, 0));
+            yCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(1, 0));
+            zCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(2, 0));
 
-            xCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(0, 1));
-            yCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(1, 1));
-            zCoefficientVector.add(vectorStart + 1, 0, contactForceMatrix.get(2, 1));
+            xCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
+            yCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
+            zCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
 
-            xCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(0, 2));
-            yCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(1, 2));
-            zCoefficientVector.add(vectorStart + 2, 0, contactForceMatrix.get(2, 2));
+            xCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
+            yCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
+            zCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
 
-            xCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(0, 3));
-            yCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(1, 3));
-            zCoefficientVector.add(vectorStart + 3, 0, contactForceMatrix.get(2, 3));
+            xCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
+            yCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
+            zCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
          }
 
          // TODO for the time squared coefficient, add in gravity
@@ -712,6 +708,15 @@ public class CoMTrajectoryModelPredictiveController
     * {@inheritDoc}
     */
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
+   {
+      this.initialCoMPosition.setMatchingFrame(centerOfMassPosition);
+      this.initialCoMVelocity.setMatchingFrame(centerOfMassVelocity);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
       this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);

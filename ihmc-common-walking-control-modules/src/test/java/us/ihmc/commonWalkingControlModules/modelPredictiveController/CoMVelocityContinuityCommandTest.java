@@ -33,6 +33,8 @@ public class CoMVelocityContinuityCommandTest
       ContactStateMagnitudeToForceMatrixHelper rhoHelper1 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactStateMagnitudeToForceMatrixHelper rhoHelper2 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -46,6 +48,8 @@ public class CoMVelocityContinuityCommandTest
 
       rhoHelper1.computeMatrices(contactPolygon, contactPose1, 1e-8, 1e-10, mu);
       rhoHelper2.computeMatrices(contactPolygon, contactPose2, 1e-8, 1e-10, mu);
+      contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose1, mu);
+      contactPlaneHelper2.computeBasisVectors(contactPolygon, contactPose2, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
@@ -56,10 +60,8 @@ public class CoMVelocityContinuityCommandTest
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
-      command.addFirstSegmentRhoToForceMatrixHelper(rhoHelper1);
-      command.addSecondSegmentRhoToForceMatrixHelper(rhoHelper2);
-      command.addFirstSegmentJacobianMatrixHelper(helper);
-      command.addSecondSegmentJacobianMatrixHelper(helper);
+      command.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
+      command.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
 
       double regularization = 1e-5;
       solver.initialize();

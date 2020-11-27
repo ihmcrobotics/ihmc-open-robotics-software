@@ -38,6 +38,7 @@ public class VRPPositionCommandTest
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -45,6 +46,7 @@ public class VRPPositionCommandTest
       FramePose3D contactPose = new FramePose3D();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
+      contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
@@ -57,8 +59,7 @@ public class VRPPositionCommandTest
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
-      command.addRhoToForceMatrixHelper(rhoHelper);
-      command.addJacobianMatrixHelper(helper);
+      command.addContactPlaneHelper(contactPlaneHelper);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -84,6 +85,7 @@ public class VRPPositionCommandTest
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 
+      helper.computeMatrices(timeOfConstraint, omega);
       CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
       CommonOps_DDRM.multAdd(-1.0 / omega2, helper.getAccelerationJacobianMatrix(), rhoSolution, rhoValueVector);
 
