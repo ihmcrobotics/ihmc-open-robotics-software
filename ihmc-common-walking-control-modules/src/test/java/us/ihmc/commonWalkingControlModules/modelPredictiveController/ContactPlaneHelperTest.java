@@ -35,7 +35,7 @@ public class ContactPlaneHelperTest
             DMatrixRMaj jacobianExpected = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
             CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getJacobianMatrix(i), jacobianExpected);
 
-            EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getJacobian(i), 1e-5);
+            EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearJacobian(i), 1e-5);
          }
       }
    }
@@ -63,7 +63,7 @@ public class ContactPlaneHelperTest
          DMatrixRMaj jacobianExpected = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
          CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getPositionJacobianMatrix(), jacobianExpected);
 
-         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getPositionJacobian(), 1e-5);
+         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearPositionJacobian(), 1e-5);
       }
    }
 }

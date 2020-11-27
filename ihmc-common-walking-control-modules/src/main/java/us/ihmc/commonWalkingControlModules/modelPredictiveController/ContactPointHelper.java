@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -35,10 +34,16 @@ public class ContactPointHelper
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
-   private final DMatrixRMaj positionJacobianMatrix;
-   private final DMatrixRMaj velocityJacobianMatrix;
-   private final DMatrixRMaj accelerationJacobianMatrix;
-   private final DMatrixRMaj jerkJacobianMatrix;
+   private final DMatrixRMaj linearPositionJacobianMatrix;
+   private final DMatrixRMaj linearVelocityJacobianMatrix;
+   private final DMatrixRMaj linearAccelerationJacobianMatrix;
+   private final DMatrixRMaj linearJerkJacobianMatrix;
+
+   private final DMatrixRMaj rhoMagnitudeJacobianMatrix;
+   private final DMatrixRMaj rhoRateJacobianMatrix;
+   private final DMatrixRMaj rhoAccelerationJacobianMatrix;
+   private final DMatrixRMaj rhoJerkJacobianMatrix;
+
    private final DMatrixRMaj accelerationIntegrationHessian;
    private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
@@ -61,10 +66,16 @@ public class ContactPointHelper
       totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, this.numberOfBasisVectorsPerContactPoint);
       linearJacobianInWorldFrame = new DMatrixRMaj(3, this.numberOfBasisVectorsPerContactPoint);
 
-      positionJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      velocityJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      accelerationJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      jerkJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
+      linearPositionJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
+      linearVelocityJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
+      linearAccelerationJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
+      linearJerkJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
+
+      rhoMagnitudeJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
+      rhoRateJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
+      rhoAccelerationJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
+      rhoJerkJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
+
       accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
       accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
@@ -74,6 +85,11 @@ public class ContactPointHelper
          basisVectors[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
          basisVectorsOrigin[i] = new FramePoint3D(ReferenceFrame.getWorldFrame());
       }
+   }
+
+   public void setMaxNormalForce(double maxNormalForce)
+   {
+      this.maxContactForce = maxNormalForce;
    }
 
    public int getRhoSize()
@@ -107,6 +123,8 @@ public class ContactPointHelper
 
       int rhoIndex = 0;
 
+      double maxRhoZ = maxContactForce / numberOfBasisVectorsPerContactPoint;
+
       // rotate each friction cone approximation to point one vector towards the center of the foot
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
@@ -116,7 +134,7 @@ public class ContactPointHelper
          basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
          computeBasisVector(basisVectorIndex, rotationOffset, normalContactVectorRotationMatrix, basisVector, mu);
 
-         rhoMaxMatrix.set(rhoIndex, 0, basisVector.getZ() * maxContactForce / numberOfBasisVectorsPerContactPoint);
+         rhoMaxMatrix.set(rhoIndex, 0, maxRhoZ / basisVector.getZ());
 
          rhoIndex++;
       }
@@ -131,10 +149,10 @@ public class ContactPointHelper
 
       timeOfContact = time;
 
-      positionJacobianMatrix.zero();
-      velocityJacobianMatrix.zero();
-      accelerationJacobianMatrix.zero();
-      jerkJacobianMatrix.zero();
+      linearPositionJacobianMatrix.zero();
+      linearVelocityJacobianMatrix.zero();
+      linearAccelerationJacobianMatrix.zero();
+      linearJerkJacobianMatrix.zero();
 
       double t2 = timeOfContact * timeOfContact;
       double t3 = timeOfContact * t2;
@@ -151,46 +169,164 @@ public class ContactPointHelper
       double fourthVelocityCoefficient = 2 * timeOfContact;
       double thirdAccelerationCoefficient = 6 * timeOfContact;
 
-      positionJacobianMatrix.zero();
-      velocityJacobianMatrix.zero();
-      accelerationJacobianMatrix.zero();
-      jerkJacobianMatrix.zero();
+      rhoMagnitudeJacobianMatrix.zero();
+      rhoRateJacobianMatrix.zero();
+      rhoAccelerationJacobianMatrix.zero();
+      rhoJerkJacobianMatrix.zero();
+
+      linearPositionJacobianMatrix.zero();
+      linearVelocityJacobianMatrix.zero();
+      linearAccelerationJacobianMatrix.zero();
+      linearJerkJacobianMatrix.zero();
 
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
          int startColumn = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
          FrameVector3DReadOnly basisVector = basisVectors[basisVectorIndex];
 
+         rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn, positiveExponential);
+         rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 1, negativeExponential);
+
+         rhoRateJacobianMatrix.set(basisVectorIndex, startColumn, firstVelocityCoefficient);
+         rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondVelocityCoefficient);
+
+         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn, firstAccelerationCoefficient);
+         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondAccelerationCoefficient);
+         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 3, 2.0);
+
+         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn, firstJerkCoefficient);
+         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondJerkCoefficient);
+         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn + 2, 6.0);
+
+         if (setTimeCoefficients)
+         {
+            rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 2, t3);
+            rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 3, t2);
+
+            rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 2, thirdVelocityCoefficient);
+            rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 3, fourthVelocityCoefficient);
+
+            rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 2, thirdAccelerationCoefficient);
+         }
+
          for (int ordinal = 0; ordinal < 3; ordinal++)
          {
-            positionJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * positiveExponential);
-            positionJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * negativeExponential);
+            linearPositionJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * positiveExponential);
+            linearPositionJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * negativeExponential);
 
-            velocityJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstVelocityCoefficient);
-            velocityJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondVelocityCoefficient);
+            linearVelocityJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstVelocityCoefficient);
+            linearVelocityJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondVelocityCoefficient);
 
-            accelerationJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstAccelerationCoefficient);
-            accelerationJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondAccelerationCoefficient);
-            accelerationJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * 2.0);
+            linearAccelerationJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstAccelerationCoefficient);
+            linearAccelerationJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondAccelerationCoefficient);
+            linearAccelerationJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * 2.0);
 
-            jerkJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstJerkCoefficient);
-            jerkJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondJerkCoefficient);
-            jerkJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * 6.0);
+            linearJerkJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstJerkCoefficient);
+            linearJerkJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondJerkCoefficient);
+            linearJerkJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * 6.0);
 
             if (setTimeCoefficients)
             {
-               positionJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * t3);
-               positionJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * t2);
+               linearPositionJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * t3);
+               linearPositionJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * t2);
 
-               velocityJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdVelocityCoefficient);
-               velocityJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthVelocityCoefficient);
+               linearVelocityJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdVelocityCoefficient);
+               linearVelocityJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthVelocityCoefficient);
 
-               accelerationJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdAccelerationCoefficient);
+               linearAccelerationJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdAccelerationCoefficient);
             }
          }
       }
 
       timeOfContact = time;
+   }
+
+   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValue)
+   {
+      double positiveExponential = Math.exp(omega * duration);
+      double positiveExponential2 = positiveExponential * positiveExponential;
+      double negativeExponential = 1.0 / positiveExponential;
+      double negativeExponential2 = negativeExponential * negativeExponential;
+      double duration2 = duration * duration;
+      double duration3 = duration * duration2;
+      double omega2 = omega * omega;
+      double omega3 = omega * omega2;
+      double omega4 = omega2 * omega2;
+      double c00 = omega3 / 2.0 * (positiveExponential2 - 1.0);
+      double c01 = omega4 * duration;
+      double c02 = 6.0 * (positiveExponential * (omega * duration - 1.0) + 1.0);
+      double c03 = 2.0 * omega * (positiveExponential - 1.0);
+      double c11 = -omega3 / 2.0 * (negativeExponential2 - 1.0);
+      double c12 = -6.0 * (negativeExponential * (omega * duration + 1.0) - 1.0);
+      double c13 = -2.0 * omega * (negativeExponential - 1.0);
+      double c22 = 12.0 * duration3;
+      double c23 = 6.0 * duration2;
+      double c33 = 4.0 * duration;
+
+      double g0 = omega * (positiveExponential - 1.0) * goalValue;
+      double g1 = -omega * (negativeExponential - 1.0) * goalValue;
+      double g2 = 3.0 * duration2 * goalValue;
+      double g3 = 2.0 * duration * goalValue;
+
+      for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
+      {
+         int startIdx = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
+
+         accelerationIntegrationHessian.set(startIdx, startIdx, c00);
+         accelerationIntegrationHessian.set(startIdx, startIdx + 1, c01);
+         accelerationIntegrationHessian.set(startIdx, startIdx + 2, c02);
+         accelerationIntegrationHessian.set(startIdx, startIdx + 2, c03);
+         accelerationIntegrationHessian.set(startIdx + 1, startIdx, c01);
+         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 1, c11);
+         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 2, c12);
+         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 3, c13);
+         accelerationIntegrationHessian.set(startIdx + 2, startIdx, c02);
+         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 1, c12);
+         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 2, c22);
+         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 3, c23);
+         accelerationIntegrationHessian.set(startIdx + 3, startIdx, c03);
+         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 1, c13);
+         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 2, c23);
+         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 3, c33);
+
+         accelerationIntegrationGradient.set(startIdx, 0, g0);
+         accelerationIntegrationGradient.set(startIdx + 1, 0, g1);
+         accelerationIntegrationGradient.set(startIdx + 2, 0, g2);
+         accelerationIntegrationGradient.set(startIdx + 3, 0, g3);
+      }
+   }
+
+   public void computeJerkIntegrationMatrix(double duration, double omega)
+   {
+      double positiveExponential = Math.exp(omega * duration);
+      double positiveExponential2 = positiveExponential * positiveExponential;
+      double negativeExponential = 1.0 / positiveExponential;
+      double negativeExponential2 = negativeExponential * negativeExponential;
+      double omega2 = omega * omega;
+      double omega3 = omega * omega2;
+      double omega5 = omega2 * omega3;
+      double omega6 = omega3 * omega3;
+      double c00 = omega5 / 2.0 * (positiveExponential2 - 1.0);
+      double c01 = omega6 * duration;
+      double c02 = 6.0 * omega2 * (positiveExponential - 1.0);
+      double c11 = -omega5 / 2.0 * (negativeExponential2 - 1.0);
+      double c12 = 6.0 * omega2 * (negativeExponential - 1.0);
+      double c22 = 36.0 * duration;
+
+      for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
+      {
+         int startColumn = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
+
+         jerkIntegrationHessian.set(startColumn, startColumn, c00);
+         jerkIntegrationHessian.set(startColumn, startColumn + 1, c01);
+         jerkIntegrationHessian.set(startColumn, startColumn + 2, c02);
+         jerkIntegrationHessian.set(startColumn + 1, startColumn, c01);
+         jerkIntegrationHessian.set(startColumn + 1, startColumn + 1, c11);
+         jerkIntegrationHessian.set(startColumn + 1, startColumn + 2, c12);
+         jerkIntegrationHessian.set(startColumn + 2, startColumn, c02);
+         jerkIntegrationHessian.set(startColumn + 2, startColumn + 1, c12);
+         jerkIntegrationHessian.set(startColumn + 2, startColumn + 2, c22);
+      }
    }
 
    private final FrameVector3D contactNormalVector = new FrameVector3D();
@@ -215,7 +351,11 @@ public class ContactPointHelper
       }
    }
 
-   private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack, double mu)
+   private void computeBasisVector(int basisVectorIndex,
+                                   double rotationOffset,
+                                   RotationMatrix normalContactVectorRotationMatrix,
+                                   FrameVector3D basisVectorToPack,
+                                   double mu)
    {
       double angle = rotationOffset + basisVectorIndex * basisVectorAngleIncrement;
 
@@ -245,40 +385,98 @@ public class ContactPointHelper
       }
    }
 
-   public DMatrixRMaj getJacobian(int derivativeOrder)
+   public DMatrixRMaj getLinearJacobian(int derivativeOrder)
    {
       switch (derivativeOrder)
       {
          case 0:
-            return getPositionJacobian();
+            return getLinearPositionJacobian();
          case 1:
-            return getVelocityJacobian();
+            return getLinearVelocityJacobian();
          case 2:
-            return getAccelerationJacobian();
+            return getLinearAccelerationJacobian();
          case 3:
-            return getJerkJacobian();
+            return getLinearJerkJacobian();
          default:
             throw new IllegalArgumentException("Derivative order must be less than 4.");
       }
    }
 
-   public DMatrixRMaj getPositionJacobian()
+   public DMatrixRMaj getRhoJacobian(int derivativeOrder)
    {
-      return positionJacobianMatrix;
+      switch (derivativeOrder)
+      {
+         case 0:
+            return getRhoMagnitudeJacobian();
+         case 1:
+            return getRhoRateJacobian();
+         case 2:
+            return getRhoAccelerationJacobian();
+         case 3:
+            return getRhoJerkJacobian();
+         default:
+            throw new IllegalArgumentException("Derivative order must be less than 4.");
+      }
    }
 
-   public DMatrixRMaj getVelocityJacobian()
+   public DMatrixRMaj getRhoMaxMatrix()
    {
-      return velocityJacobianMatrix;
+      return rhoMaxMatrix;
    }
 
-   public DMatrixRMaj getAccelerationJacobian()
+   public DMatrixRMaj getLinearPositionJacobian()
    {
-      return accelerationJacobianMatrix;
+      return linearPositionJacobianMatrix;
    }
 
-   public DMatrixRMaj getJerkJacobian()
+   public DMatrixRMaj getLinearVelocityJacobian()
    {
-      return jerkJacobianMatrix;
+      return linearVelocityJacobianMatrix;
+   }
+
+   public DMatrixRMaj getLinearAccelerationJacobian()
+   {
+      return linearAccelerationJacobianMatrix;
+   }
+
+   public DMatrixRMaj getLinearJerkJacobian()
+   {
+      return linearJerkJacobianMatrix;
+   }
+
+
+   public DMatrixRMaj getRhoMagnitudeJacobian()
+   {
+      return rhoMagnitudeJacobianMatrix;
+   }
+
+   public DMatrixRMaj getRhoRateJacobian()
+   {
+      return rhoRateJacobianMatrix;
+   }
+
+   public DMatrixRMaj getRhoAccelerationJacobian()
+   {
+      return rhoAccelerationJacobianMatrix;
+   }
+
+   public DMatrixRMaj getRhoJerkJacobian()
+   {
+      return rhoJerkJacobianMatrix;
+   }
+
+   public DMatrixRMaj getAccelerationIntegrationHessian()
+   {
+      return accelerationIntegrationHessian;
+   }
+
+   public DMatrixRMaj getAccelerationIntegrationGradient()
+   {
+      return accelerationIntegrationGradient;
+   }
+
+   public DMatrixRMaj getJerkIntegrationHessian()
+   {
+      return jerkIntegrationHessian;
    }
 }
