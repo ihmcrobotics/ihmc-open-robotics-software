@@ -51,7 +51,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(contactPose.getPosition());
       initialCoM.setZ(nominalHeight);
 
-      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D());
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0, 0.0);
 
@@ -173,7 +173,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D finalDCM = new FramePoint3D(contactPose2.getPosition());
       finalDCM.setZ(nominalHeight);
 
-      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D());
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0, 0.0);
 
@@ -297,7 +297,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(contactPose.getPosition());
       initialCoM.setZ(nominalHeight);
 
-      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D());
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0, 0.0);
 

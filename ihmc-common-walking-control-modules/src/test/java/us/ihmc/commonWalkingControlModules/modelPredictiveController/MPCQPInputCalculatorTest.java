@@ -29,6 +29,7 @@ public class MPCQPInputCalculatorTest
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
@@ -62,6 +63,9 @@ public class MPCQPInputCalculatorTest
       {
          helper.reshape(contact.getNumberOfContactPointsInPlane(0));
          helper.computeMatrices(time, omega);
+
+         contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+         contactPlaneHelper.computeJacobians(time, omega);
 
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
@@ -107,16 +111,14 @@ public class MPCQPInputCalculatorTest
          FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
          CoMPositionCommand comPositionCommand = new CoMPositionCommand();
-         comPositionCommand.addJacobianMatrixHelper(helper);
-         comPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comPositionCommand.addContactPlaneHelper(contactPlaneHelper);
          comPositionCommand.setOmega(omega);
          comPositionCommand.setSegmentNumber(0);
          comPositionCommand.setTimeOfObjective(time);
          comPositionCommand.setObjective(comPositionObjective);
 
          CoMVelocityCommand comVelocityCommand = new CoMVelocityCommand();
-         comVelocityCommand.addJacobianMatrixHelper(helper);
-         comVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
          comVelocityCommand.setOmega(omega);
          comVelocityCommand.setSegmentNumber(0);
          comVelocityCommand.setTimeOfObjective(time);
@@ -150,6 +152,7 @@ public class MPCQPInputCalculatorTest
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
@@ -178,6 +181,9 @@ public class MPCQPInputCalculatorTest
 
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
+         contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+         contactPlaneHelper.computeJacobians(time, omega);
+
          DMatrixRMaj rhoMagnitudesJacobian = MPCTestHelper.getCoMPositionJacobian(time, omega, rhoHelper);
          DMatrixRMaj rhoRatesJacobian = MPCTestHelper.getCoMVelocityJacobian(time, omega, rhoHelper);
 
@@ -194,16 +200,14 @@ public class MPCQPInputCalculatorTest
          FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
          CoMPositionCommand comPositionCommand = new CoMPositionCommand();
-         comPositionCommand.addJacobianMatrixHelper(helper);
-         comPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comPositionCommand.addContactPlaneHelper(contactPlaneHelper);
          comPositionCommand.setOmega(omega);
          comPositionCommand.setSegmentNumber(1);
          comPositionCommand.setTimeOfObjective(time);
          comPositionCommand.setObjective(comPositionObjective);
 
          CoMVelocityCommand comVelocityCommand = new CoMVelocityCommand();
-         comVelocityCommand.addJacobianMatrixHelper(helper);
-         comVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
+         comVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
          comVelocityCommand.setOmega(omega);
          comVelocityCommand.setSegmentNumber(1);
          comVelocityCommand.setTimeOfObjective(time);
@@ -239,6 +243,7 @@ public class MPCQPInputCalculatorTest
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
@@ -274,6 +279,9 @@ public class MPCQPInputCalculatorTest
          helper.computeMatrices(time, omega);
 
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+         contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+         contactPlaneHelper.computeJacobians(time, omega);
 
          DMatrixRMaj rhoMagnitudesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
          DMatrixRMaj rhoRatesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
@@ -322,16 +330,14 @@ public class MPCQPInputCalculatorTest
          FrameVector3D dcmVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
          DCMPositionCommand dcmPositionCommand = new DCMPositionCommand();
-         dcmPositionCommand.addJacobianMatrixHelper(helper);
-         dcmPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
+         dcmPositionCommand.addContactPlaneHelper(contactPlaneHelper);
          dcmPositionCommand.setOmega(omega);
          dcmPositionCommand.setSegmentNumber(0);
          dcmPositionCommand.setTimeOfObjective(time);
          dcmPositionCommand.setObjective(dcmPositionObjective);
 
          DCMVelocityCommand dcmVelocityCommand = new DCMVelocityCommand();
-         dcmVelocityCommand.addJacobianMatrixHelper(helper);
-         dcmVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
+         dcmVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
          dcmVelocityCommand.setOmega(omega);
          dcmVelocityCommand.setSegmentNumber(0);
          dcmVelocityCommand.setTimeOfObjective(time);
@@ -367,6 +373,7 @@ public class MPCQPInputCalculatorTest
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
@@ -402,6 +409,9 @@ public class MPCQPInputCalculatorTest
          helper.computeMatrices(time, omega);
 
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+         contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+         contactPlaneHelper.computeJacobians(time, omega);
 
          DMatrixRMaj rhoMagnitudesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
          DMatrixRMaj rhoRatesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
@@ -456,16 +466,14 @@ public class MPCQPInputCalculatorTest
          FrameVector3D vrpVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
          VRPPositionCommand vrpPositionCommand = new VRPPositionCommand();
-         vrpPositionCommand.addJacobianMatrixHelper(helper);
-         vrpPositionCommand.addRhoToForceMatrixHelper(rhoHelper);
+         vrpPositionCommand.addContactPlaneHelper(contactPlaneHelper);
          vrpPositionCommand.setOmega(omega);
          vrpPositionCommand.setSegmentNumber(0);
          vrpPositionCommand.setTimeOfObjective(time);
          vrpPositionCommand.setObjective(vrpPositionObjective);
 
          VRPVelocityCommand vrpVelocityCommand = new VRPVelocityCommand();
-         vrpVelocityCommand.addJacobianMatrixHelper(helper);
-         vrpVelocityCommand.addRhoToForceMatrixHelper(rhoHelper);
+         vrpVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
          vrpVelocityCommand.setOmega(omega);
          vrpVelocityCommand.setSegmentNumber(0);
          vrpVelocityCommand.setTimeOfObjective(time);

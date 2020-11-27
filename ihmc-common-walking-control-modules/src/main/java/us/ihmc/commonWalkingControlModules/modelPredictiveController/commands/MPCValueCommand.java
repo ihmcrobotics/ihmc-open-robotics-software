@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
@@ -13,8 +10,7 @@ import java.util.List;
 public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
 {
    private final FramePoint3D objective = new FramePoint3D();
-   private final List<CoefficientJacobianMatrixHelper> jacobianMatrixHelpers = new ArrayList<>();
-   private final List<ContactStateMagnitudeToForceMatrixHelper> rhoToForceMatrixHelpers = new ArrayList<>();
+   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
 
    private int segmentNumber;
    private double timeOfObjective;
@@ -32,8 +28,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
 
    public void clear()
    {
-      rhoToForceMatrixHelpers.clear();
-      jacobianMatrixHelpers.clear();
+      contactPlaneHelpers.clear();
    }
 
    public void setWeight(double weight)
@@ -41,14 +36,9 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       this.weight = weight;
    }
 
-   public void addRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper helper)
+   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
    {
-      rhoToForceMatrixHelpers.add(helper);
-   }
-
-   public void addJacobianMatrixHelper(CoefficientJacobianMatrixHelper jacobianMatrixHelper)
-   {
-      jacobianMatrixHelpers.add(jacobianMatrixHelper);
+      this.contactPlaneHelpers.add(contactPlaneHelper);
    }
 
    public void setObjective(FrameTuple3DReadOnly objective)
@@ -96,18 +86,13 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       return objective;
    }
 
-   public CoefficientJacobianMatrixHelper getCoefficientJacobianMatrixHelper(int i)
-   {
-      return jacobianMatrixHelpers.get(i);
-   }
-
    public int getNumberOfContacts()
    {
-      return rhoToForceMatrixHelpers.size();
+      return contactPlaneHelpers.size();
    }
 
-   public ContactStateMagnitudeToForceMatrixHelper getRhoToForceMatrixHelper(int i)
+   public ContactPlaneHelper getContactPlaneHelper(int i)
    {
-      return rhoToForceMatrixHelpers.get(i);
+      return contactPlaneHelpers.get(i);
    }
 }

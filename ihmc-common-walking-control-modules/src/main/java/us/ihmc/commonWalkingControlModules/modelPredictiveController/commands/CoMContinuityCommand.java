@@ -1,20 +1,14 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCommand>
 {
-   private final List<CoefficientJacobianMatrixHelper> firstSegmentJacobianMatrixHelpers = new ArrayList<>();
-   private final List<CoefficientJacobianMatrixHelper> secondSegmentJacobianMatrixHelpers = new ArrayList<>();
-
-   private final List<ContactStateMagnitudeToForceMatrixHelper> firstRhoToForceMatrixHelpers = new ArrayList<>();
-   private final List<ContactStateMagnitudeToForceMatrixHelper> secondRhoToForceMatrixHelpers = new ArrayList<>();
+   private final List<ContactPlaneHelper> firstSegmentContactPlaneHelpers = new ArrayList<>();
+   private final List<ContactPlaneHelper> secondSegmentContactPlaneHelpers = new ArrayList<>();
 
    private int firstSegmentNumber;
    private double firstSegmentDuration;
@@ -30,31 +24,18 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
 
    public void clear()
    {
-      firstSegmentJacobianMatrixHelpers.clear();
-      secondSegmentJacobianMatrixHelpers.clear();
-
-      firstRhoToForceMatrixHelpers.clear();
-      secondRhoToForceMatrixHelpers.clear();
+      firstSegmentContactPlaneHelpers.clear();
+      secondSegmentContactPlaneHelpers.clear();
    }
 
-   public void addFirstSegmentRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper firstRhoToForceMatrixHelper)
+   public void addFirstSegmentContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
    {
-      firstRhoToForceMatrixHelpers.add(firstRhoToForceMatrixHelper);
+      firstSegmentContactPlaneHelpers.add(contactPlaneHelper);
    }
 
-   public void addSecondSegmentRhoToForceMatrixHelper(ContactStateMagnitudeToForceMatrixHelper secondRhoToForceMatrixHelper)
+   public void addSecondSegmentContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
    {
-      secondRhoToForceMatrixHelpers.add(secondRhoToForceMatrixHelper);
-   }
-
-   public void addFirstSegmentJacobianMatrixHelper(CoefficientJacobianMatrixHelper firstSegmentJacobianMatrixHelper)
-   {
-      firstSegmentJacobianMatrixHelpers.add(firstSegmentJacobianMatrixHelper);
-   }
-
-   public void addSecondSegmentJacobianMatrixHelper(CoefficientJacobianMatrixHelper secondSegmentJacobianMatrixHelper)
-   {
-      secondSegmentJacobianMatrixHelpers.add(secondSegmentJacobianMatrixHelper);
+      secondSegmentContactPlaneHelpers.add(contactPlaneHelper);
    }
 
    public void setFirstSegmentNumber(int firstSegmentNumber)
@@ -99,31 +80,21 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
 
    public int getFirstSegmentNumberOfContacts()
    {
-      return firstRhoToForceMatrixHelpers.size();
+      return firstSegmentContactPlaneHelpers.size();
    }
 
-   public CoefficientJacobianMatrixHelper getFirstSegmentCoefficientJacobianMatrixHelper(int i)
+   public ContactPlaneHelper getFirstSegmentContactPlaneHelper(int i)
    {
-      return firstSegmentJacobianMatrixHelpers.get(i);
-   }
-
-   public ContactStateMagnitudeToForceMatrixHelper getFirstSegmentRhoToForceMatrixHelper(int i)
-   {
-      return firstRhoToForceMatrixHelpers.get(i);
+      return firstSegmentContactPlaneHelpers.get(i);
    }
 
    public int getSecondSegmentNumberOfContacts()
    {
-      return secondRhoToForceMatrixHelpers.size();
+      return secondSegmentContactPlaneHelpers.size();
    }
 
-   public CoefficientJacobianMatrixHelper getSecondSegmentCoefficientJacobianMatrixHelper(int i)
+   public ContactPlaneHelper getSecondSegmentContactPlaneHelper(int i )
    {
-      return secondSegmentJacobianMatrixHelpers.get(i);
-   }
-
-   public ContactStateMagnitudeToForceMatrixHelper getSecondSegmentRhoToForceMatrixHelper(int i)
-   {
-      return secondRhoToForceMatrixHelpers.get(i);
+      return secondSegmentContactPlaneHelpers.get(i);
    }
 }
