@@ -5,6 +5,11 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
  */
 public interface BehaviorTreeNode
 {
+   default double evaluateUtility()
+   {
+      return 1.0;
+   }
+
    BehaviorTreeNodeStatus tick();
 
    public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
