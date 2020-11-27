@@ -35,6 +35,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -457,7 +458,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ValkyrieSensorSuiteManager getSensorSuiteManager()
+   public ValkyrieSensorSuiteManager getSensorSuiteManager(PubSubImplementation pubSubImplementation)
    {
       if (sensorSuiteManager == null)
       {
@@ -467,7 +468,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getROSClockCalculator(),
                                                              getSensorInformation(),
                                                              getJointMap(),
-                                                             target);
+                                                             target,
+                                                             pubSubImplementation);
       }
       return sensorSuiteManager;
    }

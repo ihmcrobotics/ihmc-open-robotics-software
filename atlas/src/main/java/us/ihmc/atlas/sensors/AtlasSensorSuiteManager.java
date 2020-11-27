@@ -34,7 +34,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
+   private final ROS2Node ros2Node;
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;
@@ -66,7 +66,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   HumanoidRobotSensorInformation sensorInformation,
                                   DRCRobotJointMap jointMap,
                                   RobotPhysicalProperties physicalProperties,
-                                  RobotTarget targetDeployment)
+                                  RobotTarget targetDeployment,
+                                  PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -74,6 +75,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
+
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_atlas_sensor_suite_node");
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)
