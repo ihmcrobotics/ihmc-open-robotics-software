@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,7 +15,7 @@ import java.util.List;
 
 public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCommand>
 {
-   private final List<CoefficientJacobianMatrixHelper> jacobianMatrixHelpers = new ArrayList<>();
+   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
 
    private int segmentNumber;
    private double timeOfObjective;
@@ -22,15 +24,17 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    private ConstraintType constraintType;
 
    private double objective = 0.0;
+   private final DMatrixRMaj objectiveVector = new DMatrixRMaj(0, 0);
+   private boolean useScalarObjective = true;
 
    public void clear()
    {
-      jacobianMatrixHelpers.clear();
+      contactPlaneHelpers.clear();
    }
 
-   public void addCoefficientJacobianMatrixHelper(CoefficientJacobianMatrixHelper jacobianMatrixHelper)
+   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
    {
-      this.jacobianMatrixHelpers.add(jacobianMatrixHelper);
+      this.contactPlaneHelpers.add(contactPlaneHelper);
    }
 
    public void setConstraintType(ConstraintType constraintType)
@@ -53,9 +57,14 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       this.omega = omega;
    }
 
-   public void setObjective(double objective)
+   public void setScalarObjective(double objective)
    {
       this.objective = objective;
+   }
+
+   public void setUseScalarObjective(boolean useScalarObjective)
+   {
+      this.useScalarObjective = useScalarObjective;
    }
 
    public ConstraintType getConstraintType()
@@ -78,19 +87,29 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       return omega;
    }
 
-   public double getObjective()
+   public boolean getUseScalarObjective()
+   {
+      return useScalarObjective;
+   }
+
+   public double getScalarObjective()
    {
       return objective;
    }
 
-   public CoefficientJacobianMatrixHelper getCoefficientJacobianMatrixHelper(int i)
+   public DMatrixRMaj getObjectiveVector()
    {
-      return jacobianMatrixHelpers.get(i);
+      return objectiveVector;
+   }
+
+   public ContactPlaneHelper getContactPlaneHelper(int i)
+   {
+      return contactPlaneHelpers.get(i);
    }
 
    public int getNumberOfContacts()
    {
-      return jacobianMatrixHelpers.size();
+      return contactPlaneHelpers.size();
    }
 
    @Override

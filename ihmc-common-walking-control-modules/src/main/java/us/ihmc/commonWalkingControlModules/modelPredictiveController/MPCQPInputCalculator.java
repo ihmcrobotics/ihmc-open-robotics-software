@@ -50,7 +50,7 @@ public class MPCQPInputCalculator
          ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
          contactPlaneHelper.computeJacobians(firstSegmentDuration, omega);
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, contactPlaneHelper.getJacobian(objective.getDerivativeOrder()), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -60,7 +60,7 @@ public class MPCQPInputCalculator
          ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
          contactPlaneHelper.computeJacobians(0.0, omega);
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, contactPlaneHelper.getJacobian(objective.getDerivativeOrder()), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0);
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -109,7 +109,7 @@ public class MPCQPInputCalculator
          ContactPlaneHelper contactPlaneHelper = objective.getContactPlaneHelper(i);
          contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
-         DMatrixRMaj jacobian = contactPlaneHelper.getJacobian(objective.getDerivativeOrder());
+         DMatrixRMaj jacobian = contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder());
 
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, jacobian, 0, 0, jacobian.getNumRows(), jacobian.getNumCols(), 1.0);
          startCol += jacobian.getNumCols();
@@ -154,7 +154,7 @@ public class MPCQPInputCalculator
          contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
          tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getJacobian(objectiveOrder), 1.0 / omega, contactPlaneHelper.getJacobian(objectiveHigherOrder), tempCoefficientJacobian);
+         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objectiveOrder), 1.0 / omega, contactPlaneHelper.getLinearJacobian(objectiveHigherOrder), tempCoefficientJacobian);
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
 
          startCol += contactPlaneHelper.getCoefficientSize();
@@ -197,9 +197,9 @@ public class MPCQPInputCalculator
          contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
          tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getJacobian(objective.getDerivativeOrder()),
+         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
                             -1.0 / omega2,
-                            contactPlaneHelper.getJacobian(objective.getDerivativeOrder() + 2),
+                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
                             tempCoefficientJacobian);
 
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
@@ -222,8 +222,7 @@ public class MPCQPInputCalculator
 
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
-         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = command.getCoefficientJacobianMatrixHelper(i);
-         problemSize += coefficientJacobianMatrixHelper.getRhoSize();
+         problemSize += command.getContactPlaneHelper(i).getRhoSize();
       }
 
       if (problemSize < 1)
@@ -236,27 +235,35 @@ public class MPCQPInputCalculator
       double omega = command.getOmega();
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      int startRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
-         CoefficientJacobianMatrixHelper coefficientJacobianMatrixHelper = command.getCoefficientJacobianMatrixHelper(i);
-         coefficientJacobianMatrixHelper.computeMatrices(timeOfObjective, omega);
+         ContactPlaneHelper contactPlaneHelper = command.getContactPlaneHelper(i);
+         contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                    0,
+                                    startRow,
                                     startCol,
-                                    coefficientJacobianMatrixHelper.getJacobianMatrix(2),
+                                    contactPlaneHelper.getRhoAccelerationJacobian(),
                                     0,
                                     0,
-                                    problemSize,
-                                    coefficientJacobianMatrixHelper.getCoefficientSize(),
+                                    contactPlaneHelper.getRhoSize(),
+                                    contactPlaneHelper.getCoefficientSize(),
                                     1.0);
-         startCol += coefficientJacobianMatrixHelper.getCoefficientSize();
+         startRow += contactPlaneHelper.getRhoSize();
+         startCol += contactPlaneHelper.getCoefficientSize();
       }
 
-      for (int i = 0; i < problemSize; i++)
+      if (command.getUseScalarObjective())
       {
-         inputToPack.getTaskObjective().set(i, 0, command.getObjective());
+         for (int i = 0; i < problemSize; i++)
+            inputToPack.getTaskObjective().set(i, 0, command.getScalarObjective());
       }
+      else
+      {
+         inputToPack.getTaskObjective().set(command.getObjectiveVector());
+      }
+
       inputToPack.setConstraintType(command.getConstraintType());
 
       return true;

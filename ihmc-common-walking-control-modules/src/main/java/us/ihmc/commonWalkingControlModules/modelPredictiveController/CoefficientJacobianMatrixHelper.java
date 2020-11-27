@@ -192,10 +192,10 @@ public class CoefficientJacobianMatrixHelper
       double c23 = 6.0 * duration2;
       double c33 = 4.0 * duration;
 
-      double g0 = omega * (positiveExponential - 1.0);
-      double g1 = -omega * (negativeExponential - 1.0);
-      double g2 = 3.0 * duration2;
-      double g3 = 2.0 * duration;
+      double g0 = omega * (positiveExponential - 1.0) * goalValue;
+      double g1 = -omega * (negativeExponential - 1.0) * goalValue;
+      double g2 = 3.0 * duration2 * goalValue;
+      double g3 = 2.0 * duration * goalValue;
 
       for (int contactPointIndex = 0; contactPointIndex < numberOfContactPointsInContact; contactPointIndex++)
       {
