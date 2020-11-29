@@ -345,6 +345,8 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicEllipsoid;
       private final FrameEllipsoid3DReadOnly shape;
 
+      private final FramePose3D tempPose = new FramePose3D();
+
       public EllipsoidGraphicUpdater(String name, FrameEllipsoid3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
@@ -363,7 +365,9 @@ public class CollidableVisualizer
       @Override
       public void update()
       {
-         pose.setFromReferenceFrame(shape.getReferenceFrame());
+         tempPose.setReferenceFrame(shape.getReferenceFrame());
+         tempPose.set(shape.getPose());
+         pose.setMatchingFrame(tempPose);
       }
 
       @Override
