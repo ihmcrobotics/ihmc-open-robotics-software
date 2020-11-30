@@ -2,11 +2,10 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MPCQPInputCalculator
@@ -22,7 +21,7 @@ public class MPCQPInputCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
-   public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective)
+   public boolean calculateCoMContinuityObjective(QPInputTypeA inputToPack, CoMContinuityCommand objective)
    {
       inputToPack.reshape(3);
       inputToPack.setConstraintType(objective.getConstraintType());
@@ -77,7 +76,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateValueObjective(QPInput inputToPack, MPCValueCommand objective)
+   public boolean calculateValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
    {
       switch (objective.getValueType())
       {
@@ -92,7 +91,7 @@ public class MPCQPInputCalculator
       }
    }
 
-   private boolean calculateCoMValueObjective(QPInput inputToPack, MPCValueCommand objective)
+   private boolean calculateCoMValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
@@ -127,7 +126,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateDCMValueObjective(QPInput inputToPack, MPCValueCommand objective)
+   private boolean calculateDCMValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
@@ -173,7 +172,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   private boolean calculateVRPValueObjective(QPInput inputToPack, MPCValueCommand objective)
+   private boolean calculateVRPValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
    {
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
@@ -219,7 +218,7 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateRhoValueCommand(QPInput inputToPack, RhoValueObjectiveCommand command)
+   public boolean calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
    {
       int problemSize = 0;
 

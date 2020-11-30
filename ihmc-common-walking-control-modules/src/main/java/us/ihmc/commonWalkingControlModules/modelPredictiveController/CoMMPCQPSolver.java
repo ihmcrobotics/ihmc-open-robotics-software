@@ -5,10 +5,9 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -64,7 +63,7 @@ public class CoMMPCQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   final QPInput qpInput = new QPInput(0);
+   final QPInputTypeA qpInput = new QPInputTypeA(0);
 
    private final MPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
@@ -275,7 +274,7 @@ public class CoMMPCQPSolver
          addInput(qpInput);
    }
 
-   public void addInput(QPInput input)
+   public void addInput(QPInputTypeA input)
    {
       switch (input.getConstraintType())
       {
