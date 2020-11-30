@@ -29,31 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * <p>
- * This is the main class of the trajectory-based CoM Trajectory Planner.
- * </p>
- * <p>
- * This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
- * This means that the final VRP is the terminal DCM location
- * </p>
- * <p>
- * The CoM has the following definitions:
- * <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
- * c<sub>4</sub> t + c<sub>5</sub></li>
- * <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
- * 2 c<sub>3</sub> t+ c<sub>4</sub>
- * <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega;
- * t</sup>
- * + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
- * </p>
- *
- *
- * <p> From this, it follows that the VRP has the trajectory
- * <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> +
- * c<sub>5</sub></li>
- * </p>
- */
 public class CoMTrajectoryModelPredictiveController
 {
    private static boolean verbose = false;
@@ -104,6 +79,8 @@ public class CoMTrajectoryModelPredictiveController
 
    private final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
+   private final CoMTrajectoryPlanner initializationCalculator;
+
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
 
@@ -120,6 +97,8 @@ public class CoMTrajectoryModelPredictiveController
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
+
+      initializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -226,15 +205,18 @@ public class CoMTrajectoryModelPredictiveController
       for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
       {
          ContactPlaneProvider contact = contactSequence.get(sequenceId);
+         double duration = contact.getTimeInterval().getDuration();
 
          RecyclingArrayList<ContactPlaneHelper> contactPlaneHelpers = contactPlaneHelperPool.add();
          contactPlaneHelpers.clear();
 
+         double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
             ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.add();
             contactPlaneHelper.setMaxNormalForce(maxContactForce);
             contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
+            contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
          }
       }
    }
@@ -244,7 +226,6 @@ public class CoMTrajectoryModelPredictiveController
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
-
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
       if (includeVelocityObjective)
          mpcCommands.addCommand(computeInitialCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand()));
@@ -253,9 +234,8 @@ public class CoMTrajectoryModelPredictiveController
          double duration = contactSequence.get(0).getTimeInterval().getDuration();
          mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(0), 0, duration, 0.0));
          mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
-//         mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+         mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
       }
-
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
@@ -270,14 +250,14 @@ public class CoMTrajectoryModelPredictiveController
          {
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), endVRPPositions.get(transition), transition, firstSegmentDuration, firstSegmentDuration));
             mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
-//            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
             double duration = contactSequence.get(nextSequence).getTimeInterval().getDuration();
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(nextSequence), nextSequence, duration, 0.0));
             mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
-//            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
          }
       }
 
@@ -287,7 +267,7 @@ public class CoMTrajectoryModelPredictiveController
       mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), endVRPPositions.getLast(), numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(), commandProvider.getNextVRPVelocityCommand(), startVRPPositions.get(numberOfPhases - 1), numberOfPhases - 1, finalDuration, finalDuration));
       mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
-//      mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjevctiveCommand(), numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -518,10 +498,8 @@ public class CoMTrajectoryModelPredictiveController
             zCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
          }
 
-         // TODO for the time squared coefficient, add in gravity
          zCoefficientVector.add(vectorStart + 3, 0, -0.5 * gravityZ);
       }
-
    }
 
    public int getSegmentNumber(double time)
