@@ -62,6 +62,7 @@ public class JumpingBalanceManager
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
                                 JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
+                                JumpingParameters jumpingParameters,
                                 YoRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -85,7 +86,7 @@ public class JumpingBalanceManager
       copTrajectoryForStanding = new StandingCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       copTrajectoryForStanding.registerState(copTrajectoryState);
 
-      copTrajectoryForJumping = new JumpingCoPTrajectoryGenerator(copTrajectoryParameters, jumpingCoPTrajectoryParameters, registry);
+      copTrajectoryForJumping = new JumpingCoPTrajectoryGenerator(copTrajectoryParameters, controllerToolbox.getDefaultFootPolygon(), jumpingCoPTrajectoryParameters, jumpingParameters, registry);
       copTrajectoryForJumping.registerState(copTrajectoryState);
 
       minimizeAngularMomentumRate.set(true);
