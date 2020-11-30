@@ -5,7 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -54,8 +54,8 @@ public class MPCQPInputCalculatorTest
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
       int comCoefficients = 6;
-      QPInput comPositionQPInput = new QPInput(rhoCoefficients + comCoefficients);
-      QPInput comVelocityQPInput = new QPInput(rhoCoefficients + comCoefficients);
+      QPInputTypeA comPositionQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
+      QPInputTypeA comVelocityQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
 
       Random random = new Random(1738L);
 
@@ -169,8 +169,8 @@ public class MPCQPInputCalculatorTest
       int rhoSize = 16;
       int rhoCoefficients = 2 * 4 * rhoSize;
       int comCoefficients = 2 * 6;
-      QPInput comPositionQPInput = new QPInput(rhoCoefficients + comCoefficients);
-      QPInput comVelocityQPInput = new QPInput(rhoCoefficients + comCoefficients);
+      QPInputTypeA comPositionQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
+      QPInputTypeA comVelocityQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
 
       Random random = new Random(1738L);
 
@@ -268,8 +268,8 @@ public class MPCQPInputCalculatorTest
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
       int comCoefficients = 6;
-      QPInput dcmPositionQPInput = new QPInput(rhoCoefficients + comCoefficients);
-      QPInput dcmVelocityQPInput = new QPInput(rhoCoefficients + comCoefficients);
+      QPInputTypeA dcmPositionQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
+      QPInputTypeA dcmVelocityQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
 
       Random random = new Random(1738L);
 
@@ -398,8 +398,8 @@ public class MPCQPInputCalculatorTest
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
       int comCoefficients = 6;
-      QPInput vrpPositionQPInput = new QPInput(rhoCoefficients + comCoefficients);
-      QPInput vrpVelocityQPInput = new QPInput(rhoCoefficients + comCoefficients);
+      QPInputTypeA vrpPositionQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
+      QPInputTypeA vrpVelocityQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
 
       Random random = new Random(1738L);
 

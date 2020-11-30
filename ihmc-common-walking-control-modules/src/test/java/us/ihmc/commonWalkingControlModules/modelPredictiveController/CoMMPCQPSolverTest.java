@@ -6,7 +6,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,8 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class CoMMPCQPSolverTest
 {
@@ -658,7 +656,7 @@ public class CoMMPCQPSolverTest
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
    }
 
-   private static void addTask(QPInput input, DMatrixRMaj hessianToPack, DMatrixRMaj gradientToPack)
+   private static void addTask(QPInputTypeA input, DMatrixRMaj hessianToPack, DMatrixRMaj gradientToPack)
    {
       addTaskToHessian(input.taskJacobian, hessianToPack);
       addTaskToGradient(input.taskJacobian, input.taskObjective, gradientToPack);

@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -56,7 +57,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final CoMTrajectoryModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -73,8 +74,7 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
+      comTrajectoryPlanner = new CoMTrajectoryModelPredictiveController(controllerToolbox.getGravityZ(), 1.0, controllerToolbox.getControlDT(), registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
