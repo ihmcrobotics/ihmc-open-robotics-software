@@ -18,7 +18,7 @@ public class AtlasBehaviorUI
 
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      BehaviorUI.createInterprocess(BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS, drcRobotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
+      BehaviorUI.createInterprocess(BehaviorUIRegistry.DEFAULT_BEHAVIORS, drcRobotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
    }
 
    public static void main(String[] args)
