@@ -41,12 +41,15 @@ mainDependencies {
 testDependencies {
 
    api("us.ihmc:ihmc-commons-testing:0.30.4")
-   api("us.ihmc:simulation-construction-set:0.21.1")
-   api("us.ihmc:simulation-construction-set-test:0.21.1")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.1")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.1") {
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
+      exclude(group = "org.junit.platform", module = "junit-platform-commons")
+      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
+   }
 }
 
 visualizersDependencies {

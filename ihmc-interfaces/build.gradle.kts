@@ -34,7 +34,12 @@ mainDependencies {
    api("us.ihmc:euclid:0.15.1")
    api("us.ihmc:euclid-geometry:0.15.1")
    api("us.ihmc:ihmc-pub-sub:0.15.0")
-   api("us.ihmc:ros2-common-interfaces:0.19.3")
+   api("us.ihmc:ros2-common-interfaces:0.19.3") {
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
+      exclude(group = "org.junit.platform", module = "junit-platform-commons")
+      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
+   }
    api("us.ihmc:ihmc-commons:0.30.4")
 }
 

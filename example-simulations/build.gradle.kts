@@ -34,7 +34,6 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-description:0.20.1")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-robot-models:source")
