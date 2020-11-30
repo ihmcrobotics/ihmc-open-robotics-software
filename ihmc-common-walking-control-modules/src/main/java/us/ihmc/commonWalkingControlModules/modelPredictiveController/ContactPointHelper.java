@@ -20,7 +20,7 @@ public class ContactPointHelper
    private final int numberOfBasisVectorsPerContactPoint;
    private final int coefficientsSize;
    private final FrameVector3D[] basisVectors;
-   private final FramePoint3D[] basisVectorsOrigin;
+   private final FramePoint3D basisVectorOrigin = new FramePoint3D();
    private final double basisVectorAngleIncrement;
    private final PoseReferenceFrame planeFrame;
 
@@ -48,6 +48,15 @@ public class ContactPointHelper
    private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
+   private final DMatrixRMaj contactWrenchCoefficientMatrix;
+
+
+   private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FrameVector3D[] basisMagnitudes;
+   private final DMatrixRMaj[] basisCoefficients;
+
+   private ContactPointForceViewer viewer;
+
    public ContactPointHelper(int numberOfBasisVectorsPerContactPoint)
    {
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
@@ -60,7 +69,8 @@ public class ContactPointHelper
       maxContactForce = Double.POSITIVE_INFINITY;
 
       basisVectors = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
-      basisVectorsOrigin = new FramePoint3D[this.numberOfBasisVectorsPerContactPoint];
+      basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
+      basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
       totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, this.numberOfBasisVectorsPerContactPoint);
@@ -80,11 +90,21 @@ public class ContactPointHelper
       accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
 
+      contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
+
       for (int i = 0; i < this.numberOfBasisVectorsPerContactPoint; i++)
       {
          basisVectors[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
-         basisVectorsOrigin[i] = new FramePoint3D(ReferenceFrame.getWorldFrame());
+         basisMagnitudes[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
+         basisCoefficients[i] = new DMatrixRMaj(1, 4);
       }
+
+      clear();
+   }
+
+   public void setContactPointForceViewer(ContactPointForceViewer viewer)
+   {
+      this.viewer = viewer;
    }
 
    public void setMaxNormalForce(double maxNormalForce)
@@ -107,31 +127,32 @@ public class ContactPointHelper
       return basisVectors[index];
    }
 
-   public FramePoint3DReadOnly getBasisVectorOrigin(int index)
+   public FramePoint3DReadOnly getBasisVectorOrigin()
    {
-      return basisVectorsOrigin[index];
+      return basisVectorOrigin;
    }
 
    public void computeBasisVectors(Point2DReadOnly contactPointInPlaneFrame, FramePose3DReadOnly framePose, double rotationOffset, double mu)
    {
+      timeOfContact = Double.NaN;
       planeFrame.setPoseAndUpdate(framePose);
 
       // Compute the orientation of the normal contact vector and the corresponding transformation matrix
       computeNormalContactVectorRotation(normalContactVectorRotationMatrix);
 
       rhoMaxMatrix.reshape(numberOfBasisVectorsPerContactPoint, 1);
+      rhoMaxMatrix.zero();
 
       int rhoIndex = 0;
 
       double maxRhoZ = maxContactForce / numberOfBasisVectorsPerContactPoint;
+      basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
 
       // rotate each friction cone approximation to point one vector towards the center of the foot
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
-         FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
          FrameVector3D basisVector = basisVectors[rhoIndex];
 
-         basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
          computeBasisVector(basisVectorIndex, rotationOffset, normalContactVectorRotationMatrix, basisVector, mu);
 
          rhoMaxMatrix.set(rhoIndex, 0, maxRhoZ / basisVector.getZ());
@@ -154,6 +175,11 @@ public class ContactPointHelper
       linearAccelerationJacobianMatrix.zero();
       linearJerkJacobianMatrix.zero();
 
+      rhoMagnitudeJacobianMatrix.zero();
+      rhoRateJacobianMatrix.zero();
+      rhoAccelerationJacobianMatrix.zero();
+      rhoJerkJacobianMatrix.zero();
+
       double t2 = timeOfContact * timeOfContact;
       double t3 = timeOfContact * t2;
       double positiveExponential = Math.exp(omega * timeOfContact);
@@ -168,16 +194,6 @@ public class ContactPointHelper
       double thirdVelocityCoefficient = 3 * t2;
       double fourthVelocityCoefficient = 2 * timeOfContact;
       double thirdAccelerationCoefficient = 6 * timeOfContact;
-
-      rhoMagnitudeJacobianMatrix.zero();
-      rhoRateJacobianMatrix.zero();
-      rhoAccelerationJacobianMatrix.zero();
-      rhoJerkJacobianMatrix.zero();
-
-      linearPositionJacobianMatrix.zero();
-      linearVelocityJacobianMatrix.zero();
-      linearAccelerationJacobianMatrix.zero();
-      linearJerkJacobianMatrix.zero();
 
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
@@ -339,16 +355,17 @@ public class ContactPointHelper
 
    public void clear()
    {
-      for (int rhoIndex = 0; rhoIndex < basisVectorsOrigin.length; rhoIndex++)
+      basisVectorOrigin.setToZero(ReferenceFrame.getWorldFrame());
+      for (int rhoIndex = 0; rhoIndex < basisVectors.length; rhoIndex++)
       {
-         FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
          FrameVector3D basisVector = basisVectors[rhoIndex];
-
-         basisVectorOrigin.setToZero(ReferenceFrame.getWorldFrame());
          basisVector.setToZero(ReferenceFrame.getWorldFrame());
 
          rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
       }
+
+      if (viewer != null)
+         viewer.reset();
    }
 
    private void computeBasisVector(int basisVectorIndex,
@@ -373,11 +390,11 @@ public class ContactPointHelper
    {
       wrenchMatrixToPack.reshape(Wrench.SIZE, numberOfBasisVectorsPerContactPoint);
       forceMatrixToPack.reshape(3, numberOfBasisVectorsPerContactPoint);
+      basisVectorOrigin.changeFrame(frame);
+
       for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
       {
-         FramePoint3D basisVectorOrigin = basisVectorsOrigin[rhoIndex];
          FrameVector3D basisVector = basisVectors[rhoIndex];
-         basisVectorOrigin.changeFrame(frame);
          basisVector.changeFrame(frame);
          unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
          unitSpatialForceVector.get(0, rhoIndex, wrenchMatrixToPack);
@@ -478,5 +495,62 @@ public class ContactPointHelper
    public DMatrixRMaj getJerkIntegrationHessian()
    {
       return jerkIntegrationHessian;
+   }
+
+   public void computeContactForceCoefficientMatrix(DMatrixRMaj solutionVector, int solutionStartIdx)
+   {
+      contactWrenchCoefficientMatrix.zero();
+
+      int startIdx = solutionStartIdx;
+      for (int rhoIndex = 0; rhoIndex < 4; rhoIndex++)
+      {
+         FrameVector3D basisVector = basisVectors[rhoIndex];
+         for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
+         {
+            double rhoCoeff = solutionVector.get(startIdx++, 0);
+            contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);
+            contactWrenchCoefficientMatrix.add(1, coeffIdx, basisVector.getY() * rhoCoeff);
+            contactWrenchCoefficientMatrix.add(2, coeffIdx, basisVector.getZ() * rhoCoeff);
+
+            basisCoefficients[rhoIndex].set(0, coeffIdx, rhoCoeff);
+         }
+      }
+   }
+
+   public DMatrixRMaj getContactWrenchCoefficientMatrix()
+   {
+      return contactWrenchCoefficientMatrix;
+   }
+
+   public void computeContactForce(double omega, double time)
+   {
+      double omega2 = omega * omega;
+      double exponential = Math.exp(omega * time);
+      double negativeExponential = 1.0 / exponential;
+      double a0 = omega2 * exponential;
+      double a1 = omega2 * negativeExponential;
+      double a2 = 6.0 * time;
+      double a3 = 2.0;
+
+      contactAcceleration.setToZero();
+
+      for (int rhoIdx = 0; rhoIdx < 4; rhoIdx++)
+      {
+         double rhoValue = a0 * basisCoefficients[rhoIdx].get(0, 0);
+         rhoValue += a1 * basisCoefficients[rhoIdx].get(0, 1);
+         rhoValue += a2 * basisCoefficients[rhoIdx].get(0, 2);
+         rhoValue += a3 * basisCoefficients[rhoIdx].get(0, 3);
+
+         basisMagnitudes[rhoIdx].setAndScale(rhoValue, basisVectors[rhoIdx]);
+         contactAcceleration.add(basisMagnitudes[rhoIdx]);
+      }
+
+      if (viewer != null)
+         viewer.update(basisVectorOrigin, contactAcceleration, basisMagnitudes);
+   }
+
+   public FrameVector3DReadOnly getContactAcceleration()
+   {
+      return contactAcceleration;
    }
 }

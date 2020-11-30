@@ -4,6 +4,7 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -65,6 +66,7 @@ public class CoMPositionContinuityCommandTest
       command.setWeight(1.0);
       command.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
       command.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
+      command.setConstraintType(ConstraintType.OBJECTIVE);
 
       double regularization = 1e-5;
       solver.initialize();

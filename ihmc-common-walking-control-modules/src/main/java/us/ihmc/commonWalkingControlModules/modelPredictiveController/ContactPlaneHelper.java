@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -45,6 +49,11 @@ public class ContactPlaneHelper
    private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
+   private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FramePoint3D contactCentroid = new FramePoint3D();
+
+   private ContactPlaneForceViewer viewer;
+
    public ContactPlaneHelper(int maxNumberOfContactPoints, int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator)
    {
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
@@ -84,12 +93,20 @@ public class ContactPlaneHelper
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
    }
 
+
+   public void setContactPointForceViewer(ContactPlaneForceViewer viewer)
+   {
+      this.viewer = viewer;
+
+      for (ContactPointHelper pointHelper : contactPoints)
+         pointHelper.setContactPointForceViewer(viewer.getNextPointForceViewer());
+   }
+
    public void setMaxNormalForce(double maxNormalForce)
    {
       double pointNormalForce = maxNormalForce / numberOfContactPoints;
       for (int i = 0; i < numberOfContactPoints; i++)
          contactPoints[i].setMaxNormalForce(pointNormalForce);
-
    }
 
    public int getRhoSize()
@@ -356,25 +373,34 @@ public class ContactPlaneHelper
    public void computeContactForceCoefficientMatrix(DMatrixRMaj solutionVector, int solutionStartIdx)
    {
       int startIdx = solutionStartIdx;
+      contactWrenchCoefficientMatrix.zero();
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
          ContactPointHelper contactPointHelper = contactPoints[contactPointIdx];
-         for (int rhoIndex = 0; rhoIndex < contactPointHelper.getRhoSize(); rhoIndex++)
-         {
-            FrameVector3DReadOnly basisVector = contactPointHelper.getBasisVector(rhoIndex);
-            for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
-            {
-               double rhoCoeff = solutionVector.get(startIdx++, 0);
-               contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);
-               contactWrenchCoefficientMatrix.add(1, coeffIdx, basisVector.getY() * rhoCoeff);
-               contactWrenchCoefficientMatrix.add(2, coeffIdx, basisVector.getZ() * rhoCoeff);
-            }
-         }
+         contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
+         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
+         startIdx += 4;
       }
    }
 
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
+   }
+
+   public void computeContactForce(double omega, double time)
+   {
+      contactAcceleration.setToZero();
+      contactCentroid.setToZero();
+      for (int i = 0; i < numberOfContactPoints; i++)
+      {
+         ContactPointHelper contactPoint = contactPoints[i];
+         contactPoint.computeContactForce(omega, time);
+         contactAcceleration.add(contactPoint.getContactAcceleration());
+         contactCentroid.scaleAdd(0.25, contactPoint.getBasisVectorOrigin(), contactCentroid);
+      }
+
+      if (viewer != null)
+         viewer.update(contactCentroid, contactAcceleration);
    }
 }
