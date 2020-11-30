@@ -311,13 +311,14 @@ public class ContactPlaneHelper
       timeOfContact = time;
    }
 
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValue)
+   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPlane)
    {
+      double goalValueForPoint = goalValueForPlane / numberOfContactPoints;
       int startIdx = 0;
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
          ContactPointHelper contactPoint = contactPoints[contactPointIdx];
-         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValue);
+         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
 
          MatrixTools.setMatrixBlock(accelerationIntegrationHessian,
                                     startIdx,

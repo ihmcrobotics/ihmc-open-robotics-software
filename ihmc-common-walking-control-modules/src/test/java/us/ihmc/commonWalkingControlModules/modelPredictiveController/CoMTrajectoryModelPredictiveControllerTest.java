@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CoMTrajectoryModelPredictiveControllerTest
 {
    private static final double epsilon = 1e-3;
+   private static final boolean visualize = false;
 
    @Test
    public void testSimpleStanding()
@@ -519,6 +521,9 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
    private static void visualize(CoMTrajectoryModelPredictiveController mpc, List<ContactPlaneProvider> contacts, double duration)
    {
+      if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+         return;
+
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
       YoRegistry registry = scs.getRootRegistry();
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();

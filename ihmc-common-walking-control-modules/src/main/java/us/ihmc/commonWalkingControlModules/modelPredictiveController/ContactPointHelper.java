@@ -257,8 +257,10 @@ public class ContactPointHelper
       timeOfContact = time;
    }
 
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValue)
+   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
    {
+      double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
+
       double positiveExponential = Math.exp(omega * duration);
       double positiveExponential2 = positiveExponential * positiveExponential;
       double negativeExponential = 1.0 / positiveExponential;
@@ -279,10 +281,10 @@ public class ContactPointHelper
       double c23 = 6.0 * duration2;
       double c33 = 4.0 * duration;
 
-      double g0 = omega * (positiveExponential - 1.0) * goalValue;
-      double g1 = -omega * (negativeExponential - 1.0) * goalValue;
-      double g2 = 3.0 * duration2 * goalValue;
-      double g3 = 2.0 * duration * goalValue;
+      double g0 = omega * (positiveExponential - 1.0) * goalValueForBasis;
+      double g1 = -omega * (negativeExponential - 1.0) * goalValueForBasis;
+      double g2 = 3.0 * duration2 * goalValueForBasis;
+      double g3 = 2.0 * duration * goalValueForBasis;
 
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
