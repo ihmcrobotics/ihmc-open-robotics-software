@@ -126,6 +126,7 @@ public class BehaviorUI
 
          BorderPane bottom = (BorderPane) mainPane.getBottom();
          TabPane uiTabPane = new TabPane();
+         uiTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
          Node uisPane = uiTabPane;
 
          behaviorDirectRobotUI = new BehaviorDirectRobotUI();
