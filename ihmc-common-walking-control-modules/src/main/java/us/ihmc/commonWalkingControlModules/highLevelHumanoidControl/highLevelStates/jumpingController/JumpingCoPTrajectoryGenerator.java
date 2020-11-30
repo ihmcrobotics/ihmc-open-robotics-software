@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,7 +23,7 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   private final RecyclingArrayList<ContactPlaneProvider> contactStateProviders = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FramePoint3D footMidpoint = new FramePoint3D();
@@ -67,9 +69,11 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       midstanceFrame.setPoseAndUpdate(midstancePose);
       midstanceZUpFrame.update();
 
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider contactState = contactStateProviders.add();
       contactState.setStartTime(0.0);
       contactState.setStartECMPPosition(state.getInitialCoP());
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
 
       computeForSupport();
       computeForFlight();
@@ -79,7 +83,7 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
 
    private void computeForSupport()
    {
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
 
       double supportDuration = state.getJumpingGoal().getSupportDuration();
       double segmentDuration = jumpingParameters.getFractionSupportForShift() * supportDuration;
@@ -87,19 +91,21 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       previousContactState.setDuration(segmentDuration);
       previousContactState.setLinearECMPVelocity();
 
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndECMPPosition(footMidpoint);
       contactState.setDuration(supportDuration - segmentDuration);
       contactState.setLinearECMPVelocity();
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
    }
 
    private void computeForFlight()
    {
       double flightDuration = state.getJumpingGoal().getFlightDuration();
 
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      SettableContactStateProvider contactSate = contactStateProviders.add();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider contactSate = contactStateProviders.add();
       contactSate.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactSate.setDuration(flightDuration);
       contactSate.setContactState(ContactState.FLIGHT);
@@ -107,8 +113,8 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
 
    private void computeForFinalTransfer()
    {
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider contactState = contactStateProviders.add();
 
       double goalLength = state.getJumpingGoal().getGoalLength();
       goalLength = Double.isNaN(goalLength) ? 0.0 : goalLength;
@@ -123,6 +129,7 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactState.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactState.setDuration(segmentDuration);
       contactState.setLinearECMPVelocity();
+      // TODO contact pose
 
       previousContactState = contactState;
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
@@ -131,6 +138,8 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactState.setEndECMPPosition(goalMidpoint);
       contactState.setDuration(segmentDuration);
       contactState.setLinearECMPVelocity();
+      // TODO contact pose
+
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
@@ -138,9 +147,12 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
       contactState.setLinearECMPVelocity();
+      // TODO contact pose
+
+      throw new NotImplementedException();
    }
 
-   public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
+   public RecyclingArrayList<ContactPlaneProvider> getContactStateProviders()
    {
       return contactStateProviders;
    }

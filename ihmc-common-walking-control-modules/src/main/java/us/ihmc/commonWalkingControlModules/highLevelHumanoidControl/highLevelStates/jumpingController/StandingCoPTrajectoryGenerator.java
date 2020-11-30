@@ -2,9 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.saveableModule.YoSaveableModule;
@@ -16,7 +21,7 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   private final RecyclingArrayList<ContactPlaneProvider> contactStateProviders = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FramePoint3D tempPointForCoPCalculation = new FramePoint3D();
@@ -47,11 +52,11 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       clear();
 
       // compute cop waypoint location
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider contactState = contactStateProviders.add();
       contactState.setStartTime(0.0);
       contactState.setStartECMPPosition(state.getInitialCoP());
 
-      SettableContactStateProvider previousContactState = contactState;
+      ContactPlaneProvider previousContactState = contactState;
 
       tempPointForCoPCalculation.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid(), 0.0);
       tempPointForCoPCalculation.changeFrame(worldFrame);
@@ -70,6 +75,8 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       contactState.setEndECMPPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
       contactState.setLinearECMPVelocity();
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
@@ -78,9 +85,11 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       contactState.setDuration(Double.POSITIVE_INFINITY);
       contactState.setLinearECMPVelocity();
 
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
    }
 
-   public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
+   public RecyclingArrayList<ContactPlaneProvider> getContactStateProviders()
    {
       return contactStateProviders;
    }
