@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 
 import java.util.ArrayList;
@@ -14,10 +15,21 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
    private double firstSegmentDuration;
    private double omega;
    private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private ConstraintType constraintType = ConstraintType.EQUALITY;
 
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.CONTINUITY;
+   }
+
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    public abstract int getDerivativeOrder();

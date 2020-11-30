@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingFootControlModule;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -16,10 +18,21 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    private double timeOfObjective;
    private double omega;
    private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.VALUE;
+   }
+
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    public abstract int getDerivativeOrder();

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -30,10 +31,10 @@ public class CoMMPCQPSolver
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
 
-   private final DMatrixRMaj solverInput_Aeq;
-   private final DMatrixRMaj solverInput_beq;
-   private final DMatrixRMaj solverInput_Ain;
-   private final DMatrixRMaj solverInput_bin;
+   final DMatrixRMaj solverInput_Aeq;
+   final DMatrixRMaj solverInput_beq;
+   final DMatrixRMaj solverInput_Ain;
+   final DMatrixRMaj solverInput_bin;
 
    private final DMatrixRMaj solverInput_lb;
    private final DMatrixRMaj solverInput_ub;
@@ -78,7 +79,7 @@ public class CoMMPCQPSolver
       comCoefficientRegularization.set(1e-5);
       rhoCoefficientRegularization.set(1e-5);
 
-      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver = new JavaQuadProgSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
@@ -155,7 +156,8 @@ public class CoMMPCQPSolver
       int previousProblemSize = problemSize;
       problemSize = indexHandler.getTotalProblemSize();
 
-      if (previousProblemSize != problemSize)
+//      if (previousProblemSize != problemSize)
+      if (true)
       {
          qpInput.setNumberOfVariables(problemSize);
 
@@ -252,7 +254,7 @@ public class CoMMPCQPSolver
       }
    }
 
-   private void submitRhoValueCommand(RhoValueObjectiveCommand command)
+   public void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
       boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
       if (success)

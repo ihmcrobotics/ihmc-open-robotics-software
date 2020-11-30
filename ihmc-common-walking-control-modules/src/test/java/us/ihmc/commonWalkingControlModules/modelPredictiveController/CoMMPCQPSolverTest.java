@@ -4,6 +4,7 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -15,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class CoMMPCQPSolverTest
 {
@@ -337,6 +340,322 @@ public class CoMMPCQPSolverTest
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedDCMAtEnd, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtStart, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtEnd, 6e-3);
+   }
+
+
+   @Test
+   public void testCommandOptimizeBeginningAndEnd2Segments()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      double dt = 1e-3;
+
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+
+      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
+      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
+
+      FramePose3D contactPose = new FramePose3D();
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
+      contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
+      contactPlaneHelper2.computeBasisVectors(contactPolygon, contactPose, mu);
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      double timeOfConstraint = 0.7;
+      double minRho = 0.001;
+
+      RhoValueObjectiveCommand rhoCommandStart1 = new RhoValueObjectiveCommand();
+      rhoCommandStart1.setOmega(omega);
+      rhoCommandStart1.setTimeOfObjective(0.0);
+      rhoCommandStart1.setSegmentNumber(0);
+      rhoCommandStart1.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      rhoCommandStart1.setScalarObjective(minRho);
+      rhoCommandStart1.setUseScalarObjective(true);
+      rhoCommandStart1.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoValueObjectiveCommand rhoCommandEnd1 = new RhoValueObjectiveCommand();
+      rhoCommandEnd1.setOmega(omega);
+      rhoCommandEnd1.setTimeOfObjective(timeOfConstraint);
+      rhoCommandEnd1.setSegmentNumber(0);
+      rhoCommandEnd1.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      rhoCommandEnd1.setScalarObjective(minRho);
+      rhoCommandEnd1.setUseScalarObjective(true);
+      rhoCommandEnd1.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoValueObjectiveCommand rhoCommandStart2 = new RhoValueObjectiveCommand();
+      rhoCommandStart2.setOmega(omega);
+      rhoCommandStart2.setTimeOfObjective(0.0);
+      rhoCommandStart2.setSegmentNumber(1);
+      rhoCommandStart2.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      rhoCommandStart2.setScalarObjective(minRho);
+      rhoCommandStart2.setUseScalarObjective(true);
+      rhoCommandStart2.addContactPlaneHelper(contactPlaneHelper2);
+
+      RhoValueObjectiveCommand rhoCommandEnd2 = new RhoValueObjectiveCommand();
+      rhoCommandEnd2.setOmega(omega);
+      rhoCommandEnd2.setTimeOfObjective(timeOfConstraint);
+      rhoCommandEnd2.setSegmentNumber(1);
+      rhoCommandEnd2.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      rhoCommandEnd2.setScalarObjective(minRho);
+      rhoCommandEnd2.setUseScalarObjective(true);
+      rhoCommandEnd2.addContactPlaneHelper(contactPlaneHelper2);
+
+      CoMPositionContinuityCommand positionContinuityCommand = new CoMPositionContinuityCommand();
+      positionContinuityCommand.setOmega(omega);
+      positionContinuityCommand.setConstraintType(ConstraintType.EQUALITY);
+      positionContinuityCommand.setFirstSegmentNumber(0);
+      positionContinuityCommand.setFirstSegmentDuration(timeOfConstraint);
+      positionContinuityCommand.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
+      positionContinuityCommand.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
+
+      CoMVelocityContinuityCommand velocityContinuityCommand = new CoMVelocityContinuityCommand();
+      velocityContinuityCommand.setOmega(omega);
+      velocityContinuityCommand.setConstraintType(ConstraintType.EQUALITY);
+      velocityContinuityCommand.setFirstSegmentNumber(0);
+      velocityContinuityCommand.setFirstSegmentDuration(timeOfConstraint);
+      velocityContinuityCommand.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
+      velocityContinuityCommand.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
+
+      double regularization = 1e-5;
+      solver.initialize();
+      solver.submitRhoValueCommand(rhoCommandStart1);
+      solver.submitRhoValueCommand(rhoCommandEnd1);
+      solver.submitRhoValueCommand(rhoCommandStart2);
+      solver.submitRhoValueCommand(rhoCommandEnd2);
+      solver.submitCoMContinuityObjective(positionContinuityCommand);
+      solver.submitCoMContinuityObjective(velocityContinuityCommand);
+      solver.setComCoefficientRegularizationWeight(regularization);
+      solver.setRhoCoefficientRegularizationWeight(regularization);
+
+      solver.solve();
+
+      DMatrixRMaj rhoValueVectorStart1 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
+      DMatrixRMaj rhoValueVectorStart2 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
+      DMatrixRMaj rhoValueVectorEnd1 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
+      DMatrixRMaj rhoValueVectorEnd2 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
+
+      DMatrixRMaj solution = solver.getSolution();
+      DMatrixRMaj rhoSolution1 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
+      DMatrixRMaj rhoSolution2 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
+
+      MatrixTools.setMatrixBlock(rhoSolution1, 0, 0, solution, 12, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution2, 0, 0, solution, 12 + 4 * rhoHelper.getRhoSize(), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
+
+      helper.computeMatrices(0.0, omega);
+      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution1, rhoValueVectorStart1);
+      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution2, rhoValueVectorStart2);
+      helper.computeMatrices(timeOfConstraint, omega);
+      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution1, rhoValueVectorEnd1);
+      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution2, rhoValueVectorEnd2);
+
+      DMatrixRMaj inequalityObjectiveExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 1);
+      CommonOps_DDRM.fill(inequalityObjectiveExpected, minRho);
+
+      DMatrixRMaj inequalityJacobianExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 2 * (6 + rhoHelper.getRhoSize() * 4));
+      DMatrixRMaj equalityJacobianExpected = new DMatrixRMaj(6, 2 * (6 + rhoHelper.getRhoSize() * 4));
+
+      double omega2 = omega * omega;
+
+      double c0Start = 1.0;
+      double c1Start = 1.0;
+      double c2Start = 0.0;
+      double c3Start = 0.0;
+      double c4Start = 0.0;
+      double c5Start = 1.0;
+      double c0End = Math.exp(omega * timeOfConstraint);
+      double c1End = Math.exp(-omega * timeOfConstraint);
+      double c2End = timeOfConstraint * timeOfConstraint * timeOfConstraint;
+      double c3End = timeOfConstraint * timeOfConstraint;
+      double c4End = timeOfConstraint;
+      double c5End = 1.0;
+
+      double c0DotStart = omega;
+      double c1DotStart = -omega;
+      double c2DotStart = 0.0;
+      double c3DotStart = 0.0;
+      double c4DotStart = 1.0;
+      double c5DotStart = 0.0;
+      double c0DotEnd = omega * Math.exp(omega * timeOfConstraint);
+      double c1DotEnd = -omega * Math.exp(-omega * timeOfConstraint);
+      double c2DotEnd = 3.0 * timeOfConstraint * timeOfConstraint;
+      double c3DotEnd = 2.0 * timeOfConstraint;
+      double c4DotEnd = 1.0;
+      double c5DotEnd = 0.0;
+
+      double a0Start = omega2;
+      double a0End = omega2 * Math.exp(omega * timeOfConstraint);
+      double a1Start = omega2;
+      double a1End = omega2 * Math.exp(-omega * timeOfConstraint);
+      double a2Start = 0.0;
+      double a2End = 6.0 * timeOfConstraint;
+      double a3Start = 2.0;
+      double a3End = 2.0;
+
+      equalityJacobianExpected.set(0, 0, c4End);
+      equalityJacobianExpected.set(0, 1, c5End);
+      equalityJacobianExpected.set(1, 2, c4End);
+      equalityJacobianExpected.set(1, 3, c5End);
+      equalityJacobianExpected.set(2, 4, c4End);
+      equalityJacobianExpected.set(2, 5, c5End);
+      equalityJacobianExpected.set(0, 6, -c4Start);
+      equalityJacobianExpected.set(0, 7, -c5Start);
+      equalityJacobianExpected.set(1, 8, -c4Start);
+      equalityJacobianExpected.set(1, 9, -c5Start);
+      equalityJacobianExpected.set(2, 10, -c4Start);
+      equalityJacobianExpected.set(2, 11, -c5Start);
+
+      equalityJacobianExpected.set(3, 0, c4DotEnd);
+      equalityJacobianExpected.set(3, 1, c5DotEnd);
+      equalityJacobianExpected.set(4, 2, c4DotEnd);
+      equalityJacobianExpected.set(4, 3, c5DotEnd);
+      equalityJacobianExpected.set(5, 4, c4DotEnd);
+      equalityJacobianExpected.set(5, 5, c5DotEnd);
+      equalityJacobianExpected.set(3, 6, -c4DotStart);
+      equalityJacobianExpected.set(3, 7, -c5DotStart);
+      equalityJacobianExpected.set(4, 8, -c4DotStart);
+      equalityJacobianExpected.set(4, 9, -c5DotStart);
+      equalityJacobianExpected.set(5, 10, -c4DotStart);
+      equalityJacobianExpected.set(5, 11, -c5DotStart);
+
+      for (int rhoIdxStart1  = 0; rhoIdxStart1 < rhoHelper.getRhoSize(); rhoIdxStart1++)
+      {
+         int startColIdx1 = 12 + 4 * rhoIdxStart1;
+         int startColIdx2 = startColIdx1 + 4 * rhoHelper.getRhoSize();
+
+         equalityJacobianExpected.set(0, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c0End);
+         equalityJacobianExpected.set(1, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c0End);
+         equalityJacobianExpected.set(2, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c0End);
+
+         equalityJacobianExpected.set(0, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c1End);
+         equalityJacobianExpected.set(1, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c1End);
+         equalityJacobianExpected.set(2, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c1End);
+
+         equalityJacobianExpected.set(0, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c2End);
+         equalityJacobianExpected.set(1, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c2End);
+         equalityJacobianExpected.set(2, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c2End);
+
+         equalityJacobianExpected.set(0, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c3End);
+         equalityJacobianExpected.set(1, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c3End);
+         equalityJacobianExpected.set(2, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c3End);
+
+         equalityJacobianExpected.set(0, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c0Start);
+         equalityJacobianExpected.set(1, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c0Start);
+         equalityJacobianExpected.set(2, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c0Start);
+
+         equalityJacobianExpected.set(0, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c1Start);
+         equalityJacobianExpected.set(1, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c1Start);
+         equalityJacobianExpected.set(2, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c1Start);
+
+         equalityJacobianExpected.set(0, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c2Start);
+         equalityJacobianExpected.set(1, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c2Start);
+         equalityJacobianExpected.set(2, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c2Start);
+
+         equalityJacobianExpected.set(0, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c3Start);
+         equalityJacobianExpected.set(1, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c3Start);
+         equalityJacobianExpected.set(2, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c3Start);
+
+         equalityJacobianExpected.set(3, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c0DotEnd);
+         equalityJacobianExpected.set(4, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c0DotEnd);
+         equalityJacobianExpected.set(5, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c0DotEnd);
+
+         equalityJacobianExpected.set(3, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c1DotEnd);
+         equalityJacobianExpected.set(4, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c1DotEnd);
+         equalityJacobianExpected.set(5, startColIdx1 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c1DotEnd);
+
+         equalityJacobianExpected.set(3, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c2DotEnd);
+         equalityJacobianExpected.set(4, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c2DotEnd);
+         equalityJacobianExpected.set(5, startColIdx1 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c2DotEnd);
+
+         equalityJacobianExpected.set(3, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c3DotEnd);
+         equalityJacobianExpected.set(4, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c3DotEnd);
+         equalityJacobianExpected.set(5, startColIdx1 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * c3DotEnd);
+
+         equalityJacobianExpected.set(3, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c0DotStart);
+         equalityJacobianExpected.set(4, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c0DotStart);
+         equalityJacobianExpected.set(5, startColIdx2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c0DotStart);
+
+         equalityJacobianExpected.set(3, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c1DotStart);
+         equalityJacobianExpected.set(4, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c1DotStart);
+         equalityJacobianExpected.set(5, startColIdx2 + 1, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c1DotStart);
+
+         equalityJacobianExpected.set(3, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c2DotStart);
+         equalityJacobianExpected.set(4, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c2DotStart);
+         equalityJacobianExpected.set(5, startColIdx2 + 2, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c2DotStart);
+
+         equalityJacobianExpected.set(3, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getX() * -c3DotStart);
+         equalityJacobianExpected.set(4, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getY() * -c3DotStart);
+         equalityJacobianExpected.set(5, startColIdx2 + 3, rhoHelper.getBasisVector(rhoIdxStart1).getZ() * -c3DotStart);
+
+         double rhoAccelerationValueStart1 = a0Start * solution.get(startColIdx1, 0);
+         rhoAccelerationValueStart1 += a1Start * solution.get(startColIdx1 + 1, 0);
+         rhoAccelerationValueStart1 += a2Start * solution.get(startColIdx1 + 2, 0);
+         rhoAccelerationValueStart1 += a3Start * solution.get(startColIdx1 + 3, 0);
+         double rhoAccelerationValueEnd1 = a0End * solution.get(startColIdx1, 0);
+         rhoAccelerationValueEnd1 += a1End * solution.get(startColIdx1 + 1, 0);
+         rhoAccelerationValueEnd1 += a2End * solution.get(startColIdx1 + 2, 0);
+         rhoAccelerationValueEnd1 += a3End * solution.get(startColIdx1 + 3, 0);
+         double rhoAccelerationValueStart2 = a0Start * solution.get(startColIdx2, 0);
+         rhoAccelerationValueStart2 += a1Start * solution.get(startColIdx2 + 1, 0);
+         rhoAccelerationValueStart2 += a2Start * solution.get(startColIdx2 + 2, 0);
+         rhoAccelerationValueStart2 += a3Start * solution.get(startColIdx2 + 3, 0);
+         double rhoAccelerationValueEnd2 = a0End * solution.get(startColIdx2, 0);
+         rhoAccelerationValueEnd2 += a1End * solution.get(startColIdx2 + 1, 0);
+         rhoAccelerationValueEnd2 += a2End * solution.get(startColIdx2 + 2, 0);
+         rhoAccelerationValueEnd2 += a3End * solution.get(startColIdx2 + 3, 0);
+
+         int rhoIdxEnd1 = rhoIdxStart1 + rhoHelper.getRhoSize();
+         int rhoIdxStart2 = rhoIdxEnd1 + rhoHelper.getRhoSize();
+         int rhoIdxEnd2 = rhoIdxStart2 + rhoHelper.getRhoSize();
+
+//         assertTrue(rhoAccelerationValueStart1 >= rhoValueVectorStart1.get(rhoIdxStart1));
+//         assertTrue(rhoAccelerationValueEnd1 >= rhoValueVectorEnd1.get(rhoIdxStart1));
+//         assertTrue(rhoAccelerationValueStart2 >= rhoValueVectorStart2.get(rhoIdxStart1));
+//         assertTrue(rhoAccelerationValueEnd2 >= rhoValueVectorEnd2.get(rhoIdxStart1));
+
+         inequalityJacobianExpected.set(rhoIdxStart1, startColIdx1, a0Start);
+         inequalityJacobianExpected.set(rhoIdxStart1, startColIdx1 + 1, a1Start);
+         inequalityJacobianExpected.set(rhoIdxStart1, startColIdx1 + 2, a2Start);
+         inequalityJacobianExpected.set(rhoIdxStart1, startColIdx1 + 3, a3Start);
+
+         inequalityJacobianExpected.set(rhoIdxStart2, startColIdx2, a0Start);
+         inequalityJacobianExpected.set(rhoIdxStart2, startColIdx2 + 1, a1Start);
+         inequalityJacobianExpected.set(rhoIdxStart2, startColIdx2 + 2, a2Start);
+         inequalityJacobianExpected.set(rhoIdxStart2, startColIdx2 + 3, a3Start);
+
+         inequalityJacobianExpected.set(rhoIdxEnd1, startColIdx1, a0End);
+         inequalityJacobianExpected.set(rhoIdxEnd1, startColIdx1 + 1, a1End);
+         inequalityJacobianExpected.set(rhoIdxEnd1, startColIdx1 + 2, a2End);
+         inequalityJacobianExpected.set(rhoIdxEnd1, startColIdx1 + 3, a3End);
+
+         inequalityJacobianExpected.set(rhoIdxEnd2, startColIdx2, a0End);
+         inequalityJacobianExpected.set(rhoIdxEnd2, startColIdx2 + 1, a1End);
+         inequalityJacobianExpected.set(rhoIdxEnd2, startColIdx2 + 2, a2End);
+         inequalityJacobianExpected.set(rhoIdxEnd2, startColIdx2 + 3, a3End);
+      }
+
+      EjmlUnitTests.assertEquals(equalityJacobianExpected, solver.solverInput_Aeq, 1e-5);
+
+
+      CommonOps_DDRM.scale(-1.0, inequalityJacobianExpected);
+      CommonOps_DDRM.scale(-1.0, inequalityObjectiveExpected);
+      EjmlUnitTests.assertEquals(inequalityJacobianExpected, solver.solverInput_Ain, 1e-5);
+      EjmlUnitTests.assertEquals(inequalityObjectiveExpected, solver.solverInput_bin, 1e-5);
+
+      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(inequalityJacobianExpected.getNumCols(), inequalityJacobianExpected.getNumCols());
+      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(inequalityJacobianExpected.getNumCols(), 1);
+
+      MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
+
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
    }
 
    private static void addTask(QPInput input, DMatrixRMaj hessianToPack, DMatrixRMaj gradientToPack)

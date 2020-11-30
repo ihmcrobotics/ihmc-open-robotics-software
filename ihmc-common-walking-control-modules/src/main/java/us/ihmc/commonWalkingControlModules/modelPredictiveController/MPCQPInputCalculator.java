@@ -25,7 +25,10 @@ public class MPCQPInputCalculator
    public boolean calculateCoMContinuityObjective(QPInput inputToPack, CoMContinuityCommand objective)
    {
       inputToPack.reshape(3);
-      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      inputToPack.setConstraintType(objective.getConstraintType());
+
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
 
       int firstSegmentNumber = objective.getFirstSegmentNumber();
       int secondSegmentNumber = firstSegmentNumber + 1;
@@ -94,7 +97,7 @@ public class MPCQPInputCalculator
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
-      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      inputToPack.setConstraintType(objective.getConstraintType());
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -129,7 +132,7 @@ public class MPCQPInputCalculator
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
-      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      inputToPack.setConstraintType(objective.getConstraintType());
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -175,7 +178,7 @@ public class MPCQPInputCalculator
       inputToPack.reshape(3);
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
-      inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      inputToPack.setConstraintType(objective.getConstraintType());
 
       int segmentNumber = objective.getSegmentNumber();
       double timeOfObjective = objective.getTimeOfObjective();
@@ -229,6 +232,8 @@ public class MPCQPInputCalculator
          return false;
 
       inputToPack.reshape(problemSize);
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
 
       int segmentNumber = command.getSegmentNumber();
       double timeOfObjective = command.getTimeOfObjective();
