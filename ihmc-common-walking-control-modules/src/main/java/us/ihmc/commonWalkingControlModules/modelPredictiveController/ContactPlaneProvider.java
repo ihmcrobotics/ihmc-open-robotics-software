@@ -44,12 +44,14 @@ public class ContactPlaneProvider implements ContactStateProvider
       contactPoses.clear();
    }
 
-   public void set(ContactStateProvider other)
+   public void set(ContactPlaneProvider other)
    {
       setStartCopPosition(other.getCopStartPosition());
       setEndCopPosition(other.getCopEndPosition());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
+      for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
+         addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
    }
 
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
@@ -92,7 +94,6 @@ public class ContactPlaneProvider implements ContactStateProvider
       this.contactState = contactState;
    }
 
-
    public FramePoint3DReadOnly getCopStartPosition()
    {
       return startCopPosition;
@@ -133,6 +134,12 @@ public class ContactPlaneProvider implements ContactStateProvider
       this.contactPoses.add(contactPose);
       this.contactPointsInBodyFrame.add(contactPointsInBodyFrame);
       totalContactPoints += contactPointsInBodyFrame.getNumberOfVertices();
+   }
+
+   public void setStartFromEnd(ContactStateProvider previousContactState)
+   {
+      setStartTime(previousContactState.getTimeInterval().getEndTime());
+      setStartCopPosition(previousContactState.getCopEndPosition());
    }
 
    public int getNumberOfContactPlanes()

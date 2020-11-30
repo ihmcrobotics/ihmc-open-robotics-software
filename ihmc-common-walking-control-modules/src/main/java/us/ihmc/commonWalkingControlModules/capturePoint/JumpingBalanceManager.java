@@ -169,6 +169,10 @@ public class JumpingBalanceManager
       }
       copTrajectoryForStanding.compute(copTrajectoryState);
 
+      comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
+                                                       controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
+                                                       yoPerfectVRP,
+                                                       timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForStanding.getContactStateProviders());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
@@ -195,6 +199,10 @@ public class JumpingBalanceManager
       }
       copTrajectoryForJumping.compute(copTrajectoryState);
 
+      comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
+                                                       controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
+                                                       yoPerfectVRP,
+                                                       timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
 
       comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
@@ -248,8 +256,6 @@ public class JumpingBalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
-
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
    }
 
    public void initializeCoMPlanForStanding()
@@ -263,7 +269,6 @@ public class JumpingBalanceManager
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -280,7 +285,6 @@ public class JumpingBalanceManager
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -297,7 +301,6 @@ public class JumpingBalanceManager
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -308,7 +311,6 @@ public class JumpingBalanceManager
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
       jumpingMomentumRateControlModuleInput.setInFlight(true);
 
       comPlannerDone.set(false);

@@ -553,6 +553,13 @@ public class CoMTrajectoryModelPredictiveController
       }
    }
 
+   public void compute(double timeInPhase)
+   {
+      int segmentNumber = getSegmentNumber(timeInPhase);
+      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
+      compute(segmentNumber, timeInSegment);
+   }
+
    public int getSegmentNumber(double time)
    {
       double startTime = 0.0;
