@@ -42,6 +42,14 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
+   public <T> QueuedROS2Subscription<T> createQueuedSubscription(TopicDataType<T> topicDataType, String topicName, ROS2QosProfile qosProfile, int queueSize)
+         throws IOException
+   {
+      throw new RuntimeException("This funtionality is so far unimplemented. Implement me!");
+//      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
+   }
+
+   @Override
    public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType, NewMessageListener<T> newMessageListener, String topicName)
          throws IOException
    {
