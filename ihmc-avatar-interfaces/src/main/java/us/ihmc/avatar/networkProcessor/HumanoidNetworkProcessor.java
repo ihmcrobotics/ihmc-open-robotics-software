@@ -392,7 +392,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       LogTools.info("Setting up sensor module...");
       try
       {
-         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(pubSubImplementation);
+         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(ros2Node);
 
          checkIfModuleCanBeCreated(sensorSuiteManager.getClass());
 

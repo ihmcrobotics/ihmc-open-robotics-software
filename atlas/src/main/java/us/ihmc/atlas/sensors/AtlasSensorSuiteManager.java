@@ -18,10 +18,9 @@ import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -30,11 +29,13 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
 
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;
@@ -67,7 +68,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   DRCRobotJointMap jointMap,
                                   RobotPhysicalProperties physicalProperties,
                                   RobotTarget targetDeployment,
-                                  PubSubImplementation pubSubImplementation)
+                                  ROS2NodeInterface ros2Node)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -76,7 +77,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_atlas_sensor_suite_node");
+      this.ros2Node = ros2Node == null ? ROS2Tools.createROS2Node(FAST_RTPS, "ihmc_atlas_sensor_suite_node") : ros2Node;
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)

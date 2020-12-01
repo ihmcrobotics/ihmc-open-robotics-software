@@ -48,7 +48,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
-      ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableLidarScanPublisher(true);
       sensorModule.setEnableStereoVisionPointCloudPublisher(true);
       sensorModule.setEnableVideoPublisher(true);
@@ -84,7 +84,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
-      ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
       sensorSuiteManager.setEnableLidarScanPublisher(true);
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(false);
