@@ -35,11 +35,11 @@ public class CoMMPCQPSolver
    final DMatrixRMaj solverInput_Ain;
    final DMatrixRMaj solverInput_bin;
 
-   private final DMatrixRMaj solverInput_lb;
-   private final DMatrixRMaj solverInput_ub;
+   //   private final DMatrixRMaj solverInput_lb;
+   //   private final DMatrixRMaj solverInput_ub;
 
-   private final DMatrixRMaj solverInput_lb_previous;
-   private final DMatrixRMaj solverInput_ub_previous;
+   //   private final DMatrixRMaj solverInput_lb_previous;
+   //   private final DMatrixRMaj solverInput_ub_previous;
 
    private final DMatrixRMaj solverOutput;
 
@@ -54,8 +54,6 @@ public class CoMMPCQPSolver
 
    private final YoDouble comRateCoefficientRegularization = new YoDouble("comRateCoefficientRegularization", registry);
    private final YoDouble rhoRateCoefficientRegularization = new YoDouble("rhoRateCoefficientRegularization", registry);
-
-   private final DMatrixRMaj tempJtW;
 
    private int problemSize;
 
@@ -78,6 +76,9 @@ public class CoMMPCQPSolver
       comCoefficientRegularization.set(1e-5);
       rhoCoefficientRegularization.set(1e-5);
 
+      rhoRateCoefficientRegularization.set(1e-6);
+      comRateCoefficientRegularization.set(1e-6);
+
       qpSolver = new JavaQuadProgSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
@@ -93,17 +94,16 @@ public class CoMMPCQPSolver
       solverInput_Ain = new DMatrixRMaj(0, problemSize);
       solverInput_bin = new DMatrixRMaj(0, 1);
 
-      solverInput_lb = new DMatrixRMaj(problemSize, 1);
-      solverInput_ub = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_lb = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_ub = new DMatrixRMaj(problemSize, 1);
 
-      solverInput_lb_previous = new DMatrixRMaj(problemSize, 1);
-      solverInput_ub_previous = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_lb_previous = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_ub_previous = new DMatrixRMaj(problemSize, 1);
 
-      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       solverOutput = new DMatrixRMaj(problemSize, 1);
-      tempJtW = new DMatrixRMaj(problemSize, problemSize);
 
       parentRegistry.addChild(registry);
    }
@@ -155,8 +155,8 @@ public class CoMMPCQPSolver
       int previousProblemSize = problemSize;
       problemSize = indexHandler.getTotalProblemSize();
 
-//      if (previousProblemSize != problemSize)
-      if (true)
+      if (previousProblemSize != problemSize)
+      //      if (true)
       {
          qpInput.setNumberOfVariables(problemSize);
 
@@ -166,26 +166,28 @@ public class CoMMPCQPSolver
          solverInput_H_previous.reshape(problemSize, problemSize);
          solverInput_f_previous.reshape(problemSize, 1);
 
-         solverInput_Aeq.reshape(0, problemSize);
-         solverInput_beq.reshape(0, 1);
-         solverInput_Ain.reshape(0, problemSize);
-         solverInput_bin.reshape(0, 1);
+         //         solverInput_lb.reshape(problemSize, 1);
+         //         solverInput_ub.reshape(problemSize, 1);
 
-         solverInput_lb.reshape(problemSize, 1);
-         solverInput_ub.reshape(problemSize, 1);
-
-         solverInput_lb_previous.reshape(problemSize, 1);
-         solverInput_ub_previous.reshape(problemSize, 1);
+         //         solverInput_lb_previous.reshape(problemSize, 1);
+         //         solverInput_ub_previous.reshape(problemSize, 1);
 
          solverOutput.reshape(problemSize, 1);
-         tempJtW.reshape(problemSize, problemSize);
-
-         CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-         CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
          resetRateRegularization();
          notifyResetActiveSet();
       }
+
+      solverInput_Aeq.reshape(0, problemSize);
+      solverInput_beq.reshape(0, 1);
+      solverInput_Ain.reshape(0, problemSize);
+      solverInput_bin.reshape(0, 1);
+
+      solverInput_H.zero();
+      solverInput_f.zero();
+
+      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
    }
 
    public void resetRateRegularization()
@@ -280,12 +282,12 @@ public class CoMMPCQPSolver
       {
          case OBJECTIVE:
             if (input.useWeightScalar())
-               addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+               addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar());
             else
                throw new IllegalArgumentException("Not yet implemented.");
             break;
          case EQUALITY:
-            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+            addEqualityConstraint(input.taskJacobian, input.taskObjective);
             break;
          case LEQ_INEQUALITY:
             addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
@@ -298,59 +300,50 @@ public class CoMMPCQPSolver
       }
    }
 
-   public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight)
+   public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
+   }
+
+   public static void addObjective(DMatrixRMaj taskJacobian,
+                                   DMatrixRMaj taskObjective,
+                                   double taskWeight,
+                                   int problemSize,
+                                   DMatrixRMaj solverInput_H,
+                                   DMatrixRMaj solverInput_f)
    {
       if (taskJacobian.getNumCols() != problemSize)
       {
          throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
-      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
-   }
-
-   public void addMotionEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
-   {
-      if (taskJacobian.getNumCols() != problemSize)
-      {
-         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
-      }
-      addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
-   }
-
-   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
-   {
-      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
-   }
-
-   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
-   {
-      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
-   }
-
-   private void addMotionInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign)
-   {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, 0);
-   }
-
-   private void addTaskInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, int offset)
-   {
       int variables = taskJacobian.getNumCols();
-      if (offset + variables > problemSize)
+      if (variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
 
       // Compute: H += J^T W J
-      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
+      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, 0, 0);
 
       // Compute: f += - J^T W Objective
-      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, 0, 0);
    }
 
-   private void addEqualityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int offset)
+   public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
+      addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
+   }
+
+   public static void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int problemSize, DMatrixRMaj solverInput_Aeq, DMatrixRMaj solverInput_beq)
+   {
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
-      if (offset + variables > problemSize)
+      if (variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
@@ -361,16 +354,48 @@ public class CoMMPCQPSolver
       solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, offset);
-      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, offset);
+      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   {
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+   }
 
-   private void addInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign, int offset)
+   public static void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian,
+                                                                 DMatrixRMaj taskObjective,
+                                                                 int problemSize,
+                                                                 DMatrixRMaj solverInput_Ain,
+                                                                 DMatrixRMaj solverInput_bin)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, solverInput_Ain, solverInput_bin);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   {
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+   }
+
+   public static void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian,
+                                                                  DMatrixRMaj taskObjective,
+                                                                  int problemSize,
+                                                                  DMatrixRMaj solverInput_Ain,
+                                                                  DMatrixRMaj solverInput_bin)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, solverInput_Ain, solverInput_bin);
+   }
+
+   private static void addInequalityConstraintInternal(DMatrixRMaj taskJacobian,
+                                                       DMatrixRMaj taskObjective,
+                                                       double sign,
+                                                       int problemSize,
+                                                       DMatrixRMaj solverInput_Ain,
+                                                       DMatrixRMaj solverInput_bin)
    {
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
-      if (offset + variables > problemSize)
+      if (variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
@@ -381,7 +406,7 @@ public class CoMMPCQPSolver
       solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, offset, taskJacobian, 0, 0, taskSize, variables, sign);
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, variables, sign);
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
@@ -405,7 +430,7 @@ public class CoMMPCQPSolver
       numberOfActiveVariables.set(problemSize);
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
-      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
@@ -415,6 +440,8 @@ public class CoMMPCQPSolver
 
       if (MatrixTools.containsNaN(solverOutput))
       {
+         addRateRegularization.set(false);
+         numberOfIterations.set(-1);
          return false;
       }
 
@@ -423,8 +450,8 @@ public class CoMMPCQPSolver
       solverInput_H_previous.set(solverInput_H);
       solverInput_f_previous.set(solverInput_f);
 
-      solverInput_lb_previous.set(solverInput_lb);
-      solverInput_ub_previous.set(solverInput_ub);
+      //      solverInput_lb_previous.set(solverInput_lb);
+      //      solverInput_ub_previous.set(solverInput_ub);
 
       return true;
    }

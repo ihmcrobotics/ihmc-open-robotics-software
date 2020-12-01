@@ -380,7 +380,7 @@ public class ContactPlaneHelper
          ContactPointHelper contactPointHelper = contactPoints[contactPointIdx];
          contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
          CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
-         startIdx += 4;
+         startIdx += contactPointHelper.getCoefficientsSize();
       }
    }
 
