@@ -44,6 +44,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -458,7 +459,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ValkyrieSensorSuiteManager getSensorSuiteManager(PubSubImplementation pubSubImplementation)
+   public ValkyrieSensorSuiteManager getSensorSuiteManager()
+   {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public ValkyrieSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
    {
       if (sensorSuiteManager == null)
       {
@@ -469,7 +476,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getSensorInformation(),
                                                              getJointMap(),
                                                              target,
-                                                             pubSubImplementation);
+                                                             ros2Node);
       }
       return sensorSuiteManager;
    }

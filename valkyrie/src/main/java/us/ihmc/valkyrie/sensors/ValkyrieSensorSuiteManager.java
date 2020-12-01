@@ -22,6 +22,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -61,7 +62,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                                      HumanoidRobotSensorInformation sensorInformation,
                                      ValkyrieJointMap jointMap,
                                      RobotTarget target,
-                                     PubSubImplementation pubSubImplementation)
+                                     ROS2NodeInterface ros2Node)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
