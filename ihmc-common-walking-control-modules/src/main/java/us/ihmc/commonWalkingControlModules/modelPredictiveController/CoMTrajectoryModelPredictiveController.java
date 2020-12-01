@@ -37,6 +37,7 @@ public class CoMTrajectoryModelPredictiveController
    private static boolean verbose = false;
    private static final boolean includeVelocityObjective = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   public static final double sufficientlyLongTime = 1.0;
 
    private static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final int maxCapacity = 10;
@@ -202,8 +203,6 @@ public class CoMTrajectoryModelPredictiveController
       commandProvider.reset();
       mpcCommands.clear();
 
-//      startVRPPositions.get(0).set(currentVRPPosition);
-
       computeMatrixHelpers(planningSequence);
       computeObjectives(planningSequence);
       solveQP(planningSequence.size());
@@ -245,6 +244,8 @@ public class CoMTrajectoryModelPredictiveController
          qpSolver.resetRateRegularization();
          qpSolver.notifyResetActiveSet();
       }
+
+      this.activeSegment.set(activeSegment);
 
       for (int i = activeSegment; i < fullContactSequence.size(); i++)
       {
@@ -327,7 +328,7 @@ public class CoMTrajectoryModelPredictiveController
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
-            double duration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
+            double duration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
                                                               commandProvider.getNextVRPVelocityCommand(),
                                                               startVRPPositions.get(nextSequence),
@@ -341,7 +342,7 @@ public class CoMTrajectoryModelPredictiveController
 
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
-      double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
+      double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
       mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(),
                                                          finalDCMObjective,
                                                          numberOfPhases - 1,
@@ -660,7 +661,7 @@ public class CoMTrajectoryModelPredictiveController
       {
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
-         duration = Math.min(duration, CoMTrajectoryPlannerTools.sufficientlyLongTime);
+         duration = Math.min(duration, MPCQPInputCalculator.sufficientlyLongTime);
          compute(segmentId,
                  0.0,
                  comCornerPoints.add(),
@@ -820,7 +821,7 @@ public class CoMTrajectoryModelPredictiveController
 
       double omega = this.omega.getValue();
 
-      CoMTrajectoryPlannerTools.constructDesiredCoMPosition(comPositionToPack,
+      CoMMPCTools.constructDesiredCoMPosition(comPositionToPack,
                                                             firstCoefficient,
                                                             secondCoefficient,
                                                             thirdCoefficient,
@@ -829,7 +830,7 @@ public class CoMTrajectoryModelPredictiveController
                                                             sixthCoefficient,
                                                             timeInPhase,
                                                             omega);
-      CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocityToPack,
+      CoMMPCTools.constructDesiredCoMVelocity(comVelocityToPack,
                                                             firstCoefficient,
                                                             secondCoefficient,
                                                             thirdCoefficient,
@@ -838,7 +839,7 @@ public class CoMTrajectoryModelPredictiveController
                                                             sixthCoefficient,
                                                             timeInPhase,
                                                             omega);
-      CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack,
+      CoMMPCTools.constructDesiredCoMAcceleration(comAccelerationToPack,
                                                                 firstCoefficient,
                                                                 secondCoefficient,
                                                                 thirdCoefficient,
@@ -848,7 +849,7 @@ public class CoMTrajectoryModelPredictiveController
                                                                 timeInPhase,
                                                                 omega);
 
-      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityToPack,
+      CoMMPCTools.constructDesiredVRPVelocity(vrpVelocityToPack,
                                                             firstCoefficient,
                                                             secondCoefficient,
                                                             thirdCoefficient,

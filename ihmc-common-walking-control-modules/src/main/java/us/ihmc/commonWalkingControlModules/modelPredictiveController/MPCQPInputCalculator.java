@@ -10,6 +10,9 @@ import us.ihmc.matrixlib.MatrixTools;
 
 public class MPCQPInputCalculator
 {
+   public static final double sufficientlyLongTime = 100.0;
+   public static final double sufficientlyLargeValue = 1e5;
+
    private final MPCIndexHandler indexHandler;
 
    private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);

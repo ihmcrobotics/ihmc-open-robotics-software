@@ -6,8 +6,10 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Co
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
+import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -23,6 +25,7 @@ public class CoMMPCQPSolver
    private final ActiveSetQPSolver qpSolver;
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
+   private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
 
    final DMatrixRMaj solverInput_H;
    final DMatrixRMaj solverInput_f;
@@ -34,12 +37,6 @@ public class CoMMPCQPSolver
    final DMatrixRMaj solverInput_beq;
    final DMatrixRMaj solverInput_Ain;
    final DMatrixRMaj solverInput_bin;
-
-   //   private final DMatrixRMaj solverInput_lb;
-   //   private final DMatrixRMaj solverInput_ub;
-
-   //   private final DMatrixRMaj solverInput_lb_previous;
-   //   private final DMatrixRMaj solverInput_ub_previous;
 
    private final DMatrixRMaj solverOutput;
 
@@ -79,7 +76,7 @@ public class CoMMPCQPSolver
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
 
-      qpSolver = new JavaQuadProgSolver();
+      qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
@@ -93,15 +90,6 @@ public class CoMMPCQPSolver
       solverInput_beq = new DMatrixRMaj(0, 1);
       solverInput_Ain = new DMatrixRMaj(0, problemSize);
       solverInput_bin = new DMatrixRMaj(0, 1);
-
-      //      solverInput_lb = new DMatrixRMaj(problemSize, 1);
-      //      solverInput_ub = new DMatrixRMaj(problemSize, 1);
-
-      //      solverInput_lb_previous = new DMatrixRMaj(problemSize, 1);
-      //      solverInput_ub_previous = new DMatrixRMaj(problemSize, 1);
-
-      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       solverOutput = new DMatrixRMaj(problemSize, 1);
 
@@ -453,16 +441,16 @@ public class CoMMPCQPSolver
       {
          addRateRegularization.set(false);
          numberOfIterations.set(-1);
+         foundSolution.set(false);
          return false;
       }
+
+      foundSolution.set(true);
 
       addRateRegularization.set(true);
 
       solverInput_H_previous.set(solverInput_H);
       solverInput_f_previous.set(solverInput_f);
-
-      //      solverInput_lb_previous.set(solverInput_lb);
-      //      solverInput_ub_previous.set(solverInput_ub);
 
       return true;
    }
