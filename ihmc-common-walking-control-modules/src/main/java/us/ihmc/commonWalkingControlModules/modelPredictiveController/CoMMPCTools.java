@@ -10,11 +10,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLargeValue;
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
+
 public class CoMMPCTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   public static final double sufficientlyLarge = 1.0e10;
-   public static final double sufficientlyLongTime = 1.0e1;
 
    public static void constructDesiredCoMPosition(FixedFramePoint3DBasics comPositionToPack,
                                                   FramePoint3DReadOnly firstCoefficient,
@@ -28,9 +29,9 @@ public class CoMMPCTools
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
 
-      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLarge);
+      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLargeValue);
       double t2 = timeInPhase * timeInPhase;
-      double t3 = t2 * timeInPhase;
+      double t3 = timeInPhase * t2;
 
       comPositionToPack.checkReferenceFrameMatch(worldFrame);
       comPositionToPack.setToZero();
@@ -54,7 +55,7 @@ public class CoMMPCTools
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
 
-      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLarge);
+      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLargeValue);
 
       comVelocityToPack.checkReferenceFrameMatch(worldFrame);
       comVelocityToPack.setToZero();
@@ -76,7 +77,7 @@ public class CoMMPCTools
                                                       double omega)
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
-      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLarge);
+      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLargeValue);
       double omega2 = omega * omega;
 
       comAccelerationToPack.checkReferenceFrameMatch(worldFrame);
@@ -98,7 +99,7 @@ public class CoMMPCTools
                                                   double omega)
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
-      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLarge);
+      double exponential = Math.min(Math.exp(omega * timeInPhase), sufficientlyLargeValue);
 
       double t2 = timeInPhase * timeInPhase;
       double t3 = timeInPhase * t2;

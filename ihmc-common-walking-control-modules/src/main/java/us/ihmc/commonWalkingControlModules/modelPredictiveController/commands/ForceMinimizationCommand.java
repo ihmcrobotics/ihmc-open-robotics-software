@@ -1,25 +1,20 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingFootControlModule;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 
-public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
+public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCommand>
 {
-   private final FramePoint3D objective = new FramePoint3D();
    private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
 
    private int segmentNumber;
-   private double timeOfObjective;
    private double omega;
    private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
-   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    private DoubleConsumer costToGoConsumer;
 
@@ -27,20 +22,6 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    {
       return MPCCommandType.VALUE;
    }
-
-   public void setConstraintType(ConstraintType constraintType)
-   {
-      this.constraintType = constraintType;
-   }
-
-   public ConstraintType getConstraintType()
-   {
-      return constraintType;
-   }
-
-   public abstract int getDerivativeOrder();
-
-   public abstract MPCValueType getValueType();
 
    public void clear()
    {
@@ -58,19 +39,9 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
 
-   public void setObjective(FrameTuple3DReadOnly objective)
-   {
-      this.objective.set(objective);
-   }
-
    public void setSegmentNumber(int segmentNumber)
    {
       this.segmentNumber = segmentNumber;
-   }
-
-   public void setTimeOfObjective(double timeOfObjective)
-   {
-      this.timeOfObjective = timeOfObjective;
    }
 
    public void setOmega(double omega)
@@ -88,19 +59,9 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       return weight;
    }
 
-   public double getTimeOfObjective()
-   {
-      return timeOfObjective;
-   }
-
    public double getOmega()
    {
       return omega;
-   }
-
-   public FrameTuple3DReadOnly getObjective()
-   {
-      return objective;
    }
 
    public int getNumberOfContacts()

@@ -30,14 +30,16 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
+
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
 
 public class CoMTrajectoryModelPredictiveController
 {
    private static boolean verbose = false;
    private static final boolean includeVelocityObjective = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   public static final double sufficientlyLongTime = 1.0;
 
    private static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final int maxCapacity = 10;
@@ -79,6 +81,9 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble durationOfIgnoredSegments = new YoDouble("durationOfIgnoredSegments", registry);
    private final YoFramePoint3D finalDCMObjective = new YoFramePoint3D("finalDCMObjective", worldFrame, registry);
 
+   private final YoDouble initialCoMPositionCostToGo = new YoDouble("initialCoMPositionCostToGo", registry);
+   private final YoDouble initialCoMVelocityCostToGo = new YoDouble("initialCoMVelocityCostToGo", registry);
+
    private final YoDouble maximumPlanningHorizon = new YoDouble("maximumPlanningHorizon", registry);
    private final YoInteger maximumPlanningSegments = new YoInteger("maximumPlanningSegments", registry);
    private final YoInteger activeSegment = new YoInteger("activeSegment", registry);
@@ -105,6 +110,9 @@ public class CoMTrajectoryModelPredictiveController
    final CoMMPCQPSolver qpSolver;
    private CornerPointViewer viewer = null;
    private BagOfBalls comTrajectoryViewer = null;
+
+   private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
+   private final DoubleConsumer initialComVelocityConsumer = initialCoMVelocityCostToGo::set;
 
    public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
@@ -365,6 +373,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue() - durationOfIgnoredSegments.getDoubleValue());
       objectiveToPack.setObjective(currentCoMPosition);
+      objectiveToPack.setCostToGoConsumer(initialComPositionConsumer);
 //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
@@ -382,6 +391,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue() - durationOfIgnoredSegments.getDoubleValue());
       objectiveToPack.setObjective(currentCoMVelocity);
+      objectiveToPack.setCostToGoConsumer(initialComVelocityConsumer);
 //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
@@ -661,7 +671,7 @@ public class CoMTrajectoryModelPredictiveController
       {
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
-         duration = Math.min(duration, MPCQPInputCalculator.sufficientlyLongTime);
+         duration = Math.min(duration, sufficientlyLongTime);
          compute(segmentId,
                  0.0,
                  comCornerPoints.add(),

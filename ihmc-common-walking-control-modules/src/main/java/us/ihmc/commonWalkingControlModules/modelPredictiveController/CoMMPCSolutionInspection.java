@@ -7,10 +7,11 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 
 public class CoMMPCSolutionInspection
 {
-   private static final double epsilon = 1e-5;
+   private static final double epsilon = 1e-3;
    private final MPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
    private final QPInputTypeA qpInput = new QPInputTypeA(0);
@@ -60,7 +61,7 @@ public class CoMMPCSolutionInspection
    {
       boolean success = inputCalculator.calculateValueObjective(qpInput, command);
       if (success)
-         inspectInput(qpInput, solution);
+         command.setCostToGo(inspectInput(qpInput, solution));
    }
 
    public void inspectCoMContinuityObjective(CoMContinuityCommand command, DMatrixRMaj solution)
@@ -70,16 +71,15 @@ public class CoMMPCSolutionInspection
          inspectInput(qpInput, solution);
    }
 
-   public void inspectInput(QPInputTypeA input, DMatrixRMaj solution)
+   public double inspectInput(QPInputTypeA input, DMatrixRMaj solution)
    {
       switch (input.getConstraintType())
       {
          case OBJECTIVE:
             if (input.useWeightScalar())
-               inspectObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), solution);
+               return inspectObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), solution);
             else
                throw new IllegalArgumentException("Not yet implemented.");
-            break;
          case EQUALITY:
             inspectEqualityConstraint(input.taskJacobian, input.taskObjective, solution);
             break;
@@ -92,24 +92,34 @@ public class CoMMPCSolutionInspection
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
+
+      return 0.0;
    }
 
    private final DMatrixRMaj solverInput_H = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj solverInput_f = new DMatrixRMaj(0, 0);
 
-   private void inspectObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, DMatrixRMaj solution)
+   private final DMatrixRMaj Hx = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj cost = new DMatrixRMaj(1, 1);
+
+   private double inspectObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, DMatrixRMaj solution)
    {
       int problemSize = indexHandler.getTotalProblemSize();
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_f.reshape(problemSize, 1);
+      Hx.reshape(problemSize, 1);
 
       solverInput_H.zero();
       solverInput_f.zero();
 
       CoMMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
 
-      // TODO add the cost term in
+      CommonOps_DDRM.mult(solverInput_H, solution, Hx);
+      CommonOps_DDRM.multTransA(solution, Hx, cost);
+      CommonOps_DDRM.multAddTransA(solverInput_f, solution, cost);
+
+      return cost.get(0, 0);
    }
 
    private final DMatrixRMaj solverInput_Aeq = new DMatrixRMaj(0, 0);
@@ -137,7 +147,7 @@ public class CoMMPCSolutionInspection
       for (int i = 0; i < constraints; i++)
       {
          if (!MathTools.epsilonEquals(solverOutput_beq.get(i, 0), solverInput_beq.get(i, 0), epsilon))
-            throw new RuntimeException("Equality constraint wasn't satisfied.");
+            LogTools.error("Equality constraint wasn't satisfied.");
       }
    }
 
