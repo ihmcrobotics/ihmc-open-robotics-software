@@ -142,8 +142,8 @@ public class JumpingMomentumRateControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-//      inverseDynamicsCommandList.addCommand(momentumRateCommand);
-      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
+      inverseDynamicsCommandList.addCommand(momentumRateCommand);
+//      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
       return inverseDynamicsCommandList;
    }
 

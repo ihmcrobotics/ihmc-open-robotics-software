@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -256,17 +257,15 @@ public class ContactPointHelper
             }
          }
       }
-
-      timeOfContact = time;
    }
 
    public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
    {
-      duration = Math.min(duration, sufficientlyLargeValue);
+      duration = Math.min(duration, sufficientlyLongTime);
       double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
 
-      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLongTime);
-      double positiveExponential2 = positiveExponential * positiveExponential;
+      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
+      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
       double negativeExponential = 1.0 / positiveExponential;
       double negativeExponential2 = negativeExponential * negativeExponential;
       double duration2 = duration * duration;
@@ -320,10 +319,10 @@ public class ContactPointHelper
 
    public void computeJerkIntegrationMatrix(double duration, double omega)
    {
-      duration = Math.min(duration, sufficientlyLargeValue);
+      duration = Math.min(duration, sufficientlyLongTime);
 
       double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
-      double positiveExponential2 = positiveExponential * positiveExponential;
+      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
       double negativeExponential = 1.0 / positiveExponential;
       double negativeExponential2 = negativeExponential * negativeExponential;
       double omega2 = omega * omega;

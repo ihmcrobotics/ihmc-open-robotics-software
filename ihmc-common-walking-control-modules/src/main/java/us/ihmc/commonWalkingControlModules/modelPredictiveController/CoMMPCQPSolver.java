@@ -37,6 +37,14 @@ public class CoMMPCQPSolver
    final DMatrixRMaj solverInput_beq;
    final DMatrixRMaj solverInput_Ain;
    final DMatrixRMaj solverInput_bin;
+   final DMatrixRMaj solverOutput_beq;
+   final DMatrixRMaj solverOutput_bin;
+
+   //   private final DMatrixRMaj solverInput_lb;
+   //   private final DMatrixRMaj solverInput_ub;
+
+   //   private final DMatrixRMaj solverInput_lb_previous;
+   //   private final DMatrixRMaj solverInput_ub_previous;
 
    private final DMatrixRMaj solverOutput;
 
@@ -70,11 +78,8 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
-      comCoefficientRegularization.set(1e-5);
-      rhoCoefficientRegularization.set(1e-5);
-
-      rhoRateCoefficientRegularization.set(1e-6);
-      comRateCoefficientRegularization.set(1e-6);
+      rhoRateCoefficientRegularization.set(1e-12);
+      comRateCoefficientRegularization.set(1e-12);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
@@ -90,6 +95,17 @@ public class CoMMPCQPSolver
       solverInput_beq = new DMatrixRMaj(0, 1);
       solverInput_Ain = new DMatrixRMaj(0, problemSize);
       solverInput_bin = new DMatrixRMaj(0, 1);
+      solverOutput_bin = new DMatrixRMaj(0, 1);
+      solverOutput_beq = new DMatrixRMaj(0, 1);
+
+      //      solverInput_lb = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_ub = new DMatrixRMaj(problemSize, 1);
+
+      //      solverInput_lb_previous = new DMatrixRMaj(problemSize, 1);
+      //      solverInput_ub_previous = new DMatrixRMaj(problemSize, 1);
+
+      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       solverOutput = new DMatrixRMaj(problemSize, 1);
 
@@ -451,6 +467,16 @@ public class CoMMPCQPSolver
 
       solverInput_H_previous.set(solverInput_H);
       solverInput_f_previous.set(solverInput_f);
+
+      solverOutput_beq.reshape(numberOfEqualityConstraints.getIntegerValue(), 1);
+      solverOutput_bin.reshape(numberOfInequalityConstraints.getIntegerValue(), 1);
+
+      CommonOps_DDRM.mult(solverInput_Ain, solverOutput, solverOutput_bin);
+      CommonOps_DDRM.mult(solverInput_Aeq, solverOutput, solverOutput_beq);
+
+
+      //      solverInput_lb_previous.set(solverInput_lb);
+      //      solverInput_ub_previous.set(solverInput_ub);
 
       return true;
    }

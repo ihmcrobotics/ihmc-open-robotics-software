@@ -203,6 +203,16 @@ public class ContactPlaneHelper
       return rhoMaxMatrix;
    }
 
+   public DMatrixRMaj getAccelerationIntegrationHessian()
+   {
+      return accelerationIntegrationHessian;
+   }
+
+   public DMatrixRMaj getAccelerationIntegrationGradient()
+   {
+      return accelerationIntegrationGradient;
+   }
+
    private final Point3D point = new Point3D();
 
    public void computeBasisVectors(ConvexPolygon2DReadOnly contactPointsInPlaneFrame, FramePose3DReadOnly framePose, double mu)
