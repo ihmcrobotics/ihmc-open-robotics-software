@@ -155,8 +155,8 @@ public class CoMMPCQPSolver
       int previousProblemSize = problemSize;
       problemSize = indexHandler.getTotalProblemSize();
 
-      if (previousProblemSize != problemSize)
-      //      if (true)
+      //      if (previousProblemSize != problemSize )
+      if (true)
       {
          qpInput.setNumberOfVariables(problemSize);
 
@@ -178,8 +178,15 @@ public class CoMMPCQPSolver
          notifyResetActiveSet();
       }
 
+      solverInput_Aeq.zero();
+      solverInput_beq.zero();
+
+      solverInput_Ain.zero();
+      solverInput_bin.zero();
+
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
+
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
 
@@ -334,7 +341,11 @@ public class CoMMPCQPSolver
       addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
    }
 
-   public static void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int problemSize, DMatrixRMaj solverInput_Aeq, DMatrixRMaj solverInput_beq)
+   public static void addEqualityConstraint(DMatrixRMaj taskJacobian,
+                                            DMatrixRMaj taskObjective,
+                                            int problemSize,
+                                            DMatrixRMaj solverInput_Aeq,
+                                            DMatrixRMaj solverInput_beq)
    {
       if (taskJacobian.getNumCols() != problemSize)
       {

@@ -19,6 +19,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -73,10 +75,12 @@ public class CoMTrajectoryModelPredictiveController
    private final YoFramePoint3D currentVRPPosition = new YoFramePoint3D("currentVRPPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
    private final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
+   private final YoDouble durationOfIgnoredSegments = new YoDouble("durationOfIgnoredSegments", registry);
    private final YoFramePoint3D finalDCMObjective = new YoFramePoint3D("finalDCMObjective", worldFrame, registry);
 
    private final YoDouble maximumPlanningHorizon = new YoDouble("maximumPlanningHorizon", registry);
    private final YoInteger maximumPlanningSegments = new YoInteger("maximumPlanningSegments", registry);
+   private final YoInteger activeSegment = new YoInteger("activeSegment", registry);
    private final List<ContactPlaneProvider> planningSequence = new ArrayList<>();
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
@@ -181,7 +185,7 @@ public class CoMTrajectoryModelPredictiveController
 
       initializationCalculator.solveForTrajectory(contactSequence);
       double horizonLength = computePlanningHorizon(contactSequence);
-      initializationCalculator.compute(horizonLength);
+      initializationCalculator.compute(horizonLength + durationOfIgnoredSegments.getDoubleValue());
       finalDCMObjective.set(initializationCalculator.getDesiredDCMPosition());
 
       indexHandler.initialize(planningSequence);
@@ -222,16 +226,34 @@ public class CoMTrajectoryModelPredictiveController
    {
       planningSequence.clear();
       double horizonDuration = 0.0;
+
+      int activeSegment = -1;
+      durationOfIgnoredSegments.set(0.0);
       for (int i = 0; i < fullContactSequence.size(); i++)
       {
+         TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
+         if (timeInterval.intervalContains(currentTimeInState.getDoubleValue()))
+         {
+            activeSegment = i;
+            break;
+         }
+         durationOfIgnoredSegments.add(timeInterval.getDuration());
+      }
+
+      if (this.activeSegment.getIntegerValue() != activeSegment)
+      {
+         qpSolver.resetRateRegularization();
+         qpSolver.notifyResetActiveSet();
+      }
+
+      for (int i = activeSegment; i < fullContactSequence.size(); i++)
+      {
          ContactPlaneProvider contact = fullContactSequence.get(i);
-         if (currentTimeInState.getDoubleValue() > contact.getTimeInterval().getEndTime())
-            continue;
 
          planningSequence.add(contact);
          horizonDuration += contact.getTimeInterval().getDuration();
 
-         if (contact.getContactState().isLoadBearing() && (horizonDuration >= maximumPlanningHorizon.getDoubleValue() || i > maximumPlanningSegments.getValue() - 2))
+         if (contact.getContactState().isLoadBearing() && (horizonDuration >= maximumPlanningHorizon.getDoubleValue() || planningSequence.size() > maximumPlanningSegments.getValue() - 1))
             break;
       }
 
@@ -305,7 +327,7 @@ public class CoMTrajectoryModelPredictiveController
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
-            double duration = contactSequence.get(nextSequence).getTimeInterval().getDuration();
+            double duration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), CoMTrajectoryPlannerTools.sufficientlyLongTime);
             mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
                                                               commandProvider.getNextVRPVelocityCommand(),
                                                               startVRPPositions.get(nextSequence),
@@ -340,7 +362,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(HIGH_WEIGHT);
       objectiveToPack.setSegmentNumber(0);
-      objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue());
+      objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue() - durationOfIgnoredSegments.getDoubleValue());
       objectiveToPack.setObjective(currentCoMPosition);
 //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
@@ -357,7 +379,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(HIGH_WEIGHT);
       objectiveToPack.setSegmentNumber(0);
-      objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue());
+      objectiveToPack.setTimeOfObjective(currentTimeInState.getDoubleValue() - durationOfIgnoredSegments.getDoubleValue());
       objectiveToPack.setObjective(currentCoMVelocity);
 //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
@@ -582,6 +604,7 @@ public class CoMTrajectoryModelPredictiveController
 
    public void compute(double timeInPhase)
    {
+      timeInPhase -= durationOfIgnoredSegments.getDoubleValue();
       int segmentNumber = getSegmentNumber(timeInPhase);
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
       compute(segmentNumber, timeInSegment);
