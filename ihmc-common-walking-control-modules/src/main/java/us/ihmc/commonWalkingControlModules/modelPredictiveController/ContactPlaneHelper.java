@@ -280,7 +280,6 @@ public class ContactPlaneHelper
          ContactPointHelper contactPoint = contactPoints[contactPointIdx];
          contactPoint.computeJacobians(time, omega);
 
-
          for (int derivativeOrder = 0; derivativeOrder < 4; derivativeOrder++)
          {
             MatrixTools.setMatrixBlock(getLinearJacobian(derivativeOrder),

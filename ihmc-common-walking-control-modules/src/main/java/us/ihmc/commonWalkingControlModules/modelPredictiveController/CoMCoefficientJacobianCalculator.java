@@ -40,6 +40,7 @@ public class CoMCoefficientJacobianCalculator
 
    public static void calculatePositionJacobian(int segmentId, double time, DMatrix positionJacobianToPack, double scale)
    {
+
       int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
       double c1 = scale;
 
@@ -49,6 +50,7 @@ public class CoMCoefficientJacobianCalculator
 
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
       {
+         time = Math.min(MPCQPInputCalculator.sufficientlyLongTime, time);
          double c0 = time * c1;
          add(positionJacobianToPack, 0, startIndex, c0);
          add(positionJacobianToPack, 1, startIndex + 2, c0);

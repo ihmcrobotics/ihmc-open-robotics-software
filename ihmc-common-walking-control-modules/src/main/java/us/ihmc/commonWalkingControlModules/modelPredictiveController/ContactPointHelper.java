@@ -15,6 +15,9 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLargeValue;
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
+
 public class ContactPointHelper
 {
    private final int numberOfBasisVectorsPerContactPoint;
@@ -168,7 +171,7 @@ public class ContactPointHelper
       if (MathTools.epsilonEquals(time, timeOfContact, 1e-5))
          return;
 
-      timeOfContact = time;
+      timeOfContact = Math.min(time, sufficientlyLongTime);
 
       linearPositionJacobianMatrix.zero();
       linearVelocityJacobianMatrix.zero();
@@ -182,7 +185,7 @@ public class ContactPointHelper
 
       double t2 = timeOfContact * timeOfContact;
       double t3 = timeOfContact * t2;
-      double positiveExponential = Math.exp(omega * timeOfContact);
+      double positiveExponential = Math.min(Math.exp(omega * timeOfContact), sufficientlyLargeValue);
       double negativeExponential = 1.0 / positiveExponential;
       double firstVelocityCoefficient = omega * positiveExponential;
       double secondVelocityCoefficient = -omega * negativeExponential;
@@ -259,9 +262,10 @@ public class ContactPointHelper
 
    public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
    {
+      duration = Math.min(duration, sufficientlyLargeValue);
       double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
 
-      double positiveExponential = Math.exp(omega * duration);
+      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLongTime);
       double positiveExponential2 = positiveExponential * positiveExponential;
       double negativeExponential = 1.0 / positiveExponential;
       double negativeExponential2 = negativeExponential * negativeExponential;
@@ -316,7 +320,9 @@ public class ContactPointHelper
 
    public void computeJerkIntegrationMatrix(double duration, double omega)
    {
-      double positiveExponential = Math.exp(omega * duration);
+      duration = Math.min(duration, sufficientlyLargeValue);
+
+      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
       double positiveExponential2 = positiveExponential * positiveExponential;
       double negativeExponential = 1.0 / positiveExponential;
       double negativeExponential2 = negativeExponential * negativeExponential;
@@ -527,7 +533,7 @@ public class ContactPointHelper
    public void computeContactForce(double omega, double time)
    {
       double omega2 = omega * omega;
-      double exponential = Math.exp(omega * time);
+      double exponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
       double negativeExponential = 1.0 / exponential;
       double a0 = omega2 * exponential;
       double a1 = omega2 * negativeExponential;

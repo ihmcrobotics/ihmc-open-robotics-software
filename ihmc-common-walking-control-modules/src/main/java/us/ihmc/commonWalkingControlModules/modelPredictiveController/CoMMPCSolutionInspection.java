@@ -136,8 +136,8 @@ public class CoMMPCSolutionInspection
 
       for (int i = 0; i < constraints; i++)
       {
-//         if (!MathTools.epsilonEquals(solverOutput_beq.get(i, 0), solverInput_beq.get(i, 0), epsilon))
-//            throw new RuntimeException("Equality constraint wasn't satisfied.");
+         if (!MathTools.epsilonEquals(solverOutput_beq.get(i, 0), solverInput_beq.get(i, 0), epsilon))
+            throw new RuntimeException("Equality constraint wasn't satisfied.");
       }
    }
 
@@ -190,8 +190,9 @@ public class CoMMPCSolutionInspection
 
       for (int i = 0; i < constraints; i++)
       {
-//         if (solverOutput_bin.get(i, 0) < solverInput_bin.get(i, 0) - epsilon)
-//            throw new RuntimeException("Inequality constraint wasn't satisfied.");
+         if (solverOutput_bin.get(i, 0) < solverInput_bin.get(i, 0) - epsilon)
+            throw new RuntimeException("Inequality constraint wasn't satisfied.");
       }
+
    }
 }
