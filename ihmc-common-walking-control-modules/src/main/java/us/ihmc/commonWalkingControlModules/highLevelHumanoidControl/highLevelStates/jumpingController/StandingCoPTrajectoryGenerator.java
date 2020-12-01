@@ -53,8 +53,11 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
 
       // compute cop waypoint location
       ContactPlaneProvider contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartTime(0.0);
       contactState.setStartECMPPosition(state.getInitialCoP());
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
 
       ContactPlaneProvider previousContactState = contactState;
 
@@ -71,6 +74,7 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
 
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
       contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndECMPPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
@@ -80,6 +84,7 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
