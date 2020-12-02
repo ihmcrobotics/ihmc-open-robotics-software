@@ -249,26 +249,7 @@ public class FourBar
     */
    public void setToMin(FourBarAngle source)
    {
-      FourBarVertex startVertex = getVertex(source);
-      startVertex.setToMin();
-
-      FourBarVertex nextVertex = startVertex.getNextVertex();
-      if (startVertex.isConvex() == nextVertex.isConvex())
-         nextVertex.setToMax();
-      else
-         nextVertex.setToMin();
-
-      FourBarVertex oppositeVertex = startVertex.getOppositeVertex();
-      if (startVertex.isConvex() == oppositeVertex.isConvex())
-         oppositeVertex.setToMin();
-      else
-         oppositeVertex.setToMax();
-
-      FourBarVertex previousVertex = startVertex.getPreviousVertex();
-      if (startVertex.isConvex() == previousVertex.isConvex())
-         previousVertex.setToMax();
-      else
-         previousVertex.setToMin();
+      FourBarTools.setToMinAngle(getVertex(source));
    }
 
    /**
@@ -279,26 +260,7 @@ public class FourBar
     */
    public void setToMax(FourBarAngle source)
    {
-      FourBarVertex startVertex = getVertex(source);
-      startVertex.setToMax();
-
-      FourBarVertex nextVertex = startVertex.getNextVertex();
-      if (startVertex.isConvex() == nextVertex.isConvex())
-         nextVertex.setToMin();
-      else
-         nextVertex.setToMax();
-
-      FourBarVertex oppositeVertex = startVertex.getOppositeVertex();
-      if (startVertex.isConvex() == oppositeVertex.isConvex())
-         oppositeVertex.setToMax();
-      else
-         oppositeVertex.setToMin();
-
-      FourBarVertex previousVertex = startVertex.getPreviousVertex();
-      if (startVertex.isConvex() == previousVertex.isConvex())
-         previousVertex.setToMin();
-      else
-         previousVertex.setToMax();
+      FourBarTools.setToMaxAngle(getVertex(source));
    }
 
    /**

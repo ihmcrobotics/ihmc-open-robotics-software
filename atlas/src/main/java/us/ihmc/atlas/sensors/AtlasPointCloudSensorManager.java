@@ -16,7 +16,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasPointCloudSensorManager
@@ -30,7 +30,7 @@ public class AtlasPointCloudSensorManager
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
 
    public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory,
-                                       ROS2Node ros2Node,
+                                       ROS2NodeInterface ros2Node,
                                        RobotROSClockCalculator rosClockCalculator,
                                        boolean useTrackingData)
    {
