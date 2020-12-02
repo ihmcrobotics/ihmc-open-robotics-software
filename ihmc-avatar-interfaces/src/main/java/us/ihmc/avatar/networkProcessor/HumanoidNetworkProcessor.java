@@ -296,7 +296,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
          modulesToClose.add(module);
 
          return module;
@@ -392,7 +392,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       LogTools.info("Setting up sensor module...");
       try
       {
-         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(ros2Node);
 
          checkIfModuleCanBeCreated(sensorSuiteManager.getClass());
 

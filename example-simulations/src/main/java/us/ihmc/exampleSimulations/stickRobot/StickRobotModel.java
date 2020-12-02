@@ -27,10 +27,12 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -288,7 +290,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2NodeInterface)
    {
       return null;
    }

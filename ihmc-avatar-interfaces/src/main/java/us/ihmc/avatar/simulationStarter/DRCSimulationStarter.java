@@ -20,7 +20,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -35,7 +34,6 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -82,6 +80,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
+   private boolean logToFile = false;
 
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
@@ -297,6 +296,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
+    * Whether to log intraprocess the dynamics simulation of Atlas.
+    *
+    * @param logToFile
+    */
+   public void setLogToFile(boolean logToFile)
+   {
+      this.logToFile = logToFile;
+   }
+
+   /**
     * Set a specific starting location. By default, the robot will start at (0, 0) in world with no
     * yaw.
     */
@@ -497,6 +506,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setLogToFile(logToFile);
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();

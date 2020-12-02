@@ -35,6 +35,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -43,6 +44,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -459,6 +461,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public ValkyrieSensorSuiteManager getSensorSuiteManager()
    {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public ValkyrieSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
+   {
       if (sensorSuiteManager == null)
       {
          sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
@@ -467,7 +475,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getROSClockCalculator(),
                                                              getSensorInformation(),
                                                              getJointMap(),
-                                                             target);
+                                                             target,
+                                                             ros2Node);
       }
       return sensorSuiteManager;
    }
