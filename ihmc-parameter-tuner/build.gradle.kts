@@ -20,7 +20,7 @@ mainDependencies {
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
    api("us.ihmc:ihmc-robot-data-logger:0.20.3") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
