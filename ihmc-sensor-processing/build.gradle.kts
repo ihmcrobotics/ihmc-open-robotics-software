@@ -30,7 +30,7 @@ mainDependencies {
 
    api("us.ihmc:euclid-frame:0.15.2")
    api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc:ihmc-graphics-description:0.19.1")
+   api("us.ihmc:ihmc-graphics-description:0.19.2")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
