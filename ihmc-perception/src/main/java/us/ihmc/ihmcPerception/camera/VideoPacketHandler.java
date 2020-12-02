@@ -12,8 +12,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
@@ -21,12 +21,12 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    private volatile boolean enable = true;
 
-   public VideoPacketHandler(ROS2Node ros2Node)
+   public VideoPacketHandler(ROS2NodeInterface ros2Node)
    {
       this(ros2Node, ROS2Tools.VIDEO);
    }
    
-   public VideoPacketHandler(ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic)
    {
       LogTools.info("Creating video publisher on topic: {}", topic.getName());
       publisher = ROS2Tools.createPublisher(ros2Node, topic);

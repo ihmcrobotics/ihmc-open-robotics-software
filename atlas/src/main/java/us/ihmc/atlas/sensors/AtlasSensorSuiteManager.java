@@ -18,10 +18,9 @@ import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -30,11 +29,14 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
+   public static final String NODE_NAME = "ihmc_atlas_sensor_suite_node";
 
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;
@@ -67,7 +69,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   DRCRobotJointMap jointMap,
                                   RobotPhysicalProperties physicalProperties,
                                   RobotTarget targetDeployment,
-                                  PubSubImplementation pubSubImplementation)
+                                  ROS2NodeInterface ros2Node)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -75,8 +77,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
-
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_atlas_sensor_suite_node");
+      this.ros2Node = ros2Node == null ? ROS2Tools.createROS2Node(FAST_RTPS, NODE_NAME) : ros2Node;
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)
@@ -252,15 +253,17 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          leftFishEyeCameraReceiver.closeAndDispose();
       if (rightFishEyeCameraReceiver != null)
          rightFishEyeCameraReceiver.closeAndDispose();
-      ros2Node.destroy();
+      if (ros2Node.getName().equals(NODE_NAME)) // i.e. we created this node, so should manage it
+      {
+         ((ROS2Node) ros2Node).destroy();
+      }
    }
 
    private LidarScanPublisher createLidarScanPublisher()
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withTypeName(RobotConfigurationData.class);
-      LidarScanPublisher lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
+      LidarScanPublisher lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node);
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setShadowFilter();
       lidarScanPublisher.setSelfCollisionFilter(collisionBoxProvider);

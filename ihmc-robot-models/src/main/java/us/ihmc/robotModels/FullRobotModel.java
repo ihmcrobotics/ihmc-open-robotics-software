@@ -14,6 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -149,4 +150,9 @@ public interface FullRobotModel
    ForceSensorDefinition[] getForceSensorDefinitions();
 
    double getTotalMass();
+
+   default List<? extends KinematicLoopFunction> getKinematicLoops()
+   {
+      return Collections.emptyList();
+   }
 }

@@ -130,7 +130,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
 
-      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
@@ -150,7 +150,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupObjectDetectorToolboxModule();
       networkProcessor.setupFootstepPlanningToolboxModule();
 
-      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
@@ -167,7 +167,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupFootstepPlanningToolboxModule();
 
 
-      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableDepthPointCloudPublisher(false);
       sensorModule.setEnableFisheyeCameraPublishers(false);
       sensorModule.setEnableLidarScanPublisher(true);
@@ -192,7 +192,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
 
-      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(PubSubImplementation.FAST_RTPS);
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);

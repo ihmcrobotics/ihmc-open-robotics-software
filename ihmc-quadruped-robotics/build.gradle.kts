@@ -27,7 +27,12 @@ mainDependencies {
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-robot-description:0.20.1")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.3") {
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
+      exclude(group = "org.junit.platform", module = "junit-platform-commons")
+      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
+   }
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.1")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -47,8 +52,6 @@ mainDependencies {
 testDependencies {
    api("com.google.caliper:caliper:1.0-beta-2")
 
-   api("us.ihmc:simulation-construction-set:0.21.1")
-   api("us.ihmc:simulation-construction-set-test:0.21.1")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
