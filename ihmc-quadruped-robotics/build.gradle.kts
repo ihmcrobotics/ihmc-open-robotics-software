@@ -26,7 +26,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.9.7")
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ihmc-graphics-description:0.19.2")
-   api("us.ihmc:ihmc-robot-description:0.20.1")
+   api("us.ihmc:ihmc-robot-description:0.20.2")
    api("us.ihmc:ihmc-robot-data-logger:0.20.3") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
