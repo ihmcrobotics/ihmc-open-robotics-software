@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
@@ -28,7 +30,7 @@ public class LQRJumpMomentumControllerTest
    @Test
    public void testComputingAndS1OneContact()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -76,14 +78,14 @@ public class LQRJumpMomentumControllerTest
       EjmlUnitTests.assertEquals(DExpected, controller.getD(), epsilon);
 
       DMatrixRMaj QExpected = new DMatrixRMaj(3, 3);
-      QExpected.set(0, 0, LQRMomentumController.defaultVrpTrackingWeight);
-      QExpected.set(1, 1, LQRMomentumController.defaultVrpTrackingWeight);
-      QExpected.set(2, 2, LQRMomentumController.defaultVrpTrackingWeight);
+      QExpected.set(0, 0, LQRJumpMomentumController.defaultVrpTrackingWeight);
+      QExpected.set(1, 1, LQRJumpMomentumController.defaultVrpTrackingWeight);
+      QExpected.set(2, 2, LQRJumpMomentumController.defaultVrpTrackingWeight);
 
       DMatrixRMaj RExpected = new DMatrixRMaj(3, 3);
-      RExpected.set(0, 0, LQRMomentumController.defaultMomentumRateWeight);
-      RExpected.set(1, 1, LQRMomentumController.defaultMomentumRateWeight);
-      RExpected.set(2, 2, LQRMomentumController.defaultMomentumRateWeight);
+      RExpected.set(0, 0, LQRJumpMomentumController.defaultMomentumRateWeight);
+      RExpected.set(1, 1, LQRJumpMomentumController.defaultMomentumRateWeight);
+      RExpected.set(2, 2, LQRJumpMomentumController.defaultMomentumRateWeight);
 
       EjmlUnitTests.assertEquals(QExpected, controller.getQ(), epsilon);
       EjmlUnitTests.assertEquals(RExpected, controller.getR(), epsilon);
@@ -193,7 +195,7 @@ public class LQRJumpMomentumControllerTest
    @Test
    public void testCostFunctionContinuity()
    {
-      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega, 1.0);
 
       CoMTrajectoryPlanner coMTrajectoryPlanner = new CoMTrajectoryPlanner(-9.81, 1.0, null);
 
@@ -327,15 +329,15 @@ public class LQRJumpMomentumControllerTest
       controller.getS2Segment(2).compute(contactDuration, endOfS23);
 
 
-      MatrixTestTools.assertMatrixEquals(finalS2Function.getAlpha(), ((AlgebraicS2Segment) controller.getS2Segment(2)).getAlpha(), 1e-7);
-      MatrixTestTools.assertMatrixEquals(finalS2Function.getBeta(0), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(0), 1e-7);
-      MatrixTestTools.assertMatrixEquals(finalS2Function.getBeta(1), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(1), 1e-7);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS13, startOfS13, 1e-7);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS12, startOfS12, 1e-7);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS11, startOfS11, 5e-2);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS23, startOfS23, 5e-2);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS22, startOfS22, 1e-7);
-      MatrixTestTools.assertMatrixEquals(expectedStartOfS21, startOfS21, 2e-1);
+      assertPercentageMatrixEquals(finalS2Function.getAlpha(), ((AlgebraicS2Segment) controller.getS2Segment(2)).getAlpha(), 1e-7);
+      assertPercentageMatrixEquals(finalS2Function.getBeta(0), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(0), 1e-7);
+      assertPercentageMatrixEquals(finalS2Function.getBeta(1), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(1), 1e-7);
+      assertPercentageMatrixEquals(expectedStartOfS13, startOfS13, 1e-4);
+      assertPercentageMatrixEquals(expectedStartOfS12, startOfS12, 1e-4);
+      assertPercentageMatrixEquals(expectedStartOfS11, startOfS11, 1e-3);
+      assertPercentageMatrixEquals(expectedStartOfS23, startOfS23, 1e-4);
+      assertPercentageMatrixEquals(expectedStartOfS22, startOfS22, 1e-4);
+      assertPercentageMatrixEquals(expectedStartOfS21, startOfS21, 1e-2);
 
       MatrixTestTools.assertMatrixEquals(expectedEndOfS13, endOfS13, 1e-7);
       MatrixTestTools.assertMatrixEquals(expectedEndOfS12, endOfS12, 1e-7);
@@ -352,5 +354,25 @@ public class LQRJumpMomentumControllerTest
 
       MatrixTestTools.assertMatrixEquals(startOfS23, endOfS22, 1e-7);
       MatrixTestTools.assertMatrixEquals(startOfS22, endOfS21, 1e-7);
+   }
+
+   private static void assertPercentageMatrixEquals(DMatrix expected, DMatrix actual, double delta)
+   {
+      assertPercentageMatrixEquals("", expected, actual, delta);
+   }
+
+   private static void assertPercentageMatrixEquals(String message, DMatrix expected, DMatrix actual, double delta)
+   {
+      Assertions.assertEquals(expected.getNumRows(), actual.getNumRows(), message);
+      Assertions.assertEquals(expected.getNumCols(), actual.getNumCols(), message);
+
+      for (int i = 0; i < expected.getNumRows(); i++)
+      {
+         for (int j = 0; j < expected.getNumCols(); j++)
+         {
+            double epsilon = Math.max(Math.abs(expected.get(i, j)) * delta, delta);
+            Assertions.assertEquals(expected.get(i, j), actual.get(i, j), epsilon, message + " index (" + i + ", " + j + ")");
+         }
+      }
    }
 }

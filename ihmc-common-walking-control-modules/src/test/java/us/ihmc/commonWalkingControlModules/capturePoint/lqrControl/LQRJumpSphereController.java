@@ -38,7 +38,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), sphereRobot.getTotalMass(), registry);
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
