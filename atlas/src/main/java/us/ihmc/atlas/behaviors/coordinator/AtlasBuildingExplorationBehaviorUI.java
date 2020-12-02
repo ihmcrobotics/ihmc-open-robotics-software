@@ -46,12 +46,12 @@ public class AtlasBuildingExplorationBehaviorUI
       BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
 
       LogTools.info("Starting behavior UI");
-      BehaviorUI.create(behaviorRegistry,
-                        robotModel,
-                        ros2CommunicationMode,
-                        behaviorMessagerCommunicationMode,
-                        "localhost",
-                        behaviorModule.getMessager());
+      BehaviorUI behaviorUI = BehaviorUI.create(behaviorRegistry,
+                                                robotModel,
+                                                ros2CommunicationMode,
+                                                behaviorMessagerCommunicationMode,
+                                                "localhost",
+                                                behaviorModule.getMessager());
    }
 
    public static void main(String[] args)
