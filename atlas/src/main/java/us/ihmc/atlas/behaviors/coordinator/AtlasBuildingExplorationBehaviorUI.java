@@ -40,13 +40,13 @@ public class AtlasBuildingExplorationBehaviorUI
                                          sensorInformation);
       }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS;
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       LogTools.info("Starting behavior module");
       BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
 
       LogTools.info("Starting behavior UI");
-      BehaviorUI.create(BehaviorUIRegistry.BUILDING_EXPLORATION_BEHAVIORS,
+      BehaviorUI.create(behaviorRegistry,
                         robotModel,
                         ros2CommunicationMode,
                         behaviorMessagerCommunicationMode,

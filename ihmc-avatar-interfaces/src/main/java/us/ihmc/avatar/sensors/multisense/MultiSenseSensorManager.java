@@ -8,7 +8,7 @@ import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -20,7 +20,7 @@ public class MultiSenseSensorManager
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
 
    private final RosMainNode rosMainNode;
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
    private final AvatarRobotCameraParameters cameraParameters;
    private final AvatarRobotLidarParameters lidarParameters;
    private boolean setROSParameters;
@@ -31,7 +31,7 @@ public class MultiSenseSensorManager
    private VideoPacketHandler compressedVideoHandler;
 
    public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-                                  RosMainNode rosMainNode, ROS2Node ros2Node, RobotROSClockCalculator rosClockCalculator,
+                                  RosMainNode rosMainNode, ROS2NodeInterface ros2Node, RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
                                   AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
