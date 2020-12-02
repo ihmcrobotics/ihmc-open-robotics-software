@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:mecano:0.7.1")
    api("us.ihmc:mecano-yovariables:0.7.1")
    api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc:ihmc-realtime:1.3.0")
+   api("us.ihmc:ihmc-realtime:1.3.1")
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
    }
