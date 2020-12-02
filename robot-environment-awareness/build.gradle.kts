@@ -40,7 +40,7 @@ mainDependencies {
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
       exclude(group = "org.junit.platform", module = "junit-platform-launcher")
    }
-   api("us.ihmc:ihmc-messager-kryo:0.1.5")
+   api("us.ihmc:ihmc-messager-kryo:0.1.6")
 
    api("org.bytedeco:javacv-platform:1.5") {
       exclude(group = "org.bytedeco", module = "opencv")
