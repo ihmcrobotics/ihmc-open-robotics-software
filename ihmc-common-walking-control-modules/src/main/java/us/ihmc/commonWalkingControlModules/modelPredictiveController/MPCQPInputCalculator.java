@@ -13,7 +13,7 @@ import us.ihmc.matrixlib.MatrixTools;
 
 public class MPCQPInputCalculator
 {
-   public static final double sufficientlyLongTime = 0.5;
+   public static final double sufficientlyLongTime = 5.0;
    public static final double sufficientlyLargeValue = 1e5;
 
    private final MPCIndexHandler indexHandler;

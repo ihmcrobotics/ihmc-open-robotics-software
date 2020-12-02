@@ -377,7 +377,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
-      assertEquals(duration, dcmPositionCommands.get(0).getTimeOfObjective(), epsilon);
+//      assertEquals(duration, dcmPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, dcmPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, dcmPositionCommands.get(0).getObjective(), epsilon);
 
