@@ -140,6 +140,8 @@ public class InverseDynamicsQPSolver
          wrenchEquilibriumTorqueError = null;
       }
 
+      accelerationVariablesSubstitution.setIgnoreBias(true);
+
       parentRegistry.addChild(registry);
    }
 
@@ -604,22 +606,22 @@ public class InverseDynamicsQPSolver
       if (useWarmStart && pollResetActiveSet())
          qpSolver.resetActiveSet();
 
-      numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
-
       TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
-      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
-      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setActiveVariables(solverInput_activeIndices);
-      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       if (inactiveIndices != null)
       {
          for (int i = 0; i < inactiveIndices.size(); i++)
          {
-            qpSolver.setVariableInactive(inactiveIndices.get(i));
+            solverInput_activeIndices.set(inactiveIndices.get(i), 0, 0.0);
          }
       }
+
+      numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
+      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      qpSolver.setActiveVariables(solverInput_activeIndices);
+      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
       removeSubstitution(); // This needs to be done right after solving.

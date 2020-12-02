@@ -35,7 +35,12 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.3")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.3") {
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
+      exclude(group = "org.junit.platform", module = "junit-platform-commons")
+      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
+   }
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-java-toolkit:source")
