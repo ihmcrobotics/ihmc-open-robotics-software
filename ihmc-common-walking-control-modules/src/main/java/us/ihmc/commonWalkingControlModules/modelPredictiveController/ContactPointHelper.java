@@ -172,7 +172,7 @@ public class ContactPointHelper
       if (MathTools.epsilonEquals(time, timeOfContact, 1e-5))
          return;
 
-      timeOfContact = Math.min(time, sufficientlyLongTime);
+      time = Math.min(time, sufficientlyLongTime);
 
       linearPositionJacobianMatrix.zero();
       linearVelocityJacobianMatrix.zero();
@@ -184,9 +184,9 @@ public class ContactPointHelper
       rhoAccelerationJacobianMatrix.zero();
       rhoJerkJacobianMatrix.zero();
 
-      double t2 = timeOfContact * timeOfContact;
-      double t3 = timeOfContact * t2;
-      double positiveExponential = Math.min(Math.exp(omega * timeOfContact), sufficientlyLargeValue);
+      double t2 = time * time;
+      double t3 = time * t2;
+      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
       double negativeExponential = 1.0 / positiveExponential;
       double firstVelocityCoefficient = omega * positiveExponential;
       double secondVelocityCoefficient = -omega * negativeExponential;
@@ -194,10 +194,10 @@ public class ContactPointHelper
       double secondAccelerationCoefficient = -omega * secondVelocityCoefficient;
       double firstJerkCoefficient = omega * firstAccelerationCoefficient;
       double secondJerkCoefficient = -omega * secondAccelerationCoefficient;
-      boolean setTimeCoefficients = !MathTools.epsilonEquals(timeOfContact, 0.0, 1e-4);
+      boolean setTimeCoefficients = !MathTools.epsilonEquals(time, 0.0, 1e-4);
       double thirdVelocityCoefficient = 3 * t2;
-      double fourthVelocityCoefficient = 2 * timeOfContact;
-      double thirdAccelerationCoefficient = 6 * timeOfContact;
+      double fourthVelocityCoefficient = 2 * time;
+      double thirdAccelerationCoefficient = 6 * time;
 
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
@@ -257,6 +257,8 @@ public class ContactPointHelper
             }
          }
       }
+
+      timeOfContact = time;
    }
 
    public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)

@@ -78,8 +78,12 @@ public class CoMMPCQPSolver
       this.indexHandler = indexHandler;
       this.dt = dt;
 
-      rhoRateCoefficientRegularization.set(1e-12);
-      comRateCoefficientRegularization.set(1e-12);
+      rhoCoefficientRegularization.set(1e-5);
+      comCoefficientRegularization.set(1e-5);
+
+
+      rhoRateCoefficientRegularization.set(1e-6);
+      comRateCoefficientRegularization.set(1e-6);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);

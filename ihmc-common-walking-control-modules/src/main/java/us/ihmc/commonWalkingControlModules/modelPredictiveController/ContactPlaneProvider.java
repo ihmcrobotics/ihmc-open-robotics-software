@@ -46,6 +46,7 @@ public class ContactPlaneProvider implements ContactStateProvider
 
    public void set(ContactPlaneProvider other)
    {
+      reset();
       setStartCopPosition(other.getCopStartPosition());
       setEndCopPosition(other.getCopEndPosition());
       setTimeInterval(other.getTimeInterval());
