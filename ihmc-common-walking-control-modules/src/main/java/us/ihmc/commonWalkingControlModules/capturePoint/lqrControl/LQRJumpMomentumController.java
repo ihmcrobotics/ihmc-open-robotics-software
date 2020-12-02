@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -39,6 +39,7 @@ public class LQRJumpMomentumController
    private static final double discreteDt = 5e-3;
    private static final double gravityZ = -9.81;
 
+   private final double totalMass;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
@@ -48,8 +49,8 @@ public class LQRJumpMomentumController
    private final YoFramePoint3D referenceVRPPosition = new YoFramePoint3D("referenceVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D feedbackVRPPosition = new YoFramePoint3D("feedbackVRPPosition", ReferenceFrame.getWorldFrame(), registry);
 
-   static final double defaultVrpTrackingWeight = 1e2;
-   static final double defaultMomentumRateWeight = 1e-4;
+   static final double defaultVrpTrackingWeight = 1e6;
+   static final double defaultMomentumRateWeight = 1e-5;
 
    private double vrpTrackingWeight = defaultVrpTrackingWeight;
    private double momentumRateWeight = defaultMomentumRateWeight;
@@ -75,6 +76,9 @@ public class LQRJumpMomentumController
    private final DMatrixRMaj relativeState = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj relativeDesiredVRP = new DMatrixRMaj(3, 1);
 
+   private final DMatrixRMaj linearMomentumRateGradient = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj linearMomentumRateHessian = new DMatrixRMaj(3, 3);
+
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
@@ -86,13 +90,17 @@ public class LQRJumpMomentumController
    private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
    private final List<S2Segment> s2FunctionList = new ArrayList<>();
 
-   public LQRJumpMomentumController(DoubleProvider omega)
+   private final LinearMomentumRateCostCommand momentumRateCostCommand = new LinearMomentumRateCostCommand();
+
+   public LQRJumpMomentumController(DoubleProvider omega, double totalMass)
    {
-      this(omega, null);
+      this(omega, totalMass, null);
    }
 
-   public LQRJumpMomentumController(DoubleProvider omega, YoRegistry parentRegistry)
+   public LQRJumpMomentumController(DoubleProvider omega, double totalMass, YoRegistry parentRegistry)
    {
+      this.totalMass = totalMass;
+
       computeDynamicsMatrix(omega.getValue());
 
       computeP();
@@ -337,6 +345,15 @@ public class LQRJumpMomentumController
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
+
+      double massInverse = 1.0 / totalMass;
+
+      CommonOps_DDRM.multTransA(-2.0 * massInverse, k2, lqrCommonValues.getR1(), linearMomentumRateGradient);
+      CommonOps_DDRM.multAddTransAB(2.0 * massInverse, relativeState, Nb, linearMomentumRateGradient);
+      CommonOps_DDRM.scale(2.0 * massInverse * massInverse, lqrCommonValues.getR1(), linearMomentumRateHessian);
+
+      momentumRateCostCommand.setLinearMomentumRateGradient(linearMomentumRateGradient);
+      momentumRateCostCommand.setLinearMomentumRateHessian(linearMomentumRateHessian);
    }
 
    public DMatrixRMaj getU()
@@ -429,5 +446,10 @@ public class LQRJumpMomentumController
    public FramePoint3DReadOnly getFeedbackVRPPosition()
    {
       return feedbackVRPPosition;
+   }
+
+   public LinearMomentumRateCostCommand getMomentumRateCostCommand()
+   {
+      return momentumRateCostCommand;
    }
 }

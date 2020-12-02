@@ -1,41 +1,49 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
-public class QPInput
+public class QPInputTypeB
 {
    private static final int initialTaskSize = 6;
 
    private final int numberOfVariables;
 
    public final DMatrixRMaj taskJacobian = new DMatrixRMaj(0, 0);
-   public final DMatrixRMaj taskObjective = new DMatrixRMaj(0, 0);
+   public final DMatrixRMaj taskConvectiveTerm = new DMatrixRMaj(0, 0);
    public final DMatrixRMaj taskWeightMatrix = new DMatrixRMaj(0, 0);
+   public final DMatrixRMaj directCostHessian = new DMatrixRMaj(0, 0);
+   public final DMatrixRMaj directCostGradient = new DMatrixRMaj(0, 0);
 
    private boolean useWeightScalar = false;
    private double taskWeightScalar;
 
-   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
-
    /**
     * <p>
-    * Input into the QP solver. Must be in the form
+    * Direct input into the QP solver. This is only an objective cost function Must be in the form
     * </p>
     * <p>
-    * A * x - b
+    * g * Q * u + 0.5 * u^T * (H + Q) * u
+    * </p>
+    * <p>
+    *    u = A * x + b
     * </p>
     * where:
     * <ul>
-    * <li>A is {@code taskJacobian}
-    * <li>b is {@code taskObjective}
+    * <li>A is {@link #taskJacobian}
+    * <li>b is {@link #taskConvectiveTerm}
+    * <li>u is the general objective
+    * <li>Q is {@link #taskWeightMatrix}
+    * <li>H is {@link #directCostHessian}
+    * <li>g is {@link #directCostGradient}
     * <li>x is the vector of the problem variables, for instance joint accelerations.
-    * <p>
-    * where the overall desire is minimize the objective.
-    * </p>
+    *
+    * This cost function is then expanded out as
+    * <pre>
+    * f(x) = 0.5 * x<sup>T</sup> * A<sup>T</sup> * Q * A * x - b<sup>T </sup> Q * A * x
+    * </pre>
     */
-   public QPInput(int numberOfVariables)
+   public QPInputTypeB(int numberOfVariables)
    {
       this.numberOfVariables = numberOfVariables;
       reshape(initialTaskSize);
@@ -44,8 +52,10 @@ public class QPInput
    public void reshape(int taskSize)
    {
       taskJacobian.reshape(taskSize, numberOfVariables);
-      taskObjective.reshape(taskSize, 1);
+      taskConvectiveTerm.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
+      directCostHessian.reshape(taskSize, taskSize);
+      directCostGradient.reshape(taskSize, 1);
    }
 
    public void setTaskJacobian(DMatrixRMaj taskJacobian)
@@ -58,14 +68,14 @@ public class QPInput
       return taskJacobian;
    }
 
-   public void setTaskObjective(DMatrixRMaj taskObjective)
+   public void setTaskConvectiveTerm(DMatrixRMaj taskConvectiveTerm)
    {
-      this.taskObjective.set(taskObjective);
+      this.taskConvectiveTerm.set(taskConvectiveTerm);
    }
 
-   public DMatrixRMaj getTaskObjective()
+   public DMatrixRMaj getTaskConvectiveTerm()
    {
-      return taskObjective;
+      return taskConvectiveTerm;
    }
 
    public void setTaskWeightMatrix(DMatrixRMaj taskWeightMatrix)
@@ -76,6 +86,26 @@ public class QPInput
    public DMatrixRMaj getTaskWeightMatrix()
    {
       return taskWeightMatrix;
+   }
+
+   public void setDirectCostHessian(DMatrixRMaj directCostHessian)
+   {
+      this.directCostHessian.set(directCostHessian);
+   }
+
+   public DMatrixRMaj getDirectCostHessian()
+   {
+      return directCostHessian;
+   }
+
+   public void setDirectCostGradient(DMatrixRMaj directCostGradient)
+   {
+      this.directCostGradient.set(directCostGradient);
+   }
+
+   public DMatrixRMaj getDirectCostGradient()
+   {
+      return directCostGradient;
    }
 
    public void setUseWeightScalar(boolean useWeightScalar)
@@ -103,25 +133,16 @@ public class QPInput
       return useWeightScalar;
    }
 
-   public void setConstraintType(ConstraintType constraintType)
-   {
-      this.constraintType = constraintType;
-   }
-
-   public ConstraintType getConstraintType()
-   {
-      return constraintType;
-   }
 
    @Override
    public String toString()
    {
       String ret = getClass().getSimpleName();
       ret += "Jacobian:\n" + taskJacobian;
-      ret += "Objective:\n" + taskObjective;
-      if (constraintType != ConstraintType.OBJECTIVE)
-         ret += constraintType.toString();
-      else if (useWeightScalar)
+      ret += "Convective Term:\n" + taskConvectiveTerm;
+      ret += "Direct Hessian: \n" + directCostHessian;
+      ret += "Direct Gradient: \n" + directCostGradient;
+      if (useWeightScalar)
          ret += "Weight: " + taskWeightScalar;
       else
          ret += "Weight:\n" + taskWeightMatrix;
