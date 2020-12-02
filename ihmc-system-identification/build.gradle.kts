@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:euclid:0.15.2")
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:ihmc-yovariables:0.9.6")
