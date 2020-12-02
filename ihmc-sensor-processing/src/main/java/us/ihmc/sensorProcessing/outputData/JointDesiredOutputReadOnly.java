@@ -192,8 +192,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum position error to consider in the acceleration integration of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum position error to consider in the acceleration integration of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum position error for acceleration integration for the joint.
     */
@@ -210,8 +210,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum velocity error to consider in the acceleration integration of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum velocity error to consider in the acceleration integration of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum velocity error for the joint.
     */
@@ -228,8 +228,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum position error to consider in the low level feedback control of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum position error to consider in the low level feedback control of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum position error for the joint feedback control.
     */
@@ -246,8 +246,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum velocity error to consider in the low level feedback control of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum velocity error to consider in the low level feedback control of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum velocity error for the joint feedback control.
     */
@@ -309,6 +309,32 @@ public interface JointDesiredOutputReadOnly
       if (hasPositionIntegrationBreakFrequency())
          ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
       return ret;
+   }
+
+   default String getShortRepresentativeString()
+   {
+      StringBuilder ret = new StringBuilder();
+      if (hasControlMode())
+         ret.append("mode= " + getControlMode());
+      if (hasDesiredTorque())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("tau_d= " + getDesiredTorque());
+      }
+      if (hasDesiredPosition())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("q_d= " + getDesiredPosition());
+      }
+      if (hasDesiredVelocity())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("qd_d= " + getDesiredVelocity());
+      }
+      return ret.toString();
    }
 
    default boolean equals(JointDesiredOutputReadOnly other)

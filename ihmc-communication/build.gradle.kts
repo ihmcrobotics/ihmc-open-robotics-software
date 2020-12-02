@@ -25,7 +25,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.15.1")
    api("us.ihmc:euclid-geometry:0.15.1")
-   api("us.ihmc:ihmc-ros2-library:0.19.3")
+   api("us.ihmc:ihmc-ros2-library:0.19.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")

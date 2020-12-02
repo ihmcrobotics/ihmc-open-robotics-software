@@ -32,7 +32,6 @@ testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-path-planning-data-sets:source")
-   api("us.ihmc:simulation-construction-set-test:0.21.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

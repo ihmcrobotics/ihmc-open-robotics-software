@@ -1,6 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import javafx.stage.Stage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -115,6 +117,72 @@ public class InvertedFourBarTest
 
                throw e;
             }
+         }
+      }
+   }
+
+   @Test
+   public void testAtLimits()
+   {
+      // Test the min/max configurations are continuous with configurations that are close to the limit.
+      Random random = new Random(3465764);
+      FourBar fourBar = new FourBar();
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         int flippedIndex = random.nextInt(4);
+         Collections.swap(vertices, flippedIndex, (flippedIndex + 1) % 4);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+         fourBar.setup(A, B, C, D);
+
+         double expectedDAB, expectedABC, expectedBCD, expectedCDA;
+         double angleLimitVariation = 1.0e-10;
+         double tolerance = 1.0e-3;
+
+         for (FourBarAngle fourBarAngle : FourBarAngle.values)
+         {
+            double minAngle = fourBar.getVertex(fourBarAngle).getMinAngle();
+            double maxAngle = fourBar.getVertex(fourBarAngle).getMaxAngle();
+
+            assertNull(fourBar.update(fourBarAngle, minAngle + angleLimitVariation)); // Assert that the given angle doesn't trigger limit edge-case
+            expectedDAB = fourBar.getAngleDAB();
+            expectedABC = fourBar.getAngleABC();
+            expectedBCD = fourBar.getAngleBCD();
+            expectedCDA = fourBar.getAngleCDA();
+
+            fourBar.setToMin(fourBarAngle);
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertEquals(Bound.MIN, fourBar.update(fourBarAngle, minAngle)); // Assert that the given angle triggers the limit
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertNull(fourBar.update(fourBarAngle, maxAngle - angleLimitVariation)); // Assert that the given angle doesn't trigger limit edge-case
+            expectedDAB = fourBar.getAngleDAB();
+            expectedABC = fourBar.getAngleABC();
+            expectedBCD = fourBar.getAngleBCD();
+            expectedCDA = fourBar.getAngleCDA();
+
+            fourBar.setToMax(fourBarAngle);
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertEquals(Bound.MAX, fourBar.update(fourBarAngle, maxAngle)); // Assert that the given angle triggers the limit
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
          }
       }
    }
