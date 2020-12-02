@@ -38,7 +38,7 @@ mainDependencies {
    api("us.ihmc:mecano-yovariables:0.7.1")
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ihmc-yovariables:0.9.6")
-   api("us.ihmc:ihmc-matrix-library:0.18.0")
+   api("us.ihmc:ihmc-matrix-library:0.18.1")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:simulation-construction-set-utilities:0.21.1")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
@@ -49,7 +49,7 @@ testDependencies {
    api("org.jfree:jfreechart:1.0.17")
    api("org.jfree:jcommon:1.0.21")
 
-   api("us.ihmc:ihmc-matrix-library-test:0.18.0") {
+   api("us.ihmc:ihmc-matrix-library-test:0.18.1") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
