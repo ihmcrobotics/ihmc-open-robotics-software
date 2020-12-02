@@ -24,7 +24,7 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.postgresql:postgresql:42.2.5")
 
-   api("us.ihmc:ihmc-native-library-loader:1.2.1")
+   api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("us.ihmc:ihmc-messager-kryo:0.1.5")
    api("us.ihmc:euclid:0.15.1")
    api("us.ihmc:ihmc-yovariables:0.9.6")

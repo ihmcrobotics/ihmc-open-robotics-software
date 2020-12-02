@@ -38,7 +38,7 @@ mainDependencies {
       api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
    }
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("us.ihmc:ihmc-native-library-loader:1.2.1")
+   api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
