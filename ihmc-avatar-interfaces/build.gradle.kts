@@ -26,8 +26,8 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.27.0")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:euclid-geometry:0.15.2")
    api("us.ihmc:ihmc-yovariables:0.9.6")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
    api("us.ihmc:simulation-construction-set:0.21.1")
