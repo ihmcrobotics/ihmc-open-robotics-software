@@ -9,6 +9,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.log.LogTools;
@@ -52,6 +53,7 @@ public class AtlasBuildingExplorationBehaviorUI
                                                 behaviorMessagerCommunicationMode,
                                                 "localhost",
                                                 behaviorModule.getMessager());
+      behaviorUI.selectBehavior(BuildingExplorationBehavior.DEFINITION);
    }
 
    public static void main(String[] args)
