@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -240,7 +240,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return behaviors;
    }
 
-   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                         SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
@@ -249,7 +249,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                         NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
@@ -258,7 +258,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
@@ -266,7 +266,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                                  ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
@@ -274,7 +274,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, LegJointName legJointName)
+   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -284,7 +284,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointNames;
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, ArmJointName armJointName)
+   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, ArmJointName armJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -446,7 +446,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return null;
    }
 
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                                  ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
                                                                  double maxPositionError, double maxVelocityError)
    {
@@ -456,7 +456,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
                                                                  double maxPositionError, double maxVelocityError)
    {
@@ -466,7 +466,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                         NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
                                                         double maxPositionError, double maxVelocityError)
    {
@@ -476,7 +476,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
                                                         SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
                                                         double maxPositionError, double maxVelocityError)
    {

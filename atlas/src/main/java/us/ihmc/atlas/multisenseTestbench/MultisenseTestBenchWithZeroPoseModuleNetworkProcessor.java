@@ -30,7 +30,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -55,7 +55,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
 
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
