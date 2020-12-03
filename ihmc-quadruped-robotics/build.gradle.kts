@@ -15,7 +15,7 @@ ihmc {
 
 mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("us.ihmc.thirdparty.jinput:jinput:200128")
+   api("us.ihmc.thirdparty.jinput:jinput:201202")
    api("org.ejml:ejml-core:0.39")
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.ejml:ejml-ddense:0.39")
