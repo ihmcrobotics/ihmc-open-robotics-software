@@ -16,7 +16,7 @@ mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
    api("com.esotericsoftware:kryonet:2.22.0-RC1")
    api("us.ihmc:ihmc-realtime:1.3.1")
-   api("us.ihmc:ihmc-video-codecs:2.1.5")
+   api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("org.boofcv:boofcv-geo:0.36")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("com.google.guava:guava:18.0")
