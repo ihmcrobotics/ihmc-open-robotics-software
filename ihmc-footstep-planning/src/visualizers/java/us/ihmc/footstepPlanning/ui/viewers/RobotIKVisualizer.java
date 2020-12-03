@@ -17,12 +17,12 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,7 +54,7 @@ public class RobotIKVisualizer
 
    private final AnimationTimer animationTimer;
 
-   public RobotIKVisualizer(FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, DRCRobotJointMap jointMap, Messager messager)
+   public RobotIKVisualizer(FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, HumanoidJointNameMap jointMap, Messager messager)
    {
       fullRobotModel = fullHumanoidRobotModelFactory.createFullRobotModel();
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
@@ -174,7 +174,7 @@ public class RobotIKVisualizer
       return (int) crc.getValue();
    }
 
-   private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, DRCRobotJointMap jointMap)
+   private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, HumanoidJointNameMap jointMap)
    {
       RobotDescription robotDescription = fullHumanoidRobotModelFactory.getRobotDescription();
 

@@ -37,7 +37,7 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
@@ -45,7 +45,7 @@ public class RemoteHumanoidRobotInterface
    private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
    private final String robotName;
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
    private final ROS2ControllerPublisherMap controllerPublisherMap;
 

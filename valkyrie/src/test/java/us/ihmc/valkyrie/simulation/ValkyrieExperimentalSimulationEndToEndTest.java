@@ -24,7 +24,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
 {
@@ -76,10 +76,10 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
    {
 
       private HumanoidFloatingRootJointRobot robot;
-      private DRCRobotJointMap jointMap;
+      private HumanoidJointNameMap jointMap;
 
       @Override
-      public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+      public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
       {
          this.robot = robot;
          this.jointMap = jointMap;

@@ -45,7 +45,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -148,7 +148,7 @@ public class FootstepPlannerUI
                             SwingPlannerParametersBasics swingPlannerParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
-                            DRCRobotJointMap jointMap,
+                            HumanoidJointNameMap jointMap,
                             WalkingControllerParameters walkingControllerParameters,
                             UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
@@ -457,7 +457,7 @@ public class FootstepPlannerUI
                                                     SwingPlannerParametersBasics swingPlannerParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
-                                                    DRCRobotJointMap jointMap,
+                                                    HumanoidJointNameMap jointMap,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
                                                     UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
