@@ -26,12 +26,7 @@ mainDependencies {
     api("us.ihmc:ihmc-quadruped-basics:source")
     api("us.ihmc:robot-environment-awareness:source")
     api("us.ihmc:simulation-construction-set-tools-test:source")
-    api("us.ihmc:ihmc-robot-data-logger:0.20.4") {
-        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-        exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
-        exclude(group = "org.junit.platform", module = "junit-platform-commons")
-        exclude(group = "org.junit.platform", module = "junit-platform-launcher")
-    }
+    api("us.ihmc:ihmc-robot-data-logger:0.20.4")
     api("us.ihmc:ihmc-path-planning:source")
 }
 
