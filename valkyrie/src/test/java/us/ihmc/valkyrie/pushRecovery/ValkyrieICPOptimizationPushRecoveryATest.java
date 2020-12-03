@@ -6,47 +6,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryATest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieICPOptimizationParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryATest
 {
    @Override
    protected DRCRobotModel getRobotModel()
    {
-      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(RobotTarget.SCS)
-      {
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), RobotTarget.SCS)
-            {
-               @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
-               {
-                  return new ValkyrieICPOptimizationParameters(RobotTarget.SCS)
-                  {
-                     @Override
-                     public boolean useAngularMomentum()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-                  };
-               }
-            };
-         }
-      };
-
-      return valkyrieRobotModel;
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override
@@ -78,7 +45,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.5;
       super.testPushICPOptimizationBackwardPushInSwing();
    }
 
@@ -87,7 +54,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.6;
       super.testPushICPOptimizationForwardPushInSlowSwing();
    }
 
@@ -96,7 +63,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
-      percentWeight = 0.29;
+      percentWeight = 1.0;
       super.testPushICPOptimizationForwardPushInSwing();
    }
 
@@ -105,7 +72,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      percentWeight = 0.17;
+      percentWeight = 0.2;
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
@@ -123,7 +90,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
-      percentWeight = 0.12;
+      percentWeight = 0.25;
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
@@ -132,7 +99,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
-      percentWeight = 0.12;
+      percentWeight = 0.25;
       super.testPushICPOptimizationOutwardPushOnEachStep();
    }
 

@@ -2,6 +2,7 @@ package us.ihmc.simulationToolkit.controllers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 
@@ -45,6 +46,8 @@ public class PushRobotController implements RobotController
 
    private final YoGraphicVector forceVisualizer;
 
+   private final LinkedList<DelayedPush> delayedPushs = new LinkedList<>();
+
    public PushRobotController(FloatingRootJointRobot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
@@ -76,8 +79,8 @@ public class PushRobotController implements RobotController
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
 
-      forceVisualizer = new YoGraphicVector(jointNameToApplyForce + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale,
-            YoAppearance.DarkBlue());
+      forceVisualizer = new YoGraphicVector(jointNameToApplyForce
+            + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale, YoAppearance.DarkBlue());
    }
 
    public YoGraphic getForceVisualizer()
@@ -147,6 +150,14 @@ public class PushRobotController implements RobotController
       applyForce();
    }
 
+   public void queueForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
+   {
+      if (delayedPushs.isEmpty())
+         applyForceDelayed(pushCondition, timeDelay, direction, magnitude, duration);
+      else
+         delayedPushs.add(new DelayedPush(pushCondition, timeDelay, direction, magnitude, duration));
+   }
+
    private void applyForce()
    {
       double length = pushDirection.length();
@@ -195,6 +206,12 @@ public class PushRobotController implements RobotController
       }
       else
       {
+         if (isBeingPushed.getValue() && !delayedPushs.isEmpty())
+         {
+            DelayedPush delayedPush = delayedPushs.pollFirst();
+            applyForceDelayed(delayedPush.pushCondition, delayedPush.timeDelay, delayedPush.direction, delayedPush.magnitude, delayedPush.duration);
+         }
+
          isBeingPushed.set(false);
          forceVector.set(0.0, 0.0, 0.0);
       }
@@ -218,5 +235,23 @@ public class PushRobotController implements RobotController
    public String getDescription()
    {
       return registry.getName();
+   }
+
+   private static class DelayedPush
+   {
+      private StateTransitionCondition pushCondition;
+      private double timeDelay;
+      private Vector3DReadOnly direction;
+      private double magnitude;
+      private double duration;
+
+      public DelayedPush(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
+      {
+         this.pushCondition = pushCondition;
+         this.timeDelay = timeDelay;
+         this.direction = direction;
+         this.magnitude = magnitude;
+         this.duration = duration;
+      }
    }
 }
