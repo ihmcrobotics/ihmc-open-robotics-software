@@ -537,7 +537,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       {
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid());
          framePointToPack.add(supportFootPolygon.getMaxX() - parameters.getExitCoPForwardSafetyMarginOnToes(),
-                              supportSide.negateIfRightSide(parameters.getExitCMPOffset().getY()));
+                              supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
          constrainToPolygon(framePointToPack, supportFootPolygon, parameters.getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown());
          framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
