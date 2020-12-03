@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -45,7 +45,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeightGroups = new ArrayList<>();
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeightGroups = new ArrayList<>();
 
-   public AtlasMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
+   public AtlasMomentumOptimizationSettings(HumanoidJointNameMap jointMap, int numberOfContactableBodies)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 

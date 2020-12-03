@@ -22,7 +22,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -52,13 +52,13 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    private final SideDependentList<String> footForceSensorNames;
    private final SideDependentList<String> wristForceSensorNames;
 
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
    private final ImmutablePair<String, String> imusForSpineJointEstimation;
 
    private final boolean applyJointPositionPolynomialApproximation;
 
-   public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
+   public AtlasStateEstimatorParameters(HumanoidJointNameMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;

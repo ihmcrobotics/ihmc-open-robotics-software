@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.CommonNames;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -200,7 +200,7 @@ public class WalkControllerSliderBoard
                                                                                                            registry,
                                                                                                            alpha,
                                                                                                            lowerHeadPitchPercentage);
-      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
+      HumanoidJointNameMap jointMap = drcRobotModel.getJointMap();
       SliderBoardParameters sliderBoardParameters = drcRobotModel.getSliderBoardParameters();
       HighLevelControllerParameters highLevelControllerParameters = drcRobotModel.getHighLevelControllerParameters();
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
