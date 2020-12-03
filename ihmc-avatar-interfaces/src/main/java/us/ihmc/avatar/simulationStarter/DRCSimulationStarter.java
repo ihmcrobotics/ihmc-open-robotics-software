@@ -58,7 +58,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
@@ -553,7 +553,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (createSCSSimulatedSensors)
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-         DRCRobotJointMap jointMap = robotModel.getJointMap();
+         HumanoidJointNameMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = avatarSimulation.getSimulatedRobotTimeProvider();
          HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();

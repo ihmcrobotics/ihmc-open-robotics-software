@@ -5,11 +5,11 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieMutableInitialSetup extends HumanoidRobotMutableInitialSetup
 {
-   public ValkyrieMutableInitialSetup(DRCRobotJointMap jointMap)
+   public ValkyrieMutableInitialSetup(HumanoidJointNameMap jointMap)
    {
       super(jointMap);
    }
