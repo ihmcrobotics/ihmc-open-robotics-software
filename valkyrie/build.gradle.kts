@@ -21,7 +21,7 @@ mainDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("com.esotericsoftware.minlog:minlog:1.2")
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("us.ihmc.thirdparty.jinput:jinput:200128")
+   api("us.ihmc.thirdparty.jinput:jinput:201202")
 
    api("us.ihmc:euclid:0.15.2")
    api("us.ihmc:euclid-geometry:0.15.2")

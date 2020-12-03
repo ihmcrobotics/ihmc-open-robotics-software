@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc.thirdparty.jinput:jinput:200128")
+   api("us.ihmc.thirdparty.jinput:jinput:201202")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
