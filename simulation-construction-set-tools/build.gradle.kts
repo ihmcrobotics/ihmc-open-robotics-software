@@ -26,10 +26,5 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 
-   api("us.ihmc:simulation-construction-set-test:0.21.2") {
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
-      exclude(group = "org.junit.platform", module = "junit-platform-commons")
-      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
-   }
+   api("us.ihmc:simulation-construction-set-test:0.21.2")
 }

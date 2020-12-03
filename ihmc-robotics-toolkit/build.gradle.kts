@@ -49,11 +49,6 @@ testDependencies {
    api("org.jfree:jfreechart:1.0.17")
    api("org.jfree:jcommon:1.0.21")
 
-   api("us.ihmc:ihmc-matrix-library-test:0.18.1") {
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
-      exclude(group = "org.junit.platform", module = "junit-platform-commons")
-      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
-   }
+   api("us.ihmc:ihmc-matrix-library-test:0.18.1")
    api("us.ihmc:ihmc-commons-testing:0.30.4")
 }
