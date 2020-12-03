@@ -29,7 +29,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ekf:0.7.0")
-   api("us.ihmc:ihmc-lord-microstrain-drivers:0.0.2")
+   api("us.ihmc:ihmc-lord-microstrain-drivers:0.0.3")
 }
 
 testDependencies {
