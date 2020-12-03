@@ -18,11 +18,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -134,31 +132,6 @@ public class WalkingSingleSupportState extends SingleSupportState
             updateHeightManager();
          }
       }
-      else if (balanceManager.isPushRecoveryEnabled())
-      {
-         boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
-         if (footstepHasBeenAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            walkingMessageHandler.reportWalkingAbortRequested();
-            walkingMessageHandler.clearFootsteps();
-
-            double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-
-            balanceManager.setFinalTransferTime(finalTransferTime);
-            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-            balanceManager.setICPPlanSupportSide(supportSide);
-            balanceManager.initializeICPPlanForSingleSupport();
-
-            updateHeightManager();
-         }
-      }
       else
       {
          boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
@@ -231,6 +204,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          footstepTiming.setTimings(swingTime, defaultTransferTime);
          balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
+         nextFootstep.setIsAdjustable(true);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
       }
