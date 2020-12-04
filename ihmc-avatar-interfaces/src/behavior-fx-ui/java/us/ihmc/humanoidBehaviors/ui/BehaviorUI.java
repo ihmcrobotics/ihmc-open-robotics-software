@@ -222,6 +222,11 @@ public class BehaviorUI
       });
    }
 
+   public void selectBehavior(BehaviorDefinition behaviorDefinition)
+   {
+      Platform.runLater(() -> behaviorSelector.valueProperty().setValue(behaviorDefinition.getName()));
+   }
+
    @FXML public void trackRobot()
    {
       robotVisualizer.setTrackRobot(camera, trackRobot.isSelected());
