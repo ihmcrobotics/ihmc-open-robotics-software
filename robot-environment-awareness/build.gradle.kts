@@ -60,7 +60,7 @@ applicationDependencies {
 
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.4")
-   api("us.ihmc:simulation-construction-set:0.21.3")
+   api("us.ihmc:simulation-construction-set:0.21.4")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
