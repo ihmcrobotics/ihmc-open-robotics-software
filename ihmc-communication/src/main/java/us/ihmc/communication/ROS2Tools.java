@@ -153,6 +153,11 @@ public class ROS2Tools
       return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
    }
 
+   public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
+   {
+      return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);
+   }
+
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
       return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
