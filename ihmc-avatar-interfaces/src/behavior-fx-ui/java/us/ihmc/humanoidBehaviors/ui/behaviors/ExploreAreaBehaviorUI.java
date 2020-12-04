@@ -223,7 +223,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
       if (polygons == null)
       {
-         polygons = new ArrayList<ConvexPolygon2D>();
+         polygons = new ArrayList<>();
          polygonsMap.put(index, polygons);
       }
 
@@ -233,7 +233,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private static class BunchOfPointsDisplayer
    {
       private final Group group;
-      private final ArrayList<PositionGraphic> positionGraphics = new ArrayList<PositionGraphic>();
+      private final ArrayList<PositionGraphic> positionGraphics = new ArrayList<>();
 
       public BunchOfPointsDisplayer(Group group)
       {
