@@ -13,12 +13,12 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc.thirdparty.jinput:jinput:200128")
+   api("net.java.jinput:jinput:2.0.6-ihmc")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid-geometry:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.6")
+   api("us.ihmc:euclid-geometry:0.15.2")
+   api("us.ihmc:ihmc-yovariables:0.9.7")
    api("us.ihmc:ihmc-quadruped-basics:source")
    api("us.ihmc:ihmc-quadruped-planning:source")
    api("us.ihmc:ihmc-quadruped-footstep-planning:source")

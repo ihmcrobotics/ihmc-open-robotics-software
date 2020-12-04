@@ -21,10 +21,10 @@ mainDependencies {
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:ihmc-robot-description:0.20.1")
-   api("us.ihmc:ihmc-graphics-description:0.19.1")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.1")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:ihmc-robot-description:0.20.2")
+   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
