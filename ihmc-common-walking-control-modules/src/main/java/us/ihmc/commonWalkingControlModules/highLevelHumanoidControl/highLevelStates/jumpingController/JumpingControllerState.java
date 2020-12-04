@@ -147,7 +147,7 @@ public class JumpingControllerState extends HighLevelControllerState
       momentumRateControlModule.computeControllerCoreCommands();
 
       ControllerCoreCommand controllerCoreCommand = jumpingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(momentumRateControlModule.getMomentumRateCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(momentumRateControlModule.getInverseDynamicsCommand());
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
 

@@ -12,11 +12,11 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
    private final ValkyrieSensorInformation sensorInformation;
    
    private final boolean ignoreAllNeckJoints = true;

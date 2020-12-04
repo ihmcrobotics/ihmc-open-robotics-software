@@ -13,12 +13,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -90,13 +90,13 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       setActuatorPositions(robot, jointMap);
       positionRobotInWorld(robot);
    }
 
-   public void setActuatorPositions(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void setActuatorPositions(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       // Avoid singularities at startup
       for (RobotSide robotSide : RobotSide.values)
@@ -120,7 +120,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       robot.update();
    }
 
-   private void setArmJointPosition(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, RobotSide robotSide, ArmJointName armJointName, double q)
+   private void setArmJointPosition(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap, RobotSide robotSide, ArmJointName armJointName, double q)
    {
       String armJointString = jointMap.getArmJointName(robotSide, armJointName);
       if (armJointString == null)

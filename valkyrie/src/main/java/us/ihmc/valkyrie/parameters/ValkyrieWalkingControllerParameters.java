@@ -89,6 +89,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return target == RobotTarget.REAL_ROBOT ? 0.0 : 0.04;
+   }
+
+   @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
       return true;

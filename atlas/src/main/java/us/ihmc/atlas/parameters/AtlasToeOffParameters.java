@@ -66,4 +66,10 @@ public class AtlasToeOffParameters extends ToeOffParameters
    {
       return 0.03; // JCarff ToeOff
    }
+
+   @Override
+   public double getKneeUpperLimitToTriggerToeOff()
+   {
+      return 2.0;
+   }
 }

@@ -3,6 +3,7 @@ package us.ihmc.parameterTuner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,5 +169,17 @@ public class ParameterTuningTools
       });
 
       return tunerMap;
+   }
+
+   public static void sortRegistriesAlphabetically(List<Registry> registries)
+   {
+      Collections.sort(registries, (r1, r2) -> r1.getName().compareTo(r2.getName()));
+      registries.forEach(root -> sortRegistriesAlphabeticallyRecursive(root));
+   }
+
+   private static void sortRegistriesAlphabeticallyRecursive(Registry start)
+   {
+      Collections.sort(start.getRegistries(), (r1, r2) -> r1.getName().compareTo(r2.getName()));
+      start.getRegistries().forEach(child -> sortRegistriesAlphabeticallyRecursive(child));
    }
 }

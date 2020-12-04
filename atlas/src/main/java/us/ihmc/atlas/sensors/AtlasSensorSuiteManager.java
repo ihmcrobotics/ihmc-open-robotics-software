@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
@@ -66,7 +66,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   CollisionBoxProvider collisionBoxProvider,
                                   RobotROSClockCalculator rosClockCalculator,
                                   HumanoidRobotSensorInformation sensorInformation,
-                                  DRCRobotJointMap jointMap,
+                                  HumanoidJointNameMap jointMap,
                                   RobotPhysicalProperties physicalProperties,
                                   RobotTarget targetDeployment,
                                   ROS2NodeInterface ros2Node)

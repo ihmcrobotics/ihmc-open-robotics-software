@@ -13,7 +13,7 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.jumping.AvatarStandingLongJumpTests;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 @Tag("humanoid-flat-ground")
 public class AtlasStandingLongJumpTests extends AvatarStandingLongJumpTests
@@ -50,7 +50,7 @@ public class AtlasStandingLongJumpTests extends AvatarStandingLongJumpTests
       return "/us/ihmc/atlas/parameters/jumping_controller.xml";
    }
 
-   private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
+   private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(HumanoidJointNameMap jointMap, int numberOfContactableBodies)
    {
       double jointAccelerationWeight = 1e-10;
       double jointJerkWeight = 0.0;

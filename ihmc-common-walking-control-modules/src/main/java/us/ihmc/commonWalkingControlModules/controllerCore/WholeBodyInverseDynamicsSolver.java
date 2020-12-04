@@ -220,7 +220,7 @@ public class WholeBodyInverseDynamicsSolver
          }
 
          if (!kinematicLoopFunctions.isEmpty())
-            throw new UnsupportedOperationException("The use of the dyncamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
+            throw new UnsupportedOperationException("The use of the dynamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
       }
       else
       {
@@ -326,6 +326,9 @@ public class WholeBodyInverseDynamicsSolver
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
+               break;
+            case MOMENTUM_COST:
+               optimizationControlModule.submitLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) command);
                break;
             case PRIVILEGED_CONFIGURATION:
                optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
