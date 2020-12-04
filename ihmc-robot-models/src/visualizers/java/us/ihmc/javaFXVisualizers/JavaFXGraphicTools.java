@@ -24,11 +24,7 @@ public class JavaFXGraphicTools
 {
    public static void setNodeTransformFromPose(Node node, Pose3DReadOnly pose)
    {
-      node.getTransforms().clear();
-      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-      rigidBodyTransform.set(pose.getOrientation(), pose.getPosition());
-      Affine affine = JavaFXTools.convertRigidBodyTransformToAffine(rigidBodyTransform);
-      node.getTransforms().add(affine);
+      setNodeTransformFromPose(node, pose, 1.0);
    }
 
    public static void setNodeTransformFromPose(Node node, Pose3DReadOnly pose, double scale)
@@ -36,8 +32,9 @@ public class JavaFXGraphicTools
       node.getTransforms().clear();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       rigidBodyTransform.set(pose.getOrientation(), pose.getPosition());
-      Affine affine = JavaFXTools.convertRigidBodyTransformToAffine(rigidBodyTransform);
-      affine.appendScale(scale, scale);
+      Affine affine = JavaFXTools.createRigidBodyTransformToAffine(rigidBodyTransform);
+      if (scale != 1.0)
+         affine.appendScale(scale, scale);
       node.getTransforms().add(affine);
    }
 

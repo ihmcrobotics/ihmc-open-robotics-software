@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
@@ -21,11 +21,9 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -33,6 +31,9 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+
+import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createBoundingBox3D;
+import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createSphere3D;
 
 public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 {
@@ -44,7 +45,12 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @FXML private TextField stateTextField;
    @FXML private TableView parameterTable;
 
-   private PlanarRegionsGraphic planarRegionsGraphic = null;
+   private final LivePlanarRegionsGraphic planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+   private final GraphicGroup<Node> observationPointsGraphicGroup = new GraphicGroup<>();
+   private final GraphicGroup<Node> potentialPointsToExploreGraphicGroup = new GraphicGroup<>();
+   private final GraphicGroup<Node> foundBodyPathToPointsGraphicGroup = new GraphicGroup<>();
+   private final GraphicGroup<Node> planningToPointsGraphicGroup = new GraphicGroup<>();
+   private final GraphicGroup<Node> boundingBoxGraphics = new GraphicGroup<>();
 
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
 
@@ -83,7 +89,12 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      observationPointsGraphicGroup.setEnabled(enabled);
+      potentialPointsToExploreGraphicGroup.setEnabled(enabled);
+      foundBodyPathToPointsGraphicGroup.setEnabled(enabled);
+      planningToPointsGraphicGroup.setEnabled(enabled);
+      boundingBoxGraphics.setEnabled(enabled);
+      planarRegionsGraphic.setEnabled(enabled);
    }
 
    private void publishParameters()
@@ -121,55 +132,48 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       parameters.save();
    }
 
-   private BunchOfPointsDisplayer observationPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
-   private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(get3DGroup());
-   private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
-   private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(get3DGroup());
-   private BunchOfBoundingBoxesDisplayer boundingBoxesDisplayer = new BunchOfBoundingBoxesDisplayer(get3DGroup());
-
    public void displayObservationPosition(Point3D observationPosition)
    {
-      observationPointsDisplayer.displayPoint(observationPosition, Color.AZURE, 0.04);
+      observationPointsGraphicGroup.add(createSphere3D(observationPosition, Color.AZURE, 0.04));
    }
 
    private void displayExplorationBoundingBoxes(ArrayList<BoundingBox3D> boxes)
    {
-      boundingBoxesDisplayer.clear();
+      boundingBoxGraphics.removeAll();
       Color[] boundingBoxColors = new Color[] {Color.INDIANRED, Color.DARKSEAGREEN, Color.CADETBLUE};
 
       for (int i = 0; i < boxes.size(); i++)
       {
          Color color = boundingBoxColors[i % boundingBoxColors.length];
-         boundingBoxesDisplayer.displayBoundingBox(boxes.get(i), color, 0.1);
+         boundingBoxGraphics.add(createBoundingBox3D(boxes.get(i), color, 0.1));
       }
    }
 
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
    {
-      potentialPointsToExploreDisplayer.clear();
-      foundBodyPathToPointsDisplayer.clear();
-      planningToPointsDisplayer.clear();
-      potentialPointsToExploreDisplayer.displayPoints(potentialPointsToExplore, Color.BLACK, 0.01);
+      potentialPointsToExploreGraphicGroup.removeAll();
+      foundBodyPathToPointsGraphicGroup.removeAll();
+      planningToPointsGraphicGroup.removeAll();
+      for (Point3D potentialPointToExplore : potentialPointsToExplore)
+      {
+         potentialPointsToExploreGraphicGroup.add(createSphere3D(potentialPointToExplore, Color.BLACK, 0.01));
+      }
    }
 
    public void displayFoundBodyPathTo(Point3D foundBodyPathToPoint)
    {
-      foundBodyPathToPointsDisplayer.displayPoint(foundBodyPathToPoint, Color.CORAL, 0.02);
+      foundBodyPathToPointsGraphicGroup.add(createSphere3D(foundBodyPathToPoint, Color.CORAL, 0.02));
    }
 
    public void displayPlanningToPosition(Point3D planningToPosition)
    {
-      planningToPointsDisplayer.clear();
-      planningToPointsDisplayer.displayPoint(planningToPosition, Color.BLUEVIOLET, 0.1);
+      planningToPointsGraphicGroup.removeAll();
+      planningToPointsGraphicGroup.add(createSphere3D(planningToPosition, Color.BLUEVIOLET, 0.1));
    }
 
    public void clearPlanarRegions(boolean input)
    {
-      if (planarRegionsGraphic != null)
-      {
-         get3DGroup().getChildren().remove(planarRegionsGraphic);
-      }
-      planarRegionsGraphic = null;
+      planarRegionsGraphic.clear();
 
       transformMap.clear();
       numberOfPolygonsMap.clear();
@@ -179,13 +183,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
    public void drawMap(boolean input)
    {
-      if (planarRegionsGraphic != null)
-      {
-         get3DGroup().getChildren().remove(planarRegionsGraphic);
-      }
-
-      planarRegionsGraphic = new PlanarRegionsGraphic(false);
-
+      planarRegionsGraphic.clear();
       planarRegions.clear();
 
       Set<Integer> indices = transformMap.keySet();
@@ -202,8 +200,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       }
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
-      planarRegionsGraphic.generateMeshes(planarRegionsList);
-      planarRegionsGraphic.update();
+      planarRegionsGraphic.acceptPlanarRegions(planarRegionsList);
       get3DGroup().getChildren().add(planarRegionsGraphic);
    }
 
@@ -228,71 +225,6 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       }
 
       polygons.add(polygon);
-   }
-
-   private static class BunchOfPointsDisplayer
-   {
-      private final Group group;
-      private final ArrayList<PositionGraphic> positionGraphics = new ArrayList<>();
-
-      public BunchOfPointsDisplayer(Group group)
-      {
-         this.group = group;
-      }
-
-      public void clear()
-      {
-         for (PositionGraphic graphic : positionGraphics)
-         {
-            group.getChildren().remove(graphic.getNode());
-         }
-
-         positionGraphics.clear();
-      }
-
-      public void displayPoints(ArrayList<Point3D> points, Color color, double diameter)
-      {
-         for (Point3D point : points)
-         {
-            displayPoint(point, color, diameter);
-         }
-      }
-
-      public void displayPoint(Point3D point, Color color, double diameter)
-      {
-         PositionGraphic potentialPointToExploreGraphic = new PositionGraphic(color, diameter);
-         potentialPointToExploreGraphic.setPosition(point);
-         positionGraphics.add(potentialPointToExploreGraphic);
-         group.getChildren().add(potentialPointToExploreGraphic.getNode());
-      }
-   }
-
-   private static class BunchOfBoundingBoxesDisplayer
-   {
-      private final Group group;
-      private final ArrayList<BoundingBox3DGraphic> boundingBoxGraphics = new ArrayList<BoundingBox3DGraphic>();
-
-      public BunchOfBoundingBoxesDisplayer(Group group)
-      {
-         this.group = group;
-      }
-
-      public void clear()
-      {
-         for (BoundingBox3DGraphic graphic : boundingBoxGraphics)
-         {
-            group.getChildren().remove(graphic.getNode());
-         }
-
-         boundingBoxGraphics.clear();
-      }
-
-      public void displayBoundingBox(BoundingBox3D boundingBox, Color color, double lineWidth)
-      {
-         BoundingBox3DGraphic boundingBox3DGraphic = new BoundingBox3DGraphic(boundingBox, color, lineWidth);
-         boundingBoxGraphics.add(boundingBox3DGraphic);
-         group.getChildren().add(boundingBox3DGraphic.getNode());
-      }
    }
 
    @Override

@@ -89,7 +89,7 @@ public class LookAndStepVisualizationGroup extends Group
       messager.setEnabled(enabled);
       if (!enabled)
       {
-         clearGraphics();
+         clearGraphics(); // Do we always want to clear?
          Platform.runLater(() -> getChildren().remove(closestPointAlongPathGraphic));
          Platform.runLater(() -> getChildren().remove(subGoalGraphic));
          Platform.runLater(() -> getChildren().remove(goalGraphic));
