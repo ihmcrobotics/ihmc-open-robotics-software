@@ -22,7 +22,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.15.2")
    api("us.ihmc:euclid-shape:0.15.2")
    api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc.thirdparty.jinput:jinput:201202")
+   api("net.java.jinput:jinput:2.0.6-ihmc")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-quadruped-robotics:source")
