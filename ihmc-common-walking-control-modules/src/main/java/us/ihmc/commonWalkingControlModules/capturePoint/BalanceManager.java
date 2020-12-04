@@ -776,7 +776,7 @@ public class BalanceManager
       totalStateDuration.set(currentTiming.getStepTime());
 
       inSingleSupport.set(false);
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false); // TODO Do not merge on develop
 
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
