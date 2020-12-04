@@ -8,7 +8,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -22,7 +22,7 @@ public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       robot.getRootJoint().setPosition(robotConfigurationData.getRootTranslation());
       robot.getRootJoint().setQuaternion(robotConfigurationData.getRootOrientation());

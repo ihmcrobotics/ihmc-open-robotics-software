@@ -16,7 +16,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
@@ -38,7 +38,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      HumanoidJointNameMap jointMap = robotModel.getJointMap();
       defaultRobotInitialSetup.initializeRobot(robot, jointMap);
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())

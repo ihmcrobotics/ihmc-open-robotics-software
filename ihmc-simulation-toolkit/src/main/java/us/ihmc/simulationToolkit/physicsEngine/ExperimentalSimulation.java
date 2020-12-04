@@ -63,7 +63,7 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -479,14 +479,14 @@ public class ExperimentalSimulation extends Simulation
       return collidables;
    }
 
-   public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, DRCRobotJointMap> initialSetup,
-                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, DRCRobotJointMap jointMap)
+   public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, HumanoidJointNameMap> initialSetup,
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, HumanoidJointNameMap jointMap)
    {
       return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
    }
 
-   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, DRCRobotJointMap> initialSetup, T robot,
-                                                                                        DRCRobotJointMap jointMap)
+   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup, T robot,
+                                                                                        HumanoidJointNameMap jointMap)
    {
       initialSetup.accept(robot, jointMap);
       return toMultiBodySystemStateWriter(robot);

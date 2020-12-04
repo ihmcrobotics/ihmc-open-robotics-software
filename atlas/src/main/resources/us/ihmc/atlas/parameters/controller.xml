@@ -6,8 +6,8 @@
                 <registry name="WalkingControllerState">
                     <registry name="WalkingHighLevelHumanoidController">
                         <registry name="TouchdownErrorCompensator">
-                            <parameter name="spatialVelocityThresholdForSupportConfidence" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                            <parameter name="touchdownErrorCorrectionScale" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                            <parameter name="spatialVelocityThresholdForSupportConfidence" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                            <parameter name="touchdownErrorCorrectionScale" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                         </registry>
                     </registry>
                     <registry name="LinearMomentumRateControlModule">
@@ -20,8 +20,8 @@
                             <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97"/>
                         </registry>
                         <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
-                        <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
-                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                        <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                         <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
@@ -195,9 +195,9 @@
 <registry name="LookAheadCoMHeightTrajectoryGenerator">
     <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
 </registry>
-                                <registry name="BetterLookAheadCoMHeightTrajectoryGenerator">
-                                    <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
-                                </registry>
+<registry name="BetterLookAheadCoMHeightTrajectoryGenerator">
+    <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
+</registry>
                             </registry>
                         </registry>
                         <registry name="FeetManager">
@@ -220,17 +220,17 @@
                             <registry name="ToeOffManager">
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true"/>
                             </registry>
-                             <parameter name="Verification_PerpendicularCoPErrorThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.005"/>
+                            <parameter name="Verification_PerpendicularCoPErrorThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.005"/>
 +                            <parameter name="Verification_DistanceFromLineToComputeDesiredCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.005"/>
 +                            <parameter name="Velocity_omegaMagnitudeThreshold" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
 +                            <parameter name="Velocity_rotationAngleDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                             <parameter name="Velocity_rotationAngleThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
-                             <parameter name="Cropping_ThresholdForCoPRegionOccupancy" type="IntegerParameter" min="-10" max="10" value="4"/>
-                             <parameter name="Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
-                             <parameter name="Verification_InlineCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="0.002"/>
-                             <parameter name="Verification_TransverseCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="5.0E-4"/>
-                             <parameter name="Cropping_FootDropThresholdForCrop" type="DoubleParameter" min="0.0" max="1.0" value="0.02"/>
-                             <parameter name="applyPartialFootholds" type="BooleanParameter" value="true"/>
+                            <parameter name="Velocity_rotationAngleThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+                            <parameter name="Cropping_ThresholdForCoPRegionOccupancy" type="IntegerParameter" min="-10" max="10" value="4"/>
+                            <parameter name="Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
+                            <parameter name="Verification_InlineCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="0.002"/>
+                            <parameter name="Verification_TransverseCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="5.0E-4"/>
+                            <parameter name="Cropping_FootDropThresholdForCrop" type="DoubleParameter" min="0.0" max="1.0" value="0.02"/>
+                            <parameter name="applyPartialFootholds" type="BooleanParameter" value="true"/>
                         </registry>
                         <registry name="BalanceManager">
                             <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
@@ -241,6 +241,7 @@
                             <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
                             <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.013"/>
+                            <parameter name="ICPVelocityDecayDurationWhenDone" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         </registry>
                     </registry>
                 </registry>

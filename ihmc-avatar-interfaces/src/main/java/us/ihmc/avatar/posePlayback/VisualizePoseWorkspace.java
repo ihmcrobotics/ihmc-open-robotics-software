@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class VisualizePoseWorkspace
 {
@@ -33,7 +33,7 @@ public class VisualizePoseWorkspace
    {
       this.controlDT = robotModel.getControllerDT();
       
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      HumanoidJointNameMap jointMap = robotModel.getJointMap();
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);

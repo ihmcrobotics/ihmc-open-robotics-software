@@ -1,6 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -15,8 +22,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
@@ -25,10 +35,20 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.trajectories.OptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -55,9 +75,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BalanceManager
 {
@@ -134,6 +151,25 @@ public class BalanceManager
 
    private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
    private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
+
+   /**
+    * Duration parameter used to linearly decrease the desired ICP velocity once the current state is
+    * done.
+    * <p>
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
+    * when the robot is getting stuck at the end of transfer.
+    * </p>
+    */
+   private final DoubleParameter icpVelocityDecayDurationWhenDone = new DoubleParameter("ICPVelocityDecayDurationWhenDone", registry, Double.NaN);
+   /**
+    * Output of the linear reduction being applied on the desired ICP velocity when the current state
+    * is done.
+    * <p>
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
+    * when the robot is getting stuck at the end of transfer. true*
+    * </p>
+    */
+   private final YoDouble icpVelocityReductionFactor = new YoDouble("ICPVelocityReductionFactor", registry);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -320,7 +356,7 @@ public class BalanceManager
 
       stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, residualICPErrorForStepAdjustment, omega0);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-         footstep.setPose(stepAdjustmentController.getFootstepSolution());
+      footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
    }
 
@@ -341,11 +377,13 @@ public class BalanceManager
       bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
    }
 
-   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand,
-                       boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean keepCoPInsideSupportPolygon,
+                       boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
+      if (!icpVelocityReductionFactor.isNaN())
+         desiredCapturePointVelocity2d.scale(icpVelocityReductionFactor.getValue());
       perfectCoP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
       desiredCoM2d.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
@@ -439,7 +477,7 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
-     computeICPPlanInternal(copTrajectory);
+      computeICPPlanInternal(copTrajectory);
    }
 
    public void computeFlamingoStateICPPlan()
@@ -478,8 +516,37 @@ public class BalanceManager
          timeInSupportSequence.add(controllerToolbox.getControlDT());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+      decayDesiredICPVelocity();
 
       plannerTimer.stopMeasurement();
+   }
+
+   /**
+    * Time-based decay of the desired ICP velocity activated when a double support is going over the
+    * planner state duration.
+    */
+   private void decayDesiredICPVelocity()
+   {
+      if (Double.isNaN(icpVelocityDecayDurationWhenDone.getValue()))
+      {
+         icpVelocityReductionFactor.set(Double.NaN);
+         return;
+      }
+
+      if (inSingleSupport.getValue() || !icpPlannerDone.getValue())
+      {
+         icpVelocityReductionFactor.set(Double.NaN);
+         return;
+      }
+
+      if (icpVelocityReductionFactor.isNaN())
+      {
+         icpVelocityReductionFactor.set(1.0);
+         return;
+      }
+
+      double scaleUpdated = icpVelocityReductionFactor.getValue() - controllerToolbox.getControlDT() / icpVelocityDecayDurationWhenDone.getValue();
+      icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
@@ -529,7 +596,6 @@ public class BalanceManager
 
       return estimatedTimeRemaining;
    }
-
 
    public void freezePelvisXYControl()
    {

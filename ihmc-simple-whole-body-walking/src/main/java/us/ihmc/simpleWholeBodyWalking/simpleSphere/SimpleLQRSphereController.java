@@ -54,7 +54,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), sphereRobot.getTotalMass(), registry);
       
       vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot, registry);
       

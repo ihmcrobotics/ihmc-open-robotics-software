@@ -14,10 +14,10 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
@@ -31,7 +31,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
    private static Map<String, Double> initialConfiguration(DRCRobotModel robotModel)
    {
       Map<String, Double> initialConfigurationMap = new HashMap<>();
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      HumanoidJointNameMap jointMap = robotModel.getJointMap();
 
       initialConfigurationMap.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
       initialConfigurationMap.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);

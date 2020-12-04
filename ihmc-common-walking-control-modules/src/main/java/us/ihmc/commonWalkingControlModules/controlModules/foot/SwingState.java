@@ -567,6 +567,16 @@ public class SwingState extends AbstractFootControlState
 
       leapOfFaithModule.compute(time);
 
+      if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
+      {
+         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+
+         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
+         desiredLinearAcceleration.scale(speedUpFactorSquared);
+         desiredAngularAcceleration.scale(speedUpFactorSquared);
+      }
+
       if (footstepWasAdjusted)
       {
          adjustmentVelocityCorrection.set(desiredPosition);
@@ -580,16 +590,6 @@ public class SwingState extends AbstractFootControlState
       else
       {
          adjustmentVelocityCorrection.setToZero();
-      }
-
-      if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
-      {
-         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
-         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
-
-         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
-         desiredLinearAcceleration.scale(speedUpFactorSquared);
-         desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
 
       yoDesiredSolePosition.setMatchingFrame(desiredPosition);
