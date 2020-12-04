@@ -32,6 +32,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -94,6 +95,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    }
 
    private final BehaviorHelper helper;
+   private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
    private final RemoteREAInterface rea;
 
@@ -114,6 +116,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
       rea = helper.getOrCreateREAInterface();
@@ -126,7 +129,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       helper.createUICallback(ExploreAreaBehaviorAPI.ClearMap, this::clearMap);
       navigableRegionsManager = new NavigableRegionsManager();
 
-      LogTools.debug("Initializing patrol behavior");
+      statusLogger.info("Initializing explore area behavior");
 
       EnumBasedStateMachineFactory<ExploreAreaBehaviorState> factory = new EnumBasedStateMachineFactory<>(ExploreAreaBehaviorState.class);
       factory.setOnEntry(ExploreAreaBehaviorState.Stop, this::onStopStateEntry);
@@ -191,7 +194,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       factory.getFactory().addStateChangedListener((from, to) ->
       {
          helper.publishToUI(ExploreAreaBehaviorAPI.CurrentState, to);
-         LogTools.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+         statusLogger.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
 
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
@@ -203,7 +206,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      LogTools.info("Explore area behavior selected = {}", enabled);
+      statusLogger.info("Explore area behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
       helper.setCommunicationCallbacksEnabled(enabled);
@@ -273,7 +276,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onPerceiveStateEntry()
    {
-      LogTools.info("Entering perceive state. Clearing LIDAR");
+      statusLogger.info("Entering perceive state. Clearing LIDAR");
       rea.clearREA();
    }
 
@@ -297,7 +300,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private boolean readyToTransitionFromPerceiveToGrabPlanarRegions(double timeInState)
    {
       double perceiveDuration = parameters.get(ExploreAreaBehaviorParameters.perceiveDuration);
-      LogTools.info("Perceiving for {} s", perceiveDuration);
+      statusLogger.info("Perceiving for {} s", perceiveDuration);
       return (timeInState > perceiveDuration);
    }
 
@@ -327,24 +330,24 @@ public class ExploreAreaBehavior implements BehaviorInterface
       {
          hullGotLooped.set(true);
 
-         LogTools.error("Hull got looped.");
+         statusLogger.error("Hull got looped.");
 
          if (savedOutTroublesomeRegions)
             return;
 
          savedOutTroublesomeRegions = true;
 
-         LogTools.error("First occurance this run, so saving out PlanarRegions");
+         statusLogger.error("First occurance this run, so saving out PlanarRegions");
 
          try
          {
             Path planarRegionsPath = new File("Troublesome" + File.separator + "MapPlanarRegions").toPath();
-            LogTools.error("map planarRegionsPath = {}", planarRegionsPath);
+            statusLogger.error("map planarRegionsPath = {}", planarRegionsPath);
             Files.createDirectories(planarRegionsPath);
             PlanarRegionFileTools.exportPlanarRegionData(planarRegionsPath, concatenatedMap.copy());
 
             planarRegionsPath = new File("Troublesome" + File.separator + "NewPlanarRegions").toPath();
-            LogTools.error("new planarRegionsPath = {}", planarRegionsPath);
+            statusLogger.error("new planarRegionsPath = {}", planarRegionsPath);
             Files.createDirectories(planarRegionsPath);
             PlanarRegionFileTools.exportPlanarRegionData(planarRegionsPath, latestPlanarRegionsList.copy());
          }
@@ -410,13 +413,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
          hullGotLooped.set(false);
          syncedRobot.update();
          RigidBodyTransform referenceTransform = syncedRobot.getReferenceFrames().getIMUFrame().getTransformToWorldFrame();
-         LogTools.info("Doing SLAM with IMU reference Transform \n {} ", referenceTransform);
+         statusLogger.info("Doing SLAM with IMU reference Transform \n {} ", referenceTransform);
 
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, referenceTransform, listener);
 
          concatenatedMap = slamResult.getMergedMap();
          RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
-         LogTools.info("SLAM transformFromIncomingToMap = \n {}", transformFromIncomingToMap);
+         statusLogger.info("SLAM transformFromIncomingToMap = \n {}", transformFromIncomingToMap);
 
          boolean sendingSlamCorrection = true;
          publishPoseUpdateForStateEstimator(transformFromIncomingToMap, sendingSlamCorrection);
@@ -424,8 +427,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       computeMapBoundingBox3D();
 
-      LogTools.info("concatenatedMap has " + concatenatedMap.getNumberOfPlanarRegions() + " planar Regions");
-      LogTools.info("concatenatedMapBoundingBox = " + concatenatedMapBoundingBox);
+      statusLogger.info("concatenatedMap has " + concatenatedMap.getNumberOfPlanarRegions() + " planar Regions");
+      statusLogger.info("concatenatedMapBoundingBox = " + concatenatedMapBoundingBox);
 
       List<PlanarRegion> planarRegionsAsList = concatenatedMap.getPlanarRegionsAsList();
 
@@ -567,7 +570,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          }
       }
 
-      LogTools.info("Found " + potentialPoints.size() + " potential Points on the grid.");
+      statusLogger.info("Found " + potentialPoints.size() + " potential Points on the grid.");
 
       ArrayList<Point3D> potentialPointsToSend = new ArrayList<Point3D>();
       potentialPointsToSend.addAll(potentialPoints);
@@ -583,7 +586,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       sortBasedOnBestDistances(potentialPoints, distancesFromStart, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
 
-      LogTools.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
+      statusLogger.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
 
       long startTime = System.nanoTime();
 
@@ -620,14 +623,14 @@ public class ExploreAreaBehavior implements BehaviorInterface
       double durationSeconds = ((double) duration) / 1.0e9;
       double durationPer = durationSeconds / ((double) numberConsidered);
 
-      LogTools.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
+      statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
             + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
 
       desiredFramePoses = new ArrayList<>();
 
       if (feasibleGoalPoints.isEmpty())
       {
-         LogTools.info("Couldn't find a place to walk to. Just stepping in place.");
+         statusLogger.info("Couldn't find a place to walk to. Just stepping in place.");
 
          FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
 
@@ -643,7 +646,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       double bestDistance = distancesFromStart.get(bestGoalPoint);
       List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
-      LogTools.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
+      statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 
       for (Point3DReadOnly goalPoint : feasibleGoalPoints)
       {
@@ -760,7 +763,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       {
          FramePose3D goal = desiredFramePoses.remove(0);
 
-         LogTools.info("\nPlanning to " + goal);
+         statusLogger.info("\nPlanning to " + goal);
          Point3D goalToSend = new Point3D(goal.getPosition());
 
          helper.publishToUI(ExploreAreaBehaviorAPI.PlanningToPosition, goalToSend);
@@ -769,7 +772,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
       else
       {
-         LogTools.info("Out of places to plan too!!!! We're lost!!");
+         statusLogger.info("Out of places to plan too!!!! We're lost!!");
          outOfPlans = true;
       }
    }
@@ -787,7 +790,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
          FootstepPlanningResult planResult = plannerResult.getResult();
 
-         LogTools.info("planResult = " + planResult);
+         statusLogger.info("planResult = " + planResult);
 
          if (planResult.validForExecution())
          {
@@ -874,13 +877,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
       messageWithOneStep.getFootstepDataList().add().set(footstepDataMessage);
       walkingCompleted = robotInterface.requestWalk(messageWithOneStep);
 
-      LogTools.info("Stepping to " + footstepDataMessage.getLocation());
+      statusLogger.info("Stepping to " + footstepDataMessage.getLocation());
 
       if (footstepIndex < footstepDataList.size() - 1)
       {
          FootstepDataMessage nextFootstep = footstepDataList.get(footstepIndex + 1);
          nextFootstepLocation = nextFootstep.getLocation();
-         System.out.println("Stare at next Footstep " + nextFootstep.getLocation());
+         statusLogger.info("Stare at next Footstep " + nextFootstep.getLocation());
 
 //         rotateChestAndPitchHeadToLookAtPointInWorld(0.0, takeAStepSwingSide, nextFootstepLocation, fullRobotModel, referenceFrames);
       }
