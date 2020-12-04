@@ -16,7 +16,6 @@ mainDependencies {
    api("com.martiansoftware:jsap:2.1")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("org.apache.poi:poi:3.15") // I/O library for xls files.
-   api("us.ihmc.thirdparty.jinput:jinput:201202")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.boofcv:boofcv-geo:0.36")
@@ -26,6 +25,7 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.27.0")
 
+   api("net.java.jinput:jinput:2.0.6-ihmc")
    api("us.ihmc:euclid:0.15.2")
    api("us.ihmc:euclid-geometry:0.15.2")
    api("us.ihmc:ihmc-yovariables:0.9.7")
