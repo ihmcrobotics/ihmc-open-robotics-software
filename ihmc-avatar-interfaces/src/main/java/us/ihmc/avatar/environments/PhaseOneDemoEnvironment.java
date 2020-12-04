@@ -93,6 +93,12 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 
       addGroundRegion();
 
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addModelFile("models/block.obj");
+      combinedTerrainObject.addStaticLinkGraphics(linkGraphics);
+//      linkGraphics.scale(vector);
+//      linkGraphics.transform(transformCenterConventionToBottomConvention);
+
       PlanarRegionsList[] planarRegionsList = this.planarRegionsLists.toArray(new PlanarRegionsList[0]);
       AppearanceDefinition[] appearances = this.appearances.toArray(new AppearanceDefinition[0]);
 
