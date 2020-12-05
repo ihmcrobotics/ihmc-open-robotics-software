@@ -43,6 +43,7 @@ public class NavigableRegionsManager
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
+   /** @deprecated Use only for serialization. */
    public NavigableRegionsManager()
    {
       this(null, null, null);
@@ -67,7 +68,10 @@ public class NavigableRegionsManager
    {
       this(parameters, regions, postProcessor, new EstimatedCostToGoal(parameters));
    }
-   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor,
+
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters,
+                                  List<PlanarRegion> regions,
+                                  BodyPathPostProcessor postProcessor,
                                   EstimatedCostToGoal heuristic)
    {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
