@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
@@ -39,6 +40,8 @@ public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
                                                                                      createRobotModel()),
                                "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
+
+      FootstepPlanningModuleLauncher.createModule(createRobotModel(), COMMUNICATION_MODE_ROS2.getPubSubImplementation());
 
       if (RUN_LIDAR_AND_CAMERA_SIMULATION)
          ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
