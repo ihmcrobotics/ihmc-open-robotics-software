@@ -2,7 +2,6 @@ package us.ihmc.atlas;
 
 import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
-import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
@@ -12,6 +11,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.PlannerTestEnvironments;
 
 public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
 {
@@ -20,7 +20,7 @@ public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
 
    {
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::flatGround,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(PlannerTestEnvironments::getTrickCorridorWidened,
                                                                0.0, 0.0, 0.0, 0.0));
       selectEnvironment();
    }
