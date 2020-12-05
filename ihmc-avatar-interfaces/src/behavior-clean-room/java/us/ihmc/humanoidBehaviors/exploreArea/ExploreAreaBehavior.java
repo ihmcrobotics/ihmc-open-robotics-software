@@ -206,8 +206,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      statusLogger.info("Explore area behavior selected = {}", enabled);
-
       mainThread.setRunning(enabled);
       helper.setCommunicationCallbacksEnabled(enabled);
    }
