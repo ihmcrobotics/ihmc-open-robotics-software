@@ -93,15 +93,17 @@ public class BehaviorModule
          boolean selectedOne = false;
          for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
          {
-            boolean selected = behavior.getLeft().getName().equals(selection);
+            String behaviorName = behavior.getLeft().getName();
+            boolean selected = behaviorName.equals(selection);
             if (selected)
             {
-               LogTools.info("Behavior selected: {}", behavior.getLeft().getName());
                selectedOne = true;
             }
 
-            if (enabledBehaviors.computeIfAbsent(behavior.getLeft().getName(), key -> false) != selected)
+            if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
             {
+               enabledBehaviors.put(behaviorName, selected);
+               LogTools.info("{} behavior {}.", behaviorName, selected ? "enabled" : "disabled");
                behavior.getRight().setEnabled(selected);
             }
          }
