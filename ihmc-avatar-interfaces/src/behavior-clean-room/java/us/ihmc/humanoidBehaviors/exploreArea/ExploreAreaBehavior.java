@@ -42,6 +42,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
@@ -126,7 +127,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       helper.createUICallback(ExploreAreaBehaviorAPI.RandomPoseUpdate, this::randomPoseUpdate);
       helper.createUICallback(ExploreAreaBehaviorAPI.DoSlam, this::doSlam);
       helper.createUICallback(ExploreAreaBehaviorAPI.ClearMap, this::clearMap);
-      navigableRegionsManager = new NavigableRegionsManager();
+      navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
 
       statusLogger.info("Initializing explore area behavior");
 
