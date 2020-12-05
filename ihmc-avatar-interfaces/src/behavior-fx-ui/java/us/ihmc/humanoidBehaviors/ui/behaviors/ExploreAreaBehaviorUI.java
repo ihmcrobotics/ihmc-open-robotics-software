@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -46,11 +47,11 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @FXML private TableView parameterTable;
 
    private final LivePlanarRegionsGraphic planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-   private final GraphicGroup<Node> observationPointsGraphicGroup = new GraphicGroup<>();
-   private final GraphicGroup<Node> potentialPointsToExploreGraphicGroup = new GraphicGroup<>();
-   private final GraphicGroup<Node> foundBodyPathToPointsGraphicGroup = new GraphicGroup<>();
-   private final GraphicGroup<Node> planningToPointsGraphicGroup = new GraphicGroup<>();
-   private final GraphicGroup<Node> boundingBoxGraphics = new GraphicGroup<>();
+   private final GraphicGroup<Node> observationPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
+   private final GraphicGroup<Node> potentialPointsToExploreGraphicGroup = new GraphicGroup<>(get3DGroup());
+   private final GraphicGroup<Node> foundBodyPathToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
+   private final GraphicGroup<Node> planningToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
+   private final GraphicGroup<Node> boundingBoxGraphics = new GraphicGroup<>(get3DGroup());
 
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
 
@@ -89,12 +90,21 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @Override
    public void setEnabled(boolean enabled)
    {
+      planarRegionsGraphic.setEnabled(enabled);
+
       observationPointsGraphicGroup.setEnabled(enabled);
       potentialPointsToExploreGraphicGroup.setEnabled(enabled);
       foundBodyPathToPointsGraphicGroup.setEnabled(enabled);
       planningToPointsGraphicGroup.setEnabled(enabled);
       boundingBoxGraphics.setEnabled(enabled);
-      planarRegionsGraphic.setEnabled(enabled);
+      if (enabled)
+      {
+         Platform.runLater(() -> get3DGroup().getChildren().add(planarRegionsGraphic));
+      }
+      else
+      {
+         Platform.runLater(() -> get3DGroup().getChildren().remove(planarRegionsGraphic));
+      }
    }
 
    private void publishParameters()
@@ -201,7 +211,6 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
       planarRegionsGraphic.acceptPlanarRegions(planarRegionsList);
-      get3DGroup().getChildren().add(planarRegionsGraphic);
    }
 
    public void addPlanarRegionToMap(TemporaryPlanarRegionMessage planarRegionMessage)
