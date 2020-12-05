@@ -6,37 +6,48 @@ import javafx.scene.Node;
 
 import java.util.ArrayList;
 
-public class GraphicGroup<T extends Node> extends Group
+public class GraphicGroup<T extends Node>
 {
+   private final Group parent;
    private final ArrayList<T> graphicNodes = new ArrayList<>();
+   private boolean enabled = false;
+
+   public GraphicGroup(Group parent)
+   {
+      this.parent = parent;
+   }
 
    public void setEnabled(boolean enabled)
    {
-      if (!enabled)
+      this.enabled = enabled;
+      if (enabled)
       {
-         for (T boundingBoxGraphic : graphicNodes)
+         for (T graphicNode : graphicNodes)
          {
-            Platform.runLater(() -> getChildren().remove(boundingBoxGraphic));
+            Platform.runLater(() -> parent.getChildren().add(graphicNode));
          }
       }
       else
       {
-         for (T boundingBoxGraphic : graphicNodes)
+         for (T graphicNode : graphicNodes)
          {
-            Platform.runLater(() -> getChildren().add(boundingBoxGraphic));
+            Platform.runLater(() -> parent.getChildren().remove(graphicNode));
          }
       }
    }
 
    public void removeAll()
    {
-      Platform.runLater(() -> getChildren().removeAll());
+      Platform.runLater(() -> parent.getChildren().removeAll());
       graphicNodes.clear();
    }
 
    public void add(T graphicNode)
    {
       graphicNodes.add(graphicNode);
-      Platform.runLater(() -> getChildren().add(graphicNode));
+      if (enabled)
+      {
+         Platform.runLater(() -> parent.getChildren().add(graphicNode));
+      }
    }
 }
