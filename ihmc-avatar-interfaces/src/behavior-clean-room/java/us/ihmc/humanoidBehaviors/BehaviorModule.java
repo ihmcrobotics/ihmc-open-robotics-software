@@ -14,6 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -34,6 +35,7 @@ public class BehaviorModule
 {
    private final MessagerAPI messagerAPI;
    private final Messager messager;
+   private final StatusLogger statusLogger;
    private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
    private final ROS2Node ros2Node;
@@ -77,8 +79,8 @@ public class BehaviorModule
          messager = new SharedMemoryMessager(messagerAPI);
       }
 
+      statusLogger = new StatusLogger(messager::submitMessage);
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
-
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
@@ -103,19 +105,19 @@ public class BehaviorModule
             if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
             {
                enabledBehaviors.put(behaviorName, selected);
-               LogTools.info("{} behavior {}.", behaviorName, selected ? "enabled" : "disabled");
+               statusLogger.info("{} behavior {}.", behaviorName, selected ? "enabled" : "disabled");
                behavior.getRight().setEnabled(selected);
             }
          }
          if (!selectedOne)
          {
-            LogTools.info("All behaviors disabled.");
+            statusLogger.info("All behaviors disabled.");
          }
       });
 
       new IHMCROS2Callback<>(ros2Node, BehaviorModule.API.SHUTDOWN, message ->
       {
-         LogTools.info("Received SHUTDOWN. Shutting down...");
+         statusLogger.info("Received SHUTDOWN. Shutting down...");
 
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
@@ -133,7 +135,7 @@ public class BehaviorModule
 
    public void destroy()
    {
-      LogTools.info("Shutting down...");
+      statusLogger.info("Shutting down...");
       for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
       {
          behavior.getRight().setEnabled(false);
