@@ -268,6 +268,7 @@ public class BehaviorUI
 
          if (enabledUIs.computeIfAbsent(behaviorName, key -> false) != enabled)
          {
+            enabledUIs.put(behaviorName, enabled);
             behaviorUIInterfaces.get(behaviorName).setEnabled(enabled);
          }
       }
