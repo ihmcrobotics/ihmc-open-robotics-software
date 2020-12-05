@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,11 +35,6 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -1073,39 +1067,5 @@ public class ExploreAreaBehavior implements BehaviorInterface
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       helper.publishToUI(PatrolBehaviorAPI.CurrentFootstepPlan, footstepLocations);
-   }
-
-   public static class ExploreAreaBehaviorAPI
-   {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("ExploreAreaBehavior");
-      private static final CategoryTheme ExploreAreaTheme = apiFactory.createCategoryTheme("ExploreArea");
-
-      public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
-      public static final Topic<Boolean> RandomPoseUpdate = topic("RandomPoseUpdate");
-      public static final Topic<Boolean> DoSlam = topic("DoSlam");
-      public static final Topic<Boolean> ClearMap = topic("ClearMap");
-      public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
-      public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
-      public static final Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");
-      public static final Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
-      public static final Topic<Point3D> FoundBodyPathTo = topic("FoundBodyPathTo");
-      public static final Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
-      public static final Topic<Boolean> DrawMap = topic("DrawMap");
-      public static final Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");
-      public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");
-      public static final Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = topic("AddPolygonToPlanarRegion");
-      public static final Topic<List<String>> Parameters = topic("Parameters");
-      public static final Topic<ExploreAreaBehaviorState> CurrentState = topic("CurrentState");
-
-      private static final <T> Topic<T> topic(String name)
-      {
-         return RootCategory.child(ExploreAreaTheme).topic(apiFactory.createTypedTopicTheme(name));
-      }
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }
