@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -24,10 +24,8 @@ import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.lists.PairList;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
@@ -36,7 +34,7 @@ public class BehaviorModule
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final StatusLogger statusLogger;
-   private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
+   private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
    private final ROS2Node ros2Node;
 
@@ -87,33 +85,10 @@ public class BehaviorModule
       {
          BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros2Node);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
-         constructedBehaviors.add(behaviorDefinition, constructedBehavior);
+         constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
       }
 
-      messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
-      {
-         boolean selectedOne = false;
-         for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
-         {
-            String behaviorName = behavior.getLeft().getName();
-            boolean selected = behaviorName.equals(selection);
-            if (selected)
-            {
-               selectedOne = true;
-            }
-
-            if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
-            {
-               enabledBehaviors.put(behaviorName, selected);
-               statusLogger.info("{} behavior {}.", behaviorName, selected ? "enabled" : "disabled");
-               behavior.getRight().setEnabled(selected);
-            }
-         }
-         if (!selectedOne)
-         {
-            statusLogger.info("All behaviors disabled.");
-         }
-      });
+      messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
 
       new IHMCROS2Callback<>(ros2Node, BehaviorModule.API.SHUTDOWN, message ->
       {
@@ -121,6 +96,40 @@ public class BehaviorModule
 
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
+   }
+
+   private void stringBasedSelection(String selection)
+   {
+      ArrayList<String> selectedBehaviors = new ArrayList<>();
+      selectedBehaviors.add(selection);
+      if (constructedBehaviors.containsKey(selection)) // i.e. Might be "None"
+      {
+         for (BehaviorDefinition subBehavior : constructedBehaviors.get(selection).getLeft().getSubBehaviors())
+         {
+            selectedBehaviors.add(subBehavior.getName());
+         }
+      }
+
+      boolean selectedOne = false;
+      for (Map.Entry<String, Pair<BehaviorDefinition, BehaviorInterface>> behavior : constructedBehaviors.entrySet())
+      {
+         String behaviorName = behavior.getKey();
+         boolean selected = selectedBehaviors.contains(behaviorName);
+         if (selected)
+         {
+            selectedOne = true;
+         }
+         if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
+         {
+            enabledBehaviors.put(behaviorName, selected);
+            statusLogger.info("{} {} behavior.", selected ? "Enabling" : "Disabling", behaviorName);
+            behavior.getValue().getRight().setEnabled(selected);
+         }
+      }
+      if (!selectedOne)
+      {
+         statusLogger.info("All behaviors disabled.");
+      }
    }
 
    private void kryoStarter()
@@ -136,7 +145,7 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
-      for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
+      for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
       {
          behavior.getRight().setEnabled(false);
       }

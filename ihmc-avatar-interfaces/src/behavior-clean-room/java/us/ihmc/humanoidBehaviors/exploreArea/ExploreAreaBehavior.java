@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
@@ -34,6 +35,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -65,7 +67,10 @@ import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area", ExploreAreaBehavior::new, create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",
+                                                                              ExploreAreaBehavior::new,
+                                                                              create(),
+                                                                              LookAndStepBehavior.DEFINITION);
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
@@ -76,6 +81,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteSyncedRobotModel syncedRobot;
+   private final Messager messager;
 
    private int chestYawForLookingAroundIndex = 0;
 
@@ -112,6 +118,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      messager = helper.getManagedMessager();
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
@@ -192,8 +199,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      mainThread.setRunning(enabled);
       helper.setCommunicationCallbacksEnabled(enabled);
+      mainThread.setRunning(enabled);
    }
 
    private void randomPoseUpdate(boolean doRandomPoseUpdate)
