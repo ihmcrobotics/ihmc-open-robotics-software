@@ -60,9 +60,12 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
+
 public class ExploreAreaBehavior implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area", ExploreAreaBehavior::new, ExploreAreaBehaviorAPI.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area", ExploreAreaBehavior::new, create());
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
@@ -115,83 +118,73 @@ public class ExploreAreaBehavior implements BehaviorInterface
       rea = helper.getOrCreateREAInterface();
       footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
 
-      explore = helper.createUIInput(ExploreAreaBehaviorAPI.ExploreArea, false);
-      helper.createUICallback(ExploreAreaBehaviorAPI.Parameters, parameters::setAllFromStrings);
-      helper.createUICallback(ExploreAreaBehaviorAPI.RandomPoseUpdate, this::randomPoseUpdate);
-      helper.createUICallback(ExploreAreaBehaviorAPI.DoSlam, this::doSlam);
-      helper.createUICallback(ExploreAreaBehaviorAPI.ClearMap, this::clearMap);
+      explore = helper.createUIInput(ExploreArea, false);
+      helper.createUICallback(Parameters, parameters::setAllFromStrings);
+      helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
+      helper.createUICallback(DoSlam, this::doSlam);
+      helper.createUICallback(ClearMap, this::clearMap);
       navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
 
       statusLogger.info("Initializing explore area behavior");
 
       EnumBasedStateMachineFactory<ExploreAreaBehaviorState> factory = new EnumBasedStateMachineFactory<>(ExploreAreaBehaviorState.class);
-      factory.setOnEntry(ExploreAreaBehaviorState.Stop, this::onStopStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.Stop, this::doStopStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.Stop, ExploreAreaBehaviorState.LookAround, this::readyToTransitionFromStopToLookAround);
+      factory.setOnEntry(Stop, this::onStopStateEntry);
+      factory.setDoAction(Stop, this::doStopStateAction);
+      factory.addTransition(Stop, LookAround, this::readyToTransitionFromStopToLookAround);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.LookAround, this::onLookAroundStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.LookAround, this::doLookAroundStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.LookAround, ExploreAreaBehaviorState.Perceive, this::readyToTransitionFromLookAroundToPerceive);
+      factory.setOnEntry(LookAround, this::onLookAroundStateEntry);
+      factory.setDoAction(LookAround, this::doLookAroundStateAction);
+      factory.addTransition(LookAround, Perceive, this::readyToTransitionFromLookAroundToPerceive);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.Perceive, this::onPerceiveStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.Perceive, this::doPerceiveStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.Perceive,
-                            ExploreAreaBehaviorState.GrabPlanarRegions,
-                            this::readyToTransitionFromPerceiveToGrabPlanarRegions);
+      factory.setOnEntry(Perceive, this::onPerceiveStateEntry);
+      factory.setDoAction(Perceive, this::doPerceiveStateAction);
+      factory.addTransition(Perceive, GrabPlanarRegions, this::readyToTransitionFromPerceiveToGrabPlanarRegions);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.GrabPlanarRegions, this::onGrabPlanarRegionsStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.GrabPlanarRegions, this::doGrabPlanarRegionsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
-                            ExploreAreaBehaviorState.LookAround,
-                            this::readyToTransitionFromGrabPlanarRegionsToLookAround);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
-                            ExploreAreaBehaviorState.DetermineNextLocations,
-                            this::readyToTransitionFromGrabPlanarRegionsToDetermineNextLocations);
+      factory.setOnEntry(GrabPlanarRegions, this::onGrabPlanarRegionsStateEntry);
+      factory.setDoAction(GrabPlanarRegions, this::doGrabPlanarRegionsStateAction);
+      factory.addTransition(GrabPlanarRegions, LookAround, this::readyToTransitionFromGrabPlanarRegionsToLookAround);
+      factory.addTransition(GrabPlanarRegions, DetermineNextLocations, this::readyToTransitionFromGrabPlanarRegionsToDetermineNextLocations);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.DetermineNextLocations, this::doDetermineNextLocationsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations,
-                            ExploreAreaBehaviorState.Plan,
-                            this::readyToTransitionFromDetermineNextLocationsToPlan);
+      factory.setOnEntry(DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
+      factory.setDoAction(DetermineNextLocations, this::doDetermineNextLocationsStateAction);
+      factory.addTransition(DetermineNextLocations, Plan, this::readyToTransitionFromDetermineNextLocationsToPlan);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.Plan, this::onPlanStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.Plan, this::doPlanStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.WalkToNextLocation, this::readyToTransitionFromPlanToWalkToNextLocation);
-      factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.Plan, this::readyToTransitionFromPlanToPlan);
-      factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.TurnInPlace, this::readyToTransitionFromPlanToTurnInPlace);
+      factory.setOnEntry(Plan, this::onPlanStateEntry);
+      factory.setDoAction(Plan, this::doPlanStateAction);
+      factory.addTransition(Plan, WalkToNextLocation, this::readyToTransitionFromPlanToWalkToNextLocation);
+      factory.addTransition(Plan, Plan, this::readyToTransitionFromPlanToPlan);
+      factory.addTransition(Plan, TurnInPlace, this::readyToTransitionFromPlanToTurnInPlace);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.WalkToNextLocation, this::onWalkToNextLocationStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.WalkToNextLocation, this::doWalkToNextLocationStateAction);
-      // factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
-      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation,
-                            ExploreAreaBehaviorState.TakeAStep,
-                            this::readyToTransitionFromWalkToNextLocationToTakeAStep);
+      factory.setOnEntry(WalkToNextLocation, this::onWalkToNextLocationStateEntry);
+      factory.setDoAction(WalkToNextLocation, this::doWalkToNextLocationStateAction);
+      // factory.addTransition(WalkToNextLocation, Stop, this::readyToTransitionFromWalkToNextLocationToStop);
+      factory.addTransition(WalkToNextLocation, TakeAStep, this::readyToTransitionFromWalkToNextLocationToTakeAStep);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.TakeAStep, this::onTakeAStepStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.TakeAStep, this::doTakeAStepStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.TakeAStep, ExploreAreaBehaviorState.TakeAStep, this::readyToTransitionFromTakeAStepToTakeAStep);
-      factory.addTransition(ExploreAreaBehaviorState.TakeAStep, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromTakeAStepToStop);
+      factory.setOnEntry(TakeAStep, this::onTakeAStepStateEntry);
+      factory.setDoAction(TakeAStep, this::doTakeAStepStateAction);
+      factory.addTransition(TakeAStep, TakeAStep, this::readyToTransitionFromTakeAStepToTakeAStep);
+      factory.addTransition(TakeAStep, Stop, this::readyToTransitionFromTakeAStepToStop);
 
-      factory.setOnEntry(ExploreAreaBehaviorState.TurnInPlace, this::onTurnInPlaceStateEntry);
-      factory.setDoAction(ExploreAreaBehaviorState.TurnInPlace, this::doTurnInPlaceStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.TurnInPlace, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromTurnInPlaceToStop);
+      factory.setOnEntry(TurnInPlace, this::onTurnInPlaceStateEntry);
+      factory.setDoAction(TurnInPlace, this::doTurnInPlaceStateAction);
+      factory.addTransition(TurnInPlace, Stop, this::readyToTransitionFromTurnInPlaceToStop);
 
       // Go to stop from any state when no longer exploring.
-      factory.addTransition(ExploreAreaBehaviorState.LookAround, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.Perceive, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
-      factory.addTransition(ExploreAreaBehaviorState.TurnInPlace, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
+      factory.addTransition(LookAround, Stop, this::noLongerExploring);
+      factory.addTransition(Perceive, Stop, this::noLongerExploring);
+      factory.addTransition(GrabPlanarRegions, Stop, this::noLongerExploring);
+      factory.addTransition(DetermineNextLocations, Stop, this::noLongerExploring);
+      factory.addTransition(Plan, Stop, this::noLongerExploring);
+      factory.addTransition(WalkToNextLocation, Stop, this::noLongerExploring);
+      factory.addTransition(TurnInPlace, Stop, this::noLongerExploring);
       factory.getFactory().addStateChangedListener((from, to) ->
       {
-         helper.publishToUI(ExploreAreaBehaviorAPI.CurrentState, to);
+         helper.publishToUI(CurrentState, to);
          statusLogger.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
 
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
-      stateMachine = factory.getFactory().build(ExploreAreaBehaviorState.Stop);
+      stateMachine = factory.getFactory().build(Stop);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(2), 5, this::runExploreAreaThread);
    }
@@ -279,7 +272,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FramePoint3D midFeetLocation = new FramePoint3D(midFeetZUpFrame);
       midFeetLocation.changeFrame(worldFrame);
 
-      helper.publishToUI(ExploreAreaBehaviorAPI.ObservationPosition, new Point3D(midFeetLocation));
+      helper.publishToUI(ObservationPosition, new Point3D(midFeetLocation));
 
       this.pointsObservedFrom.add(new Point3D(midFeetLocation));
    }
@@ -297,7 +290,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onGrabPlanarRegionsStateEntry()
    {
-      helper.publishToUI(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
+      helper.publishToUI(ClearPlanarRegions, true);
       rememberObservationPoint();
       doSlam(true);
    }
@@ -426,31 +419,29 @@ public class ExploreAreaBehavior implements BehaviorInterface
       int index = 0;
       for (PlanarRegion planarRegion : planarRegionsAsList)
       {
-         helper.publishToUI(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
-                                TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
+         helper.publishToUI(AddPlanarRegionToMap, TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
 
          List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
          for (ConvexPolygon2D polygon : convexPolygons)
          {
-            helper.publishToUI(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
-                                   TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
+            helper.publishToUI(AddPolygonToPlanarRegion, TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
          }
 
          index++;
       }
 
-      helper.publishToUI(ExploreAreaBehaviorAPI.DrawMap, true);
+      helper.publishToUI(DrawMap, true);
 
       // Send it to the GUI for a viz...
       //         PlanarRegionsListMessage concatenatedMapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(concatenatedMap);
-      //         helper.publishToUI(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ConcatenatedMap, concatenatedMapMessage);
+      //         helper.publishToUI(ExploreAreaBehavior.ConcatenatedMap, concatenatedMapMessage);
 
       // Find a point that has not been observed, but is close to a point that can be walked to, in order to observe it...
    }
 
    private void clearMap(boolean clearMap)
    {
-      helper.publishToUI(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
+      helper.publishToUI(ClearPlanarRegions, true);
       concatenatedMap = null;
    }
 
@@ -544,7 +535,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       explorationBoundingBoxes.add(concatenatedMapBoundingBox);
       explorationBoundingBoxes.add(intersectionBoundingBox);
 
-      helper.publishToUI(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes, explorationBoundingBoxes);
+      helper.publishToUI(ExplorationBoundingBoxes, explorationBoundingBoxes);
 
       for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
       {
@@ -565,7 +556,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       ArrayList<Point3D> potentialPointsToSend = new ArrayList<Point3D>();
       potentialPointsToSend.addAll(potentialPoints);
-      helper.publishToUI(ExploreAreaBehaviorAPI.PotentialPointsToExplore, potentialPointsToSend);
+      helper.publishToUI(PotentialPointsToExplore, potentialPointsToSend);
 
       // Compute distances to each.
 
@@ -598,7 +589,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          if (bodyPath != null)
          {
             //            LogTools.info("Found body path to " + testGoal);
-            helper.publishToUI(ExploreAreaBehaviorAPI.FoundBodyPathTo, new Point3D(testGoal));
+            helper.publishToUI(FoundBodyPathTo, new Point3D(testGoal));
 
             feasibleGoalPoints.add(testGoal);
             potentialBodyPaths.put(testGoal, bodyPath);
@@ -757,7 +748,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          statusLogger.info("\nPlanning to " + goal);
          Point3D goalToSend = new Point3D(goal.getPosition());
 
-         helper.publishToUI(ExploreAreaBehaviorAPI.PlanningToPosition, goalToSend);
+         helper.publishToUI(PlanningToPosition, goalToSend);
 
          footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose, goal, concatenatedMap);
       }
@@ -914,7 +905,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onTurnInPlaceStateEntry()
    {
-      ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<Pose3D>();
+      ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<>();
 
       RobotSide supportSide = RobotSide.RIGHT;
       RobotSide initialSupportSide = supportSide;
