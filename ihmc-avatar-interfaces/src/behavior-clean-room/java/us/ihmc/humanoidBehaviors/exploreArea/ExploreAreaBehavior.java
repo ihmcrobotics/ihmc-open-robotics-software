@@ -25,7 +25,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
