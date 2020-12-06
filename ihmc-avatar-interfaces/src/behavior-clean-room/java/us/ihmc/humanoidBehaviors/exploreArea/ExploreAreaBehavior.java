@@ -52,6 +52,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.io.File;
@@ -155,6 +156,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       factory.setOnEntry(DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
       factory.setDoAction(DetermineNextLocations, this::doDetermineNextLocationsStateAction);
+      factory.addTransition(DetermineNextLocations, TurnInPlace, this::readyToTransitionFromDetermineNextLocationsToTurnInPlace);
       factory.addTransition(DetermineNextLocations, LookAndStep, this::readyToTransitionFromDetermineNextLocationsToLookAndStep);
 
       factory.setOnEntry(LookAndStep, this::onLookAndStepStateEntry);
@@ -719,17 +721,28 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
    }
 
-   private boolean readyToTransitionFromDetermineNextLocationsToLookAndStep(double timeInState)
+   private boolean readyToTransitionFromDetermineNextLocationsToTurnInPlace(double timeInState)
    {
-      return determinedNextLocations;
+      statusLogger.error("Out of places to plan to. We're lost!");
+      return desiredFramePoses.isEmpty();
    }
 
-   Notification reachedGoal;
+   private boolean readyToTransitionFromDetermineNextLocationsToLookAndStep(double timeInState)
+   {
+      return determinedNextLocations && !desiredFramePoses.isEmpty();
+   }
 
    private void onLookAndStepStateEntry()
    {
+      FramePose3D goal = desiredFramePoses.remove(0);
+
+      statusLogger.info("Planning to {}", StringTools.zUpPoseString(goal));
+      Point3D goalToSend = new Point3D(goal.getPosition());
+
+      helper.publishToUI(PlanningToPosition, goalToSend);
+
       messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-      helper.publishROS2(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(desiredFramePoses.get(0)));
+      helper.publishROS2(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(goal));
       lookAndStepReachedGoal.poll();
    }
 

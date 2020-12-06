@@ -32,14 +32,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
 import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createBoundingBox3D;
 import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createSphere3D;
 
 public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 {
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUI::new);
-
-   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    @FXML private CheckBox exploreAreaCheckBox;
    @FXML private TextField stateTextField;
@@ -51,16 +50,22 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private final GraphicGroup<Node> foundBodyPathToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
    private final GraphicGroup<Node> planningToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
    private final GraphicGroup<Node> boundingBoxGraphics = new GraphicGroup<>(get3DGroup());
+   private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
 
+   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
-
    private final HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
    private final HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
    private final HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
+   private ExploreAreaBehavior.ExploreAreaBehaviorState currentState;
+
    public ExploreAreaBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
+
+      lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
+      get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
 
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
                                              result -> Platform.runLater(() -> displayObservationPosition(result)));
@@ -78,9 +83,15 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
                                              result -> Platform.runLater(() -> addPlanarRegionToMap(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
                                              result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap,
+                                             result -> Platform.runLater(() -> drawMap(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.CurrentState,
-                                             state -> Platform.runLater(() -> stateTextField.setText(state.name())));
+                                             state -> Platform.runLater(() ->
+                                             {
+                                                this.currentState = state;
+                                                stateTextField.setText(state.name());
+                                                lookAndStepVisualizationGroup.setEnabled(state == LookAndStep);
+                                             }));
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
@@ -96,6 +107,8 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       foundBodyPathToPointsGraphicGroup.setEnabled(enabled);
       planningToPointsGraphicGroup.setEnabled(enabled);
       boundingBoxGraphics.setEnabled(enabled);
+      lookAndStepVisualizationGroup.setEnabled(enabled && currentState == LookAndStep);
+
       if (enabled)
       {
          Platform.runLater(() -> get3DGroup().getChildren().add(planarRegionsGraphic));
