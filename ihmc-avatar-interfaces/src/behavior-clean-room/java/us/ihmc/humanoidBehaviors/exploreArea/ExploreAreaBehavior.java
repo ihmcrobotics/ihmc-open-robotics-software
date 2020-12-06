@@ -1066,6 +1066,5 @@ public class ExploreAreaBehavior implements BehaviorInterface
          footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
-      helper.publishToUI(PatrolBehaviorAPI.CurrentFootstepPlan, footstepLocations);
    }
 }
