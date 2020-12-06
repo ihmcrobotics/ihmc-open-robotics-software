@@ -55,7 +55,7 @@ public class BehaviorUI
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
-   @FXML private ChoiceBox<String> behaviorSelector;;
+   @FXML private ChoiceBox<String> behaviorSelector;
    @FXML private CheckBox trackRobot;
    @FXML private Button startRecording;
    @FXML private Button stopRecording;
