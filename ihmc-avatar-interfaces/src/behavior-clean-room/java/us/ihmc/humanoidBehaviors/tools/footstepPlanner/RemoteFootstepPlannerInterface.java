@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -97,7 +98,8 @@ public class RemoteFootstepPlannerInterface
 
    private void acceptFootstepPlannerResult(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus)
    {
-      if (resultNotifications.containsKey(footstepPlanningToolboxOutputStatus.getPlanId()))
+      FootstepPlanningResult footstepPlanningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+      if (resultNotifications.containsKey(footstepPlanningToolboxOutputStatus.getPlanId()) && footstepPlanningResult != FootstepPlanningResult.PLANNING)
       {
          RemoteFootstepPlannerResult result = new RemoteFootstepPlannerResult(footstepPlanningToolboxOutputStatus);
 
