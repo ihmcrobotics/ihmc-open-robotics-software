@@ -484,7 +484,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          stepCounter.set(0);
          lookAndStepStarted = false;
 
-         lookAndStepBehavior.reset();
+         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
 
          LogTools.info("Enabling look and step behavior");
          lookAndStepBehavior.setEnabled(true);
@@ -616,7 +616,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
-         lookAndStepBehavior.reset();
+         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
       }
    }
 
