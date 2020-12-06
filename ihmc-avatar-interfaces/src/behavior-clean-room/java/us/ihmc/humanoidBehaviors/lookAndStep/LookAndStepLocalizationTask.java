@@ -20,6 +20,7 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,12 +31,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.ClosestPointForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
 public class LookAndStepLocalizationTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected RemoteSyncedRobotModel syncedRobot;
    protected Runnable clearAndActivateBodyPathPlanning;
    protected Runnable broadcastReachedGoal;
@@ -50,25 +52,29 @@ public class LookAndStepLocalizationTask
       private final Input swingSleepCompleteInput = new Input();
       private SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
 
-      public void initialize(StatusLogger statusLogger,
-                             UIPublisher uiPublisher,
-                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                             RemoteSyncedRobotModel syncedRobot,
-                             Notification finishedWalkingNotification,
-                             Runnable clearAndActivateBodyPathPlanning,
-                             Runnable broadcastReachedGoal,
-                             SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
-                             Consumer<LookAndStepLocalizationResult> footstepPlanningOutput)
+      public void initialize(LookAndStepBehavior lookAndStep)
       {
-         this.lastCommandedFootsteps = lastCommandedFootsteps;
-         this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-         this.finishedWalkingNotification = finishedWalkingNotification;
-         this.clearAndActivateBodyPathPlanning = clearAndActivateBodyPathPlanning;
-         this.broadcastReachedGoal = broadcastReachedGoal;
-         this.footstepPlanningOutput = footstepPlanningOutput;
-         this.statusLogger = statusLogger;
-         this.uiPublisher = uiPublisher;
-         this.syncedRobot = syncedRobot;
+         lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
+         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         finishedWalkingNotification = lookAndStep.helper.createWalkingCompletedNotification();
+         clearAndActivateBodyPathPlanning = () ->
+         {
+            if ((!lookAndStep.isBeingReset.get()))
+            {
+               lookAndStep.helper.publishROS2(SLAMModuleAPI.CLEAR);
+               lookAndStep.bodyPathPlanning.acceptGoal(null);
+               lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+            }
+         };
+         broadcastReachedGoal = () ->
+         {
+            statusLogger.info("Publishing REACHED GOAL");
+            lookAndStep.helper.publishROS2(REACHED_GOAL);
+         };
+         footstepPlanningOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
+         statusLogger = lookAndStep.statusLogger;
+         uiPublisher = lookAndStep.helper::publishToUI;
+         syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -162,16 +168,16 @@ public class LookAndStepLocalizationTask
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
-      boolean reachedGoalZone = distanceToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
+      boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFeetPose.getYaw(), terminalGoal.getYaw()));
-      reachedGoalZone &= yawToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
+      reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
 
       statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
       statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
                                            FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
-                                           lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
+                                           lookAndStepParameters.getGoalSatisfactionRadius(),
                                            FormattingTools.getFormattedDecimal3D(yawToExactGoal),
-                                           lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
+                                           lookAndStepParameters.getGoalSatisfactionOrientationDelta()));
       if (reachedGoalZone)
       {
          statusLogger.info("Eventual pose reaches goal.");
