@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepLocalization;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBodyPathLocalization;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
@@ -37,7 +37,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    final RemoteHumanoidRobotInterface robotInterface;
 
    final LookAndStepBodyPathPlanning bodyPathPlanning = new LookAndStepBodyPathPlanning();
-   final LookAndStepLocalization localization = new LookAndStepLocalization();
+   final LookAndStepBodyPathLocalization bodyPathLocalization = new LookAndStepBodyPathLocalization();
    final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
    final LookAndStepStepping stepping = new LookAndStepStepping();
    final LookAndStepReset reset = new LookAndStepReset();
@@ -137,8 +137,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
 
-      localization.initialize(this);
-      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, localization::acceptCapturabilityBasedStatus);
+      bodyPathLocalization.initialize(this);
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
 
       footstepPlanning.initialize(this);
       helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);

@@ -66,7 +66,7 @@ public class LookAndStepFootstepPlanningTask
       private ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
 
-      private final TypedInput<LookAndStepLocalizationResult> localizationResultInput = new TypedInput<>();
+      private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
@@ -149,7 +149,7 @@ public class LookAndStepFootstepPlanningTask
          capturabilityBasedStatusExpirationTimer.reset();
       }
 
-      public void acceptLocalizationResult(LookAndStepLocalizationResult localizationResult)
+      public void acceptLocalizationResult(LookAndStepBodyPathLocalizationResult localizationResult)
       {
          localizationResultInput.set(localizationResult);
       }
@@ -187,7 +187,7 @@ public class LookAndStepFootstepPlanningTask
    }
 
    // snapshot data
-   protected LookAndStepLocalizationResult localizationResult;
+   protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList planarRegions;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;

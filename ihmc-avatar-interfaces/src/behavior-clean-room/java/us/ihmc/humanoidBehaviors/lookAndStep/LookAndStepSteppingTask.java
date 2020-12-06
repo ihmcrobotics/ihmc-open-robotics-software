@@ -65,7 +65,7 @@ public class LookAndStepSteppingTask
             if (!lookAndStep.isBeingReset.get())
             {
                lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-               lookAndStep.localization.acceptSwingSleepComplete();
+               lookAndStep.bodyPathLocalization.acceptSwingSleepComplete();
             }
          };
 

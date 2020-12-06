@@ -41,10 +41,10 @@ public class LookAndStepLocalizationTask
    protected RemoteSyncedRobotModel syncedRobot;
    protected Runnable clearAndActivateBodyPathPlanning;
    protected Runnable broadcastReachedGoal;
-   protected Consumer<LookAndStepLocalizationResult> footstepPlanningOutput;
+   protected Consumer<LookAndStepBodyPathLocalizationResult> bodyPathLocalizationOutput;
    protected Notification finishedWalkingNotification;
 
-   public static class LookAndStepLocalization extends LookAndStepLocalizationTask
+   public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -71,7 +71,7 @@ public class LookAndStepLocalizationTask
             statusLogger.info("Publishing REACHED GOAL");
             lookAndStep.helper.publishROS2(REACHED_GOAL);
          };
-         footstepPlanningOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
+         bodyPathLocalizationOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
          statusLogger = lookAndStep.statusLogger;
          uiPublisher = lookAndStep.helper::publishToUI;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
@@ -186,11 +186,12 @@ public class LookAndStepLocalizationTask
       }
       else
       {
-         LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
-                                                                                  closestSegmentIndex,
-                                                                                  midFeetPose,
-                                                                                  bodyPathPlan, eventualStanceFeet);
-         footstepPlanningOutput.accept(result);
+         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
+                                                                                                  closestSegmentIndex,
+                                                                                                  midFeetPose,
+                                                                                                  bodyPathPlan,
+                                                                                                  eventualStanceFeet);
+         bodyPathLocalizationOutput.accept(result);
       }
    }
 

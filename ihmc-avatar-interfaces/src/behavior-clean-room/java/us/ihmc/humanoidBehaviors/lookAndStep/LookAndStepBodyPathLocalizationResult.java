@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 
-public class LookAndStepLocalizationResult
+public class LookAndStepBodyPathLocalizationResult
 {
    private final Point3D closestPointAlongPath;
    private final int closestSegmentIndex;
@@ -15,11 +15,11 @@ public class LookAndStepLocalizationResult
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
    private final SideDependentList<MinimalFootstep> stanceForPlanning;
 
-   public LookAndStepLocalizationResult(Point3D closestPointAlongPath,
-                                        int closestSegmentIndex,
-                                        Pose3DReadOnly midFeetAlongPath,
-                                        List<? extends Pose3DReadOnly> bodyPathPlan,
-                                        SideDependentList<MinimalFootstep> stanceForPlanning)
+   public LookAndStepBodyPathLocalizationResult(Point3D closestPointAlongPath,
+                                                int closestSegmentIndex,
+                                                Pose3DReadOnly midFeetAlongPath,
+                                                List<? extends Pose3DReadOnly> bodyPathPlan,
+                                                SideDependentList<MinimalFootstep> stanceForPlanning)
    {
       this.closestPointAlongPath = closestPointAlongPath;
       this.closestSegmentIndex = closestSegmentIndex;
