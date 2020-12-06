@@ -12,6 +12,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanPostProcessHandler;
@@ -197,6 +198,11 @@ public class BehaviorHelper
    }
 
    public <T> void publishROS2(ROS2Topic<T> topic, T message)
+   {
+      ros2PublisherMap.publish(topic, message);
+   }
+
+   public void publishROS2(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);
    }

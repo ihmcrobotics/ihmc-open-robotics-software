@@ -57,6 +57,7 @@ public class IHMCROS2Callback<T>
 
    private static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
    {
+      LogTools.info("Trying to instantiate topic data type for {}", messageType.getSimpleName());
       if (messageType.equals(Pose3D.class))
       {
          PosePubSubType.setImplementation(new Pose3DPubSubTypeImpl());
@@ -71,8 +72,10 @@ public class IHMCROS2Callback<T>
       }
       catch (NoSuchMethodException | SecurityException e)
       {
-         throw new RuntimeException(
-               "Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + ROS2TopicNameTools.pubSubTypeGetterName + "().", e);
+         throw new RuntimeException("Something went wrong when looking up the method "
+                                    + messageType.getSimpleName() + "."
+                                    + ROS2TopicNameTools.pubSubTypeGetterName + "()."
+                                    + e.getMessage(), e);
       }
 
       TopicDataType<T> topicDataType;

@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -22,10 +21,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
@@ -93,7 +92,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    public enum ExploreAreaBehaviorState
    {
-      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation, TakeAStep, TurnInPlace
+      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, LookAndStep, TurnInPlace
    }
 
    private final BehaviorHelper helper;
@@ -109,6 +108,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
+   private final Notification lookAndStepReachedGoal;
 
    private PlanarRegionsList concatenatedMap, latestPlanarRegionsList;
    private BoundingBox3D concatenatedMapBoundingBox;
@@ -130,6 +130,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
       helper.createUICallback(DoSlam, this::doSlam);
       helper.createUICallback(ClearMap, this::clearMap);
+      lookAndStepReachedGoal = helper.createROS2Notification(LookAndStepBehaviorAPI.REACHED_GOAL);
       navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
 
       statusLogger.info("Initializing explore area behavior");
@@ -154,23 +155,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       factory.setOnEntry(DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
       factory.setDoAction(DetermineNextLocations, this::doDetermineNextLocationsStateAction);
-      factory.addTransition(DetermineNextLocations, Plan, this::readyToTransitionFromDetermineNextLocationsToPlan);
+      factory.addTransition(DetermineNextLocations, LookAndStep, this::readyToTransitionFromDetermineNextLocationsToLookAndStep);
 
-      factory.setOnEntry(Plan, this::onPlanStateEntry);
-      factory.setDoAction(Plan, this::doPlanStateAction);
-      factory.addTransition(Plan, WalkToNextLocation, this::readyToTransitionFromPlanToWalkToNextLocation);
-      factory.addTransition(Plan, Plan, this::readyToTransitionFromPlanToPlan);
-      factory.addTransition(Plan, TurnInPlace, this::readyToTransitionFromPlanToTurnInPlace);
-
-      factory.setOnEntry(WalkToNextLocation, this::onWalkToNextLocationStateEntry);
-      factory.setDoAction(WalkToNextLocation, this::doWalkToNextLocationStateAction);
-      // factory.addTransition(WalkToNextLocation, Stop, this::readyToTransitionFromWalkToNextLocationToStop);
-      factory.addTransition(WalkToNextLocation, TakeAStep, this::readyToTransitionFromWalkToNextLocationToTakeAStep);
-
-      factory.setOnEntry(TakeAStep, this::onTakeAStepStateEntry);
-      factory.setDoAction(TakeAStep, this::doTakeAStepStateAction);
-      factory.addTransition(TakeAStep, TakeAStep, this::readyToTransitionFromTakeAStepToTakeAStep);
-      factory.addTransition(TakeAStep, Stop, this::readyToTransitionFromTakeAStepToStop);
+      factory.setOnEntry(LookAndStep, this::onLookAndStepStateEntry);
+      factory.setDoAction(LookAndStep, this::doLookAndStepStateAction);
+      factory.addTransition(LookAndStep, Stop, this::readyToTransitionFromLookAndStepToStop);
+      factory.addTransition(LookAndStep, TurnInPlace, this::readyToTransitionFromLookAndStepToTurnInPlace);
+      factory.setOnExit(LookAndStep, this::doLookAndStepStateExit);
 
       factory.setOnEntry(TurnInPlace, this::onTurnInPlaceStateEntry);
       factory.setDoAction(TurnInPlace, this::doTurnInPlaceStateAction);
@@ -181,14 +172,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
       factory.addTransition(Perceive, Stop, this::noLongerExploring);
       factory.addTransition(GrabPlanarRegions, Stop, this::noLongerExploring);
       factory.addTransition(DetermineNextLocations, Stop, this::noLongerExploring);
-      factory.addTransition(Plan, Stop, this::noLongerExploring);
-      factory.addTransition(WalkToNextLocation, Stop, this::noLongerExploring);
+      factory.addTransition(LookAndStep, Stop, this::noLongerExploring);
       factory.addTransition(TurnInPlace, Stop, this::noLongerExploring);
       factory.getFactory().addStateChangedListener((from, to) ->
-      {
-         helper.publishToUI(CurrentState, to);
-         statusLogger.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
-      });
+                                                   {
+                                                      helper.publishToUI(CurrentState, to);
+                                                      statusLogger.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+                                                   });
 
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(Stop);
@@ -612,8 +602,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
       double durationSeconds = ((double) duration) / 1.0e9;
       double durationPer = durationSeconds / ((double) numberConsidered);
 
-      statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
-            + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
+      statusLogger.info(
+            "Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds + " seconds to find the body paths, or "
+            + durationPer + " seconds Per attempt.");
 
       desiredFramePoses = new ArrayList<>();
 
@@ -648,7 +639,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
          desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          desiredFramePoses.add(desiredFramePose);
       }
-
    }
 
    private BoundingBox3D getBoundingBoxIntersection(BoundingBox3D boxOne, BoundingBox3D boxTwo)
@@ -729,185 +719,38 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
    }
 
-   private boolean readyToTransitionFromDetermineNextLocationsToPlan(double timeInState)
+   private boolean readyToTransitionFromDetermineNextLocationsToLookAndStep(double timeInState)
    {
       return determinedNextLocations;
    }
 
-   private boolean plannerFinished = false;
-   private boolean foundValidPlan = false;
-   private FootstepPlan footstepPlan = null;
-   private FootstepDataListMessage footstepDataListMessageFromPlan = null;
-   private PlanarRegionsList planarRegionsListFromPlan = null;
-   private boolean outOfPlans = false;
+   Notification reachedGoal;
 
-   private void onPlanStateEntry()
+   private void onLookAndStepStateEntry()
    {
-      resetFootstepPlanning();
-
-      syncedRobot.update();
-      FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
-
-      if (!desiredFramePoses.isEmpty())
-      {
-         FramePose3D goal = desiredFramePoses.remove(0);
-
-         statusLogger.info("\nPlanning to " + goal);
-         Point3D goalToSend = new Point3D(goal.getPosition());
-
-         helper.publishToUI(PlanningToPosition, goalToSend);
-
-         footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose, goal, concatenatedMap);
-      }
-      else
-      {
-         statusLogger.info("Out of places to plan too!!!! We're lost!!");
-         outOfPlans = true;
-      }
+      messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+      helper.publishROS2(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(desiredFramePoses.get(0)));
+      lookAndStepReachedGoal.poll();
    }
 
-   private void doPlanStateAction(double timeInState)
+   private void doLookAndStepStateAction()
    {
-      //TODO: Something wrong with the planner. If you check on the results too quickly you get some errors. Need to fix planner issues.
-      if (timeInState < 3.0)
-         return;
 
-      plannerFinished = footstepPlanResultNotification.poll();
-
-      if (plannerFinished)
-      {
-         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
-         FootstepPlanningResult planResult = plannerResult.getResult();
-
-         statusLogger.info("planResult = " + planResult);
-
-         if (planResult.validForExecution())
-         {
-            foundValidPlan = true;
-            footstepPlan = plannerResult.getFootstepPlan();
-            footstepDataListMessageFromPlan = plannerResult.getFootstepDataListMessage();
-            planarRegionsListFromPlan = plannerResult.getPlanarRegionsList();
-
-            reduceAndSendFootstepsForVisualization(footstepPlan);
-         }
-         else
-         {
-            foundValidPlan = false;
-         }
-      }
    }
 
-   private void resetFootstepPlanning()
+   private boolean readyToTransitionFromLookAndStepToStop()
    {
-      outOfPlans = false;
-      plannerFinished = false;
-      foundValidPlan = false;
-      footstepPlan = null;
-      footstepDataListMessageFromPlan = null;
-      planarRegionsListFromPlan = null;
-      footstepPlannerToolbox.abortPlanning();
+      return false;
    }
 
-   private boolean readyToTransitionFromPlanToPlan(double timeInState)
+   private boolean readyToTransitionFromLookAndStepToTurnInPlace(double timeInState)
    {
-      return (plannerFinished && !foundValidPlan);
+      return lookAndStepReachedGoal.poll();
    }
 
-   private boolean readyToTransitionFromPlanToWalkToNextLocation(double timeInState)
+   private void doLookAndStepStateExit()
    {
-      return (foundValidPlan == true);
-   }
 
-   private boolean readyToTransitionFromPlanToTurnInPlace(double timeInState)
-   {
-      return outOfPlans;
-   }
-
-   private RecyclingArrayList<FootstepDataMessage> footstepDataList = null;
-   private int footstepIndex = 0;
-
-   private void onWalkToNextLocationStateEntry()
-   {
-      //      HumanoidRobotState referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
-      footstepDataList = footstepDataListMessageFromPlan.getFootstepDataList();
-      footstepIndex = 0;
-
-      //      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageFromPlan, referenceFrames, planarRegionsListFromPlan);
-   }
-
-   private void doWalkToNextLocationStateAction(double timeInState)
-   {
-      //      walkingCompleted.poll();
-   }
-
-   private boolean readyToTransitionFromWalkToNextLocationToTakeAStep(double timeInState)
-   {
-      return true;
-   }
-
-   //   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
-   //   {
-   //      return (walkingCompleted.hasValue());
-   //      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
-   //   }
-
-   private RobotSide takeAStepSwingSide;
-   private Point3D nextFootstepLocation;
-
-   private void onTakeAStepStateEntry()
-   {
-      syncedRobot.update();
-
-      FootstepDataMessage footstepDataMessage = footstepDataList.get(footstepIndex);
-      takeAStepSwingSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
-
-      FootstepDataListMessage messageWithOneStep = new FootstepDataListMessage(footstepDataListMessageFromPlan);
-      messageWithOneStep.getFootstepDataList().clear();
-      messageWithOneStep.getFootstepDataList().add().set(footstepDataMessage);
-      walkingCompleted = robotInterface.requestWalk(messageWithOneStep);
-
-      statusLogger.info("Stepping to " + footstepDataMessage.getLocation());
-
-      if (footstepIndex < footstepDataList.size() - 1)
-      {
-         FootstepDataMessage nextFootstep = footstepDataList.get(footstepIndex + 1);
-         nextFootstepLocation = nextFootstep.getLocation();
-         statusLogger.info("Stare at next Footstep " + nextFootstep.getLocation());
-
-//         rotateChestAndPitchHeadToLookAtPointInWorld(0.0, takeAStepSwingSide, nextFootstepLocation, fullRobotModel, referenceFrames);
-      }
-      else
-      {
-         nextFootstepLocation = null;
-         robotInterface.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
-      }
-
-      footstepIndex++;
-   }
-
-   private void doTakeAStepStateAction(double timeInState)
-   {
-      syncedRobot.update();
-
-      if (nextFootstepLocation != null)
-      {
-//         rotateChestAndPitchHeadToLookAtPointInWorld(timeInState, takeAStepSwingSide, nextFootstepLocation, fullRobotModel, referenceFrames);
-         nextFootstepLocation = null;
-      }
-
-      walkingCompleted.poll();
-   }
-
-   private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
-   {
-      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasValue()));
-      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
-   }
-
-   private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
-   {
-      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasValue()));
-      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private void onTurnInPlaceStateEntry()
