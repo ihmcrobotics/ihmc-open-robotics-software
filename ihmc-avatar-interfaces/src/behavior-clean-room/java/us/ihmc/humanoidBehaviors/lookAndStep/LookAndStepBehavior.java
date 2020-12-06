@@ -161,9 +161,4 @@ public class LookAndStepBehavior implements BehaviorInterface
       behaviorStateReference.broadcast();
       reset.queueReset();
    }
-
-   public void reset()
-   {
-      reset.queueReset();
-   }
 }
