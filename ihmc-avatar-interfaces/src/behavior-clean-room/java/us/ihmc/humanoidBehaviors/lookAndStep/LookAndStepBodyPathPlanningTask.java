@@ -82,7 +82,7 @@ public class LookAndStepBodyPathPlanningTask
             if (!lookAndStep.isBeingReset.get())
             {
                lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-               lookAndStep.localization.acceptBodyPathPlan(bodyPathPlan);
+               lookAndStep.bodyPathLocalization.acceptBodyPathPlan(bodyPathPlan);
             }
          };
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;

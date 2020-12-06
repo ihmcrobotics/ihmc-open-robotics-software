@@ -58,7 +58,7 @@ public class LookAndStepReset
       lookAndStep.helper.publishToUI(OperatorReviewEnabledToUI, true);
 
       lookAndStep.bodyPathPlanning.reset();
-      lookAndStep.localization.reset();
+      lookAndStep.bodyPathLocalization.reset();
       lookAndStep.footstepPlanning.reset();
       lookAndStep.stepping.reset();
 
