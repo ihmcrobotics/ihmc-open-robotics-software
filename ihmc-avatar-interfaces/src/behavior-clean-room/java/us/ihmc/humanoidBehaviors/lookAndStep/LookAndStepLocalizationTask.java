@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.Loo
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -50,6 +51,7 @@ public class LookAndStepLocalizationTask
    protected Consumer<LookAndStepBodyPathLocalizationResult> bodyPathLocalizationOutput;
    protected Notification finishedWalkingNotification;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
+   protected ControllerStatusTracker controllerStatusTracker;
 
    public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
@@ -73,6 +75,7 @@ public class LookAndStepLocalizationTask
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          isBeingReset = lookAndStep.isBeingReset;
          stepping = lookAndStep.stepping;
+         controllerStatusTracker = lookAndStep.controllerStatusTracker;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -203,7 +206,10 @@ public class LookAndStepLocalizationTask
    {
       statusLogger.info("Waiting for walking to complete...");
       finishedWalkingNotification.poll();
-      finishedWalkingNotification.blockingPoll();
+      if (controllerStatusTracker.isWalking())
+      {
+         finishedWalkingNotification.blockingPoll();
+      }
       stepping.reset();
       statusLogger.info("Goal reached.");
       ros2EmptyPublisher.accept(REACHED_GOAL);
