@@ -45,11 +45,11 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @FXML private TableView parameterTable;
 
    private final LivePlanarRegionsGraphic planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-   private final GraphicGroup<Node> observationPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
-   private final GraphicGroup<Node> potentialPointsToExploreGraphicGroup = new GraphicGroup<>(get3DGroup());
-   private final GraphicGroup<Node> foundBodyPathToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
-   private final GraphicGroup<Node> planningToPointsGraphicGroup = new GraphicGroup<>(get3DGroup());
-   private final GraphicGroup<Node> boundingBoxGraphics = new GraphicGroup<>(get3DGroup());
+   private final GraphicGroup observationPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup potentialPointsToExploreGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup foundBodyPathToPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup planningToPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup boundingBoxGraphics = new GraphicGroup(get3DGroup());
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
