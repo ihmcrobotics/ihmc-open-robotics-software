@@ -189,10 +189,8 @@ public class LookAndStepBodyPathPlanningTask
 
       // calculate and send body path plan
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result =
-            lookAndStepParameters.getFlatGroundBodyPathPlan() ?
-                  performTaskWithFlatGround() :
-                  performTaskWithVisibilityGraphPlanner();
+      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result
+            = lookAndStepParameters.getFlatGroundBodyPathPlan() ? performTaskWithFlatGround() : performTaskWithVisibilityGraphPlanner();
 
       statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
 
@@ -226,18 +224,11 @@ public class LookAndStepBodyPathPlanningTask
    {
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      YoRegistry parentRegistry = new YoRegistry(getClass().getSimpleName());
-      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
+      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
 
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
-      FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      bodyPathPlanner.setStanceFootPoses(syncedRobot.getReferenceFrames());
       planningStopwatch.start();
       BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();
       return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s
