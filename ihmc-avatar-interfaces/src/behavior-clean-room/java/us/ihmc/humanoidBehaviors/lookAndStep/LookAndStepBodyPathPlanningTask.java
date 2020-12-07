@@ -36,7 +36,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -77,14 +76,7 @@ public class LookAndStepBodyPathPlanningTask
          operatorReviewEnabled = lookAndStep.operatorReviewEnabledInput::get;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
-         output = bodyPathPlan ->
-         {
-            if (!lookAndStep.isBeingReset.get())
-            {
-               lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-               lookAndStep.bodyPathLocalization.acceptBodyPathPlan(bodyPathPlan);
-            }
-         };
+         output = lookAndStep::bodyPathPlanInput;
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
 
          Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;

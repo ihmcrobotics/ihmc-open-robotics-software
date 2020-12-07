@@ -507,6 +507,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private ArrayList<FramePose3D> desiredFramePoses;
    private boolean determinedNextLocations = false;
+   private List<Pose3DReadOnly> bestBodyPath;
 
    private void onDetermineNextLocationsStateEntry()
    {
@@ -633,7 +634,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
       double bestDistance = distancesFromStart.get(bestGoalPoint);
-      List<Pose3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
+      bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
       statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 
@@ -745,15 +746,14 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onLookAndStepStateEntry()
    {
-      FramePose3D goal = desiredFramePoses.remove(0);
+      List<Pose3DReadOnly> bestBodyPath = this.bestBodyPath;
+      Point3DReadOnly goal = bestBodyPath.get(bestBodyPath.size() - 1).getPosition();
 
-      statusLogger.info("Planning to {}", StringTools.zUpPoseString(goal));
-      Point3D goalToSend = new Point3D(goal.getPosition());
-
-      helper.publishToUI(PlanningToPosition, goalToSend);
+      statusLogger.info("Planning to {}", StringTools.tupleString(goal));
+      helper.publishToUI(PlanningToPosition, new Point3D(goal));
 
       messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-      helper.publishROS2(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(goal));
+      helper.publishToUI(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
       lookAndStepReachedGoal.poll();
    }
 

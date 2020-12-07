@@ -45,6 +45,9 @@ public class LookAndStepBehaviorAPI
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
+   /** Starts the look and step behavior onto a precomputed body path */
+   public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathInput = topic("BodyPathInput");
+
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
     */
