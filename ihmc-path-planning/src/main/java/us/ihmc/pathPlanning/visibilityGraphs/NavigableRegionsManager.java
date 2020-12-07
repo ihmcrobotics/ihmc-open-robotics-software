@@ -106,6 +106,19 @@ public class NavigableRegionsManager
       visibilityMapSolution.getNavigableRegions().setPlanarRegions(planarRegions);
    }
 
+   public List<Point3DReadOnly> calculateBodyPathWithOcclusionHandling(final Point3DReadOnly startInWorld, final Point3DReadOnly finalGoalInWorld)
+   {
+      return calculateBodyPathWithOcclusionHandling(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph);
+   }
+
+   public List<Point3DReadOnly> calculateBodyPathWithOcclusionHandling(final Point3DReadOnly startInWorld,
+                                                                       final Point3DReadOnly finalGoalInWorld,
+                                                                       boolean fullyExpandVisibilityGraph)
+   {
+      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(this);
+      return occlusionHandlingPathPlanner.calculateBodyPath(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph);
+   }
+
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
       return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
