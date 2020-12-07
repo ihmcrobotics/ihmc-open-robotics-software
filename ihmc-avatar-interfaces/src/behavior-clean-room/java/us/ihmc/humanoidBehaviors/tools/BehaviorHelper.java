@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanPostProcessHandler;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
@@ -27,6 +28,8 @@ import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -79,6 +82,7 @@ public class BehaviorHelper
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
+   private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
@@ -122,6 +126,16 @@ public class BehaviorHelper
       if (environmentMap == null)
          environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
       return environmentMap;
+   }
+
+   public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
+   {
+      if (bodyPathPlanner == null)
+      {
+         VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+         bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
+      }
+      return bodyPathPlanner;
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
