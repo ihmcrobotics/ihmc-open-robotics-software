@@ -70,23 +70,23 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
 
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
-                                             result -> Platform.runLater(() -> displayObservationPosition(result)));
+                                             position -> Platform.runLater(() -> displayObservationPosition(position)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
-                                             result -> Platform.runLater(() -> displayExplorationBoundingBoxes(result)));
+                                             boxes -> Platform.runLater(() -> displayExplorationBoundingBoxes(boxes)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
-                                             result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
+                                             points -> Platform.runLater(() -> displayPotentialPointsToExplore(points)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PlanningToPosition,
-                                             result -> Platform.runLater(() -> displayPlanningToPosition(result)));
+                                             position -> Platform.runLater(() -> displayPlanningToPosition(position)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
-                                             result -> Platform.runLater(() -> displayFoundBodyPathTo(result)));
+                                             bodyPath -> Platform.runLater(() -> displayFoundBodyPathTo(bodyPath)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
-                                             result -> Platform.runLater(() -> clearPlanarRegions(result)));
+                                             unused -> Platform.runLater(this::clearPlanarRegions));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
-                                             result -> Platform.runLater(() -> addPlanarRegionToMap(result)));
+                                             region -> Platform.runLater(() -> addPlanarRegionToMap(region)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
-                                             result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
+                                             polygon -> Platform.runLater(() -> addPolygonToPlanarRegion(polygon)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap,
-                                             result -> Platform.runLater(() -> drawMap(result)));
+                                             unused -> Platform.runLater(this::drawMap));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.CurrentState,
                                              state -> Platform.runLater(() ->
                                              {
@@ -169,7 +169,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       for (int i = 0; i < boxes.size(); i++)
       {
          Color color = boundingBoxColors[i % boundingBoxColors.length];
-         boundingBoxGraphics.add(createBoundingBox3D(boxes.get(i), color, 0.1));
+         boundingBoxGraphics.add(createBoundingBox3D(boxes.get(i), color, 0.02));
       }
    }
 
@@ -194,7 +194,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       planningToPointsGraphicGroup.add(createSphere3D(planningToPosition, Color.BLUEVIOLET, 0.1));
    }
 
-   public void clearPlanarRegions(boolean input)
+   public void clearPlanarRegions()
    {
       planarRegionsGraphic.clear();
 
@@ -204,7 +204,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       polygonsMap.clear();
    }
 
-   public void drawMap(boolean input)
+   public void drawMap()
    {
       planarRegionsGraphic.clear();
       planarRegions.clear();
