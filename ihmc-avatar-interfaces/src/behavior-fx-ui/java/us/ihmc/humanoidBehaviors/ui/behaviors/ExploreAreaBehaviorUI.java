@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
-import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createBoundingBox3D;
-import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.createSphere3D;
+import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.*;
 
 public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 {
@@ -75,8 +74,8 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
                                              boxes -> Platform.runLater(() -> displayExplorationBoundingBoxes(boxes)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
                                              points -> Platform.runLater(() -> displayPotentialPointsToExplore(points)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PlanningToPosition,
-                                             position -> Platform.runLater(() -> displayPlanningToPosition(position)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.WalkingToPose,
+                                             pose -> Platform.runLater(() -> displayPlanningToPose(pose)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
                                              bodyPath -> Platform.runLater(() -> displayFoundBodyPathTo(bodyPath)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
@@ -188,10 +187,10 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       foundBodyPathToPointsGraphicGroup.add(JavaFXGraphicPrimitives.createPath(foundBodyPathToPoint, Color.LIMEGREEN));
    }
 
-   public void displayPlanningToPosition(Point3D planningToPosition)
+   public void displayPlanningToPose(Pose3D planningToPosition)
    {
       planningToPointsGraphicGroup.removeAll();
-      planningToPointsGraphicGroup.add(createSphere3D(planningToPosition, Color.BLUEVIOLET, 0.1));
+      planningToPointsGraphicGroup.add(createSphereWithArrow3D(planningToPosition, Color.BLUEVIOLET, 0.1));
    }
 
    public void clearPlanarRegions()

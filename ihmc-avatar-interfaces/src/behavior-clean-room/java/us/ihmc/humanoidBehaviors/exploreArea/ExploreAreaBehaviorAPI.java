@@ -24,7 +24,7 @@ public class ExploreAreaBehaviorAPI
    public static final MessagerAPIFactory.Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");
    public static final MessagerAPIFactory.Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> FoundBodyPath = topic("FoundBodyPath");
-   public static final MessagerAPIFactory.Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
+   public static final MessagerAPIFactory.Topic<Pose3D> WalkingToPose = topic("PlanningToPosition");
    public static final MessagerAPIFactory.Topic<Object> DrawMap = topic("DrawMap");
    public static final MessagerAPIFactory.Topic<Object> ClearPlanarRegions = topic("ClearPlanarRegions");
    public static final MessagerAPIFactory.Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");
