@@ -609,13 +609,21 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
 
          // Compute distances to each.
 
-         HashMap<Point3DReadOnly, Double> distancesFromStart = new HashMap<>();
+         HashMap<Point3DReadOnly, Double> distances = new HashMap<>();
          for (Point3DReadOnly testGoal : potentialPoints)
          {
-            distancesFromStart.put(testGoal, midFeetPosition.distanceXY(testGoal));
+            double closestDistance = midFeetPosition.distanceXY(testGoal);
+            for (Pose3D pose3D : exploredGoalPosesSoFar)
+            {
+               double distance = pose3D.getPosition().distance(testGoal);
+               if (distance < closestDistance)
+                  closestDistance = distance;
+            }
+
+            distances.put(testGoal, closestDistance);
          }
 
-         sortBasedOnBestDistances(potentialPoints, distancesFromStart, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
+         sortBasedOnBestDistances(potentialPoints, distances, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
 
          statusLogger.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
 
@@ -645,7 +653,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
 
                feasibleGoalPoints.add(testGoal);
                potentialBodyPaths.put(testGoal, bodyPath);
-               distancesFromStart.put(testGoal, midFeetPosition.distanceXY(testGoal));
+               distances.put(testGoal, midFeetPosition.distanceXY(testGoal));
 
                if (feasibleGoalPoints.size() >= maxNumberOfFeasiblePointsToLookFor)
                   break;
@@ -677,7 +685,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
          }
 
          Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
-         double bestDistance = distancesFromStart.get(bestGoalPoint);
+         double bestDistance = distances.get(bestGoalPoint);
          bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
          statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
@@ -721,15 +729,17 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
          return false;
       }
 
-      private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart, double minDistanceIfPossible)
+      private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints,
+                                            HashMap<Point3DReadOnly, Double> distances,
+                                            double minDistanceIfPossible)
       {
          Comparator<Point3DReadOnly> comparator = (goalOne, goalTwo) ->
          {
             if (goalOne == goalTwo)
                return 0;
 
-            double distanceOne = distancesFromStart.get(goalOne);
-            double distanceTwo = distancesFromStart.get(goalTwo);
+            double distanceOne = distances.get(goalOne);
+            double distanceTwo = distances.get(goalTwo);
 
             if (distanceOne >= minDistanceIfPossible)
             {
