@@ -6,10 +6,10 @@ import javafx.scene.Node;
 
 import java.util.ArrayList;
 
-public class GraphicGroup<T extends Node>
+public class GraphicGroup
 {
    private final Group parent;
-   private final ArrayList<T> graphicNodes = new ArrayList<>();
+   private final ArrayList<Node> graphicNodes = new ArrayList<>();
    private boolean enabled = false;
 
    public GraphicGroup(Group parent)
@@ -22,14 +22,14 @@ public class GraphicGroup<T extends Node>
       this.enabled = enabled;
       if (enabled)
       {
-         for (T graphicNode : graphicNodes)
+         for (Node graphicNode : graphicNodes)
          {
             Platform.runLater(() -> parent.getChildren().add(graphicNode));
          }
       }
       else
       {
-         for (T graphicNode : graphicNodes)
+         for (Node graphicNode : graphicNodes)
          {
             Platform.runLater(() -> parent.getChildren().remove(graphicNode));
          }
@@ -42,7 +42,7 @@ public class GraphicGroup<T extends Node>
       graphicNodes.clear();
    }
 
-   public void add(T graphicNode)
+   public void add(Node graphicNode)
    {
       graphicNodes.add(graphicNode);
       if (enabled)
