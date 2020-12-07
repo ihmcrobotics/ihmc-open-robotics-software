@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
@@ -14,7 +13,7 @@ import us.ihmc.robotics.geometry.GeometryTools;
 
 public class JavaFXGraphicPrimitives
 {
-   public static Node createBoundingBox3D(BoundingBox3D boundingBox, Color color, double lineWidth)
+   public static MeshView createBoundingBox3D(BoundingBox3D boundingBox, Color color, double lineWidth)
    {
       Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox);
 
@@ -26,7 +25,7 @@ public class JavaFXGraphicPrimitives
       return boundingBoxMeshView;
    }
 
-   public static Node createSphere3D(Point3D point, Color color, double radius)
+   public static Sphere createSphere3D(Point3D point, Color color, double radius)
    {
       Sphere sphere = new Sphere(radius);
       PhongMaterial material = new PhongMaterial(color);
