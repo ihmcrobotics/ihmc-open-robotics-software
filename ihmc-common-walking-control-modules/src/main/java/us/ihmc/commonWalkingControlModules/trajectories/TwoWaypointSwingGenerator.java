@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -18,7 +17,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -149,12 +148,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    {
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
-         PrintTools.warn("Recieved no waypoints but trajectory type is custom. Using default trajectory.");
+         LogTools.warn("Received no waypoints but trajectory type is custom. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
       {
-         PrintTools.warn("Recieved unexpected amount of waypoints. Using default trajectory.");
+         LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
