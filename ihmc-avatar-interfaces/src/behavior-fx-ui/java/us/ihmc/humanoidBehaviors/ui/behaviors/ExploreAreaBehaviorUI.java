@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
@@ -185,9 +185,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
    public void displayFoundBodyPathTo(List<Pose3D> foundBodyPathToPoint)
    {
-      BodyPathPlanGraphic bodyPathPlanGraphic = new BodyPathPlanGraphic();
-      bodyPathPlanGraphic.generateMeshesAsynchronously(foundBodyPathToPoint);
-      foundBodyPathToPointsGraphicGroup.add(bodyPathPlanGraphic);
+      foundBodyPathToPointsGraphicGroup.add(JavaFXGraphicPrimitives.createPath(foundBodyPathToPoint, Color.LIMEGREEN));
    }
 
    public void displayPlanningToPosition(Point3D planningToPosition)
