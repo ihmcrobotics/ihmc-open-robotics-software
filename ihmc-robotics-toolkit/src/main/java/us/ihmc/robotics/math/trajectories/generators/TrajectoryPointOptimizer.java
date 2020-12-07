@@ -16,27 +16,34 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * The TrajectoryPointOptimizer computes an optimal (minimal integrated acceleration) trajectory.
- *
+ * <p>
  * Given start and end point position and velocity as well as waypoint positions (optional) this
  * optimizer finds velocities, accelerations, and times at the waypoints that minimize the overall
  * integrated acceleration along the trajectory.
- *
- * If a third order trajectory is requested the acceleration will not be zero at start and end
- * but be continuous at the waypoints. For a fifth order polynomial the start and end accelerations
- * will be zero. Time is assumed to be without dimension and goes from 0.0 at the start to 1.0 at
- * the end of the trajectory.
- *
- * The trajectory times are found through an iterative process using a gradient descent. The compute()
- * method can be called with an optional argument specifying the maximal amount of iterations if the
- * runtime is critical. The waypoint times are initialized to be evenly distributed in the interval
- * 0.0 to 1.0. The maximum number of time optimization steps can be set to zero.
- *
+ * </p>
+ * <p>
+ * If a third order trajectory is requested the acceleration will not be zero at start and end but
+ * be continuous at the waypoints. For a fifth order polynomial the start and end accelerations will
+ * be zero. Time is assumed to be without dimension and goes from 0.0 at the start to 1.0 at the end
+ * of the trajectory.
+ * </p>
+ * <p>
+ * The trajectory times are found through an iterative process using a gradient descent. The
+ * compute() method can be called with an optional argument specifying the maximal amount of
+ * iterations if the runtime is critical. The waypoint times are initialized to be evenly
+ * distributed in the interval 0.0 to 1.0. The maximum number of time optimization steps can be set
+ * to zero.
+ * </p>
+ * <p>
  * The class can return waypoint times, polynomial coefficients for the trajectory segments, and
  * optimal velocities and accelerations at the knot points of the trajectory.
- *
+ * </p>
+ * <p>
  * Algorithm based on "Minimum Snap Trajectory Generation and Control for Quadrotors" - Mellinger
+ * </p>
+ * <p>
+ * 
  * @author gwiedebach
- *
  */
 public class TrajectoryPointOptimizer
 {
@@ -144,13 +151,13 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * Set the conditions at trajectory start and end. All arguments are expected to have a size equal to the number
-    * of dimensions of the optimizer (e.g. 3 for a 3d trajectory)
+    * Set the conditions at trajectory start and end. All arguments are expected to have a size equal
+    * to the number of dimensions of the optimizer (e.g. 3 for a 3d trajectory)
     *
-    * @param startPosition      start position of the trajectory at time 0.0
-    * @param startVelocity      start velocity of the trajectory at time 0.0
-    * @param targetPosition     final position of the trajectory at time 1.0
-    * @param targetVelocity     final velocity of the trajectory at time 1.0
+    * @param startPosition  start position of the trajectory at time 0.0
+    * @param startVelocity  start velocity of the trajectory at time 0.0
+    * @param targetPosition final position of the trajectory at time 1.0
+    * @param targetVelocity final velocity of the trajectory at time 1.0
     */
    public void setEndPoints(TDoubleArrayList startPosition, TDoubleArrayList startVelocity, TDoubleArrayList targetPosition, TDoubleArrayList targetVelocity)
    {
@@ -173,11 +180,11 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * Set the waypoint positions along the trajectory. Each waypoint is expected to have a size equal to the number
-    * of dimensions of the optimizer (e.g. 3 for a 3d trajectory). Times and velocities are not specified but found
-    * by the optimization algorithm.
+    * Set the waypoint positions along the trajectory. Each waypoint is expected to have a size equal
+    * to the number of dimensions of the optimizer (e.g. 3 for a 3d trajectory). Times and velocities
+    * are not specified but found by the optimization algorithm.
     *
-    * @param waypoints   list of all waypoint positions in the trajectory
+    * @param waypoints list of all waypoint positions in the trajectory
     */
    public void setWaypoints(List<TDoubleArrayList> waypoints)
    {
@@ -195,8 +202,9 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * Run the optimization with the default number of maximum time updates. This assumes knot points of the trajectory
-    * have been set using the methods setEndPoints and setWaypoints. It is possible to specify no waypoints.
+    * Run the optimization with the default number of maximum time updates. This assumes knot points of
+    * the trajectory have been set using the methods setEndPoints and setWaypoints. It is possible to
+    * specify no waypoints.
     */
    public void compute()
    {
@@ -204,10 +212,11 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * Run the optimization with the given number of maximum time updates. This assumes knot points of the trajectory
-    * have been set using the methods setEndPoints and setWaypoints. It is possible to specify no waypoints.
+    * Run the optimization with the given number of maximum time updates. This assumes knot points of
+    * the trajectory have been set using the methods setEndPoints and setWaypoints. It is possible to
+    * specify no waypoints.
     *
-    * @param maxIterations   maximum number of iterations for the waypoint time optimization
+    * @param maxIterations maximum number of iterations for the waypoint time optimization
     */
    public void compute(int maxIterations)
    {
@@ -218,18 +227,20 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * If the user would like to provide waypoint times and only solve for the waypoint velocities this method can be used.
+    * If the user would like to provide waypoint times and only solve for the waypoint velocities this
+    * method can be used.
     *
     * @param waypointTimes the times at waypoints. Times must be between 0.0 and 1.0.
     */
    public void computeForFixedTime(TDoubleArrayList waypointTimes)
    {
-       compute(0, waypointTimes);
+      compute(0, waypointTimes);
    }
 
    /**
-    * This is a compute method that provides an optional argument for the initial waypoint times. These times will
-    * be used as an initial guess for the gradient descent that optimizes the waypoint times.
+    * This is a compute method that provides an optional argument for the initial waypoint times. These
+    * times will be used as an initial guess for the gradient descent that optimizes the waypoint
+    * times.
     *
     * @param waypointTimes the times at waypoints. Times must be between 0.0 and 1.0.
     */
@@ -282,12 +293,13 @@ public class TrajectoryPointOptimizer
    }
 
    /**
-    * Provides an alternative API to the optimizer. This method allows the user to run a single gradient descent step
-    * at a time. Will return true if the optimization has converged.
-    *
-    * If this is desired call compute(0) to initialize the optimizer and then call doFullTimeUpdate() to improve
-    * waypoint timing iteratively.
-    *
+    * Provides an alternative API to the optimizer. This method allows the user to run a single
+    * gradient descent step at a time. Will return true if the optimization has converged.
+    * <p>
+    * If this is desired call compute(0) to initialize the optimizer and then call doFullTimeUpdate()
+    * to improve waypoint timing iteratively.
+    * </p>
+    * 
     * @return whether the gradient descent has converged or not.
     */
    public boolean doFullTimeUpdate()
@@ -420,6 +432,16 @@ public class TrajectoryPointOptimizer
       return 0.5 * b.get(0, 0);
    }
 
+   /**
+    * Sets up the equality constraints used for the QP:
+    * <ul>
+    * <li>at <tt>t=0</tt>: position and velocity are equal to {@code x0} and {@code xd0}.
+    * <li>at <tt>t=1</tt>: position and velocity are equal to {@code x1} and {@code xd1}.
+    * <li>at <tt>t=t<sub>i</sub></tt> with <tt>i&in;[0;nWaypoints[</tt>: position equals
+    * <tt>waypoints<sub>i</sub></tt>, and velocity of the 2 cubic segments joining at the waypoint are
+    * equal.
+    * </ul>
+    */
    private void buildConstraintMatrixForDimension(int dimension, DMatrixRMaj A, DMatrixRMaj b)
    {
       int constraints = 4 + 3 * nWaypoints.getValue();
@@ -494,7 +516,7 @@ public class TrajectoryPointOptimizer
    /**
     * Get the optimal times at the given waypoints.
     *
-    * @param timesToPack    modified - the optimal waypoint times are stopred here
+    * @param timesToPack modified - the optimal waypoint times are stored here
     */
    public void getWaypointTimes(TDoubleArrayList timesToPack)
    {
@@ -514,8 +536,8 @@ public class TrajectoryPointOptimizer
    /**
     * Get the optimal time for a specific waypoint.
     *
-    * @param waypoint       the index of the waypoint of interest
-    * @return               the optimal time for this waypoint
+    * @param waypoint the index of the waypoint of interest
+    * @return the optimal time for this waypoint
     */
    public double getWaypointTime(int waypoint)
    {
@@ -537,8 +559,8 @@ public class TrajectoryPointOptimizer
     * equal to the number of trajectory segments. The list will contain the coefficients for the
     * trajectory segments in order.
     *
-    * @param coefficientsToPack   modified - the polynomial coefficients are stored here
-    * @param dimension            the dimension for which the polynomial coefficients are returned
+    * @param coefficientsToPack modified - the polynomial coefficients are stored here
+    * @param dimension          the dimension for which the polynomial coefficients are returned
     */
    public void getPolynomialCoefficients(List<TDoubleArrayList> coefficientsToPack, int dimension)
    {
@@ -560,8 +582,8 @@ public class TrajectoryPointOptimizer
    /**
     * Get the optimal velocity at a given waypoint.
     *
-    * @param velocityToPack     modified - the waypoint velocity is stored here
-    * @param waypointIndex      index of the waypoint of interest
+    * @param velocityToPack modified - the waypoint velocity is stored here
+    * @param waypointIndex  index of the waypoint of interest
     */
    public void getWaypointVelocity(TDoubleArrayList velocityToPack, int waypointIndex)
    {
@@ -578,6 +600,16 @@ public class TrajectoryPointOptimizer
       }
    }
 
+   /**
+    * Sets up the row vector as follows:
+    * 
+    * <pre>
+    * lineToPack = [ t<sup>3</sup> t<sup>2</sup> t 1 ]
+    * </pre>
+    * 
+    * @param t          current time.
+    * @param lineToPack modified - used to store the row vector.
+    */
    private static void getPositionLine(double t, DMatrixRMaj lineToPack)
    {
       lineToPack.reshape(1, coefficients);
@@ -590,6 +622,16 @@ public class TrajectoryPointOptimizer
       lineToPack.set(0, 0, tpow);
    }
 
+   /**
+    * Sets up the row vector as follows:
+    * 
+    * <pre>
+    * lineToPack = [ 3t<sup>2</sup> 2t 1 0 ]
+    * </pre>
+    * 
+    * @param t          current time.
+    * @param lineToPack modified - used to store the row vector.
+    */
    private static void getVelocityLine(double t, DMatrixRMaj lineToPack)
    {
       lineToPack.reshape(1, coefficients);
@@ -601,6 +643,18 @@ public class TrajectoryPointOptimizer
       lineToPack.set(0, 0, 3.0 * tpow);
    }
 
+   /**
+    * Sets up the 2-by-2 matrix as follows:
+    * 
+    * <pre>
+    * hBlockToPak = / 12 * (t1<sup>3</sup> - t0<sup>3</sup>)    6 * (t1<sup>2</sup> - t0<sup>2</sup>) \
+    *               \  6 * (t1<sup>2</sup> - t0<sup>2</sup>)    4 * (t1<sup> </sup> - t0<sup> </sup>) /
+    * </pre>
+    * 
+    * @param t0           start time of the segment.
+    * @param t1           end time of the segment.
+    * @param hBlockToPack modified - used to store the 2-by-2 matrix.
+    */
    private static void getHBlock(double t0, double t1, DMatrixRMaj hBlockToPack)
    {
       hBlockToPack.reshape(2, 2);
