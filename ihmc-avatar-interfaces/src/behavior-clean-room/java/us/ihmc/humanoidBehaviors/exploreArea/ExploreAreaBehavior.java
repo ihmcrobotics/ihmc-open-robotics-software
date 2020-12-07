@@ -3,11 +3,8 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -23,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -32,7 +28,6 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -82,7 +77,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final List<Double> headPitchForLookingAround = Arrays.asList(-20.0, 0.0, 20.0);
 
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
-   private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteSyncedRobotModel syncedRobot;
    private final Messager messager;
 
@@ -127,7 +121,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
       rea = helper.getOrCreateREAInterface();
-      footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
 
       explore = helper.createUIInput(ExploreArea, false);
       helper.createUICallback(Parameters, parameters::setAllFromStrings);
@@ -292,7 +285,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onGrabPlanarRegionsStateEntry()
    {
-      helper.publishToUI(ClearPlanarRegions, true);
+      helper.publishToUI(ClearPlanarRegions);
       rememberObservationPoint();
       doSlam(true);
    }
@@ -432,7 +425,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          index++;
       }
 
-      helper.publishToUI(DrawMap, true);
+      helper.publishToUI(DrawMap);
 
       // Send it to the GUI for a viz...
       //         PlanarRegionsListMessage concatenatedMapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(concatenatedMap);
@@ -443,7 +436,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void clearMap(boolean clearMap)
    {
-      helper.publishToUI(ClearPlanarRegions, true);
+      helper.publishToUI(ClearPlanarRegions);
       concatenatedMap = null;
    }
 
@@ -679,44 +672,40 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart, double minDistanceIfPossible)
    {
-      Comparator<Point3DReadOnly> comparator = new Comparator<Point3DReadOnly>()
+      Comparator<Point3DReadOnly> comparator = (goalOne, goalTwo) ->
       {
-         @Override
-         public int compare(Point3DReadOnly goalOne, Point3DReadOnly goalTwo)
+         if (goalOne == goalTwo)
+            return 0;
+
+         double distanceOne = distancesFromStart.get(goalOne);
+         double distanceTwo = distancesFromStart.get(goalTwo);
+
+         if (distanceOne >= minDistanceIfPossible)
          {
-            if (goalOne == goalTwo)
-               return 0;
-
-            double distanceOne = distancesFromStart.get(goalOne);
-            double distanceTwo = distancesFromStart.get(goalTwo);
-
-            if (distanceOne >= minDistanceIfPossible)
+            if (distanceTwo < minDistanceIfPossible)
+               return 1;
+            if (distanceOne < distanceTwo)
             {
-               if (distanceTwo < minDistanceIfPossible)
-                  return 1;
-               if (distanceOne < distanceTwo)
-               {
-                  return 1;
-               }
-               else
-               {
-                  return -1;
-               }
+               return 1;
             }
             else
             {
-               if (distanceTwo >= minDistanceIfPossible)
-               {
-                  return -1;
-               }
-               if (distanceTwo < distanceOne)
-               {
-                  return -1;
-               }
-               else
-               {
-                  return 1;
-               }
+               return -1;
+            }
+         }
+         else
+         {
+            if (distanceTwo >= minDistanceIfPossible)
+            {
+               return -1;
+            }
+            if (distanceTwo < distanceOne)
+            {
+               return -1;
+            }
+            else
+            {
+               return 1;
             }
          }
       };
@@ -918,17 +907,5 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FrameQuaternion headOrientation = new FrameQuaternion(worldFrame);
       headOrientation.setYawPitchRoll(yaw, 0.75 * pitch, 0.0);
       robotInterface.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, worldFrame);
-   }
-
-   //TODO: Hijacking PatrolBehavior Viz here. Should not be doing that. Should have some common vizzes for things like this that are shared.
-   private void reduceAndSendFootstepsForVisualization(FootstepPlan footstepPlan)
-   {
-      ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++) // this code makes the message smaller to send over the network, TODO investigate
-      {
-         FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
-         footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
-      }
    }
 }
