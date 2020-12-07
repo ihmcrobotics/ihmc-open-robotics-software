@@ -4,7 +4,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -38,6 +40,22 @@ public class JavaFXGraphicPrimitives
       return sphere;
    }
 
+   public static MeshView createSphereWithArrow3D(Pose3D pose, Color color, double radius)
+   {
+      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+      meshBuilder.addSphere((float) radius);
+      double cylinderLength = radius * 6.0;
+      double arrowRadius = cylinderLength / 20.0;
+      double coneHeight = 0.10 * cylinderLength;
+      double coneRadius = 1.5 * arrowRadius;
+      meshBuilder.addCylinder(cylinderLength, arrowRadius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0));
+      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(cylinderLength, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0));
+      MeshView meshView = new MeshView(meshBuilder.generateMesh());
+      meshView.setMaterial(new PhongMaterial(color));
+      JavaFXGraphicTools.setNodeTransformFromPose(meshView, pose);
+      return meshView;
+   }
+
    public static MeshView createPath(List<? extends Pose3DReadOnly> path, Color color)
    {
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
@@ -52,7 +70,6 @@ public class JavaFXGraphicPrimitives
 
       MeshView meshView = new MeshView(meshBuilder.generateMesh());
       meshView.setMaterial(new PhongMaterial(color));
-
       return meshView;
    }
 }

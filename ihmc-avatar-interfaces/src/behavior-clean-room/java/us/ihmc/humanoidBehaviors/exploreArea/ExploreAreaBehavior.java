@@ -120,6 +120,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
 
    private ArrayList<FramePose3D> desiredFramePoses;
    private boolean determinedNextLocations = false;
+   private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
@@ -776,10 +777,12 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
       void onEntry()
       {
          List<Pose3DReadOnly> bestBodyPath = ExploreAreaBehavior.this.bestBodyPath;
-         Point3DReadOnly goal = bestBodyPath.get(bestBodyPath.size() - 1).getPosition();
+         Pose3D goal = new Pose3D(bestBodyPath.get(bestBodyPath.size() - 1));
 
-         statusLogger.info("Planning to {}", StringTools.tupleString(goal));
-         helper.publishToUI(PlanningToPosition, new Point3D(goal));
+         exploredGoalPosesSoFar.add(goal);
+
+         statusLogger.info("Walking to {}", StringTools.zUpPoseString(goal));
+         helper.publishToUI(WalkingToPose, goal);
 
          messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
          helper.publishToUI(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
