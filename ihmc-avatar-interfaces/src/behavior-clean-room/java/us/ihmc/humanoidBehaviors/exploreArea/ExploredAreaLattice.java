@@ -12,15 +12,16 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExploredAreaLattice
 {
-   private static final double cellWidth = 0.5;
-   private static final double obstacleInclineThreshold = Math.toRadians(30.0);
-   private static final double obstacleNormalZThreshold = Math.cos(obstacleInclineThreshold);
+  static final double cellWidth = 0.5;
+  static final double obstacleInclineThreshold = Math.toRadians(30.0);
+  static final double obstacleNormalZThreshold = Math.cos(obstacleInclineThreshold);
 
-   private enum CellStatus
+   enum CellStatus
    {
       WALKABLE,
       OBSTACLE
@@ -90,6 +91,31 @@ public class ExploredAreaLattice
       }
    }
 
+   public CellStatus[][] getLattice()
+   {
+      return lattice;
+   }
+
+   public int getMinX()
+   {
+      return minX;
+   }
+
+   public int getMaxX()
+   {
+      return maxX;
+   }
+
+   public int getMinY()
+   {
+      return minY;
+   }
+
+   public int getMaxY()
+   {
+      return maxY;
+   }
+
    private List<Point2D> planPath(double goalX, double goalY)
    {
       return null;
@@ -105,25 +131,26 @@ public class ExploredAreaLattice
       latticeSquare.update();
    }
 
-   private static int toIndex(double value)
+   static int toIndex(double value)
    {
       return (int) (Math.round(value / cellWidth));
    }
 
-   private static double toDouble(double index)
+   static double toDouble(double index)
    {
       return cellWidth * index;
    }
 
-   private static void printState(ExploredAreaLattice exploredAreaLattice)
+   public void printState(List<ExploreAreaLatticePlanner.LatticeCell> path)
    {
-      CellStatus[][] lattice = exploredAreaLattice.lattice;
       for (int i = 0; i < lattice.length; i++)
       {
          for (int j = 0; j < lattice[i].length; j++)
          {
             CellStatus cellStatus = lattice[i][j];
-            if (cellStatus == null)
+            if (path != null && path.contains(new ExploreAreaLatticePlanner.LatticeCell(minX + i, minY + j)))
+               System.out.print("oo");
+            else if (cellStatus == null)
                System.out.print(",,");
             else if (cellStatus == CellStatus.WALKABLE)
                System.out.print("..");
@@ -136,9 +163,10 @@ public class ExploredAreaLattice
 
    public static void main(String[] args)
    {
-      ExploredAreaLattice exploreAreaLattice = new ExploredAreaLattice(new BoundingBox3D(new Point3D(-10.0, -10.0, -1.0), new Point3D(10.0, 10.0, 2.0)));
+      ExploredAreaLattice exploreAreaLattice = new ExploredAreaLattice(new BoundingBox3D(new Point3D(0.0, 0.0, -1.0), new Point3D(10.0, 10.0, 2.0)));
 
-      PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
+//      PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
+      PlanarRegionsList regions = PlannerTestEnvironments.getMazeCorridor();
 //      PlanarRegionsList regions = PlanarRegionsList.flatGround(20.0);
 
       for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
@@ -146,6 +174,13 @@ public class ExploredAreaLattice
          exploreAreaLattice.processRegion(regions.getPlanarRegion(i));
       }
 
-      printState(exploreAreaLattice);
+      double startX = 0.5;
+      double startY = 0.5;
+      double goalX = 9.0;
+      double goalY = 6.0;
+
+      ExploreAreaLatticePlanner planner = new ExploreAreaLatticePlanner();
+      List<ExploreAreaLatticePlanner.LatticeCell> latticeCells = planner.doPlan(startX, startY, goalX, goalY, exploreAreaLattice);
+      exploreAreaLattice.printState(latticeCells);
    }
 }
