@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.MessagerAPIFactory;
 
@@ -22,7 +23,7 @@ public class ExploreAreaBehaviorAPI
    public static final MessagerAPIFactory.Topic<Point3D> ObservationPosition = topic("ObservationPosition");
    public static final MessagerAPIFactory.Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");
    public static final MessagerAPIFactory.Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
-   public static final MessagerAPIFactory.Topic<Point3D> FoundBodyPathTo = topic("FoundBodyPathTo");
+   public static final MessagerAPIFactory.Topic<List<Pose3D>> FoundBodyPath = topic("FoundBodyPath");
    public static final MessagerAPIFactory.Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
    public static final MessagerAPIFactory.Topic<Boolean> DrawMap = topic("DrawMap");
    public static final MessagerAPIFactory.Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");

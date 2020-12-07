@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -152,7 +153,6 @@ public class NavigationBehavior implements BehaviorInterface
       //         visibilityGraphParameters.setPreferredNavigableExtrusionDistance(0.60);
       //         visibilityGraphParameters.setPreferredObstacleExtrusionDistance(0.6);
       navigableRegionsManager = new NavigableRegionsManager(visibilityGraphParameters, null, new ObstacleAvoidanceProcessor(visibilityGraphParameters));
-      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(navigableRegionsManager);
       latestMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest());
 
       if (latestMap.isEmpty())
@@ -164,7 +164,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       navigableRegionsManager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
       boolean fullyExpandVisibilityGraph = false;
-      pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
+      pathPoints = navigableRegionsManager.calculateBodyPathWithOcclusionHandling(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
       if (pathPoints == null || pathPoints.size() < 2)
       {
          LogTools.error("Path not found.");
@@ -172,7 +172,13 @@ public class NavigationBehavior implements BehaviorInterface
          return;
       }
 
-      helper.getManagedMessager().submitMessage(BodyPathPlanForUI, new ArrayList<>(pathPoints));
+      ArrayList<Pose3DReadOnly> pathPoses = new ArrayList<>();
+      for (Point3DReadOnly pathPoint : pathPoints)
+      {
+         pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
+      }
+
+      helper.getManagedMessager().submitMessage(BodyPathPlanForUI, pathPoses);
    }
 
    private void planBodyOrientationTrajectoryAndFootsteps()
@@ -329,7 +335,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       public static final Topic<Object> StepThroughAlgorithm = topic("StepThroughAlgorithm");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
-      public static final Topic<ArrayList<Point3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPoints");
+      public static final Topic<ArrayList<Pose3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
 
       private static final <T> Topic<T> topic(String name)

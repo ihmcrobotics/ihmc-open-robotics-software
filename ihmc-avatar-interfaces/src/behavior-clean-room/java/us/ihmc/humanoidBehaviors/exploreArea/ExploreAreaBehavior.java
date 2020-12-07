@@ -7,12 +7,14 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,7 +22,9 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
@@ -35,8 +39,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
@@ -61,6 +63,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
@@ -114,7 +117,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private PlanarRegionsList concatenatedMap, latestPlanarRegionsList;
    private BoundingBox3D concatenatedMapBoundingBox;
 
-   private final NavigableRegionsManager navigableRegionsManager;
+   private final VisibilityGraphPathPlanner bodyPathPlanner;
 
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
@@ -132,7 +135,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       helper.createUICallback(DoSlam, this::doSlam);
       helper.createUICallback(ClearMap, this::clearMap);
       lookAndStepReachedGoal = helper.createROS2Notification(LookAndStepBehaviorAPI.REACHED_GOAL);
-      navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
+      bodyPathPlanner = helper.getOrCreateBodyPathPlanner();
 
       statusLogger.info("Initializing explore area behavior");
 
@@ -513,12 +516,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
       determinedNextLocations = false;
 
       syncedRobot.update();
-      determineNextPlacesToWalkTo(syncedRobot.getReferenceFrames());
+      determineNextPlacesToWalkTo(syncedRobot);
       determinedNextLocations = true;
    }
 
-   private void determineNextPlacesToWalkTo(HumanoidReferenceFrames referenceFrames)
+   private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
    {
+      HumanoidReferenceFrames referenceFrames = syncedRobot.getReferenceFrames();
       MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
       midFeetPosition.changeFrame(worldFrame);
@@ -529,7 +533,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       BoundingBox3D intersectionBoundingBox = getBoundingBoxIntersection(maximumExplorationArea, concatenatedMapBoundingBox);
 
-      ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<BoundingBox3D>();
+      ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<>();
       explorationBoundingBoxes.add(maximumExplorationArea);
       explorationBoundingBoxes.add(concatenatedMapBoundingBox);
       explorationBoundingBoxes.add(intersectionBoundingBox);
@@ -553,7 +557,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       statusLogger.info("Found " + potentialPoints.size() + " potential Points on the grid.");
 
-      ArrayList<Point3D> potentialPointsToSend = new ArrayList<Point3D>();
+      ArrayList<Point3D> potentialPointsToSend = new ArrayList<>();
       potentialPointsToSend.addAll(potentialPoints);
       helper.publishToUI(PotentialPointsToExplore, potentialPointsToSend);
 
@@ -572,9 +576,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
       long startTime = System.nanoTime();
 
       ArrayList<Point3DReadOnly> feasibleGoalPoints = new ArrayList<>();
-      HashMap<Point3DReadOnly, List<Point3DReadOnly>> potentialBodyPaths = new HashMap<>();
+      HashMap<Point3DReadOnly, List<Pose3DReadOnly>> potentialBodyPaths = new HashMap<>();
 
-      navigableRegionsManager.setPlanarRegions(concatenatedMap.getPlanarRegionsAsList());
+      bodyPathPlanner.setPlanarRegionsList(concatenatedMap);
 
       int numberConsidered = 0;
 
@@ -582,13 +586,16 @@ public class ExploreAreaBehavior implements BehaviorInterface
       {
          //         LogTools.info("Looking for body path to " + testGoal);
 
-         List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(midFeetPosition, testGoal);
+         bodyPathPlanner.setGoal(new Pose3D(testGoal, syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getOrientation()));
+         bodyPathPlanner.setStanceFootPoses(referenceFrames);
+         BodyPathPlanningResult bodyPathPlanningResult = bodyPathPlanner.planWaypointsWithOcclusionHandling();
+         List<Pose3DReadOnly> bodyPath = bodyPathPlanner.getWaypoints();
          numberConsidered++;
 
-         if (bodyPath != null)
+         if (bodyPathPlanningResult == BodyPathPlanningResult.FOUND_SOLUTION)
          {
             //            LogTools.info("Found body path to " + testGoal);
-            helper.publishToUI(FoundBodyPathTo, new Point3D(testGoal));
+            helper.publishToUI(FoundBodyPath, bodyPath.stream().map(Pose3D::new).collect(Collectors.toList())); // deep copy
 
             feasibleGoalPoints.add(testGoal);
             potentialBodyPaths.put(testGoal, bodyPath);
@@ -626,7 +633,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
       double bestDistance = distancesFromStart.get(bestGoalPoint);
-      List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
+      List<Pose3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
       statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 
@@ -723,8 +730,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromDetermineNextLocationsToTurnInPlace(double timeInState)
    {
-      statusLogger.error("Out of places to plan to. We're lost!");
-      return desiredFramePoses.isEmpty();
+      boolean outOfPlaces = desiredFramePoses.isEmpty();
+      if (outOfPlaces)
+      {
+         statusLogger.error("Out of places to plan to. We're lost!");
+      }
+      return outOfPlaces;
    }
 
    private boolean readyToTransitionFromDetermineNextLocationsToLookAndStep(double timeInState)

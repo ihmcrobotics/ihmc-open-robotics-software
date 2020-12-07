@@ -6,6 +6,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -43,7 +44,7 @@ public class BodyPathPlanGraphic extends Group
    /**
     * To process in parallel.
     */
-   public void generateMeshesAsynchronously(List<? extends Point3DReadOnly> bodyPath)
+   public void generateMeshesAsynchronously(List<? extends Pose3DReadOnly> bodyPath)
    {
       executorService.submit(() -> {
          LogTools.debug("Received body path plan containing {} points", bodyPath.size());
@@ -51,20 +52,21 @@ public class BodyPathPlanGraphic extends Group
       });
    }
 
-   public void generateMeshes(List<? extends Point3DReadOnly> bodyPath)
+   public void generateMeshes(List<? extends Pose3DReadOnly> bodyPath)
    {
       meshBuilder.clear();
 
-      double totalPathLength = PathTools.computePathLength(bodyPath);
+      double totalPathLength = PathTools.computePosePathLength(bodyPath);
       double currentLength = 0.0;
 
       palette.clearPalette();
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
+      // TODO: Draw orientation somehow
       for (int segmentIndex = 0; segmentIndex < bodyPath.size() - 1; segmentIndex++)
       {
-         Point3DReadOnly lineStart = bodyPath.get(segmentIndex);
-         Point3DReadOnly lineEnd = bodyPath.get(segmentIndex + 1);
+         Point3DReadOnly lineStart = bodyPath.get(segmentIndex).getPosition();
+         Point3DReadOnly lineEnd = bodyPath.get(segmentIndex + 1).getPosition();
 
          double lineStartHue = EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
          currentLength += lineStart.distance(lineEnd);
