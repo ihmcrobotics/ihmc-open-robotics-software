@@ -109,6 +109,9 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
    private final TurnInPlaceNode turnInPlace;
    private final PausablePeriodicThread mainThread;
 
+   private final boolean updateExploredLattice = false;
+   private final ExploredAreaLattice exploredAreaLattice = new ExploredAreaLattice(maximumExplorationArea);
+
    private final AtomicReference<Boolean> explore;
    private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<>();
 
@@ -568,6 +571,15 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
 
       private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
       {
+         if (updateExploredLattice)
+         {
+            for (int i = 0; i < concatenatedMap.getNumberOfPlanarRegions(); i++)
+            {
+               exploredAreaLattice.processRegion(concatenatedMap.getPlanarRegion(i));
+            }
+            exploredAreaLattice.printState(null);
+         }
+
          HumanoidReferenceFrames referenceFrames = syncedRobot.getReferenceFrames();
          MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
@@ -600,6 +612,8 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
                potentialPoints.add(projectedPoint);
             }
          }
+
+
 
          statusLogger.info("Found " + potentialPoints.size() + " potential Points on the grid.");
 
