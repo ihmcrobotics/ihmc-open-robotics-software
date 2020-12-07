@@ -529,7 +529,16 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       double supportToSwingStepHeight = tempFramePoint1.getZ() - tempFramePoint2.getZ();
       if (supportFootPolygon.getArea() == 0.0)
       { // FIXME this is bad if it's a line, right?
-         framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
+         if (supportFootPolygon.getNumberOfVertices() == 2)
+         {
+            framePointToPack.setToZero(supportFootPolygon.getReferenceFrame());
+            framePointToPack.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
+         }
+         else
+         {
+            framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
+
+         }
          framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
       }
