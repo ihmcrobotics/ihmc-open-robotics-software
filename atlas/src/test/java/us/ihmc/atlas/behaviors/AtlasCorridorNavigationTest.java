@@ -249,7 +249,12 @@ public class AtlasCorridorNavigationTest
          }
          if (VISUALIZE)
          {
-            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
+            ArrayList<Pose3DReadOnly> pathPoses = new ArrayList<>();
+            for (Point3DReadOnly pathPoint : pathPoints)
+            {
+               pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
+            }
+            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoses);
          }
 
          LogTools.info("Computing poses from path");

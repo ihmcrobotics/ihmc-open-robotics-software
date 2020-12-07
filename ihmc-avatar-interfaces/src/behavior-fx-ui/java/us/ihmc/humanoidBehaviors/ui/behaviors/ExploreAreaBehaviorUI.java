@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
@@ -12,6 +11,7 @@ import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
@@ -30,6 +31,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
@@ -75,7 +77,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
                                              result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PlanningToPosition,
                                              result -> Platform.runLater(() -> displayPlanningToPosition(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPathTo,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
                                              result -> Platform.runLater(() -> displayFoundBodyPathTo(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
                                              result -> Platform.runLater(() -> clearPlanarRegions(result)));
@@ -182,9 +184,11 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       }
    }
 
-   public void displayFoundBodyPathTo(Point3D foundBodyPathToPoint)
+   public void displayFoundBodyPathTo(List<Pose3D> foundBodyPathToPoint)
    {
-      foundBodyPathToPointsGraphicGroup.add(createSphere3D(foundBodyPathToPoint, Color.CORAL, 0.02));
+      BodyPathPlanGraphic bodyPathPlanGraphic = new BodyPathPlanGraphic();
+      bodyPathPlanGraphic.generateMeshesAsynchronously(foundBodyPathToPoint);
+      foundBodyPathToPointsGraphicGroup.add(bodyPathPlanGraphic);
    }
 
    public void displayPlanningToPosition(Point3D planningToPosition)

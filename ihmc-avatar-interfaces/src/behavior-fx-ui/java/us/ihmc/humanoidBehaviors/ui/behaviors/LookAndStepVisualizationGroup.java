@@ -74,12 +74,7 @@ public class LookAndStepVisualizationGroup extends Group
       messager.registerTopicListener(BodyPathPlanForUI, bodyPathPlan ->
       {
          reviewingBodyPath = true;
-         ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
-         for (Pose3D pose3D : bodyPathPlan)
-         {
-            bodyPathAsPoints.add(pose3D.getPosition());
-         }
-         Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathAsPoints));
+         Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathPlan));
       });
    }
 
