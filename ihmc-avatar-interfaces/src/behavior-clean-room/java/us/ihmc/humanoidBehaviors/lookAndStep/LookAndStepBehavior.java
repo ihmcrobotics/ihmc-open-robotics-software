@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -139,6 +140,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       bodyPathLocalization.initialize(this);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
+      helper.createUICallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
       helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
@@ -152,6 +154,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       });
 
       stepping.initialize(this);
+   }
+
+   void bodyPathPlanInput(List<? extends Pose3DReadOnly> bodyPath)
+   {
+      if (!isBeingReset.get())
+      {
+         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+         bodyPathLocalization.acceptBodyPathPlan(bodyPath);
+      }
    }
 
    @Override

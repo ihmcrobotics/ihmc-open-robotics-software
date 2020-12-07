@@ -176,7 +176,6 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
    {
       potentialPointsToExploreGraphicGroup.removeAll();
-      foundBodyPathToPointsGraphicGroup.removeAll();
       planningToPointsGraphicGroup.removeAll();
       for (Point3D potentialPointToExplore : potentialPointsToExplore)
       {
