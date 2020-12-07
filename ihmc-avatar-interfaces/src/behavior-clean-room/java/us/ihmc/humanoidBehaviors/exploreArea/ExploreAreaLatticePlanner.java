@@ -1,8 +1,13 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,10 +58,17 @@ public class ExploreAreaLatticePlanner
    private final NodeComparator<LatticeCell> nodeComparator = new NodeComparator<>(graph, this::getDistanceToGoal);
    private final PriorityQueue<LatticeCell> stack = new PriorityQueue<>(nodeComparator);
 
+   private final ExploredAreaLattice exploredAreaLattice;
+
    private LatticeCell goalCell;
    private boolean foundGoal;
 
-   public List<LatticeCell> doPlan(double startX, double startY, double goalX, double goalY, ExploredAreaLattice exploredAreaLattice)
+   public ExploreAreaLatticePlanner(BoundingBox3DReadOnly areaToExplore)
+   {
+      this.exploredAreaLattice = new ExploredAreaLattice(areaToExplore);
+   }
+
+   public List<LatticeCell> doPlan(double startX, double startY, double goalX, double goalY, boolean printState)
    {
       LatticeCell startCell = new LatticeCell(startX, startY);
       goalCell = new LatticeCell(goalX, goalY);
@@ -78,10 +90,22 @@ public class ExploreAreaLatticePlanner
             break;
       }
 
-      if (foundGoal)
-         return graph.getPathFromStart(goalCell);
-      else
-         return new ArrayList<>();
+      List<LatticeCell> path = foundGoal ? graph.getPathFromStart(goalCell) : new ArrayList<>();
+
+      if (printState)
+      {
+         exploredAreaLattice.printState(path);
+      }
+
+      return path;
+   }
+
+   public void processRegions(PlanarRegionsList planarRegionsList)
+   {
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         exploredAreaLattice.processRegion(planarRegionsList.getPlanarRegion(i));
+      }
    }
 
    private void initialize(LatticeCell startNode)
@@ -143,14 +167,21 @@ public class ExploreAreaLatticePlanner
       return null;
    }
 
-   public DirectedGraph<LatticeCell> getGraph()
+   public static void main(String[] args)
    {
-      return graph;
-   }
+      BoundingBox3D areaToExplore = new BoundingBox3D(new Point3D(0.0, 0.0, -1.0), new Point3D(10.0, 10.0, 2.0));
+      ExploreAreaLatticePlanner planner = new ExploreAreaLatticePlanner(areaToExplore);
 
-   public AStarIterationData<LatticeCell> getIterationData()
-   {
-      return iterationData;
-   }
+            PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
+//      PlanarRegionsList regions = PlannerTestEnvironments.getMazeCorridor();
+      //      PlanarRegionsList regions = PlanarRegionsList.flatGround(20.0);
+      planner.processRegions(regions);
 
+      double startX = 0.5;
+      double startY = 0.5;
+      double goalX = 9.0;
+      double goalY = 6.0;
+
+      List<ExploreAreaLatticePlanner.LatticeCell> latticeCells = planner.doPlan(startX, startY, goalX, goalY, true);
+   }
 }

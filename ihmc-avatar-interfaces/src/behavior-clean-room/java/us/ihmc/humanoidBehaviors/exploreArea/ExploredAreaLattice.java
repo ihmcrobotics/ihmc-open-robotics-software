@@ -149,38 +149,26 @@ public class ExploredAreaLattice
          {
             CellStatus cellStatus = lattice[i][j];
             if (path != null && path.contains(new ExploreAreaLatticePlanner.LatticeCell(minX + i, minY + j)))
-               System.out.print("oo");
+            {
+               System.out.print("++");
+            }
             else if (cellStatus == null)
-               System.out.print(",,");
+            {
+               System.out.printf("%c", 0x00B7);
+               System.out.printf("%c", 0x00B7);
+            }
             else if (cellStatus == CellStatus.WALKABLE)
-               System.out.print("..");
+            {
+               System.out.printf("%c", 0x2591);
+               System.out.printf("%c", 0x2591);
+            }
             else if (cellStatus == CellStatus.OBSTACLE)
-               System.out.print("XX");
+            {
+               System.out.printf("%c", 0x25A0);
+               System.out.printf("%c", 0x25A0);
+            }
          }
          System.out.println();
       }
-   }
-
-   public static void main(String[] args)
-   {
-      ExploredAreaLattice exploreAreaLattice = new ExploredAreaLattice(new BoundingBox3D(new Point3D(0.0, 0.0, -1.0), new Point3D(10.0, 10.0, 2.0)));
-
-//      PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
-      PlanarRegionsList regions = PlannerTestEnvironments.getMazeCorridor();
-//      PlanarRegionsList regions = PlanarRegionsList.flatGround(20.0);
-
-      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
-      {
-         exploreAreaLattice.processRegion(regions.getPlanarRegion(i));
-      }
-
-      double startX = 0.5;
-      double startY = 0.5;
-      double goalX = 9.0;
-      double goalY = 6.0;
-
-      ExploreAreaLatticePlanner planner = new ExploreAreaLatticePlanner();
-      List<ExploreAreaLatticePlanner.LatticeCell> latticeCells = planner.doPlan(startX, startY, goalX, goalY, exploreAreaLattice);
-      exploreAreaLattice.printState(latticeCells);
    }
 }
