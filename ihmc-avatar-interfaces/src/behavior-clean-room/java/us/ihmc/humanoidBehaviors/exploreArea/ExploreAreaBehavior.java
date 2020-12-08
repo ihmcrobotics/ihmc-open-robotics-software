@@ -62,7 +62,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final RemoteSyncedRobotModel syncedRobot;
    private final Messager messager;
 
-   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
 
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
@@ -85,16 +85,19 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final RestOfStatesNode restOfStatesNode;
    private final PausablePeriodicThread mainThread;
 
-   private final boolean updateExploredLattice = false;
-   private final ExploredAreaLattice exploredAreaLattice = new ExploredAreaLattice(maximumExplorationArea);
+   private final boolean useNewGoalDetermination = false;
+   private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
+   private final double goalX = 6.0;
+   private final double goalY = 0.0;
 
    private final AtomicReference<Boolean> explore;
 
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
    private final Notification lookAndStepReachedGoal;
 
-   private ArrayList<FramePose3D> desiredFramePoses;
-   private boolean determinedNextLocations = false;
+   private final ArrayList<FramePose3D> desiredFramePoses = new ArrayList<>();
+   private boolean determiningNextLocation = false;
+   private boolean failedToFindNextLocation = false;
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
@@ -281,39 +284,67 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          }
 
          boolean readyToTransitionFromDetermineNextLocationsToTurnInPlace()
+      {
+         return !determiningNextLocation && failedToFindNextLocation;
+      }
+
+      boolean readyToTransitionFromDetermineNextLocationsToLookAndStep()
+      {
+         return !determiningNextLocation && !failedToFindNextLocation;
+      }
+
+      private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
+      {
+         HumanoidReferenceFrames referenceFrames = syncedRobot.getReferenceFrames();
+         MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+         FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
+         midFeetPosition.changeFrame(worldFrame);
+
+         if (useNewGoalDetermination)
          {
-            boolean outOfPlaces = desiredFramePoses.isEmpty();
-            if (outOfPlaces)
+            explorationPlanner.processRegions(concatenatedMap);
+            List<Point3D> waypoints = explorationPlanner.doPlan(midFeetPosition.getX(), midFeetPosition.getY(), goalX, goalY, true);
+
+            if (waypoints.isEmpty())
             {
-               statusLogger.error("Out of places to plan to. We're lost!");
+               failedToFindNextLocation = true;
+               return;
             }
-            return outOfPlaces;
-         }
 
-         boolean readyToTransitionFromDetermineNextLocationsToLookAndStep()
-         {
-            return determinedNextLocations && !desiredFramePoses.isEmpty();
-         }
+            int numberOfCells = waypoints.size();
+            int maxLookAhead = 7;
+            int lookAhead = Math.min(maxLookAhead, numberOfCells - 1);
 
-         private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
-         {
-            PlanarRegionsList concatenatedMap = lookAround.getConcatenatedMap();
-            BoundingBox3D concatenatedMapBoundingBox = lookAround.getConcatenatedMapBoundingBox();
-
-            if (updateExploredLattice)
+            bestBodyPath = new ArrayList<>();
+            for (int i = 0; i < lookAhead; i++)
             {
-               for (int i = 0; i < concatenatedMap.getNumberOfPlanarRegions(); i++)
+               Point3D position = waypoints.get(i);
+               Quaternion orientation = new Quaternion();
+
+               if (i != 0)
                {
-                  exploredAreaLattice.processRegion(concatenatedMap.getPlanarRegion(i));
+                  Point3D previousPosition = waypoints.get(i - 1);
+                  double yaw = Math.atan2(position.getY() - previousPosition.getY(), position.getX() - previousPosition.getX());
+                  orientation.setYawPitchRoll(yaw, 0.0, 0.0);
                }
-               exploredAreaLattice.printState(null);
+
+               bestBodyPath.add(new Pose3D(position, orientation));
             }
 
-            HumanoidReferenceFrames referenceFrames = syncedRobot.getReferenceFrames();
-            MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-            FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
-            midFeetPosition.changeFrame(worldFrame);
+            helper.publishToUI(FoundBodyPath, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
 
+            Pose3DReadOnly finalBodyPathPoint = bestBodyPath.get(bestBodyPath.size() - 1);
+            Point3D goalPoint = new Point3D(finalBodyPathPoint.getX(), finalBodyPathPoint.getY(), 0.0);
+            FrameVector3D startToGoal = new FrameVector3D();
+            startToGoal.sub(goalPoint, midFeetPosition);
+
+            FramePose3D desiredFramePose = new FramePose3D(worldFrame);
+            desiredFramePose.getPosition().set(goalPoint);
+            desiredFramePose.getOrientation().setYawPitchRoll(bestBodyPath.get(bestBodyPath.size() - 1).getYaw(), 0.0, 0.0);
+            desiredFramePoses.add(desiredFramePose);
+         }
+         else
+         {
             ArrayList<Point3D> potentialPoints = new ArrayList<>();
 
             // Do a grid over the bounding box to find potential places to step.
@@ -406,14 +437,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             double durationSeconds = ((double) duration) / 1.0e9;
             double durationPer = durationSeconds / ((double) numberConsidered);
 
-            statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
-
-            desiredFramePoses = new ArrayList<>();
+            statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
+                              + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
+            failedToFindNextLocation = feasibleGoalPoints.isEmpty();
 
             if (feasibleGoalPoints.isEmpty())
             {
                statusLogger.info("Couldn't find a place to walk to. Just stepping in place.");
-
                FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
 
                FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
