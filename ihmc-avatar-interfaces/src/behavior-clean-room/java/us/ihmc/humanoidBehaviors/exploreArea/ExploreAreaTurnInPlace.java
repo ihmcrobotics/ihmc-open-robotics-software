@@ -35,22 +35,19 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
    private final BehaviorHelper helper;
    private final Timer deactivationTimer = new Timer();
    private final RemoteSyncedRobotModel syncedRobot;
-   private final Runnable resetLookAround;
 
    private boolean hasStarted = false;
    private boolean isFinished = false;
 
    public ExploreAreaTurnInPlace(double expectedTickPeriod,
                                  ExploreAreaBehaviorParameters parameters,
-                                 BehaviorHelper helper,
-                                 Runnable resetLookAround)
+                                 BehaviorHelper helper)
    {
       this.expectedTickPeriod = expectedTickPeriod;
       this.parameters = parameters;
       this.helper = helper;
 
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
-      this.resetLookAround = resetLookAround;
    }
 
    @Override
@@ -118,8 +115,6 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
       TypedNotification<WalkingStatusMessage> walkingCompleted = requestWalk(initialSupportSide, posesFromThePreviousStep);
       walkingCompleted.blockingPoll(); // TODO: Timeout after a while
       // If times out, return failure.
-
-      resetLookAround.run();
 
       isFinished = true;
    }
