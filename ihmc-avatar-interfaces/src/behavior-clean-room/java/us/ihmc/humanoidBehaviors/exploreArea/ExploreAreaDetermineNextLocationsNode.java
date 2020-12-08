@@ -97,7 +97,7 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
       if (!hasStarted)
       {
          hasStarted = true;
-         ThreadTools.startAThread(this::runCompute, "DetermineNextLocations");
+         ThreadTools.startAThread(this::runCompute, getClass().getSimpleName());
          return RUNNING;
       }
       else if (!isFinished)
