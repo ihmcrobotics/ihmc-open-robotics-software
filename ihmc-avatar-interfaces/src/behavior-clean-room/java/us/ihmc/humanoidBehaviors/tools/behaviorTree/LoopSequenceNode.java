@@ -12,6 +12,8 @@ public class LoopSequenceNode extends SequenceNode
    @Override
    public BehaviorTreeNodeStatus tick()
    {
+      clockChildren();
+
       if (currentChild >= getChildren().size())
       {
          currentChild = 0; // this loops back to first child

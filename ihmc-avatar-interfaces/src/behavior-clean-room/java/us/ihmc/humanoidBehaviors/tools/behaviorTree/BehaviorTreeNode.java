@@ -10,6 +10,11 @@ public interface BehaviorTreeNode
       return 1.0;
    }
 
+   default void clock()
+   {
+
+   }
+
    BehaviorTreeNodeStatus tick();
 
    public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
