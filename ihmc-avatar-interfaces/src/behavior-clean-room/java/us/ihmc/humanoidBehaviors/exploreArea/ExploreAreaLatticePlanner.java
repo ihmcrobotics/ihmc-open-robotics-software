@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
@@ -68,7 +69,7 @@ public class ExploreAreaLatticePlanner
       this.exploredAreaLattice = new ExploredAreaLattice(areaToExplore);
    }
 
-   public List<LatticeCell> doPlan(double startX, double startY, double goalX, double goalY, boolean printState)
+   public List<Point3D> doPlan(double startX, double startY, double goalX, double goalY, boolean printState)
    {
       LatticeCell startCell = new LatticeCell(startX, startY);
       goalCell = new LatticeCell(goalX, goalY);
@@ -97,7 +98,13 @@ public class ExploreAreaLatticePlanner
          exploredAreaLattice.printState(path);
       }
 
-      return path;
+      List<Point3D> waypoints = new ArrayList<>();
+      for (int i = 0; i < path.size(); i++)
+      {
+         waypoints.add(new Point3D(ExploredAreaLattice.toDouble(path.get(i).x), ExploredAreaLattice.toDouble(path.get(i).y), 0.0));
+      }
+
+      return waypoints;
    }
 
    public void processRegions(PlanarRegionsList planarRegionsList)
@@ -128,24 +135,69 @@ public class ExploreAreaLatticePlanner
       neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y));
       neighbors.add(new LatticeCell(cellToExpand.x, cellToExpand.y - 1));
       neighbors.add(new LatticeCell(cellToExpand.x, cellToExpand.y + 1));
+      neighbors.add(new LatticeCell(cellToExpand.x - 1, cellToExpand.y - 1));
+      neighbors.add(new LatticeCell(cellToExpand.x - 1, cellToExpand.y + 1));
+      neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y - 1));
+      neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y + 1));
 
       for (LatticeCell cell : neighbors)
       {
-         boolean isValid = cell.x >= minX && cell.x <= maxX && cell.y >= minY && cell.y <= maxY;
-         isValid = isValid && exploredAreaLattice[cell.x][cell.y] != ExploredAreaLattice.CellStatus.OBSTACLE;
+         boolean isValidRange = isValidRange(minX, maxX, minY, maxY, cell);
+         if (!isValidRange)
+            continue;
 
-         if (isValid)
-         {
-            double edgeCost = 1.0;
-            graph.checkAndSetEdge(cellToExpand, cell, edgeCost);
-            stack.add(cell);
-         }
+         boolean isObstacle = exploredAreaLattice[cell.x - minX][cell.y - minY] == ExploredAreaLattice.CellStatus.OBSTACLE;
+         if (isObstacle)
+            continue;
+
+         double edgeCost = nextToObstacle(cell, exploredAreaLattice, minX, maxX, minY, maxY) ? 5.0 : 1.0;
+         graph.checkAndSetEdge(cellToExpand, cell, edgeCost);
+         stack.add(cell);
 
          if (cell.equals(goalCell))
             foundGoal = true;
       }
 
       expandedNodeSet.add(cellToExpand);
+   }
+
+   private static boolean isValidRange(int minX, int maxX, int minY, int maxY, LatticeCell cell)
+   {
+      return cell.x >= minX && cell.x <= maxX && cell.y >= minY && cell.y <= maxY;
+   }
+
+   private boolean nextToObstacle(LatticeCell cell, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int maxX, int minY, int maxY)
+   {
+      LatticeCell cell0 = new LatticeCell(cell.x - 1, cell.y);
+      LatticeCell cell1 = new LatticeCell(cell.x + 1, cell.y);
+      LatticeCell cell2 = new LatticeCell(cell.x, cell.y - 1);
+      LatticeCell cell3 = new LatticeCell(cell.x, cell.y + 1);
+      LatticeCell cell4 = new LatticeCell(cell.x - 1, cell.y + 1);
+      LatticeCell cell5 = new LatticeCell(cell.x + 1, cell.y + 1);
+      LatticeCell cell6 = new LatticeCell(cell.x - 1, cell.y - 1);
+      LatticeCell cell7 = new LatticeCell(cell.x + 1, cell.y - 1);
+      if (isValidRange(minX, maxX, minY, maxY, cell0) && isObstacle(cell0, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell1) && isObstacle(cell1, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell2) && isObstacle(cell2, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell3) && isObstacle(cell3, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell4) && isObstacle(cell4, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell5) && isObstacle(cell5, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell6) && isObstacle(cell6, exploredAreaLattice, minX, minY))
+         return true;
+      if (isValidRange(minX, maxX, minY, maxY, cell7) && isObstacle(cell7, exploredAreaLattice, minX, minY))
+         return true;
+      return false;
+   }
+
+   private boolean isObstacle(LatticeCell cell, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int minY)
+   {
+      return exploredAreaLattice[cell.x - minX][cell.y - minY] == ExploredAreaLattice.CellStatus.OBSTACLE;
    }
 
    private double getDistanceToGoal(LatticeCell cell)
@@ -169,19 +221,22 @@ public class ExploreAreaLatticePlanner
 
    public static void main(String[] args)
    {
-      BoundingBox3D areaToExplore = new BoundingBox3D(new Point3D(0.0, 0.0, -1.0), new Point3D(10.0, 10.0, 2.0));
+//      BoundingBox3D areaToExplore = new BoundingBox3D(new Point3D(0.0, 0.0, -1.0), new Point3D(10.0, 10.0, 2.0));
+      //      PlanarRegionsList regions = PlannerTestEnvironments.getMazeCorridor();
+
+      BoundingBox3D areaToExplore = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
+      PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
+
       ExploreAreaLatticePlanner planner = new ExploreAreaLatticePlanner(areaToExplore);
 
-            PlanarRegionsList regions = PlannerTestEnvironments.getTrickCorridor();
-//      PlanarRegionsList regions = PlannerTestEnvironments.getMazeCorridor();
       //      PlanarRegionsList regions = PlanarRegionsList.flatGround(20.0);
       planner.processRegions(regions);
 
       double startX = 0.5;
       double startY = 0.5;
-      double goalX = 9.0;
-      double goalY = 6.0;
+      double goalX = 5.0;
+      double goalY = 1.0;
 
-      List<ExploreAreaLatticePlanner.LatticeCell> latticeCells = planner.doPlan(startX, startY, goalX, goalY, true);
+      planner.doPlan(startX, startY, goalX, goalY, true);
    }
 }
