@@ -132,10 +132,15 @@ public class BehaviorHelper
    {
       if (bodyPathPlanner == null)
       {
-         VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
-         bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
+         bodyPathPlanner = newBodyPathPlanner();
       }
       return bodyPathPlanner;
+   }
+
+   public VisibilityGraphPathPlanner newBodyPathPlanner()
+   {
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+      return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
