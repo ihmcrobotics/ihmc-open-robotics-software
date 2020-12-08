@@ -125,12 +125,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                            determineNextLocations::getBestBodyPath,
                                            determineNextLocations::getExploredGoalPosesSoFar,
                                            determineNextLocations::isFailedToFindNextLocation);
-         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper, lookAround::reset);
+         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper);
 
          addChild(lookAround);
          addChild(determineNextLocations);
          addChild(lookAndStep);
          addChild(turnInPlace);
+         addChild(new AlwaysSucessfulAction(lookAround::reset));
       }
 
       class LookAndStepNode implements BehaviorTreeNode // TODO: Use look and step node directly somehow.
