@@ -4,10 +4,8 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -72,6 +70,7 @@ public class ExploreAreaBehaviorLookAroundNode extends SequenceNode
 
       helper.createUICallback(DoSlam, this::doSlam);
       helper.createUICallback(ClearMap, this::clearMap);
+      helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
 
       addChild(new LookInADirection(-40.0, -20.0));
       addChild(new LookInADirection(0.0, 0.0));
@@ -385,6 +384,48 @@ public class ExploreAreaBehaviorLookAroundNode extends SequenceNode
             concatenatedMapBoundingBox = BoundingBox3D.union(concatenatedMapBoundingBox, boundingBox);
          }
       }
+   }
+
+   private void randomPoseUpdate(boolean doRandomPoseUpdate)
+   {
+      if (doRandomPoseUpdate)
+      {
+         RigidBodyTransform transform = new RigidBodyTransform();
+
+         //TODO: Make random or allow user to input update on gui.
+         //         transform.setTranslation(0.01, -0.01, 0.01);
+         //         transform.setTranslation(0.02, -0.02, 0.0);
+         //         transform.setTranslation(0.02, -0.02, 0.02);
+         transform.getRotation().setToYawOrientation(0.025);
+
+         boolean sendingSlamCorrection = false;
+         publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
+      }
+   }
+
+   private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
+   {
+      syncedRobot.update();
+
+      FramePose3D framePose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
+      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      Pose3D pose3D = new Pose3D(framePose);
+
+      // TODO: Verify which transform or appendTransform to use...
+
+      RigidBodyTransform transform = new RigidBodyTransform(transformFromIncomingToMap);
+
+      if (sendingSlamCorrection)
+      {
+         pose3D.prependTransform(transform);
+      }
+      else
+      {
+         pose3D.appendTransform(transform);
+      }
+
+      double confidenceFactor = 1.0;
+      helper.getOrCreateRobotInterface().publishPose(pose3D, confidenceFactor, syncedRobot.getTimestamp());
    }
 
    public PlanarRegionsList getConcatenatedMap()

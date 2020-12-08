@@ -6,12 +6,10 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -53,19 +51,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                                                               create(),
                                                                               LookAndStepBehavior.DEFINITION);
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);
-
-   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
-
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final RemoteSyncedRobotModel syncedRobot;
-   private final Messager messager;
-
-   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
-
-   private double exploreGridXSteps = 0.5;
-   private double exploreGridYSteps = 0.5;
-   private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public enum ExploreAreaBehaviorState
    {
@@ -73,10 +59,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    }
 
    private final BehaviorHelper helper;
+   private final RemoteSyncedRobotModel syncedRobot;
+   private final Messager messager;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteREAInterface rea;
+   private final VisibilityGraphPathPlanner bodyPathPlanner;
 
+   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
    private ExploreAreaBehaviorState currentState = LookAround;
    private final Map<ExploreAreaBehaviorState, BehaviorTreeNode> stateToNodeMap = new HashMap<>();
    private final Stopwatch stateTimeStopwatch = new Stopwatch().start();
@@ -85,9 +74,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final PausablePeriodicThread mainThread;
 
    private final boolean useNewGoalDetermination = false;
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
    private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
    private final double goalX = 6.0;
    private final double goalY = 0.0;
+   private double exploreGridXSteps = 0.5;
+   private double exploreGridYSteps = 0.5;
+   private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
 
    private final AtomicReference<Boolean> explore;
 
@@ -100,8 +93,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
-   private final VisibilityGraphPathPlanner bodyPathPlanner;
-
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
@@ -109,11 +100,9 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
-      rea = helper.getOrCreateREAInterface();
 
       explore = helper.createUIInput(ExploreArea, false);
       helper.createUICallback(Parameters, parameters::setAllFromStrings);
-      helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
       lookAndStepReachedGoal = helper.createROS2Notification(LookAndStepBehaviorAPI.REACHED_GOAL);
       bodyPathPlanner = helper.getOrCreateBodyPathPlanner();
 
@@ -133,48 +122,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    {
       helper.setCommunicationCallbacksEnabled(enabled);
       mainThread.setRunning(enabled);
-   }
-
-   private void randomPoseUpdate(boolean doRandomPoseUpdate)
-   {
-      if (doRandomPoseUpdate)
-      {
-         RigidBodyTransform transform = new RigidBodyTransform();
-
-         //TODO: Make random or allow user to input update on gui.
-         //         transform.setTranslation(0.01, -0.01, 0.01);
-         //         transform.setTranslation(0.02, -0.02, 0.0);
-         //         transform.setTranslation(0.02, -0.02, 0.02);
-         transform.getRotation().setToYawOrientation(0.025);
-
-         boolean sendingSlamCorrection = false;
-         publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
-      }
-   }
-
-   private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
-   {
-      syncedRobot.update();
-
-      FramePose3D framePose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
-      Pose3D pose3D = new Pose3D(framePose);
-
-      // TODO: Verify which transform or appendTransform to use...
-
-      RigidBodyTransform transform = new RigidBodyTransform(transformFromIncomingToMap);
-
-      if (sendingSlamCorrection)
-      {
-         pose3D.prependTransform(transform);
-      }
-      else
-      {
-         pose3D.appendTransform(transform);
-      }
-
-      double confidenceFactor = 1.0;
-      helper.getOrCreateRobotInterface().publishPose(pose3D, confidenceFactor, syncedRobot.getTimestamp());
    }
 
    class StopNode implements BehaviorTreeNode
@@ -649,6 +596,4 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          }
       }
    }
-
-
 }
