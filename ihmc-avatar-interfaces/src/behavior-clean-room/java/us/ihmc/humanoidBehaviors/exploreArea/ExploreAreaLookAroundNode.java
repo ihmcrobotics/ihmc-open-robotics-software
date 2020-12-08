@@ -113,7 +113,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          if (!trajectoryStarted)
          {
             trajectoryStarted = true;
-            ThreadTools.startAThread(this::commandAndWaitForTrajectory, "LookInADirectionTrajectory");
+            ThreadTools.startAThread(this::commandAndWaitForTrajectory, getClass().getSimpleName());
             return RUNNING;
          }
          else if (!trajectoryComplete)
