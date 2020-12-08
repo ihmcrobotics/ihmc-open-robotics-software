@@ -109,7 +109,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
    private final TurnInPlaceNode turnInPlace;
    private final PausablePeriodicThread mainThread;
 
-   private final boolean useNewGoalDetermination = true;
+   private final boolean useNewGoalDetermination = false;
    private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
    private final double goalX = 6.0;
    private final double goalY = 0.0;
