@@ -125,7 +125,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                            determineNextLocations::getBestBodyPath,
                                            determineNextLocations::getExploredGoalPosesSoFar,
                                            determineNextLocations::isFailedToFindNextLocation);
-         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper);
+         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper, lookAround::reset);
 
          addChild(lookAround);
          addChild(determineNextLocations);
