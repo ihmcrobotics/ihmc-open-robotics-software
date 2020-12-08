@@ -37,7 +37,7 @@ import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatu
 public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean useNewGoalDetermination = false;
+   private static final boolean useNewGoalDetermination = true;
 
    private final double expectedTickPeriod;
    private final ExploreAreaBehaviorParameters parameters;
