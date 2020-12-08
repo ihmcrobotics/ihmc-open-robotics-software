@@ -20,4 +20,12 @@ public abstract class BehaviorTreeControlFlowNodeBasics implements BehaviorTreeC
       children.add(child);
       return child;
    }
+
+   public void clockChildren()
+   {
+      for (BehaviorTreeNode child : getChildren())
+      {
+         child.clock();
+      }
+   }
 }
