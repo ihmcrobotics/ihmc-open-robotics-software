@@ -15,12 +15,14 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNode;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
@@ -53,6 +55,8 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
    {
       if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
       {
+         if (hasStarted && !isFinished)
+            LogTools.warn("Task was still running after it wasn't being ticked!");
          hasStarted = false;
          isFinished = false;
       }
@@ -77,6 +81,8 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
 
    private void runCompute()
    {
+      helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
+
       ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<>();
 
       RobotSide supportSide = RobotSide.RIGHT;
