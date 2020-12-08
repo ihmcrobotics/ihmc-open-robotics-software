@@ -131,7 +131,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          addChild(determineNextLocations);
          addChild(lookAndStep);
          addChild(turnInPlace);
-         addChild(new AlwaysSucessfulAction(lookAround::reset));
+         addChild(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
       class LookAndStepNode implements BehaviorTreeNode // TODO: Use look and step node directly somehow.

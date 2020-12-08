@@ -29,7 +29,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -97,14 +97,14 @@ public class NavigationBehavior implements BehaviorInterface
       stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
-      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("aquire map")));
-      sequence.addChild(new AlwaysSucessfulAction(this::aquireMap));
-      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("plan body path")));
-      sequence.addChild(new AlwaysSucessfulAction(this::planBodyPath));
-      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
-      sequence.addChild(new AlwaysSucessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
-      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
-      sequence.addChild(new AlwaysSucessfulAction(this::shortenFootstepPlanAndWalkIt));
+      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
+      sequence.addChild(new AlwaysSuccessfulAction(this::aquireMap));
+      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body path")));
+      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyPath));
+      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
+      sequence.addChild(new AlwaysSuccessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
+      sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
+      sequence.addChild(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }

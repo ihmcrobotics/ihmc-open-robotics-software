@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.LoopSequenceNode;
 
@@ -18,9 +18,9 @@ public class BehaviorTreeNonReactiveTest
       output.setValue("0");
 
       LoopSequenceNode loopSequenceNode = new LoopSequenceNode();
-      loopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "1")));
-      loopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "2")));
-      loopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "3")));
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "1")));
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "2")));
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "3")));
 
       assertEquals("0", output.getValue());
 
