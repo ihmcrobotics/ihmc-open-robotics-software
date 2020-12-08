@@ -88,7 +88,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       mainThread.setRunning(enabled);
    }
 
-   class StopNode implements BehaviorTreeNode
+   class StopNode implements BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
    {
       @Override
       public BehaviorTreeNodeStatus tick()
@@ -167,7 +167,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          return RUNNING;
       }
 
-      class LookAndStepNode implements BehaviorTreeNode
+      class LookAndStepNode implements BehaviorTreeNode // TODO: Use look and step node directly somehow.
       {
          private final Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier;
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
