@@ -81,7 +81,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
 
    private int chestYawForLookingAroundIndex = 0;
 
-   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
 
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
@@ -109,8 +109,10 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
    private final TurnInPlaceNode turnInPlace;
    private final PausablePeriodicThread mainThread;
 
-   private final boolean updateExploredLattice = false;
-   private final ExploredAreaLattice exploredAreaLattice = new ExploredAreaLattice(maximumExplorationArea);
+   private final boolean useNewGoalDetermination = true;
+   private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
+   private final double goalX = 6.0;
+   private final double goalY = 0.0;
 
    private final AtomicReference<Boolean> explore;
    private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<>();
@@ -121,8 +123,9 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
    private PlanarRegionsList concatenatedMap, latestPlanarRegionsList;
    private BoundingBox3D concatenatedMapBoundingBox;
 
-   private ArrayList<FramePose3D> desiredFramePoses;
-   private boolean determinedNextLocations = false;
+   private final ArrayList<FramePose3D> desiredFramePoses = new ArrayList<>();
+   private boolean determiningNextLocation = false;
+   private boolean failedToFindNextLocation = false;
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
@@ -201,7 +204,7 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
                break;
             case LookAndStep:
                if (lookAndStep.readyToTransitionFromLookAndStepToTurnInPlace())
-                  currentState = TurnInPlace;
+                  currentState = useNewGoalDetermination ? Stop : TurnInPlace;
                break;
             case TurnInPlace:
                if (turnInPlace.readyToTransitionFromTurnInPlaceToStop())
@@ -546,174 +549,203 @@ public class ExploreAreaBehavior extends BehaviorTreeControlFlowNodeBasics imple
       {
          robotInterface.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
 
-         desiredFramePoses = null;
-         determinedNextLocations = false;
+         desiredFramePoses.clear();
+         determiningNextLocation = true;
+         failedToFindNextLocation = false;
 
          syncedRobot.update();
          determineNextPlacesToWalkTo(syncedRobot);
-         determinedNextLocations = true;
+         determiningNextLocation = false;
       }
 
       boolean readyToTransitionFromDetermineNextLocationsToTurnInPlace()
       {
-         boolean outOfPlaces = desiredFramePoses.isEmpty();
-         if (outOfPlaces)
-         {
-            statusLogger.error("Out of places to plan to. We're lost!");
-         }
-         return outOfPlaces;
+         return !determiningNextLocation && failedToFindNextLocation;
       }
 
       boolean readyToTransitionFromDetermineNextLocationsToLookAndStep()
       {
-         return determinedNextLocations && !desiredFramePoses.isEmpty();
+         return !determiningNextLocation && !failedToFindNextLocation;
       }
 
       private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
       {
-         if (updateExploredLattice)
-         {
-            for (int i = 0; i < concatenatedMap.getNumberOfPlanarRegions(); i++)
-            {
-               exploredAreaLattice.processRegion(concatenatedMap.getPlanarRegion(i));
-            }
-            exploredAreaLattice.printState(null);
-         }
-
          HumanoidReferenceFrames referenceFrames = syncedRobot.getReferenceFrames();
          MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
          midFeetPosition.changeFrame(worldFrame);
 
-         ArrayList<Point3D> potentialPoints = new ArrayList<>();
-
-         // Do a grid over the bounding box to find potential places to step.
-
-         BoundingBox3D intersectionBoundingBox = getBoundingBoxIntersection(maximumExplorationArea, concatenatedMapBoundingBox);
-
-         ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<>();
-         explorationBoundingBoxes.add(maximumExplorationArea);
-         explorationBoundingBoxes.add(concatenatedMapBoundingBox);
-         explorationBoundingBoxes.add(intersectionBoundingBox);
-
-         helper.publishToUI(ExplorationBoundingBoxes, explorationBoundingBoxes);
-
-         for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
+         if (useNewGoalDetermination)
          {
-            for (double y = intersectionBoundingBox.getMinY() + exploreGridYSteps / 2.0; y <= intersectionBoundingBox.getMaxY(); y = y + exploreGridYSteps)
+            explorationPlanner.processRegions(concatenatedMap);
+            List<Point3D> waypoints = explorationPlanner.doPlan(midFeetPosition.getX(), midFeetPosition.getY(), goalX, goalY, true);
+
+            if (waypoints.isEmpty())
             {
-               Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
-               if (projectedPoint == null)
-                  continue;
-
-               if (pointIsTooCloseToPreviousObservationPoint(projectedPoint))
-                  continue;
-
-               potentialPoints.add(projectedPoint);
-            }
-         }
-
-
-
-         statusLogger.info("Found " + potentialPoints.size() + " potential Points on the grid.");
-
-         ArrayList<Point3D> potentialPointsToSend = new ArrayList<>();
-         potentialPointsToSend.addAll(potentialPoints);
-         helper.publishToUI(PotentialPointsToExplore, potentialPointsToSend);
-
-         // Compute distances to each.
-
-         HashMap<Point3DReadOnly, Double> distances = new HashMap<>();
-         for (Point3DReadOnly testGoal : potentialPoints)
-         {
-            double closestDistance = midFeetPosition.distanceXY(testGoal);
-            for (Pose3D pose3D : exploredGoalPosesSoFar)
-            {
-               double distance = pose3D.getPosition().distance(testGoal);
-               if (distance < closestDistance)
-                  closestDistance = distance;
+               failedToFindNextLocation = true;
+               return;
             }
 
-            distances.put(testGoal, closestDistance);
-         }
+            int numberOfCells = waypoints.size();
+            int maxLookAhead = 7;
+            int lookAhead = Math.min(maxLookAhead, numberOfCells - 1);
 
-         sortBasedOnBestDistances(potentialPoints, distances, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
-
-         statusLogger.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
-
-         long startTime = System.nanoTime();
-
-         ArrayList<Point3DReadOnly> feasibleGoalPoints = new ArrayList<>();
-         HashMap<Point3DReadOnly, List<Pose3DReadOnly>> potentialBodyPaths = new HashMap<>();
-
-         bodyPathPlanner.setPlanarRegionsList(concatenatedMap);
-
-         int numberConsidered = 0;
-
-         for (Point3D testGoal : potentialPoints)
-         {
-            //         LogTools.info("Looking for body path to " + testGoal);
-
-            bodyPathPlanner.setGoal(new Pose3D(testGoal, syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getOrientation()));
-            bodyPathPlanner.setStanceFootPoses(referenceFrames);
-            BodyPathPlanningResult bodyPathPlanningResult = bodyPathPlanner.planWaypointsWithOcclusionHandling();
-            List<Pose3DReadOnly> bodyPath = bodyPathPlanner.getWaypoints();
-            numberConsidered++;
-
-            if (bodyPathPlanningResult == BodyPathPlanningResult.FOUND_SOLUTION)
+            bestBodyPath = new ArrayList<>();
+            for (int i = 0; i < lookAhead; i++)
             {
-               //            LogTools.info("Found body path to " + testGoal);
-               helper.publishToUI(FoundBodyPath, bodyPath.stream().map(Pose3D::new).collect(Collectors.toList())); // deep copy
+               Point3D position = waypoints.get(i);
+               Quaternion orientation = new Quaternion();
 
-               feasibleGoalPoints.add(testGoal);
-               potentialBodyPaths.put(testGoal, bodyPath);
-               distances.put(testGoal, midFeetPosition.distanceXY(testGoal));
+               if (i != 0)
+               {
+                  Point3D previousPosition = waypoints.get(i - 1);
+                  double yaw = Math.atan2(position.getY() - previousPosition.getY(), position.getX() - previousPosition.getX());
+                  orientation.setYawPitchRoll(yaw, 0.0, 0.0);
+               }
 
-               if (feasibleGoalPoints.size() >= maxNumberOfFeasiblePointsToLookFor)
-                  break;
+               bestBodyPath.add(new Pose3D(position, orientation));
             }
-         }
 
-         long endTime = System.nanoTime();
-         long duration = (endTime - startTime);
-         double durationSeconds = ((double) duration) / 1.0e9;
-         double durationPer = durationSeconds / ((double) numberConsidered);
+            helper.publishToUI(FoundBodyPath, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
 
-         statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
-                           + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
-
-         desiredFramePoses = new ArrayList<>();
-
-         if (feasibleGoalPoints.isEmpty())
-         {
-            statusLogger.info("Couldn't find a place to walk to. Just stepping in place.");
-
-            FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
-
-            FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
-            desiredFramePose.getPosition().set(desiredLocation);
-
-            desiredFramePose.changeFrame(worldFrame);
-            desiredFramePoses.add(desiredFramePose);
-            return;
-         }
-
-         Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
-         double bestDistance = distances.get(bestGoalPoint);
-         bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
-
-         statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
-
-         for (Point3DReadOnly goalPoint : feasibleGoalPoints)
-         {
+            Pose3DReadOnly finalBodyPathPoint = bestBodyPath.get(bestBodyPath.size() - 1);
+            Point3D goalPoint = new Point3D(finalBodyPathPoint.getX(), finalBodyPathPoint.getY(), 0.0);
             FrameVector3D startToGoal = new FrameVector3D();
             startToGoal.sub(goalPoint, midFeetPosition);
-            double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
 
             FramePose3D desiredFramePose = new FramePose3D(worldFrame);
             desiredFramePose.getPosition().set(goalPoint);
-            desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            desiredFramePose.getOrientation().setYawPitchRoll(bestBodyPath.get(bestBodyPath.size() - 1).getYaw(), 0.0, 0.0);
             desiredFramePoses.add(desiredFramePose);
+         }
+         else
+         {
+            ArrayList<Point3D> potentialPoints = new ArrayList<>();
+
+            // Do a grid over the bounding box to find potential places to step.
+
+            BoundingBox3D intersectionBoundingBox = getBoundingBoxIntersection(maximumExplorationArea, concatenatedMapBoundingBox);
+
+            ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<>();
+            explorationBoundingBoxes.add(maximumExplorationArea);
+            explorationBoundingBoxes.add(concatenatedMapBoundingBox);
+            explorationBoundingBoxes.add(intersectionBoundingBox);
+
+            helper.publishToUI(ExplorationBoundingBoxes, explorationBoundingBoxes);
+
+            for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
+            {
+               for (double y = intersectionBoundingBox.getMinY() + exploreGridYSteps / 2.0; y <= intersectionBoundingBox.getMaxY(); y = y + exploreGridYSteps)
+               {
+                  Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
+                  if (projectedPoint == null)
+                     continue;
+
+                  if (pointIsTooCloseToPreviousObservationPoint(projectedPoint))
+                     continue;
+
+                  potentialPoints.add(projectedPoint);
+               }
+            }
+
+            statusLogger.info("Found " + potentialPoints.size() + " potential Points on the grid.");
+
+            ArrayList<Point3D> potentialPointsToSend = new ArrayList<>();
+            potentialPointsToSend.addAll(potentialPoints);
+            helper.publishToUI(PotentialPointsToExplore, potentialPointsToSend);
+
+            // Compute distances to each.
+
+            HashMap<Point3DReadOnly, Double> distances = new HashMap<>();
+            for (Point3DReadOnly testGoal : potentialPoints)
+            {
+               double closestDistance = midFeetPosition.distanceXY(testGoal);
+               for (Pose3D pose3D : exploredGoalPosesSoFar)
+               {
+                  double distance = pose3D.getPosition().distance(testGoal);
+                  if (distance < closestDistance)
+                     closestDistance = distance;
+               }
+
+               distances.put(testGoal, closestDistance);
+            }
+
+            sortBasedOnBestDistances(potentialPoints, distances, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
+
+            statusLogger.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
+
+            long startTime = System.nanoTime();
+
+            ArrayList<Point3DReadOnly> feasibleGoalPoints = new ArrayList<>();
+            HashMap<Point3DReadOnly, List<Pose3DReadOnly>> potentialBodyPaths = new HashMap<>();
+
+            bodyPathPlanner.setPlanarRegionsList(concatenatedMap);
+
+            int numberConsidered = 0;
+
+            for (Point3D testGoal : potentialPoints)
+            {
+               //         LogTools.info("Looking for body path to " + testGoal);
+
+               bodyPathPlanner.setGoal(new Pose3D(testGoal, syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getOrientation()));
+               bodyPathPlanner.setStanceFootPoses(referenceFrames);
+               BodyPathPlanningResult bodyPathPlanningResult = bodyPathPlanner.planWaypointsWithOcclusionHandling();
+               List<Pose3DReadOnly> bodyPath = bodyPathPlanner.getWaypoints();
+               numberConsidered++;
+
+               if (bodyPathPlanningResult == BodyPathPlanningResult.FOUND_SOLUTION)
+               {
+                  //            LogTools.info("Found body path to " + testGoal);
+                  helper.publishToUI(FoundBodyPath, bodyPath.stream().map(Pose3D::new).collect(Collectors.toList())); // deep copy
+
+                  feasibleGoalPoints.add(testGoal);
+                  potentialBodyPaths.put(testGoal, bodyPath);
+                  distances.put(testGoal, midFeetPosition.distanceXY(testGoal));
+
+                  if (feasibleGoalPoints.size() >= maxNumberOfFeasiblePointsToLookFor)
+                     break;
+               }
+            }
+
+            long endTime = System.nanoTime();
+            long duration = (endTime - startTime);
+            double durationSeconds = ((double) duration) / 1.0e9;
+            double durationPer = durationSeconds / ((double) numberConsidered);
+
+            statusLogger.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
+                              + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
+            failedToFindNextLocation = feasibleGoalPoints.isEmpty();
+
+            if (feasibleGoalPoints.isEmpty())
+            {
+               statusLogger.info("Couldn't find a place to walk to. Just stepping in place.");
+               FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
+
+               FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
+               desiredFramePose.getPosition().set(desiredLocation);
+
+               desiredFramePose.changeFrame(worldFrame);
+               desiredFramePoses.add(desiredFramePose);
+               return;
+            }
+
+            Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
+            double bestDistance = distances.get(bestGoalPoint);
+            bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
+
+            statusLogger.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
+
+            for (Point3DReadOnly goalPoint : feasibleGoalPoints)
+            {
+               FrameVector3D startToGoal = new FrameVector3D();
+               startToGoal.sub(goalPoint, midFeetPosition);
+               double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
+
+               FramePose3D desiredFramePose = new FramePose3D(worldFrame);
+               desiredFramePose.getPosition().set(goalPoint);
+               desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+               desiredFramePoses.add(desiredFramePose);
+            }
          }
       }
 

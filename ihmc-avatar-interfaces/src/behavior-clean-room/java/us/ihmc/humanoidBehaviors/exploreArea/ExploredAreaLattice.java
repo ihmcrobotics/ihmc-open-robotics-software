@@ -1,23 +1,18 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.pathPlanning.PlannerTestEnvironments;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExploredAreaLattice
 {
-  static final double cellWidth = 0.5;
+  static final double cellWidth = 0.25;
   static final double obstacleInclineThreshold = Math.toRadians(30.0);
   static final double obstacleNormalZThreshold = Math.cos(obstacleInclineThreshold);
 
