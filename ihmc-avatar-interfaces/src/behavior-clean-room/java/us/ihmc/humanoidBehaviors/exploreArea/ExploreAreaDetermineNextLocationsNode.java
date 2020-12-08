@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
@@ -115,9 +116,9 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
 
    private void runCompute()
    {
-      helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.DetermineNextLocations);
+      helper.publishToUI(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
-      helper.getOrCreateRobotInterface().requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
+      helper.getOrCreateRobotInterface().requestChestGoHome(parameters.getTurnChestTrajectoryDuration());
 
       syncedRobot.update();
       determineNextPlacesToWalkTo(syncedRobot);
@@ -230,7 +231,7 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
             distances.put(testGoal, closestDistance);
          }
 
-         sortBasedOnBestDistances(potentialPoints, distances, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
+         sortBasedOnBestDistances(potentialPoints, distances, parameters.getMinDistanceToWalkIfPossible());
 
          statusLogger.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
 
@@ -327,7 +328,7 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
    {
       for (Point3D observationPoint : pointsObservedFromSupplier.get())
       {
-         if (pointToCheck.distanceXY(observationPoint) < parameters.get(ExploreAreaBehaviorParameters.minimumDistanceBetweenObservationPoints))
+         if (pointToCheck.distanceXY(observationPoint) < parameters.getMinimumDistanceBetweenObservationPoints())
          {
             return true;
          }
