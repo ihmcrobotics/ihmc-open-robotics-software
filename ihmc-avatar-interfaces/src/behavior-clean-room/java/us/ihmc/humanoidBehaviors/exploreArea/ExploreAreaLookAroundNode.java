@@ -77,15 +77,20 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       addChild(new LookInADirection(40.0, 20.0));
    }
 
+   public void reset()
+   {
+      for (BehaviorTreeNode child : getChildren())
+      {
+         ((LookInADirection) child).reset();
+      }
+   }
+
    @Override
    public BehaviorTreeNodeStatus tick()
    {
       if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
       {
-         for (BehaviorTreeNode child : getChildren())
-         {
-            ((LookInADirection) child).reset();
-         }
+         reset();
       }
 
       deactivationTimer.reset();
