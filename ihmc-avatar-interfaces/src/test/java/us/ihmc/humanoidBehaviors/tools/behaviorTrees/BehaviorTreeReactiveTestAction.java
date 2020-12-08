@@ -18,7 +18,7 @@ public class BehaviorTreeReactiveTestAction implements BehaviorTreeAction
    private final AtomicReference<String> output;
    private final Notification stepNotification;
 
-   private AtomicReference<BehaviorTreeNodeStatus> currentStatus = new AtomicReference<>(null);
+   private final AtomicReference<BehaviorTreeNodeStatus> currentStatus = new AtomicReference<>();
 
    public BehaviorTreeReactiveTestAction(int stepDuration,
                                          int taskSteps,
