@@ -1,29 +1,20 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -44,7 +35,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                                                               create(),
                                                                               LookAndStepBehavior.DEFINITION);
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public enum ExploreAreaBehaviorState
    {
@@ -52,7 +42,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    }
 
    private final BehaviorHelper helper;
-   private final RemoteSyncedRobotModel syncedRobot;
    private final Messager messager;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
@@ -76,7 +65,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       messager = helper.getManagedMessager();
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
-      syncedRobot = robotInterface.newSyncedRobot();
 
       explore = helper.createUIInput(ExploreArea, false);
       helper.createUICallback(Parameters, parameters::setAllFromStrings);
@@ -123,22 +111,22 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       private final ExploreAreaLookAroundNode lookAround;
       private final ExploreAreaDetermineNextLocationsNode determineNextLocations;
       private final LookAndStepNode lookAndStep;
-      private final TurnInPlaceNode turnInPlace;
+      private final ExploreAreaTurnInPlace turnInPlace;
 
       public RestOfStatesNode()
       {
          lookAround = new ExploreAreaLookAroundNode(TICK_PERIOD, parameters, helper);
          determineNextLocations = new ExploreAreaDetermineNextLocationsNode(TICK_PERIOD,
-                                                                                parameters,
-                                                                                helper,
-                                                                                lookAround::getConcatenatedMap,
-                                                                                lookAround::getConcatenatedMapBoundingBox,
-                                                                                lookAround::getPointsObservedFrom);
+                                                                            parameters,
+                                                                            helper,
+                                                                            lookAround::getConcatenatedMap,
+                                                                            lookAround::getConcatenatedMapBoundingBox,
+                                                                            lookAround::getPointsObservedFrom);
+         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper);
 
          stateToNodeMap.put(DetermineNextLocations, determineNextLocations);
          lookAndStep = new LookAndStepNode(determineNextLocations::getBestBodyPath, determineNextLocations::getExploredGoalPosesSoFar);
          stateToNodeMap.put(LookAndStep, lookAndStep);
-         turnInPlace = new TurnInPlaceNode();
          stateToNodeMap.put(TurnInPlace, turnInPlace);
       }
 
@@ -161,10 +149,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                if (lookAndStep.readyToTransitionFromLookAndStepToTurnInPlace())
                   currentState = TurnInPlace;
                break;
-            case TurnInPlace:
-               if (turnInPlace.readyToTransitionFromTurnInPlaceToStop())
-                  currentState = LookAround;
-               break;
          }
 
          if (currentState != previousState)
@@ -176,9 +160,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             {
                case LookAndStep:
                   lookAndStep.onEntry();
-                  break;
-               case TurnInPlace:
-                  turnInPlace.onEntry();
                   break;
             }
          }
@@ -221,83 +202,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          private boolean readyToTransitionFromLookAndStepToTurnInPlace()
          {
             return lookAndStepReachedGoal.poll();
-         }
-      }
-
-      class TurnInPlaceNode implements BehaviorTreeNode
-      {
-         @Override
-         public BehaviorTreeNodeStatus tick()
-         {
-            return SUCCESS;
-         }
-
-         private void onEntry()
-         {
-            ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<>();
-
-            RobotSide supportSide = RobotSide.RIGHT;
-            RobotSide initialSupportSide = supportSide;
-            double rotationPerStepOutside = Math.PI / 4.0;
-            double rotationPerStepInside = Math.PI / 8.0;
-
-            Quaternion orientation = new Quaternion();
-            orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
-            Point3D translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-            posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-            supportSide = supportSide.getOppositeSide();
-            orientation = new Quaternion();
-            orientation.setYawPitchRoll(rotationPerStepInside, 0.0, 0.0);
-            translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-            posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-            supportSide = supportSide.getOppositeSide();
-            orientation = new Quaternion();
-            orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
-            translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-            posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-            supportSide = supportSide.getOppositeSide();
-            orientation = new Quaternion();
-            translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-            posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-            requestWalk(initialSupportSide, posesFromThePreviousStep);
-         }
-
-         private boolean readyToTransitionFromTurnInPlaceToStop()
-         {
-            walkingCompleted.poll();
-            return (walkingCompleted.hasValue());
-            //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
-         }
-
-         private void requestWalk(RobotSide supportSide, ArrayList<Pose3D> posesFromThePreviousStep)
-         {
-            RobotSide swingSide = supportSide.getOppositeSide();
-            FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
-            us.ihmc.idl.IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
-            syncedRobot.update();
-            ReferenceFrame supportFootFrame = syncedRobot.getReferenceFrames().getSoleFrame(supportSide);
-
-            for (Pose3D pose : posesFromThePreviousStep)
-            {
-               FramePose3D nextStepFramePose = new FramePose3D(supportFootFrame, pose);
-               PoseReferenceFrame nextStepFrame = new PoseReferenceFrame("nextStepFrame", nextStepFramePose);
-
-               nextStepFramePose.changeFrame(worldFrame);
-
-               FootstepDataMessage footstepMessage = footstepDataList.add();
-               FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, nextStepFramePose);
-               footstepMessage.set(footstep);
-
-               supportSide = supportSide.getOppositeSide();
-               swingSide = swingSide.getOppositeSide();
-               supportFootFrame = nextStepFrame;
-            }
-
-            walkingCompleted = robotInterface.requestWalk(footstepDataListMessageToTurnInPlace);
          }
       }
    }
