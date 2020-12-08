@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
@@ -14,7 +14,9 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -47,9 +49,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final RemoteHumanoidRobotInterface robotInterface;
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
-   private ExploreAreaBehaviorState currentState = LookAround;
-   private final Map<ExploreAreaBehaviorState, BehaviorTreeNode> stateToNodeMap = new HashMap<>();
-   private final Stopwatch stateTimeStopwatch = new Stopwatch().start();
    private final StopNode stop;
    private final RestOfStatesNode restOfStatesNode;
    private final PausablePeriodicThread mainThread;
@@ -106,7 +105,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       }
    }
 
-   class RestOfStatesNode implements BehaviorTreeNode
+   class RestOfStatesNode extends SequenceNode
    {
       private final ExploreAreaLookAroundNode lookAround;
       private final ExploreAreaDetermineNextLocationsNode determineNextLocations;
@@ -122,70 +121,80 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                                                             lookAround::getConcatenatedMap,
                                                                             lookAround::getConcatenatedMapBoundingBox,
                                                                             lookAround::getPointsObservedFrom);
+         lookAndStep = new LookAndStepNode(TICK_PERIOD,
+                                           determineNextLocations::getBestBodyPath,
+                                           determineNextLocations::getExploredGoalPosesSoFar,
+                                           determineNextLocations::isFailedToFindNextLocation);
          turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD, parameters, helper);
 
-         stateToNodeMap.put(DetermineNextLocations, determineNextLocations);
-         lookAndStep = new LookAndStepNode(determineNextLocations::getBestBodyPath, determineNextLocations::getExploredGoalPosesSoFar);
-         stateToNodeMap.put(LookAndStep, lookAndStep);
-         stateToNodeMap.put(TurnInPlace, turnInPlace);
-      }
-
-      public BehaviorTreeNodeStatus tick()
-      {
-         ExploreAreaBehaviorState previousState = currentState;
-
-         helper.publishToUI(CurrentState, currentState);
-         stateToNodeMap.get(currentState).tick();
-
-         switch (currentState)
-         {
-            case DetermineNextLocations:
-               if (!determineNextLocations.isDeterminingNextLocation() && !determineNextLocations.isFailedToFindNextLocation())
-                  currentState = LookAndStep;
-               else if (!determineNextLocations.isDeterminingNextLocation() && determineNextLocations.isFailedToFindNextLocation())
-                  currentState = TurnInPlace;
-               break;
-            case LookAndStep:
-               if (lookAndStep.readyToTransitionFromLookAndStepToTurnInPlace())
-                  currentState = TurnInPlace;
-               break;
-         }
-
-         if (currentState != previousState)
-         {
-            stateTimeStopwatch.reset();
-            statusLogger.info("{} -> {}", previousState == null ? null : previousState.name(), currentState == null ? null : currentState.name());
-
-            switch (currentState)
-            {
-               case LookAndStep:
-                  lookAndStep.onEntry();
-                  break;
-            }
-         }
-
-         return RUNNING;
+         addChild(lookAround);
+         addChild(determineNextLocations);
+         addChild(lookAndStep);
+         addChild(turnInPlace);
       }
 
       class LookAndStepNode implements BehaviorTreeNode // TODO: Use look and step node directly somehow.
       {
+         private final double expectedTickPeriod;
+         private final Timer deactivationTimer = new Timer();
+         private boolean hasStarted = false;
+         private boolean isFinished = false;
+
          private final Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier;
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
+         private final Supplier<Boolean> noWhereToExploreSupplier;
 
-         public LookAndStepNode(Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier, Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier)
+         public LookAndStepNode(double expectedTickPeriod,
+                                Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier,
+                                Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier,
+                                Supplier<Boolean> noWhereToExploreSupplier)
          {
+            this.expectedTickPeriod = expectedTickPeriod;
             this.bestBodyPathSupplier = bestBodyPathSupplier;
             this.exploredGoalPosesSoFarSupplier = exploredGoalPosesSoFarSupplier;
+            this.noWhereToExploreSupplier = noWhereToExploreSupplier;
          }
 
          @Override
          public BehaviorTreeNodeStatus tick()
          {
-            return SUCCESS;
+            if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
+            {
+               if (hasStarted && !isFinished)
+                  LogTools.warn("Task was still running after it wasn't being ticked!");
+               hasStarted = false;
+               isFinished = false;
+            }
+
+            deactivationTimer.reset();
+
+            if (!hasStarted)
+            {
+               if (noWhereToExploreSupplier.get())
+               {
+                  return SUCCESS;
+               }
+               else
+               {
+                  hasStarted = true;
+                  ThreadTools.startAThread(this::runLookAndStep, getClass().getSimpleName());
+                  return RUNNING;
+               }
+            }
+            else if (!isFinished)
+            {
+               return RUNNING;
+            }
+            else
+            {
+               return SUCCESS;
+            }
          }
 
-         void onEntry()
+         void runLookAndStep()
          {
+            helper.publishToUI(CurrentState, LookAndStep);
+
             List<Pose3DReadOnly> bestBodyPath = bestBodyPathSupplier.get();
             Pose3D goal = new Pose3D(bestBodyPath.get(bestBodyPath.size() - 1));
 
@@ -197,11 +206,9 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
             helper.publishToUI(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
             lookAndStepReachedGoal.poll();
-         }
+            lookAndStepReachedGoal.blockingPoll();
 
-         private boolean readyToTransitionFromLookAndStepToTurnInPlace()
-         {
-            return lookAndStepReachedGoal.poll();
+            isFinished = true;
          }
       }
    }

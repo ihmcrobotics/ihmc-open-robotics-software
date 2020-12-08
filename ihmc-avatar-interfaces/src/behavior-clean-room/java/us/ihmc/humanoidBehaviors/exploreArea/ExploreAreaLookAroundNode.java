@@ -134,6 +134,8 @@ public class ExploreAreaLookAroundNode extends SequenceNode
 
       private void commandAndWaitForTrajectory()
       {
+         helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.LookAround);
+
          turnChestWithRespectToMidFeetZUpFrame(chestYaw, parameters.getTurnChestTrajectoryDuration());
          pitchHeadWithRespectToChest(headPitch, parameters.getTurnChestTrajectoryDuration());
 

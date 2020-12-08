@@ -19,6 +19,7 @@ import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNode;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -88,6 +89,8 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
    {
       if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
       {
+         if (hasStarted && !isFinished)
+            LogTools.warn("Task was still running after it wasn't being ticked!");
          hasStarted = false;
          isFinished = false;
       }
@@ -112,6 +115,8 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
 
    private void runCompute()
    {
+      helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.DetermineNextLocations);
+
       helper.getOrCreateRobotInterface().requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
 
       syncedRobot.update();
