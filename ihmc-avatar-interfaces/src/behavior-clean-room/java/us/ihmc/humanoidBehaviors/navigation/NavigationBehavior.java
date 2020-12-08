@@ -30,7 +30,7 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -39,7 +39,6 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.OcclusionHandlingPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -72,7 +71,7 @@ public class NavigationBehavior implements BehaviorInterface
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
    private final FramePose3D robotPose = new FramePose3D();
-   private final NonReactiveLoopSequenceNode sequence;
+   private final LoopSequenceNode sequence;
    private final Notification stepThroughAlgorithm;
    private final PausablePeriodicThread mainThread;
 
@@ -97,7 +96,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
-      sequence = new NonReactiveLoopSequenceNode();
+      sequence = new LoopSequenceNode();
       sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("aquire map")));
       sequence.addChild(new AlwaysSucessfulAction(this::aquireMap));
       sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("plan body path")));
