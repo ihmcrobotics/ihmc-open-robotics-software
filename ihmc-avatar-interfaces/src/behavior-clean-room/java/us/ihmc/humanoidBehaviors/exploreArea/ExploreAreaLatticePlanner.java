@@ -146,7 +146,8 @@ public class ExploreAreaLatticePlanner
          if (!isValidRange)
             continue;
 
-         boolean isObstacle = exploredAreaLattice[cell.x - minX][cell.y - minY] == ExploredAreaLattice.CellStatus.OBSTACLE;
+         ExploredAreaLattice.CellStatus cellType = exploredAreaLattice[cell.x - minX][cell.y - minY];
+         boolean isObstacle = cellType == ExploredAreaLattice.CellStatus.OBSTACLE || cellType == ExploredAreaLattice.CellStatus.NEXT_TO_OBSTACLE;
          if (isObstacle)
             continue;
 
@@ -197,7 +198,8 @@ public class ExploreAreaLatticePlanner
 
    private boolean isObstacle(LatticeCell cell, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int minY)
    {
-      return exploredAreaLattice[cell.x - minX][cell.y - minY] == ExploredAreaLattice.CellStatus.OBSTACLE;
+      ExploredAreaLattice.CellStatus cellStatus = exploredAreaLattice[cell.x - minX][cell.y - minY];
+      return cellStatus == ExploredAreaLattice.CellStatus.OBSTACLE || cellStatus == ExploredAreaLattice.CellStatus.NEXT_TO_OBSTACLE;
    }
 
    private double getDistanceToGoal(LatticeCell cell)

@@ -19,7 +19,8 @@ public class ExploredAreaLattice
    enum CellStatus
    {
       WALKABLE,
-      OBSTACLE
+      OBSTACLE,
+      NEXT_TO_OBSTACLE
    }
 
    private final CellStatus[][] lattice;
@@ -72,18 +73,39 @@ public class ExploredAreaLattice
                boolean intersection = DiscreteFootstepTools.arePolygonsIntersecting(projectedPolygon, latticeSquare);
                if (intersection)
                {
-                  int xIndex = xCoordinate - this.minX;
-                  int yIndex = yCoordinate - this.minY;
-
-                  if (lattice[xIndex][yIndex] == null)
-                     lattice[xIndex][yIndex] = cellStatus;
-                  else if (lattice[xIndex][yIndex] == CellStatus.WALKABLE)
-                     lattice[xIndex][yIndex] = cellStatus;
-                  // If it's currently OBSTACLE then leave as is
+                  markCellAndNeighbors(cellStatus, xCoordinate, yCoordinate);
                }
             }
          }
       }
+   }
+
+   public void markCellAndNeighbors(CellStatus cellStatus, int xCoordinate, int yCoordinate)
+   {
+      int xIndex = xCoordinate - this.minX;
+      int yIndex = yCoordinate - this.minY;
+
+      markCell(cellStatus, xIndex, yIndex);
+      if (cellStatus == CellStatus.OBSTACLE)
+      {
+         markCell(CellStatus.NEXT_TO_OBSTACLE, xIndex - 1, yIndex);
+         markCell(CellStatus.NEXT_TO_OBSTACLE, xIndex + 1, yIndex);
+         markCell(CellStatus.NEXT_TO_OBSTACLE, xIndex, yIndex - 1);
+         markCell(CellStatus.NEXT_TO_OBSTACLE, xIndex, yIndex + 1);
+      }
+   }
+
+   public void markCell(CellStatus cellStatus, int xIndex, int yIndex)
+   {
+      // If it's currently OBSTACLE then leave as is
+      if (lattice[xIndex][yIndex] == null)
+         lattice[xIndex][yIndex] = cellStatus;
+      else if (lattice[xIndex][yIndex] == CellStatus.OBSTACLE)
+         return;
+      else if (lattice[xIndex][yIndex] == CellStatus.WALKABLE)
+         lattice[xIndex][yIndex] = cellStatus;
+      else if (lattice[xIndex][yIndex] == CellStatus.NEXT_TO_OBSTACLE && cellStatus != CellStatus.WALKABLE)
+         lattice[xIndex][yIndex] = cellStatus;
    }
 
    public CellStatus[][] getLattice()
@@ -152,7 +174,7 @@ public class ExploredAreaLattice
                System.out.printf("%c", 0x00B7);
                System.out.printf("%c", 0x00B7);
             }
-            else if (cellStatus == CellStatus.WALKABLE)
+            else if (cellStatus == CellStatus.WALKABLE || cellStatus == CellStatus.NEXT_TO_OBSTACLE)
             {
                System.out.printf("%c", 0x2591);
                System.out.printf("%c", 0x2591);
