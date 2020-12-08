@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -14,9 +13,7 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -134,13 +131,8 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          addChild(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
-      class LookAndStepNode implements BehaviorTreeNode // TODO: Use look and step node directly somehow.
+      class LookAndStepNode extends ParallelNodeBasics // TODO: Use look and step node directly somehow.
       {
-         private final double expectedTickPeriod;
-         private final Timer deactivationTimer = new Timer();
-         private boolean hasStarted = false;
-         private boolean isFinished = false;
-
          private final Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier;
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
          private final Supplier<Boolean> noWhereToExploreSupplier;
@@ -150,50 +142,18 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
                                 Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier,
                                 Supplier<Boolean> noWhereToExploreSupplier)
          {
-            this.expectedTickPeriod = expectedTickPeriod;
+            super(expectedTickPeriod);
             this.bestBodyPathSupplier = bestBodyPathSupplier;
             this.exploredGoalPosesSoFarSupplier = exploredGoalPosesSoFarSupplier;
             this.noWhereToExploreSupplier = noWhereToExploreSupplier;
          }
 
          @Override
-         public BehaviorTreeNodeStatus tick()
+         public void doAction()
          {
-            if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
-            {
-               if (hasStarted && !isFinished)
-                  LogTools.warn("Task was still running after it wasn't being ticked!");
-               hasStarted = false;
-               isFinished = false;
-            }
+            if (noWhereToExploreSupplier.get())
+               return;
 
-            deactivationTimer.reset();
-
-            if (!hasStarted)
-            {
-               if (noWhereToExploreSupplier.get())
-               {
-                  return SUCCESS;
-               }
-               else
-               {
-                  hasStarted = true;
-                  ThreadTools.startAThread(this::runLookAndStep, getClass().getSimpleName());
-                  return RUNNING;
-               }
-            }
-            else if (!isFinished)
-            {
-               return RUNNING;
-            }
-            else
-            {
-               return SUCCESS;
-            }
-         }
-
-         void runLookAndStep()
-         {
             helper.publishToUI(CurrentState, LookAndStep);
 
             List<Pose3DReadOnly> bestBodyPath = bestBodyPathSupplier.get();
@@ -208,8 +168,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             helper.publishToUI(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
-
-            isFinished = true;
          }
       }
    }

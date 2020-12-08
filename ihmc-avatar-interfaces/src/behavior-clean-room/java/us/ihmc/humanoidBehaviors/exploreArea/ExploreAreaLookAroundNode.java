@@ -11,9 +11,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.SequenceNode;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -26,7 +24,6 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.Timer;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,31 +34,29 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
 public class ExploreAreaLookAroundNode extends SequenceNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final double expectedTickPeriod;
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
    private final RemoteSyncedRobotModel syncedRobot;
    private final StatusLogger statusLogger;
-   private final Timer deactivationTimer = new Timer();
 
    private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<>();
    private PlanarRegionsList latestPlanarRegionsList;
    private PlanarRegionsList concatenatedMap;
    private BoundingBox3D concatenatedMapBoundingBox;
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
+   private final LookInADirection lookRight;
+   private final LookInADirection lookCenter;
+   private final LookInADirection lookLeft;
 
    public ExploreAreaLookAroundNode(double expectedTickPeriod,
                                     ExploreAreaBehaviorParameters parameters,
                                     BehaviorHelper helper)
    {
-      this.expectedTickPeriod = expectedTickPeriod;
       this.parameters = parameters;
       this.helper = helper;
 
@@ -72,72 +67,36 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       helper.createUICallback(ClearMap, this::clearMap);
       helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
 
-      addChild(new LookInADirection(-40.0, -20.0));
-      addChild(new LookInADirection(0.0, 0.0));
-      addChild(new LookInADirection(40.0, 20.0));
+      lookRight = new LookInADirection(expectedTickPeriod, -40.0, -20.0);
+      lookCenter = new LookInADirection(expectedTickPeriod, 0.0, 0.0);
+      lookLeft = new LookInADirection(expectedTickPeriod, 40.0, 20.0);
+
+      addChild(lookRight);
+      addChild(lookCenter);
+      addChild(lookLeft);
    }
 
    public void reset()
    {
-      for (BehaviorTreeNode child : getChildren())
-      {
-         ((LookInADirection) child).reset();
-      }
+      lookRight.reset();
+      lookCenter.reset();
+      lookLeft.reset();
    }
 
-   @Override
-   public BehaviorTreeNodeStatus tick()
-   {
-      if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
-      {
-         reset();
-      }
-
-      deactivationTimer.reset();
-
-      return super.tick();
-   }
-
-   class LookInADirection implements BehaviorTreeNode
+   class LookInADirection extends ParallelNodeBasics
    {
       private final double chestYaw;
       private final double headPitch;
 
-      private boolean trajectoryStarted = false;
-      private boolean trajectoryComplete = false;
-
-      public LookInADirection(double chestYaw, double headPitch)
+      public LookInADirection(double expectedTickPeriod, double chestYaw, double headPitch)
       {
+         super(expectedTickPeriod);
          this.chestYaw = Math.toRadians(chestYaw);
          this.headPitch = Math.toRadians(headPitch);
       }
 
       @Override
-      public BehaviorTreeNodeStatus tick()
-      {
-         if (!trajectoryStarted)
-         {
-            trajectoryStarted = true;
-            ThreadTools.startAThread(this::commandAndWaitForTrajectory, getClass().getSimpleName());
-            return RUNNING;
-         }
-         else if (!trajectoryComplete)
-         {
-            return RUNNING;
-         }
-         else
-         {
-            return SUCCESS;
-         }
-      }
-
-      public void reset()
-      {
-         trajectoryStarted = false;
-         trajectoryComplete = false;
-      }
-
-      private void commandAndWaitForTrajectory()
+      public void doAction()
       {
          helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.LookAround);
 
@@ -158,8 +117,6 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          helper.publishToUI(ClearPlanarRegions);
          rememberObservationPoint();
          doSlam(true);
-
-         trajectoryComplete = true;
       }
 
       private void turnChestWithRespectToMidFeetZUpFrame(double chestYaw, double trajectoryTime)
