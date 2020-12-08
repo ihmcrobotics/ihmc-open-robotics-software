@@ -49,7 +49,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
    private final BehaviorHelper helper;
    private final RemoteSyncedRobotModel syncedRobot;
    private final StatusLogger statusLogger;
-   private Timer deactivationTimer = new Timer();
+   private final Timer deactivationTimer = new Timer();
 
    private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<>();
    private PlanarRegionsList latestPlanarRegionsList;
