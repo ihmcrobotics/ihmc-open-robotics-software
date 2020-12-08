@@ -40,7 +40,7 @@ import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
-public class ExploreAreaBehaviorLookAroundNode extends SequenceNode
+public class ExploreAreaLookAroundNode extends SequenceNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -57,9 +57,9 @@ public class ExploreAreaBehaviorLookAroundNode extends SequenceNode
    private BoundingBox3D concatenatedMapBoundingBox;
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
-   public ExploreAreaBehaviorLookAroundNode(double expectedTickPeriod,
-                                            ExploreAreaBehaviorParameters parameters,
-                                            BehaviorHelper helper)
+   public ExploreAreaLookAroundNode(double expectedTickPeriod,
+                                    ExploreAreaBehaviorParameters parameters,
+                                    BehaviorHelper helper)
    {
       this.expectedTickPeriod = expectedTickPeriod;
       this.parameters = parameters;

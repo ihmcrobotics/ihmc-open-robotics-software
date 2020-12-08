@@ -144,14 +144,14 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
 
    class RestOfStatesNode implements BehaviorTreeNode
    {
-      private final ExploreAreaBehaviorLookAroundNode lookAround;
+      private final ExploreAreaLookAroundNode lookAround;
       private final DetermineNextLocationsNode determineNextLocations;
       private final LookAndStepNode lookAndStep;
       private final TurnInPlaceNode turnInPlace;
 
       public RestOfStatesNode()
       {
-         lookAround = new ExploreAreaBehaviorLookAroundNode(TICK_PERIOD, parameters, helper);
+         lookAround = new ExploreAreaLookAroundNode(TICK_PERIOD, parameters, helper);
 
          determineNextLocations = new DetermineNextLocationsNode();
          stateToNodeMap.put(DetermineNextLocations, determineNextLocations);
