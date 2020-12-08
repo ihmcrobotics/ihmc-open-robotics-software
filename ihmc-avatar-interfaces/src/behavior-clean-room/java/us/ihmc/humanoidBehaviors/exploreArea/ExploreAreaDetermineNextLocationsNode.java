@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -15,15 +14,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.Timer;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -32,26 +28,20 @@ import java.util.stream.Collectors;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
-public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
+public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean useNewGoalDetermination = true;
 
-   private final double expectedTickPeriod;
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final Supplier<List<Point3D>> pointsObservedFromSupplier;
-   private final Timer deactivationTimer = new Timer();
    private final RemoteSyncedRobotModel syncedRobot;
    private final Supplier<PlanarRegionsList> concatenatedMapSupplier;
    private final Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier;
    private final StatusLogger statusLogger;
-   private boolean hasStarted = false;
-   private boolean isFinished = false;
 
    private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
    private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
@@ -73,7 +63,7 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
                                                 Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier,
                                                 Supplier<List<Point3D>> pointsObservedFromSupplier)
    {
-      this.expectedTickPeriod = expectedTickPeriod;
+      super(expectedTickPeriod);
       this.parameters = parameters;
       this.helper = helper;
       this.concatenatedMapSupplier = concatenatedMapSupplier;
@@ -86,35 +76,7 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
-   {
-      if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
-      {
-         if (hasStarted && !isFinished)
-            LogTools.warn("Task was still running after it wasn't being ticked!");
-         hasStarted = false;
-         isFinished = false;
-      }
-
-      deactivationTimer.reset();
-
-      if (!hasStarted)
-      {
-         hasStarted = true;
-         ThreadTools.startAThread(this::runCompute, getClass().getSimpleName());
-         return RUNNING;
-      }
-      else if (!isFinished)
-      {
-         return RUNNING;
-      }
-      else
-      {
-         return SUCCESS;
-      }
-   }
-
-   private void runCompute()
+   public void doAction()
    {
       helper.publishToUI(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
@@ -122,8 +84,6 @@ public class ExploreAreaDetermineNextLocationsNode implements BehaviorTreeNode
 
       syncedRobot.update();
       determineNextPlacesToWalkTo(syncedRobot);
-
-      isFinished = true;
    }
 
    private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)

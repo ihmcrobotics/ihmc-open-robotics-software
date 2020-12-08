@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,38 +11,28 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
-public class ExploreAreaTurnInPlace implements BehaviorTreeNode
+public class ExploreAreaTurnInPlace extends ParallelNodeBasics
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final double expectedTickPeriod;
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
-   private final Timer deactivationTimer = new Timer();
    private final RemoteSyncedRobotModel syncedRobot;
-
-   private boolean hasStarted = false;
-   private boolean isFinished = false;
 
    public ExploreAreaTurnInPlace(double expectedTickPeriod,
                                  ExploreAreaBehaviorParameters parameters,
                                  BehaviorHelper helper)
    {
-      this.expectedTickPeriod = expectedTickPeriod;
+      super(expectedTickPeriod);
       this.parameters = parameters;
       this.helper = helper;
 
@@ -51,35 +40,7 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
-   {
-      if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
-      {
-         if (hasStarted && !isFinished)
-            LogTools.warn("Task was still running after it wasn't being ticked!");
-         hasStarted = false;
-         isFinished = false;
-      }
-
-      deactivationTimer.reset();
-
-      if (!hasStarted)
-      {
-         hasStarted = true;
-         ThreadTools.startAThread(this::runCompute, getClass().getSimpleName());
-         return RUNNING;
-      }
-      else if (!isFinished)
-      {
-         return RUNNING;
-      }
-      else
-      {
-         return SUCCESS;
-      }
-   }
-
-   private void runCompute()
+   public void doAction()
    {
       helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
@@ -115,8 +76,6 @@ public class ExploreAreaTurnInPlace implements BehaviorTreeNode
       TypedNotification<WalkingStatusMessage> walkingCompleted = requestWalk(initialSupportSide, posesFromThePreviousStep);
       walkingCompleted.blockingPoll(); // TODO: Timeout after a while
       // If times out, return failure.
-
-      isFinished = true;
    }
 
    private TypedNotification<WalkingStatusMessage> requestWalk(RobotSide supportSide, ArrayList<Pose3D> posesFromThePreviousStep)
