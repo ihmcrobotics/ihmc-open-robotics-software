@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -43,18 +44,22 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    private final Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier;
    private final StatusLogger statusLogger;
 
-   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-4.0, -7.0, -1.0), new Point3D(8.0, 5.0, 2.0));
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(new Point3D(-3.5, -6.0, -1.0), new Point3D(7.5, 3.0, 2.0));
    private final ExploreAreaLatticePlanner explorationPlanner = new ExploreAreaLatticePlanner(maximumExplorationArea);
    private boolean determiningNextLocation = false;
    private boolean failedToFindNextLocation = false;
-   private final double goalX = 6.0;
-   private final double goalY = 0.0;
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
    private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
    private final ArrayList<FramePose3D> desiredFramePoses = new ArrayList<>();
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
+
+   private double goalX;
+   private double goalY;
+   private final int numberOfIterationsBeforeSwitchingGoals = 5;
+   private int counter = 0;
+   private final Random random = new Random(3242);
 
    private final ExploreAreaMapUI exploreAreaMapUI;
 
@@ -73,6 +78,9 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       statusLogger = helper.getOrCreateStatusLogger();
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       bodyPathPlanner = helper.newBodyPathPlanner();
+
+      goalX = maximumExplorationArea.getMaxX();
+      goalY = 0.0;
 
       exploreAreaMapUI = new ExploreAreaMapUI(explorationPlanner);
    }
@@ -102,6 +110,31 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
 
       if (useNewGoalDetermination)
       {
+         counter++;
+         if (counter > numberOfIterationsBeforeSwitchingGoals)
+         {
+            counter = 0;
+            switch (random.nextInt(4))
+            {
+               case 0:
+                  goalX = EuclidCoreTools.interpolate(maximumExplorationArea.getMinX(), maximumExplorationArea.getMaxX(), random.nextDouble());
+                  goalY = maximumExplorationArea.getMinY();
+                  break;
+               case 1:
+                  goalX = EuclidCoreTools.interpolate(maximumExplorationArea.getMinX(), maximumExplorationArea.getMaxX(), random.nextDouble());
+                  goalY = maximumExplorationArea.getMaxY();
+                  break;
+               case 2:
+                  goalX = maximumExplorationArea.getMinX();
+                  goalY = EuclidCoreTools.interpolate(maximumExplorationArea.getMinY(), maximumExplorationArea.getMaxY(), random.nextDouble());
+                  break;
+               case 3:
+                  goalX = maximumExplorationArea.getMaxX();
+                  goalY = EuclidCoreTools.interpolate(maximumExplorationArea.getMinY(), maximumExplorationArea.getMaxY(), random.nextDouble());
+                  break;
+            }
+         }
+
          explorationPlanner.processRegions(concatenatedMap);
          List<Point3D> waypoints = explorationPlanner.doPlan(midFeetPosition.getX(), midFeetPosition.getY(), goalX, goalY, false);
 
