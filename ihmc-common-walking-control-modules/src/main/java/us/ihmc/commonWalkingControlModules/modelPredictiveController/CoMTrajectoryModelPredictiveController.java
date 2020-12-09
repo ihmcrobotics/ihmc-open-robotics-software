@@ -51,9 +51,9 @@ public class CoMTrajectoryModelPredictiveController
    private final double gravityZ;
 
    private static final double mu = 0.8;
-   public static final double HIGH_WEIGHT = 1e2;
+   public static final double HIGH_WEIGHT = 5e3;
    public static final double MEDIUM_WEIGHT = 1e2;
-   public static final double LOW_WEIGHT = 1e1;
+   public static final double LOW_WEIGHT = 1e-1;
 
    private final MPCIndexHandler indexHandler;
 

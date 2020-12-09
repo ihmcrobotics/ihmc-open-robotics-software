@@ -30,6 +30,9 @@ public class PreviewWindowCalculator
    private final YoDouble maximumPreviewWindowDuration = new YoDouble("maximumPreviewWindowDuration", registry);
    private final YoInteger maximumPreviewWindowSegments = new YoInteger("maximumPreviewWindowSegments", registry);
 
+   private final YoInteger segmentsInPreviewWindow = new YoInteger("segmentsInPreviewWindow", registry);
+   private final YoDouble previewWindowDuration = new YoDouble("previewWindowDuration", registry);
+
    private final RecyclingArrayList<ContactPlaneProvider> previewWindowContacts = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
    public PreviewWindowCalculator(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
@@ -37,7 +40,7 @@ public class PreviewWindowCalculator
       initializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
 
       activeSegment.set(-1);
-      this.maximumPreviewWindowDuration.set(2.0);
+      this.maximumPreviewWindowDuration.set(0.5);
       this.maximumPreviewWindowSegments.set(2);
 
       parentRegistry.addChild(registry);
@@ -59,6 +62,9 @@ public class PreviewWindowCalculator
 
       previewWindowContacts.clear();
       double previewWindowLength = computePlanningHorizon(fullContactSequence, timeAtStartOfWindow);
+
+      this.previewWindowDuration.set(previewWindowLength);
+      segmentsInPreviewWindow.set(previewWindowContacts.size());
 
       initializationCalculator.compute(previewWindowLength + timeAtStartOfWindow);
       dcmAtEndOfWindow.set(initializationCalculator.getDesiredDCMPosition());
@@ -98,11 +104,13 @@ public class PreviewWindowCalculator
       }
 
       cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
-      cropFinalSegmentLength(previewWindowContacts.getLast());
 
       double previewWindowLength = 0.0;
-      for (int i = 0; i < previewWindowContacts.size(); i++)
+      for (int i = 0; i < previewWindowContacts.size() - 1; i++)
          previewWindowLength += previewWindowContacts.get(i).getTimeInterval().getDuration();
+
+      cropFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength);
+      previewWindowLength += previewWindowContacts.getLast().getTimeInterval().getDuration();
 
       return previewWindowLength;
    }
@@ -123,17 +131,18 @@ public class PreviewWindowCalculator
       contact.setStartCopPosition(modifiedCoPLocation);
    }
 
-   private void cropFinalSegmentLength(ContactPlaneProvider contact)
+   private void cropFinalSegmentLength(ContactPlaneProvider contact, double timeAtStartOfSegment)
    {
       TimeIntervalBasics timeInterval = contact.getTimeInterval();
-      if (maximumPreviewWindowDuration.getDoubleValue() > timeInterval.getDuration())
+      double maxSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - timeAtStartOfSegment;
+      if (maxSegmentDuration > timeInterval.getDuration())
          return;
 
       double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
-      double alphaIntoSegment = maximumPreviewWindowDuration.getDoubleValue() / segmentDuration;
+      double alphaIntoSegment = maxSegmentDuration / segmentDuration;
       modifiedCoPLocation.interpolate(contact.getCopStartPosition(), contact.getCopEndPosition(), alphaIntoSegment);
 
-      timeInterval.setEndTime(maximumPreviewWindowDuration.getDoubleValue() + timeInterval.getStartTime());
+      timeInterval.setEndTime(maxSegmentDuration + timeInterval.getStartTime());
       contact.setEndCopPosition(modifiedCoPLocation);
    }
 
