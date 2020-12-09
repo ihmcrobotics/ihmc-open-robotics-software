@@ -104,6 +104,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       private final ExploreAreaLookAroundNode lookAround;
       private final ExploreAreaDetermineNextLocationsNode determineNextLocations;
       private final LookAndStepNode lookAndStep;
+      private final ExploreAreaTurnInPlace turnInPlace;
 
       public RestOfStatesNode()
       {
@@ -116,10 +117,15 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          lookAndStep = new LookAndStepNode(determineNextLocations::getBestBodyPath,
                                            determineNextLocations::getExploredGoalPosesSoFar,
                                            determineNextLocations::isFailedToFindNextLocation);
+         turnInPlace = new ExploreAreaTurnInPlace(TICK_PERIOD,
+                                                  parameters,
+                                                  helper,
+                                                  determineNextLocations.getExplorationPlanner());
 
          addChild(lookAround);
          addChild(determineNextLocations);
          addChild(lookAndStep);
+         addChild(turnInPlace);
          addChild(new AlwaysSuccessfulAction(lookAround::reset));
       }
 

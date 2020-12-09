@@ -1,22 +1,21 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.ArrayList;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 
@@ -27,12 +26,21 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
    private final RemoteSyncedRobotModel syncedRobot;
+   private final ExploreAreaLatticePlanner exploreAreaLatticePlanner;
 
-   public ExploreAreaTurnInPlace(ExploreAreaBehaviorParameters parameters,
-                                 BehaviorHelper helper)
+   private final FootstepPlanningModule footstepPlanner;
+   private final FootstepPlannerLogger footstepPlannerLogger;
+
+   public ExploreAreaTurnInPlace(double expectedTickPeriod,
+                                 ExploreAreaBehaviorParameters parameters,
+                                 BehaviorHelper helper,
+                                 ExploreAreaLatticePlanner exploreAreaLatticePlanner)
    {
       this.parameters = parameters;
       this.helper = helper;
+      this.exploreAreaLatticePlanner = exploreAreaLatticePlanner;
+      this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
+      this.footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
    }
@@ -42,64 +50,40 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    {
       helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
-      ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<>();
+      // TODO set depending on where the hole is
+      double yaw = 1.0;
 
-      RobotSide supportSide = RobotSide.RIGHT;
-      RobotSide initialSupportSide = supportSide;
-      double rotationPerStepOutside = Math.PI / 4.0;
-      double rotationPerStepInside = Math.PI / 8.0;
-
-      Quaternion orientation = new Quaternion();
-      orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
-      Point3D translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-      supportSide = supportSide.getOppositeSide();
-      orientation = new Quaternion();
-      orientation.setYawPitchRoll(rotationPerStepInside, 0.0, 0.0);
-      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-      supportSide = supportSide.getOppositeSide();
-      orientation = new Quaternion();
-      orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
-      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-      supportSide = supportSide.getOppositeSide();
-      orientation = new Quaternion();
-      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
-      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
-
-      TypedNotification<WalkingStatusMessage> walkingCompleted = requestWalk(initialSupportSide, posesFromThePreviousStep);
-      walkingCompleted.blockingPoll(); // TODO: Timeout after a while
-      // If times out, return failure.
+      turnInPlace(yaw);
+      turnInPlace(-yaw);
    }
 
-   private TypedNotification<WalkingStatusMessage> requestWalk(RobotSide supportSide, ArrayList<Pose3D> posesFromThePreviousStep)
+   public void turnInPlace(double yaw)
    {
-      RobotSide swingSide = supportSide.getOppositeSide();
-      FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
-      us.ihmc.idl.IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      request.setAssumeFlatGround(false);
+
       syncedRobot.update();
-      ReferenceFrame supportFootFrame = syncedRobot.getReferenceFrames().getSoleFrame(supportSide);
-
-      for (Pose3D pose : posesFromThePreviousStep)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose3D nextStepFramePose = new FramePose3D(supportFootFrame, pose);
-         PoseReferenceFrame nextStepFrame = new PoseReferenceFrame("nextStepFrame", nextStepFramePose);
-
-         nextStepFramePose.changeFrame(worldFrame);
-
-         FootstepDataMessage footstepMessage = footstepDataList.add();
-         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, nextStepFramePose);
-         footstepMessage.set(footstep);
-
-         supportSide = supportSide.getOppositeSide();
-         swingSide = swingSide.getOppositeSide();
-         supportFootFrame = nextStepFrame;
+         FramePose3D solePose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
+         solePose.changeFrame(ReferenceFrame.getWorldFrame());
+         request.setStartFootPose(robotSide, solePose);
       }
 
-      return helper.getOrCreateRobotInterface().requestWalk(footstepDataListMessageToTurnInPlace);
+      FramePose3D goalPose = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPose.getOrientation().appendYawRotation(yaw);
+      goalPose.getPosition().addX(1e-4);
+      request.setGoalFootPoses(footstepPlanner.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
+
+      request.setPlanBodyPath(false);
+      request.setSnapGoalSteps(false);
+      FootstepPlannerOutput output = footstepPlanner.handleRequest(request);
+
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0);
+      TypedNotification<WalkingStatusMessage> walkingCompleted = helper.getOrCreateRobotInterface().requestWalk(footstepDataListMessage);
+      walkingCompleted.blockingPoll();
+
+      footstepPlannerLogger.logSession();
    }
 }
