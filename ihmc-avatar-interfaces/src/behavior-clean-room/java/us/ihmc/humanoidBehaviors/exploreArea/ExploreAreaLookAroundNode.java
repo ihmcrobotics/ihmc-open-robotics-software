@@ -135,12 +135,12 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       {
          syncedRobot.update();
 
-         ReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
-         FrameQuaternion chestOrientation = new FrameQuaternion(midFeetZUpFrame, chestYaw, 0.0, 0.0);
-         chestOrientation.changeFrame(worldFrame);
+         ReferenceFrame frame = syncedRobot.getReferenceFrames().getPelvisFrame();
+         FrameQuaternion frameOrientation = new FrameQuaternion(frame, chestYaw, 0.0, 0.0);
+         frameOrientation.changeFrame(worldFrame);
          helper.getOrCreateRobotInterface()
                .requestChestOrientationTrajectory(trajectoryTime,
-                                                  chestOrientation,
+                                                  frameOrientation,
                                                   worldFrame,
                                                   syncedRobot.getReferenceFrames().getPelvisZUpFrame());
          helper.getOrCreateRobotInterface().requestPelvisGoHome(trajectoryTime);
