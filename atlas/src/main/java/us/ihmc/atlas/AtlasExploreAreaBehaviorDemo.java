@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 
-public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
+public class AtlasExploreAreaBehaviorDemo extends AtlasSimulationBasics
 {
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
    private static boolean RUN_LIDAR_REA = Boolean.parseBoolean(System.getProperty("run.lidar.rea", "true"));
@@ -30,7 +30,7 @@ public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
 
-   public AtlasCoverAreaBehaviorDemo()
+   public AtlasExploreAreaBehaviorDemo()
    {
       ThreadTools.startAsDaemon(() -> perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE_ROS2,
                                                                                      environmentInitialSetup.getPlanarRegionsSupplier().get(),
@@ -84,6 +84,6 @@ public class AtlasCoverAreaBehaviorDemo extends AtlasSimulationBasics
 
    public static void main(String[] args)
    {
-      AtlasSimulationBasics.runOrLogToFile(AtlasCoverAreaBehaviorDemo.class);
+      AtlasSimulationBasics.runOrLogToFile(AtlasExploreAreaBehaviorDemo.class);
    }
 }
