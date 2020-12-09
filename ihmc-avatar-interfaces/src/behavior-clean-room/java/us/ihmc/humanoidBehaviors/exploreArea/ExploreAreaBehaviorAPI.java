@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.exploreArea;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.MessagerAPIFactory;
 
@@ -31,6 +32,7 @@ public class ExploreAreaBehaviorAPI
    public static final MessagerAPIFactory.Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = topic("AddPolygonToPlanarRegion");
    public static final MessagerAPIFactory.Topic<List<String>> Parameters = topic("Parameters");
    public static final MessagerAPIFactory.Topic<ExploreAreaBehavior.ExploreAreaBehaviorState> CurrentState = topic("CurrentState");
+   public static final MessagerAPIFactory.Topic<Point2D> EnvironmentGapToLookAt = topic("EnvironmentGapToLookAt");
 
    private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

@@ -9,6 +9,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -71,6 +72,8 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       LogTools.info("Nearest hole +   " + holeX + ", " + holeY);
       LogTools.info("Robot position + " + robotX + ", " + robotY);
 
+      helper.getManagedMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, new Point2D(holeX, holeY));
+
       turnInPlace(turnYaw);
       ThreadTools.sleepSeconds(3.0);
    }
@@ -79,6 +82,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    {
       ExploredAreaLattice.CellStatus[][] lattice = exploreAreaLatticePlanner.getExploredAreaLattice().getLattice();
 
+      syncedRobot.update();
       Vector3DBasics pelvisTranslation = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslation();
       LatticeCell robotCell = new LatticeCell(pelvisTranslation.getX(), pelvisTranslation.getY());
 
@@ -86,18 +90,20 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       int minX = exploreAreaLatticePlanner.getExploredAreaLattice().getMinX();
       int minY = exploreAreaLatticePlanner.getExploredAreaLattice().getMinY();
 
-      double minDistanceToRobot = 1.0;
-      double minDistanceToRobotCellLengthSquared = MathTools.square(ExploredAreaLattice.toIndex(minDistanceToRobot));
-
       int minIndexX = -1;
       int minIndexY = -1;
+
+      double minThreshold = MathTools.square(0.8 / ExploredAreaLattice.cellWidth);
 
       for (int i = 0; i < lattice.length; i++)
       {
          for (int j = 0; j < lattice[0].length; j++)
          {
+            if (lattice[i][j] != null)
+               continue;
+
             double distanceSquared = new LatticeCell(i + minX, j + minY).distanceSquared(robotCell);
-            if (distanceSquared < minDistanceToHole && distanceSquared > minDistanceToRobotCellLengthSquared)
+            if (distanceSquared < minDistanceToHole && distanceSquared > minThreshold)
             {
                minDistanceToHole = distanceSquared;
                minIndexX = i;
