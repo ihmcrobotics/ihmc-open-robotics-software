@@ -338,6 +338,11 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       Collections.sort(potentialPoints, comparator);
    }
 
+   public ExploreAreaLatticePlanner getExplorationPlanner()
+   {
+      return explorationPlanner;
+   }
+
    public boolean isDeterminingNextLocation()
    {
       return determiningNextLocation;
