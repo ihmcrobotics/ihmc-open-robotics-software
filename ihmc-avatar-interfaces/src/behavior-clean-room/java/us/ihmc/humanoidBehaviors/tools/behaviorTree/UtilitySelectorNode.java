@@ -5,7 +5,7 @@ public class UtilitySelectorNode extends BehaviorTreeControlFlowNodeBasics
    @Override
    public BehaviorTreeNodeStatus tick()
    {
-      clockChildren();
+      super.tick();
 
       double highestUtility = 0.0;
       BehaviorTreeNode nodeOfHighestUtility = null;

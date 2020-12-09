@@ -107,15 +107,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
 
       public RestOfStatesNode()
       {
-         lookAround = new ExploreAreaLookAroundNode(TICK_PERIOD, parameters, helper);
-         determineNextLocations = new ExploreAreaDetermineNextLocationsNode(TICK_PERIOD,
-                                                                            parameters,
+         lookAround = new ExploreAreaLookAroundNode(parameters, helper);
+         determineNextLocations = new ExploreAreaDetermineNextLocationsNode(parameters,
                                                                             helper,
                                                                             lookAround::getConcatenatedMap,
                                                                             lookAround::getConcatenatedMapBoundingBox,
                                                                             lookAround::getPointsObservedFrom);
-         lookAndStep = new LookAndStepNode(TICK_PERIOD,
-                                           determineNextLocations::getBestBodyPath,
+         lookAndStep = new LookAndStepNode(determineNextLocations::getBestBodyPath,
                                            determineNextLocations::getExploredGoalPosesSoFar,
                                            determineNextLocations::isFailedToFindNextLocation);
 
@@ -131,12 +129,10 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
          private final Supplier<Boolean> noWhereToExploreSupplier;
 
-         public LookAndStepNode(double expectedTickPeriod,
-                                Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier,
+         public LookAndStepNode(Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier,
                                 Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier,
                                 Supplier<Boolean> noWhereToExploreSupplier)
          {
-            super(expectedTickPeriod);
             this.bestBodyPathSupplier = bestBodyPathSupplier;
             this.exploredGoalPosesSoFarSupplier = exploredGoalPosesSoFarSupplier;
             this.noWhereToExploreSupplier = noWhereToExploreSupplier;

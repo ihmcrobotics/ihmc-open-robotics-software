@@ -28,11 +28,9 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    private final BehaviorHelper helper;
    private final RemoteSyncedRobotModel syncedRobot;
 
-   public ExploreAreaTurnInPlace(double expectedTickPeriod,
-                                 ExploreAreaBehaviorParameters parameters,
+   public ExploreAreaTurnInPlace(ExploreAreaBehaviorParameters parameters,
                                  BehaviorHelper helper)
    {
-      super(expectedTickPeriod);
       this.parameters = parameters;
       this.helper = helper;
 

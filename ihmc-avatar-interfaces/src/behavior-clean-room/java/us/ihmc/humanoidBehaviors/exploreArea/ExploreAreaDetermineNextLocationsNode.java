@@ -56,14 +56,12 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
-   public ExploreAreaDetermineNextLocationsNode(double expectedTickPeriod,
-                                                ExploreAreaBehaviorParameters parameters,
+   public ExploreAreaDetermineNextLocationsNode(ExploreAreaBehaviorParameters parameters,
                                                 BehaviorHelper helper,
                                                 Supplier<PlanarRegionsList> concatenatedMapSupplier,
                                                 Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier,
                                                 Supplier<List<Point3D>> pointsObservedFromSupplier)
    {
-      super(expectedTickPeriod);
       this.parameters = parameters;
       this.helper = helper;
       this.concatenatedMapSupplier = concatenatedMapSupplier;
