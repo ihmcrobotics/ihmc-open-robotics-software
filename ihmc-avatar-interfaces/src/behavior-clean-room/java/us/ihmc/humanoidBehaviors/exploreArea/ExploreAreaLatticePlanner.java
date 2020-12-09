@@ -17,41 +17,6 @@ import java.util.PriorityQueue;
 
 public class ExploreAreaLatticePlanner
 {
-   static class LatticeCell
-   {
-      final int x, y;
-
-      public LatticeCell(int x, int y)
-      {
-         this.x = x;
-         this.y = y;
-      }
-
-      public LatticeCell(double x, double y)
-      {
-         this.x = ExploredAreaLattice.toIndex(x);
-         this.y = ExploredAreaLattice.toIndex(y);
-      }
-
-      @Override
-      public int hashCode()
-      {
-         return 13 * x + 17 * y;
-      }
-
-      @Override
-      public boolean equals(Object other)
-      {
-         if (!(other instanceof LatticeCell))
-         {
-            return false;
-         }
-
-         LatticeCell otherCell = (LatticeCell) other;
-         return (otherCell.x == x) && (otherCell.y == y);
-      }
-   }
-
    private final HashSet<LatticeCell> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<LatticeCell> graph = new DirectedGraph<>();
    private final AStarIterationData<LatticeCell> iterationData = new AStarIterationData<>();
@@ -101,7 +66,7 @@ public class ExploreAreaLatticePlanner
       List<Point3D> waypoints = new ArrayList<>();
       for (int i = 0; i < path.size(); i++)
       {
-         waypoints.add(new Point3D(ExploredAreaLattice.toDouble(path.get(i).x), ExploredAreaLattice.toDouble(path.get(i).y), 0.0));
+         waypoints.add(new Point3D(ExploredAreaLattice.toDouble(path.get(i).getX()), ExploredAreaLattice.toDouble(path.get(i).getY()), 0.0));
       }
 
       return waypoints;
@@ -131,14 +96,14 @@ public class ExploreAreaLatticePlanner
       iterationData.setParentNode(cellToExpand);
 
       neighbors.clear();
-      neighbors.add(new LatticeCell(cellToExpand.x - 1, cellToExpand.y));
-      neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y));
-      neighbors.add(new LatticeCell(cellToExpand.x, cellToExpand.y - 1));
-      neighbors.add(new LatticeCell(cellToExpand.x, cellToExpand.y + 1));
-      neighbors.add(new LatticeCell(cellToExpand.x - 1, cellToExpand.y - 1));
-      neighbors.add(new LatticeCell(cellToExpand.x - 1, cellToExpand.y + 1));
-      neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y - 1));
-      neighbors.add(new LatticeCell(cellToExpand.x + 1, cellToExpand.y + 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX() - 1, cellToExpand.getY()));
+      neighbors.add(new LatticeCell(cellToExpand.getX() + 1, cellToExpand.getY()));
+      neighbors.add(new LatticeCell(cellToExpand.getX(), cellToExpand.getY() - 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX(), cellToExpand.getY() + 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX() - 1, cellToExpand.getY() - 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX() - 1, cellToExpand.getY() + 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX() + 1, cellToExpand.getY() - 1));
+      neighbors.add(new LatticeCell(cellToExpand.getX() + 1, cellToExpand.getY() + 1));
 
       for (LatticeCell cell : neighbors)
       {
@@ -146,7 +111,7 @@ public class ExploreAreaLatticePlanner
          if (!isValidRange)
             continue;
 
-         ExploredAreaLattice.CellStatus cellType = exploredAreaLattice[cell.x - minX][cell.y - minY];
+         ExploredAreaLattice.CellStatus cellType = exploredAreaLattice[cell.getX() - minX][cell.getY() - minY];
          boolean isObstacle = cellType == ExploredAreaLattice.CellStatus.OBSTACLE || cellType == ExploredAreaLattice.CellStatus.NEXT_TO_OBSTACLE;
          if (isObstacle)
             continue;
@@ -164,19 +129,19 @@ public class ExploreAreaLatticePlanner
 
    private static boolean isValidRange(int minX, int maxX, int minY, int maxY, LatticeCell cell)
    {
-      return cell.x >= minX && cell.x <= maxX && cell.y >= minY && cell.y <= maxY;
+      return cell.getX() >= minX && cell.getX() <= maxX && cell.getY() >= minY && cell.getY() <= maxY;
    }
 
    private boolean nextToObstacle(LatticeCell cell, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int maxX, int minY, int maxY)
    {
-      LatticeCell cell0 = new LatticeCell(cell.x - 1, cell.y);
-      LatticeCell cell1 = new LatticeCell(cell.x + 1, cell.y);
-      LatticeCell cell2 = new LatticeCell(cell.x, cell.y - 1);
-      LatticeCell cell3 = new LatticeCell(cell.x, cell.y + 1);
-      LatticeCell cell4 = new LatticeCell(cell.x - 1, cell.y + 1);
-      LatticeCell cell5 = new LatticeCell(cell.x + 1, cell.y + 1);
-      LatticeCell cell6 = new LatticeCell(cell.x - 1, cell.y - 1);
-      LatticeCell cell7 = new LatticeCell(cell.x + 1, cell.y - 1);
+      LatticeCell cell0 = new LatticeCell(cell.getX() - 1, cell.getY());
+      LatticeCell cell1 = new LatticeCell(cell.getX() + 1, cell.getY());
+      LatticeCell cell2 = new LatticeCell(cell.getX(), cell.getY() - 1);
+      LatticeCell cell3 = new LatticeCell(cell.getX(), cell.getY() + 1);
+      LatticeCell cell4 = new LatticeCell(cell.getX() - 1, cell.getY() + 1);
+      LatticeCell cell5 = new LatticeCell(cell.getX() + 1, cell.getY() + 1);
+      LatticeCell cell6 = new LatticeCell(cell.getX() - 1, cell.getY() - 1);
+      LatticeCell cell7 = new LatticeCell(cell.getX() + 1, cell.getY() - 1);
       if (isValidRange(minX, maxX, minY, maxY, cell0) && isObstacle(cell0, exploredAreaLattice, minX, minY))
          return true;
       if (isValidRange(minX, maxX, minY, maxY, cell1) && isObstacle(cell1, exploredAreaLattice, minX, minY))
@@ -198,13 +163,13 @@ public class ExploreAreaLatticePlanner
 
    private boolean isObstacle(LatticeCell cell, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int minY)
    {
-      ExploredAreaLattice.CellStatus cellStatus = exploredAreaLattice[cell.x - minX][cell.y - minY];
+      ExploredAreaLattice.CellStatus cellStatus = exploredAreaLattice[cell.getX() - minX][cell.getY() - minY];
       return cellStatus == ExploredAreaLattice.CellStatus.OBSTACLE || cellStatus == ExploredAreaLattice.CellStatus.NEXT_TO_OBSTACLE;
    }
 
    private double getDistanceToGoal(LatticeCell cell)
    {
-      return Math.abs(cell.x - goalCell.x) + Math.abs(cell.y - goalCell.y);
+      return Math.abs(cell.getX() - goalCell.getX()) + Math.abs(cell.getY() - goalCell.getY());
    }
 
    public LatticeCell getNextNode()

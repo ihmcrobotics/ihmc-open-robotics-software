@@ -86,4 +86,5 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
 
       footstepPlannerLogger.logSession();
    }
+
 }
