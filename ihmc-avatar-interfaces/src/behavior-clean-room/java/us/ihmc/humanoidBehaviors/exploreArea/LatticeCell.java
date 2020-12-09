@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
+
 class LatticeCell
 {
    private final int x, y;
@@ -30,6 +32,11 @@ class LatticeCell
    public int getY()
    {
       return y;
+   }
+
+   public double distanceSquared(LatticeCell other)
+   {
+      return EuclidCoreTools.normSquared(other.y - y, other.x - x);
    }
 
    @Override

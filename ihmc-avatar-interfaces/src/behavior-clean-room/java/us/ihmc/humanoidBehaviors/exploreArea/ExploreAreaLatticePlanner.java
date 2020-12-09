@@ -172,7 +172,7 @@ public class ExploreAreaLatticePlanner
       return Math.abs(cell.getX() - goalCell.getX()) + Math.abs(cell.getY() - goalCell.getY());
    }
 
-   public LatticeCell getNextNode()
+   private LatticeCell getNextNode()
    {
       while (!stack.isEmpty())
       {
@@ -184,6 +184,11 @@ public class ExploreAreaLatticePlanner
       }
 
       return null;
+   }
+
+   public ExploredAreaLattice getExploredAreaLattice()
+   {
+      return exploredAreaLattice;
    }
 
    public static void main(String[] args)
