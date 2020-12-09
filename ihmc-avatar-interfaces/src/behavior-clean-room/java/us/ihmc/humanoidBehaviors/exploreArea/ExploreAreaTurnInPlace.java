@@ -72,8 +72,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       LogTools.info("Robot position + " + robotX + ", " + robotY);
 
       turnInPlace(turnYaw);
-      ThreadTools.sleepSeconds(4.0);
-      turnInPlace(- turnYaw);
+      ThreadTools.sleepSeconds(3.0);
    }
 
    private LatticeCell findNearestHole()
