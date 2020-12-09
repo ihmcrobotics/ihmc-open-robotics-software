@@ -77,14 +77,15 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       }
 
       syncedRobot.update();
-      Vector3DBasics pelvisTranslation = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslation();
-      double robotX = pelvisTranslation.getX();
-      double robotY = pelvisTranslation.getY();
+      FramePose3D pelvisFrame = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      pelvisFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double headingToHole = Math.atan2(pointToLookAt2D.getX() - robotY, pointToLookAt2D.getY() - robotX);
-      double robotYaw = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getRotation().getYaw();
+      double robotX = pelvisFrame.getX();
+      double robotY = pelvisFrame.getY();
+      double robotYaw = pelvisFrame.getYaw();
 
-      double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(headingToHole, robotYaw);
+      double heading = Math.atan2(pointToLookAt2D.getX() - robotY, pointToLookAt2D.getY() - robotX);
+      double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(heading, robotYaw);
       helper.getManagedMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, pointToLookAt2D);
 
       turnInPlace(turnYaw);
