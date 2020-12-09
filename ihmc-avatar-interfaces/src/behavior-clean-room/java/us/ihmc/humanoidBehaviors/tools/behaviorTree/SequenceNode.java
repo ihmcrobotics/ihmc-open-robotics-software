@@ -10,7 +10,7 @@ public class SequenceNode extends BehaviorTreeControlFlowNodeBasics
    @Override
    public BehaviorTreeNodeStatus tick()
    {
-      clockChildren();
+      super.tick();
 
       for (BehaviorTreeNode child : getChildren())
       {

@@ -12,7 +12,7 @@ public class LoopSequenceNode extends SequenceNode
    @Override
    public BehaviorTreeNodeStatus tick()
    {
-      clockChildren();
+      super.tick();
 
       if (currentChild >= getChildren().size())
       {

@@ -2,36 +2,46 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.Timer;
 
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
 public abstract class ParallelNodeBasics implements BehaviorTreeNode
 {
-   private final double expectedTickPeriod;
-   private final Timer deactivationTimer = new Timer();
-
    private boolean hasStarted = false;
    private boolean isFinished = false;
 
-   public ParallelNodeBasics(double expectedTickPeriod)
+   private boolean lastWasClock = false;
+   private boolean resetRequired = false;
+
+   public ParallelNodeBasics()
    {
-      this.expectedTickPeriod = expectedTickPeriod;
+   }
+
+   @Override
+   public void clock()
+   {
+      if (lastWasClock)
+      {
+         resetRequired = true;
+      }
+
+      lastWasClock = true;
    }
 
    @Override
    public BehaviorTreeNodeStatus tick()
    {
-      if (deactivationTimer.isExpired(expectedTickPeriod * 1.5))
+      if (resetRequired)
       {
+         resetRequired = false;
          if (hasStarted && !isFinished)
-            LogTools.warn("Task was still running after it wasn't being ticked!");
-         hasStarted = false;
-         isFinished = false;
+            LogTools.warn("Task was still running after it wasn't being ticked! {}", getClass().getSimpleName());
+
+         reset();
       }
 
-      deactivationTimer.reset();
+      lastWasClock = false;
 
       if (!hasStarted)
       {

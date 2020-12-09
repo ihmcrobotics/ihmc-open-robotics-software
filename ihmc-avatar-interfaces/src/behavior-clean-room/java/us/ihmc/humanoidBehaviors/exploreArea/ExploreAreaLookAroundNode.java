@@ -54,8 +54,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
    private final LookInADirection lookCenter;
    private final LookInADirection lookLeft;
 
-   public ExploreAreaLookAroundNode(double expectedTickPeriod,
-                                    ExploreAreaBehaviorParameters parameters,
+   public ExploreAreaLookAroundNode(ExploreAreaBehaviorParameters parameters,
                                     BehaviorHelper helper)
    {
       this.parameters = parameters;
@@ -68,9 +67,9 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       helper.createUICallback(ClearMap, this::clearMap);
       helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
 
-      lookRight = new LookInADirection(expectedTickPeriod, -40.0, -20.0);
-      lookCenter = new LookInADirection(expectedTickPeriod, 0.0, 0.0);
-      lookLeft = new LookInADirection(expectedTickPeriod, 40.0, 20.0);
+      lookRight = new LookInADirection(-40.0, -20.0);
+      lookCenter = new LookInADirection(0.0, 0.0);
+      lookLeft = new LookInADirection(40.0, 20.0);
 
       addChild(lookRight);
       addChild(lookCenter);
@@ -89,9 +88,8 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       private final double chestYaw;
       private final double headPitch;
 
-      public LookInADirection(double expectedTickPeriod, double chestYaw, double headPitch)
+      public LookInADirection(double chestYaw, double headPitch)
       {
-         super(expectedTickPeriod);
          this.chestYaw = Math.toRadians(chestYaw);
          this.headPitch = Math.toRadians(headPitch);
       }
