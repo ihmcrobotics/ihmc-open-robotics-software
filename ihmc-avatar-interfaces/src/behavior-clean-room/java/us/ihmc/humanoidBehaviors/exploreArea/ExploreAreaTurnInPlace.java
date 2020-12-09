@@ -10,6 +10,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -21,6 +22,8 @@ import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 
@@ -36,6 +39,8 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger footstepPlannerLogger;
 
+   private final AtomicReference<Point3D> userRequestedPointToLookAt = new AtomicReference<>();
+
    public ExploreAreaTurnInPlace(double expectedTickPeriod,
                                  ExploreAreaBehaviorParameters parameters,
                                  BehaviorHelper helper,
@@ -47,6 +52,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       this.footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
+      helper.getManagedMessager().registerTopicListener(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, userRequestedPointToLookAt::set);
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
    }
 
@@ -55,24 +61,31 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    {
       helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
-      LatticeCell nearestHole = findNearestHole();
-      double holeX = ExploredAreaLattice.toDouble(nearestHole.getX());
-      double holeY = ExploredAreaLattice.toDouble(nearestHole.getY());
+      Point2D pointToLookAt2D = new Point2D();
+      if (userRequestedPointToLookAt.get() != null)
+      {
+         Point3D pointToLookAt = userRequestedPointToLookAt.getAndSet(null);
+         pointToLookAt2D.set(pointToLookAt.getX(), pointToLookAt.getY());
+      }
+      else
+      {
+         LatticeCell nearestHole = findNearestHole();
+         double holeX = ExploredAreaLattice.toDouble(nearestHole.getX());
+         double holeY = ExploredAreaLattice.toDouble(nearestHole.getY());
+         pointToLookAt2D.setX(holeX);
+         pointToLookAt2D.setY(holeY);
+      }
 
       syncedRobot.update();
       Vector3DBasics pelvisTranslation = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslation();
       double robotX = pelvisTranslation.getX();
       double robotY = pelvisTranslation.getY();
 
-      double headingToHole = Math.atan2(holeY - robotY, holeX - robotX);
+      double headingToHole = Math.atan2(pointToLookAt2D.getX() - robotY, pointToLookAt2D.getY() - robotX);
       double robotYaw = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getRotation().getYaw();
 
       double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(headingToHole, robotYaw);
-
-      LogTools.info("Nearest hole +   " + holeX + ", " + holeY);
-      LogTools.info("Robot position + " + robotX + ", " + robotY + ", " + robotYaw);
-
-      helper.getManagedMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, new Point2D(holeX, holeY));
+      helper.getManagedMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, pointToLookAt2D);
 
       turnInPlace(turnYaw);
       ThreadTools.sleepSeconds(3.0);
