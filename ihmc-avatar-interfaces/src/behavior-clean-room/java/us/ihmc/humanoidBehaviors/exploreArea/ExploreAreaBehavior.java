@@ -1,8 +1,6 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
@@ -52,7 +50,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
 
    private final AtomicReference<Boolean> explore;
 
-   private TypedNotification<WalkingStatusMessage> walkingCompleted;
    private final Notification lookAndStepReachedGoal;
 
    public ExploreAreaBehavior(BehaviorHelper helper)
