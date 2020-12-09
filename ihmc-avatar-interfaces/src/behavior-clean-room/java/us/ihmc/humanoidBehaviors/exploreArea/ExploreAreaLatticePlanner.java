@@ -23,6 +23,7 @@ public class ExploreAreaLatticePlanner
    private final List<LatticeCell> neighbors = new ArrayList<>();
    private final NodeComparator<LatticeCell> nodeComparator = new NodeComparator<>(graph, this::getDistanceToGoal);
    private final PriorityQueue<LatticeCell> stack = new PriorityQueue<>(nodeComparator);
+   private final List<String> stringList = new ArrayList<>();
 
    private final ExploredAreaLattice exploredAreaLattice;
 
@@ -57,11 +58,7 @@ public class ExploreAreaLatticePlanner
       }
 
       List<LatticeCell> path = foundGoal ? graph.getPathFromStart(goalCell) : new ArrayList<>();
-
-      if (printState)
-      {
-         exploredAreaLattice.printState(path);
-      }
+      exploredAreaLattice.printState(path, stringList, printState);
 
       List<Point3D> waypoints = new ArrayList<>();
       for (int i = 0; i < path.size(); i++)
@@ -88,6 +85,11 @@ public class ExploreAreaLatticePlanner
       expandedNodeSet.clear();
 
       foundGoal = false;
+   }
+
+   public List<String> getStringList()
+   {
+      return stringList;
    }
 
    public void doPlanningIteration(LatticeCell cellToExpand, ExploredAreaLattice.CellStatus[][] exploredAreaLattice, int minX, int maxX, int minY, int maxY)
