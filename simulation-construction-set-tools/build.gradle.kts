@@ -14,11 +14,11 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid-frame:0.15.1")
-   api("us.ihmc:euclid-frame-shape:0.15.1")
-   api("us.ihmc:euclid-shape:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.6")
-   api("us.ihmc:simulation-construction-set:0.21.1")
+   api("us.ihmc:euclid-frame:0.15.2")
+   api("us.ihmc:euclid-frame-shape:0.15.2")
+   api("us.ihmc:euclid-shape:0.15.2")
+   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:simulation-construction-set:0.21.4")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
@@ -26,10 +26,5 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 
-   api("us.ihmc:simulation-construction-set-test:0.21.1") {
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-      exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
-      exclude(group = "org.junit.platform", module = "junit-platform-commons")
-      exclude(group = "org.junit.platform", module = "junit-platform-launcher")
-   }
+   api("us.ihmc:simulation-construction-set-test:0.21.4")
 }

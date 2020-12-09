@@ -16,7 +16,6 @@ mainDependencies {
    api("com.martiansoftware:jsap:2.1")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("org.apache.poi:poi:3.15") // I/O library for xls files.
-   api("us.ihmc.thirdparty.jinput:jinput:200128")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.boofcv:boofcv-geo:0.36")
@@ -26,12 +25,13 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.27.0")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:euclid-geometry:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.6")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.21.1")
-   api("us.ihmc:ihmc-graphics-description:0.19.1")
+   api("net.java.jinput:jinput:2.0.6-ihmc")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:euclid-geometry:0.15.2")
+   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.4")
+   api("us.ihmc:simulation-construction-set:0.21.4")
+   api("us.ihmc:ihmc-graphics-description:0.19.2")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -58,13 +58,13 @@ mainDependencies {
 
 behaviorCleanRoomDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-messager-kryo:0.1.5")
+   api("us.ihmc:ihmc-messager-kryo:0.1.6")
 }
 
 behaviorFxUiDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("behavior-clean-room"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
@@ -85,7 +85,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
 }
