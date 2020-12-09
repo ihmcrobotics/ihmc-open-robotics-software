@@ -4,10 +4,12 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -15,6 +17,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
@@ -50,11 +54,60 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    {
       helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
-      // TODO set depending on where the hole is
-      double yaw = 1.0;
+      LatticeCell nearestHole = findNearestHole();
+      double holeX = ExploredAreaLattice.toDouble(nearestHole.getX());
+      double holeY = ExploredAreaLattice.toDouble(nearestHole.getY());
 
-      turnInPlace(yaw);
-      turnInPlace(-yaw);
+      syncedRobot.update();
+      Vector3DBasics pelvisTranslation = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslation();
+      double robotX = pelvisTranslation.getX();
+      double robotY = pelvisTranslation.getY();
+
+      double headingToHole = Math.atan2(holeY - robotY, holeX - robotX);
+      double robotYaw = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getRotation().getYaw();
+
+      double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(headingToHole, robotYaw);
+
+      LogTools.info("Nearest hole +   " + holeX + ", " + holeY);
+      LogTools.info("Robot position + " + robotX + ", " + robotY);
+
+      turnInPlace(turnYaw);
+      ThreadTools.sleepSeconds(4.0);
+      turnInPlace(- turnYaw);
+   }
+
+   private LatticeCell findNearestHole()
+   {
+      ExploredAreaLattice.CellStatus[][] lattice = exploreAreaLatticePlanner.getExploredAreaLattice().getLattice();
+
+      Vector3DBasics pelvisTranslation = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslation();
+      LatticeCell robotCell = new LatticeCell(pelvisTranslation.getX(), pelvisTranslation.getY());
+
+      double minDistanceToHole = Double.MAX_VALUE;
+      int minX = exploreAreaLatticePlanner.getExploredAreaLattice().getMinX();
+      int minY = exploreAreaLatticePlanner.getExploredAreaLattice().getMinY();
+
+      double minDistanceToRobot = 1.0;
+      double minDistanceToRobotCellLengthSquared = MathTools.square(ExploredAreaLattice.toIndex(minDistanceToRobot));
+
+      int minIndexX = -1;
+      int minIndexY = -1;
+
+      for (int i = 0; i < lattice.length; i++)
+      {
+         for (int j = 0; j < lattice[0].length; j++)
+         {
+            double distanceSquared = new LatticeCell(i + minX, j + minY).distanceSquared(robotCell);
+            if (distanceSquared < minDistanceToHole && distanceSquared > minDistanceToRobotCellLengthSquared)
+            {
+               minDistanceToHole = distanceSquared;
+               minIndexX = i;
+               minIndexY = j;
+            }
+         }
+      }
+
+      return new LatticeCell(minIndexX + minX, minIndexY + minY);
    }
 
    public void turnInPlace(double yaw)
