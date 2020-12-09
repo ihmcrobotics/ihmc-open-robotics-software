@@ -103,7 +103,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       if (useNewGoalDetermination)
       {
          explorationPlanner.processRegions(concatenatedMap);
-         List<Point3D> waypoints = explorationPlanner.doPlan(midFeetPosition.getX(), midFeetPosition.getY(), goalX, goalY, true);
+         List<Point3D> waypoints = explorationPlanner.doPlan(midFeetPosition.getX(), midFeetPosition.getY(), goalX, goalY, false);
 
          if (waypoints.isEmpty())
          {
