@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
@@ -52,6 +53,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private final GraphicGroup planningToPointsGraphicGroup = new GraphicGroup(get3DGroup());
    private final GraphicGroup boundingBoxGraphics = new GraphicGroup(get3DGroup());
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
+   private final GraphicGroup pointToLookAtGroup = new GraphicGroup(get3DGroup());
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
@@ -93,6 +95,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
                                                 stateTextField.setText(state.name());
                                                 lookAndStepVisualizationGroup.setEnabled(state == LookAndStep);
                                              }));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, point -> Platform.runLater(() -> setPointToLookAt(point)));
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
@@ -109,6 +112,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       planningToPointsGraphicGroup.setEnabled(enabled);
       boundingBoxGraphics.setEnabled(enabled);
       lookAndStepVisualizationGroup.setEnabled(enabled && currentState == LookAndStep);
+      pointToLookAtGroup.setEnabled(enabled);
 
       if (enabled)
       {
@@ -170,6 +174,14 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
          Color color = boundingBoxColors[i % boundingBoxColors.length];
          boundingBoxGraphics.add(createBoundingBox3D(boxes.get(i), color, 0.02));
       }
+   }
+
+   private void setPointToLookAt(Point2D pointToLookAt)
+   {
+      Color color = Color.RED;
+      double radius = 0.15;
+      pointToLookAtGroup.removeAll();
+      pointToLookAtGroup.add(createSphere3D(new Point3D(pointToLookAt.getX(), pointToLookAt.getY(), 0.4), color, radius));
    }
 
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
