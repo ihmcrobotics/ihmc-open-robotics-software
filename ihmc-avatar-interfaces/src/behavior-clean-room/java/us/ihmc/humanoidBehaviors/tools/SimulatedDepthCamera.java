@@ -87,7 +87,7 @@ public class SimulatedDepthCamera
       tempCameraPose.setToZero(cameraFrame);
       tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      int numberOfPointsToGenerate = 50000;
+      int numberOfPointsToGenerate = 10000;
       double sphereRadius = 5.0;
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 

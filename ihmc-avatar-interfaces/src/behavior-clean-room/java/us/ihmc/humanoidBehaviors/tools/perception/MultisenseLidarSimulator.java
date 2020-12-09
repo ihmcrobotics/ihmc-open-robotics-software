@@ -41,7 +41,7 @@ public class MultisenseLidarSimulator
 
    private final double fov = Math.toRadians(100.0);
    private final double range = 5.0;
-   private final int scanSize = 500;
+   private final int scanSize = 200;
    private final double angularVelocity = 2.183;
 
    public MultisenseLidarSimulator(DRCRobotModel robotModel, ROS2Node ros2Node, PlanarRegionsList map)
