@@ -1,32 +1,49 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import com.sun.javafx.scene.CameraHelper;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -36,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
 import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.*;
@@ -58,6 +77,11 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private final GraphicGroup pointToLookAtGroup = new GraphicGroup(get3DGroup());
 
    private final Sphere pointToLookAt = createSphere3D(new Point3D(100.0, 100.0, 0.0), Color.RED, 0.15);
+   private final SubScene sceneNode;
+   private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+   private final AtomicReference<Point3D> mouseMovedMeshIntersection = new AtomicReference<>();
+   private final AtomicReference<Point3D> mouseClickedMeshIntersection = new AtomicReference<>();
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
@@ -102,8 +126,12 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
                                              }));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, point -> Platform.runLater(() -> setPointToLookAt(point)));
 
+      sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
+      this.sceneNode = sceneNode;
    }
 
    @Override
@@ -260,6 +288,54 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       }
 
       polygons.add(polygon);
+   }
+
+   private void mouseMoved(MouseEvent event)
+   {
+      Point3D intersection = calculateMouseIntersection(event);
+      if (intersection != null)
+      {
+         mouseMovedMeshIntersection.set(intersection);
+      }
+   }
+
+   private void mouseClicked(MouseEvent event)
+   {
+      if (event.getButton() == MouseButton.SECONDARY)
+      {
+         LogTools.info("Mouse right clicked");
+         if (mouseMovedMeshIntersection.get() != null)
+         {
+            System.out.println(mouseMovedMeshIntersection.get());
+            getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, mouseMovedMeshIntersection.get());
+         }
+
+         event.consume();
+      }
+   }
+
+   private Point3D calculateMouseIntersection(MouseEvent event)
+   {
+      PickResult pickResult = event.getPickResult();
+
+      Point3D point1 = new Point3D();
+      point1.setX(sceneNode.getCamera().getLocalToSceneTransform().getTx());
+      point1.setY(sceneNode.getCamera().getLocalToSceneTransform().getTy());
+      point1.setZ(sceneNode.getCamera().getLocalToSceneTransform().getTz());
+
+      Point3D point2 = new Point3D();
+      javafx.geometry.Point3D pointOnProjectionPlane = CameraHelper.pickProjectPlane(sceneNode.getCamera(), event.getSceneX(), event.getSceneY());
+      point2.setX(pointOnProjectionPlane.getX());
+      point2.setY(pointOnProjectionPlane.getY());
+      point2.setZ(pointOnProjectionPlane.getZ());
+
+      Line3D line = new Line3D(point1, point2);
+
+      Point3DReadOnly pickPoint = new Point3D(0.0, 0.0, 0.0);
+      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Point3D pickDirection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, planeNormal, line.getPoint(), line.getDirection());
+
+      return pickDirection;
    }
 
    @Override

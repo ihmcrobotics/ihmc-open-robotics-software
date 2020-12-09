@@ -70,7 +70,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       double turnYaw = AngleTools.computeAngleDifferenceMinusPiToPi(headingToHole, robotYaw);
 
       LogTools.info("Nearest hole +   " + holeX + ", " + holeY);
-      LogTools.info("Robot position + " + robotX + ", " + robotY);
+      LogTools.info("Robot position + " + robotX + ", " + robotY + ", " + robotYaw);
 
       helper.getManagedMessager().submitMessage(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, new Point2D(holeX, holeY));
 
