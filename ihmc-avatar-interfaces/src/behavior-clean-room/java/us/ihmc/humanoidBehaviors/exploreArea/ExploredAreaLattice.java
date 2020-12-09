@@ -158,14 +158,14 @@ public class ExploredAreaLattice
       return cellWidth * index;
    }
 
-   public void printState(List<ExploreAreaLatticePlanner.LatticeCell> path)
+   public void printState(List<LatticeCell> path)
    {
       for (int i = 0; i < lattice.length; i++)
       {
          for (int j = 0; j < lattice[i].length; j++)
          {
             CellStatus cellStatus = lattice[i][j];
-            if (path != null && path.contains(new ExploreAreaLatticePlanner.LatticeCell(minX + i, minY + j)))
+            if (path != null && path.contains(new LatticeCell(minX + i, minY + j)))
             {
                System.out.print("++");
             }
