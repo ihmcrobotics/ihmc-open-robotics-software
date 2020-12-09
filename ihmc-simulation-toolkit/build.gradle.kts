@@ -16,9 +16,9 @@ ihmc {
 mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.6")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.4")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")

@@ -38,7 +38,7 @@ mainDependencies {
       api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
    }
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("us.ihmc:ihmc-native-library-loader:1.2.1")
+   api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -53,11 +53,11 @@ mainDependencies {
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.6")
-   api("us.ihmc:simulation-construction-set:0.21.1")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:ihmc-graphics-description:0.19.1")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:simulation-construction-set:0.21.4")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.4")
+   api("us.ihmc:ihmc-graphics-description:0.19.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -70,7 +70,7 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.4")
-   api("us.ihmc:simulation-construction-set:0.21.1")
+   api("us.ihmc:simulation-construction-set:0.21.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
