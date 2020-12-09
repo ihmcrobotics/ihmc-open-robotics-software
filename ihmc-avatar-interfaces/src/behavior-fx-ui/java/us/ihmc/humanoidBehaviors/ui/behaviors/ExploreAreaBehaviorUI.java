@@ -8,6 +8,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Sphere;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -24,6 +25,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -55,6 +57,8 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
    private final GraphicGroup pointToLookAtGroup = new GraphicGroup(get3DGroup());
 
+   private final Sphere pointToLookAt = createSphere3D(new Point3D(100.0, 100.0, 0.0), Color.RED, 0.15);
+
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
    private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
    private final HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
@@ -69,6 +73,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
       get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
+      pointToLookAtGroup.add(pointToLookAt);
 
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
                                              position -> Platform.runLater(() -> displayObservationPosition(position)));
@@ -178,10 +183,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
    private void setPointToLookAt(Point2D pointToLookAt)
    {
-      Color color = Color.RED;
-      double radius = 0.15;
-      pointToLookAtGroup.removeAll();
-      pointToLookAtGroup.add(createSphere3D(new Point3D(pointToLookAt.getX(), pointToLookAt.getY(), 0.4), color, radius));
+      JavaFXGraphicTools.setNodePosition(this.pointToLookAt, new Point3D(pointToLookAt.getX(), pointToLookAt.getY(), 0.4));
    }
 
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
