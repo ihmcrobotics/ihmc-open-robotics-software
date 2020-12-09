@@ -33,6 +33,7 @@ public class ExploreAreaBehaviorAPI
    public static final MessagerAPIFactory.Topic<List<String>> Parameters = topic("Parameters");
    public static final MessagerAPIFactory.Topic<ExploreAreaBehavior.ExploreAreaBehaviorState> CurrentState = topic("CurrentState");
    public static final MessagerAPIFactory.Topic<Point2D> EnvironmentGapToLookAt = topic("EnvironmentGapToLookAt");
+   public static final MessagerAPIFactory.Topic<Point3D> UserRequestedPointToLookAt = topic("UserRequestedPointToLookAt");
 
    private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
