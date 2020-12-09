@@ -80,7 +80,7 @@ public class JumpingSimulationFactory
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
       pushRobotController.setPushDuration(0.05);
       pushRobotController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
-      pushRobotController.setPushForceMagnitude(5000.0);
+      pushRobotController.setPushForceMagnitude(600.0);
       pushRobotController.addPushButtonToSCS(scs);
 
       return scs;
