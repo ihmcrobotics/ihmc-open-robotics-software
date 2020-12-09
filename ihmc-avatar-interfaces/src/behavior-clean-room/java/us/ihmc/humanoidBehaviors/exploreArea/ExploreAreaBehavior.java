@@ -35,7 +35,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
 
    public enum ExploreAreaBehaviorState
    {
-      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, LookAndStep, TurnInPlace
+      Stop, LookRight, LookCenter, LookLeft, Perceive, GrabPlanarRegions, DetermineNextLocations, LookAndStep, TurnInPlace
    }
 
    private final BehaviorHelper helper;
