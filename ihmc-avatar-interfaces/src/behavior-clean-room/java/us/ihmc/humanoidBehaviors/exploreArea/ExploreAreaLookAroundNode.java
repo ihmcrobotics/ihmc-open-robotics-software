@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.*;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 
 public class ExploreAreaLookAroundNode extends SequenceNode
@@ -98,7 +99,20 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       @Override
       public void doAction()
       {
-         helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.LookAround);
+         ExploreAreaBehaviorState currentState;
+         if (chestYaw < 0.0)
+         {
+            currentState = ExploreAreaBehaviorState.LookRight;
+         }
+         else if (chestYaw == 0.0)
+         {
+            currentState = ExploreAreaBehaviorState.LookCenter;
+         }
+         else
+         {
+            currentState = ExploreAreaBehaviorState.LookLeft;
+         }
+         helper.publishToUI(CurrentState, currentState);
 
          turnChestWithRespectToMidFeetZUpFrame(chestYaw, parameters.getTurnChestTrajectoryDuration());
          pitchHeadWithRespectToChest(headPitch, parameters.getTurnChestTrajectoryDuration());
