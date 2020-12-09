@@ -56,6 +56,8 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    private final ArrayList<Pose3D> exploredGoalPosesSoFar = new ArrayList<>();
    private List<Pose3DReadOnly> bestBodyPath;
 
+   private final ExploreAreaMapUI exploreAreaMapUI;
+
    public ExploreAreaDetermineNextLocationsNode(ExploreAreaBehaviorParameters parameters,
                                                 BehaviorHelper helper,
                                                 Supplier<PlanarRegionsList> concatenatedMapSupplier,
@@ -71,6 +73,8 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       statusLogger = helper.getOrCreateStatusLogger();
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       bodyPathPlanner = helper.newBodyPathPlanner();
+
+      exploreAreaMapUI = new ExploreAreaMapUI(explorationPlanner);
    }
 
    @Override
@@ -82,6 +86,8 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
 
       syncedRobot.update();
       determineNextPlacesToWalkTo(syncedRobot);
+
+      exploreAreaMapUI.update();
    }
 
    private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)

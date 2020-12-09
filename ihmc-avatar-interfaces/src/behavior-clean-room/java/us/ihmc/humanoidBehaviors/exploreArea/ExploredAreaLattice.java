@@ -8,7 +8,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 
 public class ExploredAreaLattice
 {
@@ -158,34 +160,46 @@ public class ExploredAreaLattice
       return cellWidth * index;
    }
 
-   public void printState(List<LatticeCell> path)
+   private final Formatter formatter = new Formatter(Locale.getDefault());
+
+   public void printState(List<LatticeCell> path, List<String> stringList, boolean print)
    {
+      stringList.clear();
+
       for (int i = 0; i < lattice.length; i++)
       {
+         String line = "";
+
          for (int j = 0; j < lattice[i].length; j++)
          {
             CellStatus cellStatus = lattice[i][j];
             if (path != null && path.contains(new LatticeCell(minX + i, minY + j)))
             {
-               System.out.print("++");
+               line += "\u25A3\u25A3";
             }
             else if (cellStatus == null)
             {
-               System.out.printf("%c", 0x00B7);
-               System.out.printf("%c", 0x00B7);
+               line += "\u2591\u2591";
             }
             else if (cellStatus == CellStatus.WALKABLE || cellStatus == CellStatus.NEXT_TO_OBSTACLE)
             {
-               System.out.printf("%c", 0x2591);
-               System.out.printf("%c", 0x2591);
+               line += "\u2592\u2592";
             }
             else if (cellStatus == CellStatus.OBSTACLE)
             {
-               System.out.printf("%c", 0x25A0);
-               System.out.printf("%c", 0x25A0);
+               line += "\u2588\u2588";
             }
          }
-         System.out.println();
+
+         stringList.add(line);
+      }
+
+      if (print)
+      {
+         for (int i = 0; i < stringList.size(); i++)
+         {
+            System.out.println(stringList.get(i));
+         }
       }
    }
 }
