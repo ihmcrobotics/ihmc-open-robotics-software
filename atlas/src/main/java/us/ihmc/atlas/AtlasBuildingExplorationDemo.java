@@ -118,7 +118,9 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
 
       AtlasRobotModel robotModel = createRobotModel();
-      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentWithDebrisRegions, robotModel, ros2Node);
+      double range = 20.0;
+      int sphereScanSize = 50000;
+      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentWithDebrisRegions, robotModel, ros2Node, range, sphereScanSize);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentWithDebrisRegions, robotModel, ros2Node);
 
       // might be a weird delay with threads at 0.5 hz depending on each other

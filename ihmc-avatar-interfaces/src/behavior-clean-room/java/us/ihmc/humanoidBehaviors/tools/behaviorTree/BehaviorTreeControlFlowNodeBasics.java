@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public abstract class BehaviorTreeControlFlowNodeBasics implements BehaviorTreeControlFlowNode
 {
    private final ArrayList<BehaviorTreeNode> children = new ArrayList<>();
+   private boolean hasBeenClocked = false;
 
    protected ArrayList<BehaviorTreeNode> getChildren()
    {
@@ -19,5 +20,27 @@ public abstract class BehaviorTreeControlFlowNodeBasics implements BehaviorTreeC
    {
       children.add(child);
       return child;
+   }
+
+   @Override
+   public void clock()
+   {
+      hasBeenClocked = true;
+      for (BehaviorTreeNode child : getChildren())
+      {
+         child.clock();
+      }
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      if (!hasBeenClocked)
+      {
+         clock();
+      }
+      hasBeenClocked = false;
+
+      return null;
    }
 }

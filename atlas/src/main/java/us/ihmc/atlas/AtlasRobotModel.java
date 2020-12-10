@@ -871,7 +871,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
-      return new DefaultVisibilityGraphParameters();
+      return new AtlasVisibilityGraphParameters();
    }
 
    @Override

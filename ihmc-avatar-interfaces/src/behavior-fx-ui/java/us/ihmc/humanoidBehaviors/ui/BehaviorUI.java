@@ -55,7 +55,7 @@ public class BehaviorUI
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
-   @FXML private ChoiceBox<String> behaviorSelector;;
+   @FXML private ChoiceBox<String> behaviorSelector;
    @FXML private CheckBox trackRobot;
    @FXML private Button startRecording;
    @FXML private Button stopRecording;
@@ -111,6 +111,11 @@ public class BehaviorUI
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
          camera = view3DFactory.addCameraController(0.05, 2000.0, true);
+         double isoZoomOut = 7.0;
+         camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
+         camera.getTranslate().setX(isoZoomOut / 5.0);
+         camera.getTranslate().setY(0.0);
+         camera.getTranslate().setZ(0.0);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
@@ -268,6 +273,7 @@ public class BehaviorUI
 
          if (enabledUIs.computeIfAbsent(behaviorName, key -> false) != enabled)
          {
+            enabledUIs.put(behaviorName, enabled);
             behaviorUIInterfaces.get(behaviorName).setEnabled(enabled);
          }
       }

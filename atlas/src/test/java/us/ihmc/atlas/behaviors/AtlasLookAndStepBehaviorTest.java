@@ -9,6 +9,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
@@ -341,7 +342,8 @@ public class AtlasLookAndStepBehaviorTest
                                                       runRealsenseSLAM,
                                                       false,
                                                       runLidarREA,
-                                                      createRobotModel());
+                                                      createRobotModel(),
+                                                      Fidelity.HIGH);
    }
 
    private void dynamicsSimulation(EnvironmentInitialSetup environment, Notification finishedSettingUp)

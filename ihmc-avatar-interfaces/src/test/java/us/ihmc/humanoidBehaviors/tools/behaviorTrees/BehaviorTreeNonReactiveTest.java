@@ -1,41 +1,43 @@
 package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.LoopSequenceNode;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 public class BehaviorTreeNonReactiveTest
 {
+   @Disabled("This functionality is kind of undefined right now. It's not clear what a loop sequence should do or if it should exist.")
    @Test
    public void testLoopSequenceNode()
    {
       MutableObject<String> output = new MutableObject<>();
       output.setValue("0");
 
-      NonReactiveLoopSequenceNode nonReactiveLoopSequenceNode = new NonReactiveLoopSequenceNode();
-      nonReactiveLoopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "1")));
-      nonReactiveLoopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "2")));
-      nonReactiveLoopSequenceNode.addChild(new AlwaysSucessfulAction(() -> output.setValue(output.getValue() + "3")));
+      LoopSequenceNode loopSequenceNode = new LoopSequenceNode();
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "1")));
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "2")));
+      loopSequenceNode.addChild(new AlwaysSuccessfulAction(() -> output.setValue(output.getValue() + "3")));
 
       assertEquals("0", output.getValue());
 
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("01", output.getValue());
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("012", output.getValue());
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("0123", output.getValue());
 
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("01231", output.getValue());
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("012312", output.getValue());
-      assertEquals(RUNNING, nonReactiveLoopSequenceNode.tick());
+      assertEquals(RUNNING, loopSequenceNode.tick());
       assertEquals("0123123", output.getValue());
    }
 

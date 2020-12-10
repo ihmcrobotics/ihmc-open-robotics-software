@@ -18,7 +18,11 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
-   public MultisenseHeadStereoSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public MultisenseHeadStereoSimulator(PlanarRegionsList map,
+                                        DRCRobotModel robotModel,
+                                        ROS2NodeInterface ros2Node,
+                                        double range,
+                                        int sphereScanSize)
    {
       this.map = map;
 
@@ -26,8 +30,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       double verticalFOV = 80.0;
       double horizontalFOV = 80.0;
-      double range = 20.0;
-      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, neckFrame);
+      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, sphereScanSize, neckFrame);
    }
 
    public PlanarRegionsList computeRegions()
