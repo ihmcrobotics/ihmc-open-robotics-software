@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
+import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
@@ -54,7 +55,8 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
                                                                                       RUN_REALSENSE_SLAM,
                                                                                       SHOW_REALSENSE_SLAM_UIS,
                                                                                       RUN_LIDAR_REA,
-                                                                                      createRobotModel()),
+                                                                                      createRobotModel(),
+                                                                                      Fidelity.HIGH),
                                 "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
 

@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation;
+import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
@@ -33,11 +34,12 @@ public class AtlasExploreAreaBehaviorDemo extends AtlasSimulationBasics
    public AtlasExploreAreaBehaviorDemo()
    {
       ThreadTools.startAsDaemon(() -> perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE_ROS2,
-                                                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
-                                                                                     RUN_REALSENSE_SLAM,
-                                                                                     SHOW_REALSENSE_SLAM_UIS,
-                                                                                     RUN_LIDAR_REA,
-                                                                                     createRobotModel()),
+                                                                                      environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                                                      RUN_REALSENSE_SLAM,
+                                                                                      SHOW_REALSENSE_SLAM_UIS,
+                                                                                      RUN_LIDAR_REA,
+                                                                                      createRobotModel(),
+                                                                                      Fidelity.LOW),
                                "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
 
