@@ -26,7 +26,7 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage;
 /**
  * TODO: Pause and resume?
  */
-public class Basic3DTest extends Lwjgl3ApplicationAdapter
+public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 {
    private static final int INITIAL_WIDTH = 1100;
    private static final int INITIAL_HEIGHT = 800;
@@ -147,10 +147,10 @@ public class Basic3DTest extends Lwjgl3ApplicationAdapter
    public static void main(String[] args)
    {
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
-      applicationConfiguration.setTitle("Basic3DTest");
+      applicationConfiguration.setTitle("GDX3DDemo");
       applicationConfiguration.setWindowedMode(INITIAL_WIDTH, INITIAL_HEIGHT);
       applicationConfiguration.useVsync(true);
 
-      new Lwjgl3Application(new Basic3DTest(), applicationConfiguration);
+      new Lwjgl3Application(new GDX3DDemo(), applicationConfiguration);
    }
 }
