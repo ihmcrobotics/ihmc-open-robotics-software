@@ -10,6 +10,10 @@ public interface BehaviorTreeNode
       return 1.0;
    }
 
+   /**
+    * A method that can be called on every node in the tree every time the root gets ticked
+    * in order for parallel nodes to figure out when they are no longer being selected.
+    */
    default void clock()
    {
 
