@@ -33,4 +33,34 @@ public class ExploreAreaBehaviorParameters extends StoredPropertySet
       ExploreAreaBehaviorParameters planarRegionSLAMParameters = new ExploreAreaBehaviorParameters();
       planarRegionSLAMParameters.save();
    }
+
+   public double getTurnChestTrajectoryDuration()
+   {
+      return get(turnChestTrajectoryDuration);
+   }
+
+   public double getTurnTrajectoryWaitTimeMulitplier()
+   {
+      return get(turnTrajectoryWaitTimeMulitplier);
+   }
+
+   public double getPerceiveDuration()
+   {
+      return get(perceiveDuration);
+   }
+
+   public double getChestYawAmount()
+   {
+      return get(chestYawAmount);
+   }
+
+   public double getMinimumDistanceBetweenObservationPoints()
+   {
+      return get(minimumDistanceBetweenObservationPoints);
+   }
+
+   public double getMinDistanceToWalkIfPossible()
+   {
+      return get(minDistanceToWalkIfPossible);
+   }
 }

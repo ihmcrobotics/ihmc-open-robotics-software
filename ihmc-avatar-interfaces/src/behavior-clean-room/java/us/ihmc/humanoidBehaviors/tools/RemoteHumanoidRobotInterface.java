@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2ControllerPublisherMap;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
@@ -48,6 +49,7 @@ public class RemoteHumanoidRobotInterface
    private final HumanoidJointNameMap jointMap;
 
    private final ROS2ControllerPublisherMap controllerPublisherMap;
+   private final ROS2PublisherMap publisherMap;
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
@@ -67,6 +69,7 @@ public class RemoteHumanoidRobotInterface
       topicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName);
 
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
+      publisherMap = new ROS2PublisherMap(ros2Node);
       
       new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.withOutput(), this::acceptWalkingStatus);
       new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), footstepStatusMessage::set);
@@ -307,7 +310,7 @@ public class RemoteHumanoidRobotInterface
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
-      controllerPublisherMap.publish(stampedPosePacket);
+      publisherMap.publish(ROS2Tools.getPoseCorrectionTopic(robotName), stampedPosePacket);
    }
 
    public void pauseWalking()

@@ -5,11 +5,11 @@ import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatu
 /**
  * Experimental action. Not sure about this one.
  */
-public class AlwaysSucessfulAction implements BehaviorTreeAction
+public class AlwaysSuccessfulAction implements BehaviorTreeAction
 {
    private final Runnable action;
 
-   public AlwaysSucessfulAction(Runnable action)
+   public AlwaysSuccessfulAction(Runnable action)
    {
       this.action = action;
    }

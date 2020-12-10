@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.tools;
 
 import javafx.scene.Group;
+import javafx.scene.transform.Translate;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -28,6 +29,9 @@ public class JavaFXRemoteRobotVisualizer extends Group
    private Activator robotLoadedActivator = new Activator();
    private boolean trackRobot = false;
    private FocusBasedCameraMouseEventHandler cameraForOptionalTracking;
+   private Translate robotTranslate;
+   private Translate savedCameraTranslate;
+   private boolean hasPrepended = false;
 
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
 
@@ -44,7 +48,23 @@ public class JavaFXRemoteRobotVisualizer extends Group
    public void setTrackRobot(FocusBasedCameraMouseEventHandler camera, boolean trackRobot)
    {
       this.trackRobot = trackRobot;
-      this.cameraForOptionalTracking = camera;
+      cameraForOptionalTracking = camera;
+      if (!hasPrepended)
+      {
+         hasPrepended = true;
+         robotTranslate = new Translate();
+         cameraForOptionalTracking.prependTransform(robotTranslate);
+      }
+      else if (trackRobot)
+      {
+         cameraForOptionalTracking.getTranslate().setX(savedCameraTranslate.getX());
+         cameraForOptionalTracking.getTranslate().setY(savedCameraTranslate.getY());
+         cameraForOptionalTracking.getTranslate().setZ(savedCameraTranslate.getZ());
+      }
+      else // !trackRobot
+      {
+         savedCameraTranslate = cameraForOptionalTracking.getTranslate().clone();
+      }
    }
 
    private void handle(long now)
@@ -65,9 +85,9 @@ public class JavaFXRemoteRobotVisualizer extends Group
          {
             FramePose3DReadOnly walkingFrame = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
 
-            cameraForOptionalTracking.getTranslate().setX(walkingFrame.getPosition().getX());
-            cameraForOptionalTracking.getTranslate().setY(walkingFrame.getPosition().getY());
-            cameraForOptionalTracking.getTranslate().setZ(walkingFrame.getPosition().getZ());
+            robotTranslate.setX(walkingFrame.getPosition().getX());
+            robotTranslate.setY(walkingFrame.getPosition().getY());
+            robotTranslate.setZ(walkingFrame.getPosition().getZ());
          }
       }
    }

@@ -400,7 +400,6 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
-      private final IHMCROS2Publisher<Empty> resetPublisher;
 
       private final Pose3DReadOnly bombPose;
 
@@ -422,7 +421,6 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       private Runnable stairsDetectedCallback = () -> {};
 
       private LookAndStepBehavior.State currentState = LookAndStepBehavior.State.RESET;
-      private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
       boolean lookAndStepStarted = false;
 
@@ -434,11 +432,9 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       {
          this.messager = messager;
          this.bombPose = bombPose;
-         this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
          String robotName = robotModel.getSimpleRobotName();
 
          goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
-         resetPublisher = ROS2Tools.createPublisher(ros2Node, LookAndStepBehaviorAPI.RESET);
 
          this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
@@ -488,7 +484,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          stepCounter.set(0);
          lookAndStepStarted = false;
 
-         resetPublisher.publish(new Empty());
+         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
 
          LogTools.info("Enabling look and step behavior");
          lookAndStepBehavior.setEnabled(true);
@@ -620,7 +616,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
-         resetPublisher.publish(new Empty());
+         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
       }
    }
 

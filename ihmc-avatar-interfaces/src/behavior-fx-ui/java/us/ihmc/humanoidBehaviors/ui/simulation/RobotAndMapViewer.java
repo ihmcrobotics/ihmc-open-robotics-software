@@ -9,8 +9,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
@@ -101,8 +101,8 @@ public class RobotAndMapViewer
       footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepLocations));
    }
 
-   public void setBodyPathPlanToVisualize(List<Point3DReadOnly> bodyPath)
+   public void setBodyPathPlanToVisualize(List<? extends Pose3DReadOnly> bodyPath)
    {
-      bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPath.stream().map(Point3D::new).collect(Collectors.toList())); // deep copy
+      bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPath);
    }
 }
