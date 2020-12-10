@@ -49,6 +49,11 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 
    public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
+      this(map, robotModel, ros2Node, 1.5, 30000);
+   }
+
+   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node, double range, int sphereScanSize)
+   {
       this.map = map;
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
@@ -58,8 +63,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 
       double verticalFOV = 80.0; // real fov is 58.0;
       double horizontalFOV = 87.0;
-      double range = 1.5;
-      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, realsenseSensorFrame);
+      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, sphereScanSize, realsenseSensorFrame);
    }
 
    public List<Point3DReadOnly> getPointCloud()
