@@ -14,6 +14,7 @@ public class BehaviorUIRegistry extends BehaviorRegistry
    static
    {
       DEFAULT_BEHAVIORS.register(BuildingExplorationBehaviorUI.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ExploreAreaBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(LookAndStepBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehaviorUI.DEFINITION);
