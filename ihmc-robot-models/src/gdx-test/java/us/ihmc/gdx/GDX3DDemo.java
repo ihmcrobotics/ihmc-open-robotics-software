@@ -6,22 +6,13 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tuple3D.Point3D;
-
-import static com.badlogic.gdx.graphics.VertexAttributes.Usage;
 
 /**
  * TODO: Pause and resume?
@@ -36,6 +27,16 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    private Viewport viewport;
    private Model rootModel;
    private ModelInstance rootModelInstance;
+
+   public GDX3DDemo()
+   {
+      Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
+      applicationConfiguration.setTitle("GDX3DDemo");
+      applicationConfiguration.setWindowedMode(INITIAL_WIDTH, INITIAL_HEIGHT);
+      applicationConfiguration.useVsync(true);
+
+      new Lwjgl3Application(this, applicationConfiguration);
+   }
 
    @Override
    public void create()
@@ -59,56 +60,19 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 //      rootModel.nodes.addAll(camera.getFocusPointSphere().nodes);
 
       float distance = 5.0f;
-      createBox(distance, distance, distance, Color.GREEN);
-      createBox(-distance, distance, distance, Color.DARK_GRAY);
-      createBox(distance, -distance, distance, Color.RED);
-      createBox(-distance, -distance, distance, Color.ORANGE);
-      createBox(distance, distance, -distance, Color.BLUE);
-      createBox(-distance, distance, -distance, Color.BLACK);
-      createBox(distance, -distance, -distance, Color.WHITE);
-      createBox(-distance, -distance, -distance, Color.YELLOW);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, distance, distance, Color.GREEN).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, distance, distance, Color.DARK_GRAY).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, -distance, distance, Color.RED).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, -distance, distance, Color.ORANGE).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, distance, -distance, Color.BLUE).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, distance, -distance, Color.BLACK).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, -distance, -distance, Color.WHITE).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, -distance, -distance, Color.YELLOW).nodes);
 
-      rootModel.nodes.addAll(createCoordinateFrame(0.3).nodes);
+      rootModel.nodes.addAll(GDXModelPrimitives.createCoordinateFrame(0.3).nodes);
 
       rootModelInstance = new ModelInstance(rootModel);
       rootModelInstance.nodes.addAll(camera.getFocusPointSphere().nodes);
-   }
-
-   private void createBox(float x, float y, float z, Color color)
-   {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      Model boxDescription = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(color)), Usage.Position | Usage.Normal);
-      boxDescription.nodes.get(0).translation.set(x, y, z);
-      boxDescription.calculateTransforms();
-      rootModel.nodes.addAll(boxDescription.nodes);
-   }
-
-   public Model createCoordinateFrame(double length)
-   {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.begin();
-      modelBuilder.node().id = "coordinateFrame"; // optional
-
-      double radius = 0.02 * length;
-      double coneHeight = 0.10 * length;
-      double coneRadius = 0.05 * length;
-      GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
-      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
-      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(length, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
-      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
-      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, length, 0.0), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
-      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(), Color.BLUE);
-      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, 0.0, length), new AxisAngle(), Color.BLUE);
-      Mesh mesh = meshBuilder.generateMesh();
-
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
-      Material material = new Material();
-      Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
-      modelBuilder.part(meshPart, material);
-
-      return modelBuilder.end();
    }
 
    @Override
@@ -146,11 +110,6 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 
    public static void main(String[] args)
    {
-      Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
-      applicationConfiguration.setTitle("GDX3DDemo");
-      applicationConfiguration.setWindowedMode(INITIAL_WIDTH, INITIAL_HEIGHT);
-      applicationConfiguration.useVsync(true);
-
-      new Lwjgl3Application(new GDX3DDemo(), applicationConfiguration);
+      new GDX3DDemo();
    }
 }
