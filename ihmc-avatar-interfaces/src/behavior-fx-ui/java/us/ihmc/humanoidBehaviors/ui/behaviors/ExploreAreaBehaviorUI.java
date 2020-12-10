@@ -4,7 +4,6 @@ import com.sun.javafx.scene.CameraHelper;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
@@ -14,11 +13,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
@@ -35,10 +31,8 @@ import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
@@ -53,7 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
@@ -316,8 +309,6 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
    private Point3D calculateMouseIntersection(MouseEvent event)
    {
-      PickResult pickResult = event.getPickResult();
-
       Point3D point1 = new Point3D();
       point1.setX(sceneNode.getCamera().getLocalToSceneTransform().getTx());
       point1.setY(sceneNode.getCamera().getLocalToSceneTransform().getTy());
