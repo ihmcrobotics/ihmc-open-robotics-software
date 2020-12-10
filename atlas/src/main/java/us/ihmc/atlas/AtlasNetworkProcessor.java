@@ -128,7 +128,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
-      networkProcessor.setupKinematicsToolboxModule(false);
+      networkProcessor.setupFootstepPlanningToolboxModule();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
@@ -136,7 +136,7 @@ public class AtlasNetworkProcessor
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
       
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
    }
 
@@ -181,7 +181,7 @@ public class AtlasNetworkProcessor
       sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
 
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
    }
 
