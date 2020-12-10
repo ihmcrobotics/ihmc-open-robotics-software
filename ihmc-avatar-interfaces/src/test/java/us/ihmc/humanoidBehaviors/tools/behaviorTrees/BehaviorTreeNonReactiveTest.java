@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
@@ -11,6 +12,7 @@ import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatu
 
 public class BehaviorTreeNonReactiveTest
 {
+   @Disabled("This functionality is kind of undefined right now. It's not clear what a loop sequence should do or if it should exist.")
    @Test
    public void testLoopSequenceNode()
    {
