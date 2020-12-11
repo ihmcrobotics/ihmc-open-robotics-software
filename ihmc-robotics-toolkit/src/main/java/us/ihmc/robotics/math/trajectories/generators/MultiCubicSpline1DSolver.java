@@ -7,6 +7,31 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * This solver allows to compute coefficients for concatenated 1D cubic splines such that:
+ * <ul>
+ * <li>the initial cubic spline starts at a given position <tt>x0</tt> and velocity <tt>xd0</tt> at
+ * <tt>t = 0</tt>
+ * <li>the i<sup>th</sup> and i+1<sup>th</sup> cubic splines meet at a given position <tt>xi</tt> at
+ * <tt>t = ti</tt> and such that their velocity match at that position.
+ * <li>the final cubic spline ends at a given position and velocity at <tt>t = 1</tt>
+ * </ul>
+ * <p>
+ * The solver computes the optimal spline coefficients by minimizing the overall integrated
+ * acceleration.
+ * </p>
+ * <p>
+ * The number of cubic splines to solve for is dictated by the number of waypoints. There's
+ * <tt>N</tt> cubic splines where <tt>N = xi.size() + 1</tt>.
+ * </p>
+ * <p>
+ * Any of the given positions and velocities can be solved for as hard constraints or as objectives
+ * allowing to relax the trajectory.
+ * </p>
+ * <p>
+ * The trajectory duration is always unitary, i.e. <tt>t &in; [0, 1]<tt>.
+ * </p>
+ */
 public class MultiCubicSpline1DSolver
 {
    public static final int coefficients = 4;
@@ -20,9 +45,9 @@ public class MultiCubicSpline1DSolver
    private double xd0;
    /** Velocity to end to at {@code t = 1}. */
    private double xd1;
-   /** Intermediate positions to go through at <tt>t = {ti}</tt>. */
+   /** Waypoints to go through at <tt>t = {ti}</tt>. */
    private final TDoubleArrayList xi = new TDoubleArrayList();
-   /** Times to reach each intermediate position. */
+   /** Times to reach each waypoint. */
    private final TDoubleArrayList ti = new TDoubleArrayList();
 
    /**
@@ -50,12 +75,16 @@ public class MultiCubicSpline1DSolver
     */
    private double wd1;
    /**
-    * Weight associated with each intermediate position {@link #xi}. When
+    * Weight associated with each waypoint {@link #xi}. When
     * <tt>wi={@value Double#POSITIVE_INFINITY}</tt>, a hard equality constraints is setup to achieve
     * {@code xi}, otherwise it is setup as an objective.
     */
    private final TDoubleArrayList wi = new TDoubleArrayList();
 
+   /**
+    * Contains the Hessian only for minimizing the integrated acceleration. Allows to compute the
+    * integrated acceleration and return it in {@link #solve(DMatrixRMaj)}.
+    */
    private final DMatrixRMaj H_minAccel = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj H = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj f = new DMatrixRMaj(1, 1);
@@ -71,6 +100,10 @@ public class MultiCubicSpline1DSolver
       clearWeights();
    }
 
+   /**
+    * Resets all weight to {@link Double#POSITIVE_INFINITY} such, that unless later modified, all the
+    * inputs are solved as hard constraints.
+    */
    public void clearWeights()
    {
       w0 = Double.POSITIVE_INFINITY;
@@ -81,6 +114,15 @@ public class MultiCubicSpline1DSolver
       wi.fill(0, xi.size(), Double.POSITIVE_INFINITY);
    }
 
+   /**
+    * Sets the conditions at <tt>t = 0</tt> and <tt>t = 1</tt> used to constrain the first and last
+    * cubic splines, respectively.
+    * 
+    * @param startPosition  position of the trajectory at <tt>t = 0</tt>.
+    * @param startVelocity  velocity of the trajectory at <tt>t = 0</tt>.
+    * @param targetPosition position of the trajectory at <tt>t = 1</tt>.
+    * @param targetVelocity velocity of the trajectory at <tt>t = 1</tt>.
+    */
    public void setEndpoints(double startPosition, double startVelocity, double targetPosition, double targetVelocity)
    {
       x0 = startPosition;
@@ -89,39 +131,105 @@ public class MultiCubicSpline1DSolver
       xd1 = targetVelocity;
    }
 
+   /**
+    * Sets the weights for the initial and final conditions.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up an objective to constrain the
+    * corresponding spline.
+    * </p>
+    * 
+    * @param startPositionWeight  the weight value to use for the start position condition.
+    * @param startVelocityWeight  the weight value to use for the start velocity condition.
+    * @param targetPositionWeight the weight value to use for the final position condition.
+    * @param targetVelocityWeight the weight value to use for the final velocity condition.
+    * @throws IllegalArgumentException if any of the weights is not in the range <tt>[0, &infin;[</tt>.
+    */
    public void setEndpointWeights(double startPositionWeight, double startVelocityWeight, double targetPositionWeight, double targetVelocityWeight)
    {
+      checkWeightValue(startPositionWeight);
+      checkWeightValue(targetPositionWeight);
+      checkWeightValue(startVelocityWeight);
+      checkWeightValue(targetVelocityWeight);
+
       w0 = startPositionWeight;
       w1 = targetPositionWeight;
       wd0 = startVelocityWeight;
       wd1 = targetVelocityWeight;
    }
 
-   public void clearIntermediatePoints()
+   /**
+    * Clears all waypoint previously added.
+    */
+   public void clearWaypoints()
    {
       xi.reset();
       ti.reset();
+      wi.clear();
    }
 
-   public void addIntermediatePoint(double position, double time)
+   /**
+    * Adds a new waypoint to go through at a given time.
+    * 
+    * @param position the position to go through.
+    * @param time     the time at which the position should be reached.
+    * @throws IllegalArgumentException if the time is not in <tt>]0, 1[</tt>.
+    */
+   public void addWaypoint(double position, double time)
    {
-      addIntermediatePoint(position, time, Double.POSITIVE_INFINITY);
+      addWaypoint(position, time, Double.POSITIVE_INFINITY);
    }
 
-   public void addIntermediatePoint(double position, double time, double weight)
+   /**
+    * Adds a new waypoint to go through at a given time.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up an objective to constrain the
+    * corresponding spline.
+    * </p>
+    * 
+    * @param position the position to go through.
+    * @param time     the time at which the position should be reached.
+    * @param weight   the weight associated with the position.
+    * @throws IllegalArgumentException if the time is not in <tt>]0, 1[</tt>.
+    * @throws IllegalArgumentException if the weight is not in the range <tt>[0, &infin;[</tt>.
+    */
+   public void addWaypoint(double position, double time, double weight)
    {
+      if (time <= 0.0 || time >= 1.0)
+         throw new IllegalArgumentException("The time for a waypoint should be in ]0, 1[, was: " + time);
+      checkWeightValue(weight);
+
       xi.add(position);
       ti.add(time);
       wi.add(weight);
    }
 
+   private static void checkWeightValue(double weight)
+   {
+      if (weight < 0.0)
+         throw new IllegalArgumentException("A weight should be in [0, +Infinity[, was: " + weight);
+   }
+
+   /**
+    * Solves for the coefficients of the cubic splines and returns the acceleration integrated over the
+    * time <tt>[0, 1]</tt>.
+    * <p>
+    * The
+    * </p>
+    * 
+    * @param solutionToPack the matrix used to store the cubic spline coefficients as column vector.
+    *                       There is 4 coefficients per spline, for each spline they are sorted from
+    *                       highest to lowest order. Modified.
+    * @return the acceleration integrated over the time <tt>[0, 1]</tt>
+    */
    public double solve(DMatrixRMaj solutionToPack)
    {
       buildCostFunction(H_minAccel, H, f);
       buildKnotEqualityConstraints(A, b);
 
       int subProblemSize = coefficients * (xi.size() + 1);
-      int constraints = computeNumberOfConstraints();
+      int constraints = computeNumberOfEqualityConstraints();
 
       // min 0.5*x'*H*x + f'*x
       // s.t. A*x == b
@@ -141,7 +249,7 @@ public class MultiCubicSpline1DSolver
 
       NativeCommonOps.solve(E, d, solutionToPack);
       solutionToPack.reshape(subProblemSize, 1);
-//      NativeCommonOps.multQuad(solutionToPack, H, b);
+      //      NativeCommonOps.multQuad(solutionToPack, H, b);
       NativeCommonOps.multQuad(solutionToPack, H_minAccel, b);
 
       return 0.5 * b.get(0, 0);
@@ -152,14 +260,13 @@ public class MultiCubicSpline1DSolver
     * <ul>
     * <li>at <tt>t=0</tt>: position and velocity are equal to {@code x0} and {@code xd0}.
     * <li>at <tt>t=1</tt>: position and velocity are equal to {@code x1} and {@code xd1}.
-    * <li>at <tt>t=t<sub>i</sub></tt> with <tt>i&in;[0;nWaypoints[</tt>: position equals
-    * <tt>waypoints<sub>i</sub></tt>, and velocity of the 2 cubic segments joining at the waypoint are
-    * equal.
+    * <li>at <tt>t=t<sub>i</sub></tt> with <tt>i&in;[0;xi.size()[</tt>: position equals
+    * <tt>x<sub>i</sub></tt>, and velocity of the 2 cubic segments joining at the waypoint are equal.
     * </ul>
     */
    private void buildKnotEqualityConstraints(DMatrixRMaj A, DMatrixRMaj b)
    {
-      int constraints = computeNumberOfConstraints();
+      int constraints = computeNumberOfEqualityConstraints();
       int subProblemSize = coefficients * (xi.size() + 1);
       A.reshape(constraints, subProblemSize);
       b.reshape(constraints, 1);
@@ -214,7 +321,11 @@ public class MultiCubicSpline1DSolver
       }
    }
 
-   private int computeNumberOfConstraints()
+   /**
+    * Evaluates and returns the actual number of equality constraints by looking at the value of each
+    * individual weight.
+    */
+   private int computeNumberOfEqualityConstraints()
    {
       int constraints = 0;
 
@@ -237,6 +348,12 @@ public class MultiCubicSpline1DSolver
       return constraints;
    }
 
+   /**
+    * Assembles the cost function necessary to minimize the integrated acceleration and achieve the
+    * given inputs if the weights are different from {@link Double#POSITIVE_INFINITY}.
+    * 
+    * @param H_minAccel can be used to compute the integrated acceleration.
+    */
    private void buildCostFunction(DMatrixRMaj H_minAccel, DMatrixRMaj H, DMatrixRMaj f)
    {
       int size = coefficients * (xi.size() + 1);
@@ -269,6 +386,9 @@ public class MultiCubicSpline1DSolver
       getMinAccelerationHBlock(t0, t1, offset, offset, H);
    }
 
+   /**
+    * Assembles as needed the objective function to satisfy each of the given inputs.
+    */
    private void addKnotsCostFunction(DMatrixRMaj H, DMatrixRMaj f)
    {
       int offset = 0;
@@ -299,14 +419,11 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
-    * Sets up the row vector as follows:
+    * Inserts the following matrix block into {@code A} at [{@code row}, {@code startColumn}]:
     * 
     * <pre>
-    * lineToPack = [ t<sup>3</sup> t<sup>2</sup> t 1 ]
+    * ABlock = [ t<sup>3</sup> t<sup>2</sup> t 1 ]
     * </pre>
-    * 
-    * @param t current time.
-    * @param A modified - used to store the row vector.
     */
    static void getPositionConstraintABlock(double t, int row, int startColumn, DMatrixRMaj A)
    {
@@ -320,14 +437,11 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
-    * Sets up the row vector as follows:
+    * Inserts the following matrix block into {@code A} at [{@code row}, {@code startColumn}]:
     * 
     * <pre>
-    * lineToPack = [ 3t<sup>2</sup> 2t 1 0 ]
+    * ABlock = [ 3t<sup>2</sup> 2t 1 0 ]
     * </pre>
-    * 
-    * @param t current time.
-    * @param A modified - used to store the row vector.
     */
    static void getVelocityConstraintABlock(double scale, double t, int row, int startColumn, DMatrixRMaj A)
    {
@@ -346,10 +460,6 @@ public class MultiCubicSpline1DSolver
     * HBlock = / 12 * (t1<sup>3</sup> - t0<sup>3</sup>)    6 * (t1<sup>2</sup> - t0<sup>2</sup>) \
     *          \  6 * (t1<sup>2</sup> - t0<sup>2</sup>)    4 * (t1<sup> </sup> - t0<sup> </sup>) /
     * </pre>
-    * 
-    * @param t0 start time of the segment.
-    * @param t1 end time of the segment.
-    * @param H  modified - used to store the 2-by-2 matrix.
     */
    static void getMinAccelerationHBlock(double t0, double t1, int startRow, int startColumn, DMatrixRMaj H)
    {
@@ -366,6 +476,9 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
+    * Inserts the following matrix blocks into {@code H} at [{@code startRow}, {@code startColumn}] and
+    * into {@code f} at [{@code startRow}, {@code 0}]:
+    * 
     * <pre>
     *                   / t<sup>6</sup> t<sup>5</sup> t<sup>4</sup> t<sup>3</sup> \
     * HBlock = weight * | t<sup>5</sup> t<sup>4</sup> t<sup>3</sup> t<sup>2</sup> | ( = A<sup>T</sup> W A )
@@ -415,6 +528,9 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
+    * Inserts the following matrix blocks into {@code H} at [{@code startRow}, {@code startColumn}] and
+    * into {@code f} at [{@code startRow}, {@code 0}]:
+    * 
     * <pre>
     *                   / 9t<sup>4</sup> 6t<sup>3</sup> 3t<sup>2</sup> 0 \
     * HBlock = weight * | 6t<sup>3</sup> 4t<sup>2</sup> 2t<sup> </sup> 0 | ( = A<sup>T</sup> W A )
