@@ -101,7 +101,7 @@ public class MultiCubicSpline1DSolver
    }
 
    /**
-    * Resets all weight to {@link Double#POSITIVE_INFINITY} such, that unless later modified, all the
+    * Resets all weight to {@link Double#POSITIVE_INFINITY} such that, unless later modified, all the
     * inputs are solved as hard constraints.
     */
    public void clearWeights()
