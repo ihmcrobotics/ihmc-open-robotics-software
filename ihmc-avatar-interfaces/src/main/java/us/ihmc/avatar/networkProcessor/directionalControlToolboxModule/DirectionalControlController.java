@@ -64,7 +64,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Controller for walking the robot using directional control messages. This controller provides 
+ * Controller for walking the robot using directional control messages.
  * 
  * DirectionalControlController is mainly intended to be used in conjunction with the DirectionalControlToolbox. It 
  * receives two primary types of messages:
@@ -138,7 +138,9 @@ public class DirectionalControlController extends ToolboxController {
 	private final RobotModelUpdater robotUpdater; 
 	
 	// Publishers 
-	private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher; // publish  the footsteps from the step generator
+	private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher; // publish  the footsteps from the step generator to the controller
+	private final IHMCROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher; // publish  the footsteps from the step generator
+	                                                                                         // for visualization
 	private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher; // pause walking immediately
 
 	// Footstep generation, validation and processing
@@ -242,6 +244,7 @@ public class DirectionalControlController extends ToolboxController {
 
 		pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
 		footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
+		footstepVisualizationPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, DirectionalControlModule.getPublisherTopicNameGenerator(robotName));
 
 		// TODO: Collision box parameters taken from StepGeneratorJavaFXController.java
 		// These are specific to the robot. To some degree, they should be derived from
@@ -489,8 +492,11 @@ public class DirectionalControlController extends ToolboxController {
 	 */
 	private void publishFootsteps() {
 		FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
-		if (footstepsToSend != null && isWalking.get()) {
+		if (footstepsToSend != null) {
+		   if (isWalking.get()) {
 			footstepPublisher.publish(footstepsToSend);
+		   }
+		   footstepVisualizationPublisher.publish(footstepsToSend);
 		}
 		if (!isWalking.get())
 			sendPauseMessage();
