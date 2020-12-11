@@ -36,7 +36,8 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final String MULTISENSE_SL_PPS_TOPIC = multisense_namespace + "/stamped_pps";
 
    /**
-    * Send robot data to ROS
+    * Send robot data to ROS.
+    * Is this "use ETH localizer"?
     */
    public static final boolean SEND_ROBOT_DATA_TO_ROS = false;
 
@@ -266,7 +267,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic,
                                                                                    fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
-      setupROSLocationService = target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
+      setupROSLocationService = SEND_ROBOT_DATA_TO_ROS;
       setupROSParameterSetters = target == RobotTarget.REAL_ROBOT;
       isMultisenseHead = target == RobotTarget.REAL_ROBOT;
 
