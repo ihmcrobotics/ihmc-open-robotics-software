@@ -144,6 +144,10 @@ public class TrajectoryPointOptimizer
       tempCoeffs.reshape(coefficients, 1);
    }
 
+   /**
+    * Resets all weight to {@link Double#POSITIVE_INFINITY} such that, unless later modified, all the
+    * inputs are solved as hard constraints.
+    */
    public void clearWeights()
    {
       w0.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
@@ -152,6 +156,15 @@ public class TrajectoryPointOptimizer
       wd1.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
    }
 
+   /**
+    * Set the conditions at trajectory start and end for a single dimension.
+    * 
+    * @param dimension      the dimension to update. Must be in [0, this.dimensions[.
+    * @param startPosition  start position of the trajectory at time 0.0
+    * @param startVelocity  start velocity of the trajectory at time 0.0
+    * @param targetPosition final position of the trajectory at time 1.0
+    * @param targetVelocity final velocity of the trajectory at time 1.0
+    */
    public void setEndPoints(int dimension, double startPosition, double startVelocity, double targetPosition, double targetVelocity)
    {
       if (dimension < 0 || dimension >= dimensions.getValue())
@@ -192,6 +205,20 @@ public class TrajectoryPointOptimizer
       }
    }
 
+   /**
+    * Sets the weights for the initial and final conditions for a single dimension.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up an objective to constrain the
+    * corresponding spline.
+    * </p>
+    * 
+    * @param dimension            the dimension to update. Must be in [0, this.dimensions[.
+    * @param startPositionWeight  the weight value to use for the start position condition.
+    * @param startVelocityWeight  the weight value to use for the start velocity condition.
+    * @param targetPositionWeight the weight value to use for the final position condition.
+    * @param targetVelocityWeight the weight value to use for the final velocity condition.
+    */
    public void setEndPointWeights(int dimension, double startPositionWeight, double startVelocityWeight, double targetPositionWeight,
                                   double targetVelocityWeight)
    {
@@ -204,6 +231,20 @@ public class TrajectoryPointOptimizer
       wd1.set(dimension, targetVelocityWeight);
    }
 
+   /**
+    * Sets the weights for the initial and final conditions. All arguments are expected to have a size
+    * equal to the number of dimensions of the optimizer (e.g. 3 for a 3d trajectory)
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up an objective to constrain the
+    * corresponding spline.
+    * </p>
+    * 
+    * @param startPositionWeight  the weight value to use for the start position condition.
+    * @param startVelocityWeight  the weight value to use for the start velocity condition.
+    * @param targetPositionWeight the weight value to use for the final position condition.
+    * @param targetVelocityWeight the weight value to use for the final velocity condition.
+    */
    public void setEndPointWeights(TDoubleArrayList startPositionWeight, TDoubleArrayList startVelocityWeight, TDoubleArrayList targetPositionWeight,
                                   TDoubleArrayList targetVelocityWeight)
    {
