@@ -6,6 +6,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
@@ -21,12 +22,14 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 {
    private static final int INITIAL_WIDTH = 1100;
    private static final int INITIAL_HEIGHT = 800;
-   private FocusBasedGDXCamera camera;
+   private FocusBasedGDXCamera camera3D;
    private ModelBatch modelBatch;
    private Environment environment;
    private Viewport viewport;
    private Model rootModel;
    private ModelInstance rootModelInstance;
+
+   private OrthographicCamera camera2D;
 
    public GDX3DDemo()
    {
@@ -52,8 +55,8 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 
       modelBatch = new ModelBatch();
 
-      camera = new FocusBasedGDXCamera();
-      viewport = new ExtendViewport(INITIAL_WIDTH, INITIAL_HEIGHT, camera);
+      camera3D = new FocusBasedGDXCamera();
+      viewport = new ExtendViewport(INITIAL_WIDTH, INITIAL_HEIGHT, camera3D);
 
       rootModel = new Model();
 
@@ -72,7 +75,11 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       rootModel.nodes.addAll(GDXModelPrimitives.createCoordinateFrame(0.3).nodes);
 
       rootModelInstance = new ModelInstance(rootModel);
-      rootModelInstance.nodes.addAll(camera.getFocusPointSphere().nodes);
+      rootModelInstance.nodes.addAll(camera3D.getFocusPointSphere().nodes);
+
+
+      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
+      camera2D.update();
    }
 
    @Override
@@ -86,13 +93,17 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    {
       Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
 
-      camera.render();
+      camera3D.render();
 
-      modelBatch.begin(camera);
+      modelBatch.begin(camera3D);
       modelBatch.render(rootModelInstance, environment);
       // TODO add more render calls here
       modelBatch.end();
+
+      camera2D.update();
    }
 
    @Override
