@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -40,7 +41,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
 
-   private static final int additionalFootstepsToConsider = 2;
+   private static final int additionalFootstepsToConsider = CoPTrajectoryParameters.maxNumberOfStepsToConsider - 1;
    private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 

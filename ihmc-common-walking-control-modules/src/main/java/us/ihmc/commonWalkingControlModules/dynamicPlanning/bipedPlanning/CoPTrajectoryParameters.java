@@ -13,6 +13,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoPTrajectoryParameters extends YoSaveableModuleState
 {
+   public static final int maxNumberOfStepsToConsider = 3;
+
    private static final double defaultMinimumDistanceInsidePolygon = 0.01;
 
    private static final double defaultStepLengthToPutExitCoPOnToes = 0.2;
