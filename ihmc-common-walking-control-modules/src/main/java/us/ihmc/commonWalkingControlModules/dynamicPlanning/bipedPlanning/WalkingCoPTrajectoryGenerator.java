@@ -533,6 +533,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          {
             framePointToPack.setToZero(supportFootPolygon.getReferenceFrame());
             framePointToPack.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
+            framePointToPack.addY(supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
+            supportFootPolygon.orthogonalProjection(framePointToPack);
          }
          else
          {
