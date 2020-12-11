@@ -67,6 +67,7 @@ public class TrajectoryPointOptimizer
    private final TDoubleArrayList x0, x1, xd0, xd1;
    private final ArrayList<DMatrixRMaj> waypoints = new ArrayList<>();
    private final MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
+   private final TDoubleArrayList w0, w1, wd0, wd1;
 
    private final DMatrixRMaj intervalTimes = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj saveIntervalTimes = new DMatrixRMaj(1, 1);
@@ -134,7 +135,32 @@ public class TrajectoryPointOptimizer
          waypoints.add(new DMatrixRMaj(dimensions, 1));
       }
 
+      w0 = new TDoubleArrayList(dimensions);
+      w1 = new TDoubleArrayList(dimensions);
+      wd0 = new TDoubleArrayList(dimensions);
+      wd1 = new TDoubleArrayList(dimensions);
+      clearWeights();
+
       tempCoeffs.reshape(coefficients, 1);
+   }
+
+   public void clearWeights()
+   {
+      w0.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      w1.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      wd0.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      wd1.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+   }
+
+   public void setEndPoints(int dimension, double startPosition, double startVelocity, double targetPosition, double targetVelocity)
+   {
+      if (dimension < 0 || dimension >= dimensions.getValue())
+         throw new IllegalArgumentException("Illegal dimension, expected to be in [0, " + dimensions.getValue() + "[, but was: " + dimension);
+
+      x0.set(dimension, startPosition);
+      xd0.set(dimension, startVelocity);
+      x1.set(dimension, targetPosition);
+      xd1.set(dimension, targetVelocity);
    }
 
    /**
@@ -163,6 +189,52 @@ public class TrajectoryPointOptimizer
          xd0.set(i, startVelocity.get(i));
          x1.set(i, targetPosition.get(i));
          xd1.set(i, targetVelocity.get(i));
+      }
+   }
+
+   public void setEndPointWeights(int dimension, double startPositionWeight, double startVelocityWeight, double targetPositionWeight,
+                                  double targetVelocityWeight)
+   {
+      if (dimension < 0 || dimension >= dimensions.getValue())
+         throw new IllegalArgumentException("Illegal dimension, expected to be in [0, " + dimensions.getValue() + "[, but was: " + dimension);
+
+      w0.set(dimension, startPositionWeight);
+      wd0.set(dimension, startVelocityWeight);
+      w1.set(dimension, targetPositionWeight);
+      wd1.set(dimension, targetVelocityWeight);
+   }
+
+   public void setEndPointWeights(TDoubleArrayList startPositionWeight, TDoubleArrayList startVelocityWeight, TDoubleArrayList targetPositionWeight,
+                                  TDoubleArrayList targetVelocityWeight)
+   {
+      if (startPositionWeight != null && startPositionWeight.size() != dimensions.getIntegerValue())
+         throw new RuntimeException("Unexpected Size of Input");
+      if (startVelocityWeight != null && startVelocityWeight.size() != dimensions.getIntegerValue())
+         throw new RuntimeException("Unexpected Size of Input");
+      if (targetPositionWeight != null && targetPositionWeight.size() != dimensions.getIntegerValue())
+         throw new RuntimeException("Unexpected Size of Input");
+      if (targetVelocityWeight != null && targetVelocityWeight.size() != dimensions.getIntegerValue())
+         throw new RuntimeException("Unexpected Size of Input");
+
+      if (startPositionWeight == null)
+         w0.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      if (startVelocityWeight == null)
+         wd0.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      if (targetPositionWeight == null)
+         w1.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+      if (targetVelocityWeight == null)
+         wd1.fill(0, dimensions.getValue(), Double.POSITIVE_INFINITY);
+
+      for (int i = 0; i < dimensions.getValue(); i++)
+      {
+         if (startPositionWeight != null)
+            w0.set(i, startPositionWeight.get(i));
+         if (startVelocityWeight != null)
+            w1.set(i, targetPositionWeight.get(i));
+         if (targetPositionWeight != null)
+            wd0.set(i, startVelocityWeight.get(i));
+         if (targetVelocityWeight != null)
+            wd1.set(i, targetVelocityWeight.get(i));
       }
    }
 
@@ -388,8 +460,11 @@ public class TrajectoryPointOptimizer
    private double solveDimension(int dimension, DMatrixRMaj solutionToPack)
    {
       solver.setEndpoints(x0.get(dimension), xd0.get(dimension), x1.get(dimension), xd1.get(dimension));
+      solver.setEndpointWeights(w0.get(dimension), wd0.get(dimension), w1.get(dimension), wd1.get(dimension));
       solver.clearIntermediatePoints();
+
       double time = 0.0;
+
       for (int w = 0; w < nWaypoints.getValue(); w++)
       {
          time += intervalTimes.get(w);
@@ -474,7 +549,8 @@ public class TrajectoryPointOptimizer
    public void getWaypointVelocity(TDoubleArrayList velocityToPack, int waypointIndex)
    {
       double waypointTime = getWaypointTime(waypointIndex);
-      MultiCubicSpline1DSolver.getVelocityLine(waypointTime, tempLine);
+      tempLine.reshape(1, coefficients);
+      MultiCubicSpline1DSolver.getVelocityConstraintABlock(1.0, waypointTime, 0, 0, tempLine);
 
       velocityToPack.reset();
       for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
