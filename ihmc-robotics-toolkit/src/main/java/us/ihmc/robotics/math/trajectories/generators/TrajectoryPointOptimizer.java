@@ -461,14 +461,14 @@ public class TrajectoryPointOptimizer
    {
       solver.setEndpoints(x0.get(dimension), xd0.get(dimension), x1.get(dimension), xd1.get(dimension));
       solver.setEndpointWeights(w0.get(dimension), wd0.get(dimension), w1.get(dimension), wd1.get(dimension));
-      solver.clearIntermediatePoints();
+      solver.clearWaypoints();
 
       double time = 0.0;
 
       for (int w = 0; w < nWaypoints.getValue(); w++)
       {
          time += intervalTimes.get(w);
-         solver.addIntermediatePoint(waypoints.get(w).get(dimension), time);
+         solver.addWaypoint(waypoints.get(w).get(dimension), time);
       }
 
       return solver.solve(solutionToPack);
