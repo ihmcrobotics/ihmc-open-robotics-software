@@ -12,10 +12,10 @@ public class SwingSpeedUpCalculator
    private final FramePoint2D projectedICPEstimate = new FramePoint2D();
 
    public double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2DReadOnly desiredICPPosition,
-                                                                 FramePoint2DReadOnly desiredCMPPosition,
-                                                                 FramePoint2DReadOnly desiredICPAtTouchdown,
-                                                                 FramePoint2DReadOnly actualICPPosition,
-                                                                 double omega0)
+                                                                FramePoint2DReadOnly desiredCMPPosition,
+                                                                FramePoint2DReadOnly desiredICPAtTouchdown,
+                                                                FramePoint2DReadOnly actualICPPosition,
+                                                                double omega0)
    {
       if (desiredICPPosition.distance(desiredICPAtTouchdown) < 1.0e-10)
          return Double.NaN;
