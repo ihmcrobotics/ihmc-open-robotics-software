@@ -119,6 +119,11 @@ public class ContactPlaneHelper
       return coefficientSize;
    }
 
+   public int getNumberOfContactPoints()
+   {
+      return numberOfContactPoints;
+   }
+
    public ContactPointHelper getContactPointHelper(int index)
    {
       return contactPoints[index];

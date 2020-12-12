@@ -291,6 +291,7 @@ public class ContactPointHelper
       double g2 = 3.0 * duration2 * goalValueForBasis;
       double g3 = 2.0 * duration * goalValueForBasis;
 
+      // FIXME I don't think this includes the cross-terms
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
          int startIdx = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
