@@ -18,12 +18,15 @@ public class MPCQPInputCalculator
 
    private final MPCIndexHandler indexHandler;
 
+   private final VRPTrackingCostCalculator vrpTrackingCostCalculator;
+
    private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);
    private final double gravityZ;
 
    public MPCQPInputCalculator(MPCIndexHandler indexHandler, double gravityZ)
    {
       this.indexHandler = indexHandler;
+      this.vrpTrackingCostCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
       this.gravityZ = -Math.abs(gravityZ);
    }
 
@@ -327,6 +330,22 @@ public class MPCQPInputCalculator
       }
 
       inputToPack.setConstraintType(command.getConstraintType());
+
+      return true;
+   }
+
+   public boolean calculateVRPTrackingObjective(QPInputTypeC inputToPack, VRPTrackingCommand objective)
+   {
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.directCostGradient, objective);
+      double weight = objective.getWeight();
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
 
       return true;
    }
