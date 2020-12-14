@@ -156,39 +156,39 @@ public class CoMMPCQPSolverTest
       solver.initialize();
 
       solver.submitMPCValueObjective(vrpStartPositionCommand);
-      EjmlUnitTests.assertEquals(expectedVRPStartPositionObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeAtStart, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedVRPStartPositionObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeAtStart, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(vrpStartVelocityCommand);
-      EjmlUnitTests.assertEquals(expectedVRPStartVelocityObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPVelocityJacobian(timeAtStart, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedVRPStartVelocityObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPVelocityJacobian(timeAtStart, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(vrpEndPositionCommand);
-      EjmlUnitTests.assertEquals(expectedVRPEndPositionObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeAtEnd, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedVRPEndPositionObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeAtEnd, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(vrpEndVelocityCommand);
-      EjmlUnitTests.assertEquals(expectedVRPEndVelocityObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPVelocityJacobian(timeAtEnd, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedVRPEndVelocityObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPVelocityJacobian(timeAtEnd, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(comStartPositionCommand);
-      EjmlUnitTests.assertEquals(expectedCoMStartPositionObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getCoMPositionJacobian(timeAtStart, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedCoMStartPositionObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getCoMPositionJacobian(timeAtStart, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(comStartVelocityCommand);
-      EjmlUnitTests.assertEquals(expectedCoMStartVelocityObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getCoMVelocityJacobian(timeAtStart, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedCoMStartVelocityObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getCoMVelocityJacobian(timeAtStart, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.submitMPCValueObjective(dcmEndPositionCommand);
-      EjmlUnitTests.assertEquals(expectedDCMEndPositionObjective, solver.qpInput.taskObjective, 1e-4);
-      EjmlUnitTests.assertEquals(MPCTestHelper.getDCMPositionJacobian(timeAtEnd, omega, rhoHelper), solver.qpInput.taskJacobian, 1e-4);
-      addTask(solver.qpInput, solverH_Expected, solverf_Expected);
+      EjmlUnitTests.assertEquals(expectedDCMEndPositionObjective, solver.qpInputTypeA.taskObjective, 1e-4);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getDCMPositionJacobian(timeAtEnd, omega, rhoHelper), solver.qpInputTypeA.taskJacobian, 1e-4);
+      addTask(solver.qpInputTypeA, solverH_Expected, solverf_Expected);
 
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);

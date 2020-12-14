@@ -62,8 +62,8 @@ public class VRPTrackingCostCalculator
       costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1);
       costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, t);
 
-      costGradientToPack.add(0, startCoMIdx + 4, gc0 * gravityZ);
-      costGradientToPack.add(0, startCoMIdx + 5, gc1 * gravityZ);
+      costGradientToPack.add(startCoMIdx + 4, 0, gc0 * gravityZ);
+      costGradientToPack.add(startCoMIdx + 5, 0, gc1 * gravityZ);
 
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
@@ -103,8 +103,8 @@ public class VRPTrackingCostCalculator
          double c0 = t2 / 3.0 * vrpDelta.getElement(ordinal) + t2 / 2.0 * vrpStart.getElement(ordinal);
          double c1 = t / 2.0 * vrpDelta.getElement(ordinal) + t * vrpStart.getElement(ordinal);
 
-         costGradientToPack.add(0, offset, c0);
-         costGradientToPack.add(0, offset + 1, c1);
+         costGradientToPack.add(offset, 0, c0);
+         costGradientToPack.add(offset + 1, 0, c1);
       }
 
       for (int i = 0; i < allBasisVectors.size(); i++)
@@ -148,8 +148,8 @@ public class VRPTrackingCostCalculator
          double basisDotDelta = vrpDelta.dot(basisVector);
          double basisDotStart = vrpStart.dot(basisVector);
 
-         costGradientToPack.add(0, idxI, basisDotDelta * a2Delta + basisDotStart * a2Start);
-         costGradientToPack.add(0, idxI + 1, basisDotDelta * a3Delta + basisDotStart * a3Start);
+         costGradientToPack.add(idxI, 0, basisDotDelta * a2Delta + basisDotStart * a2Start);
+         costGradientToPack.add(idxI + 1, 0, basisDotDelta * a3Delta + basisDotStart * a3Start);
       }
 
       return true;

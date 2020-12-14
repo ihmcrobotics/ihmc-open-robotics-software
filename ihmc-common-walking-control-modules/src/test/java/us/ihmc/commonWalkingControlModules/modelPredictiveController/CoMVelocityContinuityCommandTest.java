@@ -4,7 +4,6 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMVelocityContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -82,7 +81,7 @@ public class CoMVelocityContinuityCommandTest
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, (rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1, 1.0);
 
-      CommonOps_DDRM.mult(solver.qpInput.taskJacobian, solution, solvedObjectiveVelocity);
+      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectiveVelocity);
       solvedObjectiveVelocityTuple.set(solvedObjectiveVelocity);
       solvedObjectiveVelocityTuple.scaleAdd(duration1, gravityVector, solvedObjectiveVelocityTuple);
 
@@ -132,8 +131,8 @@ public class CoMVelocityContinuityCommandTest
       }
       valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0, gravityVector, valueStartOf2);
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInput.taskJacobian, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInput.taskObjective, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
       CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);

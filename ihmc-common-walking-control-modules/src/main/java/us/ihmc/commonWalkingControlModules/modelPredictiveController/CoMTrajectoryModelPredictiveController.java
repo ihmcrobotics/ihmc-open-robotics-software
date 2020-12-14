@@ -54,6 +54,7 @@ public class CoMTrajectoryModelPredictiveController
    public static final double HIGH_WEIGHT = 5e3;
    public static final double MEDIUM_WEIGHT = 1e2;
    public static final double LOW_WEIGHT = 1e-1;
+   public static final double VERY_LOW_WEIGHT = 1e-5;
 
    private final MPCIndexHandler indexHandler;
 
@@ -242,13 +243,18 @@ public class CoMTrajectoryModelPredictiveController
       if (contactSequence.get(0).getContactState().isLoadBearing())
       {
          double duration = contactSequence.get(0).getTimeInterval().getDuration();
-         mpcCommands.addCommand(computeVRPSegmentObjective(LOW_WEIGHT,
-                                                           commandProvider.getNextVRPPositionCommand(),
-                                                           commandProvider.getNextVRPVelocityCommand(),
-                                                           startVRPPositions.get(0),
-                                                           0,
-                                                           duration,
-                                                           0.0));
+//         mpcCommands.addCommand(computeVRPSegmentObjective(LOW_WEIGHT,
+//                                                           commandProvider.getNextVRPPositionCommand(),
+//                                                           commandProvider.getNextVRPVelocityCommand(),
+//                                                           startVRPPositions.get(0),
+//                                                           0,
+//                                                           duration,
+//                                                           0.0));
+         mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
+                                                            startVRPPositions.get(0),
+                                                            endVRPPositions.get(0),
+                                                            0,
+                                                            duration));
          mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
 //         mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, currentTimeInState.getDoubleValue()));
       }
@@ -264,24 +270,29 @@ public class CoMTrajectoryModelPredictiveController
 
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
-            mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
-                                                              commandProvider.getNextVRPVelocityCommand(),
-                                                              endVRPPositions.get(transition),
-                                                              transition,
-                                                              firstSegmentDuration,
-                                                              firstSegmentDuration));
+//            mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
+//                                                              commandProvider.getNextVRPVelocityCommand(),
+//                                                              endVRPPositions.get(transition),
+//                                                              transition,
+//                                                              firstSegmentDuration,
+//                                                              firstSegmentDuration));
             mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
 //            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
          }
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
             double duration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
-            mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
-                                                              commandProvider.getNextVRPVelocityCommand(),
-                                                              startVRPPositions.get(nextSequence),
-                                                              nextSequence,
-                                                              duration,
-                                                              0.0));
+//            mpcCommands.addCommand(computeVRPSegmentObjective(commandProvider.getNextVRPPositionCommand(),
+//                                                              commandProvider.getNextVRPVelocityCommand(),
+//                                                              startVRPPositions.get(nextSequence),
+//                                                              nextSequence,
+//                                                              duration,
+//                                                              0.0));
+            mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
+                                                               startVRPPositions.get(nextSequence),
+                                                               endVRPPositions.get(nextSequence),
+                                                               nextSequence,
+                                                               duration));
             mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
 //            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
          }
@@ -453,6 +464,27 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(constraintTime);
       objectiveToPack.setObjective(objective);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeVRPTrackingObjective(VRPTrackingCommand objectiveToPack,
+                                                    FramePoint3DReadOnly desiredStartVRPPosition,
+                                                    FramePoint3DReadOnly desiredEndVRPPosition,
+                                                    int segmentNumber,
+                                                    double segmentDuration)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(VERY_LOW_WEIGHT);
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setStartVRP(desiredStartVRPPosition);
+      objectiveToPack.setEndVRP(desiredEndVRPPosition);
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));

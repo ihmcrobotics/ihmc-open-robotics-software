@@ -6,9 +6,8 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Co
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -66,7 +65,8 @@ public class CoMMPCQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   final QPInputTypeA qpInput = new QPInputTypeA(0);
+   final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
+   final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
    private final MPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
@@ -80,7 +80,6 @@ public class CoMMPCQPSolver
 
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
-
 
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
@@ -166,7 +165,8 @@ public class CoMMPCQPSolver
       //      if (previousProblemSize != problemSize )
       if (true)
       {
-         qpInput.setNumberOfVariables(problemSize);
+         qpInputTypeA.setNumberOfVariables(problemSize);
+         qpInputTypeC.setNumberOfVariables(problemSize);
 
          solverInput_H.reshape(problemSize, problemSize);
          solverInput_f.reshape(problemSize, 1);
@@ -264,6 +264,9 @@ public class CoMMPCQPSolver
             case RHO_VALUE:
                submitRhoValueCommand((RhoValueObjectiveCommand) command);
                break;
+            case VRP_TRACKING:
+               submitVRPTrackingCommand((VRPTrackingCommand) command);
+               break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
@@ -272,23 +275,30 @@ public class CoMMPCQPSolver
 
    public void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
+      boolean success = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
       if (success)
-         addInput(qpInput);
+         addInput(qpInputTypeA);
    }
 
    public void submitMPCValueObjective(MPCValueCommand command)
    {
-      boolean success = inputCalculator.calculateValueObjective(qpInput, command);
+      boolean success = inputCalculator.calculateValueObjective(qpInputTypeA, command);
       if (success)
-         addInput(qpInput);
+         addInput(qpInputTypeA);
    }
 
    public void submitCoMContinuityObjective(CoMContinuityCommand command)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command);
+      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
       if (success)
-         addInput(qpInput);
+         addInput(qpInputTypeA);
+   }
+
+   public void submitVRPTrackingCommand(VRPTrackingCommand command)
+   {
+      boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (success)
+         addInput(qpInputTypeC);
    }
 
    public void addInput(QPInputTypeA input)
@@ -429,6 +439,15 @@ public class CoMMPCQPSolver
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
+   public void addInput(QPInputTypeC input)
+   {
+      if (!input.useWeightScalar())
+         throw new IllegalArgumentException("Not yet implemented.");
+
+      CommonOps_DDRM.addEquals(solverInput_H, input.getWeightScalar(), input.directCostHessian);
+      CommonOps_DDRM.addEquals(solverInput_f, input.getWeightScalar(), input.directCostGradient);
+   }
+
    public boolean solve()
    {
       addCoefficientRegularization();
@@ -477,7 +496,6 @@ public class CoMMPCQPSolver
 
       CommonOps_DDRM.mult(solverInput_Ain, solverOutput, solverOutput_bin);
       CommonOps_DDRM.mult(solverInput_Aeq, solverOutput, solverOutput_beq);
-
 
       //      solverInput_lb_previous.set(solverInput_lb);
       //      solverInput_ub_previous.set(solverInput_ub);

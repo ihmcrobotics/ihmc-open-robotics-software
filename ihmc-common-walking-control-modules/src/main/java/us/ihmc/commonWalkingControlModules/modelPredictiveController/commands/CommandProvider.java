@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.VRPTrackingCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class CommandProvider
@@ -10,6 +11,7 @@ public class CommandProvider
    private final RecyclingArrayList<DCMVelocityCommand> dcmVelocityCommandPool = new RecyclingArrayList<>(DCMVelocityCommand::new);
    private final RecyclingArrayList<VRPPositionCommand> vrpPositionCommandPool = new RecyclingArrayList<>(VRPPositionCommand::new);
    private final RecyclingArrayList<VRPVelocityCommand> vrpVelocityCommandPool = new RecyclingArrayList<>(VRPVelocityCommand::new);
+   private final RecyclingArrayList<VRPTrackingCommand> vrpTrackingCommandPool = new RecyclingArrayList<>(VRPTrackingCommand::new);
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<RhoValueObjectiveCommand> rhoValueObjectiveCommandPool = new RecyclingArrayList<>(RhoValueObjectiveCommand::new);
@@ -22,6 +24,7 @@ public class CommandProvider
       dcmVelocityCommandPool.clear();
       vrpPositionCommandPool.clear();
       vrpVelocityCommandPool.clear();
+      vrpTrackingCommandPool.clear();
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
       rhoValueObjectiveCommandPool.clear();
@@ -55,6 +58,11 @@ public class CommandProvider
    public VRPVelocityCommand getNextVRPVelocityCommand()
    {
       return vrpVelocityCommandPool.add();
+   }
+
+   public VRPTrackingCommand getNextVRPTrackingCommand()
+   {
+      return vrpTrackingCommandPool.add();
    }
 
    public CoMPositionContinuityCommand getNextComPositionContinuityCommand()

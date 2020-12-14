@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -7,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VRPTrackingCommand
+public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
 {
    private final FramePoint3D objective = new FramePoint3D();
    private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
@@ -108,5 +110,11 @@ public class VRPTrackingCommand
    public ContactPlaneHelper getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
+   }
+
+   @Override
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.VRP_TRACKING;
    }
 }
