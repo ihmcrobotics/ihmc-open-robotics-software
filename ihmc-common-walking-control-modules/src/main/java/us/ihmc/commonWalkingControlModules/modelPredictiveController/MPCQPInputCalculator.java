@@ -166,7 +166,7 @@ public class MPCQPInputCalculator
                             contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
                             tempCoefficientJacobian);
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
