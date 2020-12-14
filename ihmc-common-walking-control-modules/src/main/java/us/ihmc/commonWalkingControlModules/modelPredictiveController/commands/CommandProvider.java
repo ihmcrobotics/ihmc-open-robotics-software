@@ -14,6 +14,7 @@ public class CommandProvider
    private final RecyclingArrayList<VRPTrackingCommand> vrpTrackingCommandPool = new RecyclingArrayList<>(VRPTrackingCommand::new);
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
+   private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoValueObjectiveCommand> rhoValueObjectiveCommandPool = new RecyclingArrayList<>(RhoValueObjectiveCommand::new);
 
    public void reset()
@@ -27,6 +28,7 @@ public class CommandProvider
       vrpTrackingCommandPool.clear();
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
+      vrpPositionContinuityCommandPool.clear();
       rhoValueObjectiveCommandPool.clear();
    }
 
@@ -73,6 +75,11 @@ public class CommandProvider
    public CoMVelocityContinuityCommand getNextComVelocityContinuityCommand()
    {
       return comVelocityContinuityCommandPool.add();
+   }
+
+   public VRPPositionContinuityCommand getNextVRPPositionContinuityCommand()
+   {
+      return vrpPositionContinuityCommandPool.add();
    }
 
    public RhoValueObjectiveCommand getNextRhoValueObjectiveCommand()

@@ -4,7 +4,8 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMVelocityContinuityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class CoMVelocityContinuityCommandTest
+public class VRPPositionContinuityCommandTest
 {
    @Test
    public void testCommandOptimize()
@@ -24,6 +25,7 @@ public class CoMVelocityContinuityCommandTest
 
       double gravityZ = -9.81;
       double omega = 3.0;
+      double omega2 = omega * omega;
       double mu = 0.8;
       double dt = 1e-3;
 
@@ -32,6 +34,7 @@ public class CoMVelocityContinuityCommandTest
       ContactStateMagnitudeToForceMatrixHelper rhoHelper1 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactStateMagnitudeToForceMatrixHelper rhoHelper2 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
@@ -54,13 +57,14 @@ public class CoMVelocityContinuityCommandTest
 
       double duration1 = 0.7;
 
-      CoMVelocityContinuityCommand command = new CoMVelocityContinuityCommand();
+      VRPPositionContinuityCommand command = new VRPPositionContinuityCommand();
       command.setFirstSegmentDuration(duration1);
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
       command.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
       command.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
+      command.setConstraintType(ConstraintType.OBJECTIVE);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -70,66 +74,80 @@ public class CoMVelocityContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectiveVelocity = new DMatrixRMaj(3, 1);
-      FrameVector3D solvedObjectiveVelocityTuple = new FrameVector3D();
+      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
 
-      FrameVector3D valueEndOf1 = new FrameVector3D();
-      FrameVector3D valueStartOf2 = new FrameVector3D();
+      FramePoint3D valueEndOf1 = new FramePoint3D();
+      FramePoint3D valueStartOf2 = new FramePoint3D();
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj((rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1);
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, (rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1, 1.0);
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectiveVelocity);
-      solvedObjectiveVelocityTuple.set(solvedObjectiveVelocity);
-      solvedObjectiveVelocityTuple.scaleAdd(duration1, gravityVector, solvedObjectiveVelocityTuple);
+      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      solvedObjectivePositionTuple.set(solvedObjectivePosition);
+      solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
-      taskObjectiveExpected.add(2, 0, -duration1 * -Math.abs(gravityZ));
+      taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 1, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 1, -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 0, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 2, -1.0 / omega2);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 0, -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 2, 1.0 / omega2);
 
       helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 12);
+      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12);
+      MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper1.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, 12);
       helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
+      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
+      MatrixTools.multAddBlock(1.0 / omega2, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
 
-      valueEndOf1.setX(solution.get(0, 0));
-      valueEndOf1.setY(solution.get(2, 0));
-      valueEndOf1.setZ(solution.get(4, 0) );
+      valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
+      valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
+      valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
 
-      valueStartOf2.setX(solution.get(6, 0));
-      valueStartOf2.setY(solution.get(8, 0));
-      valueStartOf2.setZ(solution.get(10, 0));
+      valueStartOf2.setX(0.0 * solution.get(6, 0) + solution.get(7, 0));
+      valueStartOf2.setY(0.0 * solution.get(8, 0) + solution.get(9, 0));
+      valueStartOf2.setZ(0.0 * solution.get(10, 0) + solution.get(11, 0));
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
          int startIdx = 12 + 4 * rhoIdx;
-         double rhoValue = omega * Math.exp(omega * duration1) * solution.get(startIdx, 0);
-         rhoValue += -omega * Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
-         rhoValue += 3.0 * duration1 * duration1 * solution.get(startIdx + 2, 0);
-         rhoValue += 2.0 * duration1 * solution.get(startIdx + 3, 0);
+         double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
+         rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
+         rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);
+         rhoValue += duration1 * duration1 * solution.get(startIdx + 3, 0);
+
+         rhoValue -= 1.0 / omega2 * Math.exp(omega * duration1) * solution.get(startIdx, 0);
+         rhoValue -= 1.0 / omega2 * Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
+         rhoValue -= 1.0 / omega2 * 6.0 * duration1 * solution.get(startIdx + 2, 0);
+         rhoValue -= 1.0 / omega2 * 2.0 * solution.get(startIdx + 3, 0);
 
          valueEndOf1.scaleAdd(rhoValue, rhoHelper1.getBasisVector(rhoIdx), valueEndOf1);
       }
-      valueEndOf1.scaleAdd(duration1, gravityVector, valueEndOf1);
+      valueEndOf1.scaleAdd(0.5 * duration1 * duration1 - 1.0 / omega2, gravityVector, valueEndOf1);
 
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
       {
          int startIdx = 12 + 4 * rhoHelper1.getRhoSize() + 4 * rhoIdx;
-         double rhoValue = omega * Math.exp(omega * 0.0) * solution.get(startIdx, 0);
-         rhoValue += -omega * Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
+         double rhoValue = Math.exp(omega * 0.0) * solution.get(startIdx, 0);
+         rhoValue += Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
          rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);
          rhoValue += 0.0 * 0.0 * solution.get(startIdx + 3, 0);
 
+         rhoValue -= 1.0 / omega2 * Math.exp(omega * 0.0) * solution.get(startIdx, 0);
+         rhoValue -= 1.0 / omega2 * Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
+         rhoValue -= 1.0 / omega2 * 6.0 * 0.0 * solution.get(startIdx + 2, 0);
+         rhoValue -= 1.0 / omega2 * 2.0 * solution.get(startIdx + 3, 0);
+
          valueStartOf2.scaleAdd(rhoValue, rhoHelper2.getBasisVector(rhoIdx), valueStartOf2);
       }
-      valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0, gravityVector, valueStartOf2);
+      valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0 - 1.0 / omega2, gravityVector, valueStartOf2);
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
@@ -148,8 +166,9 @@ public class CoMVelocityContinuityCommandTest
       EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
+      FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(new FrameVector3D(), solvedObjectiveVelocityTuple, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredValue, solvedObjectivePositionTuple, 1e-4);
    }
 
 

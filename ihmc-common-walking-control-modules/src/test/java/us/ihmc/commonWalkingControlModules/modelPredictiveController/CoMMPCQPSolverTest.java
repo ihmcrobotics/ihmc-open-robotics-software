@@ -428,8 +428,8 @@ public class CoMMPCQPSolverTest
       solver.submitRhoValueCommand(rhoCommandEnd1);
       solver.submitRhoValueCommand(rhoCommandStart2);
       solver.submitRhoValueCommand(rhoCommandEnd2);
-      solver.submitCoMContinuityObjective(positionContinuityCommand);
-      solver.submitCoMContinuityObjective(velocityContinuityCommand);
+      solver.submitContinuityObjective(positionContinuityCommand);
+      solver.submitContinuityObjective(velocityContinuityCommand);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
 

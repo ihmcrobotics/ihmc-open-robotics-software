@@ -256,7 +256,7 @@ public class CoMMPCQPSolver
                submitMPCValueObjective((MPCValueCommand) command);
                break;
             case CONTINUITY:
-               submitCoMContinuityObjective((MPCContinuityCommand) command);
+               submitContinuityObjective((MPCContinuityCommand) command);
                break;
             case LIST:
                submitMPCCommandList((MPCCommandList) command);
@@ -287,9 +287,9 @@ public class CoMMPCQPSolver
          addInput(qpInputTypeA);
    }
 
-   public void submitCoMContinuityObjective(MPCContinuityCommand command)
+   public void submitContinuityObjective(MPCContinuityCommand command)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
+      boolean success = inputCalculator.calculateContinuityObjective(qpInputTypeA, command);
       if (success)
          addInput(qpInputTypeA);
    }

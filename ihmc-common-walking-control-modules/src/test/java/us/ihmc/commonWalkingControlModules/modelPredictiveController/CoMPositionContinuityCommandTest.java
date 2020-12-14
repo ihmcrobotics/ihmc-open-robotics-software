@@ -67,7 +67,7 @@ public class CoMPositionContinuityCommandTest
 
       double regularization = 1e-5;
       solver.initialize();
-      solver.submitCoMContinuityObjective(command);
+      solver.submitContinuityObjective(command);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
 
