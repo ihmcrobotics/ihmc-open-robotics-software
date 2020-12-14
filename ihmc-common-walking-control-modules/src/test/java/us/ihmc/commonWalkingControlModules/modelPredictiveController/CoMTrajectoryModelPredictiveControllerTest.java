@@ -9,7 +9,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.polytope.FrameVertex3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -517,7 +516,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
          }
          else if (command.getCommandType() == MPCCommandType.CONTINUITY)
          {
-            int derivativeOrder = ((CoMContinuityCommand) command).getDerivativeOrder();
+            int derivativeOrder = ((MPCContinuityCommand) command).getDerivativeOrder();
             if (derivativeOrder == 0)
                comPositionContinuityCommands.add((CoMPositionContinuityCommand) command);
             else if (derivativeOrder == 1)
