@@ -113,9 +113,14 @@ public class VRPTrackingCostCalculator
          int idxI = 4 * i + startRhoIdx + 2;
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
+         double selfDot = basisVector.dot(basisVector);
 
+         costHessianToPack.add(idxI, idxI, selfDot * a2a2);
+         costHessianToPack.add(idxI, idxI + 1, selfDot * a2a3);
+         costHessianToPack.add(idxI + 1, idxI, selfDot * a2a3);
+         costHessianToPack.add(idxI + 1, idxI + 1, selfDot * a3a3);
 
-         for (int j = i; j < allBasisVectors.size(); j++)
+         for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
             FrameVector3DReadOnly otherBasisVector = allBasisVectors.get(j);
 
@@ -129,10 +134,10 @@ public class VRPTrackingCostCalculator
             costHessianToPack.add(idxI + 1, idxJ + 1, basisDot * a3a3);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-//            costHessianToPack.add(idxJ, idxI, a2a2);
-//            costHessianToPack.add(idxJ + 1, idxI, a2a3);
-//            costHessianToPack.add(idxJ, idxI + 1, a2a3);
-//            costHessianToPack.add(idxJ + 1, idxI + 1, a3a3);
+            costHessianToPack.add(idxJ, idxI, basisDot * a2a2);
+            costHessianToPack.add(idxJ + 1, idxI, basisDot * a2a3);
+            costHessianToPack.add(idxJ, idxI + 1, basisDot * a2a3);
+            costHessianToPack.add(idxJ + 1, idxI + 1, basisDot * a3a3);
          }
 
 
