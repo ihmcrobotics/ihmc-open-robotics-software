@@ -607,6 +607,11 @@ public class BalanceManager
       return desiredCMP;
    }
 
+   public FramePoint2DReadOnly getFinalDesiredICP()
+   {
+      return yoFinalDesiredICP;
+   }
+
    public FramePoint2DReadOnly getDesiredICP()
    {
       return yoDesiredCapturePoint;
