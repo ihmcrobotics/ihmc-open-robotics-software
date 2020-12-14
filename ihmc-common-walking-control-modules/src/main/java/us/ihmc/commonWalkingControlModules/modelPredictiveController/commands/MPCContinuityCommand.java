@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCommand>
+public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCommand>
 {
    private final List<ContactPlaneHelper> firstSegmentContactPlaneHelpers = new ArrayList<>();
    private final List<ContactPlaneHelper> secondSegmentContactPlaneHelpers = new ArrayList<>();
@@ -16,6 +16,7 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
    private double omega;
    private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
    private ConstraintType constraintType = ConstraintType.EQUALITY;
+   private MPCValueType valueType;
 
    public MPCCommandType getCommandType()
    {
@@ -33,6 +34,8 @@ public abstract class CoMContinuityCommand implements MPCCommand<CoMContinuityCo
    }
 
    public abstract int getDerivativeOrder();
+
+   public abstract MPCValueType getValueType();
 
    public void clear()
    {

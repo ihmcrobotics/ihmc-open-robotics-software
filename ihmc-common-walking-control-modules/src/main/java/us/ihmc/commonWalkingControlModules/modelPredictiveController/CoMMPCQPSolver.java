@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -256,7 +256,7 @@ public class CoMMPCQPSolver
                submitMPCValueObjective((MPCValueCommand) command);
                break;
             case CONTINUITY:
-               submitCoMContinuityObjective((CoMContinuityCommand) command);
+               submitCoMContinuityObjective((MPCContinuityCommand) command);
                break;
             case LIST:
                submitMPCCommandList((MPCCommandList) command);
@@ -287,7 +287,7 @@ public class CoMMPCQPSolver
          addInput(qpInputTypeA);
    }
 
-   public void submitCoMContinuityObjective(CoMContinuityCommand command)
+   public void submitCoMContinuityObjective(MPCContinuityCommand command)
    {
       boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
       if (success)

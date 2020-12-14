@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,7 +24,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
@@ -351,7 +349,7 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeContinuityObjective(CoMContinuityCommand continuityObjectiveToPack, int firstSegmentNumber, double firstSegmentDuration)
+   private MPCCommand<?> computeContinuityObjective(MPCContinuityCommand continuityObjectiveToPack, int firstSegmentNumber, double firstSegmentDuration)
    {
       continuityObjectiveToPack.clear();
       continuityObjectiveToPack.setOmega(omega.getValue());

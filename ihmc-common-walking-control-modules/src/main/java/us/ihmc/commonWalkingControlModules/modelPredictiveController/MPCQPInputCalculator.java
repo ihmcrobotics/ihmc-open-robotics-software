@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMContinuityCommand;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.ForceMinimizationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeB;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -30,7 +30,23 @@ public class MPCQPInputCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
-   public boolean calculateCoMContinuityObjective(QPInputTypeA inputToPack, CoMContinuityCommand objective)
+   public boolean calculateContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      switch (objective.getValueType())
+      {
+         case COM:
+            return calculateCoMContinuityObjective(inputToPack, objective);
+         case VRP:
+            return calculateVRPContinuityObjective(inputToPack, objective);
+         case DCM:
+            throw new NotImplementedException();
+//            return calculateDCMValueObjective(inputToPack, objective);
+         default:
+            return false;
+      }
+   }
+
+   public boolean calculateCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
       inputToPack.reshape(3);
       inputToPack.setConstraintType(objective.getConstraintType());
@@ -84,6 +100,73 @@ public class MPCQPInputCalculator
                                     3,
                                     contactPlaneHelper.getCoefficientSize(),
                                     -1.0);
+         startCol += contactPlaneHelper.getCoefficientSize();
+      }
+
+      inputToPack.getTaskObjective().zero();
+      inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder(), 0.0));
+      inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), firstSegmentDuration));
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return true;
+   }
+
+   public boolean calculateVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      inputToPack.reshape(3);
+      inputToPack.setConstraintType(objective.getConstraintType());
+
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      double firstSegmentDuration = objective.getFirstSegmentDuration();
+      double omega = objective.getOmega();
+      double omega2 = omega * omega;
+      double weight = objective.getWeight();
+
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(firstSegmentNumber,
+                                                            omega,
+                                                            firstSegmentDuration,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            1.0);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentNumber, omega, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+
+      int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
+      {
+         ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
+         contactPlaneHelper.computeJacobians(firstSegmentDuration, omega);
+
+         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
+         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
+                            -1.0 / omega2,
+                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
+                            tempCoefficientJacobian);
+
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+
+
+         startCol += contactPlaneHelper.getCoefficientSize();
+      }
+
+      startCol = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+      for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
+      {
+         ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
+         contactPlaneHelper.computeJacobians(0.0, omega);
+
+         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
+         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
+                            -1.0 / omega2,
+                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
+                            tempCoefficientJacobian);
+
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
