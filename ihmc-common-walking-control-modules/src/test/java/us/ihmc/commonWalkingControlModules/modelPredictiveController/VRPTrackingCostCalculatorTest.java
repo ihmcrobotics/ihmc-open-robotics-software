@@ -338,14 +338,14 @@ public class VRPTrackingCostCalculatorTest
       double a3a4 = scalar01 * AB;
       double a3a5 = scalar01 * BB;
 
-      double a4a2 = scalar00 * AA;
-      double a4a3 = scalar00 * AB;
+      double a4a2 = scalar01 * AA;
+      double a4a3 = scalar01 * AB;
       double a4a4 = scalar11 * AA;
       double a4a5 = scalar11 * AB;
 
       double a5a2 = scalar01 * AB;
       double a5a3 = scalar01 * BB;
-      double a5a4 = scalar01 * AB;
+      double a5a4 = scalar11 * AB;
       double a5a5 = scalar11 * BB;
 
       costHessianExpected.set(0, 8, c0a2);
