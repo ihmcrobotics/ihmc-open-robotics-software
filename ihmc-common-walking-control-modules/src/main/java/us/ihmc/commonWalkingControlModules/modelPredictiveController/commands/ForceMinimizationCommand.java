@@ -14,7 +14,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
 
    private int segmentNumber;
    private double omega;
-   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private double weight;
 
    private DoubleConsumer costToGoConsumer;
 

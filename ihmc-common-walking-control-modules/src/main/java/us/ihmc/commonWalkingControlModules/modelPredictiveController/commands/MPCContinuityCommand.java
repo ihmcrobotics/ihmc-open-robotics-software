@@ -14,7 +14,7 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
    private int firstSegmentNumber;
    private double firstSegmentDuration;
    private double omega;
-   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private double weight;
    private ConstraintType constraintType = ConstraintType.EQUALITY;
    private MPCValueType valueType;
 
