@@ -11,6 +11,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -78,13 +79,19 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
 
       DRCRobotModel robotModel;
 
+      String robotVersionString = config.getString("robotModel");
+      if (robotVersionString == null)
+      {
+         robotVersionString = "ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ";
+      }
+      LogTools.info("Using to robot version: {}", robotVersionString);
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(robotVersionString, RobotTarget.SCS, false);
       }
       catch (IllegalArgumentException e)
       {
-         System.err.println("Incorrect robot model " + config.getString("robotModel"));
+         System.err.println("Incorrect robot model " + robotVersionString);
          System.out.println(jsap.getHelp());
 
          return;
