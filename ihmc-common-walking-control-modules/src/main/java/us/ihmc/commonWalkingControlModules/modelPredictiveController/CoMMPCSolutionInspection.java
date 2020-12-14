@@ -44,6 +44,9 @@ public class CoMMPCSolutionInspection
             case RHO_VALUE:
                inspectRhoValueCommand((RhoValueObjectiveCommand) command, solution);
                break;
+            case VRP_TRACKING:
+               // TODO
+               break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
