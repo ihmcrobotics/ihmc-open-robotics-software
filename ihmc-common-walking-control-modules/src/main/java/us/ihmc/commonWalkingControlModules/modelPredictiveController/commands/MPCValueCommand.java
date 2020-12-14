@@ -18,7 +18,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    private int segmentNumber;
    private double timeOfObjective;
    private double omega;
-   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private double weight;
    private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    private DoubleConsumer costToGoConsumer;

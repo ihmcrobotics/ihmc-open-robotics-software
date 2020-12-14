@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -17,7 +16,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    private int segmentNumber;
    private double segmentDuration;
    private double omega;
-   private double weight = CoMTrajectoryModelPredictiveController.MEDIUM_WEIGHT;
+   private double weight = CoMTrajectoryModelPredictiveController.vrpTrackingWeight;
 
    private final FramePoint3D startVRP = new FramePoint3D();
    private final FramePoint3D endVRP = new FramePoint3D();
