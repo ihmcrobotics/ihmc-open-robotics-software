@@ -29,10 +29,8 @@ public class VRPTrackingCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper1 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
 
-      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -47,8 +45,7 @@ public class VRPTrackingCommandTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
-      rhoHelper1.computeMatrices(contactPolygon, contactPose1, 1e-8, 1e-10, mu);
-      contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose1, mu);
+      contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose1, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
@@ -59,7 +56,7 @@ public class VRPTrackingCommandTest
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
-      command.addContactPlaneHelper(contactPlaneHelper1);
+      command.addContactPlaneHelper(contactPlaneHelper);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -70,31 +67,18 @@ public class VRPTrackingCommandTest
       solver.solve();
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper1.getRhoSize()  * 4, 1);
+      DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize()  * 4, 1);
 
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, rhoHelper1.getRhoSize() * 4, 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, contactPlaneHelper.getRhoSize() * 4, 1, 1.0);
 
 
-      DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj taskGradientExpected = new DMatrixRMaj(3, 1);
-      taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
-
-      DMatrixRMaj taskHessianExpected = new DMatrixRMaj(3, 2 * 6 + rhoHelper1.getRhoSize() * 4);
+      DMatrixRMaj taskHessianExpected = new DMatrixRMaj(3, 2 * 6 + contactPlaneHelper.getRhoSize() * 4);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskHessianExpected, 0, 1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskHessianExpected, 2, -1.0 / omega2);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskHessianExpected, 0, -1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskHessianExpected, 2, 1.0 / omega2);
 
-      helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskHessianExpected, 0, 12);
-      MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper1.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskHessianExpected, 0, 12);
-      helper.computeMatrices(0.0, omega);
 
-      EjmlUnitTests.assertEquals(taskHessianExpected, solver.qpInputTypeC.directCostHessian, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeC.directCostGradient, 1e-5);
-
-      EjmlUnitTests.assertEquals(taskHessianExpected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(taskGradientExpected, solver.solverInput_f, 1e-10);
 
       FramePoint3D assembledValue = new FramePoint3D();
       FramePoint3D expectedValue = new FramePoint3D();
@@ -106,20 +90,25 @@ public class VRPTrackingCommandTest
          assembledValue.setY(time * solution.get(2, 0) + solution.get(3, 0));
          assembledValue.setZ(time * solution.get(4, 0) + solution.get(5, 0));
 
-         for (int rhoIdx = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
+         for (int pointIdx = 0; pointIdx < contactPlaneHelper.getNumberOfContactPoints(); pointIdx++)
          {
-            int startIdx = 12 + 4 * rhoIdx;
-            double rhoValue = Math.exp(omega * time) * solution.get(startIdx, 0);
-            rhoValue += Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
-            rhoValue += time * time * time * solution.get(startIdx + 2, 0);
-            rhoValue += time * time * solution.get(startIdx + 3, 0);
+            ContactPointHelper pointHelper = contactPlaneHelper.getContactPointHelper(pointIdx);
 
-            rhoValue -= 1.0 / omega2 * Math.exp(omega * time) * solution.get(startIdx, 0);
-            rhoValue -= 1.0 / omega2 * Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
-            rhoValue -= 1.0 / omega2 * 6.0 * time * solution.get(startIdx + 2, 0);
-            rhoValue -= 1.0 / omega2 * 2.0 * solution.get(startIdx + 3, 0);
+            for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
+            {
+               int startIdx = 12 + pointIdx * 4 * 4 + 4 * rhoIdx;
+               double rhoValue = Math.exp(omega * time) * solution.get(startIdx, 0);
+               rhoValue += Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
+               rhoValue += time * time * time * solution.get(startIdx + 2, 0);
+               rhoValue += time * time * solution.get(startIdx + 3, 0);
 
-            assembledValue.scaleAdd(rhoValue, rhoHelper1.getBasisVector(rhoIdx), assembledValue);
+               rhoValue -= 1.0 / omega2 * Math.exp(omega * time) * solution.get(startIdx, 0);
+               rhoValue -= 1.0 / omega2 * Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
+               rhoValue -= 1.0 / omega2 * 6.0 * time * solution.get(startIdx + 2, 0);
+               rhoValue -= 1.0 / omega2 * 2.0 * solution.get(startIdx + 3, 0);
+
+               assembledValue.scaleAdd(rhoValue, pointHelper.getBasisVector(rhoIdx), assembledValue);
+            }
          }
          assembledValue.scaleAdd(0.5 * time * time - 1.0 / omega2, gravityVector, assembledValue);
 
