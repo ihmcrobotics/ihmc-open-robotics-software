@@ -184,12 +184,13 @@ public class DCMPositionCommandTest
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
-      solvedPositionAtConstraint.addX((timeOfConstraint + 1.0 / omega) * solution.get(6, 0));
-      solvedPositionAtConstraint.addX(solution.get(7, 0));
-      solvedPositionAtConstraint.addY((timeOfConstraint + 1.0 / omega) * solution.get(8, 0));
-      solvedPositionAtConstraint.addY(solution.get(9, 0));
-      solvedPositionAtConstraint.addZ((timeOfConstraint + 1.0 / omega) * solution.get(10, 0));
-      solvedPositionAtConstraint.addZ(solution.get(11, 0));
+      int start = 4 * rhoHelper.getRhoSize() + 6;
+      solvedPositionAtConstraint.addX((timeOfConstraint + 1.0 / omega) * solution.get(start, 0));
+      solvedPositionAtConstraint.addX(solution.get(start + 1, 0));
+      solvedPositionAtConstraint.addY((timeOfConstraint + 1.0 / omega) * solution.get(start + 2, 0));
+      solvedPositionAtConstraint.addY(solution.get(start + 3, 0));
+      solvedPositionAtConstraint.addZ((timeOfConstraint + 1.0 / omega) * solution.get(start + 4, 0));
+      solvedPositionAtConstraint.addZ(solution.get(start + 5, 0));
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12 + 4 * rhoHelper.getRhoSize(), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 

@@ -360,8 +360,8 @@ public class MinRhoObjectiveTest
 
       for (int rhoIdxStart1  = 0; rhoIdxStart1 < rhoHelper.getRhoSize(); rhoIdxStart1++)
       {
-         int startColIdx1 = 12 + 4 * rhoIdxStart1;
-         int startColIdx2 = startColIdx1 + 4 * rhoHelper.getRhoSize();
+         int startColIdx1 = 6 + 4 * rhoIdxStart1;
+         int startColIdx2 = startColIdx1 + 6 + 4 * rhoHelper.getRhoSize();
 
          double rhoValueStart1 = a0Start * solution.get(startColIdx1, 0);
          rhoValueStart1 += a1Start * solution.get(startColIdx1 + 1, 0);

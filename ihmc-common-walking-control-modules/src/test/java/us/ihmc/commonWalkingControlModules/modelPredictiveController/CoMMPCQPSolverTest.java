@@ -333,7 +333,7 @@ public class CoMMPCQPSolverTest
 
 
       EuclidCoreTestTools.assertTuple3DEquals(comStartPosition, reconstructedCoMPositionAtStart, 5e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(comStartVelocity, reconstructedCoMVelocityAtStart, 1e-3);
+      EuclidCoreTestTools.assertTuple3DEquals(comStartVelocity, reconstructedCoMVelocityAtStart, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedDCMAtStart, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedDCMAtEnd, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtStart, 5e-3);
@@ -497,18 +497,20 @@ public class CoMMPCQPSolverTest
       double a3Start = 2.0;
       double a3End = 2.0;
 
+      int startOf2 = 6 + 4 * rhoHelper.getRhoSize();
       equalityJacobianExpected.set(0, 0, c4End);
       equalityJacobianExpected.set(0, 1, c5End);
       equalityJacobianExpected.set(1, 2, c4End);
       equalityJacobianExpected.set(1, 3, c5End);
       equalityJacobianExpected.set(2, 4, c4End);
       equalityJacobianExpected.set(2, 5, c5End);
-      equalityJacobianExpected.set(0, 6, -c4Start);
-      equalityJacobianExpected.set(0, 7, -c5Start);
-      equalityJacobianExpected.set(1, 8, -c4Start);
-      equalityJacobianExpected.set(1, 9, -c5Start);
-      equalityJacobianExpected.set(2, 10, -c4Start);
-      equalityJacobianExpected.set(2, 11, -c5Start);
+
+      equalityJacobianExpected.set(0, startOf2 + 0, -c4Start);
+      equalityJacobianExpected.set(0, startOf2 + 1, -c5Start);
+      equalityJacobianExpected.set(1, startOf2 + 2, -c4Start);
+      equalityJacobianExpected.set(1, startOf2 + 3, -c5Start);
+      equalityJacobianExpected.set(2, startOf2 + 4, -c4Start);
+      equalityJacobianExpected.set(2, startOf2 + 5, -c5Start);
 
       equalityJacobianExpected.set(3, 0, c4DotEnd);
       equalityJacobianExpected.set(3, 1, c5DotEnd);
@@ -516,17 +518,18 @@ public class CoMMPCQPSolverTest
       equalityJacobianExpected.set(4, 3, c5DotEnd);
       equalityJacobianExpected.set(5, 4, c4DotEnd);
       equalityJacobianExpected.set(5, 5, c5DotEnd);
-      equalityJacobianExpected.set(3, 6, -c4DotStart);
-      equalityJacobianExpected.set(3, 7, -c5DotStart);
-      equalityJacobianExpected.set(4, 8, -c4DotStart);
-      equalityJacobianExpected.set(4, 9, -c5DotStart);
-      equalityJacobianExpected.set(5, 10, -c4DotStart);
-      equalityJacobianExpected.set(5, 11, -c5DotStart);
+
+      equalityJacobianExpected.set(3, startOf2 + 0, -c4DotStart);
+      equalityJacobianExpected.set(3, startOf2 + 1, -c5DotStart);
+      equalityJacobianExpected.set(4, startOf2 + 2, -c4DotStart);
+      equalityJacobianExpected.set(4, startOf2 + 3, -c5DotStart);
+      equalityJacobianExpected.set(5, startOf2 + 4, -c4DotStart);
+      equalityJacobianExpected.set(5, startOf2 + 5, -c5DotStart);
 
       for (int rhoIdxStart1  = 0; rhoIdxStart1 < rhoHelper.getRhoSize(); rhoIdxStart1++)
       {
-         int startColIdx1 = 12 + 4 * rhoIdxStart1;
-         int startColIdx2 = startColIdx1 + 4 * rhoHelper.getRhoSize();
+         int startColIdx1 = 6 + 4 * rhoIdxStart1;
+         int startColIdx2 = startOf2 + 6 + 4 * rhoIdxStart1;
 
          equalityJacobianExpected.set(0, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c0End);
          equalityJacobianExpected.set(1, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c0End);
