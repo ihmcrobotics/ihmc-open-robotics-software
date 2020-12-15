@@ -123,6 +123,9 @@ public class VRPTrackingCostCalculatorTest
       double a2a3 =  (1.0 / 6.0 * Math.pow(duration, 6.0) - 2.0 / omega2 * Math.pow(duration, 4.0) + 6.0 / omega2 / omega2 * Math.pow(duration, 2.0));
       double a3a3 =  (1.0 / 5.0 * Math.pow(duration, 5.0) - 4.0 / (3.0 * omega2) * Math.pow(duration, 3.0) + 4.0 / omega2 / omega2 * Math.pow(duration, 1.0));
 
+      double ga2 = 1.0 / 12.0 * Math.pow(duration, 6.0) - 1.0 / omega2 * Math.pow(duration, 4.0) + 3.0 / (omega2 * omega2) * duration * duration;
+      double ga3 = Math.pow(duration, 5.0) / 10.0 - 2.0 / 3.0 / omega2 * Math.pow(duration, 3.0) + 2.0 / (omega2 * omega2) * duration;
+
       costHessianExpected.set(0, 6, c0a0);
       costHessianExpected.set(0, 7, c0a1);
       costHessianExpected.set(0, 8, c0a2);
@@ -208,14 +211,14 @@ public class VRPTrackingCostCalculatorTest
       double a3Change = changeDotBasis * (Math.pow(duration, 4.0) / (4.0 * duration) - Math.pow(duration, 2.0) / (omega2 * duration));
       double a3Start = startDotBasis * (Math.pow(duration, 3.0) / 3.0 - 2.0 / omega2 * duration);
 
-      costGradientExpected.set(0, 0, deltaC0);
-      costGradientExpected.set(1, 0, deltaC1);
-      costGradientExpected.set(2, 0, deltaC2);
-      costGradientExpected.set(3, 0, deltaC3);
-      costGradientExpected.set(4, 0, gc4 + deltaC4);
-      costGradientExpected.set(5, 0, gc5 + deltaC5);
-      costGradientExpected.set(8, 0, a2Change + a2Start);
-      costGradientExpected.set(9, 0, a3Change + a3Start);
+      costGradientExpected.set(0, 0, -deltaC0);
+      costGradientExpected.set(1, 0, -deltaC1);
+      costGradientExpected.set(2, 0, -deltaC2);
+      costGradientExpected.set(3, 0, -deltaC3);
+      costGradientExpected.set(4, 0, gc4 - deltaC4);
+      costGradientExpected.set(5, 0, gc5 - deltaC5);
+      costGradientExpected.set(8, 0, -a2Change - a2Start + gravityZ * basisVector.getZ() * ga2);
+      costGradientExpected.set(9, 0, -a3Change - a3Start + gravityZ * basisVector.getZ() * ga3) ;
 
       EjmlUnitTests.assertEquals(costGradientExpected, costGradient, 1e-5);
    }
@@ -338,6 +341,9 @@ public class VRPTrackingCostCalculatorTest
       double AA = (1.0 / 7.0 * Math.pow(duration, 7.0) - 12.0 / 5.0 / omega2 * Math.pow(duration, 5.0) + 12.0 / omega2 / omega2 * Math.pow(duration, 3.0));
       double AB = (1.0 / 6.0 * Math.pow(duration, 6.0) - 2.0 / omega2 * Math.pow(duration, 4.0) + 6.0 / omega2 / omega2 * Math.pow(duration, 2.0));
       double BB = (1.0 / 5.0 * Math.pow(duration, 5.0) - 4.0 / (3.0 * omega2) * Math.pow(duration, 3.0) + 4.0 / omega2 / omega2 * Math.pow(duration, 1.0));
+
+      double ga2 = 1.0 / 12.0 * Math.pow(duration, 6.0) - 1.0 / omega2 * Math.pow(duration, 4.0) + 3.0 / (omega2 * omega2) * duration * duration;
+      double ga3 = Math.pow(duration, 5.0) / 10.0 - 2.0 / 3.0 / omega2 * Math.pow(duration, 3.0) + 2.0 / (omega2 * omega2) * duration;
 
       double a2a2 = scalar00 * AA;
       double a2a3 = scalar00 * AB;
@@ -468,17 +474,17 @@ public class VRPTrackingCostCalculatorTest
       double a7Change = a3Change / changeDotBasis0 * changeDotBasis1;
       double a7Start = a3Start / startDotBasis0 * startDotBasis1;
 
-      costGradientExpected.set(0, 0, deltaC0);
-      costGradientExpected.set(1, 0, deltaC1);
-      costGradientExpected.set(2, 0, deltaC2);
-      costGradientExpected.set(3, 0, deltaC3);
-      costGradientExpected.set(4, 0, gc4 + deltaC4);
-      costGradientExpected.set(5, 0, gc5 + deltaC5);
+      costGradientExpected.set(0, 0, -deltaC0);
+      costGradientExpected.set(1, 0, -deltaC1);
+      costGradientExpected.set(2, 0, -deltaC2);
+      costGradientExpected.set(3, 0, -deltaC3);
+      costGradientExpected.set(4, 0, gc4 - deltaC4);
+      costGradientExpected.set(5, 0, gc5 - deltaC5);
 
-      costGradientExpected.set(8, 0, a2Change + a2Start);
-      costGradientExpected.set(9, 0, a3Change + a3Start);
-      costGradientExpected.set(12, 0, a6Change + a6Start);
-      costGradientExpected.set(13, 0, a7Change + a7Start);
+      costGradientExpected.set(8, 0, -a2Change - a2Start + gravityZ * basisVector0.getZ() * ga2);
+      costGradientExpected.set(9, 0, -a3Change - a3Start + gravityZ * basisVector0.getZ() * ga3);
+      costGradientExpected.set(12, 0, -a6Change - a6Start + gravityZ * basisVector1.getZ() * ga2);
+      costGradientExpected.set(13, 0, -a7Change - a7Start + gravityZ * basisVector1.getZ() * ga3);
 
       EjmlUnitTests.assertEquals(costGradientExpected, costGradient, 1e-5);
    }
