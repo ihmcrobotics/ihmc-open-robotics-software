@@ -33,8 +33,8 @@ public class AtlasRemoteLidarBasedREAModuleLauncher
 //      messager.setAllowSelfSubmit(true);
 //      messager.startMessager();
 
-            KryoMessager messager = KryoMessager.createServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 5);
-      ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
+      KryoMessager messager = KryoMessager.createServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 5);
+      messager.startMessagerBlocking();
 
       LIDARBasedREAModule remoteModule = new LIDARBasedREAModule(messager, new FilePropertyHelper(configurationFile), networkProvider);
       remoteModule.start();
