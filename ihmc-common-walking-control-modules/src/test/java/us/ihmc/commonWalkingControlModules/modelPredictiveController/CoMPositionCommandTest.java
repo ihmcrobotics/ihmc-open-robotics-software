@@ -318,12 +318,14 @@ public class CoMPositionCommandTest
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
-      solvedPositionAtConstraint.addX(timeOfConstraint * solution.get(6, 0));
-      solvedPositionAtConstraint.addX(solution.get(7, 0));
-      solvedPositionAtConstraint.addY(timeOfConstraint * solution.get(8, 0));
-      solvedPositionAtConstraint.addY(solution.get(9, 0));
-      solvedPositionAtConstraint.addZ(timeOfConstraint * solution.get(10, 0));
-      solvedPositionAtConstraint.addZ(solution.get(11, 0));
+      int start = 6 + 4 * rhoHelper.getRhoSize();
+
+      solvedPositionAtConstraint.addX(timeOfConstraint * solution.get(start, 0));
+      solvedPositionAtConstraint.addX(solution.get(start + 1, 0));
+      solvedPositionAtConstraint.addY(timeOfConstraint * solution.get(start + 2, 0));
+      solvedPositionAtConstraint.addY(solution.get(start + 3, 0));
+      solvedPositionAtConstraint.addZ(timeOfConstraint * solution.get(start + 4, 0));
+      solvedPositionAtConstraint.addZ(solution.get(start + 5, 0));
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12 + 4 * rhoHelper.getRhoSize(), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 
@@ -340,12 +342,12 @@ public class CoMPositionCommandTest
       taskObjectiveExpected.add(2, 0, -0.5 * timeOfConstraint * timeOfConstraint * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * (6 + rhoHelper.getRhoSize() * 4));
-      taskJacobianExpected.set(0, 6, timeOfConstraint);
-      taskJacobianExpected.set(0, 7, 1.0);
-      taskJacobianExpected.set(1, 8, timeOfConstraint);
-      taskJacobianExpected.set(1, 9, 1.0);
-      taskJacobianExpected.set(2, 10, timeOfConstraint);
-      taskJacobianExpected.set(2, 11, 1.0);
+      taskJacobianExpected.set(0, start, timeOfConstraint);
+      taskJacobianExpected.set(0, start + 1, 1.0);
+      taskJacobianExpected.set(1, start + 2, timeOfConstraint);
+      taskJacobianExpected.set(1, start + 3, 1.0);
+      taskJacobianExpected.set(2, start + 4, timeOfConstraint);
+      taskJacobianExpected.set(2, start + 5, 1.0);
 
 
 

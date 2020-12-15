@@ -59,9 +59,10 @@ public class CoMCoefficientJacobianCalculatorTest
 
          for (int segment = 0; segment < 4; segment++)
          {
-            CoMCoefficientJacobianCalculator.calculateCoMJacobian(segment, time, position, 0, 1.0);
-            CoMCoefficientJacobianCalculator.calculateCoMJacobian(segment, time, velocity, 1, 1.0);
-            CoMCoefficientJacobianCalculator.calculateCoMJacobian(segment, time, acceleration, 2, 1.0);
+            int startIndex = 6 * segment;
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(startIndex, time, position, 0, 1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(startIndex, time, velocity, 1, 1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(startIndex, time, acceleration, 2, 1.0);
 
             double c0 = time;
             double c1 = 1.0;
@@ -140,9 +141,10 @@ public class CoMCoefficientJacobianCalculatorTest
 
          for (int segment = 0; segment < 4; segment++)
          {
-            CoMCoefficientJacobianCalculator.calculateDCMJacobian(segment, omega, time, position, 0, 1.0);
-            CoMCoefficientJacobianCalculator.calculateDCMJacobian(segment, omega, time, velocity, 1, 1.0);
-            CoMCoefficientJacobianCalculator.calculateDCMJacobian(segment, omega, time, acceleration, 2, 1.0);
+            int comStartCol = segment * 6;
+            CoMCoefficientJacobianCalculator.calculateDCMJacobian(comStartCol, omega, time, position, 0, 1.0);
+            CoMCoefficientJacobianCalculator.calculateDCMJacobian(comStartCol, omega, time, velocity, 1, 1.0);
+            CoMCoefficientJacobianCalculator.calculateDCMJacobian(comStartCol, omega, time, acceleration, 2, 1.0);
 
             double c0 = time + 1.0 / omega;
             double c1 = 1.0;
@@ -215,8 +217,9 @@ public class CoMCoefficientJacobianCalculatorTest
 
          for (int segment = 0; segment < 4; segment++)
          {
-            CoMCoefficientJacobianCalculator.calculateVRPJacobian(segment, omega, time, position, 0, 1.0);
-            CoMCoefficientJacobianCalculator.calculateVRPJacobian(segment, omega, time, velocity, 1, 1.0);
+            int comStartIndex = 6 * segment;
+            CoMCoefficientJacobianCalculator.calculateVRPJacobian(comStartIndex, omega, time, position, 0, 1.0);
+            CoMCoefficientJacobianCalculator.calculateVRPJacobian(comStartIndex, omega, time, velocity, 1, 1.0);
 
             double c0 = time;
             double c1 = 1.0;

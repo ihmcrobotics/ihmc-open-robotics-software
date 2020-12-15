@@ -80,9 +80,6 @@ public class CoMPositionContinuityCommandTest
       FramePoint3D valueStartOf2 = new FramePoint3D();
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj((rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1);
-
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, (rhoHelper1.getRhoSize() + rhoHelper2.getRhoSize()) * 4, 1, 1.0);
 
       CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
@@ -94,10 +91,10 @@ public class CoMPositionContinuityCommandTest
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskJacobianExpected, 0, -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(6 + rhoHelper1.getRhoSize() * 4, 0.0, taskJacobianExpected, 0, -1.0);
 
       helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12);
+      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 6);
       helper.computeMatrices(0.0, omega);
       MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
 
@@ -105,13 +102,13 @@ public class CoMPositionContinuityCommandTest
       valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
       valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
 
-      valueStartOf2.setX(0.0 * solution.get(6, 0) + solution.get(7, 0));
-      valueStartOf2.setY(0.0 * solution.get(8, 0) + solution.get(9, 0));
-      valueStartOf2.setZ(0.0 * solution.get(10, 0) + solution.get(11, 0));
+      valueStartOf2.setX(0.0 * solution.get(6 + 4 * rhoHelper1.getRhoSize(), 0) + solution.get(7 + 4 * rhoHelper1.getRhoSize(), 0));
+      valueStartOf2.setY(0.0 * solution.get(8 + 4 * rhoHelper1.getRhoSize(), 0) + solution.get(9 + 4 * rhoHelper1.getRhoSize(), 0));
+      valueStartOf2.setZ(0.0 * solution.get(10 + 4 * rhoHelper1.getRhoSize(), 0) + solution.get(11 + 4 * rhoHelper1.getRhoSize(), 0));
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 12 + 4 * rhoIdx;
+         int startIdx = 6 + 4 * rhoIdx;
          double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
          rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
          rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);

@@ -5,15 +5,15 @@ import us.ihmc.commons.MathTools;
 
 public class CoMCoefficientJacobianCalculator
 {
-   public static void calculateCoMJacobian(int segmentId, double time, DMatrix jacobianToPack, int derivative, double scale)
+   public static void calculateCoMJacobian(int startIndex, double time, DMatrix jacobianToPack, int derivative, double scale)
    {
       switch (derivative)
       {
          case 0:
-            calculatePositionJacobian(segmentId, time, jacobianToPack, scale);
+            calculatePositionJacobian(startIndex, time, jacobianToPack, scale);
             break;
          case 1:
-            calculateVelocityJacobian(segmentId, jacobianToPack, scale);
+            calculateVelocityJacobian(startIndex, jacobianToPack, scale);
             break;
          case 2:
             calculateAccelerationJacobian();
@@ -26,22 +26,20 @@ public class CoMCoefficientJacobianCalculator
       }
    }
 
-   public static void calculateDCMJacobian(int segmentId, double omega, double time, DMatrix jacobianToPack, int derivative, double scale)
+   public static void calculateDCMJacobian(int startIndex, double omega, double time, DMatrix jacobianToPack, int derivative, double scale)
    {
-      calculateCoMJacobian(segmentId, time, jacobianToPack, derivative, scale);
-      calculateCoMJacobian(segmentId, time, jacobianToPack, derivative + 1, scale / omega);
+      calculateCoMJacobian(startIndex, time, jacobianToPack, derivative, scale);
+      calculateCoMJacobian(startIndex, time, jacobianToPack, derivative + 1, scale / omega);
    }
 
-   public static void calculateVRPJacobian(int segmentId, double omega, double time, DMatrix jacobianToPack, int derivative, double scale)
+   public static void calculateVRPJacobian(int startIndex, double omega, double time, DMatrix jacobianToPack, int derivative, double scale)
    {
-      calculateCoMJacobian(segmentId, time, jacobianToPack, derivative, scale);
-      calculateCoMJacobian(segmentId, time, jacobianToPack, derivative + 2, -scale / (omega * omega));
+      calculateCoMJacobian(startIndex, time, jacobianToPack, derivative, scale);
+      calculateCoMJacobian(startIndex, time, jacobianToPack, derivative + 2, -scale / (omega * omega));
    }
 
-   public static void calculatePositionJacobian(int segmentId, double time, DMatrix positionJacobianToPack, double scale)
+   public static void calculatePositionJacobian(int startIndex, double time, DMatrix positionJacobianToPack, double scale)
    {
-
-      int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
       double c1 = scale;
 
       add(positionJacobianToPack, 0, startIndex + 1, c1);
@@ -58,9 +56,8 @@ public class CoMCoefficientJacobianCalculator
       }
    }
 
-   public static void calculateVelocityJacobian(int segmentId, DMatrix velocityJacobianToPack, double scale)
+   public static void calculateVelocityJacobian(int startIndex, DMatrix velocityJacobianToPack, double scale)
    {
-      int startIndex = MPCIndexHandler.comCoefficientsPerSegment * segmentId;
       add(velocityJacobianToPack, 0, startIndex, scale);
       add(velocityJacobianToPack, 1, startIndex + 2, scale);
       add(velocityJacobianToPack, 2, startIndex + 4, scale);
