@@ -51,7 +51,7 @@ public class CoMTrajectoryModelPredictiveController
    private static final double mu = 0.8;
 
    public static final double initialComWeight = 5e3;
-   public static final double vrpTrackingWeight = 1e-5;
+   public static final double vrpTrackingWeight = 1e-1;
 
    private final MPCIndexHandler indexHandler;
 
