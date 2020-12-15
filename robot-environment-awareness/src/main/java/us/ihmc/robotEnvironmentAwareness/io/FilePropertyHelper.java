@@ -1,5 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.io;
 
+import us.ihmc.log.LogTools;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,14 +16,21 @@ public final class FilePropertyHelper
 {
    private final File configurationFile;
 
-   public FilePropertyHelper(File configurationFile)
-   {
-      this.configurationFile = ensureFileExists(configurationFile);
-   }
-
    public FilePropertyHelper(String configurationFilePath)
    {
-      this.configurationFile = ensureFileExists(new File(configurationFilePath));
+      this(new File(configurationFilePath), 2);
+   }
+
+   public FilePropertyHelper(File configurationFile)
+   {
+      this(configurationFile, 2);
+   }
+
+   private FilePropertyHelper(File configurationFile, int stackHeightForPrintout)
+   {
+      this.configurationFile = ensureFileExists(configurationFile);
+
+      LogTools.debug(stackHeightForPrintout, "Using configuration file: " + configurationFile.toPath().toAbsolutePath().normalize().toString());
    }
 
    private File ensureFileExists(File file)
