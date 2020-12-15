@@ -570,7 +570,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumePlanarRegionStepConstraintCommand();
       commandConsumer.consumePrepareForLocomotionCommands();
 
-      updateFailureDetection();
+//      updateFailureDetection(); // TODO Do not merge on develop
 
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
