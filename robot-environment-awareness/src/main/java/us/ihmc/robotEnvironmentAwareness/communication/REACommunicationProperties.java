@@ -18,6 +18,7 @@ import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
@@ -64,6 +65,7 @@ public class REACommunicationProperties
    static
    {
       privateNetClassList.registerPacketClass(Message.class);
+      privateNetClassList.registerPacketClass(Pose3D.class);
       privateNetClassList.registerPacketField(PacketDestination.class);
       privateNetClassList.registerPacketField(Boolean.class);
       privateNetClassList.registerPacketField(Double.class);
@@ -74,6 +76,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(Point3D.class);
       privateNetClassList.registerPacketField(Point3D32.class);
       privateNetClassList.registerPacketField(Point2D.class);
+      privateNetClassList.registerPacketField(Pose3D.class);
       privateNetClassList.registerPacketField(Vector3D.class);
       privateNetClassList.registerPacketField(Vector3D32.class);
       privateNetClassList.registerPacketField(Quaternion.class);
