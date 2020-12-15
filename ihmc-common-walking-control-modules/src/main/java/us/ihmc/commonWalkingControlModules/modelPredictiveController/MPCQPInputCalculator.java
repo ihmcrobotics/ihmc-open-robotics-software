@@ -424,7 +424,7 @@ public class MPCQPInputCalculator
       inputToPack.getDirectCostHessian().zero();
       inputToPack.getDirectCostGradient().zero();
 
-      vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.directCostGradient, objective);
+      vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective);
       double weight = objective.getWeight();
 
       inputToPack.setUseWeightScalar(true);

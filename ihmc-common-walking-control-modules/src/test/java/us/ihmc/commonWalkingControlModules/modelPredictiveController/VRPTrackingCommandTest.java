@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,7 +30,6 @@ public class VRPTrackingCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
@@ -47,15 +47,17 @@ public class VRPTrackingCommandTest
 
       contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose1, mu);
 
-      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
 
-      double duration1 = 0.7;
+      double duration = 0.7;
 
       VRPTrackingCommand command = new VRPTrackingCommand();
-      command.setSegmentDuration(duration1);
+      command.setStartVRP(startVRP);
+      command.setEndVRP(endVRP);
+      command.setSegmentDuration(duration);
       command.setSegmentNumber(0);
       command.setOmega(omega);
-      command.setWeight(1.0);
+      command.setWeight(10.0);
       command.addContactPlaneHelper(contactPlaneHelper);
 
       double regularization = 1e-5;
@@ -67,28 +69,31 @@ public class VRPTrackingCommandTest
       solver.solve();
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize()  * 4, 1);
+      DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize() * 4, 1);
 
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 12, 0, contactPlaneHelper.getRhoSize() * 4, 1, 1.0);
-
-
-      DMatrixRMaj taskHessianExpected = new DMatrixRMaj(3, 2 * 6 + contactPlaneHelper.getRhoSize() * 4);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskHessianExpected, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskHessianExpected, 2, -1.0 / omega2);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskHessianExpected, 0, -1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(1, 0.0, taskHessianExpected, 2, 1.0 / omega2);
-
-
+      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, contactPlaneHelper.getCoefficientSize(), 1, 1.0);
 
       FramePoint3D assembledValue = new FramePoint3D();
       FramePoint3D expectedValue = new FramePoint3D();
 
+      DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + contactPlaneHelper.getCoefficientSize());
 
-      for (double time = 0.0; time <= duration1; time += 0.001)
+      for (double time = 0.0; time <= duration; time += 0.001)
       {
          assembledValue.setX(time * solution.get(0, 0) + solution.get(1, 0));
          assembledValue.setY(time * solution.get(2, 0) + solution.get(3, 0));
          assembledValue.setZ(time * solution.get(4, 0) + solution.get(5, 0));
+
+         contactPlaneHelper.computeJacobians(time, omega);
+
+         jacobian.zero();
+
+         CoMCoefficientJacobianCalculator.calculateVRPJacobian(0, omega, time, jacobian, 0, 1.0);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearPositionJacobian(), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearAccelerationJacobian(), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
+
+         CommonOps_DDRM.mult(jacobian, solution, solutionPosition);
 
          for (int pointIdx = 0; pointIdx < contactPlaneHelper.getNumberOfContactPoints(); pointIdx++)
          {
@@ -96,7 +101,7 @@ public class VRPTrackingCommandTest
 
             for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
             {
-               int startIdx = 12 + pointIdx * 4 * 4 + 4 * rhoIdx;
+               int startIdx = 6 + pointIdx * 4 * 4 + 4 * rhoIdx;
                double rhoValue = Math.exp(omega * time) * solution.get(startIdx, 0);
                rhoValue += Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
                rhoValue += time * time * time * solution.get(startIdx + 2, 0);
@@ -112,13 +117,10 @@ public class VRPTrackingCommandTest
          }
          assembledValue.scaleAdd(0.5 * time * time - 1.0 / omega2, gravityVector, assembledValue);
 
-         double alpha = time / duration1;
+         double alpha = time / duration;
          expectedValue.interpolate(startVRP, endVRP, alpha);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedValue, assembledValue, 1e-4);
-
+         EuclidCoreTestTools.assertTuple3DEquals(expectedValue, assembledValue, 1e-3);
       }
    }
-
-
 }

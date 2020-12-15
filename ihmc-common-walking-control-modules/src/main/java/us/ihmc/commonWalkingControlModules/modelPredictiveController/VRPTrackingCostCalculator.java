@@ -94,6 +94,9 @@ public class VRPTrackingCostCalculator
       double a2Start = a2c1;
       double a3Start = a3c1;
 
+      double ga2 = t6 / 12.0 - t4 / w2 + 3.0 * t2 / w4;
+      double ga3 = t5 / 10 - 2.0 * t3 / (3.0 * w2) + 2.0 / w4 * t;
+
       vrpStart.set(objective.getStartVRP());
       vrpDelta.sub(objective.getEndVRP(), objective.getStartVRP());
 
@@ -103,8 +106,8 @@ public class VRPTrackingCostCalculator
          double c0 = t2 / 3.0 * vrpDelta.getElement(ordinal) + t2 / 2.0 * vrpStart.getElement(ordinal);
          double c1 = t / 2.0 * vrpDelta.getElement(ordinal) + t * vrpStart.getElement(ordinal);
 
-         costGradientToPack.add(offset, 0, c0);
-         costGradientToPack.add(offset + 1, 0, c1);
+         costGradientToPack.add(offset, 0, -c0);
+         costGradientToPack.add(offset + 1, 0, -c1);
       }
 
 
@@ -159,9 +162,10 @@ public class VRPTrackingCostCalculator
 
          double basisDotDelta = vrpDelta.dot(basisVector);
          double basisDotStart = vrpStart.dot(basisVector);
+         double basisDotG = basisVector.getZ() * gravityZ;
 
-         costGradientToPack.add(idxI, 0, basisDotDelta * a2Delta + basisDotStart * a2Start);
-         costGradientToPack.add(idxI + 1, 0, basisDotDelta * a3Delta + basisDotStart * a3Start);
+         costGradientToPack.add(idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2Start + basisDotG * ga2);
+         costGradientToPack.add(idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3Start + basisDotG * ga3);
       }
 
       return true;
