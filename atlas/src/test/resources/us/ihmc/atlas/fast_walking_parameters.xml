@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+	<registry name="DRCControllerThread">
+		<registry name="DRCMomentumBasedController">
+			<registry name="HumanoidHighLevelControllerManager">
+				<registry name="HighLevelHumanoidControllerFactory">
+					<registry name="RigidBodyGains">
+						<parameter name="kpXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+						<parameter name="kpZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
+						<parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+						<parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+					</registry>
+				</registry>
+			</registry>
+		</registry>
+	</registry>
+</parameters>
