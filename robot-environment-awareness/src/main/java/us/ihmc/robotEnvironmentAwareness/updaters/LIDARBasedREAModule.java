@@ -83,7 +83,7 @@ public class LIDARBasedREAModule implements PerceptionModule
 
    private final REANetworkProvider networkProvider;
 
-   private LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider)
+   public LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider)
    {
       this(reaMessager, filePropertyHelper, networkProvider, true);
    }
