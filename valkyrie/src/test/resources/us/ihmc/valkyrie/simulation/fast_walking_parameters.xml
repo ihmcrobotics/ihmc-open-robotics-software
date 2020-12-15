@@ -249,7 +249,7 @@
                         <parameter name="leftFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="leftFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0" />
-                        <parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="-0.005" />
                         <parameter name="leftFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
                         <parameter name="leftFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.33" />
                         <parameter name="leftFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
@@ -296,7 +296,7 @@
                         <parameter name="rightFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="rightFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0" />
-                        <parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="-0.005" />
                         <parameter name="rightFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
                         <parameter name="rightFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.33" />
                         <parameter name="rightFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
