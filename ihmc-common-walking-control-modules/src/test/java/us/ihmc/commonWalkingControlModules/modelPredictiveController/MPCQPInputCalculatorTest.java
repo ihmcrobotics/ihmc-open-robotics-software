@@ -187,14 +187,13 @@ public class MPCQPInputCalculatorTest
          DMatrixRMaj rhoMagnitudesJacobian = MPCTestHelper.getCoMPositionJacobian(time, omega, rhoHelper);
          DMatrixRMaj rhoRatesJacobian = MPCTestHelper.getCoMVelocityJacobian(time, omega, rhoHelper);
 
-
          DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
          DMatrixRMaj comVelocityJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
 
-         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 6, rhoMagnitudesJacobian, 0, 0, 3, 6, 1.0);
-         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 6, rhoRatesJacobian, 0, 0, 3, 6, 1.0);
-         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 12 + 4 * rhoSize, rhoMagnitudesJacobian, 0, 6, 3, 4 * rhoSize, 1.0);
-         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 12 + 4 * rhoSize, rhoRatesJacobian, 0, 6, 3, 4 * rhoSize, 1.0);
+//         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 0, rhoMagnitudesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
+//         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 0, rhoRatesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
+         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 6 + 4 * rhoSize, rhoMagnitudesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
+         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 6 + 4 * rhoSize, rhoRatesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
 
          FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
