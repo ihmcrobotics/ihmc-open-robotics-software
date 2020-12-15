@@ -17,6 +17,7 @@ public class MPCIndexHandler
    private int totalProblemSize = 0;
 
    private final int numberOfBasisVectorsPerContactPoint;
+   private final TIntArrayList comStartIndices = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
    private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
 
@@ -36,11 +37,15 @@ public class MPCIndexHandler
    public void initialize(IntUnaryOperator pointsInContact, int numberOfContacts)
    {
       rhoStartIndices.clear();
+      comStartIndices.clear();
       rhoCoefficientsInSegment.clear();
 
-      totalProblemSize = comCoefficientsPerSegment * numberOfContacts;
+      totalProblemSize = 0;
       for (int i = 0; i < numberOfContacts; i++)
       {
+         comStartIndices.add(totalProblemSize);
+         totalProblemSize += comCoefficientsPerSegment;
+
          int rhoCoefficients = coefficientsPerRho * numberOfBasisVectorsPerContactPoint * pointsInContact.applyAsInt(i);
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
@@ -48,9 +53,14 @@ public class MPCIndexHandler
       }
    }
 
+   public int getComCoefficientStartIndex(int segmentId)
+   {
+      return comStartIndices.get(segmentId);
+   }
+
    public int getComCoefficientStartIndex(int segmentId, int ordinal)
    {
-      return segmentId * comCoefficientsPerSegment + 2 * ordinal;
+      return getComCoefficientStartIndex(segmentId) + 2 * ordinal;
    }
 
    public int getRhoCoefficientStartIndex(int segmentId)

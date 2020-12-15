@@ -206,12 +206,13 @@ public class DCMPositionCommandTest
       taskObjectiveExpected.add(2, 0, -(0.5 * timeOfConstraint * timeOfConstraint + timeOfConstraint / omega) * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * (6 + rhoHelper.getRhoSize() * 4));
-      taskJacobianExpected.set(0, 6, timeOfConstraint + 1.0 / omega);
-      taskJacobianExpected.set(0, 7, 1.0);
-      taskJacobianExpected.set(1, 8, timeOfConstraint + 1.0 / omega);
-      taskJacobianExpected.set(1, 9, 1.0);
-      taskJacobianExpected.set(2, 10, timeOfConstraint + 1.0 / omega);
-      taskJacobianExpected.set(2, 11, 1.0);
+      int startIndex = 6 + rhoHelper.getRhoSize() * 4;
+      taskJacobianExpected.set(0, startIndex, timeOfConstraint + 1.0 / omega);
+      taskJacobianExpected.set(0, startIndex + 1, 1.0);
+      taskJacobianExpected.set(1, startIndex + 2, timeOfConstraint + 1.0 / omega);
+      taskJacobianExpected.set(1, startIndex + 3, 1.0);
+      taskJacobianExpected.set(2, startIndex + 4, timeOfConstraint + 1.0 / omega);
+      taskJacobianExpected.set(2, startIndex + 5, 1.0);
 
 
 

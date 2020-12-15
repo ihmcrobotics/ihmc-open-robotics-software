@@ -60,12 +60,15 @@ public class MPCQPInputCalculator
       double omega = objective.getOmega();
       double weight = objective.getWeight();
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstSegmentNumber,
+      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstCoMStartIndex,
                                                             firstSegmentDuration,
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondSegmentNumber, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondCoMStartIndex, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
@@ -128,13 +131,15 @@ public class MPCQPInputCalculator
       double omega2 = omega * omega;
       double weight = objective.getWeight();
 
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(firstSegmentNumber,
+      int firstSegmentCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondSegmentCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(firstSegmentCoMStartIndex,
                                                             omega,
                                                             firstSegmentDuration,
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             1.0);
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentNumber, omega, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentCoMStartIndex, omega, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
@@ -249,7 +254,8 @@ public class MPCQPInputCalculator
       double omega = objective.getOmega();
       double weight = objective.getWeight();
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(segmentNumber, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
+      int comStartCol = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartCol, timeOfObjective, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), 1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
@@ -287,7 +293,8 @@ public class MPCQPInputCalculator
       int objectiveOrder = objective.getDerivativeOrder();
       int objectiveHigherOrder = objectiveOrder + 1;
 
-      CoMCoefficientJacobianCalculator.calculateDCMJacobian(segmentNumber, omega, timeOfObjective, inputToPack.getTaskJacobian(), objectiveOrder, 1.0);
+      int comStartCol = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      CoMCoefficientJacobianCalculator.calculateDCMJacobian(comStartCol, omega, timeOfObjective, inputToPack.getTaskJacobian(), objectiveOrder, 1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
 
@@ -329,7 +336,8 @@ public class MPCQPInputCalculator
       double weight = objective.getWeight();
       double omega2 = omega * omega;
 
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(segmentNumber,
+      int comStartIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(comStartIndex,
                                                             omega,
                                                             timeOfObjective,
                                                             inputToPack.getTaskJacobian(),
