@@ -530,7 +530,7 @@
                </registry>
                <parameter name="ContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                <parameter name="CoPThresholdFraction" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
-               <parameter name="SecondContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="75.0" />
+               <parameter name="SecondContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
             </registry>
             <registry name="WalkingControllerState">
                <registry name="LinearMomentumRateControlModule">
