@@ -187,6 +187,9 @@ public class VRPTrackingCostCalculatorTest
       FrameVector3D vrpChange = new FrameVector3D();
       vrpChange.sub(endVRP, startVRP);
 
+      double changeDotBasis = vrpChange.dot(basisVector);
+      double startDotBasis = new FrameVector3D(startVRP).dot(basisVector);
+
       double deltaC0 = vrpChange.getX() * 1.0 / (3.0 * duration) * Math.pow(duration, 3.0) + 0.5 * startVRP.getX() * Math.pow(duration, 2.0);
       double deltaC1 = vrpChange.getX() * 1.0 / (2.0 * duration) * Math.pow(duration, 2.0) + startVRP.getX() * duration;
 
@@ -199,12 +202,20 @@ public class VRPTrackingCostCalculatorTest
       double gc4 = (0.5 / 4.0 * Math.pow(duration, 4.0) - duration * duration / (2.0 * omega2)) * gravityZ;
       double gc5 = (0.5 / 3.0 * Math.pow(duration, 3.0) - duration / omega2) * gravityZ;
 
+      double a2Change = changeDotBasis * (Math.pow(duration, 5.0) / (duration * 5.0) - 2.0 / (omega2 * duration) * Math.pow(duration, 3.0));
+      double a2Start = startDotBasis * (Math.pow(duration, 4.0) / 4.0 - 3.0 / omega2 * Math.pow(duration, 2.0));
+
+      double a3Change = changeDotBasis * (Math.pow(duration, 4.0) / (4.0 * duration) - Math.pow(duration, 2.0) / (omega2 * duration));
+      double a3Start = startDotBasis * (Math.pow(duration, 3.0) / 3.0 - 2.0 / omega2 * duration);
+
       costGradientExpected.set(0, 0, deltaC0);
       costGradientExpected.set(1, 0, deltaC1);
       costGradientExpected.set(2, 0, deltaC2);
       costGradientExpected.set(3, 0, deltaC3);
       costGradientExpected.set(4, 0, gc4 + deltaC4);
       costGradientExpected.set(5, 0, gc5 + deltaC5);
+      costGradientExpected.set(8, 0, a2Change + a2Start);
+      costGradientExpected.set(9, 0, a3Change + a3Start);
 
       EjmlUnitTests.assertEquals(costGradientExpected, costGradient, 1e-5);
    }
@@ -439,12 +450,35 @@ public class VRPTrackingCostCalculatorTest
       double gc4 = (0.5 / 4.0 * Math.pow(duration, 4.0) - duration * duration / (2.0 * omega2)) * gravityZ;
       double gc5 = (0.5 / 3.0 * Math.pow(duration, 3.0) - duration / omega2) * gravityZ;
 
+
+      double changeDotBasis0 = vrpChange.dot(basisVector0);
+      double changeDotBasis1 = vrpChange.dot(basisVector1);
+      double startDotBasis0 = new FrameVector3D(startVRP).dot(basisVector0);
+      double startDotBasis1 = new FrameVector3D(startVRP).dot(basisVector1);
+
+      double a2Change = changeDotBasis0 * (Math.pow(duration, 5.0) / (duration * 5.0) - 2.0 / (omega2 * duration) * Math.pow(duration, 3.0));
+      double a2Start = startDotBasis0 * (Math.pow(duration, 4.0) / 4.0 - 3.0 / omega2 * Math.pow(duration, 2.0));
+
+      double a3Change = changeDotBasis0 * (Math.pow(duration, 4.0) / (4.0 * duration) - Math.pow(duration, 2.0) / (omega2 * duration));
+      double a3Start = startDotBasis0 * (Math.pow(duration, 3.0) / 3.0 - 2.0 / omega2 * duration);
+
+      double a6Change = a2Change / changeDotBasis0 * changeDotBasis1;
+      double a6Start = a2Start / startDotBasis0 * startDotBasis1;
+
+      double a7Change = a3Change / changeDotBasis0 * changeDotBasis1;
+      double a7Start = a3Start / startDotBasis0 * startDotBasis1;
+
       costGradientExpected.set(0, 0, deltaC0);
       costGradientExpected.set(1, 0, deltaC1);
       costGradientExpected.set(2, 0, deltaC2);
       costGradientExpected.set(3, 0, deltaC3);
       costGradientExpected.set(4, 0, gc4 + deltaC4);
       costGradientExpected.set(5, 0, gc5 + deltaC5);
+
+      costGradientExpected.set(8, 0, a2Change + a2Start);
+      costGradientExpected.set(9, 0, a3Change + a3Start);
+      costGradientExpected.set(12, 0, a6Change + a6Start);
+      costGradientExpected.set(13, 0, a7Change + a7Start);
 
       EjmlUnitTests.assertEquals(costGradientExpected, costGradient, 1e-5);
    }
