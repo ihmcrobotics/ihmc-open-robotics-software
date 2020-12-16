@@ -875,7 +875,7 @@
                   <parameter name="alphaRootJointLinearVelocityNewTwist" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
                   <parameter name="trustCoPAsNonSlippingContactPoint" type="BooleanParameter" value="true" />
                   <parameter name="useControllerDesiredCoP" type="BooleanParameter" value="false" />
-                  <parameter name="CopFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="4.0" />
+                  <parameter name="CopFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="correctTrustedFeetPositions" type="BooleanParameter" value="false" />
                </registry>
                <parameter name="TrustOnlyLowestFoot" type="BooleanParameter" value="false" />
