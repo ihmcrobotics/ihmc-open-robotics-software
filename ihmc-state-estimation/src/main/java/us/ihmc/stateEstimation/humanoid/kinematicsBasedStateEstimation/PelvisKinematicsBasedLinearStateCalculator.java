@@ -63,7 +63,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final YoFramePoint3D rootJointPosition = new YoFramePoint3D("estimatedRootJointPositionWithKinematics", worldFrame, registry);
 
    private final Map<RigidBodyBasics, YoFrameVector3D> footVelocitiesInWorld = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
-   private final Map<RigidBodyBasics, Twist> footTwistsInWorld = new LinkedHashMap<RigidBodyBasics, Twist>();
    private final YoFrameVector3D rootJointLinearVelocityNewTwist = new YoFrameVector3D("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final DoubleProvider alphaRootJointLinearVelocityNewTwist;
 
@@ -193,8 +192,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          YoFrameVector3D footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
          footVelocitiesInWorld.put(foot, footVelocityInWorld);
-
-         footTwistsInWorld.put(foot, new Twist());
 
          ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
@@ -430,25 +427,23 @@ public class PelvisKinematicsBasedLinearStateCalculator
    }
 
    private final Twist tempRootBodyTwist = new Twist();
+   private final Twist footTwistInWorld = new Twist();
 
    private void updateKinematicsNewTwist()
    {
       tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
 
       tempFrameVector.setIncludingFrame(rootJointLinearVelocityNewTwist);
-      tempFrameVector.changeFrame(tempRootBodyTwist.getReferenceFrame());
-
-      tempRootBodyTwist.getLinearPart().set(tempFrameVector);
-      rootJoint.setJointTwist(tempRootBodyTwist);
-      rootJoint.updateFramesRecursively();
+      tempRootBodyTwist.getLinearPart().setMatchingFrame(tempFrameVector);
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
          RigidBodyBasics foot = feetRigidBodies.get(i);
-         Twist footTwistInWorld = footTwistsInWorld.get(foot);
          YoFrameVector3D footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
-         foot.getBodyFixedFrame().getTwistOfFrame(footTwistInWorld);
+         foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
+         tempRootBodyTwist.changeFrame(footTwistInWorld.getReferenceFrame());
+         footTwistInWorld.add(tempRootBodyTwist);
          footTwistInWorld.setBodyFrame(soleFrames.get(foot));
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
 
