@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.DirectionalControlConfigurationMessage;
 import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -30,13 +32,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -47,6 +49,7 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -59,6 +62,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -96,11 +100,13 @@ import java.util.concurrent.TimeUnit;
  * @author Mark Paterson (heavily based on existing hardware joystick walking code by Sylvain Bertand)
  *
  */
+
+
 @SuppressWarnings("restriction")
 public class DirectionalControlController extends ToolboxController {
 
-	/* Class constants */
-	private final int MAIN_TASK_RATE_MS = 500; // How often to consider publishing footsteps to the controller in milliseconds.
+   /* Class constants */
+	private final int MAIN_TASK_RATE_MS = 100; // How often to consider publishing footsteps to the controller in milliseconds.
 	                                           // XBox controller uses 500ms for the equivalent value.
 	
 	/* 
@@ -156,6 +162,13 @@ public class DirectionalControlController extends ToolboxController {
 	private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 	private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 	private final PlanarRegion tempRegion = new PlanarRegion();
+   private final SideDependentList<FramePose3D> lastSupportFootPoses = new SideDependentList<>(null, null);
+   private final ConcurrentLinkedQueue<Runnable> queuedTasksToProcess = new ConcurrentLinkedQueue<>();   
+   private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
+   private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
+   private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
+   private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();   
+   private boolean supportFootPosesInitialized = false;
 	
 	private FootstepDataListMessage lastPublishedFootstepPlan = null; // the last footstep plan published
 	
@@ -219,11 +232,11 @@ public class DirectionalControlController extends ToolboxController {
 
 		continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
 		continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
-		continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(getSoleFrame(robotSide)));
+      continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));		
 		continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
 		continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
 		continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
-
+		
 		ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 		ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
@@ -239,6 +252,23 @@ public class DirectionalControlController extends ToolboxController {
          if (newStatus == RobotMotionStatus.STANDING)
             hasSuccessfullyStoppedWalking.set(true);
       });		
+      
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      {
+         FootstepStatusMessage footstepStatus = s.takeNextData();
+         queuedTasksToProcess.add(() ->
+         {
+            continuousStepGenerator.consumeFootstepStatus(footstepStatus);
+
+            if (footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+            {
+               lastSupportFootPoses.put(RobotSide.fromByte(footstepStatus.getRobotSide()),
+                                        new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                        footstepStatus.getActualFootPositionInWorld(),
+                                                        footstepStatus.getActualFootOrientationInWorld()));
+            }
+         });
+      });      
 		
 		// Status on whether a footstep started/completed
 		ROS2Tools.createCallbackSubscription(ros2Node, 
@@ -261,6 +291,16 @@ public class DirectionalControlController extends ToolboxController {
 				                             RobotConfigurationData.class, 
 				                             controllerPubGenerator,
 				                             s -> updateRobotConfigurationData(s.takeNextData()));
+		
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      {
+         CapturabilityBasedStatus status = s.takeNextData();
+         queuedTasksToProcess.add(() ->
+         {
+            isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
+            isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
+         });
+      });		
 
 		pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
 		footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
@@ -326,7 +366,7 @@ public class DirectionalControlController extends ToolboxController {
 
 	public void updateInputs(DirectionalControlInputCommand command) {
 		controlInputCommand.set(command);
-//		LogTools.info("Input is now " + controlInputCommand.toString());
+      LogTools.info("Input is now " + controlInputCommand.toString());
 	}
 	
 	public void updateInputs(DirectionalControlInputMessage message) {
@@ -525,6 +565,11 @@ public class DirectionalControlController extends ToolboxController {
 		footstepsToSendReference.set(null);
 		continuousStepGenerator.stopWalking();
 		sendPauseMessage();
+		lastPublishedFootstepPlan = null;
+	}
+	
+	private boolean isNotYetWalking() {
+	   return lastPublishedFootstepPlan == null;	   
 	}
 
 	/**
@@ -557,7 +602,16 @@ public class DirectionalControlController extends ToolboxController {
 		FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
 		if (footstepsToSend != null) {
 		   if (isWalking.get()) {
-            if (!footstepsToSend.equals(lastPublishedFootstepPlan)) {
+		      // Publishing too often to the controller is wasted effort and sometimes causes halts in the plan execution. 
+		      // Here, we impose two filter conditions
+		      // - we will not republish a plan that is identical to the previous plan
+		      // - we publish plans only if we are either beginning walking and have not yet published a plan or in single support.
+		      // The single support condition solves the following situation.
+		      // - the robot completes a walking step and begins transition to single support on the landed foot
+		      // - the step is no longer in the next generated plan, so a new plan needs to be published
+		      // - publishing a new plan while in transition from double to single support causes the controller to rebalance,
+		      // interrupting the flow of movement
+            if (!footstepsToSend.equals(lastPublishedFootstepPlan) && (isNotYetWalking() || !isInDoubleSupport.getValue())) {
                long millis = System.currentTimeMillis();
                LogTools.info(String.format("%d.%d: Publishing Footsteps", millis / 1000, millis % 1000));
                footstepPublisher.publish(footstepsToSend);
@@ -714,6 +768,44 @@ public class DirectionalControlController extends ToolboxController {
 	public void updateInternal() throws Exception {
 		
 		try {
+         while (!queuedTasksToProcess.isEmpty())
+            queuedTasksToProcess.poll().run();		
+         
+         if (!supportFootPosesInitialized)
+         {
+            if (isLeftFootInSupport.get() && isRightFootInSupport.get())
+            {
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  lastSupportFootPoses.put(robotSide, new FramePose3D(getSoleFrame(robotSide)));
+               }
+
+               supportFootPosesInitialized = true;
+            }
+            else
+            {
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  if (!isFootInSupport.get(robotSide).get())
+                     LogTools.warn(robotSide.getPascalCaseName() + " foot is not in support, cannot initialize foot poses.");
+               }
+            }
+         }
+
+         if (!supportFootPosesInitialized)
+            return;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (isFootInSupport.get(robotSide).get())
+            { // Touchdown may not have been made with the foot properly settled, so we update the support foot pose if its current pose is lower.
+               MovingReferenceFrame soleFrame = getSoleFrame(robotSide);
+               double currentHeight = soleFrame.getTransformToWorldFrame().getTranslationZ();
+               if (currentHeight < lastSupportFootPoses.get(robotSide).getZ())
+                  lastSupportFootPoses.put(robotSide, new FramePose3D(soleFrame));
+            }
+         }         
+		   
 			DirectionalControlController.this.handleIncomingMessages();
 			PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
 			if (latestMessage != null) {
