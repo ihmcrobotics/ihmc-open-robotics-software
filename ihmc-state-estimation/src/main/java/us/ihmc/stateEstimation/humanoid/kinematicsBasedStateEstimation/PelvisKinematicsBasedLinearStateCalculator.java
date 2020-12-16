@@ -41,9 +41,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using the leg kinematics.
+ * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using
+ * the leg kinematics.
+ * 
  * @author Sylvain
- *
  */
 public class PelvisKinematicsBasedLinearStateCalculator
 {
@@ -111,8 +112,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
                                                      Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
                                                      Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-                                                     CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
-                                                     StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                     CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
+                                                     double estimatorDT,
+                                                     StateEstimatorParameters stateEstimatorParameters,
+                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      YoRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -121,19 +124,34 @@ public class PelvisKinematicsBasedLinearStateCalculator
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
 
-      footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency", registry, stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz());
-      alphaRootJointLinearVelocityNewTwist = new DoubleParameter("alphaRootJointLinearVelocityNewTwist", registry, stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
-      trustCoPAsNonSlippingContactPoint = new BooleanParameter("trustCoPAsNonSlippingContactPoint", registry, stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
+      footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency",
+                                                                  registry,
+                                                                  stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz());
+      alphaRootJointLinearVelocityNewTwist = new DoubleParameter("alphaRootJointLinearVelocityNewTwist",
+                                                                 registry,
+                                                                 stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
+      trustCoPAsNonSlippingContactPoint = new BooleanParameter("trustCoPAsNonSlippingContactPoint",
+                                                               registry,
+                                                               stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
       useControllerDesiredCoP = new BooleanParameter("useControllerDesiredCoP", registry, stateEstimatorParameters.useControllerDesiredCenterOfPressure());
       copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       correctTrustedFeetPositions = new BooleanParameter("correctTrustedFeetPositions", registry, stateEstimatorParameters.correctTrustedFeetPositions());
 
-      /* These are for debug purposes, not need to clutter the state estimator parameters class with them. */
+      /*
+       * These are for debug purposes, not need to clutter the state estimator parameters class with them.
+       */
       alphaRootJointLinearVelocityBacklashKinematics.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       slopTimeRootJointLinearVelocityBacklashKinematics.set(0.03);
-      rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "",
-            alphaRootJointLinearVelocityBacklashKinematics, estimatorDT, slopTimeRootJointLinearVelocityBacklashKinematics, registry, rootJointPosition);
-      /* ------------------------------------------------------------------------------------------------- */
+      rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin",
+                                                                                                                                            "",
+                                                                                                                                            alphaRootJointLinearVelocityBacklashKinematics,
+                                                                                                                                            estimatorDT,
+                                                                                                                                            slopTimeRootJointLinearVelocityBacklashKinematics,
+                                                                                                                                            registry,
+                                                                                                                                            rootJointPosition);
+      /*
+       * -------------------------------------------------------------------------------------------------
+       */
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
@@ -143,8 +161,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          String namePrefix = foot.getName();
 
-         DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(), estimatorDT);
-         AlphaFilteredYoFrameVector footToRootJointPosition = new AlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+         DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
+                                                                                                          estimatorDT);
+         AlphaFilteredYoFrameVector footToRootJointPosition = new AlphaFilteredYoFrameVector(namePrefix
+               + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          footToRootJointPositions.put(foot, footToRootJointPosition);
 
          YoFramePoint3D rootJointPosition = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
@@ -153,17 +173,18 @@ public class PelvisKinematicsBasedLinearStateCalculator
          YoFramePoint3D footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
          footPositionsInWorld.put(foot, footPositionInWorld);
 
-         FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(feetContactablePlaneBodies.get(foot).getContactPoints2d()));
+         FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(feetContactablePlaneBodies.get(foot)
+                                                                                                                                             .getContactPoints2d()));
          footPolygons.put(foot, footPolygon);
 
-         FrameLineSegment2D tempLineSegment = new FrameLineSegment2D(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
-         footCenterCoPLineSegments.put(foot, tempLineSegment);
+         footCenterCoPLineSegments.put(foot, new FrameLineSegment2D(soleFrame));
 
          YoFramePoint2D copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
          copsRawInFootFrame.put(foot, copRawInFootFrame);
 
          DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
-         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = new AlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
+         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = new AlphaFilteredYoFramePoint2d(namePrefix
+               + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0);
          copsFilteredInFootFrame.put(foot, copFilteredInFootFrame);
 
@@ -198,7 +219,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
             {
                RigidBodyBasics foot = feetRigidBodies.get(i);
                String sidePrefix = foot.getName();
-               YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(foot), 0.005, YoAppearance.DeepPink());
+               YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP",
+                                                                    copPositionsInWorld.get(foot),
+                                                                    0.005,
+                                                                    YoAppearance.DeepPink());
                YoArtifactPosition artifact = copInWorld.createArtifact();
                artifact.setVisible(false);
                yoGraphicsListRegistry.registerArtifact("StateEstimator", artifact);
@@ -211,6 +235,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Estimates the foot positions corresponding to the given pelvisPosition
+    * 
     * @param pelvisPosition
     */
    public void initialize(FramePoint3D pelvisPosition)
@@ -239,39 +264,35 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Estimates the pelvis position and linear velocity using the leg kinematics
-    * @param trustedFoot is the foot used to estimates the pelvis state
+    * 
+    * @param trustedFoot          is the foot used to estimates the pelvis state
     * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
     */
    private void updatePelvisWithKinematics(RigidBodyBasics trustedFoot, int numberOfTrustedFeet)
    {
       double scaleFactor = 1.0 / numberOfTrustedFeet;
 
-      tempPosition.set(footToRootJointPositions.get(trustedFoot));
-      tempPosition.scale(scaleFactor);
-      rootJointPosition.add(tempPosition);
-      tempPosition.set(footPositionsInWorld.get(trustedFoot));
+      tempPosition.add(footPositionsInWorld.get(trustedFoot), footToRootJointPositions.get(trustedFoot));
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
 
-      YoFramePoint3D rootJointPositionPerFoot = rootJointPositionsPerFoot.get(trustedFoot);
-      rootJointPositionPerFoot.set(footPositionsInWorld.get(trustedFoot));
-      rootJointPositionPerFoot.add(footToRootJointPositions.get(trustedFoot));
+      rootJointPositionsPerFoot.get(trustedFoot).add(footPositionsInWorld.get(trustedFoot), footToRootJointPositions.get(trustedFoot));
 
-      tempFrameVector.setIncludingFrame(footVelocitiesInWorld.get(trustedFoot));
-      tempFrameVector.scale(scaleFactor * alphaRootJointLinearVelocityNewTwist.getValue());
-      rootJointLinearVelocityNewTwist.sub(tempFrameVector);
+      rootJointLinearVelocityNewTwist.scaleAdd(-scaleFactor * alphaRootJointLinearVelocityNewTwist.getValue(),
+                                               footVelocitiesInWorld.get(trustedFoot),
+                                               rootJointLinearVelocityNewTwist);
    }
 
    /**
     * updates the position of a swinging foot
-    * @param swingingFoot a foot in swing
+    * 
+    * @param swingingFoot   a foot in swing
     * @param pelvisPosition the current pelvis position
     */
    private void updateUntrustedFootPosition(RigidBodyBasics swingingFoot, FramePoint3DReadOnly pelvisPosition)
    {
       YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(swingingFoot);
-      footPositionInWorld.set(pelvisPosition);
-      footPositionInWorld.sub(footToRootJointPositions.get(swingingFoot));
+      footPositionInWorld.sub(pelvisPosition, footToRootJointPositions.get(swingingFoot));
 
       copPositionsInWorld.get(swingingFoot).set(footPositionInWorld);
 
@@ -281,16 +302,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private void updateTrustedFootPosition(RigidBodyBasics trustedFoot)
    {
-      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(trustedFoot);
+      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(trustedFoot); // Previous foot position
       AlphaFilteredYoFrameVector footToRootJointPosition = footToRootJointPositions.get(trustedFoot);
 
       if (trustCoPAsNonSlippingContactPoint.getValue())
       {
-         tempPosition.setIncludingFrame(footToRootJointPosition);
-         tempFramePoint.setIncludingFrame(rootJointPosition);
-         tempFramePoint.sub(tempPosition); // New foot position
-         tempPosition.set(footPositionInWorld); // Previous foot position
-         tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
+         tempFrameVector.setIncludingFrame(rootJointPosition);
+         tempFrameVector.sub(footToRootJointPosition); // New foot position
+         tempFrameVector.sub(footPositionInWorld); // Delta from previous to new foot position
          copPositionsInWorld.get(trustedFoot).add(tempFrameVector); // New CoP position
       }
 
@@ -300,6 +319,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Compute the foot CoP. The CoP is the point on the support foot trusted to be not slipping.
+    * 
     * @param trustedSide
     * @param footSwitch
     */
@@ -310,7 +330,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (trustCoPAsNonSlippingContactPoint.getValue())
       {
-
          if (useControllerDesiredCoP.getValue())
             centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, trustedFoot);
          else
@@ -356,7 +375,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          tempCoPOffset.setIncludingFrame(footFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
          copFilteredInFootFrame.update();
-         tempCoPOffset.setIncludingFrame(footFrame, copFilteredInFootFrame.getX() - tempCoPOffset.getX(), copFilteredInFootFrame.getY() - tempCoPOffset.getY(), 0.0);
+         tempCoPOffset.setIncludingFrame(footFrame,
+                                         copFilteredInFootFrame.getX() - tempCoPOffset.getX(),
+                                         copFilteredInFootFrame.getY() - tempCoPOffset.getY(),
+                                         0.0);
 
          tempCoPOffset.changeFrame(worldFrame);
          copPositionsInWorld.get(trustedFoot).add(tempCoPOffset);
@@ -368,7 +390,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
    }
 
    /**
-    * Assuming the CoP is not moving, the foot position can be updated. That way we can see if the foot is on the edge.
+    * Assuming the CoP is not moving, the foot position can be updated. That way we can see if the foot
+    * is on the edge.
+    * 
     * @param plantedFoot
     */
    private void correctFootPositionsUsingCoP(RigidBodyBasics plantedFoot)
@@ -379,9 +403,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       tempCoPOffset.setIncludingFrame(copsFilteredInFootFrame.get(plantedFoot), 0.0);
       tempCoPOffset.changeFrame(worldFrame);
 
-      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(plantedFoot);
-      footPositionInWorld.set(copPositionsInWorld.get(plantedFoot));
-      footPositionInWorld.sub(tempCoPOffset);
+      footPositionsInWorld.get(plantedFoot).sub(copPositionsInWorld.get(plantedFoot), tempCoPOffset);
    }
 
    /**
@@ -428,11 +450,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          foot.getBodyFixedFrame().getTwistOfFrame(footTwistInWorld);
          footTwistInWorld.setBodyFrame(soleFrames.get(foot));
-         footTwistInWorld.changeFrame(soleFrames.get(foot));
+         footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
 
          tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
-         footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
          tempCoP.changeFrame(footTwistInWorld.getReferenceFrame());
          footTwistInWorld.getLinearVelocityAt(tempCoP, tempFrameVector);
 
