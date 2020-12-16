@@ -174,8 +174,6 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       LidarScanMessage message = subscriber.takeNextData();
 
-      LogTools.info("Dispatching LidarScanMessage scan size: {}", message.scan_.size());
-
       moduleStateReporter.registerLidarScanMessage(message);
       lidarBufferUpdater.handleLidarScanMessage(message);
       latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
