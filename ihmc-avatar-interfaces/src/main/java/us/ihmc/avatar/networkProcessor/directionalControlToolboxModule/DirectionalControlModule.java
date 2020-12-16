@@ -30,7 +30,7 @@ public class DirectionalControlModule extends ToolboxModule {
 	 * reacting to the input happens in the controller's updateInternal() function. Unlike the InputListener, the 
 	 * call to upateInternal is performed on a separate thread, and so will not block other processing.
 	 */
-	private final static int UPDATE_PERIOD_IN_MS = 1;
+	private final static int UPDATE_PERIOD_IN_MS = 10;
 
 	public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer) {
 		super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(),
