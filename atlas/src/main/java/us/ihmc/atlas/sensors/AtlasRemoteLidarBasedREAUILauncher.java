@@ -30,7 +30,7 @@ public class AtlasRemoteLidarBasedREAUILauncher
 //      KryoMessager messager = KryoMessager.createTCPClient(REAModuleAPI.API, "poweredge", NetworkPorts.REA_MODULE_UI_PORT, getPrivateNetClassList());
 //      ExceptionTools.handle(messager::startMessager, RUNTIME_EXCEPTION);
 
-      KryoMessager messager = KryoMessager.createClient(REAModuleAPI.API, "poweredge", NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 5);
+      KryoMessager messager = KryoMessager.createClient(REAModuleAPI.API, "poweredge", NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 1);
       messager.startMessagerBlocking();
 
       REAUIMessager uiMessager = new REAUIMessager(messager);
