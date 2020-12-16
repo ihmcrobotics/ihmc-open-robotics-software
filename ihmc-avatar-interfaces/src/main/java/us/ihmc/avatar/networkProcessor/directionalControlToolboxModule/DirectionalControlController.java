@@ -58,6 +58,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -120,6 +121,9 @@ public class DirectionalControlController extends ToolboxController {
 
 	// Whether walking is enabled in the controller
 	private final AtomicBoolean isWalking = new AtomicBoolean(false);
+	
+	// Whether robot has stopped walking on request. Needed because sometimes request messages are lost.
+   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);	
 
     // Support for "profiles" that determine how aggressive or conservative the steps will be	
 	private JoystickStepParameters controlParameters;
@@ -223,6 +227,19 @@ public class DirectionalControlController extends ToolboxController {
 		ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 		ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
+         RobotMotionStatus newStatus = RobotMotionStatus.fromByte(s.takeNextData().getRobotMotionStatus());
+         // We only want to verify that the last PauseWalking sent has been successfully executed once.
+         // Considering that the user may use a separate app to get the robot to walk, we do not want to interfere with the other app.
+         if (hasSuccessfullyStoppedWalking.get() || isWalking.get())
+            return;
+         if (newStatus == null)
+            return;
+         if (newStatus == RobotMotionStatus.STANDING)
+            hasSuccessfullyStoppedWalking.set(true);
+      });		
+		
 		// Status on whether a footstep started/completed
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             FootstepStatusMessage.class, controllerPubGenerator,
@@ -497,6 +514,7 @@ public class DirectionalControlController extends ToolboxController {
 	public void startWalking() {
 		isWalking.set(true);
 		continuousStepGenerator.startWalking();
+      hasSuccessfullyStoppedWalking.set(false);		
 	}
 
 	/**
@@ -549,8 +567,12 @@ public class DirectionalControlController extends ToolboxController {
             }
 		   }
 		}
-		if (!isWalking.get())
-			sendPauseMessage();
+		
+      // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
+		if (!isWalking.get()) {
+	      if (!hasSuccessfullyStoppedWalking.get())
+	         sendPauseMessage();
+		}
 	}
 
 	/**
