@@ -144,6 +144,10 @@ public class ValkyrieNetworkProcessor
          networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
          networkProcessor.setupHumanoidAvatarREAStateUpdater();
       }
+      
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_directional_nav)) {
+         networkProcessor.setupDirectionalControlModule(true);
+      }
 
        // Always required for Valkyrie
        networkProcessor.setupRosModule();
