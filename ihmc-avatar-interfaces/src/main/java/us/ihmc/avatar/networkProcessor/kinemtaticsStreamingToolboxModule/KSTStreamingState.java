@@ -209,6 +209,7 @@ public class KSTStreamingState implements State
                                                                                                                  toolboxControllerPeriod);
       inputsFilterBreakFrequency.set(2.0);
       inputVelocityDecay.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / 0.5, toolboxControllerPeriod));
+      // inputVelocityDecay.set(1.0);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
