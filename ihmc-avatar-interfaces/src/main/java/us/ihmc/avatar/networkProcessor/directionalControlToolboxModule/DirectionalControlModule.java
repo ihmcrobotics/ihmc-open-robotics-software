@@ -29,10 +29,8 @@ public class DirectionalControlModule extends ToolboxModule {
 	 * in the constructor). However, this level of processing is limited to simple updates. The heavier work of 
 	 * reacting to the input happens in the controller's updateInternal() function. Unlike the InputListener, the 
 	 * call to upateInternal is performed on a separate thread, and so will not block other processing.
-	 * The generic default update period for toolboxes is 1ms, which is much faster than is needed for
-	 * this toolbox, so we'll bump it up to something more reasonable.
 	 */
-	private final static int UPDATE_PERIOD_IN_MS = 1000;
+	private final static int UPDATE_PERIOD_IN_MS = 1;
 
 	public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer) {
 		super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(),
