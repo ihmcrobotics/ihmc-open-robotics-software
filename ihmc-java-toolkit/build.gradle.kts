@@ -22,6 +22,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-commons:0.30.4")
+   api("us.ihmc:log-tools:0.6.1")
    api("us.ihmc:euclid:0.15.2")
    api("us.ihmc:euclid-frame:0.15.2")
    api("us.ihmc:euclid-shape:0.15.2")
