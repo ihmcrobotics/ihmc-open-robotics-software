@@ -222,6 +222,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
       factory.addTransition(WalkToLocationStates.WAIT_FOR_GOAL, WalkToLocationStates.PLAN_PATH, t -> currentGoalPose.get() != null);
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.WALK_PATH, t -> isPlanPathComplete() && hasValidPlanPath());
+      factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_FAILED, t -> isPlanPathComplete() && !hasValidPlanPath());
+
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
       factory.addTransition(WalkToLocationStates.WALK_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
 
