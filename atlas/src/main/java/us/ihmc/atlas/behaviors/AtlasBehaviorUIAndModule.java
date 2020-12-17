@@ -55,7 +55,6 @@ public class AtlasBehaviorUIAndModule
                                                 behaviorMessagerCommunicationMode,
                                                 "localhost",
                                                 behaviorModule.getMessager());
-      behaviorUI.selectBehavior(BuildingExplorationBehavior.DEFINITION);
    }
    
    private DRCRobotModel createRobotModel()
