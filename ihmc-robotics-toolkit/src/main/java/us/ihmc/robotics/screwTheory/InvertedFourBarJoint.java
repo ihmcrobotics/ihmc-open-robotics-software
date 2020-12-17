@@ -106,8 +106,16 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       predecessor.getChildrenJoints().remove(getJointB());
       predecessor.addChildJoint(this);
 
-      beforeJointFrame = getJointA().getFrameBeforeJoint();
-      afterJointFrame = getJointD().getFrameAfterJoint();
+      if (getJointB().isLoopClosure() || getJointC().isLoopClosure())
+      {
+         beforeJointFrame = getJointA().getFrameBeforeJoint();
+         afterJointFrame = getJointD().getFrameAfterJoint();
+      }
+      else
+      {
+         beforeJointFrame = getJointB().getFrameBeforeJoint();
+         afterJointFrame = getJointC().getFrameAfterJoint();
+      }
 
       if (predecessor.isRootBody())
          nameId = name;
@@ -185,19 +193,35 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    {
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
       DMatrixRMaj loopConvectiveTerm = fourBarFunction.getLoopConvectiveTerm();
-      RevoluteJointBasics jointA = getJointA();
-      RevoluteJointBasics jointD = getJointD();
-      double J_A = loopJacobian.get(0);
-      double J_D = loopJacobian.get(3);
+      RevoluteJointBasics joint1, joint2;
+      double J_1, J_2, c_1, c_2;
+      if (beforeJointFrame == getJointA().getFrameBeforeJoint())
+      {
+         joint1 = getJointA();
+         joint2 = getJointD();
+         J_1 = loopJacobian.get(0);
+         J_2 = loopJacobian.get(3);
+         c_1 = loopConvectiveTerm.get(0);
+         c_2 = loopConvectiveTerm.get(3);
+      }
+      else
+      {
+         joint1 = getJointB();
+         joint2 = getJointC();
+         J_1 = loopJacobian.get(1);
+         J_2 = loopJacobian.get(2);
+         c_1 = loopConvectiveTerm.get(1);
+         c_2 = loopConvectiveTerm.get(2);
+      }
 
-      unitJointTwist.setIncludingFrame(jointA.getUnitJointTwist());
-      unitJointTwist.scale(J_A);
-      unitJointTwist.setBodyFrame(jointD.getFrameBeforeJoint());
-      unitJointTwist.changeFrame(jointD.getFrameAfterJoint());
-      tempTwist.setIncludingFrame(jointD.getUnitJointTwist());
-      tempTwist.scale(J_D);
+      unitJointTwist.setIncludingFrame(joint1.getUnitJointTwist());
+      unitJointTwist.scale(J_1);
+      unitJointTwist.setBodyFrame(joint2.getFrameBeforeJoint());
+      unitJointTwist.changeFrame(joint2.getFrameAfterJoint());
+      tempTwist.setIncludingFrame(joint2.getUnitJointTwist());
+      tempTwist.scale(J_2);
       unitJointTwist.add(tempTwist);
-      unitJointTwist.scale(1.0 / (J_A + J_D));
+      unitJointTwist.scale(1.0 / (J_1 + J_2));
       // Since we're ignoring the bias terms, the unit-accelerations are the same as the unit-twists.
       unitJointAcceleration.setIncludingFrame(unitJointTwist);
 
@@ -205,19 +229,19 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
        * This next block is for computing the bias acceleration. I ended up using tests to figure out
        * exactly what it should, but I feel that it can be simplified.
        */
-      jointD.getFrameAfterJoint().getTwistRelativeToOther(jointA.getFrameAfterJoint(), deltaTwist);
-      jointD.getFrameBeforeJoint().getTwistRelativeToOther(jointA.getFrameBeforeJoint(), bodyTwist);
-      deltaTwist.changeFrame(jointD.getFrameAfterJoint());
-      bodyTwist.changeFrame(jointD.getFrameAfterJoint());
-      jointBiasAcceleration.setIncludingFrame(jointA.getUnitJointAcceleration());
-      jointBiasAcceleration.scale(loopConvectiveTerm.get(0));
-      jointBiasAcceleration.setBodyFrame(jointD.getFrameBeforeJoint());
-      jointBiasAcceleration.changeFrame(jointD.getFrameAfterJoint(), deltaTwist, bodyTwist);
-      tempAcceleration.setIncludingFrame(jointD.getUnitJointAcceleration());
-      tempAcceleration.scale(loopConvectiveTerm.get(3));
+      joint2.getFrameAfterJoint().getTwistRelativeToOther(joint1.getFrameAfterJoint(), deltaTwist);
+      joint2.getFrameBeforeJoint().getTwistRelativeToOther(joint1.getFrameBeforeJoint(), bodyTwist);
+      deltaTwist.changeFrame(joint2.getFrameAfterJoint());
+      bodyTwist.changeFrame(joint2.getFrameAfterJoint());
+      jointBiasAcceleration.setIncludingFrame(joint1.getUnitJointAcceleration());
+      jointBiasAcceleration.scale(c_1);
+      jointBiasAcceleration.setBodyFrame(joint2.getFrameBeforeJoint());
+      jointBiasAcceleration.changeFrame(joint2.getFrameAfterJoint(), deltaTwist, bodyTwist);
+      tempAcceleration.setIncludingFrame(joint2.getUnitJointAcceleration());
+      tempAcceleration.scale(c_2);
       jointBiasAcceleration.add(tempAcceleration);
       tempAcceleration.setIncludingFrame(unitJointAcceleration);
-      tempAcceleration.scale(-(loopConvectiveTerm.get(0) + loopConvectiveTerm.get(3)));
+      tempAcceleration.scale(-(c_1 + c_2));
       jointBiasAcceleration.add((SpatialVectorReadOnly) tempAcceleration);
 
       if (getSuccessor() != null)
@@ -553,21 +577,35 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    @Override
    public void setQ(double q)
    {
-      getMasterJoint().setQ(ikSolver.solve(q, fourBarFunction.getMasterVertex()));
+      getMasterJoint().setQ(computeMasterJointQ(q));
+   }
+
+   public double computeMasterJointQ(double q)
+   {
+      return ikSolver.solve(q, fourBarFunction.getMasterVertex());
    }
 
    @Override
    public void setQd(double qd)
    {
+      getMasterJoint().setQd(computeMasterJointQd(qd));
+   }
+
+   public double computeMasterJointQd(double qd)
+   {
       fourBarFunction.updateState(false, false);
       // qd = (J_A + J_D) qd_M = (J_B + J_C) qd_M
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
-      double qd_master = qd / (loopJacobian.get(0) + loopJacobian.get(3));
-      getMasterJoint().setQd(qd_master);
+      return qd / (loopJacobian.get(0) + loopJacobian.get(3));
    }
 
    @Override
    public void setQdd(double qdd)
+   {
+      getMasterJoint().setQdd(computeMasterJointQdd(qdd));
+   }
+
+   public double computeMasterJointQdd(double qdd)
    {
       fourBarFunction.updateState(false, false);
       // qdd = (J_A + J_D) qdd_M + c_A + c_D = (J_B + J_C) qdd_M + c_B + c_C
@@ -575,7 +613,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       DMatrixRMaj loopConvectiveTerm = fourBarFunction.getLoopConvectiveTerm();
       qdd = qdd - loopConvectiveTerm.get(0) - loopConvectiveTerm.get(3);
       double qdd_master = qdd / (loopJacobian.get(0) + loopJacobian.get(3));
-      getMasterJoint().setQdd(qdd_master);
+      return qdd_master;
    }
 
    @Override
@@ -585,12 +623,16 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       getJointB().setJointTauToZero();
       getJointC().setJointTauToZero();
       getJointD().setJointTauToZero();
+      getMasterJoint().setTau(computeMasterJointTau(tau));
+   }
 
+   public double computeMasterJointTau(double tau)
+   {
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
       if (getMasterJoint() == getJointA() || getMasterJoint() == getJointD())
-         getMasterJoint().setTau((loopJacobian.get(0) + loopJacobian.get(3)) * tau);
+         return ((loopJacobian.get(0) + loopJacobian.get(3)) * tau);
       else
-         getMasterJoint().setTau((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
+         return ((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
    }
 
    @Override
