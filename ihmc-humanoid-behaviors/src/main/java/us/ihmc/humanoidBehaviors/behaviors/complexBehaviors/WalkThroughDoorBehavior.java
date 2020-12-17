@@ -121,7 +121,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
-      searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
+      
+      
+      
+      searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoTime, referenceFrames, atlasPrimitiveActions);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
       openPushDoorBehavior = new OpenPushDoorBehavior(robotName,
@@ -216,6 +219,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //this is the first search for the door, once automated searching is in place, this should be an all the time thing.
       BehaviorAction searchForDoorFar = new BehaviorAction(searchForDoorBehavior)
       {
+         
+         @Override
+         protected void setBehaviorInput()
+         {
+            searchForDoorBehavior.setScanForDoor(true);
+            super.setBehaviorInput();
+         }
 
          @Override
          public void onEntry()
