@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,13 +23,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -61,11 +67,14 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
+   private final Map<OneDoFJointBasics, YoDouble> jointPositionCheckMap = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoDouble> jointVelocityCheckMap = new HashMap<>();
+
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
+      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
@@ -100,6 +109,20 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
+
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, fullRobotModel.getElevator()).forEach(joint ->
+      {
+         jointPositionCheckMap.put(joint, new YoDouble("q_check_" + joint.getName(), registry));
+         jointVelocityCheckMap.put(joint, new YoDouble("qd_check_" + joint.getName(), registry));
+         if (joint instanceof InvertedFourBarJoint)
+         {
+            for (RevoluteJointBasics subJoint : ((InvertedFourBarJoint) joint).getFourBarFunction().getLoopJoints())
+            {
+               jointPositionCheckMap.put(subJoint, new YoDouble("q_check_" + subJoint.getName(), registry));
+               jointVelocityCheckMap.put(subJoint, new YoDouble("qd_check_" + subJoint.getName(), registry));
+            }
+         }
+      });
 
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
@@ -169,6 +192,9 @@ public class WalkingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      jointPositionCheckMap.forEach((joint, q) -> q.set(joint.getQ()));
+      jointVelocityCheckMap.forEach((joint, qd) -> qd.set(joint.getQd()));
+
       walkingController.doAction();
 
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());

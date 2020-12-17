@@ -73,7 +73,7 @@ public class JumpingControllerState extends HighLevelControllerState
                                  JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
                                  JumpingParameters jumpingParameters)
    {
-      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
+      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
 
       this.commandInputManager = commandInputManager;
       this.controllerToolbox = controllerToolbox;
