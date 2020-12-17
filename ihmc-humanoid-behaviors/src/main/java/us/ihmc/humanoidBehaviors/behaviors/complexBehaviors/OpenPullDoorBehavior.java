@@ -298,11 +298,17 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
             //      RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.096,  0.932 ) orientation 1.5511648101378044, 0.08462087065219358, 0.03818089607481523
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.870,  0.143,  0.858 ,
-                                                                                 -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.870,  0.143,  0.858 ,
+//                                                                                 -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
+//                                                                                RobotSide.RIGHT,
+//                                                                                "Turn Door Knob",
+//                                                                                4));     
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.794,  0.186,  0.792 ,
+                                                                                 -1.5431936567280218, 0.13501342218408519, -0.7156860167842839,
                                                                                 RobotSide.RIGHT,
                                                                                 "Turn Door Knob",
-                                                                                4));            
+                                                                                4));     
+
 //            
 //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.856,  0.125,  0.791,
 //                                                                                -1.2856865907790618, 0.0386255602637629, -0.9492873833196996,
