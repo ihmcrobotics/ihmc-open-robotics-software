@@ -5,6 +5,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -33,8 +34,11 @@ public class AtlasRemoteLidarBasedREAModuleLauncher
 //      messager.setAllowSelfSubmit(true);
 //      messager.startMessager();
 
-      KryoMessager messager = KryoMessager.createServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 1);
-      messager.startMessagerBlocking();
+//      KryoMessager messager = KryoMessager.createServer(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT.getPort(), "KryoREAUI", 1);
+//      messager.startMessagerBlocking();
+
+      SharedMemoryMessager messager = new SharedMemoryMessager(REAModuleAPI.API);
+      messager.startMessager();
 
       LIDARBasedREAModule remoteModule = new LIDARBasedREAModule(messager, new FilePropertyHelper(configurationFile), networkProvider);
       remoteModule.start();
