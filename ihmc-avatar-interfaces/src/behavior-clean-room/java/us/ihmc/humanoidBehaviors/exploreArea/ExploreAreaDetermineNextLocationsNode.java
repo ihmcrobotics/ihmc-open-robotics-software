@@ -61,7 +61,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    private int counter = 0;
    private final Random random = new Random(3242);
 
-   private final ExploreAreaMapUI exploreAreaMapUI;
+//   private final ExploreAreaMapUI exploreAreaMapUI;
 
    public ExploreAreaDetermineNextLocationsNode(ExploreAreaBehaviorParameters parameters,
                                                 BehaviorHelper helper,
@@ -82,7 +82,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       goalX = maximumExplorationArea.getMaxX();
       goalY = 0.0;
 
-      exploreAreaMapUI = new ExploreAreaMapUI(explorationPlanner);
+//      exploreAreaMapUI = new ExploreAreaMapUI(explorationPlanner);
    }
 
    @Override
@@ -95,7 +95,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       syncedRobot.update();
       determineNextPlacesToWalkTo(syncedRobot);
 
-      exploreAreaMapUI.update();
+//      exploreAreaMapUI.update();
    }
 
    private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
