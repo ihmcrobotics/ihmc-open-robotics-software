@@ -12,6 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -48,11 +49,17 @@ public class AtlasRealsenseSLAMRemoteLauncher
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      slamMessager = KryoMessager.createServer(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT.getPort(), "SLAMModule", 5);
-      ThreadTools.startAThread(() -> ExceptionTools.handle(slamMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
+//      slamMessager = KryoMessager.createServer(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT.getPort(), "SLAMModule", 5);
+//      ThreadTools.startAThread(() -> ExceptionTools.handle(slamMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
 
-      segmentationMessager = KryoMessager.createServer(SegmentationModuleAPI.API, NetworkPorts.PLANAR_SEGMENTATION_UI_PORT.getPort(), "SegmentationModule", 5);
-      ThreadTools.startAThread(() -> ExceptionTools.handle(segmentationMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
+      slamMessager = new SharedMemoryMessager(SLAMModuleAPI.API);
+      slamMessager.startMessager();
+
+//      segmentationMessager = KryoMessager.createServer(SegmentationModuleAPI.API, NetworkPorts.PLANAR_SEGMENTATION_UI_PORT.getPort(), "SegmentationModule", 5);
+//      ThreadTools.startAThread(() -> ExceptionTools.handle(segmentationMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
+
+      segmentationMessager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+      segmentationMessager.startMessager();
 
       File slamConfigurationFile = Paths.get(System.getProperty("user.home"), ".ihmc", SLAM_CONFIGURATION_FILE_NAME).toFile();
       File segmentationConfigurationFile = Paths.get(System.getProperty("user.home"), ".ihmc", SEGMENTATION_CONFIGURATION_FILE_NAME).toFile();
