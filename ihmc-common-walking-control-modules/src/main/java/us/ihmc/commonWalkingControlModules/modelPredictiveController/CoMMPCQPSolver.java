@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.ops.ConvertDMatrixStruct;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
@@ -9,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SparseSimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -18,6 +21,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoMMPCQPSolver
 {
+   private static final boolean useSparse = true;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
@@ -84,7 +89,15 @@ public class CoMMPCQPSolver
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
 
-      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      if (useSparse)
+      {
+         qpSolver = new SparseSimpleEfficientActiveSetQPSolver();
+         ((SparseSimpleEfficientActiveSetQPSolver) qpSolver).setInverseCostCalculator(new SparseInverseCalculator(indexHandler));
+      }
+      else
+      {
+         qpSolver = new SimpleEfficientActiveSetQPSolver();
+      }
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
@@ -218,29 +231,40 @@ public class CoMMPCQPSolver
          addRateRegularization();
    }
 
-   private void addValueRegularization()
+   void addValueRegularization()
    {
-      int i = 0;
-      for (; i < indexHandler.getRhoCoefficientStartIndex(0); i++)
-         solverInput_H.add(i, i, comCoefficientRegularization.getDoubleValue());
-      for (; i < problemSize; i++)
-         solverInput_H.add(i, i, rhoCoefficientRegularization.getDoubleValue());
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         int start = indexHandler.getComCoefficientStartIndex(segmentId);
+         for (int i = 0; i < MPCIndexHandler.comCoefficientsPerSegment; i++)
+            solverInput_H.add(start + i, start + i, comCoefficientRegularization.getDoubleValue());
+
+         start += MPCIndexHandler.comCoefficientsPerSegment;
+         for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
+            solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
+      }
    }
 
    private void addRateRegularization()
    {
       double comCoefficientFactor = dt * dt / comRateCoefficientRegularization.getDoubleValue();
       double rhoCoefficientFactor = dt * dt / rhoRateCoefficientRegularization.getDoubleValue();
-      int i = 0;
-      for (; i < indexHandler.getRhoCoefficientStartIndex(0); i++)
+
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
-         solverInput_H.add(i, i, 1.0 / comCoefficientFactor);
-         solverInput_f.add(i, 0, -solverOutput.get(i, 0) / comCoefficientFactor);
-      }
-      for (; i < problemSize; i++)
-      {
-         solverInput_H.add(i, i, 1.0 / rhoCoefficientFactor);
-         solverInput_f.add(i, 0, -solverOutput.get(i, 0) / rhoCoefficientFactor);
+         int start = indexHandler.getComCoefficientStartIndex(segmentId);
+         for (int i = 0; i < MPCIndexHandler.comCoefficientsPerSegment; i++)
+         {
+            solverInput_H.add(start + i, start + i, 1.0 / comCoefficientFactor);
+            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / comCoefficientFactor);
+         }
+
+         start += MPCIndexHandler.comCoefficientsPerSegment;
+         for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
+         {
+            solverInput_H.add(start + i, start + i, 1.0 / rhoCoefficientFactor);
+            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / rhoCoefficientFactor);
+         }
       }
    }
 
@@ -467,10 +491,28 @@ public class CoMMPCQPSolver
 
       numberOfActiveVariables.set(problemSize);
 
-      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
-      //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      if (useSparse)
+      {
+         DMatrixSparseCSC sparseH = new DMatrixSparseCSC(problemSize, problemSize);
+         DMatrixSparseCSC sparseAin = new DMatrixSparseCSC(numberOfEqualityConstraints.getIntegerValue(), problemSize);
+         DMatrixSparseCSC sparseAeq = new DMatrixSparseCSC(numberOfInequalityConstraints.getIntegerValue(), problemSize);
+
+         ConvertDMatrixStruct.convert(solverInput_H, sparseH, 1e-8);
+         ConvertDMatrixStruct.convert(solverInput_Ain, sparseAin, 1e-8);
+         ConvertDMatrixStruct.convert(solverInput_Aeq, sparseAeq, 1e-8);
+
+         qpSolver.setQuadraticCostFunction(sparseH, solverInput_f);
+         //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+         qpSolver.setLinearInequalityConstraints(sparseAin, solverInput_bin);
+         qpSolver.setLinearEqualityConstraints(sparseAeq, solverInput_beq);
+      }
+      else
+      {
+         qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
+         //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+         qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+         qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      }
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
 
