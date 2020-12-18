@@ -27,7 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:euclid:0.16.0")
-   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:simulation-construction-set:0.21.4")
    api("us.ihmc:ihmc-graphics-description:0.19.2")
    api("us.ihmc:ihmc-manipulation-planning:source")

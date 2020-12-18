@@ -21,7 +21,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.16.0")
    api("us.ihmc:euclid-geometry:0.16.0")
-   api("us.ihmc:ihmc-yovariables:0.9.7")
+   api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-graphics-description:0.19.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
