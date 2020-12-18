@@ -28,8 +28,8 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.15.2")
    api("us.ihmc:euclid-shape:0.15.2")
    api("us.ihmc:euclid-frame-shape:0.15.2")
-   api("us.ihmc:mecano:0.7.2")
-   api("us.ihmc:mecano-yovariables:0.7.2")
+   api("us.ihmc:mecano:0.7.3")
+   api("us.ihmc:mecano-yovariables:0.7.3")
    api("us.ihmc:ihmc-yovariables:0.9.7")
    api("us.ihmc:ihmc-realtime:1.3.1")
    api("us.ihmc:IHMCRosControl:0.5.0") {
@@ -66,8 +66,8 @@ testDependencies {
    api("us.ihmc:euclid-frame:0.15.2")
    api("us.ihmc:euclid-shape:0.15.2")
    api("us.ihmc:euclid-frame-shape:0.15.2")
-   api("us.ihmc:mecano:0.7.2")
-   api("us.ihmc:mecano-yovariables:0.7.2")
+   api("us.ihmc:mecano:0.7.3")
+   api("us.ihmc:mecano-yovariables:0.7.3")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }
