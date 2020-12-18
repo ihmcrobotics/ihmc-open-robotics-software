@@ -5,14 +5,12 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.atlas.sensors.AtlasRealsenseBasedREAStandaloneLauncher;
 import us.ihmc.avatar.sensors.realsense.RealSenseL515CompressedImageROS1Bridge;
 import us.ihmc.avatar.sensors.realsense.RealSenseL515PointCloudROS1Bridge;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosMainNode;
 
 import java.io.File;
@@ -21,7 +19,7 @@ import java.net.URISyntaxException;
 
 public class AtlasLineDetectionDemo
 {
-   private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
+//   private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private String ROBOT_NAME = "Atlas";
 
    public AtlasLineDetectionDemo(RosMainNode rosMainNode, ROS2Node ros2Node)
@@ -48,7 +46,7 @@ public class AtlasLineDetectionDemo
       FootstepPlanningToolboxOutputStatus statusPacket = log.getStatusPacket();
       FootstepDataListMessage footstepDataList = statusPacket.getFootstepDataList();
 
-      footstepDataListPublisher.publish(footstepDataList);
+//      footstepDataListPublisher.publish(footstepDataList);
    }
 
    public static void main(String[] args) throws URISyntaxException

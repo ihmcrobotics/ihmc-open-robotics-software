@@ -30,7 +30,7 @@ public class RealSenseL515PointCloudROS1Bridge
 
    private Point3D32[] points;
 
-   private static final int MAX_POINTS = 50000;
+   private static final int MAX_POINTS = 40000;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
    private static final String l515PointCloudTopic = "/camera/depth/color/points";
 

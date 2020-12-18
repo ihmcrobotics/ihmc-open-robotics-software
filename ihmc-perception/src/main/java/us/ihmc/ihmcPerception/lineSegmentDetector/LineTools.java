@@ -1,31 +1,18 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import static java.lang.StrictMath.acos;
 import static java.lang.StrictMath.pow;
 
 public class LineTools
 {
-
-   public static void drawLines(Mat img, Mat currentLines){
-      for (int i = 0; i < currentLines.rows(); i++)
-      {
-         double[] val = currentLines.get(i, 0);
-         Imgproc.line(img, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 255, 255), 2);
-      }
-   }
-
    public static Point2D getProjection(LineSegment2D segment, Point2D point)
    {
       Vector2D a = new Vector2D(segment.getFirstEndpointX(), segment.getFirstEndpointY());

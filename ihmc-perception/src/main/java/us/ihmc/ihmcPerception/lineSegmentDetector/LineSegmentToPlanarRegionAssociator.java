@@ -1,7 +1,9 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import com.jme3.math.LineSegment;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.lwjgl.opengl.Display;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -62,9 +64,9 @@ public class LineSegmentToPlanarRegionAssociator
       this.cameraPosition = cameraPosition;
    }
 
-   public void associateInImageSpace(PlanarRegionsListMessage currentPlanarRegionsListMessage, Mat currentImage, Mat curImgLeft){
+   public void associateInImageSpace(PlanarRegionsListMessage currentPlanarRegionsListMessage){
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
-      LogTools.info("Planar Regions: {}", newRegions.getNumberOfPlanarRegions());
+//      LogTools.info("Planar Regions: {}", newRegions.getNumberOfPlanarRegions());
       for (PlanarRegion region : newRegions.getPlanarRegionsAsList())
       {
          ArrayList<Point> pointList = new ArrayList<>();
@@ -74,11 +76,11 @@ public class LineSegmentToPlanarRegionAssociator
          {
             PlanarSegment regionBasedSegment = new PlanarSegment(region.getRegionId());
             projectPlanarRegionUsingCameraPose(region, regionBasedSegment);
-            drawPolygonOnImage(currentImage, regionBasedSegment);
+            DisplayTools.drawPolygon(regionBasedSegment, 1);
 
             PlanarSegment lineBasedSegment = new PlanarSegment(region.getRegionId());
             associateLinesToSegment(lineBasedSegment, regionBasedSegment);
-            drawPolygonOnImage(curImgLeft, lineBasedSegment);
+            DisplayTools.drawPolygon(lineBasedSegment, 0);
          }
       }
 
@@ -146,32 +148,11 @@ public class LineSegmentToPlanarRegionAssociator
       segmentToPack.setCentroid(centroid);
    }
 
-   public ArrayList<Point> getOpenCVPoints(ArrayList<Point2D> euclidPoints)
-   {
-      ArrayList<Point> opencvPoints = new ArrayList<>();
-      for (Point2D point : euclidPoints)
-      {
-         opencvPoints.add(new Point(point.getX(), point.getY()));
-      }
-      return opencvPoints;
-   }
 
-   public void drawPolygonOnImage(Mat img, PlanarSegment segment)
-   {
-      if (segment.getVertices().size() > 2)
-      {
-         MatOfPoint points = new MatOfPoint();
-         ArrayList<Point> pointList = getOpenCVPoints(segment.getVertices());
-         points.fromList(pointList);
-
-         Scalar color = new Scalar(segment.getRegionId() * 123 % 255, segment.getRegionId() * 321 % 255, segment.getRegionId() * 135 % 255);
-         Imgproc.fillConvexPoly(img, points, color, 4);
-         Imgproc.circle(img, new Point(segment.getCentroid().getX(), segment.getCentroid().getY()), 3, new Scalar(255, 140, 255), -1);
-      }
-   }
 
    public void associateLinesToSegment(PlanarSegment lineBasedSegment, PlanarSegment regionBasedSegment)
    {
+
       if (regionBasedSegment.getVertices().size() > 2)
       {
          if (regionBasedSegment.getCentroid().getX() < camIntrinsics.getWidth() && regionBasedSegment.getCentroid().getY() < camIntrinsics.getHeight()
@@ -181,8 +162,39 @@ public class LineSegmentToPlanarRegionAssociator
             lineBasedSegment.setCentroid(regionBasedSegment.getCentroid());
             lineBasedSegment.updateOrder();
             lineBasedSegment.updateArea();
+            filterSegmentWithRegion(lineBasedSegment, regionBasedSegment);
+            lineBasedSegment.updateOrder();
+            lineBasedSegment.updateArea();
          }
 
+      }
+   }
+
+   private void filterSegmentWithRegion(PlanarSegment lineBasedSegment, PlanarSegment regionBasedSegment)
+   {
+      ArrayList<Point2D> regionPoints = regionBasedSegment.getVertices();
+      ArrayList<Point2D> segmentPoints = lineBasedSegment.getVertices();
+      LogTools.info("Segment Points]: {} {}", regionPoints.size(), segmentPoints.size());
+      int lbspCount = 0;
+      for(int i = 0; i<regionPoints.size()-1; i++){
+         lbspCount %= segmentPoints.size();
+         int rA = (int)(Math.toDegrees(Math.atan2(regionPoints.get(i).getX() - regionBasedSegment.getCentroid().getX(), regionPoints.get(i).getY() - regionBasedSegment.getCentroid().getY())) + 360) % 360;
+         int rB = (int)(Math.toDegrees(Math.atan2(regionPoints.get(i+1).getX() - regionBasedSegment.getCentroid().getX(), regionPoints.get(i+1).getY() - regionBasedSegment.getCentroid().getY())) + 360) % 360;
+         int lX = (int)(Math.toDegrees(Math.atan2(segmentPoints.get(lbspCount).getX() - regionBasedSegment.getCentroid().getX(), segmentPoints.get(lbspCount).getX() - regionBasedSegment.getCentroid().getX())) + 360) % 360;
+         if(lX < rA) lbspCount = (lbspCount + 1) % segmentPoints.size();
+         else if(rA < lX && lX < rB){
+            Line2D regionLine = new Line2D(regionPoints.get(i), regionPoints.get(i+1));
+            Line2D segmentLine = new Line2D(regionBasedSegment.getCentroid(), segmentPoints.get(lbspCount));
+            Point2D sectPoint = (Point2D) regionLine.intersectionWith(segmentLine);
+            double distSq = sectPoint.distanceSquared(segmentPoints.get(lbspCount));
+            if(distSq > 100){
+               segmentPoints.remove(lbspCount);
+//               LogTools.info("DistSq: {}", distSq);
+//               DisplayTools.lineSegment(regionBasedSegment.getCentroid(), segmentPoints.get(lbspCount), new Scalar(0,55,255), 2, 0);
+            }
+         }
+         else if(rB < lX) continue;
+         DisplayTools.lineSegment(regionPoints.get(i), regionPoints.get(i+1), new Scalar(255,100,100), 2, 0);
       }
    }
 
@@ -210,10 +222,8 @@ public class LineSegmentToPlanarRegionAssociator
       {
          double[] line = curLines.get(i, 0);
          LineSegment2D ls = new LineSegment2D(line[0], line[1], line[2], line[3]);
-         Line2D lineLs = new Line2D(ls);
-         LogTools.info("Distance:{}", lineLs.distance(regionBasedSegment.getCentroid()));
-         if(lineLs.distance(regionBasedSegment.getCentroid()) < 50)
-//         if (ls.distanceSquared(regionBasedSegment.getCentroid()) < 8000 && ls.length() > 30)
+//         LogTools.info("Distance:{}", lineLs.distance(regionBasedSegment.getCentroid()));
+         if (ls.distanceSquared(regionBasedSegment.getCentroid()) < 8000 && ls.length() > 30)
          {
             queue.add(ls);
          }

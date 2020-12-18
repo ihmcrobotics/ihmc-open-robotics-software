@@ -15,6 +15,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.ihmcPerception.camera.RosCameraInfoSubscriber;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -62,14 +63,17 @@ public class RealSenseL515DepthImageSubscriber extends AbstractRosTopicSubscribe
       Mat mat = new Mat(message.getHeight(), message.getWidth(), CvType.CV_8U);
       mat.put(0, 0, payload);
 
-      Mat output = new Mat(mat.height(), mat.width(), CvType.CV_8U);
-      mat.convertTo(output, CvType.CV_8U);
+      Mat output = new Mat(mat.height(), mat.width(), CvType.CV_32FC1);
+      mat.convertTo(output, CvType.CV_32FC1);
 
-      Imgproc.resize(output, output, new Size(1200, 900));
-      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
-      HighGui.resizeWindow("LineEstimator", 1200, 900);
-      HighGui.imshow("LineEstimator", output);
-      int code = HighGui.waitKey(32);
+      double[] data = mat.get(0,0);
+      LogTools.info(data[0]);
+
+//      Imgproc.resize(output, output, new Size(1200, 900));
+//      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
+//      HighGui.resizeWindow("LineEstimator", 1200, 900);
+//      HighGui.imshow("LineEstimator", output);
+//      int code = HighGui.waitKey(32);
 
       // imageReceived(timeStamp, RosTools.bufferedImageFromRosMessageRaw(colorModel, message));
    }

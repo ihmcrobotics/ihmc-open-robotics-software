@@ -15,10 +15,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ihmcPerception.lineSegmentDetector.LineDetectionTools;
-import us.ihmc.ihmcPerception.lineSegmentDetector.LineMatch;
-import us.ihmc.ihmcPerception.lineSegmentDetector.LineSegmentToPlanarRegionAssociator;
-import us.ihmc.ihmcPerception.lineSegmentDetector.LineTools;
+import us.ihmc.ihmcPerception.lineSegmentDetector.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
@@ -46,6 +43,7 @@ public class AtlasLineSegmentEstimator
 {
 
    private boolean USE_ROS1_PERCEPTION_TOPICS = false;
+
 
    private final AtlasRobotModel robotModel;
    private boolean prevImgFilled = false;
@@ -218,25 +216,20 @@ public class AtlasLineSegmentEstimator
 
       currentLines = LineDetectionTools.getFLDLinesFromImage(currentImage);
 
-      LineTools.drawLines(currentImage, currentLines); // Visualize Lines on Right Image
       // displayLineMatches(prevImg, curImg, dispImage, correspLines);
       Mat curImgLeft = new Mat();
       currentImage.copyTo(curImgLeft);
 
+      DisplayTools.addImage(curImgLeft);
+      DisplayTools.addImage(currentImage);
+
       correspondingLines = matchFLDLines(previousLines, currentLines);
       lineRegionAssociator.setCurLines(currentLines);
-      lineRegionAssociator.associateInImageSpace(currentPlanarRegionsListMessage, currentImage, curImgLeft);
+      lineRegionAssociator.associateInImageSpace(currentPlanarRegionsListMessage);
 
-      List<Mat> src = Arrays.asList(curImgLeft, currentImage);
-      Core.hconcat(src, dispImage);
 
-//      Imgcodecs imgcodecs = new Imgcodecs();
-//      imgcodecs.imwrite("~/.ihmc/logs/IMG_" + videoPacketsRos2.peekFirst().getTimestamp(), currentImage);
-
-      Imgproc.resize(dispImage, dispImage, new Size(2400, 1000));
-      HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
-      HighGui.imshow("LineEstimator", dispImage);
-      HighGui.waitKey(1);
+      DisplayTools.drawLines(currentLines, 1); // Visualize Lines on Right Image
+      DisplayTools.display( 1); // Display all images concatenated
 
       previousLines = currentLines;
    }

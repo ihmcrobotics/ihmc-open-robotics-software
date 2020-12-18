@@ -15,14 +15,24 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
    configureDependencyResolution()
    configurePublications()
 }
 
+repositories {
+   maven {
+      url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+   }
+}
+
+
 mainDependencies {
 //   api(ihmc.sourceSetProject("javacv"))
-   api(files("/usr/local/share/java/opencv4/opencv-450.jar"))
+   api(files("/usr/local/share/java/opencv4/opencv-440.jar"))
+
+//   api("org.bytedeco:librealsense2-platform:2.38.1-1.5.5-SNAPSHOT-linux-x86_64")
+//   api("org.bytedeco:javacv-platform:1.5.5-SNAPSHOT-linux-x86_64")
+
 
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
