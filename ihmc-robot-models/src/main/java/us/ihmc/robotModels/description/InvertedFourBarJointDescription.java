@@ -16,25 +16,6 @@ public class InvertedFourBarJointDescription extends OneDoFJointDescription
       super(name, new Vector3D(Double.NaN, Double.NaN, Double.NaN), new Vector3D(Double.NaN, Double.NaN, Double.NaN));
    }
 
-   public InvertedFourBarJointDescription(InvertedFourBarJointDescription other)
-   {
-      super(other);
-      if (other.fourBarJoints != null)
-      {
-         fourBarJoints = new PinJointDescription[other.fourBarJoints.length];
-         for (int i = 0; i < fourBarJoints.length; i++)
-         {
-            if (other.fourBarJoints[i] != null)
-               fourBarJoints[i] = new PinJointDescription(other.fourBarJoints[i]);
-         }
-      }
-
-      if (other.fourBarClosure != null)
-         fourBarClosure = new LoopClosurePinConstraintDescription(other.fourBarClosure);
-
-      masterJointIndex = other.masterJointIndex;
-   }
-
    public void setMasterJointIndex(int masterJointIndex)
    {
       this.masterJointIndex = masterJointIndex;
@@ -68,6 +49,6 @@ public class InvertedFourBarJointDescription extends OneDoFJointDescription
    @Override
    public InvertedFourBarJointDescription copy()
    {
-      return new InvertedFourBarJointDescription(this);
+      throw new UnsupportedOperationException();
    }
 }
