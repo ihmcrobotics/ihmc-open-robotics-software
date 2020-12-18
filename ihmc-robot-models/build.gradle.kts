@@ -19,7 +19,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-robot-description:0.21.0")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
@@ -36,7 +36,7 @@ gdxDependencies {
    api(ihmc.sourceSetProject("main"))
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.12")
    api("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
 }

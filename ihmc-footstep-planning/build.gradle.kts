@@ -18,7 +18,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.16.0")
    api("us.ihmc:ihmc-yovariables:0.9.8")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.3")
    api("us.ihmc:ihmc-path-planning:source")
