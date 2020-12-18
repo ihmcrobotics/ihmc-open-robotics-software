@@ -30,10 +30,10 @@ mainDependencies {
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:log-tools:0.6.1")
-   api("us.ihmc:euclid:0.15.2")
-   api("us.ihmc:euclid-frame:0.15.2")
-   api("us.ihmc:euclid-frame-shape:0.15.2")
-   api("us.ihmc:euclid-shape:0.15.2")
+   api("us.ihmc:euclid:0.16.0")
+   api("us.ihmc:euclid-frame:0.16.0")
+   api("us.ihmc:euclid-frame-shape:0.16.0")
+   api("us.ihmc:euclid-shape:0.16.0")
    api("us.ihmc:mecano:0.7.3")
    api("us.ihmc:mecano-yovariables:0.7.3")
    api("us.ihmc:ihmc-commons:0.30.4")
