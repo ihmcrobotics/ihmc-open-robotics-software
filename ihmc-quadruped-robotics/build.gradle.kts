@@ -26,7 +26,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.9.7")
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ihmc-graphics-description:0.19.2")
-   api("us.ihmc:ihmc-robot-description:0.20.2")
+   api("us.ihmc:ihmc-robot-description:0.21.0")
    api("us.ihmc:ihmc-robot-data-logger:0.20.4")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.2")
