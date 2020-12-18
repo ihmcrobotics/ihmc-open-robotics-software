@@ -3,7 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * getDeltaX and getDeltaY are broken so have to track drags.
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  */
 public class GDXFunctionalInputAdapter extends InputAdapter
 {
-   private Consumer<Integer> scrolled;
+   private BiConsumer<Float, Float> scrolled;
    private TouchDraggedConsumer touchDragged;
 
    private volatile boolean dragging = false;
@@ -30,7 +30,7 @@ public class GDXFunctionalInputAdapter extends InputAdapter
       void touchDragged(int deltaX, int deltaY);
    }
 
-   public void setScrolled(Consumer<Integer> scrolled)
+   public void setScrolled(BiConsumer<Float, Float> scrolled)
    {
       this.scrolled = scrolled;
    }
@@ -77,11 +77,11 @@ public class GDXFunctionalInputAdapter extends InputAdapter
    }
 
    @Override
-   public boolean scrolled(int amount)
+   public boolean scrolled(float amountX, float amountY)
    {
       if (scrolled != null)
       {
-         scrolled.accept(amount);
+         scrolled.accept(amountX, amountY);
       }
       return false;
    }
