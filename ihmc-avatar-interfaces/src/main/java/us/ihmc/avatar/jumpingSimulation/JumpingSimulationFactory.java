@@ -50,7 +50,9 @@ public class JumpingSimulationFactory
                                                                                          graphicsListRegistry,
                                                                                          gravityZ,
                                                                                          getClass().getResourceAsStream(parameterResourceName));
-      humanoidRobot.setController(simulationController);
+
+      int controlTicksPerSimulate = ((int) (robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      humanoidRobot.setController(simulationController, controlTicksPerSimulate);
 
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
