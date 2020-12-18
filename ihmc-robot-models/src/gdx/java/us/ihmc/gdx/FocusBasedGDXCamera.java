@@ -209,9 +209,9 @@ public class FocusBasedGDXCamera extends Camera
       }
    }
 
-   public void scrolled(int amount)
+   public void scrolled(float amountX, float amountY)
    {
-      zoom = zoom + Math.signum(amount) * zoom * zoomSpeedFactor;
+      zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
    }
 
    // Taken from GDX PerspectiveCamera
