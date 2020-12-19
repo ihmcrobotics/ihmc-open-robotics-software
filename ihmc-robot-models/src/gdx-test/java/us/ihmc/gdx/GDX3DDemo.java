@@ -1,6 +1,5 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
@@ -45,7 +44,7 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    public void create()
    {
       new GLProfiler(Gdx.graphics).enable();
-      Gdx.app.setLogLevel(Application.LOG_INFO);
+      GDXTools.syncLogLevelWithLogTools();
 
       environment = new Environment();
       environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
