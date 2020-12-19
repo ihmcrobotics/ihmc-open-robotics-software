@@ -77,8 +77,8 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       rootModelInstance.nodes.addAll(camera3D.getFocusPointSphere().nodes);
 
 
-      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
-      camera2D.update();
+//      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
+//      camera2D.update();
    }
 
    @Override
@@ -102,7 +102,7 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       // TODO add more render calls here
       modelBatch.end();
 
-      camera2D.update();
+//      camera2D.update();
    }
 
    @Override
