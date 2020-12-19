@@ -291,32 +291,77 @@ public class ContactPointHelper
       double g2 = 3.0 * duration2 * goalValueForBasis;
       double g3 = 2.0 * duration * goalValueForBasis;
 
-      // FIXME I don't think this includes the cross-terms
-      for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
+      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
-         int startIdx = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
+         int startIdxI = basisVectorIndexI * MPCIndexHandler.coefficientsPerRho;
 
-         accelerationIntegrationHessian.set(startIdx, startIdx, c00);
-         accelerationIntegrationHessian.set(startIdx, startIdx + 1, c01);
-         accelerationIntegrationHessian.set(startIdx, startIdx + 2, c02);
-         accelerationIntegrationHessian.set(startIdx, startIdx + 2, c03);
-         accelerationIntegrationHessian.set(startIdx + 1, startIdx, c01);
-         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 1, c11);
-         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 2, c12);
-         accelerationIntegrationHessian.set(startIdx + 1, startIdx + 3, c13);
-         accelerationIntegrationHessian.set(startIdx + 2, startIdx, c02);
-         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 1, c12);
-         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 2, c22);
-         accelerationIntegrationHessian.set(startIdx + 2, startIdx + 3, c23);
-         accelerationIntegrationHessian.set(startIdx + 3, startIdx, c03);
-         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 1, c13);
-         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 2, c23);
-         accelerationIntegrationHessian.set(startIdx + 3, startIdx + 3, c33);
+         FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
 
-         accelerationIntegrationGradient.set(startIdx, 0, g0);
-         accelerationIntegrationGradient.set(startIdx + 1, 0, g1);
-         accelerationIntegrationGradient.set(startIdx + 2, 0, g2);
-         accelerationIntegrationGradient.set(startIdx + 3, 0, g3);
+         accelerationIntegrationHessian.set(startIdxI, startIdxI, c00);
+         accelerationIntegrationHessian.set(startIdxI, startIdxI + 1, c01);
+         accelerationIntegrationHessian.set(startIdxI, startIdxI + 2, c02);
+         accelerationIntegrationHessian.set(startIdxI, startIdxI + 2, c03);
+         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI, c01);
+         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 1, c11);
+         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 2, c12);
+         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 3, c13);
+         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI, c02);
+         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 1, c12);
+         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 2, c22);
+         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 3, c23);
+         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI, c03);
+         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 1, c13);
+         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 2, c23);
+         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 3, c33);
+
+         accelerationIntegrationGradient.set(startIdxI, 0, g0);
+         accelerationIntegrationGradient.set(startIdxI + 1, 0, g1);
+         accelerationIntegrationGradient.set(startIdxI + 2, 0, g2);
+         accelerationIntegrationGradient.set(startIdxI + 3, 0, g3);
+
+         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
+         {
+            FrameVector3DReadOnly basisVectorJ = basisVectors[basisVectorIndexJ];
+
+            double basisDot = basisVectorI.dot(basisVectorJ);
+
+            int startIdxJ = basisVectorIndexJ * MPCIndexHandler.coefficientsPerRho;
+
+            accelerationIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
+            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
+            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 2, basisDot * c02);
+            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 3, basisDot * c03);
+            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ, basisDot * c01);
+            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 3, basisDot * c13);
+            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ, basisDot * c02);
+            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 3, basisDot * c23);
+            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ, basisDot * c03);
+            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 3, basisDot * c33);
+
+            // we know it's symmetric, and this way we can avoid iterating as much
+            accelerationIntegrationHessian.add(startIdxJ, startIdxI, basisDot * c00);
+            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 1, basisDot * c01);
+            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 2, basisDot * c02);
+            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 3, basisDot * c03);
+            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI, basisDot * c01);
+            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI, basisDot * c02);
+            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI, basisDot * c03);
+            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 3, basisDot * c33);
+         }
       }
    }
 
@@ -339,19 +384,51 @@ public class ContactPointHelper
       double c12 = 6.0 * omega2 * (negativeExponential - 1.0);
       double c22 = 36.0 * duration;
 
-      for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
+      // FIXME I don't think this includes the cross-terms
+      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
-         int startColumn = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
+         int startIdxI = basisVectorIndexI * MPCIndexHandler.coefficientsPerRho;
 
-         jerkIntegrationHessian.set(startColumn, startColumn, c00);
-         jerkIntegrationHessian.set(startColumn, startColumn + 1, c01);
-         jerkIntegrationHessian.set(startColumn, startColumn + 2, c02);
-         jerkIntegrationHessian.set(startColumn + 1, startColumn, c01);
-         jerkIntegrationHessian.set(startColumn + 1, startColumn + 1, c11);
-         jerkIntegrationHessian.set(startColumn + 1, startColumn + 2, c12);
-         jerkIntegrationHessian.set(startColumn + 2, startColumn, c02);
-         jerkIntegrationHessian.set(startColumn + 2, startColumn + 1, c12);
-         jerkIntegrationHessian.set(startColumn + 2, startColumn + 2, c22);
+         FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
+
+         jerkIntegrationHessian.set(startIdxI, startIdxI, c00);
+         jerkIntegrationHessian.set(startIdxI, startIdxI + 1, c01);
+         jerkIntegrationHessian.set(startIdxI, startIdxI + 2, c02);
+         jerkIntegrationHessian.set(startIdxI + 1, startIdxI, c01);
+         jerkIntegrationHessian.set(startIdxI + 1, startIdxI + 1, c11);
+         jerkIntegrationHessian.set(startIdxI + 1, startIdxI + 2, c12);
+         jerkIntegrationHessian.set(startIdxI + 2, startIdxI, c02);
+         jerkIntegrationHessian.set(startIdxI + 2, startIdxI + 1, c12);
+         jerkIntegrationHessian.set(startIdxI + 2, startIdxI + 2, c22);
+
+         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
+         {
+            FrameVector3DReadOnly basisVectorJ = basisVectors[basisVectorIndexJ];
+
+            double basisDot = basisVectorI.dot(basisVectorJ);
+
+            int startIdxJ = basisVectorIndexJ * MPCIndexHandler.coefficientsPerRho;
+
+            jerkIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
+            jerkIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
+            jerkIntegrationHessian.add(startIdxI, startIdxJ + 2, basisDot * c02);
+            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ, basisDot * c01);
+            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ, basisDot * c02);
+            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+
+            jerkIntegrationHessian.add(startIdxJ, startIdxI, basisDot * c00);
+            jerkIntegrationHessian.add(startIdxJ, startIdxI + 1, basisDot * c01);
+            jerkIntegrationHessian.add(startIdxJ, startIdxI + 2, basisDot * c02);
+            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI, basisDot * c01);
+            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI, basisDot * c02);
+            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+         }
       }
    }
 

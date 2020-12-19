@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import com.jme3.util.IntMap;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -76,6 +77,7 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble initialCoMPositionCostToGo = new YoDouble("initialCoMPositionCostToGo", registry);
    private final YoDouble initialCoMVelocityCostToGo = new YoDouble("initialCoMVelocityCostToGo", registry);
 
+   private final IntMap<List<ContactPlaneProvider>> contactPlaneProviders = new IntMap<>();
    private final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
@@ -208,6 +210,7 @@ public class CoMTrajectoryModelPredictiveController
 
    private void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
    {
+
       contactPlaneHelperPool.clear();
 
       for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
