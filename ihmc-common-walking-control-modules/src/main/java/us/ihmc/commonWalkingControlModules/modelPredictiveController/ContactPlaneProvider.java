@@ -19,6 +19,7 @@ import java.util.List;
 
 public class ContactPlaneProvider implements ContactStateProvider
 {
+   private int planeProviderId = -1;
    private ContactState contactState = ContactState.IN_CONTACT;
    private final FramePoint3D startCopPosition = new FramePoint3D();
    private final FramePoint3D endCopPosition = new FramePoint3D();
@@ -37,6 +38,7 @@ public class ContactPlaneProvider implements ContactStateProvider
 
    public void reset()
    {
+      planeProviderId = -1;
       startCopPosition.setToNaN();
       endCopPosition.setToNaN();
       totalContactPoints = 0;
@@ -47,12 +49,23 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void set(ContactPlaneProvider other)
    {
       reset();
+      setPlaneProviderId(other.getPlaneProviderId());
       setStartCopPosition(other.getCopStartPosition());
       setEndCopPosition(other.getCopEndPosition());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
       for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
+   }
+
+   public void setPlaneProviderId(int planeProviderId)
+   {
+      this.planeProviderId = planeProviderId;
+   }
+
+   public int getPlaneProviderId()
+   {
+      return planeProviderId;
    }
 
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)

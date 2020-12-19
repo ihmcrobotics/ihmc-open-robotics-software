@@ -116,12 +116,11 @@ public class VRPTrackingCostCalculator
          int idxI = 4 * i + startRhoIdx + 2;
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
-         double selfDot = basisVector.dot(basisVector);
 
-         costHessianToPack.add(idxI, idxI, selfDot * a2a2);
-         costHessianToPack.add(idxI, idxI + 1, selfDot * a2a3);
-         costHessianToPack.add(idxI + 1, idxI, selfDot * a2a3);
-         costHessianToPack.add(idxI + 1, idxI + 1, selfDot * a3a3);
+         costHessianToPack.add(idxI, idxI, a2a2);
+         costHessianToPack.add(idxI, idxI + 1, a2a3);
+         costHessianToPack.add(idxI + 1, idxI, a2a3);
+         costHessianToPack.add(idxI + 1, idxI + 1, a3a3);
 
          for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
