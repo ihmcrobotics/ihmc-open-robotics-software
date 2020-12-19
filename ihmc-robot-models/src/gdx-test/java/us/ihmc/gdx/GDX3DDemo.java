@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -62,6 +63,7 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 //      rootModel.nodes.addAll(camera.getFocusPointSphere().nodes);
 
       float distance = 5.0f;
+      ModelBuilder modelBuilder = new ModelBuilder();
       rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, distance, distance, Color.GREEN).nodes);
       rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, distance, distance, Color.DARK_GRAY).nodes);
       rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, -distance, distance, Color.RED).nodes);
