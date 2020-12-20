@@ -24,9 +24,7 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    private Environment environment;
    private Viewport viewport;
    private ModelBatch modelBatch;
-   private BoxesDemoModel boxesModel;
    private ModelInstance boxes;
-   private Model coordinateFrameModel;
    private ModelInstance coordinateFrame;
 
    private OrthographicCamera camera2D;
@@ -58,10 +56,8 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       camera3D = new FocusBasedGDXCamera();
       viewport = new ExtendViewport(INITIAL_WIDTH, INITIAL_HEIGHT, camera3D);
 
-      coordinateFrameModel = GDXModelPrimitives.createCoordinateFrame(0.3);
-      coordinateFrame = new ModelInstance(coordinateFrameModel);
-      boxesModel = new BoxesDemoModel();
-      boxes = boxesModel.newInstance();
+      coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+      boxes = new BoxesDemoModel().newInstance();
 
 //      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
 //      camera2D.update();
@@ -96,8 +92,8 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    @Override
    public void dispose()
    {
-      boxesModel.dispose();
-      coordinateFrameModel.dispose();
+      boxes.model.dispose();
+      coordinateFrame.model.dispose();
       camera3D.dispose();
       modelBatch.dispose();
    }
