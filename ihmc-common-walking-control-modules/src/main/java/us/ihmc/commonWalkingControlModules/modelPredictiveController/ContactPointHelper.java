@@ -589,7 +589,7 @@ public class ContactPointHelper
       contactWrenchCoefficientMatrix.zero();
 
       int startIdx = solutionStartIdx;
-      for (int rhoIndex = 0; rhoIndex < 4; rhoIndex++)
+      for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
       {
          FrameVector3D basisVector = basisVectors[rhoIndex];
          for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
@@ -621,7 +621,7 @@ public class ContactPointHelper
 
       contactAcceleration.setToZero();
 
-      for (int rhoIdx = 0; rhoIdx < 4; rhoIdx++)
+      for (int rhoIdx = 0; rhoIdx < numberOfBasisVectorsPerContactPoint; rhoIdx++)
       {
          double rhoValue = a0 * basisCoefficients[rhoIdx].get(0, 0);
          rhoValue += a1 * basisCoefficients[rhoIdx].get(0, 1);
