@@ -2,6 +2,7 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -24,6 +25,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class FocusBasedGDXCamera extends Camera
 {
+   private final DragFixedInputAdapter dragFixedInputAdapter;
+
    private final FramePose3D cameraPose = new FramePose3D();
 
    private final Vector3D euclidDirection = new Vector3D();
@@ -57,7 +60,7 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   public FocusBasedGDXCamera(GDXFunctionalInputAdapter inputAdapter)
+   public FocusBasedGDXCamera()
    {
       fieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
@@ -96,8 +99,20 @@ public class FocusBasedGDXCamera extends Camera
 
       updateCameraPose();
 
-      inputAdapter.setScrolled(this::scrolled);
-      inputAdapter.setTouchDragged(this::touchDragged);
+      dragFixedInputAdapter = new DragFixedInputAdapter()
+      {
+         @Override
+         public boolean scrolled(float amountX, float amountY)
+         {
+            return FocusBasedGDXCamera.this.scrolled(amountX, amountY);
+         }
+
+         @Override
+         public boolean touchDragged(int deltaX, int deltaY)
+         {
+            return FocusBasedGDXCamera.this.touchDragged(deltaX, deltaY);
+         }
+      };
    }
 
    public ModelInstance getFocusPointSphere()
@@ -202,18 +217,20 @@ public class FocusBasedGDXCamera extends Camera
       updateCameraPose();
    }
 
-   public void touchDragged(int deltaX, int deltaY)
+   public boolean touchDragged(int deltaX, int deltaY)
    {
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
       {
          latitude -= latitudeSpeed * deltaY;
          longitude += longitudeSpeed * deltaX;
       }
+      return false;
    }
 
-   public void scrolled(float amountX, float amountY)
+   public boolean scrolled(float amountX, float amountY)
    {
       zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
+      return false;
    }
 
    // Taken from GDX PerspectiveCamera
@@ -240,6 +257,11 @@ public class FocusBasedGDXCamera extends Camera
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
+   }
+
+   public InputProcessor getInputProcessor()
+   {
+      return dragFixedInputAdapter.getInputProcessor();
    }
 
    public void dispose()
