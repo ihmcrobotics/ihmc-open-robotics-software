@@ -16,7 +16,7 @@ class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
    private static final boolean useSparse = true;
    private final MPCIndexHandler indexHandler;
 
-   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> solver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
+   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> solver = LinearSolverFactory_DSCC.cholesky(FillReducing.NONE);
 
    public SparseInverseCalculator(MPCIndexHandler indexHandler)
    {

@@ -150,7 +150,7 @@ public class JumpingBalanceManager
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredDCM, yoDesiredDCMVelocity, omega0, yoPerfectVRP);
 
       jumpingMomentumRateControlModuleInput.setOmega0(omega0);
-      jumpingMomentumRateControlModuleInput.setTimeInState(timeInSupportSequence.getDoubleValue());
+      jumpingMomentumRateControlModuleInput.setTimeInState(0.0);
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setMinimizeAngularMomentumRate(minimizeAngularMomentumRate.getBooleanValue());
    }
