@@ -206,7 +206,7 @@ public class JumpingBalanceManager
                                                        timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
 
-      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
+      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
       touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       touchdownDCMPosition.set(comTrajectoryPlanner.getDesiredDCMPosition());
 

@@ -37,7 +37,7 @@ public class CoMTrajectoryModelPredictiveController
    private static final boolean includeVelocityObjective = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfBasisVectorsPerContactPoint = 4;
+   private static final int numberOfBasisVectorsPerContactPoint = 3;
    private static final int maxCapacity = 10;
    private static final double minRhoValue = 0.0;//05;
    private final double maxContactForce;
@@ -190,7 +190,7 @@ public class CoMTrajectoryModelPredictiveController
                                                     planningWindow,
                                                     startVRPPositions,
                                                     endVRPPositions,
-                                                    true);
+                                                    false);
 
       commandProvider.reset();
       mpcCommands.clear();
@@ -513,6 +513,13 @@ public class CoMTrajectoryModelPredictiveController
 
    public void compute(double timeInPhase)
    {
+      boolean isPastPreviousWindow = timeInPhase > previewWindowCalculator.getPreviewWindowDuration();
+
+      if (isPastPreviousWindow)
+      {
+         computePastPreviewWindow(timeInPhase);
+         return;
+      }
       timeInPhase -= currentTimeInState.getDoubleValue();
       int segmentNumber = getSegmentNumber(timeInPhase);
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
@@ -582,6 +589,18 @@ public class CoMTrajectoryModelPredictiveController
       }
 
       verbose = verboseBefore;
+   }
+
+   private void computePastPreviewWindow(double timeInPhase)
+   {
+      previewWindowCalculator.compute(timeInPhase + currentTimeInState.getDoubleValue());
+      desiredCoMPosition.set(previewWindowCalculator.getDesiredCoMPosition());
+      desiredCoMVelocity.set(previewWindowCalculator.getDesiredCoMVelocity());
+      desiredCoMAcceleration.set(previewWindowCalculator.getDesiredCoMAcceleration());
+      desiredDCMPosition.set(previewWindowCalculator.getDesiredDCMPosition());
+      desiredDCMVelocity.set(previewWindowCalculator.getDesiredDCMVelocity());
+      desiredVRPPosition.set(previewWindowCalculator.getDesiredVRPPosition());
+      desiredECMPPosition.set(previewWindowCalculator.getDesiredECMPPosition());
    }
 
    /**
