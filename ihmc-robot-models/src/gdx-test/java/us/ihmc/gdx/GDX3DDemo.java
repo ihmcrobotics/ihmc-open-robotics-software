@@ -63,9 +63,8 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       InputMultiplexer inputMultiplexer = new InputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
 
-      GDXFunctionalInputAdapter inputAdapter = new GDXFunctionalInputAdapter();
-      inputMultiplexer.addProcessor(inputAdapter);
-      camera3D = new FocusBasedGDXCamera(inputAdapter);
+      camera3D = new FocusBasedGDXCamera();
+      inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
       coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
