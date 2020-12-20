@@ -75,11 +75,13 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 
       table = new Table();
       table.setFillParent(true);
-      table.setDebug(true);
+//      table.setDebug(true);
       stage.addActor(table);
 
       Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
+      table.left();
+      table.top();
       TextButton button1 = new TextButton("Button 1", skin);
       table.add(button1);
 
