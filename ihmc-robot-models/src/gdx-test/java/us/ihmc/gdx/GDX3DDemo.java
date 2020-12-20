@@ -1,23 +1,19 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -35,7 +31,6 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    private ModelInstance boxes;
    private ModelInstance coordinateFrame;
 
-   private OrthographicCamera camera2D;
    private int currentWindowWidth;
    private int currentWindowHeight;
    private Stage stage;
@@ -65,15 +60,19 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
 
       modelBatch = new ModelBatch();
 
-      camera3D = new FocusBasedGDXCamera();
-      viewport = new ScreenViewport(camera3D);
+      InputMultiplexer inputMultiplexer = new InputMultiplexer();
+      Gdx.input.setInputProcessor(inputMultiplexer);
 
+      GDXFunctionalInputAdapter inputAdapter = new GDXFunctionalInputAdapter();
+      inputMultiplexer.addProcessor(inputAdapter);
+      camera3D = new FocusBasedGDXCamera(inputAdapter);
+      viewport = new ScreenViewport(camera3D);
 
       coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
       boxes = new BoxesDemoModel().newInstance();
 
       stage = new Stage(new ScreenViewport());
-//      Gdx.input.setInputProcessor(stage);
+      inputMultiplexer.addProcessor(stage);
 
       table = new Table();
       table.setFillParent(true);
@@ -81,46 +80,12 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       stage.addActor(table);
 
       Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
-//      Skin skin = new Skin();
-//
-//      // Generate a 1x1 white texture and store it in the skin named "white".
-//      Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-//      pixmap.setColor(Color.WHITE);
-//      pixmap.fill();
-//      skin.add("white", new Texture(pixmap));
-//
-//      // Store the default libgdx font under the name "default".
-//      skin.add("default", new BitmapFont());
-//
-//      TextButtonStyle style = new TextButtonStyle();
-//      style.up = skin.newDrawable("white", Color.DARK_GRAY);
-//      style.down = skin.newDrawable("white", Color.DARK_GRAY);
-//      style.checked = skin.newDrawable("white", Color.BLUE);
-//      style.over = skin.newDrawable("white", Color.LIGHT_GRAY);
-//      style.font = skin.getFont("default");
-//      skin.add("default", style);
-
-//      TextureRegion upRegion = ...
-//      TextureRegion downRegion = ...
-//      BitmapFont buttonFont = ...
-//      TextButtonStyle style = new TextButtonStyle();
-//      style.up = new TextureRegionDrawable(upRegion);
-//      style.down = new TextureRegionDrawable(downRegion);
-//      style.font = buttonFont;
 
       TextButton button1 = new TextButton("Button 1", skin);
       table.add(button1);
 
       TextButton button2 = new TextButton("Button 2", skin);
       table.add(button2);
-
-//      table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
-
-//      table.setSize();
-
-      camera2D = new OrthographicCamera(INITIAL_WIDTH, INITIAL_HEIGHT / 4f);
-      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
-      camera2D.update();
    }
 
    @Override
@@ -147,14 +112,12 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       modelBatch.render(boxes, environment);
       modelBatch.render(coordinateFrame, environment);
       modelBatch.end();
-//
+
       Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()* 1 / 4);
       stage.getViewport().update(currentWindowWidth, currentWindowHeight * 1 / 4, true);
 
       stage.act(Gdx.graphics.getDeltaTime());
       stage.draw();
-
-//      camera2D.update();
    }
 
    @Override

@@ -21,7 +21,6 @@ public class GDXFunctionalInputAdapter extends InputAdapter
 
    public GDXFunctionalInputAdapter()
    {
-      Gdx.input.setInputProcessor(this);
    }
 
    @FunctionalInterface

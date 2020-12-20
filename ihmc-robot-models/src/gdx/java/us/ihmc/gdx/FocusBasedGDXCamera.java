@@ -57,7 +57,7 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   public FocusBasedGDXCamera()
+   public FocusBasedGDXCamera(GDXFunctionalInputAdapter inputAdapter)
    {
       fieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
@@ -96,7 +96,6 @@ public class FocusBasedGDXCamera extends Camera
 
       updateCameraPose();
 
-      GDXFunctionalInputAdapter inputAdapter = new GDXFunctionalInputAdapter();
       inputAdapter.setScrolled(this::scrolled);
       inputAdapter.setTouchDragged(this::touchDragged);
    }
