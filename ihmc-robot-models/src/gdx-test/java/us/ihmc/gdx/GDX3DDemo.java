@@ -3,14 +3,12 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,11 +21,13 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    private static final int INITIAL_WIDTH = 1100;
    private static final int INITIAL_HEIGHT = 800;
    private FocusBasedGDXCamera camera3D;
-   private ModelBatch modelBatch;
    private Environment environment;
    private Viewport viewport;
-   private Model rootModel;
-   private ModelInstance rootModelInstance;
+   private ModelBatch modelBatch;
+   private BoxesDemoModel boxesModel;
+   private ModelInstance boxes;
+   private Model coordinateFrameModel;
+   private ModelInstance coordinateFrame;
 
    private OrthographicCamera camera2D;
 
@@ -58,26 +58,10 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       camera3D = new FocusBasedGDXCamera();
       viewport = new ExtendViewport(INITIAL_WIDTH, INITIAL_HEIGHT, camera3D);
 
-      rootModel = new Model();
-
-//      rootModel.nodes.addAll(camera.getFocusPointSphere().nodes);
-
-      float distance = 5.0f;
-      ModelBuilder modelBuilder = new ModelBuilder();
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, distance, distance, Color.GREEN).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, distance, distance, Color.DARK_GRAY).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, -distance, distance, Color.RED).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, -distance, distance, Color.ORANGE).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, distance, -distance, Color.BLUE).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, distance, -distance, Color.BLACK).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(distance, -distance, -distance, Color.WHITE).nodes);
-      rootModel.nodes.addAll(GDXModelPrimitives.createBox(-distance, -distance, -distance, Color.YELLOW).nodes);
-
-      rootModel.nodes.addAll(GDXModelPrimitives.createCoordinateFrame(0.3).nodes);
-
-      rootModelInstance = new ModelInstance(rootModel);
-      rootModelInstance.nodes.addAll(camera3D.getFocusPointSphere().nodes);
-
+      coordinateFrameModel = GDXModelPrimitives.createCoordinateFrame(0.3);
+      coordinateFrame = new ModelInstance(coordinateFrameModel);
+      boxesModel = new BoxesDemoModel();
+      boxes = boxesModel.newInstance();
 
 //      camera2D.position.set(camera3D.viewportWidth / 3f, camera3D.viewportHeight / 3f, 0);
 //      camera2D.update();
@@ -100,7 +84,9 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
       camera3D.render();
 
       modelBatch.begin(camera3D);
-      modelBatch.render(rootModelInstance, environment);
+      modelBatch.render(camera3D.getFocusPointSphere(), environment);
+      modelBatch.render(boxes, environment);
+      modelBatch.render(coordinateFrame, environment);
       // TODO add more render calls here
       modelBatch.end();
 
@@ -110,8 +96,10 @@ public class GDX3DDemo extends Lwjgl3ApplicationAdapter
    @Override
    public void dispose()
    {
+      boxesModel.dispose();
+      coordinateFrameModel.dispose();
+      camera3D.dispose();
       modelBatch.dispose();
-      rootModel.dispose();
    }
 
    @Override
