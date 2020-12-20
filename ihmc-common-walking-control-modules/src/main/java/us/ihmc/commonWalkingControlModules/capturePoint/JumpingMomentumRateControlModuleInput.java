@@ -11,6 +11,7 @@ public class JumpingMomentumRateControlModuleInput
 {
    private double omega0;
    private double timeInState;
+   private double timeAtStartOfSignal;
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
    private List<Polynomial3DReadOnly> vrpTrajectories;
