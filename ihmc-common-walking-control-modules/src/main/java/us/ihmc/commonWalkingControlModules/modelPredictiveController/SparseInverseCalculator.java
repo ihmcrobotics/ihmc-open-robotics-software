@@ -9,6 +9,7 @@ import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
 import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
 import us.ihmc.convexOptimization.quadraticProgram.InverseCostCalculator;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
@@ -41,6 +42,8 @@ class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
          {
             int start = indexHandler.getComCoefficientStartIndex(i);
             int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + MPCIndexHandler.comCoefficientsPerSegment;
+            if (blockSize < 10)
+               LogTools.info("help");
 
             sparseBlockToInvert.reshape(blockSize, blockSize);
             sparseInvertedBlock.reshape(blockSize, blockSize);

@@ -70,6 +70,17 @@ public class PreviewWindowCalculator
       dcmAtEndOfWindow.set(initializationCalculator.getDesiredDCMPosition());
    }
 
+   public void compute(double time)
+   {
+      initializationCalculator.compute(time);
+   }
+
+
+   public double getPreviewWindowDuration()
+   {
+      return previewWindowDuration.getDoubleValue();
+   }
+
    private double computePlanningHorizon(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
       int activeSegment = -1;
@@ -106,13 +117,20 @@ public class PreviewWindowCalculator
       cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
 
       double previewWindowLength = 0.0;
+      double flightDuration = 0.0;
       for (int i = 0; i < previewWindowContacts.size() - 1; i++)
-         previewWindowLength += previewWindowContacts.get(i).getTimeInterval().getDuration();
+      {
+         double duration = previewWindowContacts.get(i).getTimeInterval().getDuration();
+         if (previewWindowContacts.get(i).getContactState().isLoadBearing())
+            previewWindowLength += duration;
+         else
+            flightDuration += duration;
+      }
 
       cropFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength);
       previewWindowLength += previewWindowContacts.getLast().getTimeInterval().getDuration();
 
-      return previewWindowLength;
+      return previewWindowLength + flightDuration;
    }
 
    private final FramePoint3D modifiedCoPLocation = new FramePoint3D();
@@ -159,5 +177,40 @@ public class PreviewWindowCalculator
    public boolean activeSegmentChanged()
    {
       return activeSegmentChanged.getBooleanValue();
+   }
+
+   public FramePoint3DReadOnly getDesiredCoMPosition()
+   {
+      return initializationCalculator.getDesiredCoMPosition();
+   }
+
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return initializationCalculator.getDesiredCoMVelocity();
+   }
+
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return initializationCalculator.getDesiredCoMAcceleration();
+   }
+
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return initializationCalculator.getDesiredVRPPosition();
+   }
+
+   public FramePoint3DReadOnly getDesiredDCMPosition()
+   {
+      return initializationCalculator.getDesiredDCMPosition();
+   }
+
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
+   {
+      return initializationCalculator.getDesiredDCMVelocity();
+   }
+
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return initializationCalculator.getDesiredECMPPosition();
    }
 }
