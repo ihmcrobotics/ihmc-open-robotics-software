@@ -16,22 +16,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
  */
 public class GDXModelPrimitives
 {
-   public static Model createBox(float x, float y, float z, Color color)
-   {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      Model boxDescription = modelBuilder.createBox(1f, 1f, 1f,
-                                                    new Material(ColorAttribute.createDiffuse(color)),
-                                                    VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-      boxDescription.nodes.get(0).translation.set(x, y, z);
-      boxDescription.calculateTransforms();
-      return boxDescription;
-   }
-
-   public static void createBox()
-   {
-
-   }
-
    public static Model createCoordinateFrame(double length)
    {
       ModelBuilder modelBuilder = new ModelBuilder();

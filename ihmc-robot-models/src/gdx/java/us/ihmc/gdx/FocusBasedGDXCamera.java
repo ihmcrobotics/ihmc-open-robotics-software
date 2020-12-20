@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
@@ -48,6 +49,7 @@ public class FocusBasedGDXCamera extends Camera
    private double roll;
    private double zoom = 10.0;
 
+   private final Model focusPointModel;
    private final ModelInstance focusPointSphere;
 
    private final Vector3D cameraOffsetUp;
@@ -87,7 +89,8 @@ public class FocusBasedGDXCamera extends Camera
       material.set(TextureAttribute.createDiffuse(paletteTexture));
       material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
       modelBuilder.part(meshPart, material);
-      focusPointSphere = new ModelInstance(modelBuilder.end());
+      focusPointModel = modelBuilder.end();
+      focusPointSphere = new ModelInstance(focusPointModel);
 
       changeCameraPosition(-2.0, 0.7, 1.0);
 
@@ -238,5 +241,10 @@ public class FocusBasedGDXCamera extends Camera
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
+   }
+
+   public void dispose()
+   {
+      focusPointModel.dispose();
    }
 }
