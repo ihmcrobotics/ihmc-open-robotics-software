@@ -98,6 +98,7 @@ public class FocusBasedGDXCamera extends Camera
       changeCameraPosition(-2.0, 0.7, 1.0);
 
       updateCameraPose();
+      update(true);
 
       dragFixedInputAdapter = new DragFixedInputAdapter()
       {
@@ -181,11 +182,28 @@ public class FocusBasedGDXCamera extends Camera
       position.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
       direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
-
-      update(); // TODO: skip updating frustrum?
    }
 
-   public void render()
+   public boolean touchDragged(int deltaX, int deltaY)
+   {
+      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+      {
+         latitude -= latitudeSpeed * deltaY;
+         longitude += longitudeSpeed * deltaX;
+      }
+      return false;
+   }
+
+   public boolean scrolled(float amountX, float amountY)
+   {
+      zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
+      return false;
+   }
+
+   // Taken from GDX PerspectiveCamera
+
+   @Override
+   public void update()
    {
       float tpf = Gdx.app.getGraphics().getDeltaTime();
 
@@ -215,29 +233,7 @@ public class FocusBasedGDXCamera extends Camera
       }
 
       updateCameraPose();
-   }
 
-   public boolean touchDragged(int deltaX, int deltaY)
-   {
-      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-      {
-         latitude -= latitudeSpeed * deltaY;
-         longitude += longitudeSpeed * deltaX;
-      }
-      return false;
-   }
-
-   public boolean scrolled(float amountX, float amountY)
-   {
-      zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
-      return false;
-   }
-
-   // Taken from GDX PerspectiveCamera
-
-   @Override
-   public void update()
-   {
       update(true);
    }
 
