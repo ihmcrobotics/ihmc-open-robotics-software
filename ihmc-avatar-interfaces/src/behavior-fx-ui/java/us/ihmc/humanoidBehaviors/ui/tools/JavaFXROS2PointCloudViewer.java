@@ -28,7 +28,7 @@ public class JavaFXROS2PointCloudViewer
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
-      pointCloudGraphic = new LiveStereoVisionPointCloudGraphic(ros2Node, ROS2Tools.D435_POINT_CLOUD);
+      pointCloudGraphic = new LiveStereoVisionPointCloudGraphic(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       view3dFactory.addNodeToView(pointCloudGraphic);
 
       primaryStage.setScene(view3dFactory.getScene());
