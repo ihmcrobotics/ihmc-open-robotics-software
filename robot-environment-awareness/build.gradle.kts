@@ -30,7 +30,7 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.16.0")
    api("us.ihmc:joctomap:1.12.1")
    api("us.ihmc:ihmc-yovariables:0.9.8")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
