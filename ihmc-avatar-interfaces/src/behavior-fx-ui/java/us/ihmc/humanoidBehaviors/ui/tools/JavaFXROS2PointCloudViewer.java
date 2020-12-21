@@ -2,12 +2,10 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2TopicHz;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LiveStereoVisionPointCloudGraphic;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 
 public class JavaFXROS2PointCloudViewer
@@ -40,6 +38,6 @@ public class JavaFXROS2PointCloudViewer
 
    public static void main(String[] args)
    {
-      new JavaFXROS2PointCloudViewer(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "point_cloud_viewer"));
+      new JavaFXROS2PointCloudViewer(ROS2Tools.createInterprocessROS2Node("point_cloud_viewer"));
    }
 }
