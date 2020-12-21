@@ -70,6 +70,14 @@ behaviorFxUiDependencies {
    api("us.ihmc:robot-environment-awareness-visualizers:source")
 }
 
+behaviorGdxUiDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api(ihmc.sourceSetProject("behavior-clean-room"))
+   api("us.ihmc:ihmc-robot-models-gdx:source")
+   api("us.ihmc:ihmc-path-planning:source")
+   api("us.ihmc:ihmc-communication:source")
+}
+
 testDependencies {
    api(ihmc.sourceSetProject("behavior-clean-room"))
    api(ihmc.sourceSetProject("behavior-fx-ui"))
