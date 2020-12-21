@@ -45,7 +45,6 @@ public class GDXROS2PointCloudViewer extends GDX3DApplication
       }
 
       Lwjgl3Application lwjgl3App = GDXApplicationCreator.launchGDXApplication(new PrivateGDX3DApplication(), "GDX3DDemo", 1100, 800);
-      lwjgl3App.getGraphics().getGL30().
    }
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)

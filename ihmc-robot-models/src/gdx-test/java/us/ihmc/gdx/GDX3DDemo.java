@@ -51,7 +51,12 @@ public class GDX3DDemo extends GDX3DApplication
    @Override
    public void render()
    {
-      super.render();
+      renderBefore();
+
+      getModelBatch().render(coordinateFrame, getEnvironment());
+      getModelBatch().render(boxes, getEnvironment());
+
+      renderAfter();
 
       Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()* 1 / 4);
       stage.getViewport().update(getCurrentWindowWidth(), getCurrentWindowHeight() * 1 / 4, true);
