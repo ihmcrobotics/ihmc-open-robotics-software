@@ -23,11 +23,11 @@ mainDependencies {
 
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:log-tools:0.6.1")
-   api("us.ihmc:euclid:0.15.2")
-   api("us.ihmc:euclid-frame:0.15.2")
-   api("us.ihmc:euclid-shape:0.15.2")
-   api("us.ihmc:euclid-geometry:0.15.2")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:euclid:0.16.0")
+   api("us.ihmc:euclid-frame:0.16.0")
+   api("us.ihmc:euclid-shape:0.16.0")
+   api("us.ihmc:euclid-geometry:0.16.0")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
 }
 
 testDependencies {
