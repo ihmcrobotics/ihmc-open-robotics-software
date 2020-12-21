@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
@@ -31,10 +32,16 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private int currentWindowHeight;
 
    private ArrayList<ModelInstance> modelInstances = new ArrayList<>();
+   private ArrayList<RenderableProvider> renderableProviders = new ArrayList<>();
 
    public void addModelInstance(ModelInstance modelInstance)
    {
       modelInstances.add(modelInstance);
+   }
+
+   public void addRenderableProvider(RenderableProvider renderableProvider)
+   {
+      renderableProviders.add(renderableProvider);
    }
 
    public void addInputProcessor(InputProcessor inputProcessor)
@@ -71,8 +78,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       this.currentWindowHeight = height;
    }
 
-   @Override
-   public void render()
+   public void renderBefore()
    {
       Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -81,15 +87,35 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       viewport.update(currentWindowWidth, currentWindowHeight * 3 / 4);
       Gdx.gl.glViewport(0, Gdx.graphics.getHeight() * 1 / 4, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 3 / 4);
 
-      camera3D.render();
+      camera3D.update();
 
       modelBatch.begin(camera3D);
       modelBatch.render(camera3D.getFocusPointSphere(), environment);
+   }
+
+   public void renderRegisteredObjects()
+   {
       for (ModelInstance modelInstance : modelInstances)
       {
          modelBatch.render(modelInstance, environment);
       }
+      for (RenderableProvider renderableProvider : renderableProviders)
+      {
+         modelBatch.render(renderableProvider, environment);
+      }
+   }
+
+   public void renderAfter()
+   {
       modelBatch.end();
+   }
+
+   @Override
+   public void render()
+   {
+      renderBefore();
+      renderRegisteredObjects();
+      renderAfter();
    }
 
    @Override
@@ -118,5 +144,20 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public int getCurrentWindowHeight()
    {
       return currentWindowHeight;
+   }
+
+   public FocusBasedGDXCamera getCamera3D()
+   {
+      return camera3D;
+   }
+
+   public ModelBatch getModelBatch()
+   {
+      return modelBatch;
+   }
+
+   public Environment getEnvironment()
+   {
+      return environment;
    }
 }
