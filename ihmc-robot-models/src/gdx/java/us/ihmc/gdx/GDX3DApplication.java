@@ -30,6 +30,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    private int currentWindowWidth;
    private int currentWindowHeight;
+   private double startX = 0.0;
+   private double startY = 0.0;
+   private double percentWide = 1.0;
+   private double percentTall = 1.0;
 
    private ArrayList<ModelInstance> modelInstances = new ArrayList<>();
    private ArrayList<RenderableProvider> renderableProviders = new ArrayList<>();
@@ -37,6 +41,11 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public void addModelInstance(ModelInstance modelInstance)
    {
       modelInstances.add(modelInstance);
+   }
+
+   public void addCoordinateFrame(double size)
+   {
+      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size));
    }
 
    public void addRenderableProvider(RenderableProvider renderableProvider)
@@ -47,6 +56,14 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public void addInputProcessor(InputProcessor inputProcessor)
    {
       inputMultiplexer.addProcessor(inputProcessor);
+   }
+
+   public void setViewportBounds(double startX, double startY, double percentWide, double percentTall)
+   {
+      this.startX = startX;
+      this.startY = startY;
+      this.percentWide = percentWide;
+      this.percentTall = percentTall;
    }
 
    @Override
@@ -84,8 +101,8 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
       Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
 
-      viewport.update(currentWindowWidth, currentWindowHeight * 3 / 4);
-      Gdx.gl.glViewport(0, Gdx.graphics.getHeight() * 1 / 4, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 3 / 4);
+      viewport.update(currentWindowWidth * (int) percentWide, currentWindowHeight * (int) percentTall);
+      Gdx.gl.glViewport((int) startX, (int) startY, Gdx.graphics.getWidth() * (int) percentWide, Gdx.graphics.getHeight() * (int) percentTall);
 
       camera3D.update();
 

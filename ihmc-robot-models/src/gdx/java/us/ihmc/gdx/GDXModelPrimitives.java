@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
@@ -16,6 +17,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
  */
 public class GDXModelPrimitives
 {
+   public static ModelInstance createCoordinateFrameInstance(double length)
+   {
+      return new ModelInstance(createCoordinateFrame(length));
+   }
+
    public static Model createCoordinateFrame(double length)
    {
       ModelBuilder modelBuilder = new ModelBuilder();
