@@ -26,6 +26,8 @@ public class GDX3DDemo extends GDX3DApplication
    {
       super.create();
 
+      setViewportBounds(0.0, 1.0 / 4.0, 1.0, 3.0 / 4.0);
+
       coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
       boxes = new BoxesDemoModel().newInstance();
 
