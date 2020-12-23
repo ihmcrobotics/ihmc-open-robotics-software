@@ -1,20 +1,21 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.glfw.GLFWErrorCallback;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class GDX3DWith2DImGuiDemo
 {
    private ModelInstance boxes;
    private ModelInstance coordinateFrame;
 
-   private Stage stage;
-   private Table table;
 
    public GDX3DWith2DImGuiDemo()
    {
@@ -23,33 +24,55 @@ public class GDX3DWith2DImGuiDemo
 
    class PrivateGDXApplication extends GDX3DApplication
    {
+      private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+      private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+      private String glslVersion;
+      private long windowHandle;
+
       @Override
       public void create()
       {
          super.create();
 
-         setViewportBounds(0.0, 1.0 / 4.0, 1.0, 3.0 / 4.0);
-
          coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
          boxes = new BoxesDemoModel().newInstance();
 
-         stage = new Stage(new ScreenViewport());
-         addInputProcessor(stage);
+         GLFWErrorCallback.createPrint(System.err).set();
 
-         table = new Table();
-         table.setFillParent(true);
-         //      table.setDebug(true);
-         stage.addActor(table);
+         if (!glfwInit())
+         {
+            throw new IllegalStateException("Unable to initialize GLFW");
+         }
+//         glfwDefaultWindowHints();
+//         if (SystemUtils.IS_OS_MAC) {
+//            glslVersion = "#version 150";
+//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+//            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+//            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+//         } else {
+//            glslVersion = "#version 130";
+//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+//         }
 
-         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+//         GL.createCapabilities();
 
-         table.left();
-         table.top();
-         TextButton button1 = new TextButton("Button 1", skin);
-         table.add(button1);
+         ImGui.createContext();
 
-         TextButton button2 = new TextButton("Button 2", skin);
-         table.add(button2);
+         final ImGuiIO io = ImGui.getIO();
+         io.setIniFilename(null); // We don't want to save .ini file
+//         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);  // Enable Keyboard Controls
+//         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);      // Enable Docking
+//         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);    // Enable Multi-Viewport / Platform Windows
+//         io.setConfigViewportsNoTaskBarIcon(true);
+
+         ImGuiTools.setupFonts(io);
+
+         windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
+
+         imGuiGlfw.init(windowHandle, true);
+         imGuiGl3.init(glslVersion);
       }
 
       @Override
@@ -62,18 +85,29 @@ public class GDX3DWith2DImGuiDemo
 
          renderAfter();
 
-         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
-         stage.getViewport().update(getCurrentWindowWidth(), getCurrentWindowHeight() * 1 / 4, true);
+//         glClearColor(exampleUi.backgroundColor[0], exampleUi.backgroundColor[1], exampleUi.backgroundColor[2], 0.0f);
+//         glClear(GL_COLOR_BUFFER_BIT);
 
-         stage.act(Gdx.graphics.getDeltaTime());
-         stage.draw();
+         imGuiGlfw.newFrame();
+         ImGui.newFrame();
+
+         ImGui.button("Drag me");
+
+         ImGui.render();
+         imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+         glfwSwapBuffers(windowHandle);
+         glfwPollEvents();
       }
 
       @Override
       public void dispose()
       {
          super.dispose();
-         stage.dispose();
+         imGuiGl3.dispose();
+         imGuiGlfw.dispose();
+
+         ImGui.destroyContext();
       }
    }
 
