@@ -39,6 +39,14 @@ gdxDependencies {
    api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.12")
    api("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
+
+   api("io.imgui.java:imgui-java-binding:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-lwjgl3:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-natives-linux:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-natives-linux-x86:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-natives-macos:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-natives-windows:1.79-1.4.0")
+   api("io.imgui.java:imgui-java-natives-windows-x86:1.79-1.4.0")
 }
 
 testDependencies {
