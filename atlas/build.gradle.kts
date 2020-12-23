@@ -70,7 +70,6 @@ mainDependencies {
 }
 
 gdxDependencies {
-   api(ihmc.sourceSetProject("main"))
    api("us.ihmc:ihmc-avatar-interfaces-behavior-gdx-ui:source")
 }
 
