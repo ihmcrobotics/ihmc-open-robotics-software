@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -15,14 +12,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class PreviewWindowCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-
-   private final CoMTrajectoryPlanner initializationCalculator;
-   private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
 
    private final YoInteger activeSegment = new YoInteger("activeSegmentInWindow", registry);
    private final YoBoolean activeSegmentChanged = new YoBoolean("activeSegmentChanged", registry);
@@ -34,11 +26,10 @@ public class PreviewWindowCalculator
    private final YoDouble previewWindowDuration = new YoDouble("previewWindowDuration", registry);
 
    private final RecyclingArrayList<ContactPlaneProvider> previewWindowContacts = new RecyclingArrayList<>(ContactPlaneProvider::new);
+   private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
-   public PreviewWindowCalculator(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
+   public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
-      initializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
-
       activeSegment.set(-1);
       this.maximumPreviewWindowDuration.set(0.5);
       this.maximumPreviewWindowSegments.set(3);
@@ -46,35 +37,14 @@ public class PreviewWindowCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void setNominalCoMHeight(double nominalCoMHeight)
-   {
-      initializationCalculator.setNominalCoMHeight(nominalCoMHeight);
-   }
-
-   public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
-   {
-      initializationCalculator.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
-   }
-
    public void compute(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
-      initializationCalculator.solveForTrajectory(fullContactSequence);
-
       previewWindowContacts.clear();
       double previewWindowLength = computePlanningHorizon(fullContactSequence, timeAtStartOfWindow);
 
       this.previewWindowDuration.set(previewWindowLength);
       segmentsInPreviewWindow.set(previewWindowContacts.size());
-
-      initializationCalculator.compute(previewWindowLength + timeAtStartOfWindow);
-      dcmAtEndOfWindow.set(initializationCalculator.getDesiredDCMPosition());
    }
-
-   public void compute(double time)
-   {
-      initializationCalculator.compute(time);
-   }
-
 
    public double getPreviewWindowDuration()
    {
@@ -101,6 +71,8 @@ public class PreviewWindowCalculator
          this.activeSegment.set(activeSegment);
       }
 
+      previewWindowContacts.clear();
+
       double horizonDuration = -timeAtStartOfWindow;
       for (int i = activeSegment; i < fullContactSequence.size(); i++)
       {
@@ -116,6 +88,7 @@ public class PreviewWindowCalculator
 
       cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
 
+
       double previewWindowLength = 0.0;
       double flightDuration = 0.0;
       for (int i = 0; i < previewWindowContacts.size() - 1; i++)
@@ -127,8 +100,24 @@ public class PreviewWindowCalculator
             flightDuration += duration;
       }
 
-      cropFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength);
+      ContactPlaneProvider trimmedFinalSegment = trimFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength);
       previewWindowLength += previewWindowContacts.getLast().getTimeInterval().getDuration();
+
+      fullContactSet.clear();
+      for (int i = 0; i < previewWindowContacts.size(); i++)
+         fullContactSet.add().set(previewWindowContacts.get(i));
+
+      if (trimmedFinalSegment != null)
+      {
+         fullContactSet.add().set(trimmedFinalSegment);
+         for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
+            fullContactSet.add().set(fullContactSequence.get(i));
+      }
+
+      if (!ContactStateProviderTools.checkContactSequenceIsValid(previewWindowContacts))
+         throw new IllegalArgumentException("The preview window is not valid.");
+      if (!ContactStateProviderTools.checkContactSequenceIsValid(fullContactSet))
+         throw new IllegalArgumentException("The full contact sequence is not valid.");
 
       return previewWindowLength + flightDuration;
    }
@@ -149,19 +138,30 @@ public class PreviewWindowCalculator
       contact.setStartCopPosition(modifiedCoPLocation);
    }
 
-   private void cropFinalSegmentLength(ContactPlaneProvider contact, double timeAtStartOfSegment)
+   private final ContactPlaneProvider splitSegmentRemaining = new ContactPlaneProvider();
+
+   private ContactPlaneProvider trimFinalSegmentLength(ContactPlaneProvider contact, double timeAtStartOfSegment)
    {
       TimeIntervalBasics timeInterval = contact.getTimeInterval();
       double maxSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - timeAtStartOfSegment;
       if (maxSegmentDuration > timeInterval.getDuration())
-         return;
+         return null;
 
       double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
       double alphaIntoSegment = maxSegmentDuration / segmentDuration;
       modifiedCoPLocation.interpolate(contact.getCopStartPosition(), contact.getCopEndPosition(), alphaIntoSegment);
 
-      timeInterval.setEndTime(maxSegmentDuration + timeInterval.getStartTime());
+      splitSegmentRemaining.set(contact);
+
+      double splitTime = maxSegmentDuration + timeInterval.getStartTime();
+
+      contact.setEndTime(splitTime);
       contact.setEndCopPosition(modifiedCoPLocation);
+
+      splitSegmentRemaining.setStartTime(splitTime);
+      splitSegmentRemaining.setStartCopPosition(modifiedCoPLocation);
+
+      return splitSegmentRemaining;
    }
 
    public List<ContactPlaneProvider> getPlanningWindow()
@@ -169,48 +169,13 @@ public class PreviewWindowCalculator
       return previewWindowContacts;
    }
 
-   public FramePoint3DReadOnly getDCMAtEndOfWindow()
+   public List<ContactPlaneProvider> getFullPlanningSequence()
    {
-      return dcmAtEndOfWindow;
+      return fullContactSet;
    }
 
    public boolean activeSegmentChanged()
    {
       return activeSegmentChanged.getBooleanValue();
-   }
-
-   public FramePoint3DReadOnly getDesiredCoMPosition()
-   {
-      return initializationCalculator.getDesiredCoMPosition();
-   }
-
-   public FrameVector3DReadOnly getDesiredCoMVelocity()
-   {
-      return initializationCalculator.getDesiredCoMVelocity();
-   }
-
-   public FrameVector3DReadOnly getDesiredCoMAcceleration()
-   {
-      return initializationCalculator.getDesiredCoMAcceleration();
-   }
-
-   public FramePoint3DReadOnly getDesiredVRPPosition()
-   {
-      return initializationCalculator.getDesiredVRPPosition();
-   }
-
-   public FramePoint3DReadOnly getDesiredDCMPosition()
-   {
-      return initializationCalculator.getDesiredDCMPosition();
-   }
-
-   public FrameVector3DReadOnly getDesiredDCMVelocity()
-   {
-      return initializationCalculator.getDesiredDCMVelocity();
-   }
-
-   public FramePoint3DReadOnly getDesiredECMPPosition()
-   {
-      return initializationCalculator.getDesiredECMPPosition();
    }
 }
