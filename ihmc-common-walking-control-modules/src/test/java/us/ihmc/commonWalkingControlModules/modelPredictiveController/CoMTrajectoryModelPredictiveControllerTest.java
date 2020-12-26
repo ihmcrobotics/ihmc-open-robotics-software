@@ -61,7 +61,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
       mpc.solveForTrajectory(contactProviders);
-      mpc.compute(0, 0.0);
+      mpc.compute(0.0);
 
       List<CoMPositionCommand> comPositionCommands = new ArrayList<>();
       List<CoMVelocityCommand> comVelocityCommands = new ArrayList<>();
@@ -139,7 +139,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
 
-      mpc.compute(0, duration - 0.01);
+      mpc.compute(duration - 0.01);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
@@ -186,7 +186,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
       mpc.solveForTrajectory(contactProviders);
-      mpc.compute(0, 0.0);
+      mpc.compute(0.0);
 
       List<CoMPositionCommand> comPositionCommands = new ArrayList<>();
       List<CoMVelocityCommand> comVelocityCommands = new ArrayList<>();
@@ -264,7 +264,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
 
-      mpc.compute(0, duration - 0.01);
+      mpc.compute(duration - 0.01);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
@@ -322,7 +322,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
       mpc.solveForTrajectory(contactProviders);
-      mpc.compute(0, 0.0);
+      mpc.compute(0.0);
 
       List<CoMPositionCommand> comPositionCommands = new ArrayList<>();
       List<CoMVelocityCommand> comVelocityCommands = new ArrayList<>();
@@ -418,7 +418,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
          mpc.setCurrentCenterOfMassState(modifiedCoM, new FrameVector3D(), initialCoM, time);
          mpc.solveForTrajectory(contactProviders);
-         mpc.compute(0, time);
+         mpc.compute(time);
 
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(modifiedCoM, mpc.getDesiredCoMPosition(), epsilon);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
@@ -474,7 +474,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
       mpc.solveForTrajectory(contactProviders);
-      mpc.compute(0, 0.0);
+      mpc.compute(0.0);
 
       List<CoMPositionContinuityCommand> comPositionContinuityCommands = new ArrayList<>();
       List<CoMVelocityContinuityCommand> comVelocityContinuityCommands = new ArrayList<>();
@@ -601,7 +601,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
       mpc.solveForTrajectory(contactProviders);
-      mpc.compute(0, 0.0);
+      mpc.compute(0.0);
 
       List<CoMPositionCommand> comPositionCommands = new ArrayList<>();
       List<CoMVelocityCommand> comVelocityCommands = new ArrayList<>();

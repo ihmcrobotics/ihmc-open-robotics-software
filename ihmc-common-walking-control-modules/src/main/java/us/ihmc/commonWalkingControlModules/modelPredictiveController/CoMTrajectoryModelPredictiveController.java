@@ -30,6 +30,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class CoMTrajectoryModelPredictiveController
 {
@@ -37,7 +38,7 @@ public class CoMTrajectoryModelPredictiveController
    private static final boolean includeVelocityObjective = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfBasisVectorsPerContactPoint = 3;
+   private static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final int maxCapacity = 10;
    private static final double minRhoValue = 0.0;//05;
    private final double maxContactForce;
@@ -73,21 +74,18 @@ public class CoMTrajectoryModelPredictiveController
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
    private final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
+   private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
 
    private final YoDouble initialCoMPositionCostToGo = new YoDouble("initialCoMPositionCostToGo", registry);
    private final YoDouble initialCoMVelocityCostToGo = new YoDouble("initialCoMVelocityCostToGo", registry);
 
-   private final IntMap<List<ContactPlaneProvider>> contactPlaneProviders = new IntMap<>();
    private final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
+   final TrajectoryHandler trajectoryHandler;
 
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
-
-   final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
-   final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
-   final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
 
    final CoMMPCQPSolver qpSolver;
    private final TrajectoryAndCornerPointCalculator cornerPointCalculator = new TrajectoryAndCornerPointCalculator();
@@ -102,14 +100,15 @@ public class CoMTrajectoryModelPredictiveController
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
 
-      previewWindowCalculator = new PreviewWindowCalculator(gravityZ, nominalCoMHeight, registry);
+      indexHandler = new MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+
+      previewWindowCalculator = new PreviewWindowCalculator(registry);
+      trajectoryHandler = new TrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
-
-      indexHandler = new MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
       FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
       Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
@@ -153,7 +152,7 @@ public class CoMTrajectoryModelPredictiveController
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
       this.comHeight.set(nominalCoMHeight);
-      previewWindowCalculator.setNominalCoMHeight(nominalCoMHeight);
+      trajectoryHandler.setNominalCoMHeight(nominalCoMHeight);
    }
 
    /**
@@ -174,6 +173,11 @@ public class CoMTrajectoryModelPredictiveController
 
       previewWindowCalculator.compute(contactSequence, currentTimeInState.getDoubleValue());
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
+
+      trajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
+      trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime() + currentTimeInState.getDoubleValue(), omega.getValue());
+
+      dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
 
       if (previewWindowCalculator.activeSegmentChanged())
       {
@@ -197,9 +201,11 @@ public class CoMTrajectoryModelPredictiveController
 
       computeMatrixHelpers(planningWindow);
       computeObjectives(planningWindow);
-      solveQP(planningWindow.size());
+      DMatrixRMaj solutionCoefficients = solveQP();
 
-      cornerPointCalculator.updateCornerPoints(this, planningWindow, maxCapacity);
+      trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool);
+
+      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
       if (comTrajectoryViewer != null)
       {
@@ -210,7 +216,6 @@ public class CoMTrajectoryModelPredictiveController
 
    private void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
    {
-
       contactPlaneHelperPool.clear();
 
       for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
@@ -286,10 +291,7 @@ public class CoMTrajectoryModelPredictiveController
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
-      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(),
-                                                         previewWindowCalculator.getDCMAtEndOfWindow(),
-                                                         numberOfPhases - 1,
-                                                         finalDuration));
+      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
 //      mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
@@ -439,125 +441,44 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
-   private void solveQP(int numberOfPhases)
+   private DMatrixRMaj solveQP()
    {
-      xCoefficientVector.reshape(6 * numberOfPhases, 1);
-      yCoefficientVector.reshape(6 * numberOfPhases, 1);
-      zCoefficientVector.reshape(6 * numberOfPhases, 1);
-      xCoefficientVector.zero();
-      yCoefficientVector.zero();
-      zCoefficientVector.zero();
-
       qpSolver.initialize();
       qpSolver.submitMPCCommandList(mpcCommands);
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
-         return;
+         return null;
       }
 
       DMatrixRMaj solutionCoefficients = qpSolver.getSolution();
 
       solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
-      // FIXME do something here
-      for (int sequence = 0; sequence < contactPlaneHelperPool.size(); sequence++)
-      {
-         int coeffStartIdx = indexHandler.getRhoCoefficientStartIndex(sequence);
-
-         for (int contact = 0; contact < contactPlaneHelperPool.get(sequence).size(); contact++)
-         {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(sequence).get(contact);
-            contactPlaneHelper.computeContactForceCoefficientMatrix(solutionCoefficients, coeffStartIdx);
-            coeffStartIdx += contactPlaneHelper.getCoefficientSize();
-         }
-      }
-
-      for (int i = 0; i < numberOfPhases; i++)
-      {
-         int vectorStart = 6 * i;
-
-         xCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
-         yCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
-         zCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
-
-         xCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
-         yCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
-         zCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
-
-         for (int contactIdx = 0; contactIdx < contactPlaneHelperPool.get(i).size(); contactIdx++)
-         {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(i).get(contactIdx);
-            DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
-
-            xCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(0, 0));
-            yCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(1, 0));
-            zCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(2, 0));
-
-            xCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
-            yCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
-            zCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
-
-            xCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
-            yCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
-            zCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
-
-            xCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
-            yCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
-            zCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
-         }
-
-         zCoefficientVector.add(vectorStart + 3, 0, -0.5 * gravityZ);
-      }
+      return solutionCoefficients;
    }
 
    public void compute(double timeInPhase)
    {
-      boolean isPastPreviousWindow = timeInPhase > previewWindowCalculator.getPreviewWindowDuration();
-
-      if (isPastPreviousWindow)
-      {
-         computePastPreviewWindow(timeInPhase);
-         return;
-      }
-      timeInPhase -= currentTimeInState.getDoubleValue();
-      int segmentNumber = getSegmentNumber(timeInPhase);
-      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
-      compute(segmentNumber, timeInSegment);
-   }
-
-   public int getSegmentNumber(double time)
-   {
-      double startTime = 0.0;
-      for (int i = 0; i < getVRPTrajectories().size(); i++)
-      {
-         if (getVRPTrajectories().get(i).timeIntervalContains(time - startTime))
-            return i;
-
-         startTime += getVRPTrajectories().get(i).getDuration();
-      }
-
-      return -1;
-   }
-
-   public double getTimeInSegment(int segmentNumber, double time)
-   {
-      for (int i = 0; i < segmentNumber; i++)
-         time -= getVRPTrajectories().get(i).getDuration();
-
-      return time;
+      compute(timeInPhase,
+              desiredCoMPosition,
+              desiredCoMVelocity,
+              desiredCoMAcceleration,
+              desiredDCMPosition,
+              desiredCoMVelocity,
+              desiredVRPPosition,
+              desiredVRPVelocity,
+              desiredECMPPosition);
    }
 
    private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
-   private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
-
    private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
    private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
+   private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
    private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
    private final FramePoint3D vrpPositionToThrowAway = new FramePoint3D();
    private final FrameVector3D vrpVelocityToThrowAway = new FrameVector3D();
    private final FramePoint3D ecmpPositionToThrowAway = new FramePoint3D();
-
 
    private void updateCoMTrajectoryViewer()
    {
@@ -568,14 +489,8 @@ public class CoMTrajectoryModelPredictiveController
       for (int i = 0; i < comTrajectoryViewer.getNumberOfBalls(); i++)
       {
          double time = 0.05 * i;
-         int segmentId = getSegmentNumber(time);
-         double timeInSegment = getTimeInSegment(segmentId, time);
 
-         if (segmentId < 0)
-            break;
-
-         compute(segmentId,
-                 timeInSegment,
+         compute(time,
                  comPositionToThrowAway,
                  comVelocityToThrowAway,
                  comAccelerationToThrowAway,
@@ -591,49 +506,7 @@ public class CoMTrajectoryModelPredictiveController
       verbose = verboseBefore;
    }
 
-   private void computePastPreviewWindow(double timeInPhase)
-   {
-      previewWindowCalculator.compute(timeInPhase + currentTimeInState.getDoubleValue());
-      desiredCoMPosition.set(previewWindowCalculator.getDesiredCoMPosition());
-      desiredCoMVelocity.set(previewWindowCalculator.getDesiredCoMVelocity());
-      desiredCoMAcceleration.set(previewWindowCalculator.getDesiredCoMAcceleration());
-      desiredDCMPosition.set(previewWindowCalculator.getDesiredDCMPosition());
-      desiredDCMVelocity.set(previewWindowCalculator.getDesiredDCMVelocity());
-      desiredVRPPosition.set(previewWindowCalculator.getDesiredVRPPosition());
-      desiredECMPPosition.set(previewWindowCalculator.getDesiredECMPPosition());
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void compute(int segmentId, double timeInPhase)
-   {
-      compute(segmentId,
-              timeInPhase,
-              desiredCoMPosition,
-              desiredCoMVelocity,
-              desiredCoMAcceleration,
-              desiredDCMPosition,
-              desiredDCMVelocity,
-              desiredVRPPosition,
-              desiredVRPVelocity,
-              desiredECMPPosition);
-
-      if (verbose)
-      {
-         LogTools.info("At time " + timeInPhase + ", Desired DCM = " + desiredDCMPosition + ", Desired CoM = " + desiredCoMPosition);
-      }
-   }
-
-   private final FramePoint3D firstCoefficient = new FramePoint3D();
-   private final FramePoint3D secondCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthCoefficient = new FramePoint3D();
-
-   public void compute(int segmentId,
-                       double timeInPhase,
+   public void compute(double timeInPhase,
                        FixedFramePoint3DBasics comPositionToPack,
                        FixedFrameVector3DBasics comVelocityToPack,
                        FixedFrameVector3DBasics comAccelerationToPack,
@@ -643,91 +516,16 @@ public class CoMTrajectoryModelPredictiveController
                        FixedFrameVector3DBasics vrpVelocityToPack,
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
-      if (segmentId < 0)
-         throw new IllegalArgumentException("time is invalid.");
+      trajectoryHandler.compute(timeInPhase, omega.getValue());
 
-      int startIndex = 6 * segmentId;
-      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
-
-      int secondCoefficientIndex = startIndex + 1;
-      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
-
-      int thirdCoefficientIndex = startIndex + 2;
-      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
-
-      int fourthCoefficientIndex = startIndex + 3;
-      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
-
-      int fifthCoefficientIndex = startIndex + 4;
-      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
-
-      int sixthCoefficientIndex = startIndex + 5;
-      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
-
-      double omega = this.omega.getValue();
-
-      CoMMPCTools.constructDesiredCoMPosition(comPositionToPack,
-                                                            firstCoefficient,
-                                                            secondCoefficient,
-                                                            thirdCoefficient,
-                                                            fourthCoefficient,
-                                                            fifthCoefficient,
-                                                            sixthCoefficient,
-                                                            timeInPhase,
-                                                            omega);
-      CoMMPCTools.constructDesiredCoMVelocity(comVelocityToPack,
-                                                            firstCoefficient,
-                                                            secondCoefficient,
-                                                            thirdCoefficient,
-                                                            fourthCoefficient,
-                                                            fifthCoefficient,
-                                                            sixthCoefficient,
-                                                            timeInPhase,
-                                                            omega);
-      CoMMPCTools.constructDesiredCoMAcceleration(comAccelerationToPack,
-                                                                firstCoefficient,
-                                                                secondCoefficient,
-                                                                thirdCoefficient,
-                                                                fourthCoefficient,
-                                                                fifthCoefficient,
-                                                                sixthCoefficient,
-                                                                timeInPhase,
-                                                                omega);
-
-      CoMMPCTools.constructDesiredVRPVelocity(vrpVelocityToPack,
-                                                            firstCoefficient,
-                                                            secondCoefficient,
-                                                            thirdCoefficient,
-                                                            fourthCoefficient,
-                                                            fifthCoefficient,
-                                                            sixthCoefficient,
-                                                            timeInPhase,
-                                                            omega);
-
-      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
-      CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
-      CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
-
-      ecmpPositionToPack.set(vrpPositionToPack);
-      ecmpPositionToPack.subZ(comHeight.getDoubleValue());
-
-      segmentId = Math.min(segmentId, contactPlaneHelperPool.size() - 1);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentId).size(); i++)
-      {
-         contactPlaneHelperPool.get(segmentId).get(i).computeContactForce(omega, timeInPhase);
-      }
+      comPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredCoMPosition());
+      comVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredCoMVelocity());
+      comAccelerationToPack.setMatchingFrame(trajectoryHandler.getDesiredCoMAcceleration());
+      dcmPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredDCMPosition());
+      dcmVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredDCMVelocity());
+      vrpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPPosition());
+      vrpVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPVelocity());
+      ecmpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredECMPPosition());
    }
 
    /**
@@ -735,7 +533,7 @@ public class CoMTrajectoryModelPredictiveController
     */
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      previewWindowCalculator.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
+      trajectoryHandler.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
    }
 
    public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition,

@@ -62,7 +62,7 @@ public class CoMMPCVisualizer
    {
       for (double time = 0.0; time <= duration; time += 0.005)
       {
-         mpc.compute(0, time);
+         mpc.compute(time);
 
          desiredCoM.setMatchingFrame(mpc.getDesiredCoMPosition());
          desiredDCM.setMatchingFrame(mpc.getDesiredDCMPosition());

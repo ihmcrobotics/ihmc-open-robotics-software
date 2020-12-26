@@ -28,17 +28,10 @@ public class TrajectoryAndCornerPointCalculator
 {
    private CornerPointViewer viewer = null;
 
-   private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
-   private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
-
-   private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
-   private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
-   private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
    private final FrameVector3D vrpStartVelocity = new FrameVector3D();
    private final FramePoint3D vrpEndPosition = new FramePoint3D();
    private final FrameVector3D vrpEndVelocity = new FrameVector3D();
-   private final FramePoint3D ecmpPositionToThrowAway = new FramePoint3D();
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
@@ -52,7 +45,11 @@ public class TrajectoryAndCornerPointCalculator
       this.viewer = viewer;
    }
 
-   public void updateCornerPoints(CoMTrajectoryModelPredictiveController mpc, List<? extends ContactStateProvider> contactSequence, int maxCapacity)
+   public void updateCornerPoints(CoMTrajectoryModelPredictiveController mpc,
+                                  int previewWindowLength,
+                                  List<? extends ContactStateProvider> contactSequence,
+                                  int maxCapacity,
+                                  double omega)
    {
       vrpTrajectoryPool.clear();
       vrpTrajectories.clear();
@@ -61,39 +58,29 @@ public class TrajectoryAndCornerPointCalculator
       dcmCornerPoints.clear();
       vrpSegments.clear();
 
-      for (int segmentId = 0; segmentId < Math.min(contactSequence.size(), maxCapacity + 1); segmentId++)
+      for (int segmentId = 0; segmentId < Math.min(previewWindowLength, maxCapacity + 1); segmentId++)
       {
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
          duration = Math.min(duration, sufficientlyLongTime);
-         mpc.compute(segmentId,
-                     0.0,
-                     comCornerPoints.add(),
-                     comVelocityToThrowAway,
-                     comAccelerationToThrowAway,
-                     dcmCornerPoints.add(),
-                     dcmVelocityToThrowAway,
-                     vrpStartPosition,
-                     vrpStartVelocity,
-                     ecmpPositionToThrowAway);
-         mpc.compute(segmentId,
-                     duration,
-                     comPositionToThrowAway,
-                     comVelocityToThrowAway,
-                     comAccelerationToThrowAway,
-                     dcmPositionToThrowAway,
-                     dcmVelocityToThrowAway,
-                     vrpEndPosition,
-                     vrpEndVelocity,
-                     ecmpPositionToThrowAway);
+         mpc.trajectoryHandler.computeInPlanningWindow(segmentId, 0.0, omega);
+         comCornerPoints.add().set(mpc.trajectoryHandler.getDesiredCoMPosition());
+         dcmCornerPoints.add().set(mpc.trajectoryHandler.getDesiredDCMPosition());
+         vrpStartPosition.set(mpc.trajectoryHandler.getDesiredVRPPosition());
+         vrpStartVelocity.set(mpc.trajectoryHandler.getDesiredVRPVelocity());
+
+         mpc.trajectoryHandler.computeInPlanningWindow(segmentId, duration, omega);
+         vrpEndPosition.set(mpc.trajectoryHandler.getDesiredVRPPosition());
+         vrpEndVelocity.set(mpc.trajectoryHandler.getDesiredVRPVelocity());
 
          Trajectory3D trajectory3D = vrpTrajectoryPool.add();
          trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
-         //         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
          vrpTrajectories.add(trajectory3D);
 
          vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
       }
+
+      // TODO the segment outside of the preview window
 
       if (viewer != null)
       {
