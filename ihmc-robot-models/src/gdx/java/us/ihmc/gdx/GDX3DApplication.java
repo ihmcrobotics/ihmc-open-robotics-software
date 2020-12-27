@@ -3,6 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -15,7 +16,7 @@ import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * TODO: Pause and resume?
@@ -35,8 +36,8 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private double percentWide = 1.0;
    private double percentTall = 1.0;
 
-   private ArrayList<ModelInstance> modelInstances = new ArrayList<>();
-   private ArrayList<RenderableProvider> renderableProviders = new ArrayList<>();
+   private HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private HashSet<RenderableProvider> renderableProviders = new HashSet<>();
 
    public void addModelInstance(ModelInstance modelInstance)
    {
@@ -84,6 +85,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       Gdx.input.setInputProcessor(inputMultiplexer);
 
       camera3D = new FocusBasedGDXCamera();
+      addModelInstance(camera3D.getFocusPointSphere());
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
    }
@@ -110,10 +112,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       camera3D.update();
 
       modelBatch.begin(camera3D);
-      modelBatch.render(camera3D.getFocusPointSphere(), environment);
+      renderRegisteredObjects();
    }
 
-   public void renderRegisteredObjects()
+   private void renderRegisteredObjects()
    {
       for (ModelInstance modelInstance : modelInstances)
       {
@@ -130,11 +132,26 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       modelBatch.end();
    }
 
+   public void renderVRCamera(Camera camera)
+   {
+      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
+
+      Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * percentXOffset),
+                        (int) (Gdx.graphics.getHeight() * percentYOffset),
+                        (int) (Gdx.graphics.getWidth() * percentWide),
+                        (int) (Gdx.graphics.getHeight() * percentTall));
+
+      modelBatch.begin(camera);
+      renderRegisteredObjects();
+      renderAfter();
+   }
+
    @Override
    public void render()
    {
       renderBefore();
-      renderRegisteredObjects();
       renderAfter();
    }
 

@@ -6,6 +6,12 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 public class GDXApplicationCreator
 {
    public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter application,
+                                                        Class<?> clazz)
+   {
+      return launchGDXApplication(application, clazz.getSimpleName(), 1100, 800);
+   }
+
+   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter application,
                                                         String title,
                                                         double width,
                                                         double height)

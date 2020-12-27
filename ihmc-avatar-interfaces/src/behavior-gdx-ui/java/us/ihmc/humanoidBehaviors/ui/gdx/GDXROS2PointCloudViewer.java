@@ -124,7 +124,6 @@ public class GDXROS2PointCloudViewer extends GDX3DApplication
          Point3D32[] pointsToRender = points.get();
 
          renderBefore();
-         renderRegisteredObjects();
 
          if (pointsToRender != null)
          {
