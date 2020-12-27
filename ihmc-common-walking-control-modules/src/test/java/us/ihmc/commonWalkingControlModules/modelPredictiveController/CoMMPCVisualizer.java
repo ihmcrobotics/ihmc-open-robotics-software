@@ -30,7 +30,7 @@ public class CoMMPCVisualizer
       this.mpc = mpc;
       this.scs = scs;
 
-      mpc.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+      mpc.setCornerPointViewer(new SegmentPointViewer(registry, graphicsListRegistry));
       mpc.setupCoMTrajectoryViewer(graphicsListRegistry);
       mpc.setContactPlaneViewers(() -> getNextContactPlaneForceViewer(registry, graphicsListRegistry));
 

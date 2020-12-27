@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
@@ -14,7 +15,8 @@ public class CoMMPCSolutionInspection
    private static final double epsilon = 1e-3;
    private final MPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
-   private final QPInputTypeA qpInput = new QPInputTypeA(0);
+   private final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
+   private final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
    public CoMMPCSolutionInspection(MPCIndexHandler indexHandler, double gravityZ)
    {
@@ -24,7 +26,8 @@ public class CoMMPCSolutionInspection
 
    public void inspectSolution(MPCCommandList commandList, DMatrixRMaj solution)
    {
-      qpInput.setNumberOfVariables(indexHandler.getTotalProblemSize());
+      qpInputTypeA.setNumberOfVariables(indexHandler.getTotalProblemSize());
+      qpInputTypeC.setNumberOfVariables(indexHandler.getTotalProblemSize());
 
       for (int i = 0; i < commandList.getNumberOfCommands(); i++)
       {
@@ -45,7 +48,7 @@ public class CoMMPCSolutionInspection
                inspectRhoValueCommand((RhoValueObjectiveCommand) command, solution);
                break;
             case VRP_TRACKING:
-               // TODO
+               inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
@@ -55,23 +58,30 @@ public class CoMMPCSolutionInspection
 
    public void inspectRhoValueCommand(RhoValueObjectiveCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInput, command);
+      boolean success = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
       if (success)
-         inspectInput(qpInput, solution);
+         inspectInput(qpInputTypeA, solution);
    }
 
    public void inspectMPCValueObjective(MPCValueCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateValueObjective(qpInput, command);
+      boolean success = inputCalculator.calculateValueObjective(qpInputTypeA, command);
       if (success)
-         command.setCostToGo(inspectInput(qpInput, solution));
+         command.setCostToGo(inspectInput(qpInputTypeA, solution));
    }
 
    public void inspectCoMContinuityObjective(MPCContinuityCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInput, command);
+      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
       if (success)
-         inspectInput(qpInput, solution);
+         inspectInput(qpInputTypeA, solution);
+   }
+
+   public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
+   {
+      boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (success)
+         command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
 
    public double inspectInput(QPInputTypeA input, DMatrixRMaj solution)
@@ -97,6 +107,20 @@ public class CoMMPCSolutionInspection
       }
 
       return 0.0;
+   }
+
+   public double inspectInput(QPInputTypeC input, DMatrixRMaj solution)
+   {
+      int problemSize = indexHandler.getTotalProblemSize();
+
+      Hx.reshape(problemSize, 1);
+
+      CommonOps_DDRM.mult(input.getDirectCostHessian(), solution, Hx);
+      CommonOps_DDRM.multTransA(solution, Hx, cost);
+      CommonOps_DDRM.multAddTransA(input.getDirectCostGradient(), solution, cost);
+      CommonOps_DDRM.scale(input.getWeightScalar(), cost);
+
+      return cost.get(0, 0);
    }
 
    private final DMatrixRMaj solverInput_H = new DMatrixRMaj(0, 0);

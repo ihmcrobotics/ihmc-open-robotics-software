@@ -31,7 +31,7 @@ public class PreviewWindowCalculator
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);
-      this.maximumPreviewWindowDuration.set(0.5);
+      this.maximumPreviewWindowDuration.set(0.75);
       this.maximumPreviewWindowSegments.set(3);
 
       parentRegistry.addChild(registry);

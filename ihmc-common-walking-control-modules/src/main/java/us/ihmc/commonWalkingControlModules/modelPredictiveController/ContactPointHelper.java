@@ -594,12 +594,14 @@ public class ContactPointHelper
          FrameVector3D basisVector = basisVectors[rhoIndex];
          for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
          {
-            double rhoCoeff = solutionVector.get(startIdx++, 0);
+            double rhoCoeff = solutionVector.get(startIdx, 0);
             contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);
             contactWrenchCoefficientMatrix.add(1, coeffIdx, basisVector.getY() * rhoCoeff);
             contactWrenchCoefficientMatrix.add(2, coeffIdx, basisVector.getZ() * rhoCoeff);
 
             basisCoefficients[rhoIndex].set(0, coeffIdx, rhoCoeff);
+
+            startIdx++;
          }
       }
    }
