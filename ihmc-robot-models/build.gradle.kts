@@ -40,6 +40,12 @@ gdxDependencies {
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.12")
    api("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
 
+   api("org.lwjgl:lwjgl-openvr:3.2.3")
+   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-linux")
+   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-windows")
+   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-windows-x86")
+   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-macos")
+
    api("io.imgui.java:imgui-java-binding:1.79-1.4.0")
    api("io.imgui.java:imgui-java-lwjgl3:1.79-1.4.0")
    api("io.imgui.java:imgui-java-natives-linux:1.79-1.4.0")
