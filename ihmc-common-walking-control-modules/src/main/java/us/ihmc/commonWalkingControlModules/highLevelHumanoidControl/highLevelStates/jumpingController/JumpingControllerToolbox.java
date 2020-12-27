@@ -356,6 +356,11 @@ public class JumpingControllerToolbox
       return yoCapturePoint;
    }
 
+   public YoFramePoint3D getYoCapturePoint()
+   {
+      return yoCapturePoint;
+   }
+
    public double getStandingHeight()
    {
       return standingHeight.getDoubleValue();

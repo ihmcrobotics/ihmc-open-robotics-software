@@ -239,7 +239,7 @@ public class CoMMPCQPSolver
          for (int i = 0; i < MPCIndexHandler.comCoefficientsPerSegment; i++)
             solverInput_H.add(start + i, start + i, comCoefficientRegularization.getDoubleValue());
 
-         start += MPCIndexHandler.comCoefficientsPerSegment;
+         start = indexHandler.getRhoCoefficientStartIndex(segmentId);
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
             solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
       }

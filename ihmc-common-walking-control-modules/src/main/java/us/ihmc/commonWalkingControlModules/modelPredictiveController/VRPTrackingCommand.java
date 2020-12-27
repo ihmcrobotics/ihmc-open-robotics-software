@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleConsumer;
 
 public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
 {
@@ -21,8 +22,11 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    private final FramePoint3D startVRP = new FramePoint3D();
    private final FramePoint3D endVRP = new FramePoint3D();
 
+   private DoubleConsumer costToGoConsumer;
+
    public void clear()
    {
+      costToGoConsumer = null;
       contactPlaneHelpers.clear();
    }
 
@@ -115,5 +119,16 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.VRP_TRACKING;
+   }
+
+   public void setCostToGoConsumer(DoubleConsumer costToGoConsumer)
+   {
+      this.costToGoConsumer = costToGoConsumer;
+   }
+
+   public void setCostToGo(double costToGo)
+   {
+      if (costToGoConsumer != null)
+         costToGoConsumer.accept(costToGo);
    }
 }

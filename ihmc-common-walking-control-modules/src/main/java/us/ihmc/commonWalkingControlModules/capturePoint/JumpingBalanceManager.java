@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SegmentPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -95,7 +96,7 @@ public class JumpingBalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
+         comTrajectoryPlanner.setCornerPointViewer(new SegmentPointViewer(false, false, registry, yoGraphicsListRegistry));
          comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
@@ -104,7 +105,7 @@ public class JumpingBalanceManager
                                                                           Yellow(),
                                                                           GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition desiredCoMViz = new YoGraphicPosition("Desired CoM", yoDesiredCoMPosition, 0.01, Red(), GraphicType.SOLID_BALL);
-         YoGraphicPosition perfectVRPViz = new YoGraphicPosition("Perfect VRP", yoPerfectVRP, 0.002, BlueViolet());
+         YoGraphicPosition perfectVRPViz = new YoGraphicPosition("Perfect VRP", yoPerfectVRP, 0.0075, BlueViolet(), GraphicType.SOLID_BALL);
          YoGraphicPosition desiredTouchdownCoMViz = new YoGraphicPosition("Touchdown CoM", touchdownCoMPosition, 0.01, Black(), GraphicType.SOLID_BALL);
          YoGraphicPosition desiredTouchdownDCMViz = new YoGraphicPosition("Touchdown DCM", touchdownDCMPosition, 0.01, Yellow(), GraphicType.SOLID_BALL);
 
@@ -182,7 +183,7 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(copTrajectoryForStanding.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }
@@ -217,7 +218,7 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(copTrajectoryForJumping.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }

@@ -42,6 +42,8 @@ public class TrajectoryHandler
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private double currentTimeInState;
+
    public TrajectoryHandler(MPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
@@ -67,8 +69,10 @@ public class TrajectoryHandler
 
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
-                                               List<? extends List<ContactPlaneHelper>> contactPlaneHelpers)
+                                               List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
+                                               double currentTimeInState)
    {
+      this.currentTimeInState = currentTimeInState;
       int numberOfPhases = planningWindow.size();
       this.planningWindow.clear();
       for (int i = 0; i < numberOfPhases; i++)
@@ -264,6 +268,8 @@ public class TrajectoryHandler
 
    public double getTimeInSegment(int segmentNumber, double timeInPhase)
    {
+      timeInPhase -= currentTimeInState;
+
       for (int i = 0; i < segmentNumber; i++)
          timeInPhase -= planningWindow.get(i).getTimeInterval().getDuration();
 

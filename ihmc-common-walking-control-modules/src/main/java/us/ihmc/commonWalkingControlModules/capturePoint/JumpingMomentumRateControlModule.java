@@ -103,10 +103,12 @@ public class JumpingMomentumRateControlModule
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition desiredVRPViz = new YoGraphicPosition("Desired VRP", yoDesiredVRP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
 
-         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.01, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition dcmViz = new YoGraphicPosition("DCM", controllerToolbox.getYoCapturePoint(), 0.01, Blue(), GraphicType.BALL_WITH_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredVRPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", dcmViz.createArtifact());
       }
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
@@ -199,7 +201,7 @@ public class JumpingMomentumRateControlModule
    private void computeDesiredLinearMomentumRateOfChange()
    {
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
-      lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
+      lqrMomentumController.computeControlInput(currentState, 0.0);//timeInContactPhase);
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());

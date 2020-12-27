@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,12 +28,14 @@ import java.util.List;
 public class BagOfVectors
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double DEFAULT_SIZE = 0.01;
+   private static final double DEFAULT_VECTOR_SIZE = 0.01;
+   private static final double DEFAULT_BALL_SIZE = 0.01;
    private static final int DEFAULT_NUMBER_OF_VECTORS = 50;
    private static final String DEFAULT_NAME = "BagOfVectors";
    private static final AppearanceDefinition DEFAULT_COLOR = YoAppearance.Black();
 
    private final ArrayList<YoGraphicVector> yoGraphicVectors = new ArrayList<>();
+   private final ArrayList<YoGraphicPosition> yoGraphicPositions = new ArrayList<>();
    private int index;
    private boolean outOfVectorsWarning = false;
    private YoGraphicsList yoGraphicsList;
@@ -40,56 +43,56 @@ public class BagOfVectors
 
    public BagOfVectors(YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(DEFAULT_NUMBER_OF_VECTORS, DEFAULT_SIZE, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
+      this(DEFAULT_NUMBER_OF_VECTORS, DEFAULT_VECTOR_SIZE, DEFAULT_BALL_SIZE, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
    }
 
    public BagOfVectors(int numberOfVectors, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(numberOfVectors, DEFAULT_SIZE, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
+      this(numberOfVectors, DEFAULT_VECTOR_SIZE, DEFAULT_BALL_SIZE, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public BagOfVectors(int numberOfVectors, double sizeInMeters, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BagOfVectors(int numberOfVectors, double vectorSizeInMeters, double ballSizeInMeters, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(numberOfVectors, sizeInMeters, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
+      this(numberOfVectors, vectorSizeInMeters, ballSizeInMeters, DEFAULT_NAME, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public BagOfVectors(int numberOfVectors, double sizeInMeters, String name, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BagOfVectors(int numberOfVectors, double vectorSizeInMeters, double ballSizeInMeters, String name, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(numberOfVectors, sizeInMeters, name, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
+      this(numberOfVectors, vectorSizeInMeters, ballSizeInMeters, name, DEFAULT_COLOR, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public BagOfVectors(int numberOfVectors, double sizeInMeters, AppearanceDefinition appearance, YoRegistry parentRegistry,
+   public BagOfVectors(int numberOfVectors, double vectorSizeInMeters, double ballSizeInMeters, AppearanceDefinition appearance, YoRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(numberOfVectors, sizeInMeters, DEFAULT_NAME, appearance, parentRegistry, yoGraphicsListRegistry);
+      this(numberOfVectors, vectorSizeInMeters, ballSizeInMeters, DEFAULT_NAME, appearance, parentRegistry, yoGraphicsListRegistry);
    }
 
    /**
     * Creates a BagOfVectors with the given number of balls, and all the balls with the given Appearance.
     *
     * @param numberOfVectors        int Number of balls to create.
-    * @param sizeInMeters           double Size of each ball in meters.
+    * @param vectorSizeInMeters           double Size of each ball in meters.
     * @param name                   String Name of the BagOfVectors.
     * @param appearance             Appearance for each of the balls.
     * @param parentRegistry         YoRegistry to register the BagOfVectors with.
     * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfVectors with.
     */
-   public BagOfVectors(int numberOfVectors, double sizeInMeters, String name, AppearanceDefinition appearance,
+   public BagOfVectors(int numberOfVectors, double vectorSizeInMeters, double ballSizeInMeters, String name, AppearanceDefinition appearance,
                        YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(sizeInMeters, name, toList(appearance, numberOfVectors), parentRegistry, yoGraphicsListRegistry);
+      this(vectorSizeInMeters, ballSizeInMeters, name, toList(appearance, numberOfVectors), parentRegistry, yoGraphicsListRegistry);
    }
 
    /**
     * Creates a BagOfVectors with the size being the same as the number of Appearances given.
     *
-    * @param sizeInMeters           double Size of each vector in meters.
+    * @param vectorSizeInMeters           double Size of each vector in meters.
     * @param name                   String Name of the BagOfVectors
     * @param appearances            ArrayList of the Appearance for each of the balls.
     * @param parentRegistry         YoRegistry to register the BagOfVectors with.
     * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfVectors with.
     */
-   public BagOfVectors(double sizeInMeters, String name, List<AppearanceDefinition> appearances, YoRegistry parentRegistry,
+   public BagOfVectors(double vectorSizeInMeters, double pointSizeInMeters, String name, List<AppearanceDefinition> appearances, YoRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoRegistry registry = new YoRegistry(name + "Vectors");
@@ -99,9 +102,11 @@ public class BagOfVectors
          YoFramePoint3D yoFramePoint = new YoFramePoint3D(name + i, "Point", worldFrame, registry);
          YoFrameVector3D yoFrameVector = new YoFrameVector3D(name + i, "Vector", worldFrame, registry);
 
-         YoGraphicVector newVector = new YoGraphicVector(name + i, yoFramePoint, yoFrameVector, sizeInMeters, appearances.get(i));
+         YoGraphicVector newVector = new YoGraphicVector(name + i, yoFramePoint, yoFrameVector, vectorSizeInMeters, appearances.get(i));
+         YoGraphicPosition newPoint = new YoGraphicPosition(name + i, yoFramePoint, pointSizeInMeters, appearances.get(i));
 
          yoGraphicVectors.add(newVector);
+         yoGraphicPositions.add(newPoint);
       }
 
       index = 0;
@@ -123,13 +128,13 @@ public class BagOfVectors
     * Create a Bag of Vectors with alternating ball color going through Red, White, and Blue.
     *
     * @param numberOfVectors          int Number of balls to create.
-    * @param sizeInMeters             double Size of each ball in meters.
+    * @param vectorSizeInMeters             double Size of each ball in meters.
     * @param name                     String Name of the BagOfVectors to create.
     * @param parentYoVariableRegistry YoRegistry to register the BagOfVectors with.
     * @param yoGraphicsListRegistry   YoGraphicsListRegistry to register the BagOfVectors with.
     * @return BagOfVectors
     */
-   public static BagOfVectors createPatrioticBag(int numberOfVectors, double sizeInMeters, String name, YoRegistry parentYoVariableRegistry,
+   public static BagOfVectors createPatrioticBag(int numberOfVectors, double vectorSizeInMeters, double ballSizeInMeters, String name, YoRegistry parentYoVariableRegistry,
                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       AppearanceDefinition[] redWhiteBlue = new AppearanceDefinition[] {YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue()};
@@ -141,7 +146,7 @@ public class BagOfVectors
          appearances.add(redWhiteBlue[i % redWhiteBlue.length]);
       }
 
-      return new BagOfVectors(sizeInMeters, name, appearances, parentYoVariableRegistry, yoGraphicsListRegistry);
+      return new BagOfVectors(vectorSizeInMeters, ballSizeInMeters, name, appearances, parentYoVariableRegistry, yoGraphicsListRegistry);
    }
 
    /**
@@ -149,13 +154,13 @@ public class BagOfVectors
     * rainbow.
     *
     * @param numberOfBalls            int Number of balls to create.
-    * @param sizeInMeters             double Size of each ball in meters.
+    * @param vectorSizeInMeters             double Size of each ball in meters.
     * @param name                     String Name of the BagOfBalls to create.
     * @param parentYoVariableRegistry YoRegistry to register the BagOfBalls with.
     * @param yoGraphicsListRegistry   YoGraphicsListRegistry to register the BagOfBalls with.
     * @return BagOfBalls
     */
-   public static BagOfVectors createRainbowBag(int numberOfBalls, double sizeInMeters, String name, YoRegistry parentYoVariableRegistry,
+   public static BagOfVectors createRainbowBag(int numberOfBalls, double vectorSizeInMeters, double ballSizeInMeters, String name, YoRegistry parentYoVariableRegistry,
                                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
@@ -167,7 +172,7 @@ public class BagOfVectors
          appearances.add(rainbow[i % rainbow.length]);
       }
 
-      return new BagOfVectors(sizeInMeters, name, appearances, parentYoVariableRegistry, yoGraphicsListRegistry);
+      return new BagOfVectors(vectorSizeInMeters, ballSizeInMeters, name, appearances, parentYoVariableRegistry, yoGraphicsListRegistry);
    }
 
    private void registerYoGraphics(String name, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -176,10 +181,10 @@ public class BagOfVectors
       {
          yoGraphicsList = new YoGraphicsList(name + "Balls");
 
-         for (YoGraphicVector yoGraphicPosition : yoGraphicVectors)
-         {
+         for (YoGraphicVector yoGraphicVector : yoGraphicVectors)
+            yoGraphicsList.add(yoGraphicVector);
+         for (YoGraphicPosition yoGraphicPosition : yoGraphicPositions)
             yoGraphicsList.add(yoGraphicPosition);
-         }
 
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
@@ -191,10 +196,10 @@ public class BagOfVectors
       {
          artifactList = new ArtifactList(name + "Balls");
 
-         for (YoGraphicVector yoGraphicPosition : yoGraphicVectors)
-         {
-            artifactList.add(yoGraphicPosition.createArtifact());
-         }
+         for (YoGraphicVector yoGraphic : yoGraphicVectors)
+            artifactList.add(yoGraphic.createArtifact());
+         for (YoGraphicPosition yoGraphic : yoGraphicPositions)
+            artifactList.add(yoGraphic.createArtifact());
 
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
@@ -236,8 +241,10 @@ public class BagOfVectors
    {
       if (ballIndex < yoGraphicVectors.size())
       {
-         YoGraphicVector yoGraphicPosition = yoGraphicVectors.get(ballIndex);
-         yoGraphicPosition.set(pointX, pointY, pointZ, velocityX, velocityY, velocityZ);
+         YoGraphicVector yoGraphicVector = yoGraphicVectors.get(ballIndex);
+         YoGraphicPosition yoGraphicPosition = yoGraphicPositions.get(ballIndex);
+         yoGraphicVector.set(pointX, pointY, pointZ, velocityX, velocityY, velocityZ);
+         yoGraphicPosition.setPosition(pointX, pointY, pointZ);
       }
       else
       {
@@ -266,6 +273,7 @@ public class BagOfVectors
 
       YoGraphicVector yoGraphicVector = yoGraphicVectors.get(index);
       yoGraphicVector.set(location, velocity);
+      yoGraphicPositions.get(index).setPosition(location);
 
       index++;
    }
@@ -281,6 +289,7 @@ public class BagOfVectors
       {
          YoGraphicVector yoGraphicVector = yoGraphicVectors.get(i);
          yoGraphicVector.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         yoGraphicPositions.get(i).setPosition(Double.NaN, Double.NaN, Double.NaN);
       }
    }
 
@@ -293,6 +302,7 @@ public class BagOfVectors
       for (int i = 0; i < yoGraphicVectors.size(); i++)
       {
          yoGraphicVectors.get(i).hide();
+         yoGraphicPositions.get(i).setPositionToNaN();
       }
    }
 
