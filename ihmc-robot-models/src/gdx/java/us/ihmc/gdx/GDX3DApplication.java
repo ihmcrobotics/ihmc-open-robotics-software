@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -39,6 +40,8 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private HashSet<RenderableProvider> renderableProviders = new HashSet<>();
 
+   private ArrayList<Runnable> preRenderTasks = new ArrayList<>();
+
    public void addModelInstance(ModelInstance modelInstance)
    {
       modelInstances.add(modelInstance);
@@ -57,6 +60,11 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public void addInputProcessor(InputProcessor inputProcessor)
    {
       inputMultiplexer.addProcessor(inputProcessor);
+   }
+
+   public void addPreRenderTask(Runnable task)
+   {
+      preRenderTasks.add(task);
    }
 
    public void setViewportBounds(double percentXOffset, double percentYOffset, double percentWide, double percentTall)
@@ -115,6 +123,11 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    public void renderBefore()
    {
+      for (Runnable preRenderTask : preRenderTasks)
+      {
+         preRenderTask.run();
+      }
+
       viewport.update((int) (Gdx.graphics.getWidth() * percentWide), (int) (Gdx.graphics.getHeight() * percentTall));
 
       modelBatch.begin(camera3D);
