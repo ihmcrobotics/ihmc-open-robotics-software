@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 
 import java.util.HashSet;
 
@@ -150,10 +152,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         modelInstance.model.dispose();
+         ExceptionTools.handle(() -> modelInstance.model.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
       }
 
-      camera3D.dispose();
+      ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
       modelBatch.dispose();
    }
 

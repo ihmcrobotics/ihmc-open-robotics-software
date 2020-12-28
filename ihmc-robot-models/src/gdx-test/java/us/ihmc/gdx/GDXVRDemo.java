@@ -39,8 +39,8 @@ public class GDXVRDemo
       @Override
       public void dispose()
       {
-         base.dispose();
          vr.dispose();
+         base.dispose();
       }
    }
 
