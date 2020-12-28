@@ -2,6 +2,7 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.Array;
 
@@ -78,7 +79,16 @@ public class GDXVRApplication
 
    private void renderScene(GDXVRContext.Eye eye) {
       GDXVRCamera camera = context.getEyeData(eye).camera;
+
       context.beginEye(eye);
+
+      int width = context.getEyeData(eye).getFrameBuffer().getWidth();
+      int height = context.getEyeData(eye).getFrameBuffer().getHeight();
+      Gdx.gl.glViewport(0, 0, width, height);
+
+      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
       renderer.accept(camera);
       context.endEye();
    }
