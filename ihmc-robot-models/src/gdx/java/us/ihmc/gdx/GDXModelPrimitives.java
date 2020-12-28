@@ -12,9 +12,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-/**
- * Shouldn't probably be returning Models.
- */
 public class GDXModelPrimitives
 {
    public static ModelInstance createCoordinateFrameInstance(double length)

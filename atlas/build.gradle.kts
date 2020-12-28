@@ -69,10 +69,6 @@ mainDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-behavior-fx-ui:source")
 }
 
-gdxDependencies {
-   api("us.ihmc:ihmc-avatar-interfaces-behavior-gdx-ui:source")
-}
-
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
