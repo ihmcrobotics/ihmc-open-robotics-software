@@ -74,9 +74,23 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       GDXTools.syncLogLevelWithLogTools();
 
       environment = new Environment();
-      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+      float ambientColor = 0.7f;
+      float pointColor = 0.07f;
+      float pointDistance = 2.0f;
+      float pointIntensity = 1.0f;
+      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, ambientColor, ambientColor, ambientColor, 1.0f));
+      // Point lights not working; not sure why @dcalvert
+//      PointLightsAttribute pointLights = new PointLightsAttribute();
+//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, pointDistance, pointIntensity));
+//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, pointDistance, pointIntensity));
+//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, pointDistance, pointIntensity));
+//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, pointDistance, pointIntensity));
+//      environment.set(pointLights);
       DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
-      directionalLights.lights.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, -pointDistance));
+      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, -pointDistance));
+      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, -pointDistance));
+      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, -pointDistance));
       environment.set(directionalLights);
 
       modelBatch = new ModelBatch();
