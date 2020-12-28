@@ -70,23 +70,6 @@ behaviorFxUiDependencies {
    api("us.ihmc:robot-environment-awareness-visualizers:source")
 }
 
-behaviorGdxUiDependencies {
-//   api(ihmc.sourceSetProject("main"))
-//   {
-//      exclude("us.ihmc:ihmc-jmonkey-engine-toolkit")
-//      exclude("us.ihmc:ihmc-javafx-toolkit")
-//   }
-//   api(ihmc.sourceSetProject("behavior-clean-room"))
-//   {
-//      exclude("us.ihmc:ihmc-jmonkey-engine-toolkit")
-//      exclude("us.ihmc:ihmc-javafx-toolkit")
-//   }
-
-
-   api("us.ihmc:ihmc-robot-models-gdx:source")
-   api("us.ihmc:ihmc-communication:source")
-}
-
 testDependencies {
    api(ihmc.sourceSetProject("behavior-clean-room"))
    api(ihmc.sourceSetProject("behavior-fx-ui"))
