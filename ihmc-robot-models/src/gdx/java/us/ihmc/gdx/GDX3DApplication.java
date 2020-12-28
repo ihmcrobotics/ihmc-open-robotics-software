@@ -29,8 +29,6 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private Viewport viewport;
    private ModelBatch modelBatch;
 
-   private int currentWindowWidth;
-   private int currentWindowHeight;
    private double percentXOffset = 0.0;
    private double percentYOffset = 0.0;
    private double percentWide = 1.0;
@@ -88,30 +86,31 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       addModelInstance(camera3D.getFocusPointSphere());
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
+
+      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
    }
 
    @Override
    public void resize(int width, int height)
    {
-      this.currentWindowWidth = width;
-      this.currentWindowHeight = height;
    }
 
    public void renderBefore()
    {
-      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
+      viewport.update((int) (Gdx.graphics.getWidth() * percentWide), (int) (Gdx.graphics.getHeight() * percentTall));
 
-      viewport.update((int) (currentWindowWidth * percentWide), (int) (currentWindowHeight * percentTall));
+      modelBatch.begin(camera3D);
+
       Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * percentXOffset),
                         (int) (Gdx.graphics.getHeight() * percentYOffset),
                         (int) (Gdx.graphics.getWidth() * percentWide),
                         (int) (Gdx.graphics.getHeight() * percentTall));
 
-      camera3D.update();
+      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-      modelBatch.begin(camera3D);
       renderRegisteredObjects();
    }
 
@@ -134,15 +133,6 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    public void renderVRCamera(Camera camera)
    {
-      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
-
-      Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * percentXOffset),
-                        (int) (Gdx.graphics.getHeight() * percentYOffset),
-                        (int) (Gdx.graphics.getWidth() * percentWide),
-                        (int) (Gdx.graphics.getHeight() * percentTall));
-
       modelBatch.begin(camera);
       renderRegisteredObjects();
       renderAfter();
@@ -175,12 +165,12 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    public int getCurrentWindowWidth()
    {
-      return currentWindowWidth;
+      return Gdx.graphics.getWidth();
    }
 
    public int getCurrentWindowHeight()
    {
-      return currentWindowHeight;
+      return Gdx.graphics.getHeight();
    }
 
    public FocusBasedGDXCamera getCamera3D()
