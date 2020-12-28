@@ -20,6 +20,7 @@ public class GDXApplicationCreator
       applicationConfiguration.setTitle("GDX3DDemo");
       applicationConfiguration.setWindowedMode((int) width, (int) height);
       applicationConfiguration.useVsync(true);
+      applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
 
       return new Lwjgl3Application(application, applicationConfiguration);
    }

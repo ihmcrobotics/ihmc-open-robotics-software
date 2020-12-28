@@ -25,11 +25,7 @@ public class GDXModelViewer
 
          addCoordinateFrame(1.0);
 
-         Model model = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal(modelFileName));
-
-//         G3dModelLoader g3dModelLoader = new G3dModelLoader(new JsonReader(), new InternalFileHandleResolver());
-//         FileHandle modelFile = Gdx.files.internal(modelFileName);
-//         Model model = g3dModelLoader.loadModel(modelFile, new TextureProvider.FileTextureProvider());
+         Model model = GDXModelLoader.loadG3DModel(modelFileName);
 
          addModelInstance(new ModelInstance(model));
       }
