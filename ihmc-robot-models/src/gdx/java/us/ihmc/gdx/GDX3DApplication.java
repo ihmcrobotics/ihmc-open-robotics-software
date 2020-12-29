@@ -32,10 +32,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private Viewport viewport;
    private ModelBatch modelBatch;
 
-   private double percentXOffset = 0.0;
-   private double percentYOffset = 0.0;
-   private double percentWide = 1.0;
-   private double percentTall = 1.0;
+   private int x = 0;
+   private int y = 0;
+   private int width = -1;
+   private int height = -1;
 
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private HashSet<RenderableProvider> renderableProviders = new HashSet<>();
@@ -67,12 +67,12 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       preRenderTasks.add(task);
    }
 
-   public void setViewportBounds(double percentXOffset, double percentYOffset, double percentWide, double percentTall)
+   public void setViewportBounds(int x, int y, int width, int height)
    {
-      this.percentXOffset = percentXOffset;
-      this.percentYOffset = percentYOffset;
-      this.percentWide = percentWide;
-      this.percentTall = percentTall;
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
    }
 
    @Override
@@ -128,17 +128,19 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
          preRenderTask.run();
       }
 
-      viewport.update((int) (Gdx.graphics.getWidth() * percentWide), (int) (Gdx.graphics.getHeight() * percentTall));
+      if (width < 0)
+         width = getCurrentWindowWidth();
+      if (height < 0)
+         height = getCurrentWindowHeight();
+
+      viewport.update(width, height);
 
       modelBatch.begin(camera3D);
 
-      Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * percentXOffset),
-                        (int) (Gdx.graphics.getHeight() * percentYOffset),
-                        (int) (Gdx.graphics.getWidth() * percentWide),
-                        (int) (Gdx.graphics.getHeight() * percentTall));
+      Gdx.gl.glViewport(x, y, width, height);
 
-      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+//      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+//      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
       renderRegisteredObjects();
    }
