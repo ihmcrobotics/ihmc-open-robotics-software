@@ -66,7 +66,7 @@ public class VRPPositionContinuityCommandTest
       command.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
       command.setConstraintType(ConstraintType.OBJECTIVE);
 
-      double regularization = 1e-5;
+      double regularization = 1e-6;
       solver.initialize();
       solver.submitContinuityObjective(command);
       solver.setComCoefficientRegularizationWeight(regularization);
@@ -154,9 +154,6 @@ public class VRPPositionContinuityCommandTest
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
-
       DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
       DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
 
@@ -167,6 +164,10 @@ public class VRPPositionContinuityCommandTest
 
       EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+
+
+      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);

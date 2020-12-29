@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoMMPCQPSolver
 {
-   private static final boolean useSparse = true;
+   private static final boolean useSparse = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 

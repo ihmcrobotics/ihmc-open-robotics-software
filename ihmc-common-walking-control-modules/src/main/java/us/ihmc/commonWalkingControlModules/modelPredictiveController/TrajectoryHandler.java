@@ -47,7 +47,7 @@ public class TrajectoryHandler
    public TrajectoryHandler(MPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
-      this.gravityZ = gravityZ;
+      this.gravityZ = Math.abs(gravityZ);
 
       initializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
    }
@@ -169,13 +169,13 @@ public class TrajectoryHandler
       if (segmentNumber < 0)
          return false;
 
-      return computeInPlanningWindow(segmentNumber, timeInPhase, omega);
-   }
-
-   boolean computeInPlanningWindow(int segmentNumber, double timeInPhase, double omega)
-   {
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
 
+      return computeInPlanningWindow(segmentNumber, timeInSegment, omega);
+   }
+
+   boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
+   {
       int startIndex = 6 * segmentNumber;
       firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
       firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));

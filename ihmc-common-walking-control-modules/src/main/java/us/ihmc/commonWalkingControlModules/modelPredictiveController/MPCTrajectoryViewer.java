@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MPCTrajectoryViewer
 {
-   private static final int numberOfVectors = 100;
+   private static final int numberOfVectors = 500;
    private static final double dt = 0.025;
    private static final double ballSize = 0.005;
 
@@ -38,7 +38,8 @@ public class MPCTrajectoryViewer
       dcmTrajectoryVectors.reset();
       vrpTrajectoryVectors.reset();
 
-      for (int i = 0; i < numberOfVectors; i++)
+      int max = Math.min(numberOfVectors, (int) (0.75 / dt));
+      for (int i = 0; i < max; i++)
       {
          double time = dt * i + currentTimeInState;
 

@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -37,9 +38,10 @@ public class JumpingBalanceManager
    private final YoFramePoint3D yoDesiredDCM = new YoFramePoint3D("desiredDCM", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
-   private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
 
    private final YoBoolean comPlannerDone = new YoBoolean("ICPPlannerDone", registry);
@@ -96,7 +98,7 @@ public class JumpingBalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         comTrajectoryPlanner.setCornerPointViewer(new SegmentPointViewer(false, false, registry, yoGraphicsListRegistry));
+         comTrajectoryPlanner.setCornerPointViewer(new SegmentPointViewer(false, true, registry, yoGraphicsListRegistry));
          comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
@@ -143,6 +145,7 @@ public class JumpingBalanceManager
       yoPerfectVRP.set(comTrajectoryPlanner.getDesiredVRPPosition());
       yoDesiredCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
+      yoDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))

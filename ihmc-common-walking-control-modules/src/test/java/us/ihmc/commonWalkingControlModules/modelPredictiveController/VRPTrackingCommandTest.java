@@ -40,8 +40,8 @@ public class VRPTrackingCommandTest
 
       FramePoint3D startVRP = new FramePoint3D();
       FramePoint3D endVRP = new FramePoint3D();
-      startVRP.set(-0.05, -0.02, 0.0);
-      endVRP.set(0.05, 0.02, 0.0);
+      startVRP.set(-0.05, -0.02, 1.0);
+      endVRP.set(0.05, 0.02, 0.7);
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
