@@ -5,6 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.ArrayList;

@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
@@ -206,7 +207,14 @@ public class JumpingMomentumRateControlModule
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
       else
+      {
+//         vrpTrajectories.get(0).compute(0.0);
+//         yoDesiredVRP.set(vrpTrajectories.get(0).getPosition());
+//         linearMomentumRateOfChange.setToZero(worldFrame);
+//         linearMomentumRateOfChange.sub(yoCenterOfMass, yoDesiredVRP);
+//         linearMomentumRateOfChange.scale(omega0 * omega0);
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+      }
 
       // TODO double check the momentum rate command here is the same
       controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);

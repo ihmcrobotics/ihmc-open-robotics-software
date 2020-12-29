@@ -75,7 +75,10 @@ public class CoMTrajectoryModelPredictiveController
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
    private final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
+   private final YoFramePoint3D comPositionAtEndOfWindow = new YoFramePoint3D("comPositionAtEndOfWindow", worldFrame, registry);
+   private final YoFramePoint3D comVelocityAtEndOfWindow = new YoFramePoint3D("comVelocityAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
+   private final YoFramePoint3D vrpAtEndOfWindow = new YoFramePoint3D("vrpAtEndOfWindow", worldFrame, registry);
 
    private final YoDouble initialCoMPositionCostToGo = new YoDouble("initialCoMPositionCostToGo", registry);
    private final YoDouble initialCoMVelocityCostToGo = new YoDouble("initialCoMVelocityCostToGo", registry);
@@ -83,7 +86,7 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
 
-   private final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
+   final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
    final TrajectoryHandler trajectoryHandler;
@@ -185,7 +188,10 @@ public class CoMTrajectoryModelPredictiveController
       trajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
       trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime(), omega.getValue());
 
+      comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPosition());
+      comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocity());
       dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
+      vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPosition());
 
       if (previewWindowCalculator.activeSegmentChanged())
       {
@@ -316,7 +322,10 @@ public class CoMTrajectoryModelPredictiveController
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
-      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeCoMPositionObjective(commandProvider.getNextCoMPositionCommand(), comPositionAtEndOfWindow, numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand(), comVelocityAtEndOfWindow, numberOfPhases - 1, finalDuration));
+//      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
+      mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
       if (includeRhoMinInequality)
          mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
       if (includeRhoMaxInequality)
@@ -346,13 +355,12 @@ public class CoMTrajectoryModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+//      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       objectiveToPack.setWeight(initialComWeight);
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
       objectiveToPack.setCostToGoConsumer(initialComVelocityConsumer);
-//      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -472,6 +480,64 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private MPCCommand<?> computeCoMPositionObjective(CoMPositionCommand objectiveToPack,
+                                                     FramePoint3DReadOnly desiredPosition,
+                                                     int segmentNumber,
+                                                     double timeOfObjective)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(desiredPosition);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeCoMVelocityObjective(CoMVelocityCommand objectiveToPack,
+                                                     FramePoint3DReadOnly desiredPosition,
+                                                     int segmentNumber,
+                                                     double timeOfObjective)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(desiredPosition);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+
+   private MPCCommand<?> computeVRPPositionObjective(VRPPositionCommand objectiveToPack,
+                                                     FramePoint3DReadOnly desiredPosition,
+                                                     int segmentNumber,
+                                                     double timeOfObjective)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(desiredPosition);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
    private DMatrixRMaj solveQP()
    {
       qpSolver.initialize();
@@ -496,7 +562,7 @@ public class CoMTrajectoryModelPredictiveController
               desiredCoMVelocity,
               desiredCoMAcceleration,
               desiredDCMPosition,
-              desiredCoMVelocity,
+              desiredDCMVelocity,
               desiredVRPPosition,
               desiredVRPVelocity,
               desiredECMPPosition);
