@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.ForceMinimizationCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.matrixlib.MatrixTools;
@@ -432,13 +429,35 @@ public class MPCQPInputCalculator
       inputToPack.getDirectCostHessian().zero();
       inputToPack.getDirectCostGradient().zero();
 
-      vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective);
+      boolean success = vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective);
       double weight = objective.getWeight();
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
 
-      return true;
+      return success;
+   }
+
+   public boolean calculateOrientationTrackingObjective(QPInputTypeC inputToPack, OrientationTrackingCommand objective)
+   {
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getYawTrackingCommand()))
+         return false;
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getPitchTrackingCommand()))
+         return false;
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getRollTrackingCommand()))
+         return false;
+
+      double weight = objective.getWeight();
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return  true;
    }
 
    private double getGravityZObjective(int derivativeOrder, double time)

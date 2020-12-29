@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.VRPTrackingCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingLinkedList;
 
 public class CommandProvider
 {
@@ -12,6 +12,7 @@ public class CommandProvider
    private final RecyclingArrayList<VRPPositionCommand> vrpPositionCommandPool = new RecyclingArrayList<>(VRPPositionCommand::new);
    private final RecyclingArrayList<VRPVelocityCommand> vrpVelocityCommandPool = new RecyclingArrayList<>(VRPVelocityCommand::new);
    private final RecyclingArrayList<VRPTrackingCommand> vrpTrackingCommandPool = new RecyclingArrayList<>(VRPTrackingCommand::new);
+   private final RecyclingArrayList<OrientationTrackingCommand> orientationTrackingCommandPool = new RecyclingArrayList<>(OrientationTrackingCommand::new);
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
@@ -26,6 +27,7 @@ public class CommandProvider
       vrpPositionCommandPool.clear();
       vrpVelocityCommandPool.clear();
       vrpTrackingCommandPool.clear();
+      orientationTrackingCommandPool.clear();
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
@@ -65,6 +67,11 @@ public class CommandProvider
    public VRPTrackingCommand getNextVRPTrackingCommand()
    {
       return vrpTrackingCommandPool.add();
+   }
+
+   public OrientationTrackingCommand getNextOrientationTrackingCommand()
+   {
+      return orientationTrackingCommandPool.add();
    }
 
    public CoMPositionContinuityCommand getNextComPositionContinuityCommand()

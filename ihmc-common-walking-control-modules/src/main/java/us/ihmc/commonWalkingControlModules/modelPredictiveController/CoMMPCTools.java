@@ -160,4 +160,46 @@ public class CoMMPCTools
       vrpVelocityToPack.scaleAdd(2.0 * timeInPhase, fourthCoefficient, vrpVelocityToPack);
       vrpVelocityToPack.add(fifthCoefficient);
    }
+
+   public static void constructedDesiredBodyOrientation(FixedFrameOrientation3DBasics orientationToPack,
+                                                        FramePoint3DReadOnly firstCoefficient,
+                                                        FramePoint3DReadOnly secondCoefficient,
+                                                        FramePoint3DReadOnly thirdCoefficient,
+                                                        FramePoint3DReadOnly fourthCoefficient,
+                                                        double timeInPhase)
+   {
+      timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
+
+      double t2 = timeInPhase * timeInPhase;
+      double t3 = timeInPhase * t2;
+
+      orientationToPack.checkReferenceFrameMatch(worldFrame);
+      orientationToPack.setToZero();
+
+      double yaw = t3 * firstCoefficient.getX() + t2 * secondCoefficient.getX() + timeInPhase * thirdCoefficient.getX() + fourthCoefficient.getX();
+      double pitch = t3 * firstCoefficient.getY() + t2 * secondCoefficient.getY() + timeInPhase * thirdCoefficient.getY() + fourthCoefficient.getY();
+      double roll = t3 * firstCoefficient.getZ() + t2 * secondCoefficient.getZ() + timeInPhase * thirdCoefficient.getZ() + fourthCoefficient.getZ();
+
+      orientationToPack.setYawPitchRoll(yaw, pitch, roll);
+   }
+
+   public static void constructedDesiredBodyAngularVelocity(FixedFrameVector3DBasics angularRateToPack,
+                                                            FramePoint3DReadOnly firstCoefficient,
+                                                            FramePoint3DReadOnly secondCoefficient,
+                                                            FramePoint3DReadOnly thirdCoefficient,
+                                                            FramePoint3DReadOnly fourthCoefficient,
+                                                            double timeInPhase)
+   {
+      timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
+
+      double c0 = 3.0 * timeInPhase * timeInPhase;
+      double c1 = 2.0 * timeInPhase;
+
+      angularRateToPack.checkReferenceFrameMatch(worldFrame);
+      angularRateToPack.setToZero();
+
+      angularRateToPack.scaleAdd(c0, firstCoefficient);
+      angularRateToPack.scaleAdd(c1, secondCoefficient);
+      angularRateToPack.add(thirdCoefficient);
+   }
 }

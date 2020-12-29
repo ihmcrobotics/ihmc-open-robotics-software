@@ -183,12 +183,17 @@ public class TrajectoryHandler
       return false;
    }
 
-   private final FramePoint3D firstCoefficient = new FramePoint3D();
-   private final FramePoint3D secondCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthCoefficient = new FramePoint3D();
+   private final FramePoint3D firstPositionCoefficient = new FramePoint3D();
+   private final FramePoint3D secondPositionCoefficient = new FramePoint3D();
+   private final FramePoint3D thirdPositionCoefficient = new FramePoint3D();
+   private final FramePoint3D fourthPositionCoefficient = new FramePoint3D();
+   private final FramePoint3D fifthPositionCoefficient = new FramePoint3D();
+   private final FramePoint3D sixthPositionCoefficient = new FramePoint3D();
+
+   private final FramePoint3D firstOrientationCoefficient = new FramePoint3D();
+   private final FramePoint3D secondOrientationCoefficient = new FramePoint3D();
+   private final FramePoint3D thirdOrientationCoefficient = new FramePoint3D();
+   private final FramePoint3D fourthOrientationCoefficient = new FramePoint3D();
 
    private boolean computeInPlanningWindow(double timeInPhase, double omega)
    {
@@ -203,71 +208,71 @@ public class TrajectoryHandler
 
    boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
    {
-      int startIndex = 6 * segmentNumber;
-      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
+      int positionStartIndex = 6 * segmentNumber;
+      firstPositionCoefficient.setX(xCoefficientVector.get(positionStartIndex, 0));
+      firstPositionCoefficient.setY(yCoefficientVector.get(positionStartIndex, 0));
+      firstPositionCoefficient.setZ(zCoefficientVector.get(positionStartIndex, 0));
 
-      int secondCoefficientIndex = startIndex + 1;
-      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
+      int secondPositionCoefficientIndex = positionStartIndex + 1;
+      secondPositionCoefficient.setX(xCoefficientVector.get(secondPositionCoefficientIndex, 0));
+      secondPositionCoefficient.setY(yCoefficientVector.get(secondPositionCoefficientIndex, 0));
+      secondPositionCoefficient.setZ(zCoefficientVector.get(secondPositionCoefficientIndex, 0));
 
-      int thirdCoefficientIndex = startIndex + 2;
-      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
+      int thirdPositionCoefficientIndex = positionStartIndex + 2;
+      thirdPositionCoefficient.setX(xCoefficientVector.get(thirdPositionCoefficientIndex, 0));
+      thirdPositionCoefficient.setY(yCoefficientVector.get(thirdPositionCoefficientIndex, 0));
+      thirdPositionCoefficient.setZ(zCoefficientVector.get(thirdPositionCoefficientIndex, 0));
 
-      int fourthCoefficientIndex = startIndex + 3;
-      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
+      int fourthPositionCoefficientIndex = positionStartIndex + 3;
+      fourthPositionCoefficient.setX(xCoefficientVector.get(fourthPositionCoefficientIndex, 0));
+      fourthPositionCoefficient.setY(yCoefficientVector.get(fourthPositionCoefficientIndex, 0));
+      fourthPositionCoefficient.setZ(zCoefficientVector.get(fourthPositionCoefficientIndex, 0));
 
-      int fifthCoefficientIndex = startIndex + 4;
-      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
+      int fifthCoefficientIndex = positionStartIndex + 4;
+      fifthPositionCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthPositionCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
+      fifthPositionCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
 
-      int sixthCoefficientIndex = startIndex + 5;
-      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
+      int sixthCoefficientIndex = positionStartIndex + 5;
+      sixthPositionCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthPositionCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
+      sixthPositionCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
 
-      CoMMPCTools.constructDesiredCoMPosition(desiredCoMPosition,
-                                              firstCoefficient,
-                                              secondCoefficient,
-                                              thirdCoefficient,
-                                              fourthCoefficient,
-                                              fifthCoefficient,
-                                              sixthCoefficient,
+      int orientationStartIndex = MPCIndexHandler.orientationCoefficientsPerSegment * segmentNumber;
+      firstOrientationCoefficient.setX(yawCoefficientVector.get(orientationStartIndex, 0));
+      firstOrientationCoefficient.setY(pitchCoefficientVector.get(orientationStartIndex, 0));
+      firstOrientationCoefficient.setZ(rollCoefficientVector.get(orientationStartIndex, 0));
+
+      int secondOrientationCoefficientIndex = orientationStartIndex + 1;
+      secondOrientationCoefficient.setX(yawCoefficientVector.get(secondOrientationCoefficientIndex, 0));
+      secondOrientationCoefficient.setY(pitchCoefficientVector.get(secondOrientationCoefficientIndex, 0));
+      secondOrientationCoefficient.setZ(rollCoefficientVector.get(secondOrientationCoefficientIndex, 0));
+
+      int thirdOrientationCoefficientIndex = orientationStartIndex + 2;
+      thirdOrientationCoefficient.setX(yawCoefficientVector.get(thirdOrientationCoefficientIndex, 0));
+      thirdOrientationCoefficient.setY(pitchCoefficientVector.get(thirdOrientationCoefficientIndex, 0));
+      thirdOrientationCoefficient.setZ(rollCoefficientVector.get(thirdOrientationCoefficientIndex, 0));
+
+      int fourthOrientationCoefficientIndex = orientationStartIndex + 3;
+      fourthOrientationCoefficient.setX(yawCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
+      fourthOrientationCoefficient.setY(pitchCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
+      fourthOrientationCoefficient.setZ(rollCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
+
+      CoMMPCTools.constructDesiredCoMPosition(desiredCoMPosition, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
+                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
                                               timeInSegment,
                                               omega);
-      CoMMPCTools.constructDesiredCoMVelocity(desiredCoMVelocity,
-                                              firstCoefficient,
-                                              secondCoefficient,
-                                              thirdCoefficient,
-                                              fourthCoefficient,
-                                              fifthCoefficient,
-                                              sixthCoefficient,
+      CoMMPCTools.constructDesiredCoMVelocity(desiredCoMVelocity, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
+                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
                                               timeInSegment,
                                               omega);
-      CoMMPCTools.constructDesiredCoMAcceleration(desiredCoMAcceleration,
-                                                  firstCoefficient,
-                                                  secondCoefficient,
-                                                  thirdCoefficient,
-                                                  fourthCoefficient,
-                                                  fifthCoefficient,
-                                                  sixthCoefficient,
+      CoMMPCTools.constructDesiredCoMAcceleration(desiredCoMAcceleration, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
+                                                  fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
                                                   timeInSegment,
                                                   omega);
 
-      CoMMPCTools.constructDesiredVRPVelocity(desiredVRPVelocity,
-                                              firstCoefficient,
-                                              secondCoefficient,
-                                              thirdCoefficient,
-                                              fourthCoefficient,
-                                              fifthCoefficient,
-                                              sixthCoefficient,
+      CoMMPCTools.constructDesiredVRPVelocity(desiredVRPVelocity, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
+                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
                                               timeInSegment,
                                               omega);
 
@@ -278,6 +283,19 @@ public class TrajectoryHandler
       double nominalHeight = gravityZ / MathTools.square(omega);
       desiredECMPPosition.set(desiredVRPPosition);
       desiredECMPPosition.subZ(nominalHeight);
+
+      CoMMPCTools.constructedDesiredBodyOrientation(desiredBodyOrientation,
+                                                    firstOrientationCoefficient,
+                                                    secondOrientationCoefficient,
+                                                    thirdOrientationCoefficient,
+                                                    fourthOrientationCoefficient,
+                                                    timeInSegment);
+      CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocity,
+                                                        firstOrientationCoefficient,
+                                                        secondOrientationCoefficient,
+                                                        thirdOrientationCoefficient,
+                                                        fourthOrientationCoefficient,
+                                                        timeInSegment);
 
       return true;
    }
@@ -305,14 +323,7 @@ public class TrajectoryHandler
 
    private void computeOutsideOfPlanningWindow(double time)
    {
-      int segmentId = positionInitializationCalculator.getSegmentNumber(time);
-      computeOutsideOfPlanningWindow(segmentId, time);
-   }
-
-   void computeOutsideOfPlanningWindow(int segmentId, double time)
-   {
-      positionInitializationCalculator.compute(segmentId, time);
-      orientationInitializationCalculator.compute(time);
+      positionInitializationCalculator.compute(time);
 
       desiredCoMPosition.set(positionInitializationCalculator.getDesiredCoMPosition());
       desiredCoMVelocity.set(positionInitializationCalculator.getDesiredCoMVelocity());
@@ -325,6 +336,13 @@ public class TrajectoryHandler
       desiredDCMVelocity.set(positionInitializationCalculator.getDesiredDCMVelocity());
 
       desiredECMPPosition.set(positionInitializationCalculator.getDesiredECMPPosition());
+
+      computeReferenceOrientations(time, desiredBodyOrientation, desiredBodyAngularVelocity);
+   }
+
+   public void computeReferenceOrientations(double time, FixedFrameOrientation3DBasics desiredBodyOrientation, FixedFrameVector3DBasics desiredBodyAngularVelocity)
+   {
+      orientationInitializationCalculator.compute(time);
 
       desiredBodyOrientation.set(orientationInitializationCalculator.getDesiredOrientation());
       desiredBodyAngularVelocity.set(orientationInitializationCalculator.getDesiredAngularVelocity());
