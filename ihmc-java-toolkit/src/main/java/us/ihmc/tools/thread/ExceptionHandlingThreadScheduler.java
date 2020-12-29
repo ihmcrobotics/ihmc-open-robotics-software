@@ -120,4 +120,9 @@ public class ExceptionHandlingThreadScheduler
    {
       executorService.shutdown();
    }
+
+   public void shutdownNow()
+   {
+      executorService.shutdownNow();
+   }
 }
