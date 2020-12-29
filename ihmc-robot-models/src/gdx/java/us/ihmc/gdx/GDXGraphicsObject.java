@@ -22,7 +22,7 @@ import java.util.List;
 public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements RenderableProvider
 {
    private final ArrayList<Model> models = new ArrayList<>();
-   private ModelInstance modelInstance;
+   private final ArrayList<ModelInstance> modelInstances = new ArrayList<>();
 
    public GDXGraphicsObject(Graphics3DObject graphics3dObject)
    {
@@ -86,7 +86,8 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       Model model = GDXModelLoader.loadG3DModel(modelFileName);
       models.add(model);
 
-      modelInstance = new ModelInstance(model);
+      ModelInstance modelInstance = new ModelInstance(model);
+      modelInstances.add(modelInstance);
 
       //      if (graphics3DAddModelFile.getAppearance() != null)
 //      {
@@ -303,13 +304,19 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
     */
    public void setTransform(AffineTransform transform)
    {
-      GDXTools.convertEuclidAffineToGDXAffine(transform, modelInstance.transform);
+      for (ModelInstance modelInstance : modelInstances)
+      {
+         GDXTools.convertEuclidAffineToGDXAffine(transform, modelInstance.transform);
+      }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      for (ModelInstance modelInstance : modelInstances)
+      {
+         modelInstance.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()

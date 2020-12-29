@@ -10,10 +10,8 @@ import java.util.ArrayList;
 
 public class GDXGraphics3DNode
 {
-
    private final Graphics3DNode graphicsNode;
    private final GDXGraphicsObject gdxGraphicsObject;
-   private final ArrayList<GDXGraphics3DNode> updatables = new ArrayList<>();
 
    private final ArrayList<GDXGraphics3DNode> children = new ArrayList<>();
 
@@ -42,7 +40,6 @@ public class GDXGraphics3DNode
    public void addChild(GDXGraphics3DNode child)
    {
       children.add(child);
-      addChild(child);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
