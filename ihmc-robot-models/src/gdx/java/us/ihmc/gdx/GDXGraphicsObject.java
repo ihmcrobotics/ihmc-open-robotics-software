@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.SerializationException;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -15,6 +16,7 @@ import us.ihmc.graphicsDescription.instructions.*;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,13 +83,25 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
    @Override
    protected void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile)
    {
+      try
+      {
+         String modelFileName = graphics3DAddModelFile.getFileName();
 
-      String modelFileName = graphics3DAddModelFile.getFileName();
-      Model model = GDXModelLoader.loadG3DModel(modelFileName);
-      models.add(model);
+         String[] splitSlash = modelFileName.split("/");
+         String objFileName = splitSlash[splitSlash.length - 1];
+         String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
 
-      ModelInstance modelInstance = new ModelInstance(model);
-      modelInstances.add(modelInstance);
+         Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
+//               Model model = GDXModelLoader.loadObjModel(modelFileName);
+         models.add(model);
+
+         ModelInstance modelInstance = new ModelInstance(model);
+         modelInstances.add(modelInstance);
+      }
+      catch (SerializationException e)
+      {
+         LogTools.error(e.getMessage());
+      }
 
       //      if (graphics3DAddModelFile.getAppearance() != null)
 //      {
@@ -298,15 +312,11 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       }
    }
 
-   /**
-    * TODO: Specify local or global transform.
-    * @param transform
-    */
-   public void setTransform(AffineTransform transform)
+   public void setWorldTransform(AffineTransform worldTransform)
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         GDXTools.convertEuclidAffineToGDXAffine(transform, modelInstance.transform);
+         GDXTools.convertEuclidAffineToGDXAffine(worldTransform, modelInstance.transform);
       }
    }
 

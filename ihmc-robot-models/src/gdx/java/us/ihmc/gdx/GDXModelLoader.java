@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
@@ -31,6 +32,12 @@ public class GDXModelLoader
       //         Model model = g3dModelLoader.loadModel(modelFile, new TextureProvider.FileTextureProvider());
 
       return new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal(modelFileName));
+   }
+
+   public static Model loadObjModel(String modelFileName)
+   {
+      return new ObjLoader().loadModel(Gdx.files.internal(modelFileName));
+
    }
 
 //   public static void loadG3DModelOtherWay(String modelFileName, Node node)
