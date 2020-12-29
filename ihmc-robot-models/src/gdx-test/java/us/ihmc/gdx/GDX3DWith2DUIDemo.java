@@ -28,7 +28,10 @@ public class GDX3DWith2DUIDemo
       {
          super.create();
 
-         setViewportBounds(0.0, 1.0 / 4.0, 1.0, 3.0 / 4.0);
+         setViewportBounds(0,
+                           (int) (getCurrentWindowHeight() * 1.0 / 4.0),
+                           (int) (getCurrentWindowWidth() * 1.0),
+                           (int) (getCurrentWindowHeight() * 3.0 / 4.0));
 
          coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
          boxes = new BoxesDemoModel().newInstance();
