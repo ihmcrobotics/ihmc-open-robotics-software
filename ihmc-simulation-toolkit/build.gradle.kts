@@ -16,7 +16,7 @@ ihmc {
 mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
 
-   api("us.ihmc:euclid:0.16.0")
+   api("us.ihmc:euclid:0.16.1")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
    api("us.ihmc:ihmc-java-toolkit:source")
