@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import com.jme3.util.IntMap;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
@@ -13,8 +11,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
@@ -30,7 +26,6 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class CoMTrajectoryModelPredictiveController
 {
@@ -600,7 +595,7 @@ public class CoMTrajectoryModelPredictiveController
     */
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      trajectoryHandler.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
+      trajectoryHandler.setInitialCenterOfMassPositionState(centerOfMassPosition, centerOfMassVelocity);
    }
 
    public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition,

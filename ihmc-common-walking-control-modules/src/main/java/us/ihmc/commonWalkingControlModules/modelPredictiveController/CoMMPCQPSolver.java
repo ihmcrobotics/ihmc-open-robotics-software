@@ -60,9 +60,11 @@ public class CoMMPCQPSolver
 
    private final YoDouble comCoefficientRegularization = new YoDouble("comCoefficientRegularization", registry);
    private final YoDouble rhoCoefficientRegularization = new YoDouble("rhoCoefficientRegularization", registry);
+   private final YoDouble orientationCoefficientRegularization = new YoDouble("orientationCoefficientRegularization", registry);
 
    private final YoDouble comRateCoefficientRegularization = new YoDouble("comRateCoefficientRegularization", registry);
    private final YoDouble rhoRateCoefficientRegularization = new YoDouble("rhoRateCoefficientRegularization", registry);
+   private final YoDouble orientationRateCoefficientRegularization = new YoDouble("orientationRateCoefficientRegularization", registry);
 
    private int problemSize;
 
@@ -85,9 +87,11 @@ public class CoMMPCQPSolver
 
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
+      orientationCoefficientRegularization.set(1e-5);
 
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
+      orientationRateCoefficientRegularization.set(1e-6);
 
       if (useSparse)
       {
@@ -138,6 +142,11 @@ public class CoMMPCQPSolver
       this.rhoCoefficientRegularization.set(weight);
    }
 
+   public void setOrientationCoefficientRegularization(double weight)
+   {
+      this.orientationCoefficientRegularization.set(weight);
+   }
+
    public void setComRateCoefficientRegularizationWeight(double weight)
    {
       this.comRateCoefficientRegularization.set(weight);
@@ -146,6 +155,11 @@ public class CoMMPCQPSolver
    public void setRhoRateCoefficientRegularizationWeight(double weight)
    {
       this.rhoRateCoefficientRegularization.set(weight);
+   }
+
+   public void setOrientationRateCoefficientRegularization(double weight)
+   {
+      this.orientationRateCoefficientRegularization.set(weight);
    }
 
    public void setUseWarmStart(boolean useWarmStart)
@@ -242,6 +256,16 @@ public class CoMMPCQPSolver
          start = indexHandler.getRhoCoefficientStartIndex(segmentId);
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
             solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
+
+         start = indexHandler.getYawCoefficientsStartIndex(segmentId);
+         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
+         start = indexHandler.getPitchCoefficientsStartIndex(segmentId);
+         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
+         start = indexHandler.getRollCoefficientsStartIndex(segmentId);
+         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
       }
    }
 
