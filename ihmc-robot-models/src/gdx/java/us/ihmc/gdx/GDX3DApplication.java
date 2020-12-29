@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -67,12 +68,17 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       preRenderTasks.add(task);
    }
 
+   /**
+    * Coordinates in xy bottom left
+    */
    public void setViewportBounds(int x, int y, int width, int height)
    {
       this.x = x;
       this.y = y;
       this.width = width;
       this.height = height;
+
+      camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
    }
 
    @Override

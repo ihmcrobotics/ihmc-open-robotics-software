@@ -1,26 +1,44 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiDockNodeFlags;
+import imgui.flag.ImGuiDragDropFlags;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.log.LogTools;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class GDX3DWith2DImGuiDemo
+public class GDX3DFullImGuiDemo
 {
    private ModelInstance boxes;
    private ModelInstance coordinateFrame;
 
+   private boolean isInitialized = false;
 
-   public GDX3DWith2DImGuiDemo()
+   public GDX3DFullImGuiDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
+//      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
+
+      Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
+      applicationConfiguration.setTitle(getClass().getSimpleName());
+      applicationConfiguration.setWindowedMode(1100, 800);
+      applicationConfiguration.useVsync(true);
+      applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
+
+      ThreadTools.startAThread(() -> new Lwjgl3Application(new PrivateGDXApplication(), applicationConfiguration), getClass().getSimpleName());
    }
 
    class PrivateGDXApplication extends GDX3DApplication
@@ -63,10 +81,12 @@ public class GDX3DWith2DImGuiDemo
 
          final ImGuiIO io = ImGui.getIO();
          io.setIniFilename(null); // We don't want to save .ini file
-//         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);  // Enable Keyboard Controls
-//         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);      // Enable Docking
-//         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);    // Enable Multi-Viewport / Platform Windows
-//         io.setConfigViewportsNoTaskBarIcon(true);
+//         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
+         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
+         io.addConfigFlags(ImGuiDockNodeFlags.AutoHideTabBar);
+//         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+         io.setConfigViewportsNoTaskBarIcon(true);
+         io.setConfigWindowsMoveFromTitleBarOnly(true);
 
          ImGuiTools.setupFonts(io);
 
@@ -79,18 +99,38 @@ public class GDX3DWith2DImGuiDemo
       @Override
       public void render()
       {
+
          Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-         renderBefore();
-
-         getModelBatch().render(coordinateFrame, getEnvironment());
-         getModelBatch().render(boxes, getEnvironment());
-
-         renderAfter();
-
          imGuiGlfw.newFrame();
          ImGui.newFrame();
+
+         ImGui.setNextWindowBgAlpha(0.0f);
+         int flags = 0;
+         flags += ImGuiWindowFlags.NoMove;
+         flags += ImGuiWindowFlags.NoTitleBar;
+         flags += ImGuiWindowFlags.NoBringToFrontOnFocus;
+         ImGui.begin("3D View", flags);
+
+         int id = 15;
+         ImGui.dockSpace(15);
+
+         if (!isInitialized)
+         {
+            ImGui.setWindowSize(getCurrentWindowWidth(), getCurrentWindowHeight());
+            ImGui.setWindowPos(0, 0);
+         }
+
+         float posX = ImGui.getWindowPosX();
+         float posY = ImGui.getWindowPosY();
+         float sizeX = ImGui.getWindowSizeX();
+         float sizeY = ImGui.getWindowSizeY();
+         setViewportBounds((int) posX, getCurrentWindowHeight() - (int) posY - (int) sizeY, (int) sizeX, (int) sizeY);
+
+         ImGui.end();
+
+         getCamera3D().clearInputExclusionBoxes();
 
          ImGui.begin("Window");
          ImGui.button("I'm a Button!");
@@ -103,13 +143,31 @@ public class GDX3DWith2DImGuiDemo
 
          ImGui.plotLines("Histogram", values, 100);
 
+         getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
+
          ImGui.end();
+
+//         ImGui.dockSpaceOverViewport();
+
+//         glClearColor(exampleUi.backgroundColor[0], exampleUi.backgroundColor[1], exampleUi.backgroundColor[2], 0.0f);
+//         glClear(GL_COLOR_BUFFER_BIT);
 
          ImGui.render();
          imGuiGl3.renderDrawData(ImGui.getDrawData());
 
+//         ImGui.updatePlatformWindows();
+
+         renderBefore();
+
+         getModelBatch().render(coordinateFrame, getEnvironment());
+         getModelBatch().render(boxes, getEnvironment());
+
+         renderAfter();
+
          glfwSwapBuffers(windowHandle);
          glfwPollEvents();
+
+         isInitialized = true;
       }
 
       @Override
@@ -125,6 +183,6 @@ public class GDX3DWith2DImGuiDemo
 
    public static void main(String[] args)
    {
-      new GDX3DWith2DImGuiDemo();
+      new GDX3DFullImGuiDemo();
    }
 }

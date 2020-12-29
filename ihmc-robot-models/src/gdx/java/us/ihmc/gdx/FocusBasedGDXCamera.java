@@ -16,12 +16,16 @@ import com.badlogic.gdx.math.Vector3;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Bound;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+
+import java.util.ArrayList;
 
 public class FocusBasedGDXCamera extends Camera
 {
@@ -60,6 +64,11 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
+   private int lastSeenMouseX;
+   private int lastSeenMouseY;
+   private final BoundingBox2D mainBoundary = new BoundingBox2D();
+   private final ArrayList<BoundingBox2D> exclusionBoundingBoxes = new ArrayList<>();
+
    public FocusBasedGDXCamera()
    {
       fieldOfView = 45.0f;
@@ -67,6 +76,8 @@ public class FocusBasedGDXCamera extends Camera
       viewportHeight = Gdx.graphics.getHeight();
       near = 0.05f;
       far = 2000.0f;
+
+      mainBoundary.setMax((int) viewportWidth, (int) viewportHeight);
 
       cameraOffsetUp = new Vector3D(0.0, 0.0, 1.0);
       cameraOffsetForward = new Vector3D(1.0, 0.0, 0.0);
@@ -106,6 +117,15 @@ public class FocusBasedGDXCamera extends Camera
          public boolean scrolled(float amountX, float amountY)
          {
             return FocusBasedGDXCamera.this.scrolled(amountX, amountY);
+         }
+
+         @Override
+         public boolean mouseMoved(int screenX, int screenY)
+         {
+            lastSeenMouseX = screenX;
+            lastSeenMouseY = screenY;
+
+            return false;
          }
 
          @Override
@@ -186,18 +206,40 @@ public class FocusBasedGDXCamera extends Camera
 
    public boolean touchDragged(int deltaX, int deltaY)
    {
-      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+      if (inputInBounds())
       {
-         latitude -= latitudeSpeed * deltaY;
-         longitude += longitudeSpeed * deltaX;
+         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+         {
+            latitude -= latitudeSpeed * deltaY;
+            longitude += longitudeSpeed * deltaX;
+
+            return true;
+         }
       }
       return false;
    }
 
    public boolean scrolled(float amountX, float amountY)
    {
-      zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
+      if (inputInBounds())
+      {
+         zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
+         return true;
+      }
+
       return false;
+   }
+
+   private boolean inputInBounds()
+   {
+      boolean inBounds = mainBoundary.isInsideInclusive(lastSeenMouseX, lastSeenMouseY);
+
+      for (BoundingBox2D exclusionBoundingBox : exclusionBoundingBoxes)
+      {
+         inBounds &= !exclusionBoundingBox.isInsideInclusive(lastSeenMouseX, lastSeenMouseY);
+      }
+
+      return inBounds;
    }
 
    // Taken from GDX PerspectiveCamera
@@ -248,7 +290,8 @@ public class FocusBasedGDXCamera extends Camera
       combined.set(projection);
       Matrix4.mul(combined.val, view.val);
 
-      if (updateFrustum) {
+      if (updateFrustum)
+      {
          invProjectionView.set(combined);
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
@@ -263,5 +306,26 @@ public class FocusBasedGDXCamera extends Camera
    public void dispose()
    {
       focusPointModel.dispose();
+   }
+
+   public void setInputBounds(int minX, int maxX, int minY, int maxY)
+   {
+      mainBoundary.set(minX, minY, maxX, maxY);
+   }
+
+   public void setInputExclusionBoxes(ArrayList<BoundingBox2D> exclusionBoundingBoxes)
+   {
+      exclusionBoundingBoxes.clear();
+      exclusionBoundingBoxes.addAll(exclusionBoundingBoxes);
+   }
+
+   public void addInputExclusionBox(BoundingBox2D exclusionBoundingBox)
+   {
+      exclusionBoundingBoxes.add(exclusionBoundingBox);
+   }
+
+   public void clearInputExclusionBoxes()
+   {
+      exclusionBoundingBoxes.clear();
    }
 }
