@@ -91,7 +91,7 @@ public class GDX3DWith2DImGuiDemo
          imGuiGlfw.newFrame();
          ImGui.newFrame();
 
-         ImGui.button("Drag me");
+         ImGui.button("I'm a Button!");
 
          ImGui.render();
          imGuiGl3.renderDrawData(ImGui.getDrawData());
