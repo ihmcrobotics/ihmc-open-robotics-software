@@ -17,7 +17,7 @@ public class GDXApplicationCreator
                                                         double height)
    {
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
-      applicationConfiguration.setTitle("GDX3DDemo");
+      applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
       applicationConfiguration.useVsync(true);
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
