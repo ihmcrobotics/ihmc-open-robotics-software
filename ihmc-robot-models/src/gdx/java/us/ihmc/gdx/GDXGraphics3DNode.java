@@ -3,6 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 
@@ -14,6 +15,8 @@ public class GDXGraphics3DNode
    private final GDXGraphicsObject gdxGraphicsObject;
 
    private final ArrayList<GDXGraphics3DNode> children = new ArrayList<>();
+
+   private final AffineTransform tempTransform = new AffineTransform();
 
    public GDXGraphics3DNode(Graphics3DNode graphicsNode)
    {
@@ -29,11 +32,19 @@ public class GDXGraphics3DNode
 
    public void update()
    {
-      gdxGraphicsObject.setTransform(graphicsNode.getTransform());
+      tempTransform.setIdentity();
+      updateInternal(tempTransform);
+   }
+
+   private void updateInternal(AffineTransform parentTransform)
+   {
+      tempTransform.set(parentTransform);
+      tempTransform.multiply(graphicsNode.getTransform());
+      gdxGraphicsObject.setWorldTransform(tempTransform);
 
       for (GDXGraphics3DNode child : children)
       {
-         child.update();
+         child.updateInternal(tempTransform);
       }
    }
 
