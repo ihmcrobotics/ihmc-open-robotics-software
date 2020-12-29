@@ -3,6 +3,7 @@ package us.ihmc.gdx;
 import imgui.*;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,27 +47,43 @@ public class ImGuiTools
       fontConfig.destroy(); // After all fonts were added we don't need this config more
 
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-      if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+      if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
+      {
          final ImGuiStyle style = ImGui.getStyle();
          style.setWindowRounding(0.0f);
          style.setColor(ImGuiCol.WindowBg, ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
    }
 
-   private static byte[] loadFromResources(final String fileName) {
+   private static byte[] loadFromResources(final String fileName)
+   {
       try (InputStream is = Objects.requireNonNull(ImGuiTools.class.getClassLoader().getResourceAsStream(fileName));
-           ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+           ByteArrayOutputStream buffer = new ByteArrayOutputStream())
+      {
 
          final byte[] data = new byte[16384];
 
          int nRead;
-         while ((nRead = is.read(data, 0, data.length)) != -1) {
+         while ((nRead = is.read(data, 0, data.length)) != -1)
+         {
             buffer.write(data, 0, nRead);
          }
 
          return buffer.toByteArray();
-      } catch (IOException e) {
+      }
+      catch (IOException e)
+      {
          throw new UncheckedIOException(e);
       }
+   }
+
+   public static BoundingBox2D windowBoundingBox()
+   {
+      BoundingBox2D box = new BoundingBox2D();
+      int posX = (int) ImGui.getWindowPosX();
+      int posY = (int) ImGui.getWindowPosY();
+      box.setMin(posX, posY);
+      box.setMax(posX + ImGui.getWindowSizeX(), posY + (int) ImGui.getWindowSizeX());
+      return box;
    }
 }

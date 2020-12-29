@@ -6,8 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public class GDXApplicationCreator
 {
-   public static void launchGDXApplication(Lwjgl3ApplicationAdapter application,
-                                                        Class<?> clazz)
+   public static void launchGDXApplication(Lwjgl3ApplicationAdapter application, Class<?> clazz)
    {
       launchGDXApplication(application, clazz.getSimpleName(), 1100, 800);
    }
