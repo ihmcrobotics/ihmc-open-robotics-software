@@ -1,24 +1,22 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.IntUnaryOperator;
 
 public class MPCIndexHandler
 {
    public static final int coefficientsPerRho = 4;
    public static final int comCoefficientsPerSegment = 6;
+   public static final int orientationCoefficientsPerSegment = 4;
 
    private int totalProblemSize = 0;
 
    private final int numberOfBasisVectorsPerContactPoint;
    private final TIntArrayList comStartIndices = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
+   private final TIntArrayList orientationStartIndices = new TIntArrayList();
    private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
 
    private final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
@@ -38,6 +36,7 @@ public class MPCIndexHandler
    {
       rhoStartIndices.clear();
       comStartIndices.clear();
+      orientationStartIndices.clear();
       rhoCoefficientsInSegment.clear();
 
       totalProblemSize = 0;
@@ -47,9 +46,12 @@ public class MPCIndexHandler
          totalProblemSize += comCoefficientsPerSegment;
 
          int rhoCoefficients = coefficientsPerRho * numberOfBasisVectorsPerContactPoint * pointsInContact.applyAsInt(i);
+         rhoCoefficientsInSegment.add(rhoCoefficients);
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
-         rhoCoefficientsInSegment.add(rhoCoefficients);
+
+         orientationStartIndices.add(totalProblemSize);
+         totalProblemSize += 3 * orientationCoefficientsPerSegment;
       }
    }
 
@@ -76,6 +78,21 @@ public class MPCIndexHandler
    public int getRhoCoefficientStartIndex(int segmentId)
    {
       return rhoStartIndices.get(segmentId);
+   }
+
+   public int getYawCoefficientsStartIndex(int segmentId)
+   {
+      return orientationStartIndices.get(segmentId);
+   }
+
+   public int getPitchCoefficientsStartIndex(int segmentId)
+   {
+      return orientationCoefficientsPerSegment + orientationStartIndices.get(segmentId);
+   }
+
+   public int getRollCoefficientsStartIndex(int segmentId)
+   {
+      return 2 * orientationCoefficientsPerSegment + orientationStartIndices.get(segmentId);
    }
 
    public int getTotalProblemSize()

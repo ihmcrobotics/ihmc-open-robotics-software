@@ -5,14 +5,11 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +17,8 @@ import java.util.List;
 public class TrajectoryHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final CoMTrajectoryPlanner initializationCalculator;
+   private final CoMTrajectoryPlanner positionInitializationCalculator;
+   private final OrientationTrajectoryCalculator orientationInitializationCalculator;
 
    private final List<ContactPlaneProvider> planningWindow = new ArrayList<>();
 
@@ -30,6 +28,10 @@ public class TrajectoryHandler
    final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
+
+   final DMatrixRMaj yawCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj pitchCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj rollCoefficientVector = new DMatrixRMaj(0, 1);
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -42,6 +44,9 @@ public class TrajectoryHandler
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private final FixedFrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
+   private final FixedFrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
+
    private double currentTimeInState;
 
    public TrajectoryHandler(MPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
@@ -49,22 +54,29 @@ public class TrajectoryHandler
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
 
-      initializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
+      positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
+      orientationInitializationCalculator = new OrientationTrajectoryCalculator(registry);
    }
 
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
-      initializationCalculator.setNominalCoMHeight(nominalCoMHeight);
+      positionInitializationCalculator.setNominalCoMHeight(nominalCoMHeight);
    }
 
-   public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
+   public void setInitialCenterOfMassPositionState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      initializationCalculator.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
+      positionInitializationCalculator.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
+   }
+
+   public void setInitialBodyOrientationState(FrameOrientation3DReadOnly bodyOrientation, FrameVector3DReadOnly angularVelocity)
+   {
+      orientationInitializationCalculator.setInitialBodyOrientation(bodyOrientation, angularVelocity);
    }
 
    public void solveForTrajectoryOutsidePreviewWindow(List<ContactPlaneProvider> fullContactSequence)
    {
-      initializationCalculator.solveForTrajectory(fullContactSequence);
+      positionInitializationCalculator.solveForTrajectory(fullContactSequence);
+      orientationInitializationCalculator.solveForTrajectory(fullContactSequence);
    }
 
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
@@ -85,6 +97,13 @@ public class TrajectoryHandler
       yCoefficientVector.zero();
       zCoefficientVector.zero();
 
+      yawCoefficientVector.reshape(4 * numberOfPhases, 1);
+      pitchCoefficientVector.reshape(4 * numberOfPhases, 1);
+      rollCoefficientVector.reshape(4 * numberOfPhases, 1);
+      yawCoefficientVector.zero();
+      pitchCoefficientVector.zero();
+      rollCoefficientVector.zero();
+
       for (int sequence = 0; sequence < contactPlaneHelpers.size(); sequence++)
       {
          int coeffStartIdx = indexHandler.getRhoCoefficientStartIndex(sequence);
@@ -99,39 +118,47 @@ public class TrajectoryHandler
 
       for (int i = 0; i < numberOfPhases; i++)
       {
-         int vectorStart = 6 * i;
+         int positionVectorStart = 6 * i;
+         int orientationVectorStart = 4 * i;
 
-         xCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
-         yCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
-         zCoefficientVector.set(vectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
+         xCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
+         yCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
+         zCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
 
-         xCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
-         yCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
-         zCoefficientVector.set(vectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
+         xCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
+         yCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
+         zCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
 
          for (int contactIdx = 0; contactIdx < contactPlaneHelpers.get(i).size(); contactIdx++)
          {
             ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
             DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
 
-            xCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(0, 0));
-            yCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(1, 0));
-            zCoefficientVector.add(vectorStart, 0, contactCoefficientMatrix.get(2, 0));
+            xCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(0, 0));
+            yCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(1, 0));
+            zCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(2, 0));
 
-            xCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
-            yCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
-            zCoefficientVector.add(vectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
+            xCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
+            yCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
+            zCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
 
-            xCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
-            yCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
-            zCoefficientVector.add(vectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
+            xCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
+            yCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
+            zCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
 
-            xCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
-            yCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
-            zCoefficientVector.add(vectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
+            xCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
+            yCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
+            zCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
          }
 
-         zCoefficientVector.add(vectorStart + 3, 0, -0.5 * gravityZ);
+         for (int orientationIndex = 0; orientationIndex < 4; orientationIndex++)
+         {
+            yawCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getYawCoefficientsStartIndex(i) + orientationIndex));
+            pitchCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getPitchCoefficientsStartIndex(i) + orientationIndex));
+            rollCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getRollCoefficientsStartIndex(i) + orientationIndex));
+         }
+
+         zCoefficientVector.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
       }
    }
 
@@ -278,25 +305,29 @@ public class TrajectoryHandler
 
    private void computeOutsideOfPlanningWindow(double time)
    {
-      int segmentId = initializationCalculator.getSegmentNumber(time);
+      int segmentId = positionInitializationCalculator.getSegmentNumber(time);
       computeOutsideOfPlanningWindow(segmentId, time);
    }
 
    void computeOutsideOfPlanningWindow(int segmentId, double time)
    {
-      initializationCalculator.compute(segmentId, time);
+      positionInitializationCalculator.compute(segmentId, time);
+      orientationInitializationCalculator.compute(time);
 
-      desiredCoMPosition.set(initializationCalculator.getDesiredCoMPosition());
-      desiredCoMVelocity.set(initializationCalculator.getDesiredCoMVelocity());
-      desiredCoMAcceleration.set(initializationCalculator.getDesiredCoMAcceleration());
+      desiredCoMPosition.set(positionInitializationCalculator.getDesiredCoMPosition());
+      desiredCoMVelocity.set(positionInitializationCalculator.getDesiredCoMVelocity());
+      desiredCoMAcceleration.set(positionInitializationCalculator.getDesiredCoMAcceleration());
 
-      desiredVRPPosition.set(initializationCalculator.getDesiredVRPPosition());
-      desiredVRPVelocity.set(initializationCalculator.getDesiredVRPVelocity());
+      desiredVRPPosition.set(positionInitializationCalculator.getDesiredVRPPosition());
+      desiredVRPVelocity.set(positionInitializationCalculator.getDesiredVRPVelocity());
 
-      desiredDCMPosition.set(initializationCalculator.getDesiredDCMPosition());
-      desiredDCMVelocity.set(initializationCalculator.getDesiredDCMVelocity());
+      desiredDCMPosition.set(positionInitializationCalculator.getDesiredDCMPosition());
+      desiredDCMVelocity.set(positionInitializationCalculator.getDesiredDCMVelocity());
 
-      desiredECMPPosition.set(initializationCalculator.getDesiredECMPPosition());
+      desiredECMPPosition.set(positionInitializationCalculator.getDesiredECMPPosition());
+
+      desiredBodyOrientation.set(orientationInitializationCalculator.getDesiredOrientation());
+      desiredBodyAngularVelocity.set(orientationInitializationCalculator.getDesiredAngularVelocity());
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()
