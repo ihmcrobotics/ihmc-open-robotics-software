@@ -1,9 +1,8 @@
 package us.ihmc.gdx;
 
-import javafx.collections.ObservableList;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.Transform;
-import us.ihmc.euclid.transform.AffineTransform;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 
@@ -11,9 +10,12 @@ import java.util.ArrayList;
 
 public class GDXGraphics3DNode
 {
+
    private final Graphics3DNode graphicsNode;
    private final GDXGraphicsObject gdxGraphicsObject;
    private final ArrayList<GDXGraphics3DNode> updatables = new ArrayList<>();
+
+   private final ArrayList<GDXGraphics3DNode> children = new ArrayList<>();
 
    public GDXGraphics3DNode(Graphics3DNode graphicsNode)
    {
@@ -25,28 +27,41 @@ public class GDXGraphics3DNode
       this.graphicsNode = graphicsNode;
 
       gdxGraphicsObject = new GDXGraphicsObject(graphicsNode.getGraphics3DObject(), appearance);
-      getChildren().add(gdxGraphicsObject.getGroup());
    }
 
    public void update()
    {
-      ObservableList<Transform> transforms = getTransforms();
-      transforms.clear();
-      Affine javaFxAffineTransform = new Affine();
+      gdxGraphicsObject.setTransform(graphicsNode.getTransform());
 
-      AffineTransform euclidAffineTransform = graphicsNode.getTransform();
-      JavaFXTools.convertEuclidAffineToJavaFXAffine(euclidAffineTransform, javaFxAffineTransform);
-      transforms.add(javaFxAffineTransform);
-
-      for (int i = 0; i < updatables.size(); i++)
+      for (GDXGraphics3DNode child : children)
       {
-         updatables.get(i).update();
+         child.update();
       }
    }
 
    public void addChild(GDXGraphics3DNode child)
    {
-      getChildren().add(child);
-      updatables.add(child);
+      children.add(child);
+      addChild(child);
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXGraphics3DNode child : children)
+      {
+         child.getRenderables(renderables, pool);
+      }
+
+      gdxGraphicsObject.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      for (GDXGraphics3DNode child : children)
+      {
+         child.destroy();
+      }
+
+      gdxGraphicsObject.destroy();
    }
 }

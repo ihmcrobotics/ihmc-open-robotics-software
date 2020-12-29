@@ -1,37 +1,28 @@
 package us.ihmc.gdx;
 
-import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.MatrixType;
-import javafx.scene.transform.Scale;
-import javafx.scene.transform.Translate;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.*;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.javaFXToolkit.graphics.JAssImpJavaFXTools;
-import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
-public class GDXGraphicsObject extends Graphics3DInstructionExecutor
+public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements RenderableProvider
 {
-   private final Group parentGroup = new Group();
-   private Group currentGroup = parentGroup;
+   private final ArrayList<Model> models = new ArrayList<>();
+   private ModelInstance modelInstance;
 
    public GDXGraphicsObject(Graphics3DObject graphics3dObject)
    {
@@ -62,16 +53,17 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor
    @Override
    protected void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData)
    {
-      graphics3DAddMeshData.getMeshData().getVertices();
-      TriangleMesh outputMesh = interpretMeshData(graphics3DAddMeshData.getMeshData());
-      Material outputMaterial = convertMaterial(graphics3DAddMeshData.getAppearance());
-
-      MeshView meshView = new MeshView();
-      meshView.setMesh(outputMesh);
-      meshView.setMaterial(outputMaterial);
-      Group meshGroup = new Group(meshView);
-      currentGroup.getChildren().add(meshGroup);
-      currentGroup = meshGroup;
+//      graphics3DAddMeshData.getMeshData().getVertices();
+//      TriangleMesh outputMesh = interpretMeshData(graphics3DAddMeshData.getMeshData());
+//      Material outputMaterial = convertMaterial(graphics3DAddMeshData.getAppearance());
+//
+//      MeshView meshView = new MeshView();
+//      meshView.setMesh(outputMesh);
+//      meshView.setMaterial(outputMaterial);
+//      Node meshGroup = new Node();
+//      meshGroup.
+//      currentNode.addChild(meshGroup);
+//      currentNode = meshGroup;
    }
 
    @Override
@@ -89,99 +81,68 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor
    @Override
    protected void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile)
    {
-      MeshView[] outputModelMeshes = new MeshView[0];
-      try
-      {
-         outputModelMeshes = JAssImpJavaFXTools.getJavaFxMeshes(graphics3DAddModelFile.getFileName(), graphics3DAddModelFile.getResourceClassLoader());
-      }
-      catch (URISyntaxException | IOException e)
-      {
-         e.printStackTrace();
-      }
 
-      if (graphics3DAddModelFile.getAppearance() != null)
-      {
-         Material outputMaterial = convertMaterial(graphics3DAddModelFile.getAppearance());
-         for (int i = 0; i < outputModelMeshes.length; i++)
-         {
-            outputModelMeshes[i].setMaterial(outputMaterial);
-         }
-      }
+      String modelFileName = graphics3DAddModelFile.getFileName();
+      Model model = GDXModelLoader.loadG3DModel(modelFileName);
+      models.add(model);
 
-      Group meshGroup = new Group(outputModelMeshes);
-      currentGroup.getChildren().add(meshGroup);
-      currentGroup = meshGroup;
+      modelInstance = new ModelInstance(model);
+
+      //      if (graphics3DAddModelFile.getAppearance() != null)
+//      {
+//         Material outputMaterial = convertMaterial(graphics3DAddModelFile.getAppearance());
+//         for (int i = 0; i < outputModelMeshes.length; i++)
+//         {
+//            outputModelMeshes[i].setMaterial(outputMaterial);
+//         }
+//      }
+//
+//      Group meshGroup = new Group(outputModelMeshes);
+//      currentNode.getChildren().add(meshGroup);
+//      currentNode = meshGroup;
    }
 
    @Override
    protected void doIdentityInstruction()
    {
-      currentGroup = parentGroup;
+//      currentNode = parentNode;
    }
 
    @Override
    protected void doRotateInstruction(Graphics3DRotateInstruction rot)
    {
-      RotationMatrixReadOnly mat = rot.getRotationMatrix();
-      Affine outputRotation = new Affine(new double[] {mat.getM00(), mat.getM01(), mat.getM02(), 0, mat.getM10(), mat.getM11(), mat.getM12(), 0, mat.getM20(),
-            mat.getM21(), mat.getM22(), 0, 0, 0, 0, 1}, MatrixType.MT_3D_4x4, 0);
-
-      Group rotationGroup = new Group();
-      rotationGroup.getTransforms().add(outputRotation);
-      currentGroup.getChildren().add(rotationGroup);
-      currentGroup = rotationGroup;
+//      RotationMatrixReadOnly mat = rot.getRotationMatrix();
+//      Affine outputRotation = new Affine(new double[] {mat.getM00(), mat.getM01(), mat.getM02(), 0, mat.getM10(), mat.getM11(), mat.getM12(), 0, mat.getM20(),
+//            mat.getM21(), mat.getM22(), 0, 0, 0, 0, 1}, MatrixType.MT_3D_4x4, 0);
+//
+//      Group rotationGroup = new Group();
+//      rotationGroup.getTransforms().add(outputRotation);
+//      currentNode.getChildren().add(rotationGroup);
+//      currentNode = rotationGroup;
    }
 
    @Override
    protected void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale)
    {
-      Vector3D scale = graphics3DScale.getScaleFactor();
-      Scale outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
-
-      Group scaleGroup = new Group();
-      scaleGroup.getTransforms().add(outputScale);
-      currentGroup.getChildren().add(scaleGroup);
-      currentGroup = scaleGroup;
+//      Vector3D scale = graphics3DScale.getScaleFactor();
+//      Scale outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
+//
+//      Group scaleGroup = new Group();
+//      scaleGroup.getTransforms().add(outputScale);
+//      currentNode.getChildren().add(scaleGroup);
+//      currentNode = scaleGroup;
    }
 
    @Override
    protected void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate)
    {
-      Vector3D t = graphics3DTranslate.getTranslation();
-      Translate outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
-
-      Group translationGroup = new Group();
-      translationGroup.getTransforms().add(outputTranslation);
-      currentGroup.getChildren().add(translationGroup);
-      currentGroup = translationGroup;
-   }
-
-   public Group getGroup()
-   {
-      return parentGroup;
-   }
-
-   private static Material convertMaterial(AppearanceDefinition appearance)
-   {
-      float r = appearance.getColor().getX();
-      float g = appearance.getColor().getY();
-      float b = appearance.getColor().getZ();
-      double transparency = appearance.getTransparency();
-
-      if (appearance instanceof YoAppearanceRGBColor)
-      {
-         transparency = 1.0 - transparency;
-      }
-
-      Color color = new Color(r, g, b, transparency);
-      PhongMaterial res = new PhongMaterial(color);
-      res.setSpecularColor(Color.WHITE);
-      return res;
-   }
-
-   private static TriangleMesh interpretMeshData(MeshDataHolder meshData)
-   {
-      return JavaFXMeshDataInterpreter.interpretMeshData(meshData);
+//      Vector3D t = graphics3DTranslate.getTranslation();
+//      Translate outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
+//
+//      Group translationGroup = new Group();
+//      translationGroup.getTransforms().add(outputTranslation);
+//      currentNode.getChildren().add(translationGroup);
+//      currentNode = translationGroup;
    }
 
    @Override
@@ -333,6 +294,29 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor
       else
       {
          throw new RuntimeException("Need to support that primitive type! primitiveInstruction = " + primitiveInstruction);
+      }
+   }
+
+   /**
+    * TODO: Specify local or global transform.
+    * @param transform
+    */
+   public void setTransform(AffineTransform transform)
+   {
+      GDXTools.convertEuclidAffineToGDXAffine(transform, modelInstance.transform);
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      modelInstance.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      for (Model model : models)
+      {
+         model.dispose();
       }
    }
 }
