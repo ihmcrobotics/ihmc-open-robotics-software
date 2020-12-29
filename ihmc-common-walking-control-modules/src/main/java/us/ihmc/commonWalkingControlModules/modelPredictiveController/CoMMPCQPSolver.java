@@ -4,9 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.ops.ConvertDMatrixStruct;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
@@ -315,6 +313,9 @@ public class CoMMPCQPSolver
             case VRP_TRACKING:
                submitVRPTrackingCommand((VRPTrackingCommand) command);
                break;
+            case ORIENTATION_TRACKING:
+               submitOrientationTrackingCommand((OrientationTrackingCommand) command);
+               break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
@@ -345,6 +346,13 @@ public class CoMMPCQPSolver
    public void submitVRPTrackingCommand(VRPTrackingCommand command)
    {
       boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (success)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitOrientationTrackingCommand(OrientationTrackingCommand command)
+   {
+      boolean success = inputCalculator.calculateOrientationTrackingObjective(qpInputTypeC, command);
       if (success)
          addInput(qpInputTypeC);
    }

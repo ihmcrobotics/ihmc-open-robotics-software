@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;

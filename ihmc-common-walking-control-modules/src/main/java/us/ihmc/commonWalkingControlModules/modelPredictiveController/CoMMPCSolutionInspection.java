@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commons.MathTools;
@@ -49,6 +50,9 @@ public class CoMMPCSolutionInspection
                break;
             case VRP_TRACKING:
                inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
+               break;
+            case ORIENTATION_TRACKING:
+               // TODO
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
