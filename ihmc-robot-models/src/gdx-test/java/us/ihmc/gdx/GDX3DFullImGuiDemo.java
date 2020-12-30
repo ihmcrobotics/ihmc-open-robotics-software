@@ -1,7 +1,5 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.*;
 import imgui.internal.ImGui;
@@ -12,9 +10,6 @@ import us.ihmc.tools.string.StringTools;
 
 public class GDX3DFullImGuiDemo
 {
-   private ModelInstance boxes;
-   private ModelInstance coordinateFrame;
-
    private boolean isInitialized = false;
 
    public GDX3DFullImGuiDemo()
@@ -33,8 +28,8 @@ public class GDX3DFullImGuiDemo
       {
          super.create();
 
-         coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-         boxes = new BoxesDemoModel().newInstance();
+         addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+         addModelInstance(new BoxesDemoModel().newInstance());
 
          imGui.create();
       }
@@ -42,10 +37,7 @@ public class GDX3DFullImGuiDemo
       @Override
       public void render()
       {
-
-         float backgroundColor = 0.3f;
-         Gdx.gl.glClearColor(backgroundColor, backgroundColor, backgroundColor, 1.0f);
-         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+         glClearGrayscale(0.3f);
 
          imGui.beforeWindowManagement();
 
@@ -106,12 +98,7 @@ public class GDX3DFullImGuiDemo
 
          imGui.afterWindowManagement();
 
-         renderBefore();
-
-         getModelBatch().render(coordinateFrame, getEnvironment());
-         getModelBatch().render(boxes, getEnvironment());
-
-         renderAfter();
+         super.render();
 
          imGui.afterGDXRender();
 
