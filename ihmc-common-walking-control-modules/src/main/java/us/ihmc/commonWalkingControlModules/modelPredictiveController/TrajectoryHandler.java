@@ -188,6 +188,25 @@ public class TrajectoryHandler
          fastComputePositionOutsideOfPlanningWindow(timeInPhase, desiredCoMPosition);
    }
 
+   public void computeOrientation(double timeInPhase,
+                                  FixedFrameOrientation3DBasics desiredBodyOrientationToPack,
+                                  FixedFrameVector3DBasics desiredBodyAngularVelocityToPack)
+   {
+      boolean success;
+
+      if (isTimeInPlanningWindow(timeInPhase))
+         success = computeOrientationInPlanningWindow(timeInPhase, desiredBodyOrientationToPack, desiredBodyAngularVelocityToPack);
+      else
+         success = false;
+
+      if (!success)
+      {
+         orientationInitializationCalculator.compute(timeInPhase);
+         desiredBodyOrientationToPack.set(orientationInitializationCalculator.getDesiredOrientation());
+         desiredBodyAngularVelocityToPack.set(orientationInitializationCalculator.getDesiredAngularVelocity());
+      }
+   }
+
    private boolean isTimeInPlanningWindow(double time)
    {
       if (planningWindow.size() > 0)
@@ -313,6 +332,42 @@ public class TrajectoryHandler
                                                     fourthOrientationCoefficient,
                                                     timeInSegment);
       CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocity,
+                                                        firstOrientationCoefficient,
+                                                        secondOrientationCoefficient,
+                                                        thirdOrientationCoefficient,
+                                                        fourthOrientationCoefficient,
+                                                        timeInSegment);
+
+      return true;
+   }
+
+   private boolean computeOrientationInPlanningWindow(double timeInPhase,
+                                                      FixedFrameOrientation3DBasics desiredBodyOrientation,
+                                                      FixedFrameVector3DBasics desiredBodyAngularVelocity)
+   {
+      int segmentNumber = getPreviewWindowSegmentNumber(timeInPhase);
+      if (segmentNumber < 0)
+         return false;
+
+      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
+
+      return computeOrientationInPlanningWindow(segmentNumber, timeInSegment, desiredBodyOrientation, desiredBodyAngularVelocity);
+   }
+
+   boolean computeOrientationInPlanningWindow(int segmentNumber,
+                                              double timeInSegment,
+                                              FixedFrameOrientation3DBasics desiredBodyOrientationToPack,
+                                              FixedFrameVector3DBasics desiredBodyAngularVelocityToPack)
+   {
+      setActiveOrientationCoefficients(segmentNumber);
+
+      CoMMPCTools.constructedDesiredBodyOrientation(desiredBodyOrientationToPack,
+                                                    firstOrientationCoefficient,
+                                                    secondOrientationCoefficient,
+                                                    thirdOrientationCoefficient,
+                                                    fourthOrientationCoefficient,
+                                                    timeInSegment);
+      CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocityToPack,
                                                         firstOrientationCoefficient,
                                                         secondOrientationCoefficient,
                                                         thirdOrientationCoefficient,
