@@ -74,6 +74,9 @@ public class CoMTrajectoryModelPredictiveController
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private final FixedFrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
+   private final FixedFrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
+
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
@@ -123,7 +126,7 @@ public class CoMTrajectoryModelPredictiveController
       indexHandler = new MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
       bodyInertia.setMass(mass);
-      bodyInertia.setMomentOfInertia(100, 100, 50);
+      bodyInertia.setMomentOfInertia(20, 20, 10);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       trajectoryHandler = new TrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
@@ -150,7 +153,7 @@ public class CoMTrajectoryModelPredictiveController
 
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      trajectoryViewer = new MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+      trajectoryViewer = new MPCTrajectoryViewer(bodyInertia, registry, yoGraphicsListRegistry);
    }
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
@@ -750,7 +753,9 @@ public class CoMTrajectoryModelPredictiveController
               desiredDCMVelocity,
               desiredVRPPosition,
               desiredVRPVelocity,
-              desiredECMPPosition);
+              desiredECMPPosition,
+              desiredBodyOrientation,
+              desiredBodyAngularVelocity);
    }
 
    private void updateCoMTrajectoryViewer()
@@ -766,7 +771,9 @@ public class CoMTrajectoryModelPredictiveController
                        FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack,
                        FixedFrameVector3DBasics vrpVelocityToPack,
-                       FixedFramePoint3DBasics ecmpPositionToPack)
+                       FixedFramePoint3DBasics ecmpPositionToPack,
+                       FixedFrameOrientation3DBasics bodyOrientationToPack,
+                       FixedFrameVector3DBasics bodyAngularVelocityToPack)
    {
       trajectoryHandler.compute(timeInPhase, omega.getValue());
 
@@ -778,6 +785,8 @@ public class CoMTrajectoryModelPredictiveController
       vrpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPVelocity());
       ecmpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredECMPPosition());
+      bodyOrientationToPack.setMatchingFrame(trajectoryHandler.getDesiredBodyOrientation());
+      bodyAngularVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredBodyAngularVelocity());
    }
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
@@ -869,12 +878,12 @@ public class CoMTrajectoryModelPredictiveController
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientation()
    {
-      return trajectoryHandler.getDesiredBodyOrientation();
+      return desiredBodyOrientation;
    }
 
    public FrameVector3DReadOnly getDesiredBodyAngularVelocity()
    {
-      return trajectoryHandler.getDesiredBodyAngularVelocity();
+      return desiredBodyAngularVelocity;
    }
 
    public List<Trajectory3D> getVRPTrajectories()
