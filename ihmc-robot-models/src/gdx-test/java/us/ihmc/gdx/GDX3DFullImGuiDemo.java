@@ -1,8 +1,6 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -11,13 +9,9 @@ import imgui.internal.ImGui;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.internal.ImGuiDockNode;
 import imgui.type.ImInt;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -31,15 +25,7 @@ public class GDX3DFullImGuiDemo
 
    public GDX3DFullImGuiDemo()
    {
-//      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
-
-      Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
-      applicationConfiguration.setTitle(getClass().getSimpleName());
-      applicationConfiguration.setWindowedMode(1100, 800);
-      applicationConfiguration.useVsync(true);
-      applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
-
-      ThreadTools.startAThread(() -> new Lwjgl3Application(new PrivateGDXApplication(), applicationConfiguration), getClass().getSimpleName());
+      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), getClass());
    }
 
    class PrivateGDXApplication extends GDX3DApplication
@@ -121,44 +107,27 @@ public class GDX3DFullImGuiDemo
 
          ImGui.pushFont(imFont);
 
-//         ImGui.setNextWindowBgAlpha(0.0f);
          int flags = ImGuiDockNodeFlags.None;
          flags += ImGuiDockNodeFlags.PassthruCentralNode;
          int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
 
-//         if (ImGui.begin(""))
-
-         //         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
-
-         ImGui.pushStyleColor(ImGuiCol.WindowBg, 0f, 0f, 0f, 0f);
-//         ImGui.setNextWindowBgAlpha(0.0f);
          flags = ImGuiWindowFlags.None;
 //         flags += ImGuiWindowFlags.NoNavInputs;
 //         flags += ImGuiWindowFlags.NoMouseInputs;
          ImGui.begin("3D View", flags);
 
-         ImGui.popStyleColor();
-
          float posX = ImGui.getWindowPosX();
          float posY = ImGui.getWindowPosY();
          float sizeX = ImGui.getWindowSizeX();
          float sizeY = ImGui.getWindowSizeY();
-         float itemRectMinX = ImGui.getItemRectMinX();
-         float itemRectMinY = ImGui.getItemRectMinY();
-         float itemRectMaxX = ImGui.getItemRectMaxX();
-         float itemRectMaxY = ImGui.getItemRectMaxY();
          setViewportBounds((int) posX, getCurrentWindowHeight() - (int) posY - (int) sizeY, (int) sizeX, (int) sizeY);
 
-//         ImGui.getWindowDrawList().addRectFilled(itemRectMinX, itemRectMinY, itemRectMaxX, itemRectMaxY, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
          ImGui.getWindowDrawList().addRectFilled(posX, posY, posX + sizeX, posY + sizeY, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
 
          ImGui.end();
 
          getCamera3D().clearInputExclusionBoxes();
-
-//         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
-//         ImGui.setNextWindowBgAlpha(0.0f);
 
          ImGui.begin("Window");
 
@@ -174,13 +143,6 @@ public class GDX3DFullImGuiDemo
 
          ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
          ImGui.button("I'm a Button!");
-
-
-//         if (ImGui.beginTabItem("Window"))
-//         {
-//            ImGui.button("I'm a tab Button!");
-//            ImGui.endTabItem();
-//         }
 
          float[] values = new float[100];
          for (int i = 0; i < 100; i++)
@@ -208,9 +170,6 @@ public class GDX3DFullImGuiDemo
             ImGui.dockBuilderDockWindow("Window", dockRightId);
             ImGui.dockBuilderFinish(dockspaceId);
          }
-
-
-
 
          ImGui.popFont();
 
