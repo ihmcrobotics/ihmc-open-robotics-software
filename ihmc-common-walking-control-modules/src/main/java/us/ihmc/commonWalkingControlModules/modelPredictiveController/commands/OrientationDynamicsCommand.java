@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -13,14 +15,14 @@ import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrientationDynamicsCommand
+public class OrientationDynamicsCommand implements MPCCommand<OrientationDynamicsCommand>
 {
    private final Quaternion orientationEstimate = new Quaternion();
    private final Vector3D angularVelocityEstimate = new Vector3D();
 
    private final Point3D comPositionEstimate = new Point3D();
 
-   private final SpatialInertia bodyInertia = new SpatialInertia();
+   private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
    private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
 
@@ -69,7 +71,7 @@ public class OrientationDynamicsCommand
       this.comPositionEstimate.set(comPositionEstimate);
    }
 
-   public void setBodyInertia(SpatialInertia inertia)
+   public void setBodyInertia(SpatialInertiaReadOnly inertia)
    {
       this.bodyInertia.set(inertia);
    }
@@ -123,5 +125,11 @@ public class OrientationDynamicsCommand
    public SpatialInertiaReadOnly getBodyInertia()
    {
       return bodyInertia;
+   }
+
+   @Override
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.ORIENTATION_DYNAMICS;
    }
 }

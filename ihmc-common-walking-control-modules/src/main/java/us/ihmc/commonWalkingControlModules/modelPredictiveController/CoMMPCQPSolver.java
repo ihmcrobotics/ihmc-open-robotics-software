@@ -316,6 +316,9 @@ public class CoMMPCQPSolver
             case ORIENTATION_TRACKING:
                submitOrientationTrackingCommand((OrientationTrackingCommand) command);
                break;
+            case ORIENTATION_DYNAMICS:
+               submitOrientationDynamicsCommand((OrientationDynamicsCommand) command);
+               break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
@@ -355,6 +358,13 @@ public class CoMMPCQPSolver
       boolean success = inputCalculator.calculateOrientationTrackingObjective(qpInputTypeC, command);
       if (success)
          addInput(qpInputTypeC);
+   }
+
+   public void submitOrientationDynamicsCommand(OrientationDynamicsCommand command)
+   {
+      boolean success = inputCalculator.calculateOrientationDynamicsObjective(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
    }
 
    public void addInput(QPInputTypeA input)

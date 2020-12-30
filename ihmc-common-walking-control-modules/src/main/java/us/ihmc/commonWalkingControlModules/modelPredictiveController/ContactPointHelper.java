@@ -469,6 +469,7 @@ public class ContactPointHelper
       // Transforming the result to consider the actual normal contact vector
       normalContactVectorRotationMatrix.transform(basisVectorToPack);
       basisVectorToPack.normalize();
+      basisVectorToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
 //   private final SpatialForce unitSpatialForceVector = new SpatialForce();
@@ -591,7 +592,7 @@ public class ContactPointHelper
       int startIdx = solutionStartIdx;
       for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
       {
-         FrameVector3D basisVector = basisVectors[rhoIndex];
+         FrameVector3DReadOnly basisVector = basisVectors[rhoIndex];
          for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
          {
             double rhoCoeff = solutionVector.get(startIdx, 0);

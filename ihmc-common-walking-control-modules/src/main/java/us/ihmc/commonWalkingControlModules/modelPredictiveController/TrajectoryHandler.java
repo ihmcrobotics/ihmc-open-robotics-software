@@ -175,6 +175,19 @@ public class TrajectoryHandler
          computeOutsideOfPlanningWindow(timeInPhase);
    }
 
+   public void fastComputePosition(double timeInPhase, double omega, FixedFramePoint3DBasics desiredCoMPosition)
+   {
+      boolean success;
+
+      if (isTimeInPlanningWindow(timeInPhase))
+         success = fastComputePositionInPlanningWindow(timeInPhase, omega, desiredCoMPosition);
+      else
+         success = false;
+
+      if (!success)
+         fastComputePositionOutsideOfPlanningWindow(timeInPhase, desiredCoMPosition);
+   }
+
    private boolean isTimeInPlanningWindow(double time)
    {
       if (planningWindow.size() > 0)
@@ -206,7 +219,7 @@ public class TrajectoryHandler
       return computeInPlanningWindow(segmentNumber, timeInSegment, omega);
    }
 
-   boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
+   private void setActivePositionCoefficients(int segmentNumber)
    {
       int positionStartIndex = 6 * segmentNumber;
       firstPositionCoefficient.setX(xCoefficientVector.get(positionStartIndex, 0));
@@ -237,7 +250,10 @@ public class TrajectoryHandler
       sixthPositionCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
       sixthPositionCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
       sixthPositionCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
+   }
 
+   private void setActiveOrientationCoefficients(int segmentNumber)
+   {
       int orientationStartIndex = MPCIndexHandler.orientationCoefficientsPerSegment * segmentNumber;
       firstOrientationCoefficient.setX(yawCoefficientVector.get(orientationStartIndex, 0));
       firstOrientationCoefficient.setY(pitchCoefficientVector.get(orientationStartIndex, 0));
@@ -257,6 +273,12 @@ public class TrajectoryHandler
       fourthOrientationCoefficient.setX(yawCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
       fourthOrientationCoefficient.setY(pitchCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
       fourthOrientationCoefficient.setZ(rollCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
+   }
+
+   boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
+   {
+      setActivePositionCoefficients(segmentNumber);
+      setActiveOrientationCoefficients(segmentNumber);
 
       CoMMPCTools.constructDesiredCoMPosition(desiredCoMPosition, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
                                               fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
@@ -300,6 +322,29 @@ public class TrajectoryHandler
       return true;
    }
 
+   private boolean fastComputePositionInPlanningWindow(double timeInPhase, double omega, FixedFramePoint3DBasics desiredCoMPositionToPack)
+   {
+      int segmentNumber = getPreviewWindowSegmentNumber(timeInPhase);
+      if (segmentNumber < 0)
+         return false;
+
+      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
+
+      return fastComputePositionInPlanningWindow(segmentNumber, timeInSegment, omega, desiredCoMPositionToPack);
+   }
+
+   private boolean fastComputePositionInPlanningWindow(int segmentNumber, double timeInSegment, double omega, FixedFramePoint3DBasics desiredCoMPositionToPack)
+   {
+      setActivePositionCoefficients(segmentNumber);
+
+      CoMMPCTools.constructDesiredCoMPosition(desiredCoMPositionToPack, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
+                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
+                                              timeInSegment,
+                                              omega);
+
+      return true;
+   }
+
    public int getPreviewWindowSegmentNumber(double time)
    {
       for (int i = 0; i < planningWindow.size(); i++)
@@ -319,6 +364,11 @@ public class TrajectoryHandler
          timeInPhase -= planningWindow.get(i).getTimeInterval().getDuration();
 
       return timeInPhase;
+   }
+
+   private void fastComputePositionOutsideOfPlanningWindow(double time, FixedFramePoint3DBasics desiredCoMPositionToPack)
+   {
+      positionInitializationCalculator.fastComputeDesiredPosition(time, desiredCoMPositionToPack);
    }
 
    private void computeOutsideOfPlanningWindow(double time)

@@ -74,7 +74,9 @@ public class VRPTrackingCostCalculator
          {
             ContactPointHelper contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
             for (int i = 0; i < contactPoint.getRhoSize(); i++)
+            {
                allBasisVectors.add(contactPoint.getBasisVector(i));
+            }
          }
       }
 
