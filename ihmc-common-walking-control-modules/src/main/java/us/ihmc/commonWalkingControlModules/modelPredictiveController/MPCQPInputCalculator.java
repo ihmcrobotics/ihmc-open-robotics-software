@@ -38,8 +38,9 @@ public class MPCQPInputCalculator
          case VRP:
             return calculateVRPContinuityObjective(inputToPack, objective);
          case DCM:
-         case ORIENTATION:
             throw new NotImplementedException();
+         case ORIENTATION:
+            return calculateOrientationContinuityObjective(inputToPack, objective);
          default:
             return false;
       }
@@ -138,7 +139,12 @@ public class MPCQPInputCalculator
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             1.0);
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentCoMStartIndex, omega, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentCoMStartIndex,
+                                                            omega,
+                                                            0.0,
+                                                            inputToPack.getTaskJacobian(),
+                                                            objective.getDerivativeOrder(),
+                                                            -1.0);
 
       int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
@@ -153,7 +159,6 @@ public class MPCQPInputCalculator
                             tempCoefficientJacobian);
 
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
-
 
          startCol += contactPlaneHelper.getCoefficientSize();
       }
@@ -170,13 +175,56 @@ public class MPCQPInputCalculator
                             contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
                             tempCoefficientJacobian);
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0);
+         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
+                                    0,
+                                    startCol,
+                                    tempCoefficientJacobian,
+                                    0,
+                                    0,
+                                    3,
+                                    contactPlaneHelper.getCoefficientSize(),
+                                    -1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
       inputToPack.getTaskObjective().zero();
       inputToPack.getTaskObjective().add(2, 0, getGravityZObjective(objective.getDerivativeOrder(), 0.0));
       inputToPack.getTaskObjective().add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), firstSegmentDuration));
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return true;
+   }
+
+   public boolean calculateOrientationContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      inputToPack.reshape(3);
+      inputToPack.setConstraintType(objective.getConstraintType());
+
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      double firstSegmentDuration = objective.getFirstSegmentDuration();
+      double weight = objective.getWeight();
+
+      int firstOrientationStartIndex = indexHandler.getOrientationCoefficientsStartIndex(firstSegmentNumber);
+      int secondOrientationStartIndex = indexHandler.getOrientationCoefficientsStartIndex(secondSegmentNumber);
+
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(firstOrientationStartIndex,
+                                                                        firstSegmentDuration,
+                                                                        inputToPack.getTaskJacobian(),
+                                                                        objective.getDerivativeOrder(),
+                                                                        1.0);
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(secondOrientationStartIndex,
+                                                                        0.0,
+                                                                        inputToPack.getTaskJacobian(),
+                                                                        objective.getDerivativeOrder(),
+                                                                        -1.0);
+
+      inputToPack.getTaskObjective().zero();
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -237,7 +285,7 @@ public class MPCQPInputCalculator
          case DCM:
             return calculateDCMValueObjective(inputToPack, objective);
          case ORIENTATION:
-            throw new NotImplementedException();
+            return calculateOrientationValueObjective(inputToPack, objective);
          default:
             return false;
       }
@@ -371,6 +419,32 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   private boolean calculateOrientationValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
+   {
+      inputToPack.reshape(3);
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+      inputToPack.setConstraintType(objective.getConstraintType());
+
+      int segmentNumber = objective.getSegmentNumber();
+      double timeOfObjective = objective.getTimeOfObjective();
+      double weight = objective.getWeight();
+
+      int orientationStartCol = indexHandler.getOrientationCoefficientsStartIndex(segmentNumber);
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(orientationStartCol,
+                                                                        timeOfObjective,
+                                                                        inputToPack.getTaskJacobian(),
+                                                                        objective.getDerivativeOrder(),
+                                                                        1.0);
+
+      objective.getObjective().get(inputToPack.getTaskObjective());
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return true;
+   }
+
    public boolean calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
    {
       int problemSize = 0;
@@ -433,7 +507,9 @@ public class MPCQPInputCalculator
       inputToPack.getDirectCostHessian().zero();
       inputToPack.getDirectCostGradient().zero();
 
-      boolean success = vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective);
+      boolean success = vrpTrackingCostCalculator.calculateVRPTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                                inputToPack.getDirectCostGradient(),
+                                                                                objective);
       double weight = objective.getWeight();
 
       inputToPack.setUseWeightScalar(true);
@@ -449,11 +525,17 @@ public class MPCQPInputCalculator
       inputToPack.getDirectCostHessian().zero();
       inputToPack.getDirectCostGradient().zero();
 
-      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getYawTrackingCommand()))
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                  inputToPack.getDirectCostGradient(),
+                                                                  objective.getYawTrackingCommand()))
          return false;
-      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getPitchTrackingCommand()))
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                  inputToPack.getDirectCostGradient(),
+                                                                  objective.getPitchTrackingCommand()))
          return false;
-      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(), inputToPack.getDirectCostGradient(), objective.getRollTrackingCommand()))
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                  inputToPack.getDirectCostGradient(),
+                                                                  objective.getRollTrackingCommand()))
          return false;
 
       double weight = objective.getWeight();
@@ -461,7 +543,7 @@ public class MPCQPInputCalculator
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
 
-      return  true;
+      return true;
    }
 
    public boolean calculateOrientationDynamicsObjective(QPInputTypeA inputToPack, OrientationDynamicsCommand command)

@@ -126,6 +126,8 @@ public class OrientationDynamicsCommandCalculator
       int pitchStartIndex = indexHandler.getPitchCoefficientsStartIndex(segmentId);
       int yawStartIndex = indexHandler.getYawCoefficientsStartIndex(segmentId);
 
+//      OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(rollStartIndex, time, rotationRateJacobian, 1.0);
+//      OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(rollStartIndex, time, rotationAccelerationJacobian, 1.0);
       rotationRateJacobian.set(0, rollStartIndex, c0Dot);
       rotationRateJacobian.set(0, rollStartIndex + 1, c1Dot);
       rotationRateJacobian.set(0, rollStartIndex + 2, c2Dot);

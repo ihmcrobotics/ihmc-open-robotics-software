@@ -80,19 +80,24 @@ public class MPCIndexHandler
       return rhoStartIndices.get(segmentId);
    }
 
-   public int getYawCoefficientsStartIndex(int segmentId)
+   public int getOrientationCoefficientsStartIndex(int segmentId)
    {
       return orientationStartIndices.get(segmentId);
    }
 
+   public int getYawCoefficientsStartIndex(int segmentId)
+   {
+      return getOrientationCoefficientsStartIndex(segmentId);
+   }
+
    public int getPitchCoefficientsStartIndex(int segmentId)
    {
-      return orientationCoefficientsPerSegment + orientationStartIndices.get(segmentId);
+      return orientationCoefficientsPerSegment + getYawCoefficientsStartIndex(segmentId);
    }
 
    public int getRollCoefficientsStartIndex(int segmentId)
    {
-      return 2 * orientationCoefficientsPerSegment + orientationStartIndices.get(segmentId);
+      return orientationCoefficientsPerSegment + getPitchCoefficientsStartIndex(segmentId);
    }
 
    public int getTotalProblemSize()
