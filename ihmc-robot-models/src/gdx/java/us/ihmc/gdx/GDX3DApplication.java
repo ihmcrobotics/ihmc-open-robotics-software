@@ -17,7 +17,6 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,44 +43,6 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    private ArrayList<Runnable> preRenderTasks = new ArrayList<>();
 
-   public void addModelInstance(ModelInstance modelInstance)
-   {
-      modelInstances.add(modelInstance);
-   }
-
-   public void addCoordinateFrame(double size)
-   {
-      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size));
-   }
-
-   public void addRenderableProvider(RenderableProvider renderableProvider)
-   {
-      renderableProviders.add(renderableProvider);
-   }
-
-   public void addInputProcessor(InputProcessor inputProcessor)
-   {
-      inputMultiplexer.addProcessor(inputProcessor);
-   }
-
-   public void addPreRenderTask(Runnable task)
-   {
-      preRenderTasks.add(task);
-   }
-
-   /**
-    * Coordinates in xy bottom left
-    */
-   public void setViewportBounds(int x, int y, int width, int height)
-   {
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-
-      camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
-   }
-
    @Override
    public void create()
    {
@@ -95,12 +56,12 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       float pointIntensity = 1.0f;
       environment.set(new ColorAttribute(ColorAttribute.AmbientLight, ambientColor, ambientColor, ambientColor, 1.0f));
       // Point lights not working; not sure why @dcalvert
-//      PointLightsAttribute pointLights = new PointLightsAttribute();
-//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, pointDistance, pointIntensity));
-//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, pointDistance, pointIntensity));
-//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, pointDistance, pointIntensity));
-//      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, pointDistance, pointIntensity));
-//      environment.set(pointLights);
+      //      PointLightsAttribute pointLights = new PointLightsAttribute();
+      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, pointDistance, pointIntensity));
+      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, pointDistance, pointIntensity));
+      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, pointDistance, pointIntensity));
+      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, pointDistance, pointIntensity));
+      //      environment.set(pointLights);
       DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
       directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, -pointDistance));
       directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, -pointDistance));
@@ -118,8 +79,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
-      Gdx.gl.glClearColor(CLEAR_COLOR, CLEAR_COLOR, CLEAR_COLOR, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      glClearGrayscale();
       Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
    }
 
@@ -196,6 +156,55 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public boolean closeRequested()
    {
       return true;
+   }
+
+   public void addModelInstance(ModelInstance modelInstance)
+   {
+      modelInstances.add(modelInstance);
+   }
+
+   public void addCoordinateFrame(double size)
+   {
+      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size));
+   }
+
+   public void addRenderableProvider(RenderableProvider renderableProvider)
+   {
+      renderableProviders.add(renderableProvider);
+   }
+
+   public void addInputProcessor(InputProcessor inputProcessor)
+   {
+      inputMultiplexer.addProcessor(inputProcessor);
+   }
+
+   public void addPreRenderTask(Runnable task)
+   {
+      preRenderTasks.add(task);
+   }
+
+   /**
+    * Coordinates in xy bottom left
+    */
+   public void setViewportBounds(int x, int y, int width, int height)
+   {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+
+      camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
+   }
+
+   public void glClearGrayscale()
+   {
+      glClearGrayscale(CLEAR_COLOR);
+   }
+
+   public void glClearGrayscale(float color)
+   {
+      Gdx.gl.glClearColor(color, color, color, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
    }
 
    public int getCurrentWindowWidth()
