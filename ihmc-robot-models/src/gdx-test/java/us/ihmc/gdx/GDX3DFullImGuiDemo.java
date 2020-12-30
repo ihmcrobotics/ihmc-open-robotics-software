@@ -98,8 +98,8 @@ public class GDX3DFullImGuiDemo
       public void render()
       {
 
-         Gdx.gl.glClearColor(0, 0, 0, 1.0f);
-//         Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+         float backgroundColor = 0.3f;
+         Gdx.gl.glClearColor(backgroundColor, backgroundColor, backgroundColor, 1.0f);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
          imGuiGlfw.newFrame();
@@ -109,6 +109,7 @@ public class GDX3DFullImGuiDemo
 
          int flags = ImGuiDockNodeFlags.None;
          flags += ImGuiDockNodeFlags.PassthruCentralNode;
+         flags += ImGuiDockNodeFlags.AutoHideTabBar;
          int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
 
@@ -123,7 +124,7 @@ public class GDX3DFullImGuiDemo
          float sizeY = ImGui.getWindowSizeY();
          setViewportBounds((int) posX, getCurrentWindowHeight() - (int) posY - (int) sizeY, (int) sizeX, (int) sizeY);
 
-         ImGui.getWindowDrawList().addRectFilled(posX, posY, posX + sizeX, posY + sizeY, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
+         ImGui.getWindowDrawList().addRectFilled(posX, posY, posX + sizeX, posY + sizeY, ImColor.floatToColor(CLEAR_COLOR, CLEAR_COLOR, CLEAR_COLOR, 1.0f));
 
          ImGui.end();
 
@@ -158,11 +159,6 @@ public class GDX3DFullImGuiDemo
 
          if (!isInitialized)
          {
-            ImGui.dockBuilderRemoveNode(dockspaceId);
-            flags = imgui.internal.flag.ImGuiDockNodeFlags.None;
-            flags += imgui.internal.flag.ImGuiDockNodeFlags.PassthruCentralNode;
-            flags += imgui.internal.flag.ImGuiDockNodeFlags.DockSpace;
-            ImGui.dockBuilderAddNode(dockspaceId, flags);
             ImGui.dockBuilderSetNodeSize(dockspaceId, getCurrentWindowWidth(), getCurrentWindowHeight());
             ImInt outIdAtOppositeDir = new ImInt();
             int dockRightId = ImGui.dockBuilderSplitNode(dockspaceId, ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
