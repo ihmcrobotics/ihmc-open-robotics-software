@@ -83,7 +83,6 @@ public class GDX3DFullImGuiDemo
          io.setIniFilename(null); // We don't want to save .ini file
 //         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
          io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-         io.addConfigFlags(ImGuiDockNodeFlags.AutoHideTabBar);
 //         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
          io.setConfigViewportsNoTaskBarIcon(true);
          io.setConfigWindowsMoveFromTitleBarOnly(true);
@@ -106,21 +105,31 @@ public class GDX3DFullImGuiDemo
          imGuiGlfw.newFrame();
          ImGui.newFrame();
 
+         ImGui.dockSpaceOverViewport();
+
+//         ImGui.setNextWindowBgAlpha(0.0f);
+//         int flags = 0;
+//         flags += ImGuiWindowFlags.NoMove;
+////         flags += ImGuiWindowFlags.NoResize;
+////         flags += ImGuiWindowFlags.NoTitleBar;
+//         flags += ImGuiWindowFlags.NoBringToFrontOnFocus;
+//         ImGui.begin("Root", flags);
+//
+//         int id = 15;
+//         flags = 0;
+////         flags += ImGuiDockNodeFlags.AutoHideTabBar;
+//         flags += ImGuiDockNodeFlags.PassthruCentralNode;
+//         ImGui.dockSpace(id, 0, 0, flags);
+//
+//         if (!isInitialized)
+//         {
+//            ImGui.setWindowSize(getCurrentWindowWidth(), getCurrentWindowHeight());
+//            ImGui.setWindowPos(0, 0);
+//         }
+//         ImGui.end();
+
          ImGui.setNextWindowBgAlpha(0.0f);
-         int flags = 0;
-         flags += ImGuiWindowFlags.NoMove;
-         flags += ImGuiWindowFlags.NoTitleBar;
-         flags += ImGuiWindowFlags.NoBringToFrontOnFocus;
-         ImGui.begin("3D View", flags);
-
-         int id = 15;
-         ImGui.dockSpace(15);
-
-         if (!isInitialized)
-         {
-            ImGui.setWindowSize(getCurrentWindowWidth(), getCurrentWindowHeight());
-            ImGui.setWindowPos(0, 0);
-         }
+         ImGui.begin("3D View");
 
          float posX = ImGui.getWindowPosX();
          float posY = ImGui.getWindowPosY();
@@ -132,6 +141,7 @@ public class GDX3DFullImGuiDemo
 
          getCamera3D().clearInputExclusionBoxes();
 
+//         ImGui.setNextWindowBgAlpha(0.0f);
          ImGui.begin("Window");
          ImGui.button("I'm a Button!");
 
