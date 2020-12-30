@@ -19,10 +19,10 @@ public class CoMMPCSolutionInspection
    private final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
    private final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
-   public CoMMPCSolutionInspection(MPCIndexHandler indexHandler, double gravityZ)
+   public CoMMPCSolutionInspection(MPCIndexHandler indexHandler, double mass, double gravityZ)
    {
       this.indexHandler = indexHandler;
-      inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
    }
 
    public void inspectSolution(MPCCommandList commandList, DMatrixRMaj solution)

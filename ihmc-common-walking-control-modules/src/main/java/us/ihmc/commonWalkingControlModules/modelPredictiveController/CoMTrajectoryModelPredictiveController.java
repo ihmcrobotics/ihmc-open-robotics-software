@@ -101,7 +101,7 @@ public class CoMTrajectoryModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
+   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
@@ -121,8 +121,8 @@ public class CoMTrajectoryModelPredictiveController
       Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
-      qpSolver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, registry);
-      solutionInspection = new CoMMPCSolutionInspection(indexHandler, gravityZ);
+      qpSolver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, registry);
+      solutionInspection = new CoMMPCSolutionInspection(indexHandler, mass, gravityZ);
 
       parentRegistry.addChild(registry);
    }

@@ -33,8 +33,8 @@ public class ContactPointHelper
    private double maxContactForce;
    private double timeOfContact = Double.NaN;
 
-   private final DMatrixRMaj totalJacobianInWorldFrame;
-   private final DMatrixRMaj linearJacobianInWorldFrame;
+//   private final DMatrixRMaj totalJacobianInWorldFrame;
+//   private final DMatrixRMaj linearJacobianInWorldFrame;
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
@@ -77,8 +77,8 @@ public class ContactPointHelper
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
-      totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, this.numberOfBasisVectorsPerContactPoint);
-      linearJacobianInWorldFrame = new DMatrixRMaj(3, this.numberOfBasisVectorsPerContactPoint);
+//      totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, this.numberOfBasisVectorsPerContactPoint);
+//      linearJacobianInWorldFrame = new DMatrixRMaj(3, this.numberOfBasisVectorsPerContactPoint);
 
       linearPositionJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
       linearVelocityJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
@@ -164,7 +164,7 @@ public class ContactPointHelper
          rhoIndex++;
       }
 
-      computeWrenchJacobianInFrame(ReferenceFrame.getWorldFrame(), totalJacobianInWorldFrame, linearJacobianInWorldFrame);
+//      computeWrenchJacobianInFrame(ReferenceFrame.getWorldFrame(), totalJacobianInWorldFrame, linearJacobianInWorldFrame);
    }
 
    public void computeJacobians(double time, double omega)
@@ -471,23 +471,23 @@ public class ContactPointHelper
       basisVectorToPack.normalize();
    }
 
-   private final SpatialForce unitSpatialForceVector = new SpatialForce();
-
-   public void computeWrenchJacobianInFrame(ReferenceFrame frame, DMatrixRMaj wrenchMatrixToPack, DMatrixRMaj forceMatrixToPack)
-   {
-      wrenchMatrixToPack.reshape(Wrench.SIZE, numberOfBasisVectorsPerContactPoint);
-      forceMatrixToPack.reshape(3, numberOfBasisVectorsPerContactPoint);
-      basisVectorOrigin.changeFrame(frame);
-
-      for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
-      {
-         FrameVector3D basisVector = basisVectors[rhoIndex];
-         basisVector.changeFrame(frame);
-         unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
-         unitSpatialForceVector.get(0, rhoIndex, wrenchMatrixToPack);
-         unitSpatialForceVector.getLinearPart().get(0, rhoIndex, forceMatrixToPack);
-      }
-   }
+//   private final SpatialForce unitSpatialForceVector = new SpatialForce();
+//
+//   public void computeWrenchJacobianInFrame(ReferenceFrame frame, DMatrixRMaj wrenchMatrixToPack, DMatrixRMaj forceMatrixToPack)
+//   {
+//      wrenchMatrixToPack.reshape(Wrench.SIZE, numberOfBasisVectorsPerContactPoint);
+//      forceMatrixToPack.reshape(3, numberOfBasisVectorsPerContactPoint);
+//      basisVectorOrigin.changeFrame(frame);
+//
+//      for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
+//      {
+//         FrameVector3D basisVector = basisVectors[rhoIndex];
+//         basisVector.changeFrame(frame);
+//         unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
+//         unitSpatialForceVector.get(0, rhoIndex, wrenchMatrixToPack);
+//         unitSpatialForceVector.getLinearPart().get(0, rhoIndex, forceMatrixToPack);
+//      }
+//   }
 
    public DMatrixRMaj getLinearJacobian(int derivativeOrder)
    {

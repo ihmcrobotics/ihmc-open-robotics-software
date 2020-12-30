@@ -26,6 +26,7 @@ public class MPCQPInputCalculatorTest
    {
       double gravityZ = -9.81;
       double omega = 3.0;
+      double mass = 1.5;
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
@@ -47,7 +48,7 @@ public class MPCQPInputCalculatorTest
       contactProviders.add(contact);
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders);
 
@@ -149,6 +150,7 @@ public class MPCQPInputCalculatorTest
    {
       double gravityZ = -9.81;
       double omega = 3.0;
+      double mass = 1.5;
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
@@ -162,7 +164,7 @@ public class MPCQPInputCalculatorTest
       contactPose.getPosition().set(0.3, 0.7, 0.0);
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
@@ -238,6 +240,7 @@ public class MPCQPInputCalculatorTest
    public void testDCMObjectiveOneSegment()
    {
       double gravityZ = -9.81;
+      double mass = 1.5;
       double omega = 3.0;
       double mu = 0.8;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
@@ -260,7 +263,7 @@ public class MPCQPInputCalculatorTest
       contactProviders.add(contact);
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders);
 
@@ -370,6 +373,7 @@ public class MPCQPInputCalculatorTest
       double gravityZ = -9.81;
       double omega = 3.0;
       double mu = 0.8;
+      double mass = 1.5;
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
@@ -390,7 +394,7 @@ public class MPCQPInputCalculatorTest
       contactProviders.add(contact);
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders);
 
