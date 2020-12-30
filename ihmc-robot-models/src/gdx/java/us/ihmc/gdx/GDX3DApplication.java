@@ -27,6 +27,7 @@ import java.util.HashSet;
  */
 public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 {
+   public static final float CLEAR_COLOR = 0.5019608f;
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
@@ -117,7 +118,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
-      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+      Gdx.gl.glClearColor(CLEAR_COLOR, CLEAR_COLOR, CLEAR_COLOR, 1.0f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
       Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
    }
@@ -144,9 +145,6 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       modelBatch.begin(camera3D);
 
       Gdx.gl.glViewport(x, y, width, height);
-
-//      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-//      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
       renderRegisteredObjects();
    }
