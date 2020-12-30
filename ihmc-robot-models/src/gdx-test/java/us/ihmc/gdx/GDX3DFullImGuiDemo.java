@@ -6,14 +6,13 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.ImGui;
+import imgui.internal.ImGui;
 import imgui.ImGuiIO;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiDragDropFlags;
-import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.internal.ImGuiDockNode;
+import imgui.type.ImInt;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -105,28 +104,13 @@ public class GDX3DFullImGuiDemo
          imGuiGlfw.newFrame();
          ImGui.newFrame();
 
-         ImGui.dockSpaceOverViewport();
+         ImGui.setNextWindowBgAlpha(0.0f);
+         int flags = 0;
+         flags += ImGuiDockNodeFlags.PassthruCentralNode;
+         int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
-//         ImGui.setNextWindowBgAlpha(0.0f);
-//         int flags = 0;
-//         flags += ImGuiWindowFlags.NoMove;
-////         flags += ImGuiWindowFlags.NoResize;
-////         flags += ImGuiWindowFlags.NoTitleBar;
-//         flags += ImGuiWindowFlags.NoBringToFrontOnFocus;
-//         ImGui.begin("Root", flags);
-//
-//         int id = 15;
-//         flags = 0;
-////         flags += ImGuiDockNodeFlags.AutoHideTabBar;
-//         flags += ImGuiDockNodeFlags.PassthruCentralNode;
-//         ImGui.dockSpace(id, 0, 0, flags);
-//
-//         if (!isInitialized)
-//         {
-//            ImGui.setWindowSize(getCurrentWindowWidth(), getCurrentWindowHeight());
-//            ImGui.setWindowPos(0, 0);
-//         }
-//         ImGui.end();
+
+         //         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
 
          ImGui.setNextWindowBgAlpha(0.0f);
          ImGui.begin("3D View");
@@ -141,7 +125,9 @@ public class GDX3DFullImGuiDemo
 
          getCamera3D().clearInputExclusionBoxes();
 
+//         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
 //         ImGui.setNextWindowBgAlpha(0.0f);
+
          ImGui.begin("Window");
          ImGui.button("I'm a Button!");
 
@@ -157,10 +143,17 @@ public class GDX3DFullImGuiDemo
 
          ImGui.end();
 
-//         ImGui.dockSpaceOverViewport();
-
-//         glClearColor(exampleUi.backgroundColor[0], exampleUi.backgroundColor[1], exampleUi.backgroundColor[2], 0.0f);
-//         glClear(GL_COLOR_BUFFER_BIT);
+         if (!isInitialized)
+         {
+            ImGui.dockBuilderRemoveNode(dockspaceId);
+            ImGui.dockBuilderAddNode(dockspaceId, imgui.internal.flag.ImGuiDockNodeFlags.DockSpace);
+            ImGui.dockBuilderSetNodeSize(dockspaceId, getCurrentWindowWidth(), getCurrentWindowHeight());
+            ImInt outIdAtOppositeDir = new ImInt();
+            int dockRightId = ImGui.dockBuilderSplitNode(dockspaceId, ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
+            ImGui.dockBuilderDockWindow("3D View", dockspaceId);
+            ImGui.dockBuilderDockWindow("Window", dockRightId);
+            ImGui.dockBuilderFinish(dockspaceId);
+         }
 
          ImGui.render();
          imGuiGl3.renderDrawData(ImGui.getDrawData());
