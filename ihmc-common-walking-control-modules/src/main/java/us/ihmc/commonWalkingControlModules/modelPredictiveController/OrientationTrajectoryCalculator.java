@@ -14,6 +14,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
+
 public class OrientationTrajectoryCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -62,8 +64,9 @@ public class OrientationTrajectoryCalculator
             nominalOrientation.set(contact.getContactPose(0).getOrientation());
 
          orientationSetpoint.setToYawOrientation(nominalOrientation.getYaw());
-         trajectory.appendWaypoint(contact.getTimeInterval().getEndTime(), orientationSetpoint, velocitySetpoint);
+         trajectory.appendWaypoint(Math.min(sufficientlyLongTime, contact.getTimeInterval().getEndTime()), orientationSetpoint, velocitySetpoint);
       }
+      trajectory.initialize();
    }
 
    public void compute(double time)

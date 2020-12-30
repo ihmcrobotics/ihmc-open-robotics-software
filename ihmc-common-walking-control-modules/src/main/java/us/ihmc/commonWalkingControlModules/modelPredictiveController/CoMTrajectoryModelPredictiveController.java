@@ -53,7 +53,7 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double dynamicsCollocationDT = 0.05;
 
-   public static final double finalOrientationWeight = 1e3;
+   public static final double finalOrientationWeight = 1e2;
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
    public static final double orientationTrackingWeight = 1e2;
@@ -231,7 +231,8 @@ public class CoMTrajectoryModelPredictiveController
       computeObjectives(planningWindow);
       DMatrixRMaj solutionCoefficients = solveQP();
 
-      trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue());
+      if (solutionCoefficients != null)
+         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue());
 
       cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
