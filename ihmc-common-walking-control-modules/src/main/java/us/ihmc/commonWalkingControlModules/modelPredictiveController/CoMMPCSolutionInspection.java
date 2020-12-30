@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCValueCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.RhoValueObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commons.MathTools;
@@ -52,7 +49,7 @@ public class CoMMPCSolutionInspection
                inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
                break;
             case ORIENTATION_TRACKING:
-               // TODO
+               inspectOrientationTrackingObjective((OrientationTrackingCommand) command, solution);
                break;
             case ORIENTATION_DYNAMICS:
                // TODO
@@ -87,6 +84,13 @@ public class CoMMPCSolutionInspection
    public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
    {
       boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (success)
+         command.setCostToGo(inspectInput(qpInputTypeC, solution));
+   }
+
+   public void inspectOrientationTrackingObjective(OrientationTrackingCommand command, DMatrixRMaj solution)
+   {
+      boolean success = inputCalculator.calculateOrientationTrackingObjective(qpInputTypeC, command);
       if (success)
          command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
