@@ -86,7 +86,7 @@ public class GDXImGuiWindowAndDockSystem
 
       int flags = ImGuiDockNodeFlags.None;
       flags += ImGuiDockNodeFlags.PassthruCentralNode;
-      flags += ImGuiDockNodeFlags.AutoHideTabBar;
+//      flags += ImGuiDockNodeFlags.AutoHideTabBar;
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
    }
