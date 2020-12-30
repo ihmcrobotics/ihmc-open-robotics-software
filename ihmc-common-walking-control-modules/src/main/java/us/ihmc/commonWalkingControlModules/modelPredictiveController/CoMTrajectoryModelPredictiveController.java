@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -49,9 +50,14 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double mu = 0.8;
 
+   private static final double dynamicsCollocationDT = 0.05;
+
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
    public static final double orientationTrackingWeight = 1e2;
+   public static final double orientationDynamicsWeight = 1e5;
+
+   private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
    private final MPCIndexHandler indexHandler;
 
@@ -108,6 +114,9 @@ public class CoMTrajectoryModelPredictiveController
       this.omega = omega;
 
       indexHandler = new MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+
+      bodyInertia.setMass(mass);
+      bodyInertia.setMomentOfInertia(100, 100, 50);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       trajectoryHandler = new TrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
@@ -265,6 +274,7 @@ public class CoMTrajectoryModelPredictiveController
                                                                  0,
                                                                  initialDuration,
                                                                  contactSequence.get(0).getTimeInterval().getStartTime()));
+      mpcCommands.addCommand(computeOrientationDynamicsObjective(0, initialDuration, contactSequence.get(0).getTimeInterval().getStartTime()));
 
       if (contactSequence.get(0).getContactState().isLoadBearing())
       {
@@ -306,6 +316,8 @@ public class CoMTrajectoryModelPredictiveController
                                                                     nextSequence,
                                                                     nextDuration,
                                                                     contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
+         mpcCommands.addCommand(computeOrientationDynamicsObjective(nextSequence, nextDuration, contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
+
 
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
@@ -469,6 +481,7 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private final FramePoint3D tempPoint = new FramePoint3D(worldFrame);
    private final FrameQuaternion tempOrientation = new FrameQuaternion(worldFrame);
    private final FrameVector3D tempAngularRate = new FrameVector3D(worldFrame);
 
@@ -490,6 +503,34 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setFinalAngularRate(tempAngularRate);
 
       return objectiveToPack;
+   }
+
+   private final MPCCommandList orientationDynamicsList = new MPCCommandList();
+
+   private MPCCommand<?> computeOrientationDynamicsObjective(int segmentNumber, double segmentDuration, double segmentStartTime)
+   {
+      orientationDynamicsList.clear();
+      for (double time = 0.0; time < segmentDuration; time += dynamicsCollocationDT)
+      {
+         OrientationDynamicsCommand command = commandProvider.getNextOrientationDynamicsCommand();
+
+         command.setSegmentNumber(segmentNumber);
+         command.setTimeOfObjective(time);
+         command.setOmega(omega.getValue());
+         command.setBodyInertia(bodyInertia);
+         command.setWeight(orientationDynamicsWeight);
+
+         // FIXME don't use the reference value, use the actual solution
+         trajectoryHandler.computeReferenceOrientations(segmentStartTime + time, tempOrientation, tempAngularRate);
+         trajectoryHandler.fastComputePosition(segmentStartTime + time, omega.getValue(), tempPoint);
+         command.setOrientationEstimate(tempOrientation);
+         command.setAngularVelocityEstimate(tempAngularRate);
+         command.setComPositionEstimate(tempPoint);
+
+         orientationDynamicsList.addCommand(command);
+      }
+
+      return orientationDynamicsList;
    }
 
    private MPCCommand<?> computeDCMPositionObjective(DCMPositionCommand objectiveToPack,

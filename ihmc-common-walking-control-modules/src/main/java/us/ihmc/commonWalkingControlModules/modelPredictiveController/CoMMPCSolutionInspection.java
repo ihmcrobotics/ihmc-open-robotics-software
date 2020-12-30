@@ -54,6 +54,9 @@ public class CoMMPCSolutionInspection
             case ORIENTATION_TRACKING:
                // TODO
                break;
+            case ORIENTATION_DYNAMICS:
+               // TODO
+               break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
