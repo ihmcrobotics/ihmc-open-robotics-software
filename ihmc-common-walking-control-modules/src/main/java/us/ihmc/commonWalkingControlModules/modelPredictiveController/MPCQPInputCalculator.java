@@ -38,8 +38,8 @@ public class MPCQPInputCalculator
          case VRP:
             return calculateVRPContinuityObjective(inputToPack, objective);
          case DCM:
+         case ORIENTATION:
             throw new NotImplementedException();
-//            return calculateDCMValueObjective(inputToPack, objective);
          default:
             return false;
       }
@@ -236,6 +236,8 @@ public class MPCQPInputCalculator
             return calculateVRPValueObjective(inputToPack, objective);
          case DCM:
             return calculateDCMValueObjective(inputToPack, objective);
+         case ORIENTATION:
+            throw new NotImplementedException();
          default:
             return false;
       }
