@@ -38,12 +38,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       double gravityZ = -9.81;
       double dt = 0.001;
+      double mass = 1.5;
       double nominalHeight = 1.0;
       double duration = 1.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, dt, testRegistry);
+      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -165,12 +166,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       double gravityZ = -9.81;
       double dt = 0.001;
+      double mass = 1.5;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, dt, testRegistry);
+      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -341,12 +343,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       double gravityZ = -9.81;
       double dt = 0.001;
+      double mass = 1.5;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, dt, testRegistry);
+      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -526,12 +529,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       double gravityZ = -9.81;
       double dt = 0.001;
+      double mass = 1.5;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, dt, testRegistry);
+      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, mass, dt, testRegistry);
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
@@ -702,12 +706,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       double gravityZ = -9.81;
       double dt = 0.001;
+      double mass = 1.5;
       double nominalHeight = 1.0;
       double duration = 1.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, dt, testRegistry);
+      CoMTrajectoryModelPredictiveController mpc = new CoMTrajectoryModelPredictiveController(gravityZ, nominalHeight, mass, dt, testRegistry);
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();

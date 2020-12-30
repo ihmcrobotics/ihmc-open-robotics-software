@@ -44,7 +44,7 @@ public class MatrixMissingToolsTest
    }
 
    @Test
-   public void testFastInverse()
+   public void testFast2x2Inverse()
    {
       int iters = 500;
       double epsilon = 1e-8;
@@ -58,6 +58,26 @@ public class MatrixMissingToolsTest
 
          NativeCommonOps.invert(matrix, matrixInverseExpected);
          MatrixMissingTools.fast2x2Inverse(matrix, matrixInverse);
+
+         MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
+      }
+   }
+
+   @Test
+   public void testFast3x3Inverse()
+   {
+      int iters = 500;
+      double epsilon = 1e-8;
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         DMatrixRMaj matrix = new DMatrixRMaj(3, 3);
+         DMatrixRMaj matrixInverseExpected = new DMatrixRMaj(3, 3);
+         DMatrixRMaj matrixInverse = new DMatrixRMaj(3, 3);
+         matrix.setData(RandomNumbers.nextDoubleArray(random, 9, 10.0));
+
+         NativeCommonOps.invert(matrix, matrixInverseExpected);
+         MatrixMissingTools.fast3x3Inverse(matrix, matrixInverse);
 
          MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
       }

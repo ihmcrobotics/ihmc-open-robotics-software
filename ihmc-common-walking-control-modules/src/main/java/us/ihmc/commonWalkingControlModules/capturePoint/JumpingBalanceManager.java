@@ -78,7 +78,7 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new CoMTrajectoryModelPredictiveController(controllerToolbox.getGravityZ(), 1.0, controllerToolbox.getControlDT(), registry);
+      comTrajectoryPlanner = new CoMTrajectoryModelPredictiveController(controllerToolbox.getGravityZ(), 1.0, controllerToolbox.getFullRobotModel().getTotalMass(), controllerToolbox.getControlDT(), registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 

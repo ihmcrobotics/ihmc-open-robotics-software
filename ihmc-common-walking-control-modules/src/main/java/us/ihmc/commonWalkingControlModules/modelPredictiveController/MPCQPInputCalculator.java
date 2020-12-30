@@ -16,14 +16,16 @@ public class MPCQPInputCalculator
    private final MPCIndexHandler indexHandler;
 
    private final VRPTrackingCostCalculator vrpTrackingCostCalculator;
+   private final OrientationDynamicsCommandCalculator orientationDynamicsCommandCalculator;
 
    private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);
    private final double gravityZ;
 
-   public MPCQPInputCalculator(MPCIndexHandler indexHandler, double gravityZ)
+   public MPCQPInputCalculator(MPCIndexHandler indexHandler, double mass, double gravityZ)
    {
       this.indexHandler = indexHandler;
       this.vrpTrackingCostCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
+      this.orientationDynamicsCommandCalculator = new OrientationDynamicsCommandCalculator(indexHandler, mass);
       this.gravityZ = -Math.abs(gravityZ);
    }
 
@@ -458,6 +460,30 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
 
       return  true;
+   }
+
+   public boolean calculateOrientationDynamicsObjective(QPInputTypeA inputToPack, OrientationDynamicsCommand command)
+   {
+      int problemSize = 0;
+
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         problemSize += command.getContactPlaneHelper(i).getRhoSize();
+      }
+
+      if (problemSize < 1)
+         return false;
+
+      inputToPack.reshape(problemSize);
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+
+      orientationDynamicsCommandCalculator.compute(command);
+      inputToPack.getTaskJacobian().set(orientationDynamicsCommandCalculator.getRotationRateJacobian());
+      CommonOps_DDRM.addEquals(inputToPack.getTaskJacobian(), orientationDynamicsCommandCalculator.getRotationAccelerationJacobian());
+      CommonOps_DDRM.addEquals(inputToPack.getTaskJacobian(), -1.0, orientationDynamicsCommandCalculator.getTorqueJacobian());
+
+      return true;
    }
 
    private double getGravityZObjective(int derivativeOrder, double time)

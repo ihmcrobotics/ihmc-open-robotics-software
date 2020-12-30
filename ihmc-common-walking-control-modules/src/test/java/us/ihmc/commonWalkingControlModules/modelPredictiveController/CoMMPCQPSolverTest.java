@@ -32,6 +32,7 @@ public class CoMMPCQPSolverTest
       double mu = 0.8;
       double dt = 1e-3;
       double duration = 1.0;
+      double mass = 1.5;
 
       double timeAtStart = 0.0;
       double timeAtEnd = duration;
@@ -49,7 +50,7 @@ public class CoMMPCQPSolverTest
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
+      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
       contactPose.getPosition().set(dcmObjective);
@@ -348,6 +349,7 @@ public class CoMMPCQPSolverTest
       double omega = 3.0;
       double mu = 0.8;
       double dt = 1e-3;
+      double mass = 1.5;
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
@@ -355,7 +357,7 @@ public class CoMMPCQPSolverTest
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
+      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 
