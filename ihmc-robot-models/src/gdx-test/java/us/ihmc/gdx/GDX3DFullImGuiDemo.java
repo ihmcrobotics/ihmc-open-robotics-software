@@ -6,11 +6,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.ImColor;
-import imgui.ImFont;
-import imgui.ImGuiStyle;
+import imgui.*;
 import imgui.internal.ImGui;
-import imgui.ImGuiIO;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -115,7 +112,8 @@ public class GDX3DFullImGuiDemo
       public void render()
       {
 
-         Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+         Gdx.gl.glClearColor(0, 0, 0, 1.0f);
+//         Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
          imGuiGlfw.newFrame();
@@ -123,29 +121,37 @@ public class GDX3DFullImGuiDemo
 
          ImGui.pushFont(imFont);
 
-         ImGui.setNextWindowBgAlpha(0.0f);
+//         ImGui.setNextWindowBgAlpha(0.0f);
          int flags = ImGuiDockNodeFlags.None;
          flags += ImGuiDockNodeFlags.PassthruCentralNode;
          int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
 
+//         if (ImGui.begin(""))
+
          //         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
 
          ImGui.pushStyleColor(ImGuiCol.WindowBg, 0f, 0f, 0f, 0f);
-         ImGui.setNextWindowBgAlpha(0.0f);
+//         ImGui.setNextWindowBgAlpha(0.0f);
          flags = ImGuiWindowFlags.None;
 //         flags += ImGuiWindowFlags.NoNavInputs;
 //         flags += ImGuiWindowFlags.NoMouseInputs;
          ImGui.begin("3D View", flags);
 
-         ImGui.getBackgroundDrawList().addRectFilled(0f, 0f, 1f, 1f, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
          ImGui.popStyleColor();
 
          float posX = ImGui.getWindowPosX();
          float posY = ImGui.getWindowPosY();
          float sizeX = ImGui.getWindowSizeX();
          float sizeY = ImGui.getWindowSizeY();
+         float itemRectMinX = ImGui.getItemRectMinX();
+         float itemRectMinY = ImGui.getItemRectMinY();
+         float itemRectMaxX = ImGui.getItemRectMaxX();
+         float itemRectMaxY = ImGui.getItemRectMaxY();
          setViewportBounds((int) posX, getCurrentWindowHeight() - (int) posY - (int) sizeY, (int) sizeX, (int) sizeY);
+
+//         ImGui.getWindowDrawList().addRectFilled(itemRectMinX, itemRectMinY, itemRectMaxX, itemRectMaxY, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
+         ImGui.getWindowDrawList().addRectFilled(posX, posY, posX + sizeX, posY + sizeY, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
 
          ImGui.end();
 
@@ -202,6 +208,9 @@ public class GDX3DFullImGuiDemo
             ImGui.dockBuilderDockWindow("Window", dockRightId);
             ImGui.dockBuilderFinish(dockspaceId);
          }
+
+
+
 
          ImGui.popFont();
 
