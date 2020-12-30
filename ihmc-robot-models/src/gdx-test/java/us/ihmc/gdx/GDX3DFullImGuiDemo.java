@@ -6,6 +6,9 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import imgui.ImColor;
+import imgui.ImFont;
+import imgui.ImGuiStyle;
 import imgui.internal.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.*;
@@ -15,8 +18,10 @@ import imgui.internal.ImGuiDockNode;
 import imgui.type.ImInt;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.string.StringTools;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -46,6 +51,9 @@ public class GDX3DFullImGuiDemo
       private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
       private String glslVersion;
       private long windowHandle;
+
+      private final Stopwatch stopwatch = new Stopwatch().start();
+      private ImFont imFont;
 
       @Override
       public void create()
@@ -86,7 +94,16 @@ public class GDX3DFullImGuiDemo
          io.setConfigViewportsNoTaskBarIcon(true);
          io.setConfigWindowsMoveFromTitleBarOnly(true);
 
-         ImGuiTools.setupFonts(io);
+         ImGui.styleColorsLight();
+         imFont = ImGuiTools.setupFonts(io);
+
+         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+         if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
+         {
+            final ImGuiStyle style = imgui.ImGui.getStyle();
+            style.setWindowRounding(0.0f);
+            style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
+         }
 
          windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
 
@@ -104,16 +121,25 @@ public class GDX3DFullImGuiDemo
          imGuiGlfw.newFrame();
          ImGui.newFrame();
 
+         ImGui.pushFont(imFont);
+
          ImGui.setNextWindowBgAlpha(0.0f);
-         int flags = 0;
+         int flags = ImGuiDockNodeFlags.None;
          flags += ImGuiDockNodeFlags.PassthruCentralNode;
          int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
 
          //         ImGui.setNextWindowDockID(dockspaceId, ImGuiCond.FirstUseEver);
 
+         ImGui.pushStyleColor(ImGuiCol.WindowBg, 0f, 0f, 0f, 0f);
          ImGui.setNextWindowBgAlpha(0.0f);
-         ImGui.begin("3D View");
+         flags = ImGuiWindowFlags.None;
+//         flags += ImGuiWindowFlags.NoNavInputs;
+//         flags += ImGuiWindowFlags.NoMouseInputs;
+         ImGui.begin("3D View", flags);
+
+         ImGui.getBackgroundDrawList().addRectFilled(0f, 0f, 1f, 1f, ImColor.floatToColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
+         ImGui.popStyleColor();
 
          float posX = ImGui.getWindowPosX();
          float posY = ImGui.getWindowPosY();
@@ -129,7 +155,26 @@ public class GDX3DFullImGuiDemo
 //         ImGui.setNextWindowBgAlpha(0.0f);
 
          ImGui.begin("Window");
+
+         if (ImGui.beginTabBar("main"))
+         {
+            if (ImGui.beginTabItem("Window"))
+            {
+               ImGui.text("Tab bar detected!");
+               ImGui.endTabItem();
+            }
+            ImGui.endTabBar();
+         }
+
+         ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
          ImGui.button("I'm a Button!");
+
+
+//         if (ImGui.beginTabItem("Window"))
+//         {
+//            ImGui.button("I'm a tab Button!");
+//            ImGui.endTabItem();
+//         }
 
          float[] values = new float[100];
          for (int i = 0; i < 100; i++)
@@ -146,7 +191,10 @@ public class GDX3DFullImGuiDemo
          if (!isInitialized)
          {
             ImGui.dockBuilderRemoveNode(dockspaceId);
-            ImGui.dockBuilderAddNode(dockspaceId, imgui.internal.flag.ImGuiDockNodeFlags.DockSpace);
+            flags = imgui.internal.flag.ImGuiDockNodeFlags.None;
+            flags += imgui.internal.flag.ImGuiDockNodeFlags.PassthruCentralNode;
+            flags += imgui.internal.flag.ImGuiDockNodeFlags.DockSpace;
+            ImGui.dockBuilderAddNode(dockspaceId, flags);
             ImGui.dockBuilderSetNodeSize(dockspaceId, getCurrentWindowWidth(), getCurrentWindowHeight());
             ImInt outIdAtOppositeDir = new ImInt();
             int dockRightId = ImGui.dockBuilderSplitNode(dockspaceId, ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
@@ -154,6 +202,8 @@ public class GDX3DFullImGuiDemo
             ImGui.dockBuilderDockWindow("Window", dockRightId);
             ImGui.dockBuilderFinish(dockspaceId);
          }
+
+         ImGui.popFont();
 
          ImGui.render();
          imGuiGl3.renderDrawData(ImGui.getDrawData());
