@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.RecyclingLinkedList;
 
 public class CommandProvider
 {
    private final RecyclingArrayList<CoMPositionCommand> comPositionCommandPool = new RecyclingArrayList<>(CoMPositionCommand::new);
    private final RecyclingArrayList<CoMVelocityCommand> comVelocityCommandPool = new RecyclingArrayList<>(CoMVelocityCommand::new);
+   private final RecyclingArrayList<BodyOrientationCommand> bodyOrientationCommandPool = new RecyclingArrayList<>(BodyOrientationCommand::new);
+   private final RecyclingArrayList<BodyAngularVelocityCommand> bodyAngularVelocityCommandPool = new RecyclingArrayList<>(BodyAngularVelocityCommand::new);
    private final RecyclingArrayList<DCMPositionCommand> dcmPositionCommandPool = new RecyclingArrayList<>(DCMPositionCommand::new);
    private final RecyclingArrayList<DCMVelocityCommand> dcmVelocityCommandPool = new RecyclingArrayList<>(DCMVelocityCommand::new);
    private final RecyclingArrayList<VRPPositionCommand> vrpPositionCommandPool = new RecyclingArrayList<>(VRPPositionCommand::new);
@@ -16,6 +17,7 @@ public class CommandProvider
    private final RecyclingArrayList<OrientationDynamicsCommand> orientationDynamicsCommandPool = new RecyclingArrayList<>(OrientationDynamicsCommand::new);
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
+   private final RecyclingArrayList<BodyOrientationContinuityCommand> bodyOrientationContinuityCommandPool = new RecyclingArrayList<>(BodyOrientationContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoValueObjectiveCommand> rhoValueObjectiveCommandPool = new RecyclingArrayList<>(RhoValueObjectiveCommand::new);
 
@@ -23,6 +25,8 @@ public class CommandProvider
    {
       comPositionCommandPool.clear();
       comVelocityCommandPool.clear();
+      bodyOrientationCommandPool.clear();
+      bodyAngularVelocityCommandPool.clear();
       dcmPositionCommandPool.clear();
       dcmVelocityCommandPool.clear();
       vrpPositionCommandPool.clear();
@@ -32,6 +36,7 @@ public class CommandProvider
       orientationDynamicsCommandPool.clear();
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
+      bodyOrientationContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoValueObjectiveCommandPool.clear();
    }
@@ -44,6 +49,16 @@ public class CommandProvider
    public CoMVelocityCommand getNextCoMVelocityCommand()
    {
       return comVelocityCommandPool.add();
+   }
+
+   public BodyOrientationCommand getNextBodyOrientationCommand()
+   {
+      return bodyOrientationCommandPool.add();
+   }
+
+   public BodyAngularVelocityCommand getNextBodyAngularVelocityCommand()
+   {
+      return bodyAngularVelocityCommandPool.add();
    }
 
    public DCMPositionCommand getNextDCMPositionCommand()
@@ -89,6 +104,11 @@ public class CommandProvider
    public CoMVelocityContinuityCommand getNextComVelocityContinuityCommand()
    {
       return comVelocityContinuityCommandPool.add();
+   }
+
+   public BodyOrientationContinuityCommand getNextBodyOrientationContinuityCommand()
+   {
+      return bodyOrientationContinuityCommandPool.add();
    }
 
    public VRPPositionContinuityCommand getNextVRPPositionContinuityCommand()

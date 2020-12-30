@@ -437,4 +437,14 @@ public class TrajectoryHandler
    {
       return desiredECMPPosition;
    }
+
+   public FrameOrientation3DReadOnly getDesiredBodyOrientation()
+   {
+      return desiredBodyOrientation;
+   }
+
+   public FrameVector3DReadOnly getDesiredBodyAngularVelocity()
+   {
+      return desiredBodyAngularVelocity;
+   }
 }
