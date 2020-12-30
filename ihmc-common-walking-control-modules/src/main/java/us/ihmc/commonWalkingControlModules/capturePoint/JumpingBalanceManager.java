@@ -221,13 +221,18 @@ public class JumpingBalanceManager
       }
       copTrajectoryForJumping.compute(copTrajectoryState);
 
+      MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
+      chestPose.setToZero(chestFrame);
+      chestPose.changeFrame(worldFrame);
       comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
                                                        controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
                                                        yoPerfectVRP,
                                                        timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
 
-      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.compute(Math.max(totalStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue(), 0.0));
       touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       touchdownDCMPosition.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
