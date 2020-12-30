@@ -22,7 +22,7 @@ import java.util.List;
  * Title: BagOfVectors
  * </p>
  * <p>
- * Description: Class for displaying multiple points in the SCS GUI.
+ * Description: Class for displaying multiple vectors in the SCS GUI.
  * </p>
  */
 public class BagOfVectors
