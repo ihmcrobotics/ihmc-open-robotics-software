@@ -323,8 +323,8 @@ public class CoMTrajectoryModelPredictiveController
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComVelocityContinuityCommand(), transition, firstSegmentDuration));
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyOrientationContinuityCommand(), transition, firstSegmentDuration));
 
-         // TODO only do this if both contacts are load bearing
-         mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), transition, firstSegmentDuration));
+         if (contactSequence.get(transition).getContactState().isLoadBearing() && contactSequence.get(nextSequence).getContactState().isLoadBearing())
+            mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), transition, firstSegmentDuration));
 
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
@@ -607,8 +607,7 @@ public class CoMTrajectoryModelPredictiveController
          command.setBodyInertia(bodyInertia);
          command.setWeight(orientationDynamicsWeight);
 
-         // FIXME don't use the reference value, use the actual solution
-         trajectoryHandler.computeReferenceOrientations(segmentStartTime + time, tempOrientation, tempAngularRate);
+         trajectoryHandler.computeOrientation(segmentStartTime + time, tempOrientation, tempAngularRate);
          trajectoryHandler.fastComputePosition(segmentStartTime + time, omega.getValue(), tempPoint);
          command.setOrientationEstimate(tempOrientation);
          command.setAngularVelocityEstimate(tempAngularRate);
