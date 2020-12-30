@@ -6,15 +6,17 @@ import imgui.internal.ImGui;
 
 import static us.ihmc.gdx.GDX3DApplication.CLEAR_COLOR;
 
-public class GDXImGui3DView
+public class ImGuiGDX3DWindow
 {
-   public void render(GDX3DApplication gdx3DApplication)
+   private static final String WINDOW_NAME = "3D View";
+
+   public void renderBeforeOtherWindows(GDX3DApplication gdx3DApplication)
    {
       // TODO: Pass inputs through ImGui?
       int flags = ImGuiWindowFlags.None;
       //         flags += ImGuiWindowFlags.NoNavInputs;
                flags += ImGuiWindowFlags.NoTitleBar;
-      ImGui.begin("3D View", flags);
+      ImGui.begin(WINDOW_NAME, flags);
 
       float posX = ImGui.getWindowPosX();
       float posY = ImGui.getWindowPosY();
@@ -27,5 +29,10 @@ public class GDXImGui3DView
       ImGui.end();
 
       gdx3DApplication.getCamera3D().clearInputExclusionBoxes();
+   }
+
+   public String getWindowName()
+   {
+      return WINDOW_NAME;
    }
 }

@@ -2,7 +2,6 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
-import com.badlogic.gdx.graphics.GL20;
 import imgui.ImFont;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
@@ -21,7 +20,7 @@ public class GDXImGuiWindowAndDockSystem
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
-
+   private boolean isFirstRenderCall = true;
    private String glslVersion; // TODO: ?
    private long windowHandle;
    private ImFont imFont;
@@ -105,6 +104,8 @@ public class GDXImGuiWindowAndDockSystem
    {
       glfwSwapBuffers(windowHandle);
       glfwPollEvents();
+
+      isFirstRenderCall = false;
    }
 
    public void dispose()
@@ -118,5 +119,10 @@ public class GDXImGuiWindowAndDockSystem
    public int getCentralDockspaceId()
    {
       return dockspaceId;
+   }
+
+   public boolean isFirstRenderCall()
+   {
+      return isFirstRenderCall;
    }
 }
