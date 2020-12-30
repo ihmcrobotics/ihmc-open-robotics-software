@@ -1,20 +1,14 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.*;
 import imgui.internal.ImGui;
 import imgui.flag.*;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImInt;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.tools.string.StringTools;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 public class GDX3DFullImGuiDemo
 {
@@ -30,13 +24,9 @@ public class GDX3DFullImGuiDemo
 
    class PrivateGDXApplication extends GDX3DApplication
    {
-      private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
-      private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-      private String glslVersion;
-      private long windowHandle;
+      private final GDXImGuiWindowAndDockSystem imGui = new GDXImGuiWindowAndDockSystem();
 
       private final Stopwatch stopwatch = new Stopwatch().start();
-      private ImFont imFont;
 
       @Override
       public void create()
@@ -46,52 +36,7 @@ public class GDX3DFullImGuiDemo
          coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
          boxes = new BoxesDemoModel().newInstance();
 
-         GLFWErrorCallback.createPrint(System.err).set();
-
-         if (!glfwInit())
-         {
-            throw new IllegalStateException("Unable to initialize GLFW");
-         }
-//         glfwDefaultWindowHints();
-//         if (SystemUtils.IS_OS_MAC) {
-//            glslVersion = "#version 150";
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-//            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-//         } else {
-//            glslVersion = "#version 130";
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-//         }
-
-//         GL.createCapabilities();
-
-         ImGui.createContext();
-
-         final ImGuiIO io = ImGui.getIO();
-         io.setIniFilename(null); // We don't want to save .ini file
-//         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
-         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-//         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
-         io.setConfigViewportsNoTaskBarIcon(true);
-         io.setConfigWindowsMoveFromTitleBarOnly(true);
-
-         ImGui.styleColorsLight();
-         imFont = ImGuiTools.setupFonts(io);
-
-         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-         if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
-         {
-            final ImGuiStyle style = imgui.ImGui.getStyle();
-            style.setWindowRounding(0.0f);
-            style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
-         }
-
-         windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
-
-         imGuiGlfw.init(windowHandle, true);
-         imGuiGl3.init(glslVersion);
+         imGui.create();
       }
 
       @Override
@@ -102,18 +47,10 @@ public class GDX3DFullImGuiDemo
          Gdx.gl.glClearColor(backgroundColor, backgroundColor, backgroundColor, 1.0f);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-         imGuiGlfw.newFrame();
-         ImGui.newFrame();
+         imGui.beforeWindowManagement();
 
-         ImGui.pushFont(imFont);
-
-         int flags = ImGuiDockNodeFlags.None;
-         flags += ImGuiDockNodeFlags.PassthruCentralNode;
-         flags += ImGuiDockNodeFlags.AutoHideTabBar;
-         int dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
-
-
-         flags = ImGuiWindowFlags.None;
+         // TODO: Pass inputs through ImGui?
+         int flags = ImGuiWindowFlags.None;
 //         flags += ImGuiWindowFlags.NoNavInputs;
 //         flags += ImGuiWindowFlags.NoMouseInputs;
          ImGui.begin("3D View", flags);
@@ -159,20 +96,15 @@ public class GDX3DFullImGuiDemo
 
          if (!isInitialized)
          {
-            ImGui.dockBuilderSetNodeSize(dockspaceId, getCurrentWindowWidth(), getCurrentWindowHeight());
+            ImGui.dockBuilderSetNodeSize(imGui.getCentralDockspaceId(), getCurrentWindowWidth(), getCurrentWindowHeight());
             ImInt outIdAtOppositeDir = new ImInt();
-            int dockRightId = ImGui.dockBuilderSplitNode(dockspaceId, ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
-            ImGui.dockBuilderDockWindow("3D View", dockspaceId);
+            int dockRightId = ImGui.dockBuilderSplitNode(imGui.getCentralDockspaceId(), ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
+            ImGui.dockBuilderDockWindow("3D View", imGui.getCentralDockspaceId());
             ImGui.dockBuilderDockWindow("Window", dockRightId);
-            ImGui.dockBuilderFinish(dockspaceId);
+            ImGui.dockBuilderFinish(imGui.getCentralDockspaceId());
          }
 
-         ImGui.popFont();
-
-         ImGui.render();
-         imGuiGl3.renderDrawData(ImGui.getDrawData());
-
-//         ImGui.updatePlatformWindows();
+         imGui.afterWindowManagement();
 
          renderBefore();
 
@@ -181,8 +113,7 @@ public class GDX3DFullImGuiDemo
 
          renderAfter();
 
-         glfwSwapBuffers(windowHandle);
-         glfwPollEvents();
+         imGui.afterGDXRender();
 
          isInitialized = true;
       }
@@ -191,10 +122,7 @@ public class GDX3DFullImGuiDemo
       public void dispose()
       {
          super.dispose();
-         imGuiGl3.dispose();
-         imGuiGlfw.dispose();
-
-         ImGui.destroyContext();
+         imGui.dispose();
       }
    }
 
