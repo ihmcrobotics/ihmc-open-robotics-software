@@ -20,6 +20,7 @@ import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -83,6 +84,7 @@ public class CoMTrajectoryModelPredictiveController
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
    private final YoFrameQuaternion currentBodyOrientation = new YoFrameQuaternion("currentBodyOrientation", worldFrame, registry);
+   private final YoFrameYawPitchRoll currentBodyYawPitchRoll = new YoFrameYawPitchRoll("currentBodyOrientation", worldFrame, registry);
    private final YoFrameVector3D currentBodyAngularVelocity = new YoFrameVector3D("currentBodyAngularVelocity", worldFrame, registry);
 
    private final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
@@ -829,6 +831,7 @@ public class CoMTrajectoryModelPredictiveController
    public void setCurrentBodyOrientationState(FrameOrientation3DReadOnly bodyOrientation, FrameVector3DReadOnly bodyAngularVelocity)
    {
       this.currentBodyOrientation.setMatchingFrame(bodyOrientation);
+      this.currentBodyYawPitchRoll.setMatchingFrame(bodyOrientation);
       this.currentBodyAngularVelocity.setMatchingFrame(bodyAngularVelocity);
    }
 

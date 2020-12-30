@@ -45,7 +45,7 @@ public class MPCTrajectoryViewer
       comTrajectoryVectors = new BagOfVectors(numberOfVectors, dt, ballSize, "CoM", YoAppearance.Black(), registry, yoGraphicsListRegistry);
       dcmTrajectoryVectors = new BagOfVectors(numberOfVectors, dt, ballSize, "DCM", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
       vrpTrajectoryVectors = new BagOfVectors(numberOfVectors, dt, ballSize, "VRP", YoAppearance.Green(), registry, yoGraphicsListRegistry);
-      angularVelocityTrajectoryVectors = new BagOfVectors(numberOfVectors, dt, 0.0, "AngularVelocity", YoAppearance.Blue(), registry, yoGraphicsListRegistry);
+      angularVelocityTrajectoryVectors = new BagOfVectors(numberOfVectors, 0.001, 0.0, "AngularVelocity", YoAppearance.Blue(), registry, yoGraphicsListRegistry);
 
       AppearanceDefinition orientationAppearance = YoAppearance.Green();
       orientationAppearance.setTransparency(0.8);
@@ -58,6 +58,8 @@ public class MPCTrajectoryViewer
       comTrajectoryVectors.reset();
       dcmTrajectoryVectors.reset();
       vrpTrajectoryVectors.reset();
+      angularVelocityTrajectoryVectors.reset();
+      orientationTrajectoryEllipses.reset();
 
       getInertiaEllipsoidRadii(inertia.getMomentOfInertia().getM00(),
                                inertia.getMomentOfInertia().getM11(),
