@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCIndexHan
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
+import java.util.function.DoubleConsumer;
+
 public class OrientationTrackingCommand implements MPCCommand<OrientationTrackingCommand>
 {
    private final CubicTrackingCommand yawTrackingCommand = new CubicTrackingCommand();
@@ -14,9 +16,16 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
 
    private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
 
+   private DoubleConsumer costToGoConsumer;
+
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.ORIENTATION_TRACKING;
+   }
+
+   public void clear()
+   {
+      costToGoConsumer = null;
    }
 
    public void setStartOrientation(FrameQuaternionReadOnly initialOrientation)
@@ -84,5 +93,17 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
    public double getWeight()
    {
       return weight;
+   }
+
+
+   public void setCostToGoConsumer(DoubleConsumer costToGoConsumer)
+   {
+      this.costToGoConsumer = costToGoConsumer;
+   }
+
+   public void setCostToGo(double costToGo)
+   {
+      if (costToGoConsumer != null)
+         costToGoConsumer.accept(costToGo);
    }
 }

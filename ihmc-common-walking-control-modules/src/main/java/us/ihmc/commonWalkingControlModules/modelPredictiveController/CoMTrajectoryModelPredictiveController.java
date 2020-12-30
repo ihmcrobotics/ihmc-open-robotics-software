@@ -53,10 +53,10 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double dynamicsCollocationDT = 0.05;
 
-   public static final double finalOrientationWeight = 1e2;
+   public static final double finalOrientationWeight = 1e5;
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
-   public static final double orientationTrackingWeight = 1e2;
+   public static final double orientationTrackingWeight = 1e5;
    public static final double orientationDynamicsWeight = 1e5;
 
    private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
@@ -98,6 +98,9 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble vrpTrackingCostToGo0 = new YoDouble("vrpTrackingCostToGo0", registry);
    private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
+   private final YoDouble orientationTrackingCostToGo0 = new YoDouble("orientationTrackingCostToGo0", registry);
+   private final YoDouble orientationTrackingCostToGo1 = new YoDouble("orientationTrackingCostToGo1", registry);
+   private final YoDouble orientationTrackingCostToGo2 = new YoDouble("orientationTrackingCostToGo2", registry);
 
    final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
@@ -116,6 +119,9 @@ public class CoMTrajectoryModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer0 = vrpTrackingCostToGo0::set;
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
+   private final DoubleConsumer orientationTrackingConsumer0 = orientationTrackingCostToGo0::set;
+   private final DoubleConsumer orientationTrackingConsumer1 = orientationTrackingCostToGo1::set;
+   private final DoubleConsumer orientationTrackingConsumer2 = orientationTrackingCostToGo2::set;
 
    public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
@@ -288,7 +294,8 @@ public class CoMTrajectoryModelPredictiveController
       mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
                                                                  0,
                                                                  initialDuration,
-                                                                 contactSequence.get(0).getTimeInterval().getStartTime()));
+                                                                 contactSequence.get(0).getTimeInterval().getStartTime(),
+                                                                 orientationTrackingConsumer0));
       mpcCommands.addCommand(computeOrientationDynamicsObjective(0, initialDuration, contactSequence.get(0).getTimeInterval().getStartTime()));
 
       if (contactSequence.get(0).getContactState().isLoadBearing())
@@ -328,10 +335,16 @@ public class CoMTrajectoryModelPredictiveController
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
+         DoubleConsumer orientationCostToGoConsumer = null;
+         if (nextSequence == 1)
+            orientationCostToGoConsumer = orientationTrackingConsumer1;
+         else if (nextSequence == 2)
+            orientationCostToGoConsumer = orientationTrackingConsumer2;
          mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
                                                                     nextSequence,
                                                                     nextDuration,
-                                                                    contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
+                                                                    contactSequence.get(nextSequence).getTimeInterval().getStartTime(),
+                                                                    orientationCostToGoConsumer));
          mpcCommands.addCommand(computeOrientationDynamicsObjective(nextSequence,
                                                                     nextDuration,
                                                                     contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
@@ -557,8 +570,11 @@ public class CoMTrajectoryModelPredictiveController
    private MPCCommand<?> computeOrientationTrackingObjective(OrientationTrackingCommand objectiveToPack,
                                                              int segmentNumber,
                                                              double segmentDuration,
-                                                             double segmentStartTime)
+                                                             double segmentStartTime,
+                                                             DoubleConsumer costToGoConsumer)
    {
+      objectiveToPack.clear();
+
       objectiveToPack.setWeight(orientationTrackingWeight);
       objectiveToPack.setSegmentNumber(segmentNumber, indexHandler);
       objectiveToPack.setSegmentDuration(segmentDuration);
@@ -570,6 +586,8 @@ public class CoMTrajectoryModelPredictiveController
       trajectoryHandler.computeReferenceOrientations(segmentStartTime + segmentDuration, tempOrientation, tempAngularRate);
       objectiveToPack.setFinalOrientation(tempOrientation);
       objectiveToPack.setFinalAngularRate(tempAngularRate);
+
+      objectiveToPack.setCostToGoConsumer(costToGoConsumer);
 
       return objectiveToPack;
    }
