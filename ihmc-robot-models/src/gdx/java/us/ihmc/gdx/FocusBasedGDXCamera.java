@@ -124,7 +124,22 @@ public class FocusBasedGDXCamera extends Camera
          {
             lastSeenMouseX = screenX;
             lastSeenMouseY = screenY;
+            return false;
+         }
 
+         @Override
+         public boolean touchUp(int screenX, int screenY, int pointer, int button)
+         {
+            lastSeenMouseX = screenX;
+            lastSeenMouseY = screenY;
+            return false;
+         }
+
+         @Override
+         public boolean touchDown(int screenX, int screenY, int pointer, int button)
+         {
+            lastSeenMouseX = screenX;
+            lastSeenMouseY = screenY;
             return false;
          }
 
