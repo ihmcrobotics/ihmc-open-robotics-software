@@ -152,7 +152,7 @@ public class OrientationDynamicsCommandCalculator
 
    private void computeInertiaInWorld(SpatialInertiaReadOnly spatialInertia)
    {
-      spatialInertia.get(inertia);
+      spatialInertia.getMomentOfInertia().get(inertia);
       CommonOps_DDRM.mult(rotationMatrix, inertia, tempInertia);
       CommonOps_DDRM.multTransB(tempInertia, rotationMatrix, inertiaInWorld);
 

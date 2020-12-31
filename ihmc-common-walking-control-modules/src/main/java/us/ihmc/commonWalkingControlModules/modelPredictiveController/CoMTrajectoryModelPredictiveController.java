@@ -324,6 +324,7 @@ public class CoMTrajectoryModelPredictiveController
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComPositionContinuityCommand(), transition, firstSegmentDuration));
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComVelocityContinuityCommand(), transition, firstSegmentDuration));
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyOrientationContinuityCommand(), transition, firstSegmentDuration));
+//         mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyAngularVelocityContinuityCommand(), transition, firstSegmentDuration));
 
          if (contactSequence.get(transition).getContactState().isLoadBearing() && contactSequence.get(nextSequence).getContactState().isLoadBearing())
             mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), transition, firstSegmentDuration));
@@ -603,6 +604,7 @@ public class CoMTrajectoryModelPredictiveController
       {
          OrientationDynamicsCommand command = commandProvider.getNextOrientationDynamicsCommand();
 
+         command.clear();
          command.setSegmentNumber(segmentNumber);
          command.setTimeOfObjective(time);
          command.setOmega(omega.getValue());
@@ -614,6 +616,9 @@ public class CoMTrajectoryModelPredictiveController
          command.setOrientationEstimate(tempOrientation);
          command.setAngularVelocityEstimate(tempAngularRate);
          command.setComPositionEstimate(tempPoint);
+
+         for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+            command.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
 
          orientationDynamicsList.addCommand(command);
       }
