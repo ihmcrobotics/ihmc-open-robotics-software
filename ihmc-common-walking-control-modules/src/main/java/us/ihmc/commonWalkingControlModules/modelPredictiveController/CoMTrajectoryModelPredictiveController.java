@@ -54,10 +54,10 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double dynamicsCollocationDT = 0.05;
 
-   public static final double finalOrientationWeight = 1e5;
+   public static final double finalOrientationWeight = 1e3;
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
-   public static final double orientationTrackingWeight = 1e5;
+   public static final double orientationTrackingWeight = 1e4;
    public static final double orientationDynamicsWeight = 1e5;
 
    private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
@@ -610,6 +610,7 @@ public class CoMTrajectoryModelPredictiveController
          command.setOmega(omega.getValue());
          command.setBodyInertia(bodyInertia);
          command.setWeight(orientationDynamicsWeight);
+         command.setConstraintType(ConstraintType.OBJECTIVE);
 
          trajectoryHandler.computeOrientation(segmentStartTime + time, tempOrientation, tempAngularRate);
          trajectoryHandler.fastComputePosition(segmentStartTime + time, omega.getValue(), tempPoint);
