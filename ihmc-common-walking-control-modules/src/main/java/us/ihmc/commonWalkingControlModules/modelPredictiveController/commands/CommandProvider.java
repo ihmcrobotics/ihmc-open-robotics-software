@@ -18,6 +18,7 @@ public class CommandProvider
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<BodyOrientationContinuityCommand> bodyOrientationContinuityCommandPool = new RecyclingArrayList<>(BodyOrientationContinuityCommand::new);
+   private final RecyclingArrayList<BodyAngularVelocityContinuityCommand> bodyAngularVelocityContinuityCommandPool = new RecyclingArrayList<>(BodyAngularVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoValueObjectiveCommand> rhoValueObjectiveCommandPool = new RecyclingArrayList<>(RhoValueObjectiveCommand::new);
 
@@ -37,6 +38,7 @@ public class CommandProvider
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
       bodyOrientationContinuityCommandPool.clear();
+      bodyAngularVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoValueObjectiveCommandPool.clear();
    }
@@ -109,6 +111,11 @@ public class CommandProvider
    public BodyOrientationContinuityCommand getNextBodyOrientationContinuityCommand()
    {
       return bodyOrientationContinuityCommandPool.add();
+   }
+
+   public BodyAngularVelocityContinuityCommand getNextBodyAngularVelocityContinuityCommand()
+   {
+      return bodyAngularVelocityContinuityCommandPool.add();
    }
 
    public VRPPositionContinuityCommand getNextVRPPositionContinuityCommand()

@@ -31,6 +31,11 @@ public class OrientationDynamicsCommand implements MPCCommand<OrientationDynamic
    private double omega;
    private double weight;
 
+   public void clear()
+   {
+      contactPlaneHelpers.clear();
+   }
+
    public void setSegmentNumber(int segmentNumber)
    {
       this.segmentNumber = segmentNumber;
