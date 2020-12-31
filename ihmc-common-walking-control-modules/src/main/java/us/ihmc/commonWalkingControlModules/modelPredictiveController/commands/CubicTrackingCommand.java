@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+
 public class CubicTrackingCommand
 {
    private int startIndex;
@@ -10,6 +12,8 @@ public class CubicTrackingCommand
    private double finalRate;
 
    private double duration;
+
+   private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
 
    public void setStartIndex(int startIndex)
    {
@@ -41,6 +45,11 @@ public class CubicTrackingCommand
       this.duration = duration;
    }
 
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+
    public double getStartValue()
    {
       return startValue;
@@ -69,5 +78,10 @@ public class CubicTrackingCommand
    public double getDuration()
    {
       return duration;
+   }
+
+   public double getWeight()
+   {
+      return weight;
    }
 }

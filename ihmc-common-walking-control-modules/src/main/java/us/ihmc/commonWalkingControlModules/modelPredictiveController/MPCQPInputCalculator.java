@@ -546,6 +546,26 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   public boolean calculateCubicTrackingCommand(QPInputTypeC inputToPack, CubicTrackingCommand objective)
+   {
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      if (!CubicTrackingCostCalculator.calculateTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                  inputToPack.getDirectCostGradient(),
+                                                                  objective))
+         return false;
+
+      double weight = objective.getWeight();
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return true;
+   }
+
    public boolean calculateOrientationDynamicsObjective(QPInputTypeA inputToPack, OrientationDynamicsCommand command)
    {
       int problemSize = 0;

@@ -360,6 +360,13 @@ public class CoMMPCQPSolver
          addInput(qpInputTypeC);
    }
 
+   public void submitCubicTrackingCommand(CubicTrackingCommand command)
+   {
+      boolean success = inputCalculator.calculateCubicTrackingCommand(qpInputTypeC, command);
+      if (success)
+         addInput(qpInputTypeC);
+   }
+
    public void submitOrientationDynamicsCommand(OrientationDynamicsCommand command)
    {
       boolean success = inputCalculator.calculateOrientationDynamicsObjective(qpInputTypeA, command);
