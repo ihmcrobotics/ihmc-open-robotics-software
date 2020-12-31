@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.ops.ConvertDMatrixStruct;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -22,6 +23,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class SparseInverseCalculatorTest
 {
+   @Disabled
    @Test
    public void testInverse()
    {

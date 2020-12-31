@@ -87,27 +87,27 @@ public class CoMVelocityContinuityCommandTest
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       taskObjectiveExpected.add(2, 0, -duration1 * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 1, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(6 + 4 * rhoHelper1.getRhoSize(), 0.0, taskJacobianExpected, 1, -1.0);
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(0), duration1, taskJacobianExpected, 1, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(1), 0.0, taskJacobianExpected, 1, -1.0);
 
       helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 6);
+      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(0));
       helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
+      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getVelocityJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(1));
 
       valueEndOf1.setX(solution.get(0, 0));
       valueEndOf1.setY(solution.get(2, 0));
       valueEndOf1.setZ(solution.get(4, 0) );
 
-      int start = 6 + 4 * rhoHelper1.getRhoSize();
+      int start = indexHandler.getComCoefficientStartIndex(1);
       valueStartOf2.setX(solution.get(start, 0));
       valueStartOf2.setY(solution.get(start + 2, 0));
       valueStartOf2.setZ(solution.get(start + 4, 0));
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 6 + 4 * rhoIdx;
+         int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
          double rhoValue = omega * Math.exp(omega * duration1) * solution.get(startIdx, 0);
          rhoValue += -omega * Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
          rhoValue += 3.0 * duration1 * duration1 * solution.get(startIdx + 2, 0);
@@ -120,7 +120,7 @@ public class CoMVelocityContinuityCommandTest
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 12 + 4 * rhoHelper1.getRhoSize() + 4 * rhoIdx;
+         int startIdx = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdx;
          double rhoValue = omega * Math.exp(omega * 0.0) * solution.get(startIdx, 0);
          rhoValue += -omega * Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
          rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);

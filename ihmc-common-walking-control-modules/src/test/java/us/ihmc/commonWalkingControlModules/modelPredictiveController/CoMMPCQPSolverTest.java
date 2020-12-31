@@ -121,8 +121,8 @@ public class CoMMPCQPSolverTest
       dcmEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
 
-      DMatrixRMaj solverH_Expected = new DMatrixRMaj(6 + 4 * rhoHelper.getRhoSize(), 6 + 4 * rhoHelper.getRhoSize());
-      DMatrixRMaj solverf_Expected = new DMatrixRMaj(6 + 4 * rhoHelper.getRhoSize(), 1);
+      DMatrixRMaj solverH_Expected = new DMatrixRMaj(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
+      DMatrixRMaj solverf_Expected = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
 
       DMatrixRMaj expectedVRPStartPositionObjective = new DMatrixRMaj(3, 1);
       DMatrixRMaj expectedVRPStartVelocityObjective = new DMatrixRMaj(3, 1);
@@ -193,6 +193,7 @@ public class CoMMPCQPSolverTest
 
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
+      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 
@@ -277,7 +278,7 @@ public class CoMMPCQPSolverTest
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 6 + 4 * rhoIdx;
+         int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
 
          double rhoStartPositionValue = c2_Start * solution.get(startIdx , 0);
          rhoStartPositionValue += c3_Start * solution.get(startIdx + 1, 0);
@@ -459,8 +460,8 @@ public class CoMMPCQPSolverTest
       DMatrixRMaj inequalityObjectiveExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 1);
       CommonOps_DDRM.fill(inequalityObjectiveExpected, minRho);
 
-      DMatrixRMaj inequalityJacobianExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 2 * (6 + rhoHelper.getRhoSize() * 4));
-      DMatrixRMaj equalityJacobianExpected = new DMatrixRMaj(6, 2 * (6 + rhoHelper.getRhoSize() * 4));
+      DMatrixRMaj inequalityJacobianExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
+      DMatrixRMaj equalityJacobianExpected = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
 
       double omega2 = omega * omega;
 
@@ -499,7 +500,7 @@ public class CoMMPCQPSolverTest
       double a3Start = 2.0;
       double a3End = 2.0;
 
-      int startOf2 = 6 + 4 * rhoHelper.getRhoSize();
+      int startOf2 = indexHandler.getComCoefficientStartIndex(1);
       equalityJacobianExpected.set(0, 0, c4End);
       equalityJacobianExpected.set(0, 1, c5End);
       equalityJacobianExpected.set(1, 2, c4End);
@@ -530,8 +531,8 @@ public class CoMMPCQPSolverTest
 
       for (int rhoIdxStart1  = 0; rhoIdxStart1 < rhoHelper.getRhoSize(); rhoIdxStart1++)
       {
-         int startColIdx1 = 6 + 4 * rhoIdxStart1;
-         int startColIdx2 = startOf2 + 6 + 4 * rhoIdxStart1;
+         int startColIdx1 = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdxStart1;
+         int startColIdx2 = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdxStart1;
 
          equalityJacobianExpected.set(0, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getX() * c0End);
          equalityJacobianExpected.set(1, startColIdx1, rhoHelper.getBasisVector(rhoIdxStart1).getY() * c0End);

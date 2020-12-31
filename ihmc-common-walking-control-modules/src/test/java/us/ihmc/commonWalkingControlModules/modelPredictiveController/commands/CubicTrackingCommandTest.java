@@ -1,7 +1,9 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CubicTrackingCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoRegistry;

@@ -102,7 +102,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize());
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize() + 12);
 
       double c0 = time;
       double c1 = 1.0;
@@ -146,7 +146,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize());
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize() + 12);
 
       double c0Dot = 1.0;
       double c1Dot = 0.0;
@@ -189,7 +189,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMAccelerationJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize());
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize() + 12);
 
       double c0Ddot = 0.0;
       double c1Ddot = 0.0;
@@ -232,7 +232,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMJerkJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize());
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + 4 * rhoHelper.getRhoSize() + 12);
 
       double c0Dddot = 0.0;
       double c1Dddot = 0.0;

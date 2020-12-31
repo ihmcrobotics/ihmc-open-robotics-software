@@ -72,6 +72,7 @@ public class VRPPositionContinuityCommandTest
       solver.submitContinuityObjective(command);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
+      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 
@@ -94,32 +95,32 @@ public class VRPPositionContinuityCommandTest
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4);
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 0, 1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, duration1, taskJacobianExpected, 2, -1.0 / omega2);
-      int secondStartIndex = 6 + 4 * rhoHelper1.getRhoSize();
+      int secondStartIndex = indexHandler.getComCoefficientStartIndex(1);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondStartIndex, 0.0, taskJacobianExpected, 0, -1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondStartIndex, 0.0, taskJacobianExpected, 2, 1.0 / omega2);
 
       helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 6);
-      MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper1.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, 6);
+      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(0));
+      MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper1.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(0));
       helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
-      MatrixTools.multAddBlock(1.0 / omega2, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, 12 + 4 * rhoHelper1.getRhoSize());
+      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(1));
+      MatrixTools.multAddBlock(1.0 / omega2, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getAccelerationJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(1));
 
       valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
       valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
       valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
 
-      int start = 6 + 4 * rhoHelper1.getRhoSize();
+      int start = indexHandler.getComCoefficientStartIndex(1);
       valueStartOf2.setX(0.0 * solution.get(start, 0) + solution.get(start + 1, 0));
       valueStartOf2.setY(0.0 * solution.get(start + 2, 0) + solution.get(start + 3, 0));
       valueStartOf2.setZ(0.0 * solution.get(start + 4, 0) + solution.get(start + 5, 0));
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 6 + 4 * rhoIdx;
+         int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
          double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
          rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
          rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);
@@ -137,7 +138,7 @@ public class VRPPositionContinuityCommandTest
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 12 + 4 * rhoHelper1.getRhoSize() + 4 * rhoIdx;
+         int startIdx = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdx;
          double rhoValue = Math.exp(omega * 0.0) * solution.get(startIdx, 0);
          rhoValue += Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
          rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);

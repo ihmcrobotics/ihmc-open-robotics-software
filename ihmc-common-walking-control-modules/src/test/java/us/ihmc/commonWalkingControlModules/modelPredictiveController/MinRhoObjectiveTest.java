@@ -79,7 +79,7 @@ public class MinRhoObjectiveTest
       DMatrixRMaj achievedObjective = new DMatrixRMaj(16, 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(rhoHelper.getRhoSize(), 6 + rhoHelper.getRhoSize() * 4);
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
 
       double omega2 = omega * omega;
 
@@ -193,7 +193,7 @@ public class MinRhoObjectiveTest
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), 6 + rhoHelper.getRhoSize() * 4);
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
 
       double omega2 = omega * omega;
 
@@ -323,6 +323,7 @@ public class MinRhoObjectiveTest
       solver.submitRhoValueCommand(commandEnd2);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
+      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 
@@ -335,8 +336,8 @@ public class MinRhoObjectiveTest
       DMatrixRMaj rhoSolution1 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
       DMatrixRMaj rhoSolution2 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
 
-      MatrixTools.setMatrixBlock(rhoSolution1, 0, 0, solution, 12, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
-      MatrixTools.setMatrixBlock(rhoSolution2, 0, 0, solution, 12 + 4 * rhoHelper.getRhoSize(), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution1, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(0), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution2, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(1), 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 
       helper.computeMatrices(0.0, omega);
       CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution1, rhoValueVectorStart1);
@@ -348,7 +349,7 @@ public class MinRhoObjectiveTest
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), 2 * (6 + rhoHelper.getRhoSize() * 4));
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(4 * rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
 
       double omega2 = omega * omega;
 
@@ -363,8 +364,8 @@ public class MinRhoObjectiveTest
 
       for (int rhoIdxStart1  = 0; rhoIdxStart1 < rhoHelper.getRhoSize(); rhoIdxStart1++)
       {
-         int startColIdx1 = 6 + 4 * rhoIdxStart1;
-         int startColIdx2 = startColIdx1 + 6 + 4 * rhoHelper.getRhoSize();
+         int startColIdx1 = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdxStart1;
+         int startColIdx2 = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdxStart1;
 
          double rhoValueStart1 = a0Start * solution.get(startColIdx1, 0);
          rhoValueStart1 += a1Start * solution.get(startColIdx1 + 1, 0);
