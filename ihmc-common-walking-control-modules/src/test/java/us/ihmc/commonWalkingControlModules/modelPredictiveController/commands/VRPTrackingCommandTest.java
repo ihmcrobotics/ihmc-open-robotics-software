@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -69,13 +70,13 @@ public class VRPTrackingCommandTest
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize() * 4, 1);
 
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, contactPlaneHelper.getCoefficientSize(), 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(0), 0, contactPlaneHelper.getCoefficientSize(), 1, 1.0);
 
       FramePoint3D assembledValue = new FramePoint3D();
       FramePoint3D expectedValue = new FramePoint3D();
 
       DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, 6 + contactPlaneHelper.getCoefficientSize());
+      DMatrixRMaj jacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
       for (double time = 0.0; time <= duration; time += 0.001)
       {
@@ -99,7 +100,7 @@ public class VRPTrackingCommandTest
 
             for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
             {
-               int startIdx = 6 + pointIdx * 4 * 4 + 4 * rhoIdx;
+               int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + pointIdx * 4 * 4 + 4 * rhoIdx;
                double rhoValue = Math.exp(omega * time) * solution.get(startIdx, 0);
                rhoValue += Math.exp(-omega * time) * solution.get(startIdx + 1, 0);
                rhoValue += time * time * time * solution.get(startIdx + 2, 0);

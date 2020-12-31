@@ -169,10 +169,8 @@ public class MPCQPInputCalculatorTest
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
       int rhoSize = 16;
-      int rhoCoefficients = 2 * 4 * rhoSize;
-      int comCoefficients = 2 * 6;
-      QPInputTypeA comPositionQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
-      QPInputTypeA comVelocityQPInput = new QPInputTypeA(rhoCoefficients + comCoefficients);
+      QPInputTypeA comPositionQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA comVelocityQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
 
@@ -189,13 +187,13 @@ public class MPCQPInputCalculatorTest
          DMatrixRMaj rhoMagnitudesJacobian = MPCTestHelper.getCoMPositionJacobian(time, omega, rhoHelper);
          DMatrixRMaj rhoRatesJacobian = MPCTestHelper.getCoMVelocityJacobian(time, omega, rhoHelper);
 
-         DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
-         DMatrixRMaj comVelocityJacobian = new DMatrixRMaj(3, rhoCoefficients + comCoefficients);
+         DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         DMatrixRMaj comVelocityJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
 //         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 0, rhoMagnitudesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
 //         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 0, rhoRatesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
-         MatrixTools.setMatrixBlock(comPositionJacobian, 0, 6 + 4 * rhoSize, rhoMagnitudesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
-         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, 6 + 4 * rhoSize, rhoRatesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
+         MatrixTools.setMatrixBlock(comPositionJacobian, 0, indexHandler.getComCoefficientStartIndex(1), rhoMagnitudesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
+         MatrixTools.setMatrixBlock(comVelocityJacobian, 0, indexHandler.getComCoefficientStartIndex(1), rhoRatesJacobian, 0, 0, 3, 6 + 4 * rhoSize, 1.0);
 
          FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());

@@ -5,6 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyOrientationContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -16,7 +18,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class CoMPositionContinuityCommandTest
+public class BodyOrientationContinuityCommandTest
 {
    @Test
    public void testCommandOptimize()
@@ -57,20 +59,21 @@ public class CoMPositionContinuityCommandTest
 
       double duration1 = 0.7;
 
-      CoMPositionContinuityCommand command = new CoMPositionContinuityCommand();
+      BodyOrientationContinuityCommand command = new BodyOrientationContinuityCommand();
       command.setFirstSegmentDuration(duration1);
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
       command.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
       command.addSecondSegmentContactPlaneHelper(contactPlaneHelper2);
-      command.setConstraintType(ConstraintType.OBJECTIVE);
+      command.setConstraintType(ConstraintType.EQUALITY);
 
       double regularization = 1e-5;
       solver.initialize();
       solver.submitContinuityObjective(command);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
+      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 
@@ -84,54 +87,26 @@ public class CoMPositionContinuityCommandTest
 
       CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
-      taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(0), duration1, taskJacobianExpected, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(1), 0.0, taskJacobianExpected, 0, -1.0);
-
-      helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(0));
-      helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(1));
-
-      valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
-      valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
-      valueEndOf1.setZ(duration1 * solution.get(4, 0) + solution.get(5, 0));
-
-      int startOf2 = indexHandler.getComCoefficientStartIndex(1);
-      valueStartOf2.setX(0.0 * solution.get(startOf2, 0) + solution.get(startOf2 + 1, 0));
-      valueStartOf2.setY(0.0 * solution.get(startOf2 + 2, 0) + solution.get(startOf2 + 3, 0));
-      valueStartOf2.setZ(0.0 * solution.get(startOf2 + 4, 0) + solution.get(startOf2 + 5, 0));
-
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
-      {
-         int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * duration1) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * duration1) * solution.get(startIdx + 1, 0);
-         rhoValue += duration1 * duration1 * duration1 * solution.get(startIdx + 2, 0);
-         rhoValue += duration1 * duration1 * solution.get(startIdx + 3, 0);
-
-         valueEndOf1.scaleAdd(rhoValue, rhoHelper1.getBasisVector(rhoIdx), valueEndOf1);
-      }
-      valueEndOf1.scaleAdd(0.5 * duration1 * duration1, gravityVector, valueEndOf1);
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4 + 2 * 12);
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(6 + rhoHelper1.getRhoSize() * 4, duration1, taskJacobianExpected, 0, 1.0);
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(2 * 6 + 2 * rhoHelper1.getRhoSize() * 4 + 12, 0.0, taskJacobianExpected, 0, -1.0);
 
 
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper2.getRhoSize(); rhoIdx++)
-      {
-         int startIdx = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * 0.0) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * 0.0) * solution.get(startIdx + 1, 0);
-         rhoValue += 0.0 * 0.0 * 0.0 * solution.get(startIdx + 2, 0);
-         rhoValue += 0.0 * 0.0 * solution.get(startIdx + 3, 0);
+      int startIndex0 = indexHandler.getOrientationCoefficientsStartIndex(0);
+      valueEndOf1.setX(duration1 * duration1 * duration1 * solution.get(startIndex0, 0) + duration1 * duration1 * solution.get(startIndex0 + 1, 0) + duration1 * solution.get(startIndex0 + 2, 0) + solution.get(startIndex0 + 3));
+      valueEndOf1.setY(duration1 * duration1 * duration1 * solution.get(startIndex0 + 4, 0) + duration1 * duration1 * solution.get(startIndex0 + 5, 0) + duration1 * solution.get(startIndex0 + 6, 0) + solution.get(startIndex0 + 7));
+      valueEndOf1.setZ(duration1 * duration1 * duration1 * solution.get(startIndex0 + 8, 0) + duration1 * duration1 * solution.get(startIndex0 + 9, 0) + duration1 * solution.get(startIndex0 + 10, 0) + solution.get(startIndex0 + 11));
 
-         valueStartOf2.scaleAdd(rhoValue, rhoHelper2.getBasisVector(rhoIdx), valueStartOf2);
-      }
-      valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0, gravityVector, valueStartOf2);
+      int startIndex1 = indexHandler.getOrientationCoefficientsStartIndex(0);
+
+      valueStartOf2.setX(solution.get(startIndex1 + 3, 0));
+      valueStartOf2.setY(solution.get(startIndex1 + 7, 0));
+      valueStartOf2.setZ(solution.get(startIndex1 + 11, 0));
+
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
@@ -139,16 +114,6 @@ public class CoMPositionContinuityCommandTest
       CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
-
-      CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
-      CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
-
-      MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
-
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
