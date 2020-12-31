@@ -73,6 +73,9 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
    public void setWeight(double weight)
    {
       this.weight = weight;
+      yawTrackingCommand.setWeight(weight);
+      pitchTrackingCommand.setWeight(weight);
+      rollTrackingCommand.setWeight(weight);
    }
 
    public CubicTrackingCommand getYawTrackingCommand()
