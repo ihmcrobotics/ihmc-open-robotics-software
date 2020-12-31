@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
@@ -568,23 +569,19 @@ public class MPCQPInputCalculator
 
    public boolean calculateOrientationDynamicsObjective(QPInputTypeA inputToPack, OrientationDynamicsCommand command)
    {
-      int problemSize = 0;
 
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
-      {
-         problemSize += command.getContactPlaneHelper(i).getRhoSize();
-      }
-
-      if (problemSize < 1)
+      if (command.getNumberOfContacts() < 1)
          return false;
+
+      int problemSize = 3;
 
       inputToPack.reshape(problemSize);
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
+      inputToPack.setConstraintType(command.getConstraintType());
 
       orientationDynamicsCommandCalculator.compute(command);
-      inputToPack.getTaskJacobian().set(orientationDynamicsCommandCalculator.getRotationRateJacobian());
-      CommonOps_DDRM.addEquals(inputToPack.getTaskJacobian(), orientationDynamicsCommandCalculator.getRotationAccelerationJacobian());
+      inputToPack.getTaskJacobian().set(orientationDynamicsCommandCalculator.getOrientationJacobian());
       CommonOps_DDRM.addEquals(inputToPack.getTaskJacobian(), -1.0, orientationDynamicsCommandCalculator.getTorqueJacobian());
 
       return true;

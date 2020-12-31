@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -41,6 +44,7 @@ public class OrientationDynamicsCommandCalculatorTest
       inertia.setMass(mass);
 
       indexHandler.initialize((i) -> 4, 1);
+      OrientationDynamicsCommandCalculator calculator = new OrientationDynamicsCommandCalculator(indexHandler, mass);
 
       Random random = new Random(1738L);
       for (int i = 0; i < 1000; i++)
@@ -61,10 +65,52 @@ public class OrientationDynamicsCommandCalculatorTest
          command.setSegmentNumber(0);
          command.setBodyInertia(inertia);
 
-         OrientationDynamicsCommandCalculator calculator = new OrientationDynamicsCommandCalculator(indexHandler, mass);
          calculator.compute(command);
 
-         fail();
+         double yaw = orientationEstimate.getYaw();
+         double pitch = orientationEstimate.getPitch();
+         double roll = orientationEstimate.getRoll();
+         double yawRate = angularVelocityEstimate.getZ();
+         double rollRate = angularVelocityEstimate.getX();
+         double pitchRate = angularVelocityEstimate.getY();
+
+         DMatrixRMaj rotationMatrixExpected = new DMatrixRMaj(3, 3);
+         rotationMatrixExpected.set(0, 0, Math.cos(pitch) * Math.cos(yaw));
+         rotationMatrixExpected.set(0, 1, -Math.sin(yaw));
+         rotationMatrixExpected.set(1, 0, Math.cos(pitch) * Math.sin(yaw));
+         rotationMatrixExpected.set(1, 1, Math.cos(yaw));
+         rotationMatrixExpected.set(2, 2, 1);
+
+         DMatrixRMaj rotationRateMatrixExpected = new DMatrixRMaj(3, 3);
+         rotationRateMatrixExpected.set(0, 0, -pitchRate * Math.sin(pitch) * Math.cos(yaw) - yawRate * Math.cos(pitch) * Math.sin(yaw));
+         rotationRateMatrixExpected.set(0, 1, -yawRate * Math.cos(yaw));
+         rotationRateMatrixExpected.set(1, 0, -pitchRate * Math.sin(pitch) * Math.sin(yaw) + yawRate * Math.cos(pitch) * Math.cos(yaw));
+         rotationRateMatrixExpected.set(1, 1, -yawRate * Math.sin(yaw));
+
+         DMatrixRMaj rotationJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         DMatrixRMaj rotationRateJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         DMatrixRMaj angularVelocityJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         DMatrixRMaj angularAccelerationJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         int orientationStart = indexHandler.getOrientationCoefficientsStartIndex(0);
+         OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(orientationStart, time, angularVelocityJacobian, 1.0);
+         OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(orientationStart, time, angularAccelerationJacobian, 1.0);
+
+         CommonOps_DDRM.mult(rotationMatrixExpected, angularAccelerationJacobian, rotationJacobianExpected );
+         CommonOps_DDRM.mult(rotationRateMatrixExpected, angularVelocityJacobian, rotationRateJacobianExpected );
+
+         DMatrixRMaj orientationJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         CommonOps_DDRM.add(rotationJacobianExpected, rotationRateJacobianExpected, orientationJacobianExpected);
+
+         EjmlUnitTests.assertEquals(rotationMatrixExpected, calculator.rotationMatrix, 1e-6);
+         EjmlUnitTests.assertEquals(rotationRateMatrixExpected, calculator.rotationMatrixDot, 1e-6);
+
+         EjmlUnitTests.assertEquals(angularVelocityJacobian, calculator.getRotationRateJacobian(), 1e-6);
+         EjmlUnitTests.assertEquals(angularAccelerationJacobian, calculator.getRotationAccelerationJacobian(), 1e-6);
+         EjmlUnitTests.assertEquals(orientationJacobianExpected, calculator.getOrientationJacobian(), 1e-6);
+
+         fail("Need to add the angular torque thing still");
 
       }
    }

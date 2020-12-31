@@ -11,8 +11,8 @@ import us.ihmc.robotics.MatrixMissingTools;
 
 public class OrientationDynamicsCommandCalculator
 {
-   private final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj rotationMatrixDot = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj rotationMatrixDot = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj rotationRateJacobian = new DMatrixRMaj(3, 0);
    private final DMatrixRMaj rotationAccelerationJacobian = new DMatrixRMaj(3, 0);
@@ -52,6 +52,11 @@ public class OrientationDynamicsCommandCalculator
       return rotationAccelerationJacobian;
    }
 
+   public DMatrixRMaj getOrientationJacobian()
+   {
+      return orientationJacobian;
+   }
+
    public DMatrixRMaj getTorqueJacobian()
    {
       return torqueJacobian;
@@ -75,10 +80,10 @@ public class OrientationDynamicsCommandCalculator
 
       rotationMatrixDot.set(0, 0, -pitchRate * sinPitch * cosYaw - yawRate * cosPitch * sinYaw);
       rotationMatrixDot.set(0, 1, -yawRate * cosYaw);
-      rotationMatrixDot.set(1, 0, -pitchRate * sinPitch * sinYaw - yawRate * cosPitch * cosYaw);
+      rotationMatrixDot.set(1, 0, -pitchRate * sinPitch * sinYaw + yawRate * cosPitch * cosYaw);
       rotationMatrixDot.set(1, 1, -yawRate * sinYaw);
 
-      int problemSize =indexHandler.getTotalProblemSize();
+      int problemSize = indexHandler.getTotalProblemSize();
       rotationRateJacobian.reshape(3, problemSize);
       rotationAccelerationJacobian.reshape(3, problemSize);
       orientationJacobian.reshape(3, problemSize);

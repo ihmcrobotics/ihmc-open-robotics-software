@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -30,10 +32,16 @@ public class OrientationDynamicsCommand implements MPCCommand<OrientationDynamic
    private double timeOfObjective;
    private double omega;
    private double weight;
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    public void clear()
    {
       contactPlaneHelpers.clear();
+   }
+
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
    }
 
    public void setSegmentNumber(int segmentNumber)
@@ -130,6 +138,11 @@ public class OrientationDynamicsCommand implements MPCCommand<OrientationDynamic
    public SpatialInertiaReadOnly getBodyInertia()
    {
       return bodyInertia;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    @Override
