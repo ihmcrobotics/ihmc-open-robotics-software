@@ -1,8 +1,9 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.imgui;
 
 import imgui.ImColor;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
+import us.ihmc.gdx.GDX3DApplication;
 
 import static us.ihmc.gdx.GDX3DApplication.CLEAR_COLOR;
 

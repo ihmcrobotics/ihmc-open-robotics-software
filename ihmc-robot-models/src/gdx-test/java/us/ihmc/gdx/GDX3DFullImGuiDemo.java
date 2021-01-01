@@ -5,6 +5,9 @@ import imgui.internal.ImGui;
 import imgui.flag.*;
 import imgui.type.ImInt;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
+import us.ihmc.gdx.imgui.ImGuiGDX3DWindow;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.tools.string.StringTools;
 
 public class GDX3DFullImGuiDemo

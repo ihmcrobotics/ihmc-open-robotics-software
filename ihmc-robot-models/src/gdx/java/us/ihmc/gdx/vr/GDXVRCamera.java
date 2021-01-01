@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.vr;
 
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
@@ -7,7 +7,7 @@ import org.lwjgl.openvr.VRSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import us.ihmc.gdx.GDXVRContext.*;
+import us.ihmc.gdx.vr.GDXVRContext.*;
 
 /**
  * A {@link Camera} implementation for one {@link Eye}
