@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 

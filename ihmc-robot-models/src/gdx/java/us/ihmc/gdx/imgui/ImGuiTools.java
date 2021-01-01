@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.imgui;
 
 import imgui.*;
 import us.ihmc.euclid.geometry.BoundingBox2D;

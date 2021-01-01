@@ -33,7 +33,9 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 
-import us.ihmc.gdx.GDXVRContext.*;
+import us.ihmc.gdx.vr.GDXVRCamera;
+import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRContext.*;
 
 public class HelloVR extends ApplicationAdapter {
 	static final String TAG = "HelloVR";

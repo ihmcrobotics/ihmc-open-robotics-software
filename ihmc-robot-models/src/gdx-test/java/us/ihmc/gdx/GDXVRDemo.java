@@ -1,6 +1,7 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import us.ihmc.gdx.vr.GDXVRApplication;
 
 public class GDXVRDemo
 {

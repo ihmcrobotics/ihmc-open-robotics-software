@@ -9,6 +9,7 @@ import imgui.ImGuiIO;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import us.ihmc.gdx.imgui.ImGuiTools;
 
 import static org.lwjgl.glfw.GLFW.*;
 
