@@ -91,15 +91,31 @@ public class BodyOrientationContinuityCommandTest
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, 2 * 6 + (rhoHelper2.getRhoSize() + rhoHelper1.getRhoSize()) * 4 + 2 * 12);
-      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(6 + rhoHelper1.getRhoSize() * 4, duration1, taskJacobianExpected, 0, 1.0);
-      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(2 * 6 + 2 * rhoHelper1.getRhoSize() * 4 + 12, 0.0, taskJacobianExpected, 0, -1.0);
-
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(indexHandler.getYawCoefficientsStartIndex(0),
+                                                                        indexHandler.getPitchCoefficientsStartIndex(0),
+                                                                        indexHandler.getRollCoefficientsStartIndex(0),
+                                                                        omega,
+                                                                        duration1,
+                                                                        taskJacobianExpected,
+                                                                        0,
+                                                                        1.0);
+      OrientationCoefficientJacobianCalculator.calculateAngularJacobian(indexHandler.getYawCoefficientsStartIndex(1),
+                                                                        indexHandler.getPitchCoefficientsStartIndex(1),
+                                                                        indexHandler.getRollCoefficientsStartIndex(1),
+                                                                        omega,
+                                                                        0.0,
+                                                                        taskJacobianExpected,
+                                                                        0,
+                                                                        -1.0);
 
       int startIndex0 = indexHandler.getOrientationCoefficientsStartIndex(0);
-      valueEndOf1.setX(duration1 * duration1 * duration1 * solution.get(startIndex0, 0) + duration1 * duration1 * solution.get(startIndex0 + 1, 0) + duration1 * solution.get(startIndex0 + 2, 0) + solution.get(startIndex0 + 3));
-      valueEndOf1.setY(duration1 * duration1 * duration1 * solution.get(startIndex0 + 4, 0) + duration1 * duration1 * solution.get(startIndex0 + 5, 0) + duration1 * solution.get(startIndex0 + 6, 0) + solution.get(startIndex0 + 7));
-      valueEndOf1.setZ(duration1 * duration1 * duration1 * solution.get(startIndex0 + 8, 0) + duration1 * duration1 * solution.get(startIndex0 + 9, 0) + duration1 * solution.get(startIndex0 + 10, 0) + solution.get(startIndex0 + 11));
+      valueEndOf1.setX(duration1 * duration1 * duration1 * solution.get(startIndex0, 0) + duration1 * duration1 * solution.get(startIndex0 + 1, 0)
+                       + duration1 * solution.get(startIndex0 + 2, 0) + solution.get(startIndex0 + 3));
+      valueEndOf1.setY(duration1 * duration1 * duration1 * solution.get(startIndex0 + 4, 0) + duration1 * duration1 * solution.get(startIndex0 + 5, 0)
+                       + duration1 * solution.get(startIndex0 + 6, 0) + solution.get(startIndex0 + 7));
+      valueEndOf1.setZ(duration1 * duration1 * duration1 * solution.get(startIndex0 + 8, 0) + duration1 * duration1 * solution.get(startIndex0 + 9, 0)
+                       + duration1 * solution.get(startIndex0 + 10, 0) + solution.get(startIndex0 + 11));
 
       int startIndex1 = indexHandler.getOrientationCoefficientsStartIndex(0);
 
@@ -107,18 +123,14 @@ public class BodyOrientationContinuityCommandTest
       valueStartOf2.setY(solution.get(startIndex1 + 7, 0));
       valueStartOf2.setZ(solution.get(startIndex1 + 11, 0));
 
-
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
       CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
       EuclidCoreTestTools.assertTuple3DEquals(desiredValue, solvedObjectivePositionTuple, 1e-4);
    }
-
-
 }

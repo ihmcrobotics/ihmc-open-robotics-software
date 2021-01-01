@@ -97,9 +97,9 @@ public class TrajectoryHandler
       yCoefficientVector.zero();
       zCoefficientVector.zero();
 
-      yawCoefficientVector.reshape(4 * numberOfPhases, 1);
-      pitchCoefficientVector.reshape(4 * numberOfPhases, 1);
-      rollCoefficientVector.reshape(4 * numberOfPhases, 1);
+      yawCoefficientVector.reshape(MPCIndexHandler.orientationCoefficientsPerSegment * numberOfPhases, 1);
+      pitchCoefficientVector.reshape(MPCIndexHandler.orientationCoefficientsPerSegment * numberOfPhases, 1);
+      rollCoefficientVector.reshape(MPCIndexHandler.orientationCoefficientsPerSegment * numberOfPhases, 1);
       yawCoefficientVector.zero();
       pitchCoefficientVector.zero();
       rollCoefficientVector.zero();
@@ -189,13 +189,14 @@ public class TrajectoryHandler
    }
 
    public void computeOrientation(double timeInPhase,
+                                  double omega,
                                   FixedFrameOrientation3DBasics desiredBodyOrientationToPack,
                                   FixedFrameVector3DBasics desiredBodyAngularVelocityToPack)
    {
       boolean success;
 
       if (isTimeInPlanningWindow(timeInPhase))
-         success = computeOrientationInPlanningWindow(timeInPhase, desiredBodyOrientationToPack, desiredBodyAngularVelocityToPack);
+         success = computeOrientationInPlanningWindow(omega, timeInPhase, desiredBodyOrientationToPack, desiredBodyAngularVelocityToPack);
       else
          success = false;
 
@@ -226,6 +227,8 @@ public class TrajectoryHandler
    private final FramePoint3D secondOrientationCoefficient = new FramePoint3D();
    private final FramePoint3D thirdOrientationCoefficient = new FramePoint3D();
    private final FramePoint3D fourthOrientationCoefficient = new FramePoint3D();
+   private final FramePoint3D fifthOrientationCoefficient = new FramePoint3D();
+   private final FramePoint3D sixthOrientationCoefficient = new FramePoint3D();
 
    private boolean computeInPlanningWindow(double timeInPhase, double omega)
    {
@@ -292,6 +295,16 @@ public class TrajectoryHandler
       fourthOrientationCoefficient.setX(yawCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
       fourthOrientationCoefficient.setY(pitchCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
       fourthOrientationCoefficient.setZ(rollCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
+
+      int fifthOrientationCoefficientIndex = orientationStartIndex + 4;
+      fifthOrientationCoefficient.setX(yawCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+      fifthOrientationCoefficient.setY(pitchCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+      fifthOrientationCoefficient.setZ(rollCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+
+      int sixthOrientationCoefficientIndex = orientationStartIndex + 5;
+      sixthOrientationCoefficient.setX(yawCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+      sixthOrientationCoefficient.setY(pitchCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+      sixthOrientationCoefficient.setZ(rollCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
    }
 
    boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
@@ -330,18 +343,25 @@ public class TrajectoryHandler
                                                     secondOrientationCoefficient,
                                                     thirdOrientationCoefficient,
                                                     fourthOrientationCoefficient,
+                                                    fifthOrientationCoefficient,
+                                                    sixthOrientationCoefficient,
+                                                    omega,
                                                     timeInSegment);
       CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocity,
                                                         firstOrientationCoefficient,
                                                         secondOrientationCoefficient,
                                                         thirdOrientationCoefficient,
                                                         fourthOrientationCoefficient,
+                                                        fifthOrientationCoefficient,
+                                                        sixthOrientationCoefficient,
+                                                        omega,
                                                         timeInSegment);
 
       return true;
    }
 
-   private boolean computeOrientationInPlanningWindow(double timeInPhase,
+   private boolean computeOrientationInPlanningWindow(double omega,
+                                                      double timeInPhase,
                                                       FixedFrameOrientation3DBasics desiredBodyOrientation,
                                                       FixedFrameVector3DBasics desiredBodyAngularVelocity)
    {
@@ -351,10 +371,11 @@ public class TrajectoryHandler
 
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
 
-      return computeOrientationInPlanningWindow(segmentNumber, timeInSegment, desiredBodyOrientation, desiredBodyAngularVelocity);
+      return computeOrientationInPlanningWindow(segmentNumber, omega, timeInSegment, desiredBodyOrientation, desiredBodyAngularVelocity);
    }
 
    boolean computeOrientationInPlanningWindow(int segmentNumber,
+                                              double omega,
                                               double timeInSegment,
                                               FixedFrameOrientation3DBasics desiredBodyOrientationToPack,
                                               FixedFrameVector3DBasics desiredBodyAngularVelocityToPack)
@@ -366,12 +387,18 @@ public class TrajectoryHandler
                                                     secondOrientationCoefficient,
                                                     thirdOrientationCoefficient,
                                                     fourthOrientationCoefficient,
+                                                    fifthOrientationCoefficient,
+                                                    sixthOrientationCoefficient,
+                                                    omega,
                                                     timeInSegment);
       CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocityToPack,
                                                         firstOrientationCoefficient,
                                                         secondOrientationCoefficient,
                                                         thirdOrientationCoefficient,
                                                         fourthOrientationCoefficient,
+                                                        fifthOrientationCoefficient,
+                                                        sixthOrientationCoefficient,
+                                                        omega,
                                                         timeInSegment);
 
       return true;

@@ -52,13 +52,14 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double mu = 0.8;
 
-   private static final double dynamicsCollocationDT = 0.05;
+   private static final double dynamicsCollocationDT = 0.1;
 
    public static final double finalOrientationWeight = 1e3;
+   public static final double initialOrientationWeight = 1e5;
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
-   public static final double orientationTrackingWeight = 1e4;
-   public static final double orientationDynamicsWeight = 1e5;
+   public static final double orientationTrackingWeight = 1e2;
+   public static final double orientationDynamicsWeight = 0.0;
 
    private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
@@ -449,7 +450,8 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(eulerAngles);
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setWeight(initialOrientationWeight);
+      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -465,7 +467,8 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentBodyAngularVelocity);
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setWeight(initialOrientationWeight);
+      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -612,7 +615,7 @@ public class CoMTrajectoryModelPredictiveController
          command.setWeight(orientationDynamicsWeight);
          command.setConstraintType(ConstraintType.OBJECTIVE);
 
-         trajectoryHandler.computeOrientation(segmentStartTime + time, tempOrientation, tempAngularRate);
+         trajectoryHandler.computeOrientation(segmentStartTime + time, omega.getValue(), tempOrientation, tempAngularRate);
          trajectoryHandler.fastComputePosition(segmentStartTime + time, omega.getValue(), tempPoint);
          command.setOrientationEstimate(tempOrientation);
          command.setAngularVelocityEstimate(tempAngularRate);

@@ -23,8 +23,8 @@ public class OrientationDynamicsCommandCalculator
 
    private final DMatrixRMaj inertia = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj tempInertia = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj inertiaInWorld = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj inertiaInWorldInverse = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj inertiaInWorld = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj inertiaInWorldInverse = new DMatrixRMaj(3, 3);
 
    private final MPCIndexHandler indexHandler;
    private final Vector3D contactLocation = new Vector3D();
@@ -88,8 +88,9 @@ public class OrientationDynamicsCommandCalculator
       rotationAccelerationJacobian.reshape(3, problemSize);
       orientationJacobian.reshape(3, problemSize);
       torqueJacobian.reshape(3, problemSize);
+      torqueJacobian.zero();
 
-      computeOrientationJacobians(command.getTimeOfCommand(), command.getSegmentNumber());
+      computeOrientationJacobians(command.getOmega(), command.getTimeOfCommand(), command.getSegmentNumber());
 
       CommonOps_DDRM.mult(rotationMatrixDot, rotationRateJacobian, orientationJacobian);
       CommonOps_DDRM.multAdd(rotationMatrix, rotationAccelerationJacobian, orientationJacobian);
@@ -118,14 +119,19 @@ public class OrientationDynamicsCommandCalculator
       }
    }
 
-   private void computeOrientationJacobians(double time, int segmentId)
+   private void computeOrientationJacobians(double omega, double time, int segmentId)
    {
-      double c0Dot = 3.0 * time * time;
-      double c1Dot = 2.0 * time;
-      double c2Dot = 1.0;
+      double exponential = Math.exp(omega * time);
+      double c0Dot = omega * exponential;
+      double c1Dot = -omega / exponential;
+      double c2Dot = 3.0 * time * time;
+      double c3Dot = 2.0 * time;
+      double c4Dot = 1.0;
 
-      double c0Ddot = 6.0 * time;
-      double c1Ddot = 2.0;
+      double c0Ddot = omega * c0Dot;
+      double c1Ddot = -omega * c1Dot;
+      double c2Ddot = 6.0 * time;
+      double c3Ddot = 2.0;
 
       int rollStartIndex = indexHandler.getRollCoefficientsStartIndex(segmentId);
       int pitchStartIndex = indexHandler.getPitchCoefficientsStartIndex(segmentId);
@@ -136,23 +142,35 @@ public class OrientationDynamicsCommandCalculator
       rotationRateJacobian.set(0, rollStartIndex, c0Dot);
       rotationRateJacobian.set(0, rollStartIndex + 1, c1Dot);
       rotationRateJacobian.set(0, rollStartIndex + 2, c2Dot);
+      rotationRateJacobian.set(0, rollStartIndex + 3, c3Dot);
+      rotationRateJacobian.set(0, rollStartIndex + 4, c4Dot);
 
       rotationRateJacobian.set(1, pitchStartIndex, c0Dot);
       rotationRateJacobian.set(1, pitchStartIndex + 1, c1Dot);
       rotationRateJacobian.set(1, pitchStartIndex + 2, c2Dot);
+      rotationRateJacobian.set(1, pitchStartIndex + 3, c3Dot);
+      rotationRateJacobian.set(1, pitchStartIndex + 4, c4Dot);
 
       rotationRateJacobian.set(2, yawStartIndex, c0Dot);
       rotationRateJacobian.set(2, yawStartIndex + 1, c1Dot);
       rotationRateJacobian.set(2, yawStartIndex + 2, c2Dot);
+      rotationRateJacobian.set(2, yawStartIndex + 3, c3Dot);
+      rotationRateJacobian.set(2, yawStartIndex + 4, c4Dot);
 
       rotationAccelerationJacobian.set(0, rollStartIndex, c0Ddot);
       rotationAccelerationJacobian.set(0, rollStartIndex + 1, c1Ddot);
+      rotationAccelerationJacobian.set(0, rollStartIndex + 2, c2Ddot);
+      rotationAccelerationJacobian.set(0, rollStartIndex + 3, c3Ddot);
 
       rotationAccelerationJacobian.set(1, pitchStartIndex, c0Ddot);
       rotationAccelerationJacobian.set(1, pitchStartIndex + 1, c1Ddot);
+      rotationAccelerationJacobian.set(1, pitchStartIndex + 2, c2Ddot);
+      rotationAccelerationJacobian.set(1, pitchStartIndex + 3, c3Ddot);
 
       rotationAccelerationJacobian.set(2, yawStartIndex, c0Ddot);
       rotationAccelerationJacobian.set(2, yawStartIndex + 1, c1Ddot);
+      rotationAccelerationJacobian.set(2, yawStartIndex + 2, c2Ddot);
+      rotationAccelerationJacobian.set(2, yawStartIndex + 3, c3Ddot);
    }
 
    private void computeInertiaInWorld(SpatialInertiaReadOnly spatialInertia)
@@ -164,7 +182,7 @@ public class OrientationDynamicsCommandCalculator
       MatrixMissingTools.fast3x3Inverse(inertiaInWorld, inertiaInWorldInverse);
    }
 
-   private static void convertToSkewSymmetric(Tuple3DReadOnly tuple, DMatrixRMaj skewMatrix)
+   static void convertToSkewSymmetric(Tuple3DReadOnly tuple, DMatrixRMaj skewMatrix)
    {
       skewMatrix.set(0, 1, -tuple.getZ());
       skewMatrix.set(1, 0, tuple.getZ());

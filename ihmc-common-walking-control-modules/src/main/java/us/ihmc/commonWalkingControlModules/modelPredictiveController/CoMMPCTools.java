@@ -166,19 +166,23 @@ public class CoMMPCTools
                                                         FramePoint3DReadOnly secondCoefficient,
                                                         FramePoint3DReadOnly thirdCoefficient,
                                                         FramePoint3DReadOnly fourthCoefficient,
+                                                        FramePoint3DReadOnly fifthCoefficient,
+                                                        FramePoint3DReadOnly sixthCoefficient,
+                                                        double omega,
                                                         double timeInPhase)
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
 
+      double exponential = Math.exp(omega * timeInPhase);
       double t2 = timeInPhase * timeInPhase;
       double t3 = timeInPhase * t2;
 
       orientationToPack.checkReferenceFrameMatch(worldFrame);
       orientationToPack.setToZero();
 
-      double yaw = t3 * firstCoefficient.getX() + t2 * secondCoefficient.getX() + timeInPhase * thirdCoefficient.getX() + fourthCoefficient.getX();
-      double pitch = t3 * firstCoefficient.getY() + t2 * secondCoefficient.getY() + timeInPhase * thirdCoefficient.getY() + fourthCoefficient.getY();
-      double roll = t3 * firstCoefficient.getZ() + t2 * secondCoefficient.getZ() + timeInPhase * thirdCoefficient.getZ() + fourthCoefficient.getZ();
+      double roll = exponential * firstCoefficient.getX() + secondCoefficient.getX() / exponential + t3 * thirdCoefficient.getX() + t2 * fourthCoefficient.getX() + timeInPhase * fifthCoefficient.getX() + sixthCoefficient.getX();
+      double pitch = exponential * firstCoefficient.getY() + secondCoefficient.getY() / exponential + t3 * thirdCoefficient.getY() + t2 * fourthCoefficient.getY() + timeInPhase * fifthCoefficient.getY() + sixthCoefficient.getY();
+      double yaw = exponential * firstCoefficient.getZ() + secondCoefficient.getZ() / exponential + t3 * thirdCoefficient.getZ() + t2 * fourthCoefficient.getZ() + timeInPhase * fifthCoefficient.getZ() + sixthCoefficient.getZ();
 
       orientationToPack.setYawPitchRoll(yaw, pitch, roll);
    }
@@ -188,18 +192,24 @@ public class CoMMPCTools
                                                             FramePoint3DReadOnly secondCoefficient,
                                                             FramePoint3DReadOnly thirdCoefficient,
                                                             FramePoint3DReadOnly fourthCoefficient,
+                                                            FramePoint3DReadOnly fifthCoefficient,
+                                                            FramePoint3DReadOnly sixthCoefficient,
+                                                            double omega,
                                                             double timeInPhase)
    {
       timeInPhase = Math.min(timeInPhase, sufficientlyLongTime);
 
+      double exponential = Math.exp(omega * timeInPhase);
       double c0 = 3.0 * timeInPhase * timeInPhase;
       double c1 = 2.0 * timeInPhase;
 
       angularRateToPack.checkReferenceFrameMatch(worldFrame);
       angularRateToPack.setToZero();
 
-      angularRateToPack.scaleAdd(c0, firstCoefficient);
-      angularRateToPack.scaleAdd(c1, secondCoefficient);
-      angularRateToPack.add(thirdCoefficient);
+      angularRateToPack.scaleAdd(omega * exponential, firstCoefficient);
+      angularRateToPack.scaleAdd(-omega / exponential, secondCoefficient);
+      angularRateToPack.scaleAdd(c0, thirdCoefficient);
+      angularRateToPack.scaleAdd(c1, fourthCoefficient);
+      angularRateToPack.add(fifthCoefficient);
    }
 }
