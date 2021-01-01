@@ -5,9 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyAngularVelocityContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyOrientationContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,12 +14,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-public class BodyOrientationContinuityCommandTest
+public class BodyAngularVelocityContinuityCommandTest
 {
    @Test
    public void testCommandOptimize()
@@ -61,7 +57,7 @@ public class BodyOrientationContinuityCommandTest
 
       double duration1 = 0.7;
 
-      BodyOrientationContinuityCommand command = new BodyOrientationContinuityCommand();
+      BodyAngularVelocityContinuityCommand command = new BodyAngularVelocityContinuityCommand();
       command.setFirstSegmentDuration(duration1);
       command.setFirstSegmentNumber(0);
       command.setOmega(omega);
@@ -100,7 +96,7 @@ public class BodyOrientationContinuityCommandTest
                                                                         omega,
                                                                         duration1,
                                                                         taskJacobianExpected,
-                                                                        0,
+                                                                        1,
                                                                         1.0);
       OrientationCoefficientJacobianCalculator.calculateAngularJacobian(indexHandler.getYawCoefficientsStartIndex(1),
                                                                         indexHandler.getPitchCoefficientsStartIndex(1),
@@ -108,7 +104,7 @@ public class BodyOrientationContinuityCommandTest
                                                                         omega,
                                                                         0.0,
                                                                         taskJacobianExpected,
-                                                                        0,
+                                                                        1,
                                                                         -1.0);
 
       int yawStartIndex0 = indexHandler.getYawCoefficientsStartIndex(0);
@@ -116,20 +112,20 @@ public class BodyOrientationContinuityCommandTest
       int rollStartIndex0 = indexHandler.getRollCoefficientsStartIndex(0);
       if (MPCIndexHandler.includeExponentialInOrientation)
       {
-         valueEndOf1.setX(Math.exp(omega * duration1) * solution.get(rollStartIndex0, 0) + Math.exp(-omega * duration1) * solution.get(rollStartIndex0 + 1, 0));
-         valueEndOf1.setY(Math.exp(omega * duration1) * solution.get(pitchStartIndex0, 0) + Math.exp(-omega * duration1) * solution.get(pitchStartIndex0 + 1, 0));
-         valueEndOf1.setZ(Math.exp(omega * duration1) * solution.get(yawStartIndex0, 0) + Math.exp(-omega * duration1) * solution.get(yawStartIndex0 + 1, 0));
+         valueEndOf1.setX(omega * Math.exp(omega * duration1) * solution.get(rollStartIndex0, 0) - omega * Math.exp(-omega * duration1) * solution.get(rollStartIndex0 + 1, 0));
+         valueEndOf1.setY(omega * Math.exp(omega * duration1) * solution.get(pitchStartIndex0, 0) - omega * Math.exp(-omega * duration1) * solution.get(pitchStartIndex0 + 1, 0));
+         valueEndOf1.setZ(omega * Math.exp(omega * duration1) * solution.get(yawStartIndex0, 0) - omega * Math.exp(-omega * duration1) * solution.get(yawStartIndex0 + 1, 0));
 
          yawStartIndex0 += 2;
          pitchStartIndex0 += 2;
          rollStartIndex0 += 2;
       }
-      valueEndOf1.addX(duration1 * duration1 * duration1 * solution.get(rollStartIndex0, 0) + duration1 * duration1 * solution.get(rollStartIndex0 + 1, 0)
-                       + duration1 * solution.get(rollStartIndex0 + 2, 0) + solution.get(rollStartIndex0 + 3));
-      valueEndOf1.addY(duration1 * duration1 * duration1 * solution.get(pitchStartIndex0, 0) + duration1 * duration1 * solution.get(pitchStartIndex0 + 1, 0)
-                       + duration1 * solution.get(pitchStartIndex0 + 2, 0) + solution.get(pitchStartIndex0 + 3));
-      valueEndOf1.addZ(duration1 * duration1 * duration1 * solution.get(yawStartIndex0, 0) + duration1 * duration1 * solution.get(yawStartIndex0 + 1, 0)
-                       + duration1 * solution.get(yawStartIndex0 + 2, 0) + solution.get(yawStartIndex0 + 3));
+      valueEndOf1.addX(3.0 * duration1 * duration1 * solution.get(rollStartIndex0, 0) + 2.0 * duration1 * solution.get(rollStartIndex0 + 1, 0)
+                       + solution.get(rollStartIndex0 + 2, 0));
+      valueEndOf1.addY(3.0 * duration1 * duration1 * solution.get(pitchStartIndex0, 0) + duration1 * duration1 * solution.get(pitchStartIndex0 + 1, 0)
+                       + solution.get(pitchStartIndex0 + 2, 0));
+      valueEndOf1.addZ(3.0 * duration1 * duration1 * solution.get(yawStartIndex0, 0) + 2.0 * duration1 * solution.get(yawStartIndex0 + 1, 0)
+                       + solution.get(yawStartIndex0 + 2, 0));
 
       int yawStartIndex1 = indexHandler.getYawCoefficientsStartIndex(0);
       int pitchStartIndex1 = indexHandler.getPitchCoefficientsStartIndex(0);
@@ -137,22 +133,18 @@ public class BodyOrientationContinuityCommandTest
 
       if (MPCIndexHandler.includeExponentialInOrientation)
       {
-         valueStartOf2.setX(solution.get(rollStartIndex1, 0) + solution.get(rollStartIndex1 + 1));
-         valueStartOf2.setY(solution.get(pitchStartIndex1, 0) + solution.get(pitchStartIndex1 + 1));
-         valueStartOf2.setZ(solution.get(yawStartIndex1, 0) + solution.get(yawStartIndex1 + 1));
+         valueStartOf2.setX(omega * solution.get(rollStartIndex1, 0) - omega * solution.get(rollStartIndex1 + 1));
+         valueStartOf2.setY(omega * solution.get(pitchStartIndex1, 0) - omega * solution.get(pitchStartIndex1 + 1));
+         valueStartOf2.setZ(omega * solution.get(yawStartIndex1, 0) - omega * solution.get(yawStartIndex1 + 1));
 
          yawStartIndex1 += 2;
          pitchStartIndex1 += 2;
          rollStartIndex1 += 2;
       }
-      valueStartOf2.addX(solution.get(rollStartIndex1 + 3, 0));
-      valueStartOf2.setY(solution.get(pitchStartIndex1 + 3, 0));
-      valueStartOf2.setZ(solution.get(yawStartIndex1 + 3, 0));
+      valueStartOf2.addX(solution.get(rollStartIndex1 + 2, 0));
+      valueStartOf2.setY(solution.get(pitchStartIndex1 + 2, 0));
+      valueStartOf2.setZ(solution.get(yawStartIndex1 + 2, 0));
 
-      for (int i = 0; i < indexHandler.getTotalProblemSize(); i++)
-      {
-         assertTrue(solver.solverInput_H.get(i, i) > 0.0);
-      }
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 

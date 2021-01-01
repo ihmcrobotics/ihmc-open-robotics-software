@@ -4,7 +4,7 @@ public class BodyAngularVelocityContinuityCommand extends MPCContinuityCommand
 {
    public int getDerivativeOrder()
    {
-      return 0;
+      return 1;
    }
 
    public MPCValueType getValueType()

@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class CubicTrackingCommandTest
+public class AngleTrackingCommandTest
 {
    @Test
    public void testCommandOptimize()
@@ -17,6 +17,7 @@ public class CubicTrackingCommandTest
       double gravityZ = -9.81;
       double mass = 1.5;
       double dt = 1e-3;
+      double omega = 3.0;
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
@@ -42,6 +43,7 @@ public class CubicTrackingCommandTest
       command.setDuration(duration);
       command.setStartIndex(startIndex);
       command.setWeight(100.0);
+      command.setOmega(omega);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -68,15 +70,27 @@ public class CubicTrackingCommandTest
 
       for (double time = 0.0; time <= duration; time += 0.001)
       {
-         double assembledValue = solution.get(startIndex, 0) * MathTools.pow(time, 3);
+         double assembledValue = 0.0;
+         double assembledRate = 0.0;
+         if (MPCIndexHandler.includeExponentialInOrientation)
+         {
+            assembledValue += solution.get(startIndex, 0) * Math.exp(omega * time);
+            assembledValue += solution.get(startIndex + 1, 0) * Math.exp(-omega * time);
+
+            assembledRate += solution.get(startIndex, 0) * omega * Math.exp(omega * time);
+            assembledRate += solution.get(startIndex + 1, 0) * -omega * Math.exp(-omega * time);
+
+            startIndex += 2;
+         }
+         assembledValue += solution.get(startIndex, 0) * MathTools.pow(time, 3);
          assembledValue += solution.get(startIndex + 1, 0) * MathTools.pow(time, 2);
          assembledValue += solution.get(startIndex + 2, 0) * MathTools.pow(time, 1);
          assembledValue += solution.get(startIndex + 3, 0);
 
-         double assembledRate = solution.get(startIndex, 0) * 3.0 * MathTools.pow(time, 2);
+
+         assembledRate += solution.get(startIndex, 0) * 3.0 * MathTools.pow(time, 2);
          assembledRate += solution.get(startIndex + 1, 0) * 2.0 * time;
          assembledRate += solution.get(startIndex + 2, 0);
-
 
          double expectedValue = a0 * Math.pow(time, 3) + a1 * time * time + a2 * time + a3;
          double expectedRate = a0 * 3.0 * Math.pow(time, 2) + a1 * 2.0 *  time + a2;

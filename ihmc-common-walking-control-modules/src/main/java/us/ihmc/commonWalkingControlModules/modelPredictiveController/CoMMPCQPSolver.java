@@ -255,15 +255,22 @@ public class CoMMPCQPSolver
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
             solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
 
-         start = indexHandler.getYawCoefficientsStartIndex(segmentId);
-         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
-         start = indexHandler.getPitchCoefficientsStartIndex(segmentId);
-         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
-         start = indexHandler.getRollCoefficientsStartIndex(segmentId);
-         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
+         boolean regularizeOrientation = MPCIndexHandler.includeOrientation;
+         if (regularizeOrientation)
+         {
+            start = indexHandler.getYawCoefficientsStartIndex(segmentId);
+            int end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
+            for (int i = start; i < end; i++)
+               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
+            start = indexHandler.getPitchCoefficientsStartIndex(segmentId);
+            end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
+            for (int i = start; i < end; i++)
+               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
+            start = indexHandler.getRollCoefficientsStartIndex(segmentId);
+            end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
+            for (int i = start; i < end; i++)
+               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
+         }
       }
    }
 
@@ -422,6 +429,8 @@ public class CoMMPCQPSolver
 
       // Compute: H += J^T W J
       MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, 0, 0);
+      if (MatrixTools.containsNaN(solverInput_H))
+         throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, 0, 0);
@@ -518,6 +527,8 @@ public class CoMMPCQPSolver
          throw new IllegalArgumentException("Not yet implemented.");
 
       CommonOps_DDRM.addEquals(solverInput_H, input.getWeightScalar(), input.directCostHessian);
+      if (MatrixTools.containsNaN(solverInput_H))
+         throw new RuntimeException("error");
       CommonOps_DDRM.addEquals(solverInput_f, input.getWeightScalar(), input.directCostGradient);
    }
 
