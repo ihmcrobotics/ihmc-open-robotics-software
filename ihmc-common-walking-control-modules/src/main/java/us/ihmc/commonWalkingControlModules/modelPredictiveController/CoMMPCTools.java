@@ -180,9 +180,22 @@ public class CoMMPCTools
       orientationToPack.checkReferenceFrameMatch(worldFrame);
       orientationToPack.setToZero();
 
-      double roll = exponential * firstCoefficient.getX() + secondCoefficient.getX() / exponential + t3 * thirdCoefficient.getX() + t2 * fourthCoefficient.getX() + timeInPhase * fifthCoefficient.getX() + sixthCoefficient.getX();
-      double pitch = exponential * firstCoefficient.getY() + secondCoefficient.getY() / exponential + t3 * thirdCoefficient.getY() + t2 * fourthCoefficient.getY() + timeInPhase * fifthCoefficient.getY() + sixthCoefficient.getY();
-      double yaw = exponential * firstCoefficient.getZ() + secondCoefficient.getZ() / exponential + t3 * thirdCoefficient.getZ() + t2 * fourthCoefficient.getZ() + timeInPhase * fifthCoefficient.getZ() + sixthCoefficient.getZ();
+      double roll, pitch, yaw;
+      if (MPCIndexHandler.includeExponentialInOrientation)
+      {
+         roll = exponential * firstCoefficient.getX() + secondCoefficient.getX() / exponential + t3 * thirdCoefficient.getX() + t2 * fourthCoefficient.getX()
+                + timeInPhase * fifthCoefficient.getX() + sixthCoefficient.getX();
+         pitch = exponential * firstCoefficient.getY() + secondCoefficient.getY() / exponential + t3 * thirdCoefficient.getY() + t2 * fourthCoefficient.getY()
+                 + timeInPhase * fifthCoefficient.getY() + sixthCoefficient.getY();
+         yaw = exponential * firstCoefficient.getZ() + secondCoefficient.getZ() / exponential + t3 * thirdCoefficient.getZ() + t2 * fourthCoefficient.getZ()
+               + timeInPhase * fifthCoefficient.getZ() + sixthCoefficient.getZ();
+      }
+      else
+      {
+         roll = t3 * firstCoefficient.getX() + t2 * secondCoefficient.getX() + timeInPhase * thirdCoefficient.getX() + fourthCoefficient.getX();
+         pitch = t3 * firstCoefficient.getY() + t2 * secondCoefficient.getY() + timeInPhase * thirdCoefficient.getY() + fourthCoefficient.getY();
+         yaw = t3 * firstCoefficient.getZ() + t2 * secondCoefficient.getZ() + timeInPhase * thirdCoefficient.getZ() + fourthCoefficient.getZ();
+      }
 
       orientationToPack.setYawPitchRoll(yaw, pitch, roll);
    }
@@ -206,10 +219,19 @@ public class CoMMPCTools
       angularRateToPack.checkReferenceFrameMatch(worldFrame);
       angularRateToPack.setToZero();
 
-      angularRateToPack.scaleAdd(omega * exponential, firstCoefficient);
-      angularRateToPack.scaleAdd(-omega / exponential, secondCoefficient);
-      angularRateToPack.scaleAdd(c0, thirdCoefficient);
-      angularRateToPack.scaleAdd(c1, fourthCoefficient);
-      angularRateToPack.add(fifthCoefficient);
+      if (MPCIndexHandler.includeExponentialInOrientation)
+      {
+         angularRateToPack.scaleAdd(omega * exponential, firstCoefficient);
+         angularRateToPack.scaleAdd(-omega / exponential, secondCoefficient);
+         angularRateToPack.scaleAdd(c0, thirdCoefficient);
+         angularRateToPack.scaleAdd(c1, fourthCoefficient);
+         angularRateToPack.add(fifthCoefficient);
+      }
+      else
+      {
+         angularRateToPack.scaleAdd(c0, firstCoefficient);
+         angularRateToPack.scaleAdd(c1, secondCoefficient);
+         angularRateToPack.add(thirdCoefficient);
+      }
    }
 }

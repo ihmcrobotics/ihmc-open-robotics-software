@@ -20,6 +20,7 @@ public class OrientationTrackingCommandTest
       double gravityZ = -9.81;
       double mass = 1.5;
       double dt = 1e-3;
+      double omega = 3.0;
 
       MPCIndexHandler indexHandler = new MPCIndexHandler(4);
       CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
@@ -54,9 +55,6 @@ public class OrientationTrackingCommandTest
 
       double duration = 0.7;
 
-      int startYawIndex = indexHandler.getYawCoefficientsStartIndex(0);
-      int startPitchIndex = indexHandler.getPitchCoefficientsStartIndex(0);
-      int startRollIndex = indexHandler.getRollCoefficientsStartIndex(0);
 
       OrientationTrackingCommand command = new OrientationTrackingCommand();
       command.setStartOrientation(startOrientation);
@@ -66,6 +64,7 @@ public class OrientationTrackingCommandTest
       command.setSegmentDuration(duration);
       command.setSegmentNumber(0, indexHandler);
       command.setWeight(100.0);
+      command.setOmega(omega);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -96,17 +95,39 @@ public class OrientationTrackingCommandTest
 
       for (double time = 0.0; time <= duration; time += 0.001)
       {
-         double assembledYawValue = solution.get(startYawIndex, 0) * MathTools.pow(time, 3);
+
+         int startYawIndex = indexHandler.getYawCoefficientsStartIndex(0);
+         int startPitchIndex = indexHandler.getPitchCoefficientsStartIndex(0);
+         int startRollIndex = indexHandler.getRollCoefficientsStartIndex(0);
+
+         double assembledYawValue = 0.0, assembledPitchValue = 0.0, assembledRollValue = 0.0;
+         if (MPCIndexHandler.includeExponentialInOrientation)
+         {
+            assembledYawValue = solution.get(startYawIndex, 0) * Math.exp(omega * time);
+            assembledYawValue += solution.get(startYawIndex + 1, 0) * Math.exp(-omega * time);
+
+            assembledPitchValue = solution.get(startPitchIndex, 0) * Math.exp(omega * time);
+            assembledPitchValue += solution.get(startPitchIndex + 1, 0) * Math.exp(-omega * time);
+
+            assembledRollValue = solution.get(startRollIndex, 0) * Math.exp(omega * time);
+            assembledRollValue += solution.get(startRollIndex + 1, 0) * Math.exp(-omega * time);
+
+            startYawIndex += 2;
+            startRollIndex += 2;
+            startPitchIndex += 2;
+         }
+
+         assembledYawValue += solution.get(startYawIndex, 0) * MathTools.pow(time, 3);
          assembledYawValue += solution.get(startYawIndex + 1, 0) * MathTools.pow(time, 2);
          assembledYawValue += solution.get(startYawIndex + 2, 0) * MathTools.pow(time, 1);
          assembledYawValue += solution.get(startYawIndex + 3, 0);
 
-         double assembledPitchValue = solution.get(startPitchIndex, 0) * MathTools.pow(time, 3);
+         assembledPitchValue += solution.get(startPitchIndex, 0) * MathTools.pow(time, 3);
          assembledPitchValue += solution.get(startPitchIndex + 1, 0) * MathTools.pow(time, 2);
          assembledPitchValue += solution.get(startPitchIndex + 2, 0) * MathTools.pow(time, 1);
          assembledPitchValue += solution.get(startPitchIndex + 3, 0);
 
-         double assembledRollValue = solution.get(startRollIndex, 0) * MathTools.pow(time, 3);
+         assembledRollValue += solution.get(startRollIndex, 0) * MathTools.pow(time, 3);
          assembledRollValue += solution.get(startRollIndex + 1, 0) * MathTools.pow(time, 2);
          assembledRollValue += solution.get(startRollIndex + 2, 0) * MathTools.pow(time, 1);
          assembledRollValue += solution.get(startRollIndex + 3, 0);

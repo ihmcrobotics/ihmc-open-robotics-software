@@ -7,9 +7,11 @@ import java.util.function.IntUnaryOperator;
 
 public class MPCIndexHandler
 {
+   public static final boolean includeOrientation = true;
+   public static final boolean includeExponentialInOrientation = false;
    public static final int coefficientsPerRho = 4;
    public static final int comCoefficientsPerSegment = 6;
-   public static final int orientationCoefficientsPerSegment = 6;
+   public static final int orientationCoefficientsPerSegment = includeExponentialInOrientation ? 6 : 4;
 
    private int totalProblemSize = 0;
 
@@ -50,8 +52,11 @@ public class MPCIndexHandler
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
 
-         orientationStartIndices.add(totalProblemSize);
-         totalProblemSize += 3 * orientationCoefficientsPerSegment;
+         if (includeOrientation)
+         {
+            orientationStartIndices.add(totalProblemSize);
+            totalProblemSize += 3 * orientationCoefficientsPerSegment;
+         }
       }
    }
 

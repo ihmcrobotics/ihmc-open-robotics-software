@@ -59,7 +59,7 @@ public class CoMTrajectoryModelPredictiveController
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
    public static final double orientationTrackingWeight = 1e2;
-   public static final double orientationDynamicsWeight = 0.0;
+   public static final double orientationDynamicsWeight = 1e-8;
 
    private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
@@ -214,10 +214,14 @@ public class CoMTrajectoryModelPredictiveController
 
       comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPosition());
       comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocity());
-      bodyOrientationAtEndOfWindow.set(trajectoryHandler.getDesiredBodyOrientation());
-      bodyAngularVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredBodyAngularVelocity());
       dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
       vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPosition());
+
+      if (MPCIndexHandler.includeOrientation)
+      {
+         bodyOrientationAtEndOfWindow.set(trajectoryHandler.getDesiredBodyOrientation());
+         bodyAngularVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredBodyAngularVelocity());
+      }
 
       if (previewWindowCalculator.activeSegmentChanged())
       {
@@ -287,23 +291,27 @@ public class CoMTrajectoryModelPredictiveController
       vrpTrackingCostToGo2.setToNaN();
 
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
-      mpcCommands.addCommand(computeInitialBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand()));
       if (includeVelocityObjective)
       {
          mpcCommands.addCommand(computeInitialCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand()));
-         mpcCommands.addCommand(computeInitialBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand()));
       }
       double initialDuration = contactSequence.get(0).getTimeInterval().getDuration();
-      mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
-                                                                 0,
-                                                                 initialDuration,
-                                                                 contactSequence.get(0).getTimeInterval().getStartTime(),
-                                                                 orientationTrackingConsumer0));
-      mpcCommands.addCommand(computeOrientationDynamicsObjective(0, initialDuration, contactSequence.get(0).getTimeInterval().getStartTime()));
+      if (MPCIndexHandler.includeOrientation)
+      {
+         mpcCommands.addCommand(computeInitialBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand()));
+         if (includeVelocityObjective)
+            mpcCommands.addCommand(computeInitialBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand()));
+
+         mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
+                                                                    0,
+                                                                    initialDuration,
+                                                                    contactSequence.get(0).getTimeInterval().getStartTime(),
+                                                                    orientationTrackingConsumer0));
+         mpcCommands.addCommand(computeOrientationDynamicsObjective(0, initialDuration, contactSequence.get(0).getTimeInterval().getStartTime()));
+      }
 
       if (contactSequence.get(0).getContactState().isLoadBearing())
       {
-
          mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
                                                             startVRPPositions.get(0),
                                                             endVRPPositions.get(0),
@@ -324,8 +332,11 @@ public class CoMTrajectoryModelPredictiveController
 
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComPositionContinuityCommand(), transition, firstSegmentDuration));
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComVelocityContinuityCommand(), transition, firstSegmentDuration));
-         mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyOrientationContinuityCommand(), transition, firstSegmentDuration));
-//         mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyAngularVelocityContinuityCommand(), transition, firstSegmentDuration));
+         if (MPCIndexHandler.includeOrientation)
+         {
+            mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyOrientationContinuityCommand(), transition, firstSegmentDuration));
+            mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyAngularVelocityContinuityCommand(), transition, firstSegmentDuration));
+         }
 
          if (contactSequence.get(transition).getContactState().isLoadBearing() && contactSequence.get(nextSequence).getContactState().isLoadBearing())
             mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), transition, firstSegmentDuration));
@@ -339,19 +350,22 @@ public class CoMTrajectoryModelPredictiveController
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
-         DoubleConsumer orientationCostToGoConsumer = null;
-         if (nextSequence == 1)
-            orientationCostToGoConsumer = orientationTrackingConsumer1;
-         else if (nextSequence == 2)
-            orientationCostToGoConsumer = orientationTrackingConsumer2;
-         mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
-                                                                    nextSequence,
-                                                                    nextDuration,
-                                                                    contactSequence.get(nextSequence).getTimeInterval().getStartTime(),
-                                                                    orientationCostToGoConsumer));
-         mpcCommands.addCommand(computeOrientationDynamicsObjective(nextSequence,
-                                                                    nextDuration,
-                                                                    contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
+         if (MPCIndexHandler.includeOrientation)
+         {
+            DoubleConsumer orientationCostToGoConsumer = null;
+            if (nextSequence == 1)
+               orientationCostToGoConsumer = orientationTrackingConsumer1;
+            else if (nextSequence == 2)
+               orientationCostToGoConsumer = orientationTrackingConsumer2;
+            mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
+                                                                       nextSequence,
+                                                                       nextDuration,
+                                                                       contactSequence.get(nextSequence).getTimeInterval().getStartTime(),
+                                                                       orientationCostToGoConsumer));
+            mpcCommands.addCommand(computeOrientationDynamicsObjective(nextSequence,
+                                                                       nextDuration,
+                                                                       contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
+         }
 
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
@@ -384,18 +398,21 @@ public class CoMTrajectoryModelPredictiveController
                                                          comVelocityAtEndOfWindow,
                                                          numberOfPhases - 1,
                                                          finalDuration));
-      mpcCommands.addCommand(computeBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand(),
-                                                             bodyOrientationAtEndOfWindow,
-                                                             numberOfPhases - 1,
-                                                             finalDuration,
-                                                             finalOrientationWeight,
-                                                             ConstraintType.OBJECTIVE));
-      mpcCommands.addCommand(computeBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand(),
-                                                             bodyAngularVelocityAtEndOfWindow,
-                                                             numberOfPhases - 1,
-                                                             finalDuration,
-                                                             finalOrientationWeight,
-                                                             ConstraintType.OBJECTIVE));
+      if (MPCIndexHandler.includeOrientation)
+      {
+         mpcCommands.addCommand(computeBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand(),
+                                                                bodyOrientationAtEndOfWindow,
+                                                                numberOfPhases - 1,
+                                                                finalDuration,
+                                                                finalOrientationWeight,
+                                                                ConstraintType.OBJECTIVE));
+         mpcCommands.addCommand(computeBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand(),
+                                                                    bodyAngularVelocityAtEndOfWindow,
+                                                                    numberOfPhases - 1,
+                                                                    finalDuration,
+                                                                    finalOrientationWeight,
+                                                                    ConstraintType.OBJECTIVE));
+      }
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
       if (includeRhoMinInequality)
@@ -584,6 +601,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setWeight(orientationTrackingWeight);
       objectiveToPack.setSegmentNumber(segmentNumber, indexHandler);
       objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setOmega(omega.getValue());
 
       trajectoryHandler.computeReferenceOrientations(segmentStartTime, tempOrientation, tempAngularRate);
       objectiveToPack.setStartOrientation(tempOrientation);

@@ -88,6 +88,10 @@ public class OrientationDynamicsCommandCalculator
       rotationAccelerationJacobian.reshape(3, problemSize);
       orientationJacobian.reshape(3, problemSize);
       torqueJacobian.reshape(3, problemSize);
+
+      rotationRateJacobian.zero();
+      rotationAccelerationJacobian.zero();
+      orientationJacobian.zero();
       torqueJacobian.zero();
 
       computeOrientationJacobians(command.getOmega(), command.getTimeOfCommand(), command.getSegmentNumber());
@@ -106,7 +110,7 @@ public class OrientationDynamicsCommandCalculator
          for (int contactPointIdx = 0; contactPointIdx < planeHelper.getNumberOfContactPoints(); contactPointIdx++)
          {
             ContactPointHelper contactPoint = planeHelper.getContactPointHelper(contactPointIdx);
-            contactLocation.sub(command.getComPositionEstimate(), contactPoint.getBasisVectorOrigin());
+            contactLocation.sub(contactPoint.getBasisVectorOrigin(), command.getComPositionEstimate());
             convertToSkewSymmetric(contactLocation, contactLocationSkew);
 
             contactPointTorqueJacobian.reshape(3, contactPoint.getCoefficientsSize());
@@ -121,56 +125,12 @@ public class OrientationDynamicsCommandCalculator
 
    private void computeOrientationJacobians(double omega, double time, int segmentId)
    {
-      double exponential = Math.exp(omega * time);
-      double c0Dot = omega * exponential;
-      double c1Dot = -omega / exponential;
-      double c2Dot = 3.0 * time * time;
-      double c3Dot = 2.0 * time;
-      double c4Dot = 1.0;
-
-      double c0Ddot = omega * c0Dot;
-      double c1Ddot = -omega * c1Dot;
-      double c2Ddot = 6.0 * time;
-      double c3Ddot = 2.0;
-
       int rollStartIndex = indexHandler.getRollCoefficientsStartIndex(segmentId);
       int pitchStartIndex = indexHandler.getPitchCoefficientsStartIndex(segmentId);
       int yawStartIndex = indexHandler.getYawCoefficientsStartIndex(segmentId);
 
-//      OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(rollStartIndex, time, rotationRateJacobian, 1.0);
-//      OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(rollStartIndex, time, rotationAccelerationJacobian, 1.0);
-      rotationRateJacobian.set(0, rollStartIndex, c0Dot);
-      rotationRateJacobian.set(0, rollStartIndex + 1, c1Dot);
-      rotationRateJacobian.set(0, rollStartIndex + 2, c2Dot);
-      rotationRateJacobian.set(0, rollStartIndex + 3, c3Dot);
-      rotationRateJacobian.set(0, rollStartIndex + 4, c4Dot);
-
-      rotationRateJacobian.set(1, pitchStartIndex, c0Dot);
-      rotationRateJacobian.set(1, pitchStartIndex + 1, c1Dot);
-      rotationRateJacobian.set(1, pitchStartIndex + 2, c2Dot);
-      rotationRateJacobian.set(1, pitchStartIndex + 3, c3Dot);
-      rotationRateJacobian.set(1, pitchStartIndex + 4, c4Dot);
-
-      rotationRateJacobian.set(2, yawStartIndex, c0Dot);
-      rotationRateJacobian.set(2, yawStartIndex + 1, c1Dot);
-      rotationRateJacobian.set(2, yawStartIndex + 2, c2Dot);
-      rotationRateJacobian.set(2, yawStartIndex + 3, c3Dot);
-      rotationRateJacobian.set(2, yawStartIndex + 4, c4Dot);
-
-      rotationAccelerationJacobian.set(0, rollStartIndex, c0Ddot);
-      rotationAccelerationJacobian.set(0, rollStartIndex + 1, c1Ddot);
-      rotationAccelerationJacobian.set(0, rollStartIndex + 2, c2Ddot);
-      rotationAccelerationJacobian.set(0, rollStartIndex + 3, c3Ddot);
-
-      rotationAccelerationJacobian.set(1, pitchStartIndex, c0Ddot);
-      rotationAccelerationJacobian.set(1, pitchStartIndex + 1, c1Ddot);
-      rotationAccelerationJacobian.set(1, pitchStartIndex + 2, c2Ddot);
-      rotationAccelerationJacobian.set(1, pitchStartIndex + 3, c3Ddot);
-
-      rotationAccelerationJacobian.set(2, yawStartIndex, c0Ddot);
-      rotationAccelerationJacobian.set(2, yawStartIndex + 1, c1Ddot);
-      rotationAccelerationJacobian.set(2, yawStartIndex + 2, c2Ddot);
-      rotationAccelerationJacobian.set(2, yawStartIndex + 3, c3Ddot);
+      OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(yawStartIndex, pitchStartIndex, rollStartIndex, omega, time, rotationRateJacobian, 1.0);
+      OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(yawStartIndex, pitchStartIndex, rollStartIndex, omega, time, rotationAccelerationJacobian, 1.0);
    }
 
    private void computeInertiaInWorld(SpatialInertiaReadOnly spatialInertia)

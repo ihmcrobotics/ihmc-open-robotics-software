@@ -110,9 +110,11 @@ public class OrientationDynamicsCommandCalculatorTest
          DMatrixRMaj angularVelocityJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
          DMatrixRMaj angularAccelerationJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
-         int orientationStart = indexHandler.getOrientationCoefficientsStartIndex(0);
-         OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(orientationStart, orientationStart + 4, orientationStart + 8, omega, time, angularVelocityJacobian, 1.0);
-         OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(orientationStart, orientationStart + 4, orientationStart + 8, omega, time, angularAccelerationJacobian, 1.0);
+         int yawStart = indexHandler.getYawCoefficientsStartIndex(0);
+         int pitchStart = indexHandler.getPitchCoefficientsStartIndex(0);
+         int rollStart = indexHandler.getRollCoefficientsStartIndex(0);
+         OrientationCoefficientJacobianCalculator.calculateAngularVelocityJacobian(yawStart, pitchStart, rollStart, omega, time, angularVelocityJacobian, 1.0);
+         OrientationCoefficientJacobianCalculator.calculateAngularAccelerationJacobian(yawStart, pitchStart, rollStart, omega, time, angularAccelerationJacobian, 1.0);
 
          CommonOps_DDRM.mult(rotationMatrixExpected, angularAccelerationJacobian, rotationJacobianExpected );
          CommonOps_DDRM.mult(rotationRateMatrixExpected, angularVelocityJacobian, rotationRateJacobianExpected );

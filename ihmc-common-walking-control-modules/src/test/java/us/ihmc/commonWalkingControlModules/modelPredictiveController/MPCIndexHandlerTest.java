@@ -34,7 +34,7 @@ public class MPCIndexHandlerTest
       indexHandler.initialize(contactProviders);
 
       int rhoSize = 4 * 4 * 4;
-      int totalSize = 6 + rhoSize + 18;
+      int totalSize = 6 + rhoSize + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
 
       assertEquals(totalSize, indexHandler.getTotalProblemSize());
       assertEquals(0, indexHandler.getComCoefficientStartIndex(0, 0));
@@ -43,10 +43,11 @@ public class MPCIndexHandlerTest
 
       assertEquals(6, indexHandler.getRhoCoefficientStartIndex(0));
 
+      int orientationSegmentSize = MPCIndexHandler.orientationCoefficientsPerSegment;
       assertEquals(6 + rhoSize, indexHandler.getOrientationCoefficientsStartIndex(0));
       assertEquals(6 + rhoSize, indexHandler.getYawCoefficientsStartIndex(0));
-      assertEquals(12 + rhoSize, indexHandler.getPitchCoefficientsStartIndex(0));
-      assertEquals(18 + rhoSize, indexHandler.getRollCoefficientsStartIndex(0));
+      assertEquals(6 + orientationSegmentSize + rhoSize, indexHandler.getPitchCoefficientsStartIndex(0));
+      assertEquals(6 + 2 * orientationSegmentSize + rhoSize, indexHandler.getRollCoefficientsStartIndex(0));
    }
 
 }

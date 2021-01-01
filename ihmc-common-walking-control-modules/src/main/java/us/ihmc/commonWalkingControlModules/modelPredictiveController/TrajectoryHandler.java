@@ -119,7 +119,7 @@ public class TrajectoryHandler
       for (int i = 0; i < numberOfPhases; i++)
       {
          int positionVectorStart = 6 * i;
-         int orientationVectorStart = 4 * i;
+         int orientationVectorStart = MPCIndexHandler.orientationCoefficientsPerSegment * i;
 
          xCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
          yCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
@@ -150,15 +150,18 @@ public class TrajectoryHandler
             yCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
             zCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
          }
+         zCoefficientVector.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
 
-         for (int orientationIndex = 0; orientationIndex < 4; orientationIndex++)
+         if (MPCIndexHandler.includeOrientation)
          {
-            yawCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getYawCoefficientsStartIndex(i) + orientationIndex));
-            pitchCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getPitchCoefficientsStartIndex(i) + orientationIndex));
-            rollCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getRollCoefficientsStartIndex(i) + orientationIndex));
+            for (int orientationIndex = 0; orientationIndex < MPCIndexHandler.orientationCoefficientsPerSegment; orientationIndex++)
+            {
+               yawCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getYawCoefficientsStartIndex(i) + orientationIndex));
+               pitchCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getPitchCoefficientsStartIndex(i) + orientationIndex));
+               rollCoefficientVector.set(orientationVectorStart + orientationIndex, 0, solutionCoefficients.get(indexHandler.getRollCoefficientsStartIndex(i) + orientationIndex));
+            }
          }
 
-         zCoefficientVector.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
       }
    }
 
@@ -296,21 +299,25 @@ public class TrajectoryHandler
       fourthOrientationCoefficient.setY(pitchCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
       fourthOrientationCoefficient.setZ(rollCoefficientVector.get(fourthOrientationCoefficientIndex, 0));
 
-      int fifthOrientationCoefficientIndex = orientationStartIndex + 4;
-      fifthOrientationCoefficient.setX(yawCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
-      fifthOrientationCoefficient.setY(pitchCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
-      fifthOrientationCoefficient.setZ(rollCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+      if (MPCIndexHandler.includeExponentialInOrientation)
+      {
+         int fifthOrientationCoefficientIndex = orientationStartIndex + 4;
+         fifthOrientationCoefficient.setX(yawCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+         fifthOrientationCoefficient.setY(pitchCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
+         fifthOrientationCoefficient.setZ(rollCoefficientVector.get(fifthOrientationCoefficientIndex, 0));
 
-      int sixthOrientationCoefficientIndex = orientationStartIndex + 5;
-      sixthOrientationCoefficient.setX(yawCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
-      sixthOrientationCoefficient.setY(pitchCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
-      sixthOrientationCoefficient.setZ(rollCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+         int sixthOrientationCoefficientIndex = orientationStartIndex + 5;
+         sixthOrientationCoefficient.setX(yawCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+         sixthOrientationCoefficient.setY(pitchCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+         sixthOrientationCoefficient.setZ(rollCoefficientVector.get(sixthOrientationCoefficientIndex, 0));
+      }
    }
 
    boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
    {
       setActivePositionCoefficients(segmentNumber);
-      setActiveOrientationCoefficients(segmentNumber);
+      if (MPCIndexHandler.includeOrientation)
+         setActiveOrientationCoefficients(segmentNumber);
 
       CoMMPCTools.constructDesiredCoMPosition(desiredCoMPosition, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
                                               fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
@@ -338,24 +345,27 @@ public class TrajectoryHandler
       desiredECMPPosition.set(desiredVRPPosition);
       desiredECMPPosition.subZ(nominalHeight);
 
-      CoMMPCTools.constructedDesiredBodyOrientation(desiredBodyOrientation,
-                                                    firstOrientationCoefficient,
-                                                    secondOrientationCoefficient,
-                                                    thirdOrientationCoefficient,
-                                                    fourthOrientationCoefficient,
-                                                    fifthOrientationCoefficient,
-                                                    sixthOrientationCoefficient,
-                                                    omega,
-                                                    timeInSegment);
-      CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocity,
-                                                        firstOrientationCoefficient,
-                                                        secondOrientationCoefficient,
-                                                        thirdOrientationCoefficient,
-                                                        fourthOrientationCoefficient,
-                                                        fifthOrientationCoefficient,
-                                                        sixthOrientationCoefficient,
-                                                        omega,
-                                                        timeInSegment);
+      if (MPCIndexHandler.includeOrientation)
+      {
+         CoMMPCTools.constructedDesiredBodyOrientation(desiredBodyOrientation,
+                                                       firstOrientationCoefficient,
+                                                       secondOrientationCoefficient,
+                                                       thirdOrientationCoefficient,
+                                                       fourthOrientationCoefficient,
+                                                       fifthOrientationCoefficient,
+                                                       sixthOrientationCoefficient,
+                                                       omega,
+                                                       timeInSegment);
+         CoMMPCTools.constructedDesiredBodyAngularVelocity(desiredBodyAngularVelocity,
+                                                           firstOrientationCoefficient,
+                                                           secondOrientationCoefficient,
+                                                           thirdOrientationCoefficient,
+                                                           fourthOrientationCoefficient,
+                                                           fifthOrientationCoefficient,
+                                                           sixthOrientationCoefficient,
+                                                           omega,
+                                                           timeInSegment);
+      }
 
       return true;
    }
