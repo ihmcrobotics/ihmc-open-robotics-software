@@ -59,7 +59,8 @@ public class GDXImGuiWindowAndDockSystem
       io.setConfigViewportsNoTaskBarIcon(true);
       io.setConfigWindowsMoveFromTitleBarOnly(true);
 
-      ImGui.styleColorsLight();
+      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
+         ImGui.styleColorsLight();
       imFont = ImGuiTools.setupFonts(io);
 
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
