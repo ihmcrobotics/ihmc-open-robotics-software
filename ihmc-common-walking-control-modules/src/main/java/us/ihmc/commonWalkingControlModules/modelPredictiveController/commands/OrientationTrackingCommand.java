@@ -10,9 +10,9 @@ import java.util.function.DoubleConsumer;
 
 public class OrientationTrackingCommand implements MPCCommand<OrientationTrackingCommand>
 {
-   private final CubicTrackingCommand yawTrackingCommand = new CubicTrackingCommand();
-   private final CubicTrackingCommand pitchTrackingCommand = new CubicTrackingCommand();
-   private final CubicTrackingCommand rollTrackingCommand = new CubicTrackingCommand();
+   private final AngleTrackingCommand yawTrackingCommand = new AngleTrackingCommand();
+   private final AngleTrackingCommand pitchTrackingCommand = new AngleTrackingCommand();
+   private final AngleTrackingCommand rollTrackingCommand = new AngleTrackingCommand();
 
    private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
 
@@ -70,6 +70,13 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
       rollTrackingCommand.setDuration(duration);
    }
 
+   public void setOmega(double omega)
+   {
+      yawTrackingCommand.setOmega(omega);
+      pitchTrackingCommand.setOmega(omega);
+      rollTrackingCommand.setOmega(omega);
+   }
+
    public void setWeight(double weight)
    {
       this.weight = weight;
@@ -78,17 +85,17 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
       rollTrackingCommand.setWeight(weight);
    }
 
-   public CubicTrackingCommand getYawTrackingCommand()
+   public AngleTrackingCommand getYawTrackingCommand()
    {
       return yawTrackingCommand;
    }
 
-   public CubicTrackingCommand getPitchTrackingCommand()
+   public AngleTrackingCommand getPitchTrackingCommand()
    {
       return pitchTrackingCommand;
    }
 
-   public CubicTrackingCommand getRollTrackingCommand()
+   public AngleTrackingCommand getRollTrackingCommand()
    {
       return rollTrackingCommand;
    }
@@ -98,6 +105,10 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
       return weight;
    }
 
+   public double getOmega()
+   {
+      return yawTrackingCommand.getOmega();
+   }
 
    public void setCostToGoConsumer(DoubleConsumer costToGoConsumer)
    {

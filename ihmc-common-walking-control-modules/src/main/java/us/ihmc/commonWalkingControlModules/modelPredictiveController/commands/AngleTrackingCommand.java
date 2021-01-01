@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 
-public class CubicTrackingCommand
+public class AngleTrackingCommand
 {
    private int startIndex;
 
@@ -12,6 +12,8 @@ public class CubicTrackingCommand
    private double finalRate;
 
    private double duration;
+
+   private double omega;
 
    private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
 
@@ -50,6 +52,11 @@ public class CubicTrackingCommand
       this.weight = weight;
    }
 
+   public void setOmega(double omega)
+   {
+      this.omega = omega;
+   }
+
    public double getStartValue()
    {
       return startValue;
@@ -83,5 +90,10 @@ public class CubicTrackingCommand
    public double getWeight()
    {
       return weight;
+   }
+
+   public double getOmega()
+   {
+      return omega;
    }
 }

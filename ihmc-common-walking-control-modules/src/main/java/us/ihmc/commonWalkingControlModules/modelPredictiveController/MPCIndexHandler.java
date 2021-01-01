@@ -9,7 +9,7 @@ public class MPCIndexHandler
 {
    public static final int coefficientsPerRho = 4;
    public static final int comCoefficientsPerSegment = 6;
-   public static final int orientationCoefficientsPerSegment = 4;
+   public static final int orientationCoefficientsPerSegment = 6;
 
    private int totalProblemSize = 0;
 

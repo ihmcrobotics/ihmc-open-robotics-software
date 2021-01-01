@@ -256,14 +256,14 @@ public class CoMMPCQPSolver
             solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
 
          start = indexHandler.getYawCoefficientsStartIndex(segmentId);
-         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
+         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
          start = indexHandler.getPitchCoefficientsStartIndex(segmentId);
-         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
+         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
          start = indexHandler.getRollCoefficientsStartIndex(segmentId);
-         for (int i = 0; i < MPCIndexHandler.orientationCoefficientsPerSegment; i++)
-            solverInput_H.add(start + i, start + i, orientationCoefficientRegularization.getDoubleValue());
+         for (int i = start; i < start + MPCIndexHandler.orientationCoefficientsPerSegment; i++)
+            solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
       }
    }
 
@@ -360,7 +360,7 @@ public class CoMMPCQPSolver
          addInput(qpInputTypeC);
    }
 
-   public void submitCubicTrackingCommand(CubicTrackingCommand command)
+   public void submitCubicTrackingCommand(AngleTrackingCommand command)
    {
       boolean success = inputCalculator.calculateCubicTrackingCommand(qpInputTypeC, command);
       if (success)
