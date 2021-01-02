@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
@@ -21,7 +20,7 @@ public class GDXDepthSensorSimulator
    private int framebufferId;
    private DepthShaderProvider depthShaderProvider;
 
-   private ModelBatch modelBatch = new ModelBatch();
+   private ModelBatch modelBatch;
    private int depthTextureId;
    private ScreenViewport viewport;
 
@@ -36,7 +35,6 @@ public class GDXDepthSensorSimulator
    {
       camera = new PerspectiveCamera(fieldOfViewY, viewportWidth, viewportHeight);
       viewport = new ScreenViewport(camera);
-      viewport.update((int) viewportWidth, (int) viewportHeight);
 
       DepthShader.Config depthShaderConfig = new DepthShader.Config();
 //      depthShaderConfig.numDirectionalLights = 0;
@@ -59,6 +57,9 @@ public class GDXDepthSensorSimulator
 
    public void render(GDX3DApplication gdx3DApplication)
    {
+      gdx3DApplication.glClearGrayscale();
+
+      viewport.update((int) viewportWidth, (int) viewportHeight);
       modelBatch.begin(camera);
 
       Gdx.gl.glBindFramebuffer(GL20.GL_FRAMEBUFFER, framebufferId);
@@ -79,5 +80,10 @@ public class GDXDepthSensorSimulator
    {
       Gdx.gl.glDeleteFramebuffer(framebufferId);
       Gdx.gl.glDeleteTexture(depthTextureId);
+   }
+
+   public PerspectiveCamera getCamera()
+   {
+      return camera;
    }
 }
