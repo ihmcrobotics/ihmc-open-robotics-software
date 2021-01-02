@@ -5,10 +5,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
@@ -38,10 +35,9 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private int width = -1;
    private int height = -1;
 
-   private HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private HashSet<RenderableProvider> renderableProviders = new HashSet<>();
-
-   private ArrayList<Runnable> preRenderTasks = new ArrayList<>();
+   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private final HashSet<RenderableProvider> renderableProviders = new HashSet<>();
+   private final ArrayList<Runnable> preRenderTasks = new ArrayList<>();
 
    @Override
    public void create()
@@ -106,10 +102,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
       Gdx.gl.glViewport(x, y, width, height);
 
-      renderRegisteredObjects();
+      renderRegisteredObjectsWithEnvironment(modelBatch);
    }
 
-   private void renderRegisteredObjects()
+   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch)
    {
       for (ModelInstance modelInstance : modelInstances)
       {
@@ -129,7 +125,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public void renderVRCamera(Camera camera)
    {
       modelBatch.begin(camera);
-      renderRegisteredObjects();
+      renderRegisteredObjectsWithEnvironment(modelBatch);
       renderAfter();
    }
 
@@ -145,7 +141,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         ExceptionTools.handle(() -> modelInstance.model.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
+         ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
       }
 
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
