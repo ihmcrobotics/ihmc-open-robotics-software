@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCTestHelper;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -8,14 +11,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
-public class MPCIndexHandlerTest
+public class LinearMPCIndexHandlerTest
 {
    @Test
    public void testIndices()
    {
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
 
@@ -34,7 +37,7 @@ public class MPCIndexHandlerTest
       indexHandler.initialize(contactProviders);
 
       int rhoSize = 4 * 4 * 4;
-      int totalSize = 6 + rhoSize + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
+      int totalSize = 6 + rhoSize;
 
       assertEquals(totalSize, indexHandler.getTotalProblemSize());
       assertEquals(0, indexHandler.getComCoefficientStartIndex(0, 0));
@@ -42,12 +45,6 @@ public class MPCIndexHandlerTest
       assertEquals(4, indexHandler.getComCoefficientStartIndex(0, 2));
 
       assertEquals(6, indexHandler.getRhoCoefficientStartIndex(0));
-
-      int orientationSegmentSize = MPCIndexHandler.orientationCoefficientsPerSegment;
-      assertEquals(6 + rhoSize, indexHandler.getOrientationCoefficientsStartIndex(0));
-      assertEquals(6 + rhoSize, indexHandler.getYawCoefficientsStartIndex(0));
-      assertEquals(6 + orientationSegmentSize + rhoSize, indexHandler.getPitchCoefficientsStartIndex(0));
-      assertEquals(6 + 2 * orientationSegmentSize + rhoSize, indexHandler.getRollCoefficientsStartIndex(0));
    }
 
 }

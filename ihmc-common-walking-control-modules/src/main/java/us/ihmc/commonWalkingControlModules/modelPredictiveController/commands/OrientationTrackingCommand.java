@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCIndexHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
@@ -14,7 +14,7 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
    private final AngleTrackingCommand pitchTrackingCommand = new AngleTrackingCommand();
    private final AngleTrackingCommand rollTrackingCommand = new AngleTrackingCommand();
 
-   private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
+   private double weight = ContinuousModelPredictiveController.orientationTrackingWeight;
 
    private DoubleConsumer costToGoConsumer;
 
@@ -56,7 +56,7 @@ public class OrientationTrackingCommand implements MPCCommand<OrientationTrackin
       rollTrackingCommand.setFinalRate(finalAngularRate.getZ());
    }
 
-   public void setSegmentNumber(int segmentNumber, MPCIndexHandler indexHandler)
+   public void setSegmentNumber(int segmentNumber, ContinuousMPCIndexHandler indexHandler)
    {
       yawTrackingCommand.setStartIndex(indexHandler.getYawCoefficientsStartIndex(segmentNumber));
       pitchTrackingCommand.setStartIndex(indexHandler.getPitchCoefficientsStartIndex(segmentNumber));

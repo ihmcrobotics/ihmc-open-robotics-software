@@ -26,7 +26,6 @@ public class CoMPositionContinuityCommandTest
       double gravityZ = -9.81;
       double omega = 3.0;
       double mu = 0.8;
-      double mass = 1.5;
       double dt = 1e-3;
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -38,8 +37,8 @@ public class CoMPositionContinuityCommandTest
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose1 = new FramePose3D();
       FramePose3D contactPose2 = new FramePose3D();

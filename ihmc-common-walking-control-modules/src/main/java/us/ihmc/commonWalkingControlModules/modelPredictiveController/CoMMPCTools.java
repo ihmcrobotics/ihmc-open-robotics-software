@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrix;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -181,7 +182,7 @@ public class CoMMPCTools
       orientationToPack.setToZero();
 
       double roll, pitch, yaw;
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          roll = exponential * firstCoefficient.getX() + secondCoefficient.getX() / exponential + t3 * thirdCoefficient.getX() + t2 * fourthCoefficient.getX()
                 + timeInPhase * fifthCoefficient.getX() + sixthCoefficient.getX();
@@ -219,7 +220,7 @@ public class CoMMPCTools
       angularRateToPack.checkReferenceFrameMatch(worldFrame);
       angularRateToPack.setToZero();
 
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          angularRateToPack.scaleAdd(omega * exponential, firstCoefficient);
          angularRateToPack.scaleAdd(-omega / exponential, secondCoefficient);

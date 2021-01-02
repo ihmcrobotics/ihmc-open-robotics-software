@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMMPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrackingCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCQPSolver;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,8 +21,8 @@ public class OrientationTrackingCommandTest
       double dt = 1e-3;
       double omega = 3.0;
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      ContinuousMPCQPSolver solver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
 
       double startYawValue = -2.0;
@@ -101,7 +100,7 @@ public class OrientationTrackingCommandTest
          int startRollIndex = indexHandler.getRollCoefficientsStartIndex(0);
 
          double assembledYawValue = 0.0, assembledPitchValue = 0.0, assembledRollValue = 0.0;
-         if (MPCIndexHandler.includeExponentialInOrientation)
+         if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
          {
             assembledYawValue = solution.get(startYawIndex, 0) * Math.exp(omega * time);
             assembledYawValue += solution.get(startYawIndex + 1, 0) * Math.exp(-omega * time);

@@ -17,11 +17,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class CoMMPCQPSolver
+public class LinearMPCQPSolver
 {
    private static final boolean useSparse = false;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
    private final ActiveSetQPSolver qpSolver;
@@ -29,16 +29,16 @@ public class CoMMPCQPSolver
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
 
-   final DMatrixRMaj solverInput_H;
-   final DMatrixRMaj solverInput_f;
+   protected final DMatrixRMaj solverInput_H;
+   protected final DMatrixRMaj solverInput_f;
 
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
 
-   final DMatrixRMaj solverInput_Aeq;
-   final DMatrixRMaj solverInput_beq;
-   final DMatrixRMaj solverInput_Ain;
-   final DMatrixRMaj solverInput_bin;
+   protected final DMatrixRMaj solverInput_Aeq;
+   protected final DMatrixRMaj solverInput_beq;
+   protected final DMatrixRMaj solverInput_Ain;
+   protected final DMatrixRMaj solverInput_bin;
    final DMatrixRMaj solverOutput_beq;
    final DMatrixRMaj solverOutput_bin;
 
@@ -58,11 +58,9 @@ public class CoMMPCQPSolver
 
    private final YoDouble comCoefficientRegularization = new YoDouble("comCoefficientRegularization", registry);
    private final YoDouble rhoCoefficientRegularization = new YoDouble("rhoCoefficientRegularization", registry);
-   private final YoDouble orientationCoefficientRegularization = new YoDouble("orientationCoefficientRegularization", registry);
 
    private final YoDouble comRateCoefficientRegularization = new YoDouble("comRateCoefficientRegularization", registry);
    private final YoDouble rhoRateCoefficientRegularization = new YoDouble("rhoRateCoefficientRegularization", registry);
-   private final YoDouble orientationRateCoefficientRegularization = new YoDouble("orientationRateCoefficientRegularization", registry);
 
    private int problemSize;
 
@@ -70,26 +68,24 @@ public class CoMMPCQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
-   final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
+   protected final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
+   protected final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
-   private final MPCIndexHandler indexHandler;
+   private final LinearMPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
 
    private final double dt;
 
-   public CoMMPCQPSolver(MPCIndexHandler indexHandler, double dt, double mass, double gravityZ, YoRegistry parentRegistry)
+   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
 
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
-      orientationCoefficientRegularization.set(1e-5);
 
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
-      orientationRateCoefficientRegularization.set(1e-6);
 
       if (useSparse)
       {
@@ -100,7 +96,7 @@ public class CoMMPCQPSolver
       {
          qpSolver = new SimpleEfficientActiveSetQPSolver();
       }
-      inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
@@ -140,11 +136,6 @@ public class CoMMPCQPSolver
       this.rhoCoefficientRegularization.set(weight);
    }
 
-   public void setOrientationCoefficientRegularization(double weight)
-   {
-      this.orientationCoefficientRegularization.set(weight);
-   }
-
    public void setComRateCoefficientRegularizationWeight(double weight)
    {
       this.comRateCoefficientRegularization.set(weight);
@@ -153,11 +144,6 @@ public class CoMMPCQPSolver
    public void setRhoRateCoefficientRegularizationWeight(double weight)
    {
       this.rhoRateCoefficientRegularization.set(weight);
-   }
-
-   public void setOrientationRateCoefficientRegularization(double weight)
-   {
-      this.orientationRateCoefficientRegularization.set(weight);
    }
 
    public void setUseWarmStart(boolean useWarmStart)
@@ -243,38 +229,21 @@ public class CoMMPCQPSolver
          addRateRegularization();
    }
 
-   void addValueRegularization()
+   protected void addValueRegularization()
    {
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
-         for (int i = 0; i < MPCIndexHandler.comCoefficientsPerSegment; i++)
+         for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
             solverInput_H.add(start + i, start + i, comCoefficientRegularization.getDoubleValue());
 
          start = indexHandler.getRhoCoefficientStartIndex(segmentId);
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
             solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
-
-         boolean regularizeOrientation = MPCIndexHandler.includeOrientation;
-         if (regularizeOrientation)
-         {
-            start = indexHandler.getYawCoefficientsStartIndex(segmentId);
-            int end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
-            for (int i = start; i < end; i++)
-               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
-            start = indexHandler.getPitchCoefficientsStartIndex(segmentId);
-            end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
-            for (int i = start; i < end; i++)
-               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
-            start = indexHandler.getRollCoefficientsStartIndex(segmentId);
-            end = start + MPCIndexHandler.orientationCoefficientsPerSegment;
-            for (int i = start; i < end; i++)
-               solverInput_H.add(i, i, orientationCoefficientRegularization.getDoubleValue());
-         }
       }
    }
 
-   private void addRateRegularization()
+   protected void addRateRegularization()
    {
       double comCoefficientFactor = dt * dt / comRateCoefficientRegularization.getDoubleValue();
       double rhoCoefficientFactor = dt * dt / rhoRateCoefficientRegularization.getDoubleValue();
@@ -282,13 +251,13 @@ public class CoMMPCQPSolver
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
-         for (int i = 0; i < MPCIndexHandler.comCoefficientsPerSegment; i++)
+         for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
          {
             solverInput_H.add(start + i, start + i, 1.0 / comCoefficientFactor);
             solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / comCoefficientFactor);
          }
 
-         start += MPCIndexHandler.comCoefficientsPerSegment;
+         start += LinearMPCIndexHandler.comCoefficientsPerSegment;
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
          {
             solverInput_H.add(start + i, start + i, 1.0 / rhoCoefficientFactor);
@@ -319,12 +288,6 @@ public class CoMMPCQPSolver
                break;
             case VRP_TRACKING:
                submitVRPTrackingCommand((VRPTrackingCommand) command);
-               break;
-            case ORIENTATION_TRACKING:
-               submitOrientationTrackingCommand((OrientationTrackingCommand) command);
-               break;
-            case ORIENTATION_DYNAMICS:
-               submitOrientationDynamicsCommand((OrientationDynamicsCommand) command);
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
@@ -358,27 +321,6 @@ public class CoMMPCQPSolver
       boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
       if (success)
          addInput(qpInputTypeC);
-   }
-
-   public void submitOrientationTrackingCommand(OrientationTrackingCommand command)
-   {
-      boolean success = inputCalculator.calculateOrientationTrackingObjective(qpInputTypeC, command);
-      if (success)
-         addInput(qpInputTypeC);
-   }
-
-   public void submitCubicTrackingCommand(AngleTrackingCommand command)
-   {
-      boolean success = inputCalculator.calculateCubicTrackingCommand(qpInputTypeC, command);
-      if (success)
-         addInput(qpInputTypeC);
-   }
-
-   public void submitOrientationDynamicsCommand(OrientationDynamicsCommand command)
-   {
-      boolean success = inputCalculator.calculateOrientationDynamicsObjective(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
    }
 
    public void addInput(QPInputTypeA input)

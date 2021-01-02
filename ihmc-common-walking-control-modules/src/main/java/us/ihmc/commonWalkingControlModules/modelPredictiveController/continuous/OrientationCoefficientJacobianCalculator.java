@@ -1,6 +1,7 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
 import org.ejml.data.DMatrix;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator;
 import us.ihmc.commons.MathTools;
 
 public class OrientationCoefficientJacobianCalculator
@@ -29,7 +30,7 @@ public class OrientationCoefficientJacobianCalculator
 
    public static void calculateOrientationJacobian(int yawStart, int pitchStart, int rollStart, double omega, double time, DMatrix orientationJacobianToPack, double scale)
    {
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          double c0 = Math.exp(omega * time);
          double c1 = 1.0 / c0;
@@ -74,7 +75,7 @@ public class OrientationCoefficientJacobianCalculator
 
    public static void calculateAngularVelocityJacobian(int yawStart, int pitchStart, int rollStart, double omega, double time, DMatrix velocityJacobianToPack, double scale)
    {
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          double exponential = Math.exp(omega * time);
          double c0 = omega * exponential;
@@ -114,7 +115,7 @@ public class OrientationCoefficientJacobianCalculator
 
    public static void calculateAngularAccelerationJacobian(int yawStart, int pitchStart, int rollStart, double omega, double time, DMatrix accelerationJacobianToPack, double scale)
    {
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          double exponential = Math.exp(omega * time);
          double omega2 = omega * omega;
@@ -152,7 +153,7 @@ public class OrientationCoefficientJacobianCalculator
 
    public static void calculateAngularJerkJacobian(int yawStart, int pitchStart, int rollStart, double omega, double time, DMatrix jerkJacobianToPack, double scale)
    {
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          double exponential = Math.exp(omega * time);
          double omega3 = omega * omega * omega;

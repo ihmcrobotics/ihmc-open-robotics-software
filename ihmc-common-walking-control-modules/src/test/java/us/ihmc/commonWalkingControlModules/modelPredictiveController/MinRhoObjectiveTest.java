@@ -21,7 +21,6 @@ public class MinRhoObjectiveTest
    {
       double gravityZ = -9.81;
       double omega = 3.0;
-      double mass = 1.5;
       double mu = 0.8;
       double dt = 1e-3;
 
@@ -29,8 +28,8 @@ public class MinRhoObjectiveTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 
@@ -126,7 +125,6 @@ public class MinRhoObjectiveTest
    {
       double gravityZ = -9.81;
       double omega = 3.0;
-      double mass = 1.5;
       double mu = 0.8;
       double dt = 1e-3;
 
@@ -134,8 +132,8 @@ public class MinRhoObjectiveTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 
@@ -258,14 +256,13 @@ public class MinRhoObjectiveTest
       double omega = 3.0;
       double mu = 0.8;
       double dt = 1e-3;
-      double mass = 1.5;
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 
@@ -323,7 +320,6 @@ public class MinRhoObjectiveTest
       solver.submitRhoValueCommand(commandEnd2);
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
-      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 

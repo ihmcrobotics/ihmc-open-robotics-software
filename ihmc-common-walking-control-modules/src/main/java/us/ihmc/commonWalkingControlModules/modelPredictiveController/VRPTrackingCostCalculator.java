@@ -10,14 +10,14 @@ import java.util.List;
 
 public class VRPTrackingCostCalculator
 {
-   private final MPCIndexHandler indexHandler;
+   private final LinearMPCIndexHandler indexHandler;
    private final double gravityZ;
 
    private final List<FrameVector3DReadOnly> allBasisVectors = new ArrayList<>();
    private final FrameVector3D vrpDelta = new FrameVector3D();
    private final FrameVector3D vrpStart = new FrameVector3D();
 
-   public VRPTrackingCostCalculator(MPCIndexHandler indexHandler, double gravityZ)
+   public VRPTrackingCostCalculator(LinearMPCIndexHandler indexHandler, double gravityZ)
    {
       this.indexHandler = indexHandler;
       this.gravityZ = -Math.abs(gravityZ);

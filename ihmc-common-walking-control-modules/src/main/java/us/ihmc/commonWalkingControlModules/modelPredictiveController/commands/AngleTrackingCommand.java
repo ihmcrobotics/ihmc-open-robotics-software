@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousModelPredictiveController;
 
 public class AngleTrackingCommand
 {
@@ -15,7 +15,7 @@ public class AngleTrackingCommand
 
    private double omega;
 
-   private double weight = CoMTrajectoryModelPredictiveController.orientationTrackingWeight;
+   private double weight = ContinuousModelPredictiveController.orientationTrackingWeight;
 
    public void setStartIndex(int startIndex)
    {

@@ -151,6 +151,7 @@ public class ContactPointHelper
 
       double maxRhoZ = maxContactForce / numberOfBasisVectorsPerContactPoint;
       basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
+      basisVectorOrigin.changeFrame(ReferenceFrame.getWorldFrame());
 
       // rotate each friction cone approximation to point one vector towards the center of the foot
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)

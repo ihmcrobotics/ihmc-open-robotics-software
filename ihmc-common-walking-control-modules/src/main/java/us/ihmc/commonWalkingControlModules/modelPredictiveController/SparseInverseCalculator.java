@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
@@ -12,14 +10,14 @@ import us.ihmc.convexOptimization.quadraticProgram.InverseCostCalculator;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
+public class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
 {
    private static final boolean useSparse = true;
-   private final MPCIndexHandler indexHandler;
+   private final LinearMPCIndexHandler indexHandler;
 
    private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> solver = LinearSolverFactory_DSCC.cholesky(FillReducing.NONE);
 
-   public SparseInverseCalculator(MPCIndexHandler indexHandler)
+   public SparseInverseCalculator(LinearMPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
    }
@@ -41,7 +39,7 @@ class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
          for (int i = 0; i < indexHandler.getNumberOfSegments(); i++)
          {
             int start = indexHandler.getComCoefficientStartIndex(i);
-            int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + MPCIndexHandler.comCoefficientsPerSegment;
+            int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
             if (blockSize < 10)
                LogTools.info("help");
 
@@ -66,7 +64,7 @@ class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
          for (int i = 0; i < indexHandler.getNumberOfSegments(); i++)
          {
             int start = indexHandler.getComCoefficientStartIndex(i);
-            int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + MPCIndexHandler.comCoefficientsPerSegment;
+            int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
 
             denseBlockToInvert.reshape(blockSize, blockSize);
             denseInvertedBlock.reshape(blockSize, blockSize);

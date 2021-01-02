@@ -1,5 +1,7 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.BagOfEllipses;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.BagOfVectors;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class MPCTrajectoryViewer
+public class ContinuousMPCTrajectoryViewer
 {
    private static final int numberOfVectors = 500;
    private static final double dt = 0.025;
@@ -38,7 +40,7 @@ public class MPCTrajectoryViewer
    private final SpatialInertia inertia;
    private final Vector3D inertiaAxes = new Vector3D();
 
-   public MPCTrajectoryViewer(SpatialInertia inertia, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ContinuousMPCTrajectoryViewer(SpatialInertia inertia, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.inertia = inertia;
 
@@ -53,7 +55,7 @@ public class MPCTrajectoryViewer
       orientationTrajectoryEllipses = new BagOfEllipses(numberOfVectors, "Orientation", orientationAppearance, registry, yoGraphicsListRegistry);
    }
 
-   public void compute(CoMTrajectoryModelPredictiveController mpc, double currentTimeInState)
+   public void compute(ContinuousModelPredictiveController mpc, double currentTimeInState)
    {
       comTrajectoryVectors.reset();
       dcmTrajectoryVectors.reset();

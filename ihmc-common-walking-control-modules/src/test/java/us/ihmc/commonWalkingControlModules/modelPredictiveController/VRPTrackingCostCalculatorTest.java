@@ -26,7 +26,7 @@ public class VRPTrackingCostCalculatorTest
 
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, numberOfBases, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(numberOfBases);
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBases);
       VRPTrackingCostCalculator costCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
 
       FramePose3D contactPose1 = new FramePose3D();
@@ -234,7 +234,7 @@ public class VRPTrackingCostCalculatorTest
 
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, numberOfBases, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(numberOfBases);
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBases);
       VRPTrackingCostCalculator costCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
 
       FramePose3D contactPose1 = new FramePose3D();
