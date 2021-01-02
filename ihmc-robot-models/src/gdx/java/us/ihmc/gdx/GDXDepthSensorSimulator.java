@@ -1,15 +1,14 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLOnlyTextureData;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -59,7 +58,7 @@ public class GDXDepthSensorSimulator
 
       modelBatch = new ModelBatch(depthShaderProvider);
 
-      frameBuffer = new FrameBuffer(Pixmap.Format.Intensity, (int) viewportWidth, (int) viewportHeight, true, true);
+      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) viewportWidth, (int) viewportHeight, true, true);
 
    }
 
@@ -76,21 +75,37 @@ public class GDXDepthSensorSimulator
       gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch);
 
       modelBatch.end();
+
+      int width = frameBuffer.getWidth();
+      int height = frameBuffer.getHeight();
+      Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, width, height);
+
       frameBuffer.end();
 
-      points = new Point3D32[(int) viewportWidth * (int) viewportHeight];
+      points = new Point3D32[width * height];
 
-      Pixmap pixmap = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap();
-      for (int x = 0; x < viewportWidth; x++)
+//      GLOnlyTextureData textureData = (GLOnlyTextureData) frameBuffer.getColorBufferTexture().getTextureData();
+//      Pixmap pixmap = textureData.consumePixmap();
+         for (int y = 0; y < height; y++)
       {
-         for (int y = 0; y < viewportHeight; y++)
+      for (int x = 0; x < width; x++)
          {
             int color = pixmap.getPixel(x, y);
             float depthReading = new Color(color).r;
             Vector3 worldRangePoint = viewport.unproject(new Vector3(x, y, depthReading));
-            points[x * (int) viewportWidth + (int) viewportHeight] = new Point3D32(worldRangePoint.x, worldRangePoint.y, worldRangePoint.z);
+            int arrayIndex = y * width + x;
+            int arrayLength = width * height;
+            if (arrayIndex < arrayLength)
+            {
+               points[arrayIndex] = new Point3D32(worldRangePoint.x, worldRangePoint.y, worldRangePoint.z);
+            }
+            else
+            {
+               System.out.println("why");
+            }
          }
       }
+      pixmap.dispose();
 
 //      frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels().
 

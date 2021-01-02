@@ -34,7 +34,7 @@ public class GDXPointCloudRenderer
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      int capacity = 1000;
+      int capacity = 480000;
       vertices = new float[capacity * CPU_VERTEX_SIZE];
       if (renderable.meshPart.mesh != null) renderable.meshPart.mesh.dispose();
       renderable.meshPart.mesh = new Mesh(false, capacity, 0, CPU_ATTRIBUTES);
