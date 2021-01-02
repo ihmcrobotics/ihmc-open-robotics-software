@@ -1,5 +1,6 @@
 attribute vec3 a_position;
 uniform mat4 u_projViewWorldTrans;
+uniform mat4 u_viewWorldTrans;
 
 #if defined(diffuseTextureFlag) && defined(blendedFlag)
 #define blendedTextureFlag
@@ -78,6 +79,8 @@ uniform mat4 u_bones[numBones];
 varying float v_depth;
 #endif //PackedDepthFlag
 
+varying vec4 point;
+
 void main() {
 	#ifdef blendedTextureFlag
 		v_texCoords0 = a_texCoord0;
@@ -120,6 +123,8 @@ void main() {
 	#ifdef PackedDepthFlag
 		v_depth = pos.z / pos.w * 0.5 + 0.5;
 	#endif //PackedDepthFlag
+
+	point = u_viewWorldTrans * vec4(a_position, 1.0);
 
 	gl_Position = pos;
 }
