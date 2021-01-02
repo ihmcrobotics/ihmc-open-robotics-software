@@ -11,14 +11,14 @@ public class LinearMPCIndexHandler
    public static final int coefficientsPerRho = 4;
    public static final int comCoefficientsPerSegment = 6;
 
-   private int totalProblemSize = 0;
+   protected int totalProblemSize = 0;
 
    private final int numberOfBasisVectorsPerContactPoint;
    private final TIntArrayList comStartIndices = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
    private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
 
-   private final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
+   protected final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 
    public LinearMPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
@@ -80,7 +80,7 @@ public class LinearMPCIndexHandler
       return totalProblemSize;
    }
 
-   private static class ListToSizeReturn implements IntUnaryOperator
+   protected static class ListToSizeReturn implements IntUnaryOperator
    {
       private List<ContactPlaneProvider> contacts;
 

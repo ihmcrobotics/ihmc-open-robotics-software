@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PreviewWindowCalculator
 {
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoInteger activeSegment = new YoInteger("activeSegmentInWindow", registry);
    private final YoBoolean activeSegmentChanged = new YoBoolean("activeSegmentChanged", registry);

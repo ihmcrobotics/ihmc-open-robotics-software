@@ -1,8 +1,11 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -10,7 +13,10 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
@@ -27,7 +33,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
 
-public class CoMTrajectoryModelPredictiveController
+public class DiscreteTrajectoryModelPredictiveController
 {
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
@@ -40,7 +46,6 @@ public class CoMTrajectoryModelPredictiveController
    private final double maxContactForce;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final LinearMPCSolutionInspection solutionInspection;
 
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
@@ -51,7 +56,7 @@ public class CoMTrajectoryModelPredictiveController
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
 
-   private final LinearMPCIndexHandler indexHandler;
+   private final DiscreteMPCIndexHandler indexHandler;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -84,7 +89,7 @@ public class CoMTrajectoryModelPredictiveController
 
    final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
-   private final PreviewWindowCalculator previewWindowCalculator;
+   private final DiscretePreviewWindowCalculator previewWindowCalculator;
    final LinearTrajectoryHandler trajectoryHandler;
 
    private final CommandProvider commandProvider = new CommandProvider();
@@ -100,15 +105,15 @@ public class CoMTrajectoryModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight,double dt, YoRegistry parentRegistry)
+   public DiscreteTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
 
-      indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+      indexHandler = new DiscreteMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
-      previewWindowCalculator = new PreviewWindowCalculator(registry);
+      previewWindowCalculator = new DiscretePreviewWindowCalculator(registry);
       trajectoryHandler = new LinearTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
@@ -121,7 +126,6 @@ public class CoMTrajectoryModelPredictiveController
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
-      solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
 
       parentRegistry.addChild(registry);
    }
@@ -194,7 +198,7 @@ public class CoMTrajectoryModelPredictiveController
          qpSolver.resetRateRegularization();
       }
 
-      indexHandler.initialize(planningWindow);
+      indexHandler.initialize(planningWindow, previewWindowCalculator.getOrientationPreviewWindowDuration());
 
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
                                                     gravityZ,
@@ -215,7 +219,8 @@ public class CoMTrajectoryModelPredictiveController
       if (solutionCoefficients != null)
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue());
 
-      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
+      // FIXME
+//      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
       if (trajectoryViewer != null)
       {
@@ -555,8 +560,6 @@ public class CoMTrajectoryModelPredictiveController
 
       DMatrixRMaj solutionCoefficients = qpSolver.getSolution();
 
-      solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
-
       return solutionCoefficients;
    }
 
@@ -575,7 +578,8 @@ public class CoMTrajectoryModelPredictiveController
 
    private void updateCoMTrajectoryViewer()
    {
-      trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
+      // FIXME
+//      trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
    }
 
    public void compute(double timeInPhase,
