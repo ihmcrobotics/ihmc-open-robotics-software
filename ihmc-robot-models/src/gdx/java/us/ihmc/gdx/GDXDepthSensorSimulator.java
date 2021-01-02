@@ -1,12 +1,18 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
@@ -23,6 +29,9 @@ public class GDXDepthSensorSimulator
    private ModelBatch modelBatch;
    private int depthTextureId;
    private ScreenViewport viewport;
+   private FrameBuffer frameBuffer;
+
+   private Point3D32[] points;
 
    public GDXDepthSensorSimulator(float fieldOfViewY, float viewportWidth, float viewportHeight)
    {
@@ -50,28 +59,40 @@ public class GDXDepthSensorSimulator
 
       modelBatch = new ModelBatch(depthShaderProvider);
 
-      framebufferId = Gdx.gl.glGenFramebuffer();
+      frameBuffer = new FrameBuffer(Pixmap.Format.Intensity, (int) viewportWidth, (int) viewportHeight, true, true);
 
-      depthTextureId = Gdx.gl.glGenTexture();
    }
 
    public void render(GDX3DApplication gdx3DApplication)
    {
+      frameBuffer.begin();
       gdx3DApplication.glClearGrayscale();
 
       viewport.update((int) viewportWidth, (int) viewportHeight);
       modelBatch.begin(camera);
 
-      Gdx.gl.glBindFramebuffer(GL20.GL_FRAMEBUFFER, framebufferId);
-      Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-      Gdx.gl.glBindTexture(framebufferId, depthTextureId);
-      Gdx.gl.glFramebufferTexture2D(framebufferId, GL20.GL_DEPTH_ATTACHMENT, 0, depthTextureId, 0);
-
-      Gdx.gl.glViewport(0, 0, (int) camera.viewportWidth, (int) camera.viewportHeight);
+      Gdx.gl.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
 
       gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch);
 
       modelBatch.end();
+      frameBuffer.end();
+
+      points = new Point3D32[(int) viewportWidth * (int) viewportHeight];
+
+      Pixmap pixmap = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap();
+      for (int x = 0; x < viewportWidth; x++)
+      {
+         for (int y = 0; y < viewportHeight; y++)
+         {
+            int color = pixmap.getPixel(x, y);
+            float depthReading = new Color(color).r;
+            Vector3 worldRangePoint = viewport.unproject(new Vector3(x, y, depthReading));
+            points[x * (int) viewportWidth + (int) viewportHeight] = new Point3D32(worldRangePoint.x, worldRangePoint.y, worldRangePoint.z);
+         }
+      }
+
+//      frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels().
 
       // bind original framebuffer?
    }
@@ -85,5 +106,10 @@ public class GDXDepthSensorSimulator
    public PerspectiveCamera getCamera()
    {
       return camera;
+   }
+
+   public Point3D32[] getPoints()
+   {
+      return points;
    }
 }
