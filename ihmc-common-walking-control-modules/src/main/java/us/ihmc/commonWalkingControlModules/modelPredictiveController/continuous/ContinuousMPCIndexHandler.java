@@ -10,8 +10,6 @@ public class ContinuousMPCIndexHandler extends LinearMPCIndexHandler
    public static final boolean includeExponentialInOrientation = false;
    public static final int orientationCoefficientsPerSegment = includeExponentialInOrientation ? 6 : 4;
 
-   private int totalProblemSize = 0;
-
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
 
    public ContinuousMPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
