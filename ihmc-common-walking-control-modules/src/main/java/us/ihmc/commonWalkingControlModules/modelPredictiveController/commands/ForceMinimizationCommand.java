@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 

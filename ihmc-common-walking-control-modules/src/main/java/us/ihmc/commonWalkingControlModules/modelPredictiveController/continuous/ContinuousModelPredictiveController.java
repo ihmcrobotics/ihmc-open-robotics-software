@@ -1,22 +1,30 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.TrajectoryAndCornerPointCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -27,7 +35,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
 
-public class CoMTrajectoryModelPredictiveController
+public class ContinuousModelPredictiveController
 {
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
@@ -40,7 +48,7 @@ public class CoMTrajectoryModelPredictiveController
    private final double maxContactForce;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final LinearMPCSolutionInspection solutionInspection;
+   private final ContinuousMPCSolutionInspection solutionInspection;
 
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
@@ -48,10 +56,18 @@ public class CoMTrajectoryModelPredictiveController
 
    private static final double mu = 0.8;
 
+   private static final double dynamicsCollocationDT = 0.1;
+
+   public static final double finalOrientationWeight = 1e1;
+   public static final double initialOrientationWeight = 1e5;
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
+   public static final double orientationTrackingWeight = 1e-2;
+   public static final double orientationDynamicsWeight = 1e2;
 
-   private final LinearMPCIndexHandler indexHandler;
+   private final SpatialInertia bodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+
+   private final ContinuousMPCIndexHandler indexHandler;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -64,15 +80,23 @@ public class CoMTrajectoryModelPredictiveController
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private final FixedFrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
+   private final FixedFrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
+
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
+   private final YoFrameQuaternion currentBodyOrientation = new YoFrameQuaternion("currentBodyOrientation", worldFrame, registry);
+   private final YoFrameYawPitchRoll currentBodyYawPitchRoll = new YoFrameYawPitchRoll("currentBodyOrientation", worldFrame, registry);
+   private final YoFrameVector3D currentBodyAngularVelocity = new YoFrameVector3D("currentBodyAngularVelocity", worldFrame, registry);
 
    private final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
    private final YoFramePoint3D comPositionAtEndOfWindow = new YoFramePoint3D("comPositionAtEndOfWindow", worldFrame, registry);
    private final YoFrameVector3D comVelocityAtEndOfWindow = new YoFrameVector3D("comVelocityAtEndOfWindow", worldFrame, registry);
+   private final YoFrameQuaternion bodyOrientationAtEndOfWindow = new YoFrameQuaternion("bodyOrientationAtEndOfWindow", worldFrame, registry);
+   private final YoFrameVector3D bodyAngularVelocityAtEndOfWindow = new YoFrameVector3D("bodyAngularVelocityAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D vrpAtEndOfWindow = new YoFramePoint3D("vrpAtEndOfWindow", worldFrame, registry);
 
@@ -88,31 +112,37 @@ public class CoMTrajectoryModelPredictiveController
    final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
-   final LinearTrajectoryHandler trajectoryHandler;
+   final ContinuousTrajectoryHandler trajectoryHandler;
 
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
 
-   final LinearMPCQPSolver qpSolver;
+   final ContinuousMPCQPSolver qpSolver;
    private final TrajectoryAndCornerPointCalculator cornerPointCalculator = new TrajectoryAndCornerPointCalculator();
-   private LinearMPCTrajectoryViewer trajectoryViewer = null;
+   private ContinuousMPCTrajectoryViewer trajectoryViewer = null;
 
    private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
    private final DoubleConsumer initialComVelocityConsumer = initialCoMVelocityCostToGo::set;
    private final DoubleConsumer vrpTrackingConsumer0 = vrpTrackingCostToGo0::set;
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
+   private final DoubleConsumer orientationTrackingConsumer0 = orientationTrackingCostToGo0::set;
+   private final DoubleConsumer orientationTrackingConsumer1 = orientationTrackingCostToGo1::set;
+   private final DoubleConsumer orientationTrackingConsumer2 = orientationTrackingCostToGo2::set;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight,double dt, YoRegistry parentRegistry)
+   public ContinuousModelPredictiveController(double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
 
-      indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+      indexHandler = new ContinuousMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+
+      bodyInertia.setMass(mass);
+      bodyInertia.setMomentOfInertia(20, 20, 10);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
-      trajectoryHandler = new LinearTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
+      trajectoryHandler = new ContinuousTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -123,8 +153,8 @@ public class CoMTrajectoryModelPredictiveController
       Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
-      qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
-      solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
+      qpSolver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, registry);
+      solutionInspection = new ContinuousMPCSolutionInspection(indexHandler, mass, gravityZ);
 
       parentRegistry.addChild(registry);
    }
@@ -136,7 +166,7 @@ public class CoMTrajectoryModelPredictiveController
 
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      trajectoryViewer = new LinearMPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+      trajectoryViewer = new ContinuousMPCTrajectoryViewer(bodyInertia, registry, yoGraphicsListRegistry);
    }
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
@@ -191,6 +221,9 @@ public class CoMTrajectoryModelPredictiveController
       dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
       vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPosition());
 
+         bodyOrientationAtEndOfWindow.set(trajectoryHandler.getDesiredBodyOrientation());
+         bodyAngularVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredBodyAngularVelocity());
+
       if (previewWindowCalculator.activeSegmentChanged())
       {
          qpSolver.notifyResetActiveSet();
@@ -218,7 +251,8 @@ public class CoMTrajectoryModelPredictiveController
       if (solutionCoefficients != null)
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue());
 
-      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
+      // FIXME
+//      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
       if (trajectoryViewer != null)
       {
@@ -264,6 +298,16 @@ public class CoMTrajectoryModelPredictiveController
          mpcCommands.addCommand(computeInitialCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand()));
       }
       double initialDuration = contactSequence.get(0).getTimeInterval().getDuration();
+         mpcCommands.addCommand(computeInitialBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand()));
+         if (includeVelocityObjective)
+            mpcCommands.addCommand(computeInitialBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand()));
+
+         mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
+                                                                    0,
+                                                                    initialDuration,
+                                                                    contactSequence.get(0).getTimeInterval().getStartTime(),
+                                                                    orientationTrackingConsumer0));
+         mpcCommands.addCommand(computeOrientationDynamicsObjective(0, initialDuration, contactSequence.get(0).getTimeInterval().getStartTime()));
 
       if (contactSequence.get(0).getContactState().isLoadBearing())
       {
@@ -287,6 +331,8 @@ public class CoMTrajectoryModelPredictiveController
 
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComPositionContinuityCommand(), transition, firstSegmentDuration));
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextComVelocityContinuityCommand(), transition, firstSegmentDuration));
+            mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyOrientationContinuityCommand(), transition, firstSegmentDuration));
+            mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextBodyAngularVelocityContinuityCommand(), transition, firstSegmentDuration));
 
          if (contactSequence.get(transition).getContactState().isLoadBearing() && contactSequence.get(nextSequence).getContactState().isLoadBearing())
             mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), transition, firstSegmentDuration));
@@ -299,6 +345,20 @@ public class CoMTrajectoryModelPredictiveController
                mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
+
+            DoubleConsumer orientationCostToGoConsumer = null;
+            if (nextSequence == 1)
+               orientationCostToGoConsumer = orientationTrackingConsumer1;
+            else if (nextSequence == 2)
+               orientationCostToGoConsumer = orientationTrackingConsumer2;
+            mpcCommands.addCommand(computeOrientationTrackingObjective(commandProvider.getNextOrientationTrackingCommand(),
+                                                                       nextSequence,
+                                                                       nextDuration,
+                                                                       contactSequence.get(nextSequence).getTimeInterval().getStartTime(),
+                                                                       orientationCostToGoConsumer));
+            mpcCommands.addCommand(computeOrientationDynamicsObjective(nextSequence,
+                                                                       nextDuration,
+                                                                       contactSequence.get(nextSequence).getTimeInterval().getStartTime()));
 
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
@@ -331,7 +391,18 @@ public class CoMTrajectoryModelPredictiveController
                                                          comVelocityAtEndOfWindow,
                                                          numberOfPhases - 1,
                                                          finalDuration));
-
+         mpcCommands.addCommand(computeBodyOrientationObjective(commandProvider.getNextBodyOrientationCommand(),
+                                                                bodyOrientationAtEndOfWindow,
+                                                                numberOfPhases - 1,
+                                                                finalDuration,
+                                                                finalOrientationWeight,
+                                                                ConstraintType.OBJECTIVE));
+         mpcCommands.addCommand(computeBodyAngularVelocityObjective(commandProvider.getNextBodyAngularVelocityCommand(),
+                                                                    bodyAngularVelocityAtEndOfWindow,
+                                                                    numberOfPhases - 1,
+                                                                    finalDuration,
+                                                                    finalOrientationWeight,
+                                                                    ConstraintType.OBJECTIVE));
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
       if (includeRhoMinInequality)
@@ -369,6 +440,42 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
       objectiveToPack.setCostToGoConsumer(initialComVelocityConsumer);
+      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeInitialBodyOrientationObjective(BodyOrientationCommand objectiveToPack)
+   {
+      currentBodyOrientation.getEuler(eulerAngles);
+
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(0);
+      objectiveToPack.setTimeOfObjective(0.0);
+      objectiveToPack.setObjective(eulerAngles);
+      objectiveToPack.setWeight(initialOrientationWeight);
+      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeInitialBodyAngularVelocityObjective(BodyAngularVelocityCommand objectiveToPack)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(0);
+      objectiveToPack.setTimeOfObjective(0.0);
+      objectiveToPack.setObjective(currentBodyAngularVelocity);
+      objectiveToPack.setWeight(initialOrientationWeight);
+      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -469,6 +576,68 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private final FramePoint3D tempPoint = new FramePoint3D(worldFrame);
+   private final FrameQuaternion tempOrientation = new FrameQuaternion(worldFrame);
+   private final FrameVector3D tempAngularRate = new FrameVector3D(worldFrame);
+
+   private MPCCommand<?> computeOrientationTrackingObjective(OrientationTrackingCommand objectiveToPack,
+                                                             int segmentNumber,
+                                                             double segmentDuration,
+                                                             double segmentStartTime,
+                                                             DoubleConsumer costToGoConsumer)
+   {
+      objectiveToPack.clear();
+
+      objectiveToPack.setWeight(orientationTrackingWeight);
+      objectiveToPack.setSegmentNumber(segmentNumber, indexHandler);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setOmega(omega.getValue());
+
+      trajectoryHandler.computeReferenceOrientations(segmentStartTime, tempOrientation, tempAngularRate);
+      objectiveToPack.setStartOrientation(tempOrientation);
+      objectiveToPack.setStartAngularRate(tempAngularRate);
+
+      trajectoryHandler.computeReferenceOrientations(segmentStartTime + segmentDuration, tempOrientation, tempAngularRate);
+      objectiveToPack.setFinalOrientation(tempOrientation);
+      objectiveToPack.setFinalAngularRate(tempAngularRate);
+
+      objectiveToPack.setCostToGoConsumer(costToGoConsumer);
+
+      return objectiveToPack;
+   }
+
+   private final MPCCommandList orientationDynamicsList = new MPCCommandList();
+
+   private MPCCommand<?> computeOrientationDynamicsObjective(int segmentNumber, double segmentDuration, double segmentStartTime)
+   {
+      orientationDynamicsList.clear();
+      for (double time = 0.0; time < segmentDuration; time += dynamicsCollocationDT)
+      {
+         OrientationDynamicsCommand command = commandProvider.getNextOrientationDynamicsCommand();
+
+         command.clear();
+         command.setSegmentNumber(segmentNumber);
+         command.setTimeOfObjective(time);
+         command.setOmega(omega.getValue());
+         command.setBodyInertia(bodyInertia);
+         command.setWeight(orientationDynamicsWeight);
+         command.setConstraintType(ConstraintType.OBJECTIVE);
+
+         trajectoryHandler.computeOrientation(segmentStartTime + time, omega.getValue(), tempOrientation, tempAngularRate);
+         trajectoryHandler.fastComputePosition(segmentStartTime + time, omega.getValue(), tempPoint);
+         command.setOrientationEstimate(tempOrientation);
+         command.setAngularVelocityEstimate(tempAngularRate);
+         command.setComPositionEstimate(tempPoint);
+
+         for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+            command.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+
+         orientationDynamicsList.addCommand(command);
+      }
+
+      return orientationDynamicsList;
+   }
+
    private MPCCommand<?> computeDCMPositionObjective(DCMPositionCommand objectiveToPack,
                                                      FramePoint3DReadOnly desiredPosition,
                                                      int segmentNumber,
@@ -526,6 +695,53 @@ public class CoMTrajectoryModelPredictiveController
       return objectiveToPack;
    }
 
+   private final FramePoint3D eulerAngles = new FramePoint3D();
+
+   private MPCCommand<?> computeBodyOrientationObjective(BodyOrientationCommand objectiveToPack,
+                                                         FrameQuaternionReadOnly desiredOrientation,
+                                                         int segmentNumber,
+                                                         double timeOfObjective,
+                                                         double weight,
+                                                         ConstraintType constraintType)
+   {
+      desiredOrientation.getEuler(eulerAngles);
+
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(eulerAngles);
+      objectiveToPack.setConstraintType(constraintType);
+      objectiveToPack.setWeight(weight);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeBodyAngularVelocityObjective(BodyAngularVelocityCommand objectiveToPack,
+                                                             FrameVector3DReadOnly desiredAngularVelocity,
+                                                             int segmentNumber,
+                                                             double timeOfObjective,
+                                                             double weight,
+                                                             ConstraintType constraintType)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setTimeOfObjective(timeOfObjective);
+      objectiveToPack.setObjective(desiredAngularVelocity);
+      objectiveToPack.setConstraintType(constraintType);
+      objectiveToPack.setWeight(weight);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
+
+      return objectiveToPack;
+   }
 
    private MPCCommand<?> computeVRPPositionObjective(VRPPositionCommand objectiveToPack,
                                                      FramePoint3DReadOnly desiredPosition,
@@ -573,7 +789,9 @@ public class CoMTrajectoryModelPredictiveController
               desiredDCMVelocity,
               desiredVRPPosition,
               desiredVRPVelocity,
-              desiredECMPPosition);
+              desiredECMPPosition,
+              desiredBodyOrientation,
+              desiredBodyAngularVelocity);
    }
 
    private void updateCoMTrajectoryViewer()
@@ -589,7 +807,9 @@ public class CoMTrajectoryModelPredictiveController
                        FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack,
                        FixedFrameVector3DBasics vrpVelocityToPack,
-                       FixedFramePoint3DBasics ecmpPositionToPack)
+                       FixedFramePoint3DBasics ecmpPositionToPack,
+                       FixedFrameOrientation3DBasics bodyOrientationToPack,
+                       FixedFrameVector3DBasics bodyAngularVelocityToPack)
    {
       trajectoryHandler.compute(timeInPhase, omega.getValue());
 
@@ -601,11 +821,18 @@ public class CoMTrajectoryModelPredictiveController
       vrpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPVelocity());
       ecmpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredECMPPosition());
+      bodyOrientationToPack.setMatchingFrame(trajectoryHandler.getDesiredBodyOrientation());
+      bodyAngularVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredBodyAngularVelocity());
    }
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       trajectoryHandler.setInitialCenterOfMassPositionState(centerOfMassPosition, centerOfMassVelocity);
+   }
+
+   public void setInitialBodyOrientationState(FrameOrientation3DReadOnly bodyOrientation, FrameVector3DReadOnly bodyAngularVelocity)
+   {
+      trajectoryHandler.setInitialBodyOrientationState(bodyOrientation, bodyAngularVelocity);
    }
 
    public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition,
@@ -616,6 +843,13 @@ public class CoMTrajectoryModelPredictiveController
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
       this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);
       this.currentTimeInState.set(timeInState);
+   }
+
+   public void setCurrentBodyOrientationState(FrameOrientation3DReadOnly bodyOrientation, FrameVector3DReadOnly bodyAngularVelocity)
+   {
+      this.currentBodyOrientation.setMatchingFrame(bodyOrientation);
+      this.currentBodyYawPitchRoll.setMatchingFrame(bodyOrientation);
+      this.currentBodyAngularVelocity.setMatchingFrame(bodyAngularVelocity);
    }
 
    /**
@@ -677,6 +911,16 @@ public class CoMTrajectoryModelPredictiveController
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;
+   }
+
+   public FrameOrientation3DReadOnly getDesiredBodyOrientation()
+   {
+      return desiredBodyOrientation;
+   }
+
+   public FrameVector3DReadOnly getDesiredBodyAngularVelocity()
+   {
+      return desiredBodyAngularVelocity;
    }
 
    public List<Trajectory3D> getVRPTrajectories()

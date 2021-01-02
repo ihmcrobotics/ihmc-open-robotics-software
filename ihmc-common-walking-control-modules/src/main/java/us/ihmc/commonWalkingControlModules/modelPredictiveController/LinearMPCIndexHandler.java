@@ -1,29 +1,26 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
-public class MPCIndexHandler
+public class LinearMPCIndexHandler
 {
-   public static final boolean includeOrientation = true;
-   public static final boolean includeExponentialInOrientation = false;
    public static final int coefficientsPerRho = 4;
    public static final int comCoefficientsPerSegment = 6;
-   public static final int orientationCoefficientsPerSegment = includeExponentialInOrientation ? 6 : 4;
 
    private int totalProblemSize = 0;
 
    private final int numberOfBasisVectorsPerContactPoint;
    private final TIntArrayList comStartIndices = new TIntArrayList();
    private final TIntArrayList rhoStartIndices = new TIntArrayList();
-   private final TIntArrayList orientationStartIndices = new TIntArrayList();
    private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
 
    private final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 
-   public MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
+   public LinearMPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
    }
@@ -38,7 +35,6 @@ public class MPCIndexHandler
    {
       rhoStartIndices.clear();
       comStartIndices.clear();
-      orientationStartIndices.clear();
       rhoCoefficientsInSegment.clear();
 
       totalProblemSize = 0;
@@ -51,12 +47,6 @@ public class MPCIndexHandler
          rhoCoefficientsInSegment.add(rhoCoefficients);
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
-
-         if (includeOrientation)
-         {
-            orientationStartIndices.add(totalProblemSize);
-            totalProblemSize += 3 * orientationCoefficientsPerSegment;
-         }
       }
    }
 
@@ -83,26 +73,6 @@ public class MPCIndexHandler
    public int getRhoCoefficientStartIndex(int segmentId)
    {
       return rhoStartIndices.get(segmentId);
-   }
-
-   public int getOrientationCoefficientsStartIndex(int segmentId)
-   {
-      return orientationStartIndices.get(segmentId);
-   }
-
-   public int getYawCoefficientsStartIndex(int segmentId)
-   {
-      return getOrientationCoefficientsStartIndex(segmentId);
-   }
-
-   public int getPitchCoefficientsStartIndex(int segmentId)
-   {
-      return orientationCoefficientsPerSegment + getYawCoefficientsStartIndex(segmentId);
-   }
-
-   public int getRollCoefficientsStartIndex(int segmentId)
-   {
-      return orientationCoefficientsPerSegment + getPitchCoefficientsStartIndex(segmentId);
    }
 
    public int getTotalProblemSize()

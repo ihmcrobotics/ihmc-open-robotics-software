@@ -26,7 +26,6 @@ public class VRPPositionCommandTest
 
       double gravityZ = -9.81;
       double omega = 3.0;
-      double mass = 1.5;
       double omega2 = omega * omega;
       double mu = 0.8;
       double dt = 1e-3;
@@ -37,8 +36,8 @@ public class VRPPositionCommandTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();

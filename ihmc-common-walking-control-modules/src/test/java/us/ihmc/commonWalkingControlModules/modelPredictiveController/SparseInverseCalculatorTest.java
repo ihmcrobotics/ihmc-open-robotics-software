@@ -32,17 +32,14 @@ public class SparseInverseCalculatorTest
       FramePoint3D comStartPosition = new FramePoint3D();
       double gravityZ = -9.81;
       double omega = 3.0;
-      double omega2 = omega * omega;
       double mu = 0.8;
-      double dt = 1e-3;
       double duration = 1.0;
-      double mass = 1.5;
 
       double timeAtStart = 0.0;
       double timeAtEnd = duration;
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
       FramePose3D contactPose = new FramePose3D();
@@ -94,7 +91,7 @@ public class SparseInverseCalculatorTest
       dcmEndPositionCommand.setWeight(1.0);
       dcmEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, 1e-3, mass, gravityZ, new YoRegistry("registry"));
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, gravityZ, new YoRegistry("registry"));
       QPInputTypeA inputA = new QPInputTypeA(indexHandler.getTotalProblemSize());
       QPInputTypeC inputC = new QPInputTypeC(indexHandler.getTotalProblemSize());
 

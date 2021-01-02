@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMMPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCQPSolver;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -19,8 +19,8 @@ public class AngleTrackingCommandTest
       double dt = 1e-3;
       double omega = 3.0;
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      ContinuousMPCQPSolver solver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
 
       double startValue = -5.0;
@@ -72,7 +72,7 @@ public class AngleTrackingCommandTest
       {
          double assembledValue = 0.0;
          double assembledRate = 0.0;
-         if (MPCIndexHandler.includeExponentialInOrientation)
+         if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
          {
             assembledValue += solution.get(startIndex, 0) * Math.exp(omega * time);
             assembledValue += solution.get(startIndex + 1, 0) * Math.exp(-omega * time);

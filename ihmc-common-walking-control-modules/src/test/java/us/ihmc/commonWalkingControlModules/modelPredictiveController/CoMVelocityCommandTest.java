@@ -28,7 +28,6 @@ public class CoMVelocityCommandTest
       double omega = 3.0;
       double mu = 0.8;
       double dt = 1e-3;
-      double mass = 1.5;
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
@@ -36,8 +35,8 @@ public class CoMVelocityCommandTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 

@@ -1,7 +1,8 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.AngleTrackingCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class AngleTrackingCostCalculator
@@ -31,7 +32,7 @@ public class AngleTrackingCostCalculator
       double a1 = 3.0 / t2 * (objective.getFinalValue() - a3) - (objective.getFinalRate() + 2.0 * a2) / t;
       double a0 = (objective.getFinalRate() + a2) / t2 - 2.0 / t3 * (objective.getFinalValue() - a3);
 
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          double h00 = (exponential * exponential - 1.0) / (2.0 * w);
          double h10 = t;

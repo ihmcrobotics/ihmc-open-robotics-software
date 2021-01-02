@@ -4,7 +4,10 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPPositionCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -38,8 +41,8 @@ public class OrientationDynamicsCommandTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      ContinuousMPCQPSolver solver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();

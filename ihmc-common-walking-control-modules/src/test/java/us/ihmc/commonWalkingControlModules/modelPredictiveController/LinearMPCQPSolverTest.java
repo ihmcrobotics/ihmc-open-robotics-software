@@ -5,7 +5,9 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -17,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class CoMMPCQPSolverTest
+public class LinearMPCQPSolverTest
 {
    @Test
    public void testCommandOptimize()
@@ -32,7 +34,6 @@ public class CoMMPCQPSolverTest
       double mu = 0.8;
       double dt = 1e-3;
       double duration = 1.0;
-      double mass = 1.5;
 
       double timeAtStart = 0.0;
       double timeAtEnd = duration;
@@ -49,8 +50,8 @@ public class CoMMPCQPSolverTest
 
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
       contactPose.getPosition().set(dcmObjective);
@@ -193,7 +194,6 @@ public class CoMMPCQPSolverTest
 
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
-      solver.setOrientationCoefficientRegularization(regularization);
 
       solver.solve();
 
@@ -350,15 +350,14 @@ public class CoMMPCQPSolverTest
       double omega = 3.0;
       double mu = 0.8;
       double dt = 1e-3;
-      double mass = 1.5;
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 

@@ -5,8 +5,11 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyAngularVelocityContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyOrientationContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.OrientationCoefficientJacobianCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -38,8 +41,8 @@ public class BodyAngularVelocityContinuityCommandTest
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      ContinuousMPCQPSolver solver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose1 = new FramePose3D();
       FramePose3D contactPose2 = new FramePose3D();
@@ -110,7 +113,7 @@ public class BodyAngularVelocityContinuityCommandTest
       int yawStartIndex0 = indexHandler.getYawCoefficientsStartIndex(0);
       int pitchStartIndex0 = indexHandler.getPitchCoefficientsStartIndex(0);
       int rollStartIndex0 = indexHandler.getRollCoefficientsStartIndex(0);
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          valueEndOf1.setX(omega * Math.exp(omega * duration1) * solution.get(rollStartIndex0, 0) - omega * Math.exp(-omega * duration1) * solution.get(rollStartIndex0 + 1, 0));
          valueEndOf1.setY(omega * Math.exp(omega * duration1) * solution.get(pitchStartIndex0, 0) - omega * Math.exp(-omega * duration1) * solution.get(pitchStartIndex0 + 1, 0));
@@ -131,7 +134,7 @@ public class BodyAngularVelocityContinuityCommandTest
       int pitchStartIndex1 = indexHandler.getPitchCoefficientsStartIndex(0);
       int rollStartIndex1 = indexHandler.getRollCoefficientsStartIndex(0);
 
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          valueStartOf2.setX(omega * solution.get(rollStartIndex1, 0) - omega * solution.get(rollStartIndex1 + 1));
          valueStartOf2.setY(omega * solution.get(pitchStartIndex1, 0) - omega * solution.get(pitchStartIndex1 + 1));

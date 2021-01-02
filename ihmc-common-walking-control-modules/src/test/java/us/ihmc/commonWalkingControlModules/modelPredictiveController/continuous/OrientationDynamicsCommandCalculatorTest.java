@@ -1,10 +1,13 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.OrientationCoefficientJacobianCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.OrientationDynamicsCommandCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -12,7 +15,6 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,12 +24,11 @@ import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.sql.Ref;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.fail;
 
 public class OrientationDynamicsCommandCalculatorTest
@@ -54,7 +55,7 @@ public class OrientationDynamicsCommandCalculatorTest
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
       contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
       SpatialInertia spatialInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       spatialInertia.setMomentOfInertia(10.0, 10.0, 5.0);
       spatialInertia.setMass(mass);
@@ -122,8 +123,8 @@ public class OrientationDynamicsCommandCalculatorTest
          DMatrixRMaj orientationJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
          CommonOps_DDRM.add(rotationJacobianExpected, rotationRateJacobianExpected, orientationJacobianExpected);
 
-         EjmlUnitTests.assertEquals(rotationMatrixExpected, calculator.rotationMatrix, 1e-6);
-         EjmlUnitTests.assertEquals(rotationRateMatrixExpected, calculator.rotationMatrixDot, 1e-6);
+         EjmlUnitTests.assertEquals(rotationMatrixExpected, calculator.bodyVelocityToWorld, 1e-6);
+         EjmlUnitTests.assertEquals(rotationRateMatrixExpected, calculator.bodyAccelerationToWorld, 1e-6);
 
          EjmlUnitTests.assertEquals(angularVelocityJacobian, calculator.getRotationRateJacobian(), 1e-6);
          EjmlUnitTests.assertEquals(angularAccelerationJacobian, calculator.getRotationAccelerationJacobian(), 1e-6);
@@ -152,10 +153,10 @@ public class OrientationDynamicsCommandCalculatorTest
          {
             DMatrixRMaj forceJacobian = new DMatrixRMaj(3, indexHandler.getRhoCoefficientsInSegment(0));
             ContactPointHelper pointHelper = contactPlaneHelper.getContactPointHelper(contactIdx);
-            DMatrixRMaj pointTorqueJacobian = new DMatrixRMaj(3, MPCIndexHandler.coefficientsPerRho * pointHelper.getRhoSize());
+            DMatrixRMaj pointTorqueJacobian = new DMatrixRMaj(3, ContinuousMPCIndexHandler.coefficientsPerRho * pointHelper.getRhoSize());
             for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
             {
-               int startIdx = MPCIndexHandler.coefficientsPerRho * rhoIdx;
+               int startIdx = ContinuousMPCIndexHandler.coefficientsPerRho * rhoIdx;
                FrameVector3DReadOnly basisVector = rhoHelper.getBasisVector(rhoIdx);
                basisVector.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
@@ -175,11 +176,11 @@ public class OrientationDynamicsCommandCalculatorTest
 
             EjmlUnitTests.assertEquals(pointTorqueJacobian, pointHelper.getLinearJacobian(2), 1e-5);
 
-            int startIdx = MPCIndexHandler.coefficientsPerRho * 4 * contactIdx;
+            int startIdx = ContinuousMPCIndexHandler.coefficientsPerRho * 4 * contactIdx;
             MatrixTools.setMatrixBlock(forceJacobian, 0, startIdx, pointTorqueJacobian, 0, 0, 3, pointTorqueJacobian.getNumCols(), 1.0);
 
             Vector3D vectorToPoint = new Vector3D();
-            vectorToPoint.sub(comPositionEstimate, pointHelper.getBasisVectorOrigin());
+            vectorToPoint.sub(pointHelper.getBasisVectorOrigin(), comPositionEstimate);
 
             DMatrixRMaj skewVector = new DMatrixRMaj(3, 3);
             skewVector.set(0, 1, -vectorToPoint.getZ());
@@ -203,6 +204,116 @@ public class OrientationDynamicsCommandCalculatorTest
          DMatrixRMaj fullTorqueJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
          MatrixTools.setMatrixBlock(fullTorqueJacobian, 0, indexHandler.getRhoCoefficientStartIndex(0), torqueJacobian, 0, 0, 3, indexHandler.getRhoCoefficientsInSegment(0), 1.0);
          MatrixTestTools.assertMatrixEquals("i = " + i, fullTorqueJacobian, calculator.getTorqueJacobian(), 1e-5);
+
+      }
+   }
+
+   @Test
+   public void testTorqueJacobian()
+   {
+      double omega = 3.0;
+      double mu = 0.8;
+      double mass = 1.5;
+
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+
+      FramePose3D contactPose = new FramePose3D();
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
+      contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      SpatialInertia spatialInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      spatialInertia.setMomentOfInertia(10.0, 10.0, 5.0);
+      spatialInertia.setMass(mass);
+
+      indexHandler.initialize((i) -> 4, 1);
+      OrientationDynamicsCommandCalculator calculator = new OrientationDynamicsCommandCalculator(indexHandler, mass);
+
+      Random random = new Random(1738L);
+      for (int i = 0; i < 1000; i++)
+      {
+         Orientation3DReadOnly orientationEstimate = EuclidCoreRandomTools.nextOrientation3D(random);
+         Vector3DReadOnly angularVelocityEstimate = EuclidCoreRandomTools.nextVector3D(random);
+         Point3DReadOnly comPositionEstimate = EuclidCoreRandomTools.nextPoint3D(random);
+
+         double time = RandomNumbers.nextDouble(random, 0.0, 3.0);
+
+         OrientationDynamicsCommand command = new OrientationDynamicsCommand();
+         command.setOrientationEstimate(orientationEstimate);
+         command.setAngularVelocityEstimate(angularVelocityEstimate);
+         command.setComPositionEstimate(comPositionEstimate);
+         command.setTimeOfObjective(time);
+         command.setOmega(omega);
+         command.setWeight(10);
+         command.setSegmentNumber(0);
+         command.setBodyInertia(spatialInertia);
+         command.addContactPlaneHelper(contactPlaneHelper);
+
+         calculator.compute(command);
+
+         DMatrixRMaj rhoCoefficients = new DMatrixRMaj(indexHandler.getRhoCoefficientsInSegment(0), 1);
+         DMatrixRMaj fullSolution = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
+
+         MatrixTools.setMatrixBlock(fullSolution, indexHandler.getRhoCoefficientStartIndex(0), 0, rhoCoefficients, 0, 0, indexHandler.getRhoCoefficientsInSegment(0), 1, 1.0);
+
+         DMatrixRMaj rhoValues = new DMatrixRMaj(contactPlaneHelper.getRhoSize(), 1);
+
+         List<FrameVector3D> rhoForces = new ArrayList<>();
+
+         FrameVector3D totalTorque = new FrameVector3D();
+
+         double a0 = omega * omega * Math.exp(omega * time);
+         double a1 = omega * omega * Math.exp(-omega * time);
+         double a2 = 6.0 * time;
+         double a3 = 2.0;
+
+         DMatrixRMaj torqueJacobian = new DMatrixRMaj(3, indexHandler.getRhoCoefficientsInSegment(0));
+         for (int contactIdx = 0; contactIdx < contactPlaneHelper.getNumberOfContactPoints(); contactIdx++)
+         {
+            ContactPointHelper pointHelper = contactPlaneHelper.getContactPointHelper(contactIdx);
+            for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
+            {
+               int startIdx = ContinuousMPCIndexHandler.coefficientsPerRho * (contactIdx * 4 + rhoIdx);
+               FrameVector3DReadOnly basisVector = rhoHelper.getBasisVector(rhoIdx);
+               basisVector.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+               double rhoValue = a0 * rhoCoefficients.get(startIdx, 0);
+               rhoValue += a1 * rhoCoefficients.get(startIdx + 1, 0);
+               rhoValue += a2 * rhoCoefficients.get(startIdx + 2, 0);
+               rhoValue += a3 * rhoCoefficients.get(startIdx + 3, 0);
+
+               rhoValues.set(contactIdx * 4 + rhoIdx, 0, rhoValue);
+
+               FrameVector3D rhoForce = new FrameVector3D(basisVector);
+               rhoForce.changeFrame(ReferenceFrame.getWorldFrame());
+               rhoForce.normalize();
+               rhoForce.scale(rhoValue);
+
+               rhoForces.add(rhoForce);
+
+               FrameVector3D vectorToForce = new FrameVector3D();
+               vectorToForce.sub(pointHelper.getBasisVectorOrigin(), comPositionEstimate);
+
+               FrameVector3D rhoTorque = new FrameVector3D();
+               rhoTorque.cross(vectorToForce, rhoForce);
+
+               totalTorque.add(rhoTorque);
+            }
+         }
+
+         DMatrixRMaj angularAccelerationExpected = new DMatrixRMaj(3, 1);
+         DMatrixRMaj angularAccelerationFromJacobian = new DMatrixRMaj(3, 1);
+         DMatrixRMaj totalTorqueVector = new DMatrixRMaj(3, 1);
+         totalTorque.get(totalTorqueVector);
+
+         CommonOps_DDRM.mult(calculator.inertiaInWorldInverse, totalTorqueVector, angularAccelerationExpected);
+         CommonOps_DDRM.mult(calculator.getTorqueJacobian(), fullSolution, angularAccelerationFromJacobian);
+
+         MatrixTestTools.assertMatrixEquals("i = " + i, angularAccelerationExpected, angularAccelerationFromJacobian, 1e-5);
 
       }
    }

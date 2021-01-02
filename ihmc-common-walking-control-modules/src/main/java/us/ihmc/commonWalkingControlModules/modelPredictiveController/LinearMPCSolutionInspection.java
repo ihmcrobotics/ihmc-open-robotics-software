@@ -8,18 +8,18 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
-public class CoMMPCSolutionInspection
+public class LinearMPCSolutionInspection
 {
-   private static final double epsilon = 1e-3;
-   private final MPCIndexHandler indexHandler;
+   protected static final double epsilon = 1e-3;
+   private final LinearMPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
-   private final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
-   private final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
+   protected final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
+   protected final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
-   public CoMMPCSolutionInspection(MPCIndexHandler indexHandler, double mass, double gravityZ)
+   public LinearMPCSolutionInspection(LinearMPCIndexHandler indexHandler, double gravityZ)
    {
       this.indexHandler = indexHandler;
-      inputCalculator = new MPCQPInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
    }
 
    public void inspectSolution(MPCCommandList commandList, DMatrixRMaj solution)
@@ -47,12 +47,6 @@ public class CoMMPCSolutionInspection
                break;
             case VRP_TRACKING:
                inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
-               break;
-            case ORIENTATION_TRACKING:
-               inspectOrientationTrackingObjective((OrientationTrackingCommand) command, solution);
-               break;
-            case ORIENTATION_DYNAMICS:
-               // TODO
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
@@ -84,13 +78,6 @@ public class CoMMPCSolutionInspection
    public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
    {
       boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
-      if (success)
-         command.setCostToGo(inspectInput(qpInputTypeC, solution));
-   }
-
-   public void inspectOrientationTrackingObjective(OrientationTrackingCommand command, DMatrixRMaj solution)
-   {
-      boolean success = inputCalculator.calculateOrientationTrackingObjective(qpInputTypeC, command);
       if (success)
          command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
@@ -151,7 +138,7 @@ public class CoMMPCSolutionInspection
       solverInput_H.zero();
       solverInput_f.zero();
 
-      CoMMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
+      LinearMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
 
       CommonOps_DDRM.mult(solverInput_H, solution, Hx);
       CommonOps_DDRM.multTransA(solution, Hx, cost);
@@ -175,7 +162,7 @@ public class CoMMPCSolutionInspection
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
 
-      CoMMPCQPSolver.addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
+      LinearMPCQPSolver.addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
 
       solverOutput_beq.reshape(constraints, problemSize);
       solverOutput_beq.zero();
@@ -204,7 +191,7 @@ public class CoMMPCSolutionInspection
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
 
-      CoMMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();
@@ -229,7 +216,7 @@ public class CoMMPCSolutionInspection
       solverInput_Ain.zero();
       solverInput_bin.zero();
 
-      CoMMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();

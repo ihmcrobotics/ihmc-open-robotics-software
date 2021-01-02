@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SegmentPointViewer;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -84,7 +82,7 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new CoMTrajectoryModelPredictiveController(controllerToolbox.getGravityZ(), 1.0, controllerToolbox.getFullRobotModel().getTotalMass(), controllerToolbox.getControlDT(), registry);
+      comTrajectoryPlanner = new CoMTrajectoryModelPredictiveController(controllerToolbox.getGravityZ(), 1.0, controllerToolbox.getControlDT(), registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
@@ -152,9 +150,9 @@ public class JumpingBalanceManager
       yoDesiredCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       yoDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
-      yoDesiredBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientation());
-      yoDesiredBodyYawPitchRoll.set(comTrajectoryPlanner.getDesiredBodyOrientation());
-      yoDesiredBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocity());
+//      yoDesiredBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientation());
+//      yoDesiredBodyYawPitchRoll.set(comTrajectoryPlanner.getDesiredBodyOrientation());
+//      yoDesiredBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocity());
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
@@ -192,7 +190,7 @@ public class JumpingBalanceManager
                                                        controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
                                                        yoPerfectVRP,
                                                        timeInSupportSequence.getDoubleValue());
-      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+//      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
 
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForStanding.getContactStateProviders());
@@ -228,7 +226,7 @@ public class JumpingBalanceManager
                                                        controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
                                                        yoPerfectVRP,
                                                        timeInSupportSequence.getDoubleValue());
-      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+//      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
       comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
 
@@ -284,7 +282,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.NaN);
@@ -296,7 +294,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
 
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
@@ -313,7 +311,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
 
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
@@ -330,7 +328,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
 
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);

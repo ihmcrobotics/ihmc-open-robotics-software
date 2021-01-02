@@ -1,10 +1,12 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous;
 
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.AngleTrackingCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.AngleTrackingCostCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -31,7 +33,7 @@ public class AngleTrackingCostCalculatorTest
       command.setOmega(omega);
       command.setWeight(100.0);
 
-      int size = MPCIndexHandler.orientationCoefficientsPerSegment;
+      int size = ContinuousMPCIndexHandler.orientationCoefficientsPerSegment;
       DMatrixRMaj hessian = new DMatrixRMaj(size, size);
       DMatrixRMaj gradient = new DMatrixRMaj(size, 1);
 
@@ -46,7 +48,7 @@ public class AngleTrackingCostCalculatorTest
       double a2 = (endRate + a4) / Math.pow(duration, 2) - 2.0 / Math.pow(duration, 3) * (endValue - a5);
 
       int start = 0;
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          hessianExpected.set(0, 0, 1.0 / (2.0 * omega) * (Math.exp(2.0 * omega * duration) - 1.0));
          hessianExpected.set(1, 0, duration);

@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.CenterOfMassFeedbackController;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;

@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.BodyOrientationContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.OrientationCoefficientJacobianCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -33,17 +34,14 @@ public class BodyOrientationContinuityCommandTest
       double mass = 1.5;
       double dt = 1e-3;
 
-      FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
-
       ContactStateMagnitudeToForceMatrixHelper rhoHelper1 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactStateMagnitudeToForceMatrixHelper rhoHelper2 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
 
       ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      MPCIndexHandler indexHandler = new MPCIndexHandler(4);
-      CoMMPCQPSolver solver = new CoMMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
+      ContinuousMPCIndexHandler indexHandler = new ContinuousMPCIndexHandler(4);
+      ContinuousMPCQPSolver solver = new ContinuousMPCQPSolver(indexHandler, dt, mass, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose1 = new FramePose3D();
       FramePose3D contactPose2 = new FramePose3D();
@@ -114,7 +112,7 @@ public class BodyOrientationContinuityCommandTest
       int yawStartIndex0 = indexHandler.getYawCoefficientsStartIndex(0);
       int pitchStartIndex0 = indexHandler.getPitchCoefficientsStartIndex(0);
       int rollStartIndex0 = indexHandler.getRollCoefficientsStartIndex(0);
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          valueEndOf1.setX(Math.exp(omega * duration1) * solution.get(rollStartIndex0, 0) + Math.exp(-omega * duration1) * solution.get(rollStartIndex0 + 1, 0));
          valueEndOf1.setY(Math.exp(omega * duration1) * solution.get(pitchStartIndex0, 0) + Math.exp(-omega * duration1) * solution.get(pitchStartIndex0 + 1, 0));
@@ -135,7 +133,7 @@ public class BodyOrientationContinuityCommandTest
       int pitchStartIndex1 = indexHandler.getPitchCoefficientsStartIndex(0);
       int rollStartIndex1 = indexHandler.getRollCoefficientsStartIndex(0);
 
-      if (MPCIndexHandler.includeExponentialInOrientation)
+      if (ContinuousMPCIndexHandler.includeExponentialInOrientation)
       {
          valueStartOf2.setX(solution.get(rollStartIndex1, 0) + solution.get(rollStartIndex1 + 1));
          valueStartOf2.setY(solution.get(pitchStartIndex1, 0) + solution.get(pitchStartIndex1 + 1));
