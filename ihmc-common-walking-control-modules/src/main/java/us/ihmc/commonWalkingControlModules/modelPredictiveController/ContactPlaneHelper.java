@@ -62,7 +62,7 @@ public class ContactPlaneHelper
 
       numberOfContactPoints = maxNumberOfContactPoints;
       rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
-      coefficientSize = MPCIndexHandler.coefficientsPerRho * maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
+      coefficientSize = LinearMPCIndexHandler.coefficientsPerRho * maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
 
       contactPoints = new ContactPointHelper[maxNumberOfContactPoints];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
@@ -72,7 +72,7 @@ public class ContactPlaneHelper
          contactPoints[i] = new ContactPointHelper(numberOfBasisVectorsPerContactPoint);
       }
 
-      int coefficientsSize = MPCIndexHandler.coefficientsPerRho * rhoSize;
+      int coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
       rhoMaxMatrix = new DMatrixRMaj(rhoSize, 1);
 
@@ -230,7 +230,7 @@ public class ContactPlaneHelper
       planeFrame.setPoseAndUpdate(framePose);
 
       rhoSize = numberOfContactPoints * numberOfBasisVectorsPerContactPoint;
-      coefficientSize = MPCIndexHandler.coefficientsPerRho * rhoSize;
+      coefficientSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
       rhoMaxMatrix.reshape(rhoSize, 1);
       rhoMaxMatrix.zero();

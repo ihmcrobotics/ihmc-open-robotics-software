@@ -271,29 +271,34 @@ public class LinearMPCQPSolver
       for (int i = 0; i < commandList.getNumberOfCommands(); i++)
       {
          MPCCommand<?> command = commandList.getCommand(i);
-
-         switch (command.getCommandType())
-         {
-            case VALUE:
-               submitMPCValueObjective((MPCValueCommand) command);
-               break;
-            case CONTINUITY:
-               submitContinuityObjective((MPCContinuityCommand) command);
-               break;
-            case LIST:
-               submitMPCCommandList((MPCCommandList) command);
-               break;
-            case RHO_VALUE:
-               submitRhoValueCommand((RhoValueObjectiveCommand) command);
-               break;
-            case VRP_TRACKING:
-               submitVRPTrackingCommand((VRPTrackingCommand) command);
-               break;
-            default:
-               throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
-         }
+         submitMPCCommand(command);
       }
    }
+
+   public void submitMPCCommand(MPCCommand<?> command)
+   {
+      switch (command.getCommandType())
+      {
+         case VALUE:
+            submitMPCValueObjective((MPCValueCommand) command);
+            break;
+         case CONTINUITY:
+            submitContinuityObjective((MPCContinuityCommand) command);
+            break;
+         case LIST:
+            submitMPCCommandList((MPCCommandList) command);
+            break;
+         case RHO_VALUE:
+            submitRhoValueCommand((RhoValueObjectiveCommand) command);
+            break;
+         case VRP_TRACKING:
+            submitVRPTrackingCommand((VRPTrackingCommand) command);
+            break;
+         default:
+            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
+      }
+   }
+
 
    public void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {

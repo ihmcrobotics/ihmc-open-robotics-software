@@ -11,13 +11,16 @@ import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixExponentialCalculator
 {
-   private final int size;
-   private final DMatrixRMaj As, As_2, As_4, As_6;
-   private final DMatrixRMaj U;
-   private final DMatrixRMaj V;
-   private final DMatrixRMaj AV;
-   private final DMatrixRMaj N, D;
-   private final DMatrixRMaj temp;
+   private int size;
+   private final DMatrixRMaj As = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_2 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_4 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_6 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj V = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj AV = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj N = new DMatrixRMaj(0, 0), D = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj temp = new DMatrixRMaj(0, 0);
    private final LinearSolverDense<DMatrixRMaj> solver;
 
    // constants for pade approximation
@@ -38,22 +41,28 @@ public class MatrixExponentialCalculator
 
    public MatrixExponentialCalculator(int size)
    {
-      this.size = size;
-      this.As = new DMatrixRMaj(size, size);
-      this.As_2 = new DMatrixRMaj(size, size);
-      this.As_4 = new DMatrixRMaj(size, size);
-      this.As_6 = new DMatrixRMaj(size, size);
-
-      this.U = new DMatrixRMaj(size, size);
-      this.V = new DMatrixRMaj(size, size);
-
-      this.AV = new DMatrixRMaj(size, size);
-      this.N = new DMatrixRMaj(size, size);
-      this.D = new DMatrixRMaj(size, size);
-
-      this.temp = new DMatrixRMaj(size, size);
+      reshape(size);
 
       solver = LinearSolverFactory_DDRM.linear(size);
+   }
+
+   public void reshape(int size)
+   {
+      this.size = size;
+
+      As.reshape(size, size);
+      As_2.reshape(size, size);
+      As_4.reshape(size, size);
+      As_6.reshape(size, size);
+
+      U.reshape(size, size);
+      V.reshape(size, size);
+
+      AV.reshape(size, size);
+      N.reshape(size, size);
+      D.reshape(size, size);
+
+      temp.reshape(size, size);
    }
 
    /**
@@ -85,13 +94,11 @@ public class MatrixExponentialCalculator
       CommonOps_DDRM.mult(As_4, As_2, As_6);
 
       // U = c0*I + c2*A^2 + c4*A^4 + (c6*I + c8*A^2 + c10*A^4 + c12*A^6)*A^6
-      CommonOps_DDRM.fill(U, 0.0);
-      SpecializedOps_DDRM.addIdentity(U, U, c0);
+      MatrixTools.setDiagonal(U, c0);
       CommonOps_DDRM.addEquals(U, c2, As_2);
       CommonOps_DDRM.addEquals(U, c4, As_4);
 
-      CommonOps_DDRM.fill(temp, 0.0);
-      SpecializedOps_DDRM.addIdentity(temp, temp, c6);
+      MatrixTools.setDiagonal(temp, c6);
       CommonOps_DDRM.addEquals(temp, c8, As_2);
       CommonOps_DDRM.addEquals(temp, c10, As_4);
       CommonOps_DDRM.addEquals(temp, c12, As_6);
@@ -99,13 +106,11 @@ public class MatrixExponentialCalculator
       CommonOps_DDRM.multAdd(temp, As_6, U);
 
       // V = c1*I + c3*A^2 + c5*A^4 + (c7*I + c9*A^2 + c11*A^4 + c13*A^6)*A^6
-      CommonOps_DDRM.fill(V, 0.0);
-      SpecializedOps_DDRM.addIdentity(V, V, c1);
+      MatrixTools.setDiagonal(V, c1);
       CommonOps_DDRM.addEquals(V, c3, As_2);
       CommonOps_DDRM.addEquals(V, c5, As_4);
 
-      CommonOps_DDRM.fill(temp, 0.0);
-      SpecializedOps_DDRM.addIdentity(temp, temp, c7);
+      MatrixTools.setDiagonal(temp, c7);
       CommonOps_DDRM.addEquals(temp, c9, As_2);
       CommonOps_DDRM.addEquals(temp, c11, As_4);
       CommonOps_DDRM.addEquals(temp, c13, As_6);

@@ -70,41 +70,26 @@ public class ContinuousMPCQPSolver extends LinearMPCQPSolver
    }
 
    @Override
-   public void submitMPCCommandList(MPCCommandList commandList)
+   public void submitMPCCommand(MPCCommand<?> command)
    {
-      for (int i = 0; i < commandList.getNumberOfCommands(); i++)
+      switch (command.getCommandType())
       {
-         MPCCommand<?> command = commandList.getCommand(i);
-
-         switch (command.getCommandType())
-         {
-            case VALUE:
-               submitMPCValueObjective((MPCValueCommand) command);
-               break;
-            case CONTINUITY:
-               submitContinuityObjective((MPCContinuityCommand) command);
-               break;
-            case LIST:
-               submitMPCCommandList((MPCCommandList) command);
-               break;
-            case RHO_VALUE:
-               submitRhoValueCommand((RhoValueObjectiveCommand) command);
-               break;
-            case VRP_TRACKING:
-               submitVRPTrackingCommand((VRPTrackingCommand) command);
-               break;
-            case ORIENTATION_TRACKING:
-               submitOrientationTrackingCommand((OrientationTrackingCommand) command);
-               break;
-            case ORIENTATION_DYNAMICS:
-               submitOrientationDynamicsCommand((OrientationDynamicsCommand) command);
-               break;
-            default:
-               throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
-         }
+         case VALUE:
+            submitMPCValueObjective((MPCValueCommand) command);
+            break;
+         case CONTINUITY:
+            submitContinuityObjective((MPCContinuityCommand) command);
+            break;
+         case ORIENTATION_TRACKING:
+            submitOrientationTrackingCommand((OrientationTrackingCommand) command);
+            break;
+         case ORIENTATION_DYNAMICS:
+            submitOrientationDynamicsCommand((OrientationDynamicsCommand) command);
+            break;
+         default:
+            super.submitMPCCommand(command);
       }
    }
-
 
    @Override
    public void submitMPCValueObjective(MPCValueCommand command)
