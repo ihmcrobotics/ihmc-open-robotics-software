@@ -64,7 +64,7 @@ public class ContactPointHelper
    public ContactPointHelper(int numberOfBasisVectorsPerContactPoint)
    {
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
-      coefficientsSize = MPCIndexHandler.coefficientsPerRho * numberOfBasisVectorsPerContactPoint;
+      coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * numberOfBasisVectorsPerContactPoint;
 
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
@@ -202,7 +202,7 @@ public class ContactPointHelper
 
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
-         int startColumn = basisVectorIndex * MPCIndexHandler.coefficientsPerRho;
+         int startColumn = basisVectorIndex * LinearMPCIndexHandler.coefficientsPerRho;
          FrameVector3DReadOnly basisVector = basisVectors[basisVectorIndex];
 
          rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn, positiveExponential);
@@ -294,7 +294,7 @@ public class ContactPointHelper
 
       for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
-         int startIdxI = basisVectorIndexI * MPCIndexHandler.coefficientsPerRho;
+         int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
          FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
 
@@ -326,7 +326,7 @@ public class ContactPointHelper
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
-            int startIdxJ = basisVectorIndexJ * MPCIndexHandler.coefficientsPerRho;
+            int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
             accelerationIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
             accelerationIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
@@ -388,7 +388,7 @@ public class ContactPointHelper
       // FIXME I don't think this includes the cross-terms
       for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
-         int startIdxI = basisVectorIndexI * MPCIndexHandler.coefficientsPerRho;
+         int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
          FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
 
@@ -408,7 +408,7 @@ public class ContactPointHelper
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
-            int startIdxJ = basisVectorIndexJ * MPCIndexHandler.coefficientsPerRho;
+            int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
             jerkIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
             jerkIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
@@ -594,7 +594,7 @@ public class ContactPointHelper
       for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
       {
          FrameVector3DReadOnly basisVector = basisVectors[rhoIndex];
-         for (int coeffIdx = 0; coeffIdx < MPCIndexHandler.coefficientsPerRho; coeffIdx++)
+         for (int coeffIdx = 0; coeffIdx < LinearMPCIndexHandler.coefficientsPerRho; coeffIdx++)
          {
             double rhoCoeff = solutionVector.get(startIdx, 0);
             contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);

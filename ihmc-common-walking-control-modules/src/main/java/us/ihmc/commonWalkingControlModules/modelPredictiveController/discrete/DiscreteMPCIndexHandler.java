@@ -14,6 +14,8 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
    public static final int orientationVariablesPerTick = 6;
 
    private final TIntArrayList orientationTicksInSegment = new TIntArrayList();
+   private final TIntArrayList orientationStartSegment = new TIntArrayList();
+   private int totalOrientationTicks = -1;
 
    public DiscreteMPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
@@ -31,8 +33,11 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
       listToSizeReturn.setContacts(contactSequence);
       initialize(listToSizeReturn, contactSequence.size());
 
-      int totalTicks = (int) Math.floor(orientationWindowDuration / orientationDt);
-      int ticksRemaining = totalTicks;
+      orientationTicksInSegment.clear();
+      orientationStartSegment.clear();
+
+      totalOrientationTicks = (int) Math.floor(orientationWindowDuration / orientationDt);
+      int ticksRemaining = totalOrientationTicks;
 
       for (int segmentId = 0; segmentId < contactSequence.size(); segmentId++)
       {
@@ -42,13 +47,24 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
          orientationTicksInSegment.add(ticksInSegment);
 
          ticksRemaining -= ticksInSegment;
-      }
 
-      totalProblemSize += totalTicks * orientationVariablesPerTick;
+         orientationStartSegment.add(totalProblemSize);
+         totalProblemSize += ticksInSegment * orientationVariablesPerTick;
+      }
    }
 
    public int getOrientationTicksInSegment(int segmentId)
    {
       return orientationTicksInSegment.get(segmentId);
+   }
+
+   public int getOrientationStart(int segmentId)
+   {
+      return orientationStartSegment.get(segmentId);
+   }
+
+   public int getTotalOrientationTicks()
+   {
+      return totalOrientationTicks;
    }
 }
