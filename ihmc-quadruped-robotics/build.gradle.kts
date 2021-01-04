@@ -21,8 +21,8 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("net.java.jinput:jinput:2.0.6-ihmc")
-   api("us.ihmc:euclid-frame:0.16.0")
-   api("us.ihmc:euclid-shape:0.16.0")
+   api("us.ihmc:euclid-frame:0.16.1")
+   api("us.ihmc:euclid-shape:0.16.1")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ihmc-graphics-description:0.19.3")

@@ -17,7 +17,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid-geometry:0.16.0")
+   api("us.ihmc:euclid-geometry:0.16.1")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-quadruped-basics:source")
    api("us.ihmc:ihmc-quadruped-planning:source")
