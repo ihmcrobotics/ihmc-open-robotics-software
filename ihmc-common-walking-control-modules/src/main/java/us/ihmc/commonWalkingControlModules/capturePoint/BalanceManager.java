@@ -494,7 +494,7 @@ public class BalanceManager
       for (RobotSide robotSide : RobotSide.values)
       {
          if (controllerToolbox.getFootContactState(robotSide).inContact())
-            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
+            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), soleFrames.get(robotSide));
       }
       copTrajectory.compute(copTrajectoryState);
 
