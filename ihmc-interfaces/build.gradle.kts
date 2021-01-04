@@ -31,8 +31,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.16.0")
-   api("us.ihmc:euclid-geometry:0.16.0")
+   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid-geometry:0.16.1")
    api("us.ihmc:ihmc-pub-sub:0.15.0")
    api("us.ihmc:ros2-common-interfaces:0.19.4") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
@@ -48,7 +48,7 @@ testDependencies {
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.16.0")
+   api("us.ihmc:euclid:0.16.1")
    api("us.ihmc:ihmc-commons:0.30.4")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.19.4")
 }

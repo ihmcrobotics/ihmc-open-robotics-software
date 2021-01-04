@@ -15,7 +15,7 @@ ihmc {
 mainDependencies {
    api("io.javaslang:javaslang:2.0.3")
 
-   api("us.ihmc:euclid:0.16.0")
+   api("us.ihmc:euclid:0.16.1")
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:ihmc-robot-description:0.21.1")
    api("us.ihmc:ihmc-graphics-description:0.19.3")
