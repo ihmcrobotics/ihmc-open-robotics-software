@@ -84,7 +84,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
       {
          robotVersionString = "ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ";
       }
-      LogTools.info("Using to robot version: {}", robotVersionString);
+      LogTools.info("Using robot version: {}", robotVersionString);
       try
       {
          robotModel = AtlasRobotModelFactory.createDRCRobotModel(robotVersionString, RobotTarget.SCS, false);
@@ -99,6 +99,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
 
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
+      LogTools.info("Using ROS 2 {} mode.", pubSubImplementation.name());
       new AtlasKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
    }
 }
