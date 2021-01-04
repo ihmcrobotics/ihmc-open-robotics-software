@@ -10,16 +10,25 @@ import java.util.function.IntUnaryOperator;
 
 public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
 {
-   public static final double orientationDt = 1e-2;
+   private static final double defaultOrientationDt = 5e-2;
    public static final int orientationVariablesPerTick = 6;
 
+   private final double orientationDt;
    private final TIntArrayList orientationTicksInSegment = new TIntArrayList();
+   private final TIntArrayList orientationTicksBeforeSegment = new TIntArrayList();
    private final TIntArrayList orientationStartSegment = new TIntArrayList();
    private int totalOrientationTicks = -1;
 
    public DiscreteMPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
+      this(numberOfBasisVectorsPerContactPoint, defaultOrientationDt);
+   }
+
+   public DiscreteMPCIndexHandler(int numberOfBasisVectorsPerContactPoint, double orientationDt)
+   {
       super(numberOfBasisVectorsPerContactPoint);
+
+      this.orientationDt = orientationDt;
    }
 
    @Override
@@ -33,20 +42,34 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
       listToSizeReturn.setContacts(contactSequence);
       initialize(listToSizeReturn, contactSequence.size());
 
-      orientationTicksInSegment.clear();
-      orientationStartSegment.clear();
+      orientationTicksInSegment.reset();
+      orientationStartSegment.reset();
+      orientationTicksBeforeSegment.reset();
 
-      totalOrientationTicks = (int) Math.floor(orientationWindowDuration / orientationDt);
-      int ticksRemaining = totalOrientationTicks;
-
+      double maxWindowDuration = 0.0;
       for (int segmentId = 0; segmentId < contactSequence.size(); segmentId++)
+         maxWindowDuration += contactSequence.get(segmentId).getTimeInterval().getDuration();
+      maxWindowDuration = Math.min(maxWindowDuration, orientationWindowDuration);
+
+      totalOrientationTicks = (int) Math.floor(maxWindowDuration / orientationDt + 1e-5);
+      int ticksRemaining = totalOrientationTicks;
+      int ticksBefore = 0;
+
+      double residualTime = 0.0;
+
+      int segmentId = 0;
+      for (; segmentId < contactSequence.size(); segmentId++)
       {
-         double duration = contactSequence.get(0).getTimeInterval().getDuration();
-         int ticksInSegment = (int) Math.floor(duration / orientationDt);
+         double duration = contactSequence.get(segmentId).getTimeInterval().getDuration() + residualTime;
+         int ticksInSegment = (int) Math.floor((duration + 1e-5) / orientationDt);
          ticksInSegment = Math.min(ticksInSegment, ticksRemaining);
          orientationTicksInSegment.add(ticksInSegment);
 
+         residualTime = duration - ticksInSegment * orientationDt;
+
          ticksRemaining -= ticksInSegment;
+         orientationTicksBeforeSegment.add(ticksBefore);
+         ticksBefore += ticksInSegment;
 
          orientationStartSegment.add(totalProblemSize);
          totalProblemSize += ticksInSegment * orientationVariablesPerTick;
@@ -58,6 +81,11 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
       return orientationTicksInSegment.get(segmentId);
    }
 
+   public int getOrientationTicksBeforeSegment(int segmentId)
+   {
+      return orientationTicksBeforeSegment.get(segmentId);
+   }
+
    public int getOrientationStart(int segmentId)
    {
       return orientationStartSegment.get(segmentId);
@@ -66,5 +94,21 @@ public class DiscreteMPCIndexHandler extends LinearMPCIndexHandler
    public int getTotalOrientationTicks()
    {
       return totalOrientationTicks;
+   }
+
+   public double getOrientationDt()
+   {
+      return orientationDt;
+   }
+
+   public int getSegmentForTick(int tick)
+   {
+      int segmentId = 0;
+      while (segmentId < getNumberOfSegments() && tick > (getOrientationTicksBeforeSegment(segmentId) + getOrientationTicksInSegment(segmentId)))
+         segmentId++;
+
+      if (segmentId > getNumberOfSegments() - 1)
+         return -1;
+      return segmentId;
    }
 }
