@@ -54,6 +54,11 @@ public class DiscreteOrientationDynamicsCommand implements MPCCommand<DiscreteOr
       this.weight = weight;
    }
 
+   public void addContactPlaneHelper(List<ContactPlaneHelper> contactPlaneHelper)
+   {
+      contactPlaneHelpers.add(contactPlaneHelper);
+   }
+
    // FIXME this makes garbage
    public void addContactPlaneHelper(int segment, ContactPlaneHelper contactPlaneHelper)
    {
