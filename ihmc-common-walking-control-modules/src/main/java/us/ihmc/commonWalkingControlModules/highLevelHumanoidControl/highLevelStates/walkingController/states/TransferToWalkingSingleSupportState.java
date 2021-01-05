@@ -5,7 +5,6 @@ import org.apache.commons.math3.util.Precision;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -30,9 +29,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfFootstepsToConsider = CoPTrajectoryParameters.maxNumberOfStepsToConsider;
-   private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
-   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+   private final int numberOfFootstepsToConsider;
+   private final Footstep[] footsteps;
+   private final FootstepTiming[] footstepTimings;
 
    private final DoubleProvider minimumTransferTime;
 
@@ -66,6 +65,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+
+      numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
+      footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
+      footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
    }
 
    @Override

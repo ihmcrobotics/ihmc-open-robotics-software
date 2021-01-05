@@ -201,6 +201,7 @@ public class BalanceManager
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final int maxNumberOfStepsToConsider;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                          WalkingControllerParameters walkingControllerParameters,
@@ -256,9 +257,10 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
+      maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
-      copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
+      copTrajectoryState = new CoPTrajectoryGeneratorState(registry, maxNumberOfStepsToConsider);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
@@ -601,6 +603,11 @@ public class BalanceManager
    public void freezePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.freeze();
+   }
+
+   public int getMaxNumberOfStepsToConsider()
+   {
+      return maxNumberOfStepsToConsider;
    }
 
    public FramePoint2DReadOnly getDesiredCMP()

@@ -105,8 +105,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       finalTransferWeightDistribution = new YoDouble("processedFinalTransferWeightDistribution", registry);
       finalTransferSplitFraction = new YoDouble("processedFinalTransferSplitFraction", registry);
 
-      transferSplitFractions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferSplitFraction" + shiftFractionCounter++, registry), CoPTrajectoryParameters.maxNumberOfStepsToConsider);
-      transferWeightDistributions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferWeightDistribution" + weightDistributionCounter++, registry), CoPTrajectoryParameters.maxNumberOfStepsToConsider);
+      transferSplitFractions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferSplitFraction" + shiftFractionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
+      transferWeightDistributions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferWeightDistribution" + weightDistributionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
 
       positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionParameters);
 
