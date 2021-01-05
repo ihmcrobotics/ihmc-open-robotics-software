@@ -58,10 +58,11 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
 
    public abstract double getFastTransferTime();
 
+   public abstract double getMaxForwardStepLength();
+
    @Test
    public void testForwardWalking() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupSim(getRobotModel(), false, false, null);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
@@ -71,7 +72,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT,
                                                        30,
-                                                       trapezoidFunction(0.2, 0.45, 0.33, 0.66),
+                                                       trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
                                                        0.25,
                                                        getFastSwingTime(),
                                                        getFastTransferTime(),
@@ -79,11 +80,13 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
                                                        true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
       drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps,
-                                                                                                   getRobotModel().getWalkingControllerParameters())));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1
+            * computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters())));
    }
 
-   private void setupSim(DRCRobotModel robotModel, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+   private void setupSim(DRCRobotModel robotModel,
+                         boolean useVelocityAndHeadingScript,
+                         boolean cheatWithGroundHeightAtForFootstep,
                          HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -108,14 +111,14 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       };
    }
 
-   private static FootstepDataListMessage forwardSteps(RobotSide initialStepSide, int numberOfSteps, double stepLength, double stepWidth, double swingTime,
-                                                       double transferTime, Pose3DReadOnly startPose, boolean squareUp)
-   {
-      return forwardSteps(initialStepSide, numberOfSteps, d -> stepLength, stepWidth, swingTime, transferTime, startPose, squareUp);
-   }
-
-   private static FootstepDataListMessage forwardSteps(RobotSide initialStepSide, int numberOfSteps, DoubleUnaryOperator stepLengthFunction, double stepWidth,
-                                                       double swingTime, double transferTime, Pose3DReadOnly startPose, boolean squareUp)
+   private static FootstepDataListMessage forwardSteps(RobotSide initialStepSide,
+                                                       int numberOfSteps,
+                                                       DoubleUnaryOperator stepLengthFunction,
+                                                       double stepWidth,
+                                                       double swingTime,
+                                                       double transferTime,
+                                                       Pose3DReadOnly startPose,
+                                                       boolean squareUp)
    {
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage footstep = message.getFootstepDataList().add();
