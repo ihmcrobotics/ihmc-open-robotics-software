@@ -13,9 +13,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoPTrajectoryParameters extends YoSaveableModuleState
 {
-   /** Used to pre-allocate variables. Should be greater than or equal to {@link #numberOfStepsToConsider}. */
-   public static final int maxNumberOfStepsToConsider = 3;
-
    private static final double defaultMinimumDistanceInsidePolygon = 0.01;
 
    private static final double defaultStepLengthToPutExitCoPOnToes = 0.2;
@@ -191,6 +188,11 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
          return false;
       }
    };
+
+   public int getMaxNumberOfStepsToConsider()
+   {
+      return 3;
+   }
 
    public double getMinimumDistanceInsidePolygon()
    {
