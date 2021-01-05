@@ -4,13 +4,24 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Application;
+import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasToeOffParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundFastWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
@@ -34,7 +45,85 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
          @Override
          public InputStream getParameterOverwrites()
          {
-            return AtlasFlatGroundFastWalkingTest.class.getResourceAsStream(FAST_WALKING_PARAMETERS_XML);
+            InputStream resourceAsStream = AtlasFlatGroundFastWalkingTest.class.getResourceAsStream(FAST_WALKING_PARAMETERS_XML);
+            Objects.requireNonNull(resourceAsStream);
+            return resourceAsStream;
+         }
+
+         @Override
+         public CoPTrajectoryParameters getCoPTrajectoryParameters()
+         {
+            return new AtlasCoPTrajectoryParameters()
+            {
+               @Override
+               public int getMaxNumberOfStepsToConsider()
+               {
+                  return 5;
+               }
+            };
+         }
+
+         @Override
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+            {
+               @Override
+               public boolean controlHeightWithMomentum()
+               {
+                  return false;
+               }
+
+               @Override
+               public SwingTrajectoryParameters getSwingTrajectoryParameters()
+               {
+                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
+                  {
+                     @Override
+                     public double getDesiredTouchdownHeightOffset()
+                     {
+                        return -0.005;
+                     }
+
+                     @Override
+                     public Tuple3DReadOnly getTouchdownVelocityWeight()
+                     {
+                        return new Vector3D(30.0, 30.0, 30.0);
+                     }
+                  };
+               }
+
+               @Override
+               public ToeOffParameters getToeOffParameters()
+               {
+                  return new AtlasToeOffParameters(getJointMap())
+                  {
+                     @Override
+                     public boolean doToeOffIfPossibleInSingleSupport()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public double getECMPProximityForToeOff()
+                     {
+                        return 0.02;
+                     }
+
+                     @Override
+                     public double getICPProximityForToeOff()
+                     {
+                        return 0.02;
+                     }
+
+                     @Override
+                     public double getICPPercentOfStanceForSSToeOff()
+                     {
+                        return 0.20;
+                     }
+                  };
+               }
+            };
          }
 
          @Override
@@ -54,13 +143,19 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
    @Override
    public double getFastSwingTime()
    {
-      return 0.4;
+      return 0.45;
    }
 
    @Override
    public double getFastTransferTime()
    {
       return 0.05;
+   }
+
+   @Override
+   public double getMaxForwardStepLength()
+   {
+      return 0.55;
    }
 
    @Test
