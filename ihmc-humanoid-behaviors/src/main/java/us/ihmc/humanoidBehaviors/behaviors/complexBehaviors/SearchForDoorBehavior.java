@@ -88,7 +88,6 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
    @Override
    public void doControl()
    {
-      System.out.println(scan);
       if (doorLocationQueue.isNewPacketAvailable())
       {
          recievedDoorLocation(doorLocationQueue.getLatestPacket());
