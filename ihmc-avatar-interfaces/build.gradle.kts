@@ -58,7 +58,6 @@ mainDependencies {
 
 behaviorCleanRoomDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-messager-kryo:0.1.7")
 }
 
 behaviorFxUiDependencies {

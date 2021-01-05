@@ -35,7 +35,6 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-robot-data-logger:0.20.5")
-   api("us.ihmc:ihmc-messager-kryo:0.1.7")
 
    api("org.bytedeco:javacv-platform:1.5") {
       exclude(group = "org.bytedeco", module = "opencv")
