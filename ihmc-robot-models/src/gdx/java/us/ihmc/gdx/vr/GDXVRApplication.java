@@ -2,9 +2,9 @@ package us.ihmc.gdx.vr;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.Array;
+import org.lwjgl.opengl.GL32;
 
 import java.util.function.Consumer;
 
@@ -87,7 +87,7 @@ public class GDXVRApplication
       Gdx.gl.glViewport(0, 0, width, height);
 
       Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
       renderer.accept(camera);
       context.endEye();
