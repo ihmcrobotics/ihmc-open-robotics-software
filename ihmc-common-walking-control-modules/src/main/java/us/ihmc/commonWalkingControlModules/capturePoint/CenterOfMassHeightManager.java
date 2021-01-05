@@ -93,12 +93,12 @@ public class CenterOfMassHeightManager
    }
 
    /**
-    * set the weights for user mode, CenterOfMassHeightControlState does not use this weight
-    * @param weight
+    * Sets the weights to use when controlling the height with a feedback controller.
     */
    public void setPelvisTaskspaceWeights(Vector3DReadOnly weight)
    {
       pelvisHeightControlState.setWeights(weight);
+      centerOfMassHeightControlState.setWeights(weight);
    }
 
    public void setPrepareForLocomotion(boolean value)
@@ -251,7 +251,7 @@ public class CenterOfMassHeightManager
 
    public boolean getControlHeightWithMomentum()
    {
-      return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
+      return stateMachine.getCurrentState().getControlHeightWithMomentum();
    }
 
    public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
