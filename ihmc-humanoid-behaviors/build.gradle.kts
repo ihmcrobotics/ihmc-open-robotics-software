@@ -25,7 +25,6 @@ mainDependencies {
    api("org.postgresql:postgresql:42.2.5")
 
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:euclid:0.16.1")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:simulation-construction-set:0.21.5")

@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.esotericsoftware.kryo:kryo:2.24.0")
    api("com.github.quickhull3d:quickhull3d:1.0.0")
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.georegression:georegression:0.22")
@@ -37,6 +36,7 @@ mainDependencies {
    api("us.ihmc:mecano:0.7.4")
    api("us.ihmc:mecano-yovariables:0.7.4")
    api("us.ihmc:ihmc-commons:0.30.4")
+   api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-matrix-library:0.18.2")
    api("us.ihmc:ihmc-graphics-description:0.19.3")

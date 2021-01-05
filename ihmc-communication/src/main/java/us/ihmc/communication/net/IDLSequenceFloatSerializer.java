@@ -31,7 +31,7 @@ public class IDLSequenceFloatSerializer extends Serializer<IDLSequence.Float>
          output.writeFloat(collection.get(i));
    }
 
-   public IDLSequence.Float read(Kryo kryo, Input input, Class<IDLSequence.Float> type)
+   public IDLSequence.Float read(Kryo kryo, Input input, Class<? extends IDLSequence.Float> type)
    {
       int length = input.readInt(true);
       IDLSequence.Float resultList = new IDLSequence.Float(length, TYPE_CODE);

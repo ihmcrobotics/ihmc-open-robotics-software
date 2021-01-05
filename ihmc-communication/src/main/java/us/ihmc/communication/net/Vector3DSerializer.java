@@ -19,7 +19,7 @@ public class Vector3DSerializer extends Serializer<Vector3D>
    }
 
    @Override
-   public Vector3D read(Kryo kryo, Input input, Class<Vector3D> type)
+   public Vector3D read(Kryo kryo, Input input, Class<? extends Vector3D> type)
    {
       return new Vector3D(input.readDouble(), input.readDouble(), input.readDouble());
    }
