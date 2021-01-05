@@ -406,9 +406,8 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                                                                                                    swingSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      // TODO Figure out proper fix for that.
-//      if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
-//         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide) && feetManager.getToeOffManager().isSteppingUp())
+         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
