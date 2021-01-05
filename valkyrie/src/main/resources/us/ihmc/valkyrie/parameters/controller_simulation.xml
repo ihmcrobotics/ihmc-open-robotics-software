@@ -157,6 +157,8 @@
                      </registry>
                      <parameter name="icpDistanceOutsideSupportForStep" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
                      <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                     <parameter name="maintainInitialCoMVelocityContinuitySingleSupport" type="BooleanParameter" value="true" />
+                     <parameter name="maintainInitialCoMVelocityContinuityTransfer" type="BooleanParameter" value="true" />
                      <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035" />
                      <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
