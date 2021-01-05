@@ -470,9 +470,9 @@
                   <parameter name="FootAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   <parameter name="FootAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   <parameter name="FootAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                  <parameter name="PelvisLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  <parameter name="PelvisLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  <parameter name="PelvisLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
+                  <parameter name="PelvisLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="PelvisLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="PelvisLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
                   <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                   <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                   <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
