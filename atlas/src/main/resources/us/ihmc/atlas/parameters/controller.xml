@@ -233,12 +233,17 @@
                      <parameter name="applyPartialFootholds" type="BooleanParameter" value="true" />
                   </registry>
                   <registry name="BalanceManager">
-                     <parameter name="maintainInitialCoMVelocityContinuitySingleSupport" type="BooleanParameter" value="true" />
-                     <parameter name="maintainInitialCoMVelocityContinuityTransfer" type="BooleanParameter" value="true" />
-                     <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
                      <registry name="PelvisICPBasedTranslationManager">
                         <parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                      </registry>
+                     <registry name="CoPTrajectoryParameters">
+                        <parameter name="planWithExitCMPOnToes" type="BooleanParameter" value="false" />
+                        <parameter name="numberOfStepsToConsider" type="IntegerParameter" min="-10" max="10" value="3" />
+                        <parameter name="exitCoPForwardSafetyMarginOnToes" type="DoubleParameter" min="0.0" max="1.0" value="0.016" />
+                     </registry>
+                     <parameter name="maintainInitialCoMVelocityContinuitySingleSupport" type="BooleanParameter" value="true" />
+                     <parameter name="maintainInitialCoMVelocityContinuityTransfer" type="BooleanParameter" value="true" />
+                     <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
                      <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035" />
                      <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035" />
                      <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.015" />
