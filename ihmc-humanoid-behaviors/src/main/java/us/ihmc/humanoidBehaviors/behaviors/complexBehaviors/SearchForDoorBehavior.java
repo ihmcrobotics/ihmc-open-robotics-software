@@ -71,13 +71,24 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
    public void onBehaviorEntered()
    {
       publishTextToSpeech("entering search for door behavior action");
-
-      doorLocationQueue.clear();
+      clearDoorLocationHistory();
+      super.onBehaviorEntered();
    }
+   
+   public void clearDoorLocationHistory()
+   {
+      recievedNewDoorLocation = false;
+      doorTransformToWorld = null;
+      doorLocationQueue.clear();
+      detectedDoorType= DoorLocationPacket.UNKNOWN_TYPE;
+   }
+   
+   
 
    @Override
    public void doControl()
    {
+      System.out.println(scan);
       if (doorLocationQueue.isNewPacketAvailable())
       {
          recievedDoorLocation(doorLocationQueue.getLatestPacket());
@@ -89,7 +100,6 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
    @Override
    public void onBehaviorExited()
    {
-      recievedNewDoorLocation = false;
       scan = false;
    }
 
