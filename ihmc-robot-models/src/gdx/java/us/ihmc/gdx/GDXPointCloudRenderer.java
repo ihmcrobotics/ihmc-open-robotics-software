@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
 public class GDXPointCloudRenderer
@@ -47,8 +47,8 @@ public class GDXPointCloudRenderer
 
    public void render(GDX3DApplication gdx3DApplication)
    {
-      Gdx.gl.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-      Gdx.gl.glEnable(GL30.GL_POINT_SPRITE);
+      Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
+      Gdx.gl.glEnable(GL32.GL_POINT_SPRITE);
 
       if (pointsToRender != null)
       {

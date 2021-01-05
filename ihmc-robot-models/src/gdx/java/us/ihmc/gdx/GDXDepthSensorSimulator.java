@@ -100,7 +100,7 @@ public class GDXDepthSensorSimulator
       Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, width, height);
 
 //      ByteBuffer underlyingBuffer = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels();
-//      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL20.GL_HIGH_FLOAT, underlyingBuffer);
+//      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL32.GL_HIGH_FLOAT, underlyingBuffer);
 
       frameBuffer.end();
       floatframeBuffer.end();

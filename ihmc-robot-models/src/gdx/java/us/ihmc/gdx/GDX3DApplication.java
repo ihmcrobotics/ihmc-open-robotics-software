@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
@@ -12,8 +11,10 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +39,8 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final HashSet<RenderableProvider> renderableProviders = new HashSet<>();
    private final ArrayList<Runnable> preRenderTasks = new ArrayList<>();
+
+   private boolean firstRenderStarted = false;
 
    @Override
    public void create()
@@ -76,7 +79,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       viewport = new ScreenViewport(camera3D);
 
       glClearGrayscale();
-      Gdx.gl.glEnable(GL20.GL_TEXTURE_2D);
+      Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
    }
 
    @Override
@@ -86,6 +89,12 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    public void renderBefore()
    {
+      if (!firstRenderStarted)
+      {
+         firstRenderStarted = true;
+         LogTools.info("Starting first render.");
+      }
+
       for (Runnable preRenderTask : preRenderTasks)
       {
          preRenderTask.run();
@@ -200,7 +209,7 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    public void glClearGrayscale(float color)
    {
       Gdx.gl.glClearColor(color, color, color, 1.0f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
    }
 
    public int getCurrentWindowWidth()

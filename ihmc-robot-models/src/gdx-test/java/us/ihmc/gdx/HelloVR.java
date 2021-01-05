@@ -33,6 +33,7 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 
+import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.vr.GDXVRCamera;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRContext.*;
@@ -289,7 +290,7 @@ public class HelloVR extends ApplicationAdapter {
 
 	private void renderScene(Camera camera) {
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
 		// render all the models in the scene
 		batch.begin(camera);
