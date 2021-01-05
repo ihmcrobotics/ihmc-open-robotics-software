@@ -1,5 +1,6 @@
 package us.ihmc.robotics.dataStructures.parameters;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,7 +16,7 @@ public class ParameterVector3D implements Vector3DReadOnly
       this(prefix, null, registry);
    }
 
-   public ParameterVector3D(String prefix, Vector3DReadOnly defaults, YoRegistry registry)
+   public ParameterVector3D(String prefix, Tuple3DReadOnly defaults, YoRegistry registry)
    {
       if (defaults == null)
       {
