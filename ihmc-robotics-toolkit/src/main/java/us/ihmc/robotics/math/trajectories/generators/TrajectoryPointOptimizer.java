@@ -669,10 +669,11 @@ public class TrajectoryPointOptimizer
       MultiCubicSpline1DSolver.getPositionConstraintABlock(1.0, 0, 0, tempLine);
 
       positionToPack.reset();
+      int index = nWaypoints.getValue() * coefficients;
+
       for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
       {
          DMatrixRMaj xDim = x.get(dimension);
-         int index = nWaypoints.getValue() * coefficients;
          CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          positionToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
       }
@@ -693,10 +694,11 @@ public class TrajectoryPointOptimizer
       MultiCubicSpline1DSolver.getVelocityConstraintABlock(1.0, 0, 0, tempLine);
 
       velocityToPack.reset();
+      int index = nWaypoints.getValue() * coefficients;
+
       for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
       {
          DMatrixRMaj xDim = x.get(dimension);
-         int index = nWaypoints.getValue() * coefficients;
          CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          velocityToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
       }
