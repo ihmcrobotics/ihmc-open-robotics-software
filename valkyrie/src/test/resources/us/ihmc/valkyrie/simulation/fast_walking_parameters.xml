@@ -52,7 +52,7 @@
                         <parameter name="kneeLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="icpPercentOfStanceForDSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="icpPercentOfStanceForSSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="ecmpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                        <parameter name="ecmpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0225" />
                         <parameter name="copProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                         <parameter name="checkECMPForToeOff" type="BooleanParameter" value="true" />
                         <parameter name="checkCoPForToeOff" type="BooleanParameter" value="false" />
