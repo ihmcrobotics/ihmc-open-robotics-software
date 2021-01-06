@@ -38,25 +38,9 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
 
    private ModelInstance modelInstance;
 
-
-   public GDXPlanarRegionsGraphic()
+   public void generateFlatGround()
    {
-      this(true);
-   }
-
-   public GDXPlanarRegionsGraphic(boolean initializeToFlatGround)
-   {
-      PlanarRegionsList planarRegionsList;
-      if (initializeToFlatGround)
-      {
-         planarRegionsList = PlanarRegionsList.flatGround(20.0);
-      }
-      else
-      {
-         planarRegionsList = new PlanarRegionsList();
-      }
-
-      generateMeshes(planarRegionsList);
+      generateMeshes(PlanarRegionsList.flatGround(20.0));
    }
 
    public void generateMeshesAsync(PlanarRegionsList planarRegionsList)
@@ -138,7 +122,10 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       // sync over current and add
-      modelInstance.getRenderables(renderables, pool);
+      if (modelInstance != null)
+      {
+         modelInstance.getRenderables(renderables, pool);
+      }
    }
 
    public void setDrawAreaText(boolean drawAreaText)
