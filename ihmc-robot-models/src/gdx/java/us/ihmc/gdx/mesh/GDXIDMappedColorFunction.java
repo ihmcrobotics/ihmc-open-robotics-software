@@ -7,37 +7,40 @@ import java.util.function.Function;
 
 public class GDXIDMappedColorFunction implements Function<Integer, Color>
 {
-   public static final GDXIDMappedColorFunction INSTANCE = new GDXIDMappedColorFunction();
+   private final ArrayList<Color> colors = new ArrayList<>();
 
-   private static final ArrayList<Color> colors = new ArrayList<>();
-
-   static
+   public GDXIDMappedColorFunction()
    {
-      colors.add(Color.rgba8888(104.0f, 130.0f, 219.0f, 1.0f));
-      colors.add(Color.rgba8888(113, 168, 133));
-      colors.add(Color.rgba8888(196, 182, 90));
-      colors.add(Color.rgba8888(190, 89, 110));
-      colors.add(Color.rgba8888(155, 80, 190));
-      colors.add(Color.rgba8888(114, 120, 199));
-      colors.add(Color.rgba8888(118, 158, 143));
-      colors.add(Color.rgba8888(176, 192, 80));
-      colors.add(Color.rgba8888(200, 79, 100));
-      colors.add(Color.rgba8888(135, 80, 140));
-      colors.add(Color.rgba8888(90, 100, 219));
-      colors.add(Color.rgba8888(113, 128, 53));
-      colors.add(Color.rgba8888(126, 112, 80));
-      colors.add(Color.rgba8888(200, 59, 30));
-      colors.add(Color.rgba8888(75, 185, 130));
-      colors.add(Color.rgba8888(24, 130, 219));
-      colors.add(Color.rgba8888(23, 168, 133));
-      colors.add(Color.rgba8888(26, 182, 90));
-      colors.add(Color.rgba8888(60, 89, 110));
-      colors.add(Color.rgba8888(65, 80, 190));
+      colors.add(new Color(104.0f / 255.0f, 130.0f / 255.0f, 219.0f / 255.0f, 1.0f));
+      colors.add(new Color(113.0f / 255.0f, 168.0f / 255.0f, 133.0f / 255.0f, 1.0f));
+      colors.add(new Color(196.0f / 255.0f, 182.0f / 255.0f, 90.0f / 255.0f, 1.0f));
+      colors.add(new Color(190.0f / 255.0f, 89.0f / 255.0f, 110.0f / 255.0f, 1.0f));
+      colors.add(new Color(155.0f / 255.0f, 80.0f / 255.0f, 190.0f / 255.0f, 1.0f));
+      colors.add(new Color(114.0f / 255.0f, 120.0f / 255.0f, 199.0f / 255.0f, 1.0f));
+      colors.add(new Color(118.0f / 255.0f, 158.0f / 255.0f, 143.0f / 255.0f, 1.0f));
+      colors.add(new Color(176.0f / 255.0f, 192.0f / 255.0f, 80.0f / 255.0f, 1.0f));
+      colors.add(new Color(200.0f / 255.0f, 79.0f / 255.0f, 100.0f / 255.0f, 1.0f));
+      colors.add(new Color(135.0f / 255.0f, 80.0f / 255.0f, 140.0f / 255.0f, 1.0f));
+      colors.add(new Color(90.0f / 255.0f, 100.0f / 255.0f, 219.0f / 255.0f, 1.0f));
+      colors.add(new Color(113.0f / 255.0f, 128.0f / 255.0f, 53.0f / 255.0f, 1.0f));
+      colors.add(new Color(126.0f / 255.0f, 112.0f / 255.0f, 80.0f / 255.0f, 1.0f));
+      colors.add(new Color(200.0f / 255.0f, 59.0f / 255.0f, 30.0f / 255.0f, 1.0f));
+      colors.add(new Color(75.0f / 255.0f, 185.0f / 255.0f, 130.0f / 255.0f, 1.0f));
+      colors.add(new Color(24.0f / 255.0f, 130.0f / 255.0f, 219.0f / 255.0f, 1.0f));
+      colors.add(new Color(23.0f / 255.0f, 168.0f / 255.0f, 133.0f / 255.0f, 1.0f));
+      colors.add(new Color(26.0f / 255.0f, 182.0f / 255.0f, 90.0f / 255.0f, 1.0f));
+      colors.add(new Color(60.0f / 255.0f, 89.0f / 255.0f, 110.0f / 255.0f, 1.0f));
+      colors.add(new Color(65.0f / 255.0f, 80.0f / 255.0f, 190.0f / 255.0f, 1.0f));
+   }
+
+   public Color getColor(int id)
+   {
+      return colors.get(Math.abs(id % colors.size()));
    }
 
    @Override
    public Color apply(Integer id)
    {
-      return colors.get(Math.abs(id % colors.size()));
+      return getColor(id);
    }
 }
