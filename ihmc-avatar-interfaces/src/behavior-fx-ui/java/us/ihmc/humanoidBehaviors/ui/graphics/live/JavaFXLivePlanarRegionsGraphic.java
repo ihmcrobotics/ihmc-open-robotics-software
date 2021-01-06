@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
+public class JavaFXLivePlanarRegionsGraphic extends PlanarRegionsGraphic
 {
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
 
@@ -24,12 +24,12 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private boolean acceptNewRegions = true;
    private volatile PlanarRegionsList latestPlanarRegionsList = new PlanarRegionsList(); // prevent NPEs
 
-   public LivePlanarRegionsGraphic(ROS2Node ros2Node, boolean initializeToFlatGround)
+   public JavaFXLivePlanarRegionsGraphic(ROS2Node ros2Node, boolean initializeToFlatGround)
    {
       this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(ROS2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
+   public JavaFXLivePlanarRegionsGraphic(ROS2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 
@@ -37,7 +37,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       animationTimer.start();
    }
 
-   public LivePlanarRegionsGraphic(boolean initializeToFlatGround)
+   public JavaFXLivePlanarRegionsGraphic(boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
       animationTimer.start();

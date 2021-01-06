@@ -10,11 +10,11 @@ import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.javaFXVisualizers.RandomColorFunction;
@@ -74,7 +74,7 @@ public class PlanarRegionSLAMUITabController extends Group
    private PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::fxUpdate);
 
    private Window window;
-   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private JavaFXLivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private SimulatedREAModule simulatedREAModule;
 
    private PlanarRegionsList map = new PlanarRegionsList();
@@ -125,7 +125,7 @@ public class PlanarRegionSLAMUITabController extends Group
             observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, parameterSpinner5.getValue()));
       });
 
-      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
+      livePlanarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, false);
       livePlanarRegionsGraphic.setColorFunction(new RandomColorFunction()); // make incoming regions color always changing
       getChildren().add(livePlanarRegionsGraphic);
 
