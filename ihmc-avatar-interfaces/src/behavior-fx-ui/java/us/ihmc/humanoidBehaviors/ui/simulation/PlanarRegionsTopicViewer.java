@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory;
@@ -23,7 +23,7 @@ public class PlanarRegionsTopicViewer extends Application
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
-      LivePlanarRegionsGraphic regionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
+      JavaFXLivePlanarRegionsGraphic regionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
       view3dFactory.addNodeToView(regionsGraphic);
 
       primaryStage.setTitle(getClass().getSimpleName());
