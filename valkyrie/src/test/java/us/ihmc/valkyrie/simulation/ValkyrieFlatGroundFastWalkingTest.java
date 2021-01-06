@@ -118,7 +118,7 @@ public class ValkyrieFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalki
    @Override
    public double getFastTransferTime()
    {
-      return 0.01;
+      return 0.025;
    }
 
    @Override
