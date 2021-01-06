@@ -2,6 +2,8 @@ package us.ihmc.avatar;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +27,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestInterface
@@ -96,6 +102,36 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       drcSimulationTestHelper.setCheatWithGroundHeightAtFootstep(cheatWithGroundHeightAtForFootstep);
       drcSimulationTestHelper.setWalkingScriptParameters(walkingScriptParameters);
       drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+      setupRobotStateVarGroup();
+   }
+
+   private void setupRobotStateVarGroup()
+   {
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      List<String> stateVars = new ArrayList<>();
+      List<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
+      Robot robot = scs.getRobots()[0];
+      robot.getAllOneDegreeOfFreedomJoints(joints);
+      stateVars.add(robot.getYoTime().getFullNameString());
+      FloatingJoint rootJoint = (FloatingJoint) robot.getRootJoints().get(0);
+      stateVars.add(rootJoint.getQx().getFullNameString());
+      stateVars.add(rootJoint.getQy().getFullNameString());
+      stateVars.add(rootJoint.getQz().getFullNameString());
+      stateVars.add(rootJoint.getQdx().getFullNameString());
+      stateVars.add(rootJoint.getQdy().getFullNameString());
+      stateVars.add(rootJoint.getQdz().getFullNameString());
+      stateVars.add(rootJoint.getQuaternionQx().getFullNameString());
+      stateVars.add(rootJoint.getQuaternionQy().getFullNameString());
+      stateVars.add(rootJoint.getQuaternionQz().getFullNameString());
+      stateVars.add(rootJoint.getQuaternionQs().getFullNameString());
+      
+      for (OneDegreeOfFreedomJoint joint : joints)
+      {
+         stateVars.add(joint.getQYoVariable().getFullNameString());
+         stateVars.add(joint.getQDYoVariable().getFullNameString());
+         stateVars.add(joint.getTauYoVariable().getFullNameString());
+      }
+      scs.setupVarGroup("RobotState", stateVars.toArray(new String[0]));
    }
 
    private static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
