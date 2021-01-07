@@ -1,9 +1,7 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.log.LogTools;
 
 import java.util.concurrent.*;
 
@@ -21,31 +19,22 @@ public class SaferExecutorService
 
    public void execute(Runnable runnable)
    {
-
+      execute(runnable, ExecutionResultHandler.DEFAULT());
    }
 
-   public void submit(Runnable runnable, ExceptionHandler exceptionHandler)
+   public void execute(Runnable runnable, ExecutionResultHandler executionResultHandler)
    {
-      executorService.submit(runnable, future ->
-      {
-         try
-         {
-            future.get();
-         }
-         catch (ExecutionException executionException)
-         {
-            exceptionHandler.handleException(executionException.getCause());
-         }
-         catch (CancellationException ce)
-         {
-            LogTools.warn(1, "Task cancelled");
-         }
-         catch (InterruptedException ie)
-         {
-            LogTools.warn(1, "Task interrupted");
-            Thread.currentThread().interrupt(); // ignore/reset
-         }
-      });
+      executorService.execute(runnable, executionResultHandler);
+   }
+
+   public void submit(Runnable runnable)
+   {
+      submit(runnable, ExecutionResultHandler.DEFAULT());
+   }
+
+   public void submit(Runnable runnable, ExecutionResultHandler executionResultHandler)
+   {
+      executorService.submit(runnable, executionResultHandler);
    }
 
    public void destroy()

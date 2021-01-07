@@ -13,6 +13,11 @@ public class MissingThreadTools
       return ThreadTools.createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
    }
 
+   public static SaferExecutorService newSingleThreadExecutor(String prefix)
+   {
+      return newSingleThreadExecutor(prefix, false);
+   }
+
    public static SaferExecutorService newSingleThreadExecutor(String prefix, boolean daemon)
    {
       int corePoolSize = 1;
