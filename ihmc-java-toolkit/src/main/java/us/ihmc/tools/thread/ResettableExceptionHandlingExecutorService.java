@@ -4,17 +4,26 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 /**
  * Work in progress.
  */
-public class SaferExecutorService
+public class ResettableExceptionHandlingExecutorService
 {
-   private final ExceptionHandlingThreadPoolExecutor executorService;
+   private final Supplier<ExceptionHandlingThreadPoolExecutor> executorServiceSupplier;
+   private ExceptionHandlingThreadPoolExecutor executorService;
 
-   public SaferExecutorService(ExceptionHandlingThreadPoolExecutor executorService)
+   public ResettableExceptionHandlingExecutorService(Supplier<ExceptionHandlingThreadPoolExecutor> executorServiceSupplier)
    {
-      this.executorService = executorService;
+      this.executorServiceSupplier = executorServiceSupplier;
+
+      executorService = executorServiceSupplier.get();
+   }
+
+   public void clearTaskQueue()
+   {
+      executorService.getQueue().clear();
    }
 
    public void execute(Runnable runnable)
@@ -35,6 +44,17 @@ public class SaferExecutorService
    public void submit(Runnable runnable, ExecutionResultHandler executionResultHandler)
    {
       executorService.submit(runnable, executionResultHandler);
+   }
+
+   public boolean isExecuting()
+   {
+      return executorService.getActiveCount() > 0 || executorService.getQueue().size() > 0;
+   }
+
+   public void interruptAndReset()
+   {
+      executorService.shutdownNow();
+      executorService = executorServiceSupplier.get();
    }
 
    public void destroy()
