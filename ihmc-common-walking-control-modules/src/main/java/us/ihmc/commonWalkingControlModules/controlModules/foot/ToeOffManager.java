@@ -10,8 +10,17 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -303,7 +312,8 @@ public class ToeOffManager
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
       double percentProximity = icpPercentOfStanceForSSToeOff.getValue();
@@ -323,6 +333,11 @@ public class ToeOffManager
       }
 
       toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, nextFootSupportPolygon);
+      if (finalDesiredICP != null && !onToesSupportPolygon.isPointInside(finalDesiredICP))
+      { // This allows to better account for long and/or fast steps when the final ICP lies outside the toe-off support polygon.
+         onToesSupportPolygon.addVertex(finalDesiredICP);
+         onToesSupportPolygon.update();
+      }
 
       ReferenceFrame soleFrame = nextFootstep.getSoleReferenceFrame();
       double requiredProximity = checkICPLocations(trailingLeg,
@@ -380,7 +395,8 @@ public class ToeOffManager
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
       if (lookAtTwoStepCapturabilityForToeOff.getValue() && setPolygonFromNextFootstep(nextFootSupportPolygon))
@@ -404,6 +420,11 @@ public class ToeOffManager
       }
 
       toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, leadingFootSupportPolygon);
+      if (finalDesiredICP != null && !onToesSupportPolygon.isPointInside(finalDesiredICP))
+      { // This allows to better account for long and/or fast steps when the final ICP lies outside the toe-off support polygon.
+         onToesSupportPolygon.addVertex(finalDesiredICP);
+         onToesSupportPolygon.update();
+      }
 
       ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
       double requiredProximity = checkICPLocations(trailingLeg,
