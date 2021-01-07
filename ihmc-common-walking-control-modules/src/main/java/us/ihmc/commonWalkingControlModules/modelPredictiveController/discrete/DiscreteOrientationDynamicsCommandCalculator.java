@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPointHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -39,7 +40,6 @@ public class DiscreteOrientationDynamicsCommandCalculator
    private final FrameVector3D contactLocation = new FrameVector3D();
    private final DMatrixRMaj contactLocationSkew = new DMatrixRMaj(3, 3);
 
-   private final DMatrixRMaj A = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj B = new DMatrixRMaj(6, 1);
 
    private final DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
@@ -103,18 +103,7 @@ public class DiscreteOrientationDynamicsCommandCalculator
       bodyVelocityToWorld.set(1, 1, cosYaw);
       bodyVelocityToWorld.set(2, 1, -sinPitch);
 
-
-
       int problemSize = indexHandler.getTotalProblemSize();
-      B.reshape(6, problemSize);
-      Bd.reshape(6, problemSize);
-      fullMatrix.reshape(6 + problemSize, 6 + problemSize);
-      matrixExponential.reshape(6 + problemSize, 6 + problemSize);
-      angularAccelerationJacobian.reshape(3, problemSize);
-
-      // TODO may not need to do the intermediate step
-      MatrixTools.setMatrixBlock(A, 0, 3, bodyVelocityToWorld, 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(fullMatrix, 0, 3, bodyVelocityToWorld, 0, 0, 3, 3, 1.0);
 
       computeInertiaInWorld(command.getBodyInertia());
 
@@ -127,24 +116,42 @@ public class DiscreteOrientationDynamicsCommandCalculator
       double timeInHorizon = 0.0;
       for (int segment = 0; segment < command.getNumberOfSegments(); segment++)
       {
-         for (int i = 0; i < command.getNumberOfContacts(segment); i++)
+         int rhoSize = indexHandler.getRhoCoefficientsInSegment(segment);
+         matrixExponentialCalculator.reshape(6 + indexHandler.getTotalProblemSize());
+
+         angularAccelerationJacobian.reshape(3, indexHandler.getRhoCoefficientsInSegment(segment));
+
+         B.reshape(6, rhoSize);
+         Bd.reshape(6, indexHandler.getTotalProblemSize());
+         fullMatrix.reshape(6 + indexHandler.getTotalProblemSize(), 6 + indexHandler.getTotalProblemSize());
+         matrixExponential.reshape(6 + indexHandler.getTotalProblemSize(), 6 + indexHandler.getTotalProblemSize());
+
+         B.zero();
+         Bd.zero();
+         fullMatrix.zero();
+         matrixExponential.zero();
+
+
+         // TODO should deal with the contact points and acceleration jacobians individually, as there are a lot of repeated and extra calculations in here.
+         int lastTick = Math.min(tick + indexHandler.getOrientationTicksInSegment(segment), indexHandler.getTotalOrientationTicks() - 1);
+
+         for (; tick < lastTick; tick++)
          {
+            double time = tick * indexHandler.getOrientationDt();
+
             int ticksIntoSegment = tick - indexHandler.getOrientationTicksBeforeSegment(segment);
             boolean isLastTickInSegment = ticksIntoSegment == indexHandler.getOrientationTicksInSegment(segment);
-            int element = DiscreteMPCIndexHandler.orientationVariablesPerTick * ticksIntoSegment + indexHandler.getOrientationStart(segment);
-            int nextElement = isLastTickInSegment ? indexHandler.getOrientationStart(segment + 1) : element + DiscreteMPCIndexHandler.orientationVariablesPerTick;
 
-            ContactPlaneHelper planeHelper = command.getContactPlaneHelper(segment, i);
 
-            // TODO should deal with the contact points and acceleration jacobians individually, as there are a lot of repeated and extra calculations in here.
-            for (; tick < tick + indexHandler.getOrientationTicksInSegment(segment); tick++)
+            angularAccelerationJacobian.zero();
+
+            for (int i = 0; i < command.getNumberOfContacts(segment); i++)
             {
-               double time = tick * indexHandler.getOrientationDt();
+               ContactPlaneHelper planeHelper = command.getContactPlaneHelper(segment, i);
 
                planeHelper.computeJacobians(time - timeInHorizon, command.getOmega());
-               angularAccelerationJacobian.zero();
 
-               int columnStart = indexHandler.getRhoCoefficientStartIndex(segment);
+               int columnStart = 0;
                for (int contactPointIdx = 0; contactPointIdx < planeHelper.getNumberOfContactPoints(); contactPointIdx++)
                {
                   ContactPointHelper contactPoint = planeHelper.getContactPointHelper(contactPointIdx);
@@ -159,16 +166,24 @@ public class DiscreteOrientationDynamicsCommandCalculator
                   columnStart += contactPoint.getCoefficientsSize();
                }
 
-               MatrixTools.setMatrixBlock(B, 3, 0, angularAccelerationJacobian, 0, 0, 3, problemSize, 1.0);
-
-               MatrixTools.setMatrixBlock(fullMatrix, 0, 6, B, 0, 0, 6, problemSize, 1.0);
-               matrixExponentialCalculator.compute(matrixExponential, fullMatrix);
-
-               MatrixTools.setMatrixBlock(Ad, 0, 0, matrixExponential, 0, 0, 6, 6, 1.0);
-               MatrixTools.setMatrixBlock(Bd, 0, 0, matrixExponential, 6, 0, 6, problemSize, 1.0);
-
-               MatrixTools.setMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, element, Bd, 0, 0, 6, problemSize, 1.0);
+               MatrixTools.addMatrixBlock(B, 3, 0, angularAccelerationJacobian, 0, 0, 3, rhoSize, 1.0);
             }
+
+            fullMatrix.zero();
+            MatrixTools.setMatrixBlock(fullMatrix, 0, 3, bodyVelocityToWorld, 0, 0, 3, 3, 1.0);
+            MatrixTools.setMatrixBlock(fullMatrix, 0, 6 + indexHandler.getRhoCoefficientStartIndex(segment), B, 0, 0, 6, rhoSize, 1.0);
+            CommonOps_DDRM.scale(indexHandler.getOrientationDt(), fullMatrix);
+            matrixExponentialCalculator.compute(matrixExponential, fullMatrix);
+
+            MatrixTools.setMatrixBlock(Ad, 0, 0, matrixExponential, 0, 0, 6, 6, 1.0);
+            MatrixTools.setMatrixBlock(Bd, 0, 0, matrixExponential, 0, 6, 6, indexHandler.getTotalProblemSize(), 1.0);
+
+            MatrixTools.addMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, 0, Bd, 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
+
+            int element = DiscreteMPCIndexHandler.orientationVariablesPerTick * ticksIntoSegment + indexHandler.getOrientationStart(segment);
+            int nextElement = isLastTickInSegment ?
+                  indexHandler.getOrientationStart(segment + 1) :
+                  element + DiscreteMPCIndexHandler.orientationVariablesPerTick;
 
             if (tick > 0)
                MatrixTools.setMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, element, Ad, 0, 0, 6, 6, 1.0);
@@ -177,7 +192,6 @@ public class DiscreteOrientationDynamicsCommandCalculator
             timeInHorizon += command.getSegmentDuration(segment);
          }
       }
-
    }
 
    private void computeInertiaInWorld(SpatialInertiaReadOnly spatialInertia)
@@ -201,12 +215,12 @@ public class DiscreteOrientationDynamicsCommandCalculator
 
    public DMatrixRMaj getRhsJacobian()
    {
-      throw new NotImplementedException();
+      return rhsJacobian;
    }
 
    public DMatrixRMaj getLhsJacobian()
    {
-      throw new NotImplementedException();
+      return lhsJacobian;
    }
 
    private static void convertYawPitchRollToMatrix(double yaw, double pitch, double roll, DMatrixRMaj matrixToPack)
