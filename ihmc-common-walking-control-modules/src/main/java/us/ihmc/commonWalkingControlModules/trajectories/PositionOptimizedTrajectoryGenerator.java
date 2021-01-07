@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -224,7 +225,9 @@ public class PositionOptimizedTrajectoryGenerator
     * @param finalPosition
     * @param finalVelocity
     */
-   public void setEndpointConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, FramePoint3DReadOnly finalPosition,
+   public void setEndpointConditions(FramePoint3DReadOnly initialPosition,
+                                     FrameVector3DReadOnly initialVelocity,
+                                     FramePoint3DReadOnly finalPosition,
                                      FrameVector3DReadOnly finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -244,6 +247,37 @@ public class PositionOptimizedTrajectoryGenerator
                                 this.initialVelocity.getElement(axis),
                                 this.finalPosition.getElement(axis),
                                 this.finalVelocity.getElement(axis));
+      }
+   }
+
+   /**
+    * Sets the weights to use for the endpoint conditions.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up the condition as an objective.
+    * </p>
+    * 
+    * @param initialPositionWeight the weight for the initial position condition. If {@code null}, it
+    *                              is set up as a hard constraint. Not modified.
+    * @param initialVelocityWeight the weight for the initial velocity condition. If {@code null}, it
+    *                              is set up as a hard constraint. Not modified.
+    * @param finalPositionWeight   the weight for the final position condition. If {@code null}, it is
+    *                              set up as a hard constraint. Not modified.
+    * @param finalVelocityWeight   the weight for the final velocity condition. If {@code null}, it is
+    *                              set up as a hard constraint. Not modified.
+    */
+   public void setEndpointWeights(Tuple3DReadOnly initialPositionWeight,
+                                  Tuple3DReadOnly initialVelocityWeight,
+                                  Tuple3DReadOnly finalPositionWeight,
+                                  Tuple3DReadOnly finalVelocityWeight)
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         optimizer.setEndPointWeights(axis.ordinal(),
+                                      initialPositionWeight == null ? Double.POSITIVE_INFINITY : initialPositionWeight.getElement(axis),
+                                      initialVelocityWeight == null ? Double.POSITIVE_INFINITY : initialVelocityWeight.getElement(axis),
+                                      finalPositionWeight == null ? Double.POSITIVE_INFINITY : finalPositionWeight.getElement(axis),
+                                      finalVelocityWeight == null ? Double.POSITIVE_INFINITY : finalVelocityWeight.getElement(axis));
       }
    }
 
@@ -436,6 +470,78 @@ public class PositionOptimizedTrajectoryGenerator
       waypointVelocityToPack.setToZero(trajectoryFrame);
       for (int d = 0; d < Axis3D.values.length; d++)
          waypointVelocityToPack.setElement(d, this.waypointVelocity.get(d));
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal initial position.
+    * <p>
+    * Note that this method is only useful when the initial position is configured as an objective, in
+    * which case it can differ from the given position in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param initialPositionToPack
+    */
+   public void getInitialPosition(FrameVector3DBasics initialPositionToPack)
+   {
+      optimizer.getStartPosition(waypointVelocity);
+      initialPositionToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         initialPositionToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal initial velocity.
+    * <p>
+    * Note that this method is only useful when the initial velocity is configured as an objective, in
+    * which case it can differ from the given velocity in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param initialVelocityToPack
+    */
+   public void getInitialVelocity(FrameVector3DBasics initialVelocityToPack)
+   {
+      optimizer.getStartVelocity(waypointVelocity);
+      initialVelocityToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         initialVelocityToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after finalize to retrieve the optimal final position.
+    * <p>
+    * Note that this method is only useful when the final position is configured as an objective, in
+    * which case it can differ from the given position in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param finalPositionToPack
+    */
+   public void getFinalPosition(FrameVector3DBasics finalPositionToPack)
+   {
+      optimizer.getTargetPosition(waypointVelocity);
+      finalPositionToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         finalPositionToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal final velocity.
+    * <p>
+    * Note that this method is only useful when the final velocity is configured as an objective, in
+    * which case it can differ from the given velocity in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param finalVelocityToPack
+    */
+   public void getFinalVelocity(FrameVector3DBasics finalVelocityToPack)
+   {
+      optimizer.getTargetVelocity(waypointVelocity);
+      finalVelocityToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         finalVelocityToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
    }
 
    public boolean isDone()
