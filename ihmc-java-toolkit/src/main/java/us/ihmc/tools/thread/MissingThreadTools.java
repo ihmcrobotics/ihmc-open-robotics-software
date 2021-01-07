@@ -13,23 +13,29 @@ public class MissingThreadTools
       return ThreadTools.createNamedThreadFactory(prefix, includePoolInName, includeThreadNumberInName, daemon, Thread.NORM_PRIORITY);
    }
 
-   public static SaferExecutorService newSingleThreadExecutor(String prefix)
+   public static ResettableExceptionHandlingExecutorService newSingleThreadExecutor(String prefix)
    {
       return newSingleThreadExecutor(prefix, false);
    }
 
-   public static SaferExecutorService newSingleThreadExecutor(String prefix, boolean daemon)
+   public static ResettableExceptionHandlingExecutorService newSingleThreadExecutor(String prefix, boolean daemon)
+   {
+      return newSingleThreadExecutor(prefix, daemon, -1);
+   }
+
+   public static ResettableExceptionHandlingExecutorService newSingleThreadExecutor(String prefix, boolean daemon, int queueSize)
    {
       int corePoolSize = 1;
       int maximumPoolSize = 1;
       long keepAliveTime = 0L;
-      ExceptionHandlingThreadPoolExecutor executorService = new ExceptionHandlingThreadPoolExecutor(corePoolSize,
-                                                                                                    maximumPoolSize,
-                                                                                                    keepAliveTime,
-                                                                                                    TimeUnit.MILLISECONDS,
-                                                                                                    new LinkedBlockingQueue<>(),
-                                                                                                    createNamedThreadFactory(prefix, daemon),
-                                                                                                    new ThreadPoolExecutor.AbortPolicy());
-      return new SaferExecutorService(executorService);
+      return new ResettableExceptionHandlingExecutorService(() -> new ExceptionHandlingThreadPoolExecutor(
+            corePoolSize,
+            maximumPoolSize,
+            keepAliveTime,
+            TimeUnit.MILLISECONDS,
+            queueSize < 0 ? new LinkedBlockingQueue<>() : new ArrayBlockingQueue<>(queueSize),
+            createNamedThreadFactory(prefix, daemon),
+            new ThreadPoolExecutor.AbortPolicy())
+      );
    }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.tools.thread;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
 
 @FunctionalInterface
@@ -23,7 +22,8 @@ public interface ExecutionResultHandler
          }
          else
          {
-            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
+            LogTools.error("Exception in thread: {}: {}", Thread.currentThread().getName(), exception.getMessage());
+            exception.printStackTrace();
          }
       };
    }
