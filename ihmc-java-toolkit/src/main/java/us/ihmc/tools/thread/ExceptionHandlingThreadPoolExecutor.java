@@ -1,15 +1,11 @@
 package us.ihmc.tools.thread;
 
-import us.ihmc.commons.exception.ExceptionHandler;
-
 import java.util.HashMap;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 
 public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
 {
-   private final HashMap<Runnable, Consumer<Future<?>>> afterSubmitHandlers = new HashMap<>();
-   private final HashMap<Runnable, ExceptionHandler> afterExecuteHandlers = new HashMap<>();
+   private final HashMap<Runnable, ExecutionResultHandler> executionResultHandlers = new HashMap<>();
 
    public ExceptionHandlingThreadPoolExecutor(int corePoolSize,
                                               int maximumPoolSize,
@@ -22,20 +18,29 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
    }
 
-   public void execute(Runnable runnable, ExceptionHandler exceptionHandler)
+   public void execute(Runnable runnable, ExecutionResultHandler executionResultHandler)
    {
-      afterExecuteHandlers.put(runnable, exceptionHandler);
+      executionResultHandlers.put(runnable, executionResultHandler);
       execute(runnable);
    }
 
-   public Future<?> submit(Runnable task, Consumer<Future<?>> afterExecute)
+   public Future<?> submit(Runnable task, ExecutionResultHandler executionResultHandler)
    {
       if (task == null) throw new NullPointerException();
       RunnableFuture<Void> futureTask = newTaskFor(task, null);
-      afterSubmitHandlers.put(futureTask, afterExecute);
+      executionResultHandlers.put(futureTask, executionResultHandler);
       execute(futureTask);
       return futureTask;
    }
+
+//   public <V> Future<V> submit(Callable<V> task, ExecutionResultHandler executionResultHandler)
+//   {
+//      if (task == null) throw new NullPointerException();
+//      RunnableFuture<V> futureTask = newTaskFor(task);
+//      executionResultHandlers.put(futureTask, executionResultHandler);
+//      execute(futureTask);
+//      return futureTask;
+//   }
 
    @Override
    protected void afterExecute(Runnable runnableFuture, Throwable throwable)
@@ -45,17 +50,43 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       if (throwable == null && runnableFuture instanceof Future<?>) // used submit
       {
          Future<?> castedFuture = (Future<?>) runnableFuture;
-         afterSubmitHandlers.computeIfPresent(runnableFuture, (future, listener) ->
+         executionResultHandlers.computeIfPresent(runnableFuture, (future, executionResultHandler) ->
          {
-            listener.accept(castedFuture);
+            try
+            {
+               castedFuture.get();
+            }
+            catch (CancellationException cancellationException)
+            {
+               executionResultHandler.handle(cancellationException, true, false);
+            }
+            catch (InterruptedException interruptedException)
+            {
+               executionResultHandler.handle(interruptedException, false, true);
+            }
+            catch (ExecutionException executionException)
+            {
+               executionResultHandler.handle(executionException.getCause(), false, false);
+            }
             return null;
          });
       }
       else if (throwable != null) // used execute directly
       {
-         afterExecuteHandlers.computeIfPresent(runnableFuture, (runnable, handler) ->
+         executionResultHandlers.computeIfPresent(runnableFuture, (runnable, executionResultHandler) ->
          {
-            handler.handleException(throwable);
+            if (throwable instanceof CancellationException)
+            {
+               executionResultHandler.handle(throwable, true, false);
+            }
+            else if (throwable instanceof InterruptedException)
+            {
+               executionResultHandler.handle(throwable, false, true);
+            }
+            else // ExecutionException
+            {
+               executionResultHandler.handle(throwable, false, false);
+            }
             return null;
          });
       }
