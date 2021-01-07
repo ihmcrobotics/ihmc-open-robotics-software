@@ -46,6 +46,11 @@ public class ResettableExceptionHandlingExecutorService
       executorService.submit(runnable, executionResultHandler);
    }
 
+   public <V> void submit(Callable<V> callable, ExecutionResultHandler executionResultHandler)
+   {
+      executorService.submit(callable, executionResultHandler);
+   }
+
    public boolean isExecuting()
    {
       return executorService.getActiveCount() > 0 || executorService.getQueue().size() > 0;
@@ -53,7 +58,7 @@ public class ResettableExceptionHandlingExecutorService
 
    public void interruptAndReset()
    {
-      executorService.shutdownNow();
+      executorService.interruptRunningAndCancelQueue();
       executorService = executorServiceSupplier.get();
    }
 

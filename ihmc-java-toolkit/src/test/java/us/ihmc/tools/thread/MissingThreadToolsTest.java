@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +37,49 @@ public class MissingThreadToolsTest
       ThreadTools.sleepSeconds(0.2);
 
       assertTrue(assertionRan.get());
+   }
+
+   @Test
+   public void testSingleScheduleThreadCancel()
+   {
+      LogTools.info("Begin test");
+      int[] ints = new int[1];
+      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
+      AtomicInteger numberOfThingsThatHappened = new AtomicInteger();
+      executor.submit(() ->
+      {
+         LogTools.info("Start sleeping");
+         Object syncObject = new Object();
+         synchronized (syncObject)
+         {
+            syncObject.wait();
+         }
+         ThreadTools.sleepSeconds(1.0);
+         LogTools.info("Finish sleeping");
+         return null;
+      }, (exception, cancelled, interrupted) ->
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
+         assertTrue(interrupted);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
+
+      executor.submit(() ->
+      {
+         return null;
+      }, (exception, cancelled, interrupted) ->
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
+         assertTrue(cancelled);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
+
+      ThreadTools.sleepSeconds(0.5);
+      executor.interruptAndReset();
+
+      ThreadTools.sleepSeconds(0.5);
+
+      assertEquals(2, numberOfThingsThatHappened.get());
    }
 
    @Test

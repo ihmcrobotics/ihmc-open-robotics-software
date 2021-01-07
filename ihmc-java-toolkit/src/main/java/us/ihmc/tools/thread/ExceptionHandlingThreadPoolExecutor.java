@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
@@ -33,6 +34,15 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       return futureTask;
    }
 
+   public <V> Future<V> submit(Callable<V> task, ExecutionResultHandler executionResultHandler)
+   {
+      if (task == null) throw new NullPointerException();
+      RunnableFuture<V> futureTask = newTaskFor(task);
+      executionResultHandlers.put(futureTask, executionResultHandler);
+      execute(futureTask);
+      return futureTask;
+   }
+
 //   public <V> Future<V> submit(Callable<V> task, ExecutionResultHandler executionResultHandler)
 //   {
 //      if (task == null) throw new NullPointerException();
@@ -42,12 +52,24 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
 //      return futureTask;
 //   }
 
+   public void interruptRunningAndCancelQueue()
+   {
+      List<Runnable> queuedTasks = shutdownNow();
+      for (Runnable queuedTask : queuedTasks)
+      {
+         if (queuedTask instanceof Future<?>)
+         {
+            ((Future<?>) queuedTask).cancel(false);
+         }
+      }
+   }
+
    @Override
    protected void afterExecute(Runnable runnableFuture, Throwable throwable)
    {
       super.afterExecute(runnableFuture, throwable); // fluff pretty much, super has no implementation
 
-      if (throwable == null && runnableFuture instanceof Future<?>) // used submit
+      if (runnableFuture instanceof Future<?>) // used submit
       {
          Future<?> castedFuture = (Future<?>) runnableFuture;
          executionResultHandlers.computeIfPresent(runnableFuture, (future, executionResultHandler) ->
@@ -66,20 +88,17 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
             }
             catch (ExecutionException executionException)
             {
-               executionResultHandler.handle(executionException.getCause(), false, false);
+               Throwable cause = executionException.getCause();
+               executionResultHandler.handle(cause, false, cause != null && cause instanceof InterruptedException);
             }
             return null;
          });
       }
-      else if (throwable != null) // used execute directly
+      else // used execute directly; these can't be cancelled; that's a Future thing
       {
          executionResultHandlers.computeIfPresent(runnableFuture, (runnable, executionResultHandler) ->
          {
-            if (throwable instanceof CancellationException)
-            {
-               executionResultHandler.handle(throwable, true, false);
-            }
-            else if (throwable instanceof InterruptedException)
+            if (throwable != null && throwable instanceof InterruptedException)
             {
                executionResultHandler.handle(throwable, false, true);
             }
