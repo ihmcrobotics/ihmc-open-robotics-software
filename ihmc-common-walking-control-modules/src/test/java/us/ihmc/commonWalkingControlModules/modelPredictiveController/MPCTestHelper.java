@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete.DiscreteMPCIndexHandler;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -102,7 +103,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      int coefficients = MPCIndexHandler.comCoefficientsPerSegment + MPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize() + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
+      int coefficients = DiscreteMPCIndexHandler.comCoefficientsPerSegment + DiscreteMPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize();
       DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
 
       double c0 = time;
@@ -147,7 +148,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      int coefficients = MPCIndexHandler.comCoefficientsPerSegment + MPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize() + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
+      int coefficients = DiscreteMPCIndexHandler.comCoefficientsPerSegment + DiscreteMPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize();
       DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
 
       double c0Dot = 1.0;
@@ -191,7 +192,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMAccelerationJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      int coefficients = MPCIndexHandler.comCoefficientsPerSegment + MPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize() + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
+      int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize();
       DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
 
       double c0Ddot = 0.0;
@@ -235,7 +236,7 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMJerkJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      int coefficients = MPCIndexHandler.comCoefficientsPerSegment + MPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize() + 3 * MPCIndexHandler.orientationCoefficientsPerSegment;
+      int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize();
       DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
 
       double c0Dddot = 0.0;

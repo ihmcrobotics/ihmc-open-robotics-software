@@ -1,28 +1,42 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete;
 
+import org.ejml.data.CMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.convexOptimization.qpOASES.Matrix;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.lang.annotation.Native;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DiscreteOrientationDynamicsCommandCalculatorTest
 {
+   private static boolean print = true;
+   @BeforeEach
+   public void setup()
+   {
+      print &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
+
    @Test
    public void computeSimpleSingleSegment()
    {
@@ -39,7 +53,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
 
-      DiscreteMPCIndexHandler indexHandler = new DiscreteMPCIndexHandler(4, 0.25);
+      DiscreteMPCIndexHandler indexHandler = new DiscreteMPCIndexHandler(4);
 
       FramePose3D contactPose = new FramePose3D();
 
@@ -93,6 +107,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
       calculator.compute(command);
 
       DMatrixRMaj Cmatrix = new DMatrixRMaj(3, 3);
+      DMatrixRMaj CmatrixInverse = new DMatrixRMaj(3, 3);
       RotationMatrix rotation = new RotationMatrix();
       orientation.get(rotation);
       DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
@@ -102,15 +117,23 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
       Cmatrix.set(0, 1, -Math.sin(yaw));
       Cmatrix.set(1, 0, Math.cos(pitch) * Math.sin(yaw));
       Cmatrix.set(1, 1, Math.cos(yaw));
-      Cmatrix.set(2, 1, -Math.sin(pitch));
+      Cmatrix.set(2, 0, -Math.sin(pitch));
+      Cmatrix.set(2, 2, 1.0);
+
+      NativeCommonOps.invert(Cmatrix, CmatrixInverse);
 
       DMatrixRMaj A = new DMatrixRMaj(6, 6);
       DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
-      MatrixTools.setMatrixBlock(A, 0, 3, Cmatrix, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 3, CmatrixInverse, 0, 0, 3, 3, 1.0);
 
       MatrixExponentialCalculator eAT = new MatrixExponentialCalculator(6);
       CommonOps_DDRM.scale(indexHandler.getOrientationDt(), A);
       eAT.compute(Ad, A);
+
+      // reset this guy
+      A.zero();
+      MatrixTools.setMatrixBlock(A, 0, 3, CmatrixInverse, 0, 0, 3, 3, 1.0);
+
 
       DMatrixRMaj rhsJacobian = new DMatrixRMaj(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), indexHandler.getTotalProblemSize());
       DMatrixRMaj lhsJacobian = new DMatrixRMaj(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), indexHandler.getTotalProblemSize());
@@ -133,7 +156,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
 
       // the first tick should be equal to the state transition matrix times the initial angular velocity.
       DMatrixRMaj firstTickConst = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(Cmatrix, angularVelocityVector, firstTickConst);
+      CommonOps_DDRM.mult(CmatrixInverse, angularVelocityVector, firstTickConst);
       MatrixTools.setMatrixBlock(rhsConstant, 0, 0, firstTickConst, 0, 0, 3, 1, 1.0);
 
       for (int tick = 0; tick < indexHandler.getTotalOrientationTicks() - 1; tick++)
@@ -142,8 +165,8 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
          int nextTickSegment = indexHandler.getSegmentForTick(tick + 1);
          int startIndexOfSegment = indexHandler.getOrientationStart(segment);
          int startIndexOfSegmentNextTick = indexHandler.getOrientationStart(nextTickSegment);
-         int ticksIntoSegment = indexHandler.getOrientationTicksBeforeSegment(segment);
-         int ticksIntoSegmentNext = indexHandler.getOrientationTicksBeforeSegment(nextTickSegment);
+         int ticksIntoSegment = tick - indexHandler.getOrientationTicksBeforeSegment(segment);
+         int ticksIntoSegmentNext = tick + 1 - indexHandler.getOrientationTicksBeforeSegment(nextTickSegment);
          int currentVariables = startIndexOfSegment + ticksIntoSegment * DiscreteMPCIndexHandler.orientationVariablesPerTick;
          int nextTickVariables = startIndexOfSegmentNextTick + ticksIntoSegmentNext * DiscreteMPCIndexHandler.orientationVariablesPerTick;
 
@@ -176,6 +199,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
             coefficientOffset += contactPoint.getCoefficientsSize();
          }
 
+
          CommonOps_DDRM.mult(inertiaInWorldInverse, torqueJacobian, angularAccelerationJacobian);
 
          DMatrixRMaj B = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
@@ -193,12 +217,45 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
          DMatrixRMaj Bd = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
          MatrixTools.setMatrixBlock(Bd, 0, 0, fullStateExponential, 0, 6, 6, indexHandler.getTotalProblemSize(), 1.0);
 
+         if (tick == 1)
+         {
+            printInfo(indexHandler, segment, fullStateMatrix, fullStateExponential, angularAccelerationJacobian);
+         }
+
          MatrixTools.addMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, 0, Bd, 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
       }
 
       MatrixTestTools.assertMatrixEquals(rhsJacobian, calculator.getRhsJacobian(), 1e-5);
+      MatrixTestTools.assertMatrixEquals(rhsConstant, calculator.getRhsConstant(), 1e-5);
+      // TODO
       MatrixTestTools.assertMatrixEquals(lhsJacobian, calculator.getLhsJacobian(), 1e-5);
    }
+
+   private static void printInfo(DiscreteMPCIndexHandler indexHandler, int segment, DMatrixRMaj fullState, DMatrixRMaj fullStateExponential, DMatrixRMaj accelJacobian)
+   {
+      if (!print)
+         return;
+
+      int rhoSize = indexHandler.getRhoCoefficientsInSegment(segment);
+      DMatrixRMaj nonAccel = new DMatrixRMaj(3, rhoSize);
+      DMatrixRMaj nonZeroA = new DMatrixRMaj(6, 6);
+      DMatrixRMaj nonZeroB = new DMatrixRMaj(6, rhoSize);
+      DMatrixRMaj nonZeroBd = new DMatrixRMaj(6, rhoSize);
+      DMatrixRMaj nonZeroAd = new DMatrixRMaj(6, 6);
+
+      MatrixTools.setMatrixBlock(nonAccel, 0, 0, accelJacobian, 0, indexHandler.getRhoCoefficientStartIndex(segment), 3, rhoSize, 1.0);
+      MatrixTools.setMatrixBlock(nonZeroA, 0, 0, fullState, 0, 0, 6, 6, 1.0 / indexHandler.getOrientationDt());
+      MatrixTools.setMatrixBlock(nonZeroB, 0, 0, fullState, 0, 6 + indexHandler.getRhoCoefficientStartIndex(segment), 6, rhoSize, 1.0 / indexHandler.getOrientationDt());
+      MatrixTools.setMatrixBlock(nonZeroAd, 0, 0, fullStateExponential, 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(nonZeroBd, 0, 0, fullStateExponential, 0, 6 + indexHandler.getRhoCoefficientStartIndex(segment), 6, rhoSize, 1.0);
+
+      LogTools.info("Estimate Accel : " + nonAccel);
+      LogTools.info("Estimate B : " + nonZeroB);
+      LogTools.info("Estimate A : " + nonZeroA);
+      LogTools.info("Estimate Bd : " + nonZeroBd);
+      LogTools.info("Estimate Ad : " + nonZeroAd);
+   }
+
 
    @Test
    public void computeSingleSegment()
@@ -268,6 +325,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
       calculator.compute(command);
 
       DMatrixRMaj Cmatrix = new DMatrixRMaj(3, 3);
+      DMatrixRMaj CmatrixInverse = new DMatrixRMaj(3, 3);
       RotationMatrix rotation = new RotationMatrix();
       orientation.get(rotation);
       DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
@@ -277,15 +335,21 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
       Cmatrix.set(0, 1, -Math.sin(yaw));
       Cmatrix.set(1, 0, Math.cos(pitch) * Math.sin(yaw));
       Cmatrix.set(1, 1, Math.cos(yaw));
-      Cmatrix.set(2, 1, -Math.sin(pitch));
+      Cmatrix.set(2, 0, -Math.sin(pitch));
+      Cmatrix.set(2, 2, 1.0);
+
+      NativeCommonOps.invert(Cmatrix, CmatrixInverse);
 
       DMatrixRMaj A = new DMatrixRMaj(6, 6);
       DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
-      MatrixTools.setMatrixBlock(A, 0, 3, Cmatrix, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 3, CmatrixInverse, 0, 0, 3, 3, 1.0);
 
       MatrixExponentialCalculator eAT = new MatrixExponentialCalculator(6);
       CommonOps_DDRM.scale(indexHandler.getOrientationDt(), A);
       eAT.compute(Ad, A);
+
+      A.zero();
+      MatrixTools.setMatrixBlock(A, 0, 3, CmatrixInverse, 0, 0, 3, 3, 1.0);
 
       DMatrixRMaj rhsJacobian = new DMatrixRMaj(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), indexHandler.getTotalProblemSize());
       DMatrixRMaj lhsJacobian = new DMatrixRMaj(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), indexHandler.getTotalProblemSize());
@@ -308,7 +372,7 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
 
       // the first tick should be equal to the state transition matrix times the initial angular velocity.
       DMatrixRMaj firstTickConst = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(Cmatrix, angularVelocityVector, firstTickConst);
+      CommonOps_DDRM.mult(CmatrixInverse, angularVelocityVector, firstTickConst);
       MatrixTools.setMatrixBlock(rhsConstant, 0, 0, firstTickConst, 0, 0, 3, 1, 1.0);
 
       for (int tick = 0; tick < indexHandler.getTotalOrientationTicks() - 1; tick++)
@@ -317,8 +381,8 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
          int nextTickSegment = indexHandler.getSegmentForTick(tick + 1);
          int startIndexOfSegment = indexHandler.getOrientationStart(segment);
          int startIndexOfSegmentNextTick = indexHandler.getOrientationStart(nextTickSegment);
-         int ticksIntoSegment = indexHandler.getOrientationTicksBeforeSegment(segment);
-         int ticksIntoSegmentNext = indexHandler.getOrientationTicksBeforeSegment(nextTickSegment);
+         int ticksIntoSegment = tick - indexHandler.getOrientationTicksBeforeSegment(segment);
+         int ticksIntoSegmentNext = tick + 1 - indexHandler.getOrientationTicksBeforeSegment(nextTickSegment);
          int currentVariables = startIndexOfSegment + ticksIntoSegment * DiscreteMPCIndexHandler.orientationVariablesPerTick;
          int nextTickVariables = startIndexOfSegmentNextTick + ticksIntoSegmentNext * DiscreteMPCIndexHandler.orientationVariablesPerTick;
 
@@ -368,10 +432,17 @@ public class DiscreteOrientationDynamicsCommandCalculatorTest
          DMatrixRMaj Bd = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
          MatrixTools.setMatrixBlock(Bd, 0, 0, fullStateExponential, 0, 6, 6, indexHandler.getTotalProblemSize(), 1.0);
 
+
+         if (tick == 1)
+         {
+            printInfo(indexHandler, segment, fullStateMatrix, fullStateExponential, angularAccelerationJacobian);
+         }
+
          MatrixTools.addMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, 0, Bd, 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
       }
 
       MatrixTestTools.assertMatrixEquals(rhsJacobian, calculator.getRhsJacobian(), 1e-5);
+      MatrixTestTools.assertMatrixEquals(rhsConstant, calculator.getRhsConstant(), 1e-5);
       MatrixTestTools.assertMatrixEquals(lhsJacobian, calculator.getLhsJacobian(), 1e-5);
    }
 }

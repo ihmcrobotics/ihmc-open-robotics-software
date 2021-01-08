@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPointHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.YawPitchRollTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
@@ -20,17 +20,14 @@ import java.util.Arrays;
 
 public class DiscreteOrientationDynamicsCommandCalculator
 {
+   private static final boolean shouldPrint = false;
+   private static final int tickToPrint = 1;
+
    final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-   final DMatrixRMaj bodyVelocityToWorld = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj eulerVelocityToWorld = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj worldVelocityToEuler = new DMatrixRMaj(3, 3);
 
-   private final DMatrixRMaj rotationRateJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj rotationAccelerationJacobian = new DMatrixRMaj(3, 0);
-
-   private final DMatrixRMaj orientationJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj angularTorqueJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj angularAccelerationJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj contactPointTorqueJacobian = new DMatrixRMaj(3, 0);
-
+   private final DMatrixRMaj angularVelocity = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj inertia = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj tempInertia = new DMatrixRMaj(3, 3);
    final DMatrixRMaj inertiaInWorld = new DMatrixRMaj(3, 3);
@@ -39,8 +36,7 @@ public class DiscreteOrientationDynamicsCommandCalculator
    private final DiscreteMPCIndexHandler indexHandler;
    private final FrameVector3D contactLocation = new FrameVector3D();
    private final DMatrixRMaj contactLocationSkew = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj B = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj Ircross = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 1);
@@ -49,9 +45,8 @@ public class DiscreteOrientationDynamicsCommandCalculator
    private final DMatrixRMaj matrixExponential = new DMatrixRMaj(0, 0);
 
    private final DMatrixRMaj rhsJacobian = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj rhsConstant = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj lhsJacobian = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj identity = CommonOps_DDRM.identity(6);
-   private final DMatrixRMaj stateControlMatrix = new DMatrixRMaj(0, 0);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(0);
 
@@ -62,27 +57,7 @@ public class DiscreteOrientationDynamicsCommandCalculator
       this.indexHandler = indexHandler;
       this.mass = mass;
 
-      bodyVelocityToWorld.set(2, 2, 1.0);
-   }
-
-   public DMatrixRMaj getRotationRateJacobian()
-   {
-      return rotationRateJacobian;
-   }
-
-   public DMatrixRMaj getRotationAccelerationJacobian()
-   {
-      return rotationAccelerationJacobian;
-   }
-
-   public DMatrixRMaj getOrientationJacobian()
-   {
-      return orientationJacobian;
-   }
-
-   public DMatrixRMaj getAngularAccelerationJacobian()
-   {
-      return angularAccelerationJacobian;
+      eulerVelocityToWorld.set(2, 2, 1.0);
    }
 
    public void compute(DiscreteOrientationDynamicsCommand command)
@@ -90,60 +65,50 @@ public class DiscreteOrientationDynamicsCommandCalculator
       double yaw = command.getOrientationEstimate().getYaw();
       double pitch = command.getOrientationEstimate().getPitch();
       double roll = command.getOrientationEstimate().getRoll();
-      double cosYaw = Math.cos(yaw);
-      double sinYaw = Math.sin(yaw);
-      double cosPitch = Math.cos(pitch);
-      double sinPitch = Math.sin(pitch);
+      command.getAngularVelocityEstimate().get(angularVelocity);
 
       convertYawPitchRollToMatrix(yaw, pitch, roll, rotationMatrix);
 
-      bodyVelocityToWorld.set(0, 0, cosPitch * cosYaw);
-      bodyVelocityToWorld.set(0, 1, -sinYaw);
-      bodyVelocityToWorld.set(1, 0, cosPitch * sinYaw);
-      bodyVelocityToWorld.set(1, 1, cosYaw);
-      bodyVelocityToWorld.set(2, 1, -sinPitch);
+      computeEulerVelocityToWorldVelocity(pitch, yaw, eulerVelocityToWorld);
+
+      NativeCommonOps.invert(eulerVelocityToWorld, worldVelocityToEuler);
 
       int problemSize = indexHandler.getTotalProblemSize();
 
       computeInertiaInWorld(command.getBodyInertia());
 
-      matrixExponentialCalculator.reshape(6 + problemSize);
-
       rhsJacobian.reshape(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), problemSize);
+      rhsConstant.reshape(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), 1);
       lhsJacobian.reshape(DiscreteMPCIndexHandler.orientationVariablesPerTick * indexHandler.getTotalOrientationTicks(), problemSize);
+
+      rhsJacobian.zero();
+      rhsConstant.zero();
+      lhsJacobian.zero();
+
+      MatrixTools.multAddBlock(worldVelocityToEuler, angularVelocity, rhsConstant, 0, 0);
 
       int tick = 0;
       double timeInHorizon = 0.0;
       for (int segment = 0; segment < command.getNumberOfSegments(); segment++)
       {
          int rhoSize = indexHandler.getRhoCoefficientsInSegment(segment);
-         matrixExponentialCalculator.reshape(6 + indexHandler.getTotalProblemSize());
+         matrixExponentialCalculator.reshape(6 + rhoSize);
+         Bd.reshape(6, rhoSize);
+         fullMatrix.reshape(6 + rhoSize, 6 + rhoSize);
+         matrixExponential.reshape(6 + rhoSize, 6 + rhoSize);
 
-         angularAccelerationJacobian.reshape(3, indexHandler.getRhoCoefficientsInSegment(segment));
-
-         B.reshape(6, rhoSize);
-         Bd.reshape(6, indexHandler.getTotalProblemSize());
-         fullMatrix.reshape(6 + indexHandler.getTotalProblemSize(), 6 + indexHandler.getTotalProblemSize());
-         matrixExponential.reshape(6 + indexHandler.getTotalProblemSize(), 6 + indexHandler.getTotalProblemSize());
-
-         B.zero();
-         Bd.zero();
-         fullMatrix.zero();
-         matrixExponential.zero();
-
-
-         // TODO should deal with the contact points and acceleration jacobians individually, as there are a lot of repeated and extra calculations in here.
          int lastTick = Math.min(tick + indexHandler.getOrientationTicksInSegment(segment), indexHandler.getTotalOrientationTicks() - 1);
 
          for (; tick < lastTick; tick++)
          {
+            Bd.zero();
+            fullMatrix.zero();
+            matrixExponential.zero();
+
             double time = tick * indexHandler.getOrientationDt();
 
             int ticksIntoSegment = tick - indexHandler.getOrientationTicksBeforeSegment(segment);
             boolean isLastTickInSegment = ticksIntoSegment == indexHandler.getOrientationTicksInSegment(segment);
-
-
-            angularAccelerationJacobian.zero();
 
             for (int i = 0; i < command.getNumberOfContacts(segment); i++)
             {
@@ -158,27 +123,24 @@ public class DiscreteOrientationDynamicsCommandCalculator
                   contactLocation.sub(contactPoint.getBasisVectorOrigin(), command.getComPositionEstimate());
                   convertToSkewSymmetric(contactLocation, contactLocationSkew);
 
-                  contactPointTorqueJacobian.reshape(3, contactPoint.getCoefficientsSize());
-                  CommonOps_DDRM.mult(mass, contactLocationSkew, contactPoint.getLinearJacobian(2), contactPointTorqueJacobian);
+                  CommonOps_DDRM.mult(inertiaInWorldInverse, contactLocationSkew, Ircross);
 
-                  MatrixTools.multAddBlock(inertiaInWorldInverse, contactPointTorqueJacobian, angularAccelerationJacobian, 0, columnStart);
+                  MatrixTools.multAddBlock(mass * indexHandler.getOrientationDt(), Ircross, contactPoint.getLinearJacobian(2), fullMatrix, 3, 6 + columnStart);
 
                   columnStart += contactPoint.getCoefficientsSize();
                }
-
-               MatrixTools.addMatrixBlock(B, 3, 0, angularAccelerationJacobian, 0, 0, 3, rhoSize, 1.0);
             }
 
-            fullMatrix.zero();
-            MatrixTools.setMatrixBlock(fullMatrix, 0, 3, bodyVelocityToWorld, 0, 0, 3, 3, 1.0);
-            MatrixTools.setMatrixBlock(fullMatrix, 0, 6 + indexHandler.getRhoCoefficientStartIndex(segment), B, 0, 0, 6, rhoSize, 1.0);
-            CommonOps_DDRM.scale(indexHandler.getOrientationDt(), fullMatrix);
+            MatrixTools.setMatrixBlock(fullMatrix, 0, 3, worldVelocityToEuler, 0, 0, 3, 3, indexHandler.getOrientationDt());
             matrixExponentialCalculator.compute(matrixExponential, fullMatrix);
 
             MatrixTools.setMatrixBlock(Ad, 0, 0, matrixExponential, 0, 0, 6, 6, 1.0);
-            MatrixTools.setMatrixBlock(Bd, 0, 0, matrixExponential, 0, 6, 6, indexHandler.getTotalProblemSize(), 1.0);
+            MatrixTools.setMatrixBlock(Bd, 0, 0, matrixExponential, 0, 6, 6, rhoSize, 1.0);
 
-            MatrixTools.addMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, 0, Bd, 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
+            MatrixTools.addMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, indexHandler.getRhoCoefficientStartIndex(segment), Bd, 0, 0, 6, rhoSize, 1.0);
+
+            if (shouldPrint && tick == tickToPrint)
+               printInfo(segment);
 
             int element = DiscreteMPCIndexHandler.orientationVariablesPerTick * ticksIntoSegment + indexHandler.getOrientationStart(segment);
             int nextElement = isLastTickInSegment ?
@@ -187,12 +149,32 @@ public class DiscreteOrientationDynamicsCommandCalculator
 
             if (tick > 0)
                MatrixTools.setMatrixBlock(rhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, element, Ad, 0, 0, 6, 6, 1.0);
-            MatrixTools.setMatrixBlock(lhsJacobian, DiscreteMPCIndexHandler.orientationVariablesPerTick * tick, nextElement, identity, 0, 0, 6, 6, 1.0);
 
-            timeInHorizon += command.getSegmentDuration(segment);
+            for (int i = 0; i < 6; i++)
+               lhsJacobian.set(DiscreteMPCIndexHandler.orientationVariablesPerTick * tick + i, nextElement + i, 1.0);
          }
+
+         timeInHorizon += command.getSegmentDuration(segment);
       }
    }
+
+   private void printInfo(int segment)
+   {
+      DMatrixRMaj nonZeroB = new DMatrixRMaj(6, indexHandler.getRhoCoefficientsInSegment(segment));
+      DMatrixRMaj nonZeroA = new DMatrixRMaj(6, 6);
+      MatrixTools.setMatrixBlock(nonZeroB, 3, 0, fullMatrix, 3, 6, 3, indexHandler.getRhoCoefficientsInSegment(segment), 1.0);
+      MatrixTools.setMatrixBlock(nonZeroA, 0, 0, fullMatrix, 0, 0, 6, 6, 1.0 / indexHandler.getOrientationDt());
+
+      LogTools.info("Actual A : " + nonZeroA);
+      LogTools.info("Actual B : " + nonZeroB);
+
+      DMatrixRMaj nonZeroBd = new DMatrixRMaj(6, indexHandler.getRhoCoefficientsInSegment(segment));
+      MatrixTools.setMatrixBlock(nonZeroBd, 0, 0, Bd, 0, 0, 6, indexHandler.getRhoCoefficientsInSegment(segment), 1.0);
+
+      LogTools.info("Actual Ad : " + Ad);
+      LogTools.info("Actual Bd : " + nonZeroBd);
+   }
+
 
    private void computeInertiaInWorld(SpatialInertiaReadOnly spatialInertia)
    {
@@ -213,9 +195,32 @@ public class DiscreteOrientationDynamicsCommandCalculator
       skewMatrix.set(2, 1, tuple.getX());
    }
 
+   public static void computeEulerVelocityToWorldVelocity(double pitch, double yaw, DMatrixRMaj matrixToPack)
+   {
+      double cosYaw = Math.cos(yaw);
+      double sinYaw = Math.sin(yaw);
+      double cosPitch = Math.cos(pitch);
+      double sinPitch = Math.sin(pitch);
+
+      matrixToPack.set(0, 0, cosPitch * cosYaw);
+      matrixToPack.set(0, 1, -sinYaw);
+      matrixToPack.set(1, 0, cosPitch * sinYaw);
+      matrixToPack.set(1, 1, cosYaw);
+      matrixToPack.set(2, 0, -sinPitch);
+   }
+
+   public static void computeWorldVelocityToEulerVelocity(double pitch, double yaw, DMatrixRMaj matrixToPack)
+   {}
+
+
    public DMatrixRMaj getRhsJacobian()
    {
       return rhsJacobian;
+   }
+
+   public DMatrixRMaj getRhsConstant()
+   {
+      return rhsConstant;
    }
 
    public DMatrixRMaj getLhsJacobian()
