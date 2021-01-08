@@ -413,12 +413,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
             //
 
          }
-         @Override
-         public boolean isDone()
-         {
-            // TODO Auto-generated method stub
-            return false;
-         }
+        
       };
       
       
