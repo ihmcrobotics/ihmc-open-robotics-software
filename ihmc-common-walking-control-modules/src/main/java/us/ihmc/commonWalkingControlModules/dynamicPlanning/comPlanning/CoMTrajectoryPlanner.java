@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.ejml.data.*;
 
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
 import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -31,26 +31,28 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>
- *    This is the main class of the trajectory-based CoM Trajectory Planner.
+ * This is the main class of the trajectory-based CoM Trajectory Planner.
  * </p>
  * <p>
- *    This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
- *    This means that the final VRP is the terminal DCM location
- *  </p>
- *  <p>
- *     The CoM has the following definitions:
- *     <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
- *     c<sub>4</sub> t + c<sub>5</sub></li>
- *     <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
- *     2 c<sub>3</sub> t+ c<sub>4</sub>
- *     <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup>
- *     + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
- *  </p>
+ * This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
+ * This means that the final VRP is the terminal DCM location
+ * </p>
+ * <p>
+ * The CoM has the following definitions:
+ * <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
+ * c<sub>4</sub> t + c<sub>5</sub></li>
+ * <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
+ * 2 c<sub>3</sub> t+ c<sub>4</sub>
+ * <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega;
+ * t</sup>
+ * + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
+ * </p>
  *
  *
- *    <p> From this, it follows that the VRP has the trajectory
- *    <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> + c<sub>5</sub></li>
- *    </p>
+ * <p> From this, it follows that the VRP has the trajectory
+ * <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> +
+ * c<sub>5</sub></li>
+ * </p>
  */
 public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 {
@@ -63,33 +65,33 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final DMatrixSparseCSC coefficientMultipliersSparse = new DMatrixSparseCSC(0, 0);
 
-   private final DMatrixSparseCSC tempSparse = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC xEquivalents = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC yEquivalents = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC zEquivalents = new DMatrixSparseCSC(0, 1);
+   private final DMatrixRMaj xEquivalents = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj yEquivalents = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj zEquivalents = new DMatrixRMaj(0, 1);
 
-   private final DMatrixSparseCSC xConstants = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC yConstants = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC zConstants = new DMatrixSparseCSC(0, 1);
+   private final DMatrixRMaj xConstants = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj yConstants = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj zConstants = new DMatrixRMaj(0, 1);
 
    private final DMatrixSparseCSC vrpWaypointJacobian = new DMatrixSparseCSC(0, 1);
 
-   private final DMatrixSparseCSC vrpXWaypoints = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC vrpYWaypoints = new DMatrixSparseCSC(0, 1);
-   private final DMatrixSparseCSC vrpZWaypoints = new DMatrixSparseCSC(0, 1);
+   private final DMatrixRMaj vrpXWaypoints = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj vrpYWaypoints = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj vrpZWaypoints = new DMatrixRMaj(0, 1);
 
    // FIXME fill reducing?
    private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
 
-   final DMatrixSparseCSC xCoefficientVector = new DMatrixSparseCSC(0, 1);
-   final DMatrixSparseCSC yCoefficientVector = new DMatrixSparseCSC(0, 1);
-   final DMatrixSparseCSC zCoefficientVector = new DMatrixSparseCSC(0, 1);
+   final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
+   final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
 
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
 
    private final CoMTrajectoryPlannerIndexHandler indexHandler = new CoMTrajectoryPlannerIndexHandler();
+   private final LinearCoMTrajectoryHandler trajectoryHandler = new LinearCoMTrajectoryHandler(indexHandler);
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -109,13 +111,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
-
-   private final YoFramePoint3D yoFirstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
-   private final YoFramePoint3D yoSecondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
-   private final YoFramePoint3D yoThirdCoefficient = new YoFramePoint3D("comThirdCoefficient", worldFrame, registry);
-   private final YoFramePoint3D yoFourthCoefficient = new YoFramePoint3D("comFourthCoefficient", worldFrame, registry);
-   private final YoFramePoint3D yoFifthCoefficient = new YoFramePoint3D("comFifthCoefficient", worldFrame, registry);
-   private final YoFramePoint3D yoSixthCoefficient = new YoFramePoint3D("comSixthCoefficient", worldFrame, registry);
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
@@ -181,21 +176,27 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.comContinuityCalculator = comContinuityCalculator;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
       this.comHeight.set(nominalCoMHeight);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getNominalCoMHeight()
    {
       return comHeight.getDoubleValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void solveForTrajectory(List<? extends ContactStateProvider> contactSequence)
    {
@@ -206,17 +207,31 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       resetMatrices();
 
-      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequence, startVRPPositions,
-                                                    endVRPPositions, true);
+      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
+                                                    gravityZ,
+                                                    omega.getValue(),
+                                                    currentCoMVelocity,
+                                                    contactSequence,
+                                                    startVRPPositions,
+                                                    endVRPPositions,
+                                                    true);
 
       solveForCoefficientConstraintMatrix(contactSequence);
+      trajectoryHandler.setCoefficientsFromSolution(xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
       if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null)
       {
          int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
          double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
-         compute(segmentId, time, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+         compute(segmentId,
+                 time,
+                 comPositionToThrowAway,
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway,
+                 vrpStartPosition,
+                 ecmpPositionToThrowAway);
 
          comContinuityCalculator.setInitialCoMPosition(currentCoMPosition);
          comContinuityCalculator.setInitialCoMVelocity(currentCoMVelocity);
@@ -230,37 +245,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          }
       }
 
-      // update coefficient holders
-      int firstCoefficientIndex = 0;
-      int secondCoefficientIndex = 1;
-      int thirdCoefficientIndex = 2;
-      int fourthCoefficientIndex = 3;
-      int fifthCoefficientIndex = 4;
-      int sixthCoefficientIndex = 5;
-
-      yoFirstCoefficient.setX(xCoefficientVector.get(firstCoefficientIndex, 0));
-      yoFirstCoefficient.setY(yCoefficientVector.get(firstCoefficientIndex, 0));
-      yoFirstCoefficient.setZ(zCoefficientVector.get(firstCoefficientIndex, 0));
-
-      yoSecondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
-      yoSecondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
-      yoSecondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
-
-      yoThirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
-      yoThirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
-      yoThirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
-
-      yoFourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
-      yoFourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
-      yoFourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
-
-      yoFifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
-      yoFifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
-      yoFifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
-
-      yoSixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
-      yoSixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
-      yoSixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
+      trajectoryHandler.setCoefficientsFromSolution(xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
       updateCornerPoints(contactSequence);
 
@@ -275,9 +260,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          updateCoMTrajectoryViewer();
       }
    }
-
-   private final IGrowArray gw = new IGrowArray();
-   private final DGrowArray gx = new DGrowArray();
 
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
    {
@@ -311,18 +293,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       sparseSolver.setA(coefficientMultipliersSparse);
 
       // TODO make an add equals method. Also don't pass in null, as that apparently makes garbage.
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpXWaypoints, tempSparse, gw, gx);
-      CommonOps_DSCC.add(1.0, tempSparse, 1.0, xConstants, xEquivalents, gw, gx);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+      CommonOps_DDRM.addEquals(xEquivalents, xConstants);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpYWaypoints, tempSparse, gw, gx);
-      CommonOps_DSCC.add(1.0, tempSparse, 1.0, yConstants, yEquivalents, gw, gx);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+      CommonOps_DDRM.addEquals(yEquivalents, yConstants);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpZWaypoints, tempSparse, gw, gx);
-      CommonOps_DSCC.add(1.0, tempSparse, 1.0, zConstants, zEquivalents, gw, gx);
+      CommonOps_DSCC.mult(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+      CommonOps_DDRM.addEquals(zEquivalents, zConstants);
 
-      sparseSolver.solveSparse(xEquivalents, xCoefficientVector);
-      sparseSolver.solveSparse(yEquivalents, yCoefficientVector);
-      sparseSolver.solveSparse(zEquivalents, zCoefficientVector);
+      sparseSolver.solve(xEquivalents, xCoefficientVector);
+      sparseSolver.solve(yEquivalents, yCoefficientVector);
+      sparseSolver.solve(zEquivalents, zCoefficientVector);
    }
 
    private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
@@ -350,10 +332,24 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
-         compute(segmentId, 0.0, comCornerPoints.add(), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.add(),
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
-         compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpEndPosition, ecmpPositionToThrowAway);
+         compute(segmentId,
+                 0.0,
+                 comCornerPoints.add(),
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmCornerPoints.add(),
+                 dcmVelocityToThrowAway,
+                 vrpStartPosition,
+                 ecmpPositionToThrowAway);
+         compute(segmentId,
+                 duration,
+                 comPositionToThrowAway,
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway,
+                 vrpEndPosition,
+                 ecmpPositionToThrowAway);
 
          Polynomial3D trajectory3D = vrpTrajectoryPool.add();
          trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
@@ -365,12 +361,21 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       verbose = verboseBefore;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void compute(int segmentId, double timeInPhase)
    {
-      compute(segmentId, timeInPhase, desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration, desiredDCMPosition, desiredDCMVelocity,
-              desiredVRPPosition, desiredECMPPosition);
+      compute(segmentId,
+              timeInPhase,
+              desiredCoMPosition,
+              desiredCoMVelocity,
+              desiredCoMAcceleration,
+              desiredDCMPosition,
+              desiredDCMVelocity,
+              desiredVRPPosition,
+              desiredECMPPosition);
 
       if (verbose)
       {
@@ -378,72 +383,38 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       }
    }
 
-   private final FramePoint3D firstCoefficient = new FramePoint3D();
-   private final FramePoint3D secondCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthCoefficient = new FramePoint3D();
-
    @Override
-   public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
-                       FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
-                       FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
+   public void compute(int segmentId,
+                       double timeInPhase,
+                       FixedFramePoint3DBasics comPositionToPack,
+                       FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack,
+                       FixedFramePoint3DBasics dcmPositionToPack,
+                       FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack,
+                       FixedFramePoint3DBasics ecmpPositionToPack)
    {
       if (segmentId < 0)
          throw new IllegalArgumentException("time is invalid.");
 
-      int startIndex = indexHandler.getContactSequenceStartIndex(segmentId);
-      firstCoefficient.setX(xCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setY(yCoefficientVector.get(startIndex, 0));
-      firstCoefficient.setZ(zCoefficientVector.get(startIndex, 0));
-
-      int secondCoefficientIndex = startIndex + 1;
-      secondCoefficient.setX(xCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setY(yCoefficientVector.get(secondCoefficientIndex, 0));
-      secondCoefficient.setZ(zCoefficientVector.get(secondCoefficientIndex, 0));
-
-      int thirdCoefficientIndex = startIndex + 2;
-      thirdCoefficient.setX(xCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setY(yCoefficientVector.get(thirdCoefficientIndex, 0));
-      thirdCoefficient.setZ(zCoefficientVector.get(thirdCoefficientIndex, 0));
-
-      int fourthCoefficientIndex = startIndex + 3;
-      fourthCoefficient.setX(xCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setY(yCoefficientVector.get(fourthCoefficientIndex, 0));
-      fourthCoefficient.setZ(zCoefficientVector.get(fourthCoefficientIndex, 0));
-
-      int fifthCoefficientIndex = startIndex + 4;
-      fifthCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
-
-      int sixthCoefficientIndex = startIndex + 5;
-      sixthCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
-
-      double omega = this.omega.getValue();
-
-      CoMTrajectoryPlannerTools.constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                  sixthCoefficient, timeInPhase, omega);
-      CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocityToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                  sixthCoefficient, timeInPhase, omega);
-      CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                      sixthCoefficient, timeInPhase, omega);
-
-      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(desiredVRPVelocity, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                                            sixthCoefficient, timeInPhase, omega);
-
-      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
-      CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
-      CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
+      trajectoryHandler.setActiveCoefficientsForSegment(segmentId);
+      trajectoryHandler.compute(omega.getValue(),
+                                timeInPhase,
+                                comPositionToPack,
+                                comVelocityToPack,
+                                comAccelerationToPack,
+                                dcmPositionToPack,
+                                dcmVelocityToPack,
+                                vrpPositionToPack,
+                                desiredVRPVelocity);
 
       ecmpPositionToPack.set(vrpPositionToPack);
       ecmpPositionToPack.subZ(comHeight.getDoubleValue());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
@@ -451,42 +422,54 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
       return desiredDCMPosition;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FrameVector3DReadOnly getDesiredDCMVelocity()
    {
       return desiredDCMVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
       return desiredCoMPosition;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
       return desiredCoMVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FrameVector3DReadOnly getDesiredCoMAcceleration()
    {
       return desiredCoMAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
@@ -498,7 +481,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       return desiredVRPVelocity;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
@@ -517,8 +502,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          int segmentId = getSegmentNumber(time);
          double timeInSegment = getTimeInSegment(segmentId, time);
 
-         compute(segmentId, timeInSegment, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+         compute(segmentId,
+                 timeInSegment,
+                 comPositionToThrowAway,
+                 comVelocityToThrowAway,
+                 comAccelerationToThrowAway,
+                 dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway,
+                 vrpStartPosition,
+                 ecmpPositionToThrowAway);
 
          comTrajectoryViewer.setBall(comPositionToThrowAway);
       }
@@ -535,7 +527,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       int numberOfVRPWaypoints = indexHandler.getNumberOfVRPWaypoints();
 
       coefficientMultipliersSparse.reshape(size, size);
-      tempSparse.reshape(size, 1);
       xEquivalents.reshape(size, 1);
       yEquivalents.reshape(size, 1);
       zEquivalents.reshape(size, 1);
@@ -569,25 +560,33 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> This constraint should be used for the initial position of the center of mass to properly initialize the trajectory. </p>
     * <p> Recall that the equation for the center of mass is defined by </p>
     * <p>
-    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
-    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
-    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    * c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    * c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
     * <p>
-    *    This constraint defines
+    * This constraint defines
     * </p>
     * <p>
-    *    x<sub>0</sub>(0) = x<sub>d</sub>,
+    * x<sub>0</sub>(0) = x<sub>d</sub>,
     * </p>
     * <p>
-    *    substituting in the coefficients into the constraint matrix.
+    * substituting in the coefficients into the constraint matrix.
     * </p>
+    *
     * @param centerOfMassLocationForConstraint x<sub>d</sub> in the above equations
     */
    private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
-      CoMTrajectoryPlannerTools.addCoMPositionConstraint(centerOfMassLocationForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
-                                                         coefficientMultipliersSparse, xConstants, yConstants, zConstants);
+      CoMTrajectoryPlannerTools.addCoMPositionConstraint(centerOfMassLocationForConstraint,
+                                                         omega.getValue(),
+                                                         0.0,
+                                                         0,
+                                                         numberOfConstraints,
+                                                         coefficientMultipliersSparse,
+                                                         xConstants,
+                                                         yConstants,
+                                                         zConstants);
       numberOfConstraints++;
    }
 
@@ -595,31 +594,37 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> Sets a constraint on the desired DCM position. This constraint is useful for constraining the terminal location of the DCM trajectory. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
-    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
-    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    * c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    * c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
     * <p> and the center of mass velocity is defined by </p>
     * <p>
-    *    d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
-    *    &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
-    *     2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>
+    * d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
+    * &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
+    * 2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>
     * </p>
     * <p>
-    *    This constraint is then combining these two, saying
+    * This constraint is then combining these two, saying
     * </p>
     * <p> x<sub>i</sub>(t<sub>i</sub>) + 1 / &omega; d/dt x<sub>i</sub>(t<sub>i</sub>) = &xi;<sub>d</sub>,</p>
     * <p> substituting in the appropriate coefficients. </p>
+    *
     * @param sequenceId i in the above equations
     * @param time t<sub>i</sub> in the above equations
     * @param desiredDCMPosition desired DCM location. &xi;<sub>d</sub> in the above equations.
     */
-   private void setDCMPositionConstraint(int sequenceId,
-                                         double time,
-                                         FramePoint3DReadOnly desiredDCMPosition)
+   private void setDCMPositionConstraint(int sequenceId, double time, FramePoint3DReadOnly desiredDCMPosition)
    {
-      CoMTrajectoryPlannerTools.addDCMPositionConstraint(sequenceId, numberOfConstraints, time, omega.getValue(), desiredDCMPosition, coefficientMultipliersSparse,
-                                                         xConstants, yConstants, zConstants);
+      CoMTrajectoryPlannerTools.addDCMPositionConstraint(sequenceId,
+                                                         numberOfConstraints,
+                                                         time,
+                                                         omega.getValue(),
+                                                         desiredDCMPosition,
+                                                         coefficientMultipliersSparse,
+                                                         xConstants,
+                                                         yConstants,
+                                                         zConstants);
       numberOfConstraints++;
    }
 
@@ -627,9 +632,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> Set a continuity constraint on the CoM position at a state change, aka a trajectory knot.. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
-    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
-    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    * c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    * c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
     * <p> This constraint is then defined as </p>
     * <p> x<sub>i-1</sub>(T<sub>i-1</sub>) = x<sub>i</sub>(0), </p>
@@ -639,12 +644,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMPositionContinuity(List<? extends ContactStateProvider> contactSequence,
-                                         int previousSequence,
-                                         int nextSequence)
+   private void setCoMPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
    {
       double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addCoMPositionContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
+      CoMTrajectoryPlannerTools.addCoMPositionContinuityConstraint(previousSequence,
+                                                                   nextSequence,
+                                                                   numberOfConstraints,
+                                                                   omega.getValue(),
+                                                                   previousDuration,
                                                                    coefficientMultipliersSparse);
       numberOfConstraints++;
    }
@@ -653,9 +660,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> Set a continuity constraint on the CoM velocity at a state change, aka a trajectory knot.. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
-    *    &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
-    *     2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>.
+    * d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
+    * &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
+    * 2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>.
     * </p>
     * <p> This constraint is then defined as </p>
     * <p> d / dt x<sub>i-1</sub>(T<sub>i-1</sub>) = d / dt x<sub>i</sub>(0), </p>
@@ -665,12 +672,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMVelocityContinuity(List<? extends ContactStateProvider> contactSequence,
-                                         int previousSequence,
-                                         int nextSequence)
+   private void setCoMVelocityContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
    {
       double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
-      CoMTrajectoryPlannerTools.addCoMVelocityContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
+      CoMTrajectoryPlannerTools.addCoMVelocityContinuityConstraint(previousSequence,
+                                                                   nextSequence,
+                                                                   numberOfConstraints,
+                                                                   omega.getValue(),
+                                                                   previousDuration,
                                                                    coefficientMultipliersSparse);
       numberOfConstraints++;
    }
@@ -708,8 +717,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param contactSequence current contact sequence.
     * @param sequenceId desired trajectory segment.
     */
-   private void setDynamicsFinalConstraint(List<? extends ContactStateProvider> contactSequence,
-                                           int sequenceId)
+   private void setDynamicsFinalConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       ContactState contactState = contactStateProvider.getContactState();
@@ -737,18 +745,25 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> v<sub>i</sub>(t<sub>i</sub>) = J v<sub>d</sub> </p>
     * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
     * <p> v<sub>d,j</sub> = v<sub>r</sub> </p>
+    *
     * @param sequenceId segment of interest, i in the above equations
     * @param vrpWaypointPositionIndex current vrp waypoint index, j in the above equations
     * @param time time in the segment, t<sub>i</sub> in the above equations
     * @param desiredVRPPosition reference VRP position, v<sub>r</sub> in the above equations.
     */
-   private void constrainVRPPosition(int sequenceId,
-                                     int vrpWaypointPositionIndex,
-                                     double time,
-                                     FramePoint3DReadOnly desiredVRPPosition)
+   private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
    {
-      CoMTrajectoryPlannerTools.addVRPPositionConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, time, omega.getValue(), desiredVRPPosition,
-                                                         coefficientMultipliersSparse, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
+      CoMTrajectoryPlannerTools.addVRPPositionConstraint(sequenceId,
+                                                         numberOfConstraints,
+                                                         vrpWaypointPositionIndex,
+                                                         time,
+                                                         omega.getValue(),
+                                                         desiredVRPPosition,
+                                                         coefficientMultipliersSparse,
+                                                         vrpXWaypoints,
+                                                         vrpYWaypoints,
+                                                         vrpZWaypoints,
+                                                         vrpWaypointJacobian);
       numberOfConstraints++;
    }
 
@@ -761,18 +776,25 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> d/dt v<sub>i</sub>(t<sub>i</sub>) = J v<sub>d</sub> </p>
     * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
     * <p> v<sub>d,j</sub> = d/dt v<sub>r</sub> </p>
+    *
     * @param sequenceId segment of interest, i in the above equations
     * @param vrpWaypointVelocityIndex current vrp waypoint index, j in the above equations
     * @param time time in the segment, t<sub>i</sub> in the above equations
     * @param desiredVRPVelocity reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
     */
-   private void constrainVRPVelocity(int sequenceId,
-                                     int vrpWaypointVelocityIndex,
-                                     double time,
-                                     FrameVector3DReadOnly desiredVRPVelocity)
+   private void constrainVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
    {
-      CoMTrajectoryPlannerTools.addVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointVelocityIndex, omega.getValue(), time, desiredVRPVelocity,
-                                                         coefficientMultipliersSparse, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
+      CoMTrajectoryPlannerTools.addVRPVelocityConstraint(sequenceId,
+                                                         numberOfConstraints,
+                                                         vrpWaypointVelocityIndex,
+                                                         omega.getValue(),
+                                                         time,
+                                                         desiredVRPVelocity,
+                                                         coefficientMultipliersSparse,
+                                                         vrpXWaypoints,
+                                                         vrpYWaypoints,
+                                                         vrpZWaypoints,
+                                                         vrpWaypointJacobian);
       numberOfConstraints++;
    }
 
@@ -784,12 +806,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> This constraint then states that </p>
     * <p> d<sup>2</sup> / dt<sup>2</sup> x<sub>i</sub>(t<sub>i</sub>) = -g, </p>
     * <p> substituting in the appropriate coefficients. </p>
+    *
     * @param sequenceId segment of interest, i in the above equations.
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
    private void constrainCoMAccelerationToGravity(int sequenceId, double time)
    {
-      CoMTrajectoryPlannerTools.constrainCoMAccelerationToGravity(sequenceId, numberOfConstraints, omega.getValue(), time, gravityZ, coefficientMultipliersSparse,
+      CoMTrajectoryPlannerTools.constrainCoMAccelerationToGravity(sequenceId,
+                                                                  numberOfConstraints,
+                                                                  omega.getValue(),
+                                                                  time,
+                                                                  gravityZ,
+                                                                  coefficientMultipliersSparse,
                                                                   zConstants);
       numberOfConstraints++;
    }
@@ -802,6 +830,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * <p> This constraint then states that </p>
     * <p> d<sup>3</sup> / dt<sup>3</sup> x<sub>i</sub>(t<sub>i</sub>) = 0.0, </p>
     * <p> substituting in the appropriate coefficients. </p>
+    *
     * @param sequenceId segment of interest, i in the above equations.
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
