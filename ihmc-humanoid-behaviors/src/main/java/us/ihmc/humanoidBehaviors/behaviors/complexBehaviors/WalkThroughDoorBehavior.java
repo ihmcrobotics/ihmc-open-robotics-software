@@ -239,6 +239,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       BehaviorAction searchForDoorNear = new BehaviorAction(searchForDoorBehavior)
       {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            searchForDoorBehavior.setScanForDoor(true);
+
+            super.setBehaviorInput();
+         }
+
          @Override
          public void onEntry()
          {
