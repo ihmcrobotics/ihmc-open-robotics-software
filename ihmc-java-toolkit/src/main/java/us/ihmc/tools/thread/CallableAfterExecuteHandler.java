@@ -1,7 +1,5 @@
 package us.ihmc.tools.thread;
 
-import us.ihmc.log.LogTools;
-
 import java.util.function.Consumer;
 
 @FunctionalInterface
@@ -15,8 +13,7 @@ public interface CallableAfterExecuteHandler<V>
       {
          if (exception != null)
          {
-            LogTools.error("Exception in thread: {}: {}", Thread.currentThread().getName(), exception.getMessage());
-            exception.printStackTrace();
+            ResettableExceptionHandlingExecutorService.MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
          }
          else
          {

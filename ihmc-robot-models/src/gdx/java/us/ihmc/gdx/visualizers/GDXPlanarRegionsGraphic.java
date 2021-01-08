@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL32;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -28,7 +27,6 @@ import java.util.function.Function;
 public class GDXPlanarRegionsGraphic implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
-   private final GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
 
    // visualization options
    private Function<Integer, Color> colorFunction = new GDXIDMappedColorFunction();
@@ -36,38 +34,48 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
    private boolean drawBoundingBox = false;
    private boolean drawNormal;
 
+   private volatile Runnable toRender = null;
+
    private ModelInstance modelInstance;
+   private Model lastModel;
 
    public void generateFlatGround()
    {
       generateMeshes(PlanarRegionsList.flatGround(20.0));
    }
 
-   public void generateMeshesAsync(PlanarRegionsList planarRegionsList)
+   public void render()
    {
-      ThreadTools.startAThread(() -> generateMeshes(planarRegionsList), "MeshGeneration");
+      if (toRender != null)
+      {
+         toRender.run();
+      }
    }
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
    {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.begin();
-
       GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
          singleRegionMeshBuilder(planarRegion, meshBuilder); // should do in parallel somehow?
       }
-      Mesh mesh = meshBuilder.generateMesh();
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
-      Material material = new Material();
-      Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
-      modelBuilder.part(meshPart, material);
+      toRender = () ->
+      {
+         modelBuilder.begin();
+         Mesh mesh = meshBuilder.generateMesh();
+         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+         Material material = new Material();
+         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         material.set(TextureAttribute.createDiffuse(paletteTexture));
+         material.set(ColorAttribute.createDiffuse(Color.WHITE));
+         modelBuilder.part(meshPart, material);
 
-      Model model = modelBuilder.end();
-      modelInstance = new ModelInstance(model); // TODO: Clean up garbage and look into reusing the Model
+         if (lastModel != null)
+            lastModel.dispose();
+
+         lastModel = modelBuilder.end();
+         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+      };
    }
 
    private void singleRegionMeshBuilder(PlanarRegion planarRegion, GDXMultiColorMeshBuilder meshBuilder)
