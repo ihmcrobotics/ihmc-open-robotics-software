@@ -328,7 +328,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                publishTextToSpeech("open door action");
             }
             //this should happen in the openDoorBehavior
-            openPushDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+            openPullDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
          }
       };
 
