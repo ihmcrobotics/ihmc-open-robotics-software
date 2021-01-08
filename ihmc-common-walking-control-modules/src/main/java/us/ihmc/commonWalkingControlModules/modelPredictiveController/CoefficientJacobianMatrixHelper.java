@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete.DiscreteMPCIndexHandler;
 import us.ihmc.commons.MathTools;
 
 public class CoefficientJacobianMatrixHelper
@@ -29,7 +30,7 @@ public class CoefficientJacobianMatrixHelper
       this.numberOfContactPointsInContact = maxNumberOfContactPoints;
 
       rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
-      coefficientsSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
+      coefficientsSize = rhoSize * DiscreteMPCIndexHandler.coefficientsPerRho;
 
       positionJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
       velocityJacobianMatrix = new DMatrixRMaj(rhoSize, coefficientsSize);
@@ -44,7 +45,7 @@ public class CoefficientJacobianMatrixHelper
    {
       this.numberOfContactPointsInContact = numberOfContactPointsInContact;
       rhoSize = numberOfContactPointsInContact * numberOfBasisVectorsPerContactPoint;
-      coefficientsSize = rhoSize * MPCIndexHandler.coefficientsPerRho;
+      coefficientsSize = rhoSize * DiscreteMPCIndexHandler.coefficientsPerRho;
       positionJacobianMatrix.reshape(rhoSize, coefficientsSize);
       velocityJacobianMatrix.reshape(rhoSize, coefficientsSize);
       accelerationJacobianMatrix.reshape(rhoSize, coefficientsSize);
@@ -97,7 +98,7 @@ public class CoefficientJacobianMatrixHelper
       {
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            int startColumn = rhoIndex * MPCIndexHandler.coefficientsPerRho;
+            int startColumn = rhoIndex * DiscreteMPCIndexHandler.coefficientsPerRho;
 
             positionJacobianMatrix.set(rhoIndex, startColumn, positiveExponential);
             positionJacobianMatrix.set(rhoIndex, startColumn + 1, negativeExponential);
@@ -201,7 +202,7 @@ public class CoefficientJacobianMatrixHelper
       {
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            int startIdx = rhoIndex * MPCIndexHandler.coefficientsPerRho;
+            int startIdx = rhoIndex * DiscreteMPCIndexHandler.coefficientsPerRho;
 
             accelerationIntegrationHessian.set(startIdx, startIdx, c00);
             accelerationIntegrationHessian.set(startIdx, startIdx + 1, c01);
@@ -254,7 +255,7 @@ public class CoefficientJacobianMatrixHelper
       {
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            int startColumn = rhoIndex * MPCIndexHandler.coefficientsPerRho;
+            int startColumn = rhoIndex * DiscreteMPCIndexHandler.coefficientsPerRho;
 
             jerkIntegrationHessian.set(startColumn, startColumn, c00);
             jerkIntegrationHessian.set(startColumn, startColumn + 1, c01);
