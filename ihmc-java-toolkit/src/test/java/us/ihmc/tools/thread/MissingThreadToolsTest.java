@@ -1,15 +1,14 @@
 package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService.MESSAGE_AND_TRACE_WITH_THREAD_NAME;
 
 public class MissingThreadToolsTest
 {
@@ -18,68 +17,63 @@ public class MissingThreadToolsTest
    {
       LogTools.info("Begin test");
       int[] ints = new int[1];
-      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
-      AtomicBoolean assertionRan = new AtomicBoolean();
+      int queueSize = -1;
+      boolean daemon= false;
+      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("Test", daemon, queueSize);
+      AtomicInteger numberOfThingsThatHappened = new AtomicInteger();
+      executor.execute(() ->
+      {
+         LogTools.info("ints[0] = {}", ints[0]);
+         LogTools.info("ints[1] = {}", ints[1]);
+      },
+      exception ->
+      {
+         MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
+         assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
+
       executor.submit(() ->
-                      {
-                         LogTools.info("ints[0] = {}", ints[0]);
-                         LogTools.info("ints[1] = {}", ints[1]);
-                      }, (exception, cancelled, interrupted) ->
-                      {
-                         if (!cancelled && !interrupted)
-                         {
-                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
-                            assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
-                            assertionRan.set(true);
-                         }
-                      });
+      {
+         LogTools.info("ints[0] = {}", ints[0]);
+         LogTools.info("ints[1] = {}", ints[1]);
+      },
+      exception ->
+      {
+         MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
+         assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
+
+      executor.submit(() ->
+      {
+         LogTools.info("ints[0] = {}", ints[0]);
+         LogTools.info("ints[1] = {}", ints[1]);
+
+         return 5;
+      },
+      (result, exception) ->
+      {
+         MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
+         assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
+
+      executor.submit(() ->
+      {
+         LogTools.info("ints[0] = {}", ints[0]);
+
+         return 5;
+      },
+      (result, exception) ->
+      {
+         assertEquals(5, result);
+         numberOfThingsThatHappened.getAndIncrement();
+      });
 
       ThreadTools.sleepSeconds(0.2);
 
-      assertTrue(assertionRan.get());
-   }
-
-   @Test
-   public void testSingleScheduleThreadCancel()
-   {
-      LogTools.info("Begin test");
-      int[] ints = new int[1];
-      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
-      AtomicInteger numberOfThingsThatHappened = new AtomicInteger();
-      executor.submit(() ->
-      {
-         LogTools.info("Start sleeping");
-         Object syncObject = new Object();
-         synchronized (syncObject)
-         {
-            syncObject.wait();
-         }
-         ThreadTools.sleepSeconds(1.0);
-         LogTools.info("Finish sleeping");
-         return null;
-      }, (exception, cancelled, interrupted) ->
-      {
-         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
-         assertTrue(interrupted);
-         numberOfThingsThatHappened.getAndIncrement();
-      });
-
-      executor.submit(() ->
-      {
-         return null;
-      }, (exception, cancelled, interrupted) ->
-      {
-         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
-         assertTrue(cancelled);
-         numberOfThingsThatHappened.getAndIncrement();
-      });
-
-      ThreadTools.sleepSeconds(0.5);
-      executor.interruptAndReset();
-
-      ThreadTools.sleepSeconds(0.5);
-
-      assertEquals(2, numberOfThingsThatHappened.get());
+      assertEquals(4, numberOfThingsThatHappened.get());
    }
 
    @Test
