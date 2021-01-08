@@ -50,7 +50,7 @@ public class CoMTrajectoryPlannerIndexHandler
 
    public int getContactSequenceStartIndex(int sequenceNumber)
    {
-      return 6 * sequenceNumber;
+      return polynomialCoefficientsPerSegment * sequenceNumber;
    }
 
    public int getVRPWaypointStartPositionIndex(int sequenceNumber)
