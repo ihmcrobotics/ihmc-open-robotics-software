@@ -15,8 +15,11 @@ public class ResettableExceptionHandlingExecutorService
 {
    public static final ExceptionHandler MESSAGE_AND_TRACE_WITH_THREAD_NAME = exception ->
    {
-      LogTools.error("Exception in thread: {}: {}", Thread.currentThread().getName(), exception.getMessage());
-      exception.printStackTrace();
+      if (exception != null)
+      {
+         LogTools.error("Exception in thread: {}: {}", Thread.currentThread().getName(), exception.getMessage());
+         exception.printStackTrace();
+      }
    };
 
    private final Supplier<ExceptionHandlingThreadPoolExecutor> executorServiceSupplier;
