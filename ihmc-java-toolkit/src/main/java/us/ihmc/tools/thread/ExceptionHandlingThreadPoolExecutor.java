@@ -1,12 +1,14 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.exception.ExceptionHandler;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
 
 public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
 {
-   private final HashMap<Runnable, ExecutionResultHandler> executionResultHandlers = new HashMap<>();
+   private final HashMap<Runnable, ExceptionHandler> afterExecuteHandlers = new HashMap<>();
 
    public ExceptionHandlingThreadPoolExecutor(int corePoolSize,
                                               int maximumPoolSize,
@@ -19,38 +21,65 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
    }
 
-   public void execute(Runnable runnable, ExecutionResultHandler executionResultHandler)
+   public void execute(Runnable runnable, ExceptionHandler exceptionHandler)
    {
-      executionResultHandlers.put(runnable, executionResultHandler);
+      afterExecuteHandlers.put(runnable, exceptionHandler);
       execute(runnable);
    }
 
-   public Future<?> submit(Runnable task, ExecutionResultHandler executionResultHandler)
+   public Future<Void> submit(Runnable task, ExceptionHandler exceptionHandler)
    {
       if (task == null) throw new NullPointerException();
       RunnableFuture<Void> futureTask = newTaskFor(task, null);
-      executionResultHandlers.put(futureTask, executionResultHandler);
+      afterExecuteHandlers.put(futureTask, throwable ->
+      {
+         try
+         {
+            futureTask.get();
+         }
+         catch (ExecutionException executionException)
+         {
+            exceptionHandler.handleException(executionException.getCause());
+         }
+         catch (InterruptedException interruptedException) // if the get() above gets interrupted; expected to never happen
+         {
+            exceptionHandler.handleException(interruptedException);
+         }
+         catch (CancellationException cancellationException)
+         {
+            throw new RuntimeException("This should not be possible. If the future was cancelled it wouldn't get to afterExecute()");
+         }
+      });
       execute(futureTask);
       return futureTask;
    }
 
-   public <V> Future<V> submit(Callable<V> task, ExecutionResultHandler executionResultHandler)
+   public <V> Future<V> submit(Callable<V> task, CallableAfterExecuteHandler<V> callableAfterExecuteHandler)
    {
       if (task == null) throw new NullPointerException();
       RunnableFuture<V> futureTask = newTaskFor(task);
-      executionResultHandlers.put(futureTask, executionResultHandler);
+      afterExecuteHandlers.put(futureTask, throwable ->
+      {
+         try
+         {
+            callableAfterExecuteHandler.handle(futureTask.get(), null);
+         }
+         catch (ExecutionException executionException)
+         {
+            callableAfterExecuteHandler.handle(null, executionException.getCause());
+         }
+         catch (InterruptedException interruptedException) // if the get() above gets interrupted; expected to never happen
+         {
+            callableAfterExecuteHandler.handle(null, interruptedException);
+         }
+         catch (CancellationException cancellationException)
+         {
+            throw new RuntimeException("This should not be possible. If the future was cancelled it wouldn't get to afterExecute()");
+         }
+      });
       execute(futureTask);
       return futureTask;
    }
-
-//   public <V> Future<V> submit(Callable<V> task, ExecutionResultHandler executionResultHandler)
-//   {
-//      if (task == null) throw new NullPointerException();
-//      RunnableFuture<V> futureTask = newTaskFor(task);
-//      executionResultHandlers.put(futureTask, executionResultHandler);
-//      execute(futureTask);
-//      return futureTask;
-//   }
 
    public void interruptRunningAndCancelQueue()
    {
@@ -69,45 +98,6 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
    {
       super.afterExecute(runnableFuture, throwable); // fluff pretty much, super has no implementation
 
-      if (runnableFuture instanceof Future<?>) // used submit
-      {
-         Future<?> castedFuture = (Future<?>) runnableFuture;
-         executionResultHandlers.computeIfPresent(runnableFuture, (future, executionResultHandler) ->
-         {
-            try
-            {
-               castedFuture.get();
-            }
-            catch (CancellationException cancellationException)
-            {
-               executionResultHandler.handle(cancellationException, true, false);
-            }
-            catch (InterruptedException interruptedException)
-            {
-               executionResultHandler.handle(interruptedException, false, true);
-            }
-            catch (ExecutionException executionException)
-            {
-               Throwable cause = executionException.getCause();
-               executionResultHandler.handle(cause, false, cause != null && cause instanceof InterruptedException);
-            }
-            return null;
-         });
-      }
-      else // used execute directly; these can't be cancelled; that's a Future thing
-      {
-         executionResultHandlers.computeIfPresent(runnableFuture, (runnable, executionResultHandler) ->
-         {
-            if (throwable != null && throwable instanceof InterruptedException)
-            {
-               executionResultHandler.handle(throwable, false, true);
-            }
-            else // ExecutionException
-            {
-               executionResultHandler.handle(throwable, false, false);
-            }
-            return null;
-         });
-      }
+      afterExecuteHandlers.remove(runnableFuture).handleException(throwable);
    }
 }

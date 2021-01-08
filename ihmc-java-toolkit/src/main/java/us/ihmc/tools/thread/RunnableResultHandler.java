@@ -3,22 +3,17 @@ package us.ihmc.tools.thread;
 import us.ihmc.log.LogTools;
 
 @FunctionalInterface
-public interface ExecutionResultHandler
+public interface RunnableResultHandler
 {
-   void handle(Throwable exception, boolean cancelled, boolean interrupted);
+   void handle(Throwable exception, boolean cancelled);
 
-   static ExecutionResultHandler DEFAULT()
+   static RunnableResultHandler DEFAULT()
    {
-      return (exception, cancelled, interrupted) ->
+      return (exception, cancelled) ->
       {
          if (cancelled)
          {
             LogTools.warn(1, "Task cancelled");
-         }
-         else if (interrupted)
-         {
-            LogTools.warn(1, "Task interrupted");
-            Thread.currentThread().interrupt(); // ignore/reset
          }
          else
          {
