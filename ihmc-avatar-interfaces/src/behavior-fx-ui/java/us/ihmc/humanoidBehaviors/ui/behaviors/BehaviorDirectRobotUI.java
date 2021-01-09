@@ -7,7 +7,7 @@ import javafx.scene.layout.StackPane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.DirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
@@ -19,10 +19,10 @@ public class BehaviorDirectRobotUI extends Group
    private final DirectRobotUI directRobotUI = new DirectRobotUI();
    private final AnchorPane directRobotAnchorPane;
 
-   private LivePlanarRegionsGraphic lidarRegionsGraphic;
-   private LivePlanarRegionsGraphic realsenseRegionsGraphic;
-   private LivePlanarRegionsGraphic mapRegionsGraphic;
-   private LivePlanarRegionsGraphic supportRegionsGraphic;
+   private JavaFXLivePlanarRegionsGraphic lidarRegionsGraphic;
+   private JavaFXLivePlanarRegionsGraphic realsenseRegionsGraphic;
+   private JavaFXLivePlanarRegionsGraphic mapRegionsGraphic;
+   private JavaFXLivePlanarRegionsGraphic supportRegionsGraphic;
    private JavaFXROS2VideoViewOverlay multisenseVideoOverlay;
    private StackPane multisenseVideoStackPane;
    private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
@@ -44,16 +44,16 @@ public class BehaviorDirectRobotUI extends Group
    {
       directRobotUI.init(ros2Node,robotModel);
 
-      lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
+      lidarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);
       getChildren().add(lidarRegionsGraphic);
-      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
+      realsenseRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
       realsenseRegionsGraphic.setEnabled(false);
       getChildren().add(realsenseRegionsGraphic);
-      mapRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
+      mapRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
       mapRegionsGraphic.setEnabled(false);
       getChildren().add(mapRegionsGraphic);
-      supportRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.BIPEDAL_SUPPORT_REGIONS, false);
+      supportRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.BIPEDAL_SUPPORT_REGIONS, false);
       supportRegionsGraphic.setEnabled(false);
       getChildren().add(supportRegionsGraphic);
 

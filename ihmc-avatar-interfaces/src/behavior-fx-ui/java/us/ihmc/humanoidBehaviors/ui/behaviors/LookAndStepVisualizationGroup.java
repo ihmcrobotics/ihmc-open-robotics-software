@@ -4,18 +4,14 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
-
-import java.util.ArrayList;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
@@ -31,7 +27,7 @@ public class LookAndStepVisualizationGroup extends Group
    private final PoseGraphic closestPointAlongPathGraphic;
    private final PoseGraphic subGoalGraphic;
    private final BodyPathPlanGraphic bodyPathPlanGraphic;
-   private final LivePlanarRegionsGraphic planarRegionsGraphic;
+   private final JavaFXLivePlanarRegionsGraphic planarRegionsGraphic;
    private final PoseGraphic goalGraphic;
 
    private boolean reviewingBodyPath = true;
@@ -56,7 +52,7 @@ public class LookAndStepVisualizationGroup extends Group
       commandedFootsteps = new FootstepPlanGraphic();
       messager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
-      planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+      planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
       messager.registerTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
