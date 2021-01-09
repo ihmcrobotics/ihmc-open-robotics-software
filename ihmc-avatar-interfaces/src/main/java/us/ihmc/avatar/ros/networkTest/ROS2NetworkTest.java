@@ -12,6 +12,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotDataVisualizer.BasicYoVariablesUpdatedListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -19,7 +20,6 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 
 import javax.swing.*;
 import java.time.LocalDateTime;
@@ -71,7 +71,7 @@ public class ROS2NetworkTest
          LogTools.info("Starting nodes at {}", formattedStartTime);
 
          ArrayList<YoVariableClient> yoVariableClients = new ArrayList<>();
-         ConcurrentLinkedDeque<ROS2NetworkTestYoVariablesUpdatedListener> clientUpdateListeners = new ConcurrentLinkedDeque<>();
+         ConcurrentLinkedDeque<BasicYoVariablesUpdatedListener> clientUpdateListeners = new ConcurrentLinkedDeque<>();
          Object variableSynchronizer = new Object();
          profile.getRemoteMachines().parallelStream().forEach(remoteMachine ->
          //for (ROS2NetworkTestMachine remoteMachine : profile.getRemoteMachines())
@@ -95,7 +95,7 @@ public class ROS2NetworkTest
                ThreadTools.sleepSeconds(10.0);
 
                // start YoVariableClient
-               ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener = new ROS2NetworkTestYoVariablesUpdatedListener(yoRegistry);
+               BasicYoVariablesUpdatedListener clientUpdateListener = new BasicYoVariablesUpdatedListener(yoRegistry);
                YoVariableClient yoVariableClient = new YoVariableClient(clientUpdateListener);
                LogTools.info("Connecting to {}:{}", remoteMachine.getIPAddress(), DataServerSettings.DEFAULT_PORT);
                yoVariableClient.start(remoteMachine.getIPAddress(), DataServerSettings.DEFAULT_PORT);
@@ -112,7 +112,7 @@ public class ROS2NetworkTest
          //}
 
          // wait until they are all started
-         for (ROS2NetworkTestYoVariablesUpdatedListener clientUpdateListener : clientUpdateListeners)
+         for (BasicYoVariablesUpdatedListener clientUpdateListener : clientUpdateListeners)
          {
             if (!clientUpdateListener.isHandshakeComplete())
                LogTools.info("Waiting for handshake...");

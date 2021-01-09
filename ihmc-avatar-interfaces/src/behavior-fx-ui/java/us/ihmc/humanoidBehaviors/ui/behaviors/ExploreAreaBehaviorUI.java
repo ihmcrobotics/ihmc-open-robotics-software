@@ -10,7 +10,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Sphere;
@@ -34,7 +33,7 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.log.LogTools;
@@ -60,7 +59,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @FXML private TextField stateTextField;
    @FXML private TableView parameterTable;
 
-   private final LivePlanarRegionsGraphic planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+   private final JavaFXLivePlanarRegionsGraphic planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
    private final GraphicGroup observationPointsGraphicGroup = new GraphicGroup(get3DGroup());
    private final GraphicGroup potentialPointsToExploreGraphicGroup = new GraphicGroup(get3DGroup());
    private final GraphicGroup foundBodyPathToPointsGraphicGroup = new GraphicGroup(get3DGroup());

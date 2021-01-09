@@ -1,4 +1,4 @@
-package us.ihmc.avatar.ros.networkTest;
+package us.ihmc.robotDataVisualizer;
 
 import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
@@ -8,14 +8,14 @@ import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-class ROS2NetworkTestYoVariablesUpdatedListener implements YoVariablesUpdatedListener
+public class BasicYoVariablesUpdatedListener implements YoVariablesUpdatedListener
 {
    private YoVariableClientInterface yoVariableClientInterface;
    private YoRegistry parentRegistry;
    private YoRegistry clientRootRegistry;
    private boolean handshakeComplete;
 
-   public ROS2NetworkTestYoVariablesUpdatedListener(YoRegistry parentRegistry)
+   public BasicYoVariablesUpdatedListener(YoRegistry parentRegistry)
    {
 
       this.parentRegistry = parentRegistry;
