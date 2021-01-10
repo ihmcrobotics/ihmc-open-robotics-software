@@ -2,8 +2,9 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
-public interface Trajectory3DReadOnly
+public interface Trajectory3DReadOnly extends TimeIntervalReadOnly
 {
    void reset();
 
