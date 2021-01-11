@@ -10,6 +10,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class AtlasLineDetectionDemo
 {
@@ -18,7 +20,8 @@ public class AtlasLineDetectionDemo
    public void execFootstepPlan()
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      FootstepPlannerLogLoader.LoadResult loadresult = logLoader.load(new File("/home/quantum/.ihmc/logs/20200821_172044151_FootstepPlannerLog/"));
+      Path path = Paths.get(System.getProperty("user.home"), ".ihmc/logs/20200821_172044151_FootstepPlannerLog");
+      FootstepPlannerLogLoader.LoadResult loadresult = logLoader.load(path.toFile());
       if (!(loadresult == FootstepPlannerLogLoader.LoadResult.LOADED))
       {
          LogTools.error("Couldn't find file");
