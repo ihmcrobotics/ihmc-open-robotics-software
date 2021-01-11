@@ -20,12 +20,12 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    private int order = 0;
 
-   private double tInitial;
-   private double tFinal;
+   private double tInitial = 0.0;
+   private double tFinal = Double.POSITIVE_INFINITY;
 
-   private double position;
-   private double velocity;
-   private double acceleration;
+   private double position = Double.NaN;
+   private double velocity = Double.NaN;
+   private double acceleration = Double.NaN;
 
    public int getOrder()
    {
@@ -35,8 +35,8 @@ public class PolynomialEstimator implements TimeIntervalBasics
    @Override
    public void reset()
    {
-      tInitial = Double.NaN;
-      tFinal = Double.NaN;
+      tInitial = 0.0;
+      tFinal = Double.POSITIVE_INFINITY;
 
       position = Double.NaN;
       velocity = Double.NaN;
@@ -100,6 +100,70 @@ public class PolynomialEstimator implements TimeIntervalBasics
             double hessianEntrant = weight * timeI * timeJ;
             hessian.add(i, j, hessianEntrant);
             hessian.add(j, i, hessianEntrant);
+
+            timeJ *= time;
+         }
+
+         timeI *= time;
+      }
+   }
+
+   public void addObjectiveVelocity(double time, double value)
+   {
+      addObjectiveVelocity(defaultWeight, time, value);
+   }
+
+   public void addObjectiveVelocity(double weight, double time, double value)
+   {
+      time -= getStartTime();
+      double timeI = 1.0;
+      for (int idx = 0; idx < order - 1; idx++)
+      {
+         int row = idx + 1;
+
+         hessian.add(row, row, weight * row * row * timeI * timeI);
+         gradient.add(row, 0, weight * value * row * timeI);
+
+         double timeJ = timeI * time;
+         for (int j = idx + 1; j < order - 1; j++)
+         {
+            int col = j + 1;
+            double hessianEntrant = weight * row * col * timeI * timeJ;
+            hessian.add(row, col, hessianEntrant);
+            hessian.add(col, row, hessianEntrant);
+
+            timeJ *= time;
+         }
+
+         timeI *= time;
+      }
+   }
+
+   public void addObjectiveAcceleration(double time, double value)
+   {
+      addObjectiveAcceleration(defaultWeight, time, value);
+   }
+
+   public void addObjectiveAcceleration(double weight, double time, double value)
+   {
+      time -= getStartTime();
+      double timeI = 1.0;
+      for (int idx = 0; idx < order - 2; idx++)
+      {
+         int row = idx + 2;
+         int prefixI = row * (row - 1);
+
+         hessian.add(row, row, weight * prefixI * prefixI * timeI * timeI);
+         gradient.add(row, 0, weight * value * prefixI * timeI);
+
+         double timeJ = timeI * time;
+         for (int j = idx + 1; j < order - 2; j++)
+         {
+            int col = j + 2;
+            int prefixJ = col * (col - 1);
+            double hessianEntrant = weight * prefixI * prefixJ * timeI * timeJ;
+            hessian.add(row, col, hessianEntrant);
+            hessian.add(col, row, hessianEntrant);
 
             timeJ *= time;
          }
