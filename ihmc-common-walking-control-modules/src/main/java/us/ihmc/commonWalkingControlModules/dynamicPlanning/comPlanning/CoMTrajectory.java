@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
@@ -71,6 +69,21 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
    public double getStartTime()
    {
       return this.tInitial;
+   }
+
+   public void setCoefficients(DMatrixRMaj coefficients)
+   {
+      setCoefficients(coefficients, 0);
+   }
+
+   public void setCoefficients(DMatrixRMaj coefficients, int startRow)
+   {
+      setFirstCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow, 0), coefficients.get(startRow, 1), coefficients.get(startRow, 2));
+      setSecondCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 1, 0), coefficients.get(startRow + 1, 1), coefficients.get(startRow + 1, 2));
+      setThirdCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 2, 0), coefficients.get(startRow + 2, 1), coefficients.get(startRow + 2, 2));
+      setFourthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 3, 0), coefficients.get(startRow + 3, 1), coefficients.get(startRow + 3, 2));
+      setFifthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 4, 0), coefficients.get(startRow + 4, 1), coefficients.get(startRow + 4, 2));
+      setSixthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 5, 0), coefficients.get(startRow + 5, 1), coefficients.get(startRow + 5, 2));
    }
 
    public void setCoefficients(FramePoint3DReadOnly firstCoefficient,
@@ -166,7 +179,7 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
                                                             omega);
    }
 
-   public void computeCoMVelocity(double time, FrameVector3DBasics comVelocityToPack)
+   public void computeCoMVelocity(double time, FixedFrameVector3DBasics comVelocityToPack)
    {
       CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocityToPack,
                                                             firstCoefficient,
@@ -179,9 +192,22 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
                                                             omega);
    }
 
-   public void computeCoMAcceleration(double time, FrameVector3DBasics comAccelerationToPack)
+   public void computeCoMAcceleration(double time, FixedFrameVector3DBasics comAccelerationToPack)
    {
       CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack,
+                                                                firstCoefficient,
+                                                                secondCoefficient,
+                                                                thirdCoefficient,
+                                                                fourthCoefficient,
+                                                                fifthCoefficient,
+                                                                sixthCoefficient,
+                                                                time,
+                                                                omega);
+   }
+
+   public void computeVRPVelocity(double time, FixedFrameVector3DBasics vrpVelocityToPack)
+   {
+      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityToPack,
                                                                 firstCoefficient,
                                                                 secondCoefficient,
                                                                 thirdCoefficient,
@@ -200,12 +226,12 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
 
    public void compute(double time,
                        FixedFramePoint3DBasics comPositionToPack,
-                       FrameVector3DBasics comVelocityToPack,
-                       FrameVector3DBasics comAccelerationToPack,
-                       FramePoint3DBasics dcmPositionToPack,
-                       FrameVector3DBasics dcmVelocityToPack,
-                       FramePoint3DBasics vrpPositionToPack,
-                       FrameVector3DBasics vrpVelocityTPack)
+                       FixedFrameVector3DBasics comVelocityToPack,
+                       FixedFrameVector3DBasics comAccelerationToPack,
+                       FixedFramePoint3DBasics dcmPositionToPack,
+                       FixedFrameVector3DBasics dcmVelocityToPack,
+                       FixedFramePoint3DBasics vrpPositionToPack,
+                       FixedFrameVector3DBasics vrpVelocityTPack)
    {
       computeCoMPosition(time, comPositionToPack);
       computeCoMVelocity(time, comVelocityToPack);
