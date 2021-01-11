@@ -341,7 +341,6 @@ public class AtlasLookAndStepBehaviorTest
                                                       environment.getPlanarRegionsSupplier().get(),
                                                       runRealsenseSLAM,
                                                       false,
-                                                      true,
                                                       runLidarREA,
                                                       createRobotModel(),
                                                       Fidelity.HIGH);
