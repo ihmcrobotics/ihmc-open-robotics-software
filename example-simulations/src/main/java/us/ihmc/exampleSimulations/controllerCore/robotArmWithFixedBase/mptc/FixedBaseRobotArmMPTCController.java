@@ -12,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerFactory;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.MPTCSpatialFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -115,6 +117,14 @@ public class FixedBaseRobotArmMPTCController implements RobotController
 
       handSpatialCommand.set(elevator, hand);
       template.enableSpatialFeedbackController(hand);
+      template.setFeedbackControllerFactory(new FeedbackControllerFactory()
+      {
+         @Override
+         public MPTCSpatialFeedbackController buildSpatialFeedbackController(RigidBodyBasics endEffector, int controllerIndex)
+         {
+            return new MPTCSpatialFeedbackController(endEffector, controllerIndex, ccToolbox, fbToolbox, parentRegistry);
+         }
+      });
 
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(MultiBodySystemTools.filterJoints(controlledJoints,
                                                                                                                          OneDoFJointBasics.class));
@@ -146,11 +156,11 @@ public class FixedBaseRobotArmMPTCController implements RobotController
 
       handWeight.set(1.0);
 
-      handPositionGains.setProportionalGains(100.0);
-      handPositionGains.setDampingRatios(1.0);
+      handPositionGains.setProportionalGains(500.0);
+      handPositionGains.setDampingRatios(1.4);
 
-      handOrientationGains.setProportionalGains(100.0);
-      handOrientationGains.setDampingRatios(1.0);
+      handOrientationGains.setProportionalGains(500.0);
+      handOrientationGains.setDampingRatios(1.4);
 
       FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);

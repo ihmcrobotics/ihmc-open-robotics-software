@@ -13,6 +13,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerFactory;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.MPTCOrientationFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.MPTCPointFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.MPTCSpatialFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -65,11 +72,15 @@ public class WalkingControllerState extends HighLevelControllerState
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
+      super(controllerState, highLevelControllerParameters,
+            MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
-      walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+      walkingController = new WalkingHighLevelHumanoidController(commandInputManager,
+                                                                 statusOutputManager,
+                                                                 managerFactory,
+                                                                 walkingControllerParameters,
                                                                  controllerToolbox);
 
       // create controller core
@@ -78,10 +89,14 @@ public class WalkingControllerState extends HighLevelControllerState
 
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
-                                                                            jointsToOptimizeFor, centerOfMassFrame,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+                                                                            controllerToolbox.getGravityZ(),
+                                                                            rootJoint,
+                                                                            jointsToOptimizeFor,
+                                                                            centerOfMassFrame,
                                                                             walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(), registry);
+                                                                            controllerToolbox.getYoGraphicsListRegistry(),
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       if (setupInverseDynamicsSolver)
@@ -92,6 +107,26 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
       fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
       FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
+      template.setFeedbackControllerFactory(new FeedbackControllerFactory()
+      {
+         @Override
+         public SpatialFeedbackController buildSpatialFeedbackController(RigidBodyBasics endEffector, int controllerIndex)
+         {
+            return new MPTCSpatialFeedbackController(endEffector, controllerIndex, toolbox, fbToolbox, parentRegistry);
+         }
+
+//         @Override
+//         public PointFeedbackController buildPointFeedbackController(RigidBodyBasics endEffector, int controllerIndex)
+//         {
+//            return new MPTCPointFeedbackController(endEffector, controllerIndex, toolbox, fbToolbox, parentRegistry);
+//         }
+//
+//         @Override
+//         public OrientationFeedbackController buildOrientationFeedbackController(RigidBodyBasics endEffector, int controllerIndex)
+//         {
+//            return new MPTCOrientationFeedbackController(endEffector, controllerIndex, toolbox, fbToolbox, parentRegistry);
+//         }
+      });
       // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
       template.setAllowDynamicControllerConstruction(false);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
@@ -109,9 +144,16 @@ public class WalkingControllerState extends HighLevelControllerState
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
-      managerFactory.getOrCreateBalanceManager().setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames,
+                                                                            contactableFeet,
+                                                                            elevator,
+                                                                            walkingControllerParameters,
+                                                                            gravityZ,
+                                                                            controlDT,
+                                                                            registry,
+                                                                            yoGraphicsListRegistry);
+      managerFactory.getOrCreateBalanceManager()
+                    .setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -131,8 +173,8 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    /**
-    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should
-    * be created or not.
+    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should be
+    * created or not.
     * <p>
     * This module is not created by default to prevent creating unused {@link YoVariable}s.
     * </p>
@@ -145,8 +187,8 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    /**
-    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore}
-    * should be created or not.
+    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore} should
+    * be created or not.
     * <p>
     * This module is not created by default to prevent creating unused {@link YoVariable}s.
     * </p>
@@ -246,6 +288,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    /**
     * Returns the currently active walking state. This is used for unit testing.
+    * 
     * @return WalkingStateEnum
     */
    public WalkingStateEnum getWalkingStateEnum()

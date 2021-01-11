@@ -46,83 +46,83 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoRegistry registry;
+   protected final YoRegistry registry;
 
-   private final YoBoolean isEnabled;
+   protected final YoBoolean isEnabled;
 
-   private final FBQuaternion3D yoDesiredOrientation;
-   private final FBQuaternion3D yoCurrentOrientation;
-   private final FBQuaternion3D yoErrorOrientation;
+   protected final FBQuaternion3D yoDesiredOrientation;
+   protected final FBQuaternion3D yoCurrentOrientation;
+   protected final FBQuaternion3D yoErrorOrientation;
 
-   private final FBQuaternion3D yoErrorOrientationCumulated;
+   protected final FBQuaternion3D yoErrorOrientationCumulated;
 
-   private final FBVector3D yoDesiredRotationVector;
-   private final FBVector3D yoCurrentRotationVector;
-   private final FBVector3D yoErrorRotationVector;
+   protected final FBVector3D yoDesiredRotationVector;
+   protected final FBVector3D yoCurrentRotationVector;
+   protected final FBVector3D yoErrorRotationVector;
 
-   private final FBVector3D yoErrorRotationVectorIntegrated;
+   protected final FBVector3D yoErrorRotationVectorIntegrated;
 
-   private final FBVector3D yoDesiredAngularVelocity;
-   private final FBVector3D yoCurrentAngularVelocity;
-   private final FBVector3D yoErrorAngularVelocity;
-   private final FBAlphaFilteredVector3D yoFilteredErrorAngularVelocity;
-   private final FBVector3D yoFeedForwardAngularVelocity;
-   private final FBVector3D yoFeedbackAngularVelocity;
-   private final FBRateLimitedVector3D rateLimitedFeedbackAngularVelocity;
+   protected final FBVector3D yoDesiredAngularVelocity;
+   protected final FBVector3D yoCurrentAngularVelocity;
+   protected final FBVector3D yoErrorAngularVelocity;
+   protected final FBAlphaFilteredVector3D yoFilteredErrorAngularVelocity;
+   protected final FBVector3D yoFeedForwardAngularVelocity;
+   protected final FBVector3D yoFeedbackAngularVelocity;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackAngularVelocity;
 
-   private final FBVector3D yoDesiredAngularAcceleration;
-   private final FBVector3D yoFeedForwardAngularAcceleration;
-   private final FBVector3D yoFeedbackAngularAcceleration;
-   private final FBRateLimitedVector3D rateLimitedFeedbackAngularAcceleration;
-   private final FBVector3D yoAchievedAngularAcceleration;
+   protected final FBVector3D yoDesiredAngularAcceleration;
+   protected final FBVector3D yoFeedForwardAngularAcceleration;
+   protected final FBVector3D yoFeedbackAngularAcceleration;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackAngularAcceleration;
+   protected final FBVector3D yoAchievedAngularAcceleration;
 
-   private final FBVector3D yoDesiredAngularTorque;
-   private final FBVector3D yoFeedForwardAngularTorque;
-   private final FBVector3D yoFeedbackAngularTorque;
-   private final FBRateLimitedVector3D rateLimitedFeedbackAngularTorque;
+   protected final FBVector3D yoDesiredAngularTorque;
+   protected final FBVector3D yoFeedForwardAngularTorque;
+   protected final FBVector3D yoFeedbackAngularTorque;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackAngularTorque;
 
-   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
+   protected final FrameQuaternion desiredOrientation = new FrameQuaternion();
+   protected final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
 
-   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
-   private final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
+   protected final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   protected final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
 
-   private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
-   private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
-   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
-   private final FrameVector3D achievedAngularAcceleration = new FrameVector3D();
+   protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
+   protected final FrameVector3D feedForwardAngularAction = new FrameVector3D();
+   protected final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
+   protected final FrameVector3D achievedAngularAcceleration = new FrameVector3D();
 
-   private final FrameVector3D desiredAngularTorque = new FrameVector3D();
+   protected final FrameVector3D desiredAngularTorque = new FrameVector3D();
 
-   private final Twist currentTwist = new Twist();
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   protected final Twist currentTwist = new Twist();
+   protected final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
-   private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
-   private final VirtualTorqueCommand virtualModelControlOutput = new VirtualTorqueCommand();
-   private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
+   protected final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
+   protected final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   protected final VirtualTorqueCommand virtualModelControlOutput = new VirtualTorqueCommand();
+   protected final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
 
-   private final YoPID3DGains gains;
-   private final Matrix3D tempGainMatrix = new Matrix3D();
+   protected final YoPID3DGains gains;
+   protected final Matrix3D tempGainMatrix = new Matrix3D();
 
-   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   private RigidBodyBasics base;
-   private ReferenceFrame controlBaseFrame;
-   private ReferenceFrame angularGainsFrame;
+   protected RigidBodyBasics base;
+   protected ReferenceFrame controlBaseFrame;
+   protected ReferenceFrame angularGainsFrame;
 
-   private final RigidBodyBasics rootBody;
-   private final RigidBodyBasics endEffector;
-   private final MovingReferenceFrame endEffectorFrame;
+   protected final RigidBodyBasics rootBody;
+   protected final RigidBodyBasics endEffector;
+   protected final MovingReferenceFrame endEffectorFrame;
 
-   private final double dt;
-   private final boolean isRootBody;
-   private final boolean computeIntegralTerm;
+   protected final double dt;
+   protected final boolean isRootBody;
+   protected final boolean computeIntegralTerm;
 
-   private final int controllerIndex;
-   private int currentCommandId;
+   protected final int controllerIndex;
+   protected int currentCommandId;
 
    public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
                                         YoRegistry parentRegistry)
@@ -350,9 +350,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoErrorRotationVectorIntegrated.setToZero(worldFrame);
    }
 
-   private final FrameVector3D proportionalFeedback = new FrameVector3D();
-   private final FrameVector3D derivativeFeedback = new FrameVector3D();
-   private final FrameVector3D integralFeedback = new FrameVector3D();
+   protected final FrameVector3D proportionalFeedback = new FrameVector3D();
+   protected final FrameVector3D derivativeFeedback = new FrameVector3D();
+   protected final FrameVector3D integralFeedback = new FrameVector3D();
 
    @Override
    public void computeInverseDynamics()
@@ -446,7 +446,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       }
    }
 
-   private void computeFeedbackTorque()
+   protected void computeFeedbackTorque()
    {
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
 
@@ -500,7 +500,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   private void computeProportionalTerm(FrameVector3D feedbackTermToPack)
+   protected void computeProportionalTerm(FrameVector3D feedbackTermToPack)
    {
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
 

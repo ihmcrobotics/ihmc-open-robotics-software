@@ -46,79 +46,79 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoRegistry registry;
+   protected final YoRegistry registry;
 
-   private final YoBoolean isEnabled;
+   protected final YoBoolean isEnabled;
 
-   private final FBPoint3D yoDesiredPosition;
-   private final FBPoint3D yoCurrentPosition;
-   private final FBVector3D yoErrorPosition;
+   protected final FBPoint3D yoDesiredPosition;
+   protected final FBPoint3D yoCurrentPosition;
+   protected final FBVector3D yoErrorPosition;
 
-   private final FBVector3D yoErrorPositionIntegrated;
+   protected final FBVector3D yoErrorPositionIntegrated;
 
-   private final FBVector3D yoDesiredLinearVelocity;
-   private final FBVector3D yoCurrentLinearVelocity;
-   private final FBVector3D yoErrorLinearVelocity;
-   private final FBAlphaFilteredVector3D yoFilteredErrorLinearVelocity;
-   private final FBVector3D yoFeedForwardLinearVelocity;
-   private final FBVector3D yoFeedbackLinearVelocity;
-   private final FBRateLimitedVector3D rateLimitedFeedbackLinearVelocity;
+   protected final FBVector3D yoDesiredLinearVelocity;
+   protected final FBVector3D yoCurrentLinearVelocity;
+   protected final FBVector3D yoErrorLinearVelocity;
+   protected final FBAlphaFilteredVector3D yoFilteredErrorLinearVelocity;
+   protected final FBVector3D yoFeedForwardLinearVelocity;
+   protected final FBVector3D yoFeedbackLinearVelocity;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackLinearVelocity;
 
-   private final FBVector3D yoDesiredLinearAcceleration;
-   private final FBVector3D yoFeedForwardLinearAcceleration;
-   private final FBVector3D yoFeedbackLinearAcceleration;
-   private final FBRateLimitedVector3D rateLimitedFeedbackLinearAcceleration;
-   private final FBVector3D yoAchievedLinearAcceleration;
+   protected final FBVector3D yoDesiredLinearAcceleration;
+   protected final FBVector3D yoFeedForwardLinearAcceleration;
+   protected final FBVector3D yoFeedbackLinearAcceleration;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackLinearAcceleration;
+   protected final FBVector3D yoAchievedLinearAcceleration;
 
-   private final FBVector3D yoDesiredLinearForce;
-   private final FBVector3D yoFeedForwardLinearForce;
-   private final FBVector3D yoFeedbackLinearForce;
-   private final FBRateLimitedVector3D rateLimitedFeedbackLinearForce;
+   protected final FBVector3D yoDesiredLinearForce;
+   protected final FBVector3D yoFeedForwardLinearForce;
+   protected final FBVector3D yoFeedbackLinearForce;
+   protected final FBRateLimitedVector3D rateLimitedFeedbackLinearForce;
 
-   private final FramePoint3D desiredPosition = new FramePoint3D();
+   protected final FramePoint3D desiredPosition = new FramePoint3D();
 
-   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
-   private final FrameVector3D currentLinearVelocity = new FrameVector3D();
-   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
-   private final FrameVector3D feedForwardLinearVelocity = new FrameVector3D();
+   protected final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   protected final FrameVector3D currentLinearVelocity = new FrameVector3D();
+   protected final FrameVector3D currentAngularVelocity = new FrameVector3D();
+   protected final FrameVector3D feedForwardLinearVelocity = new FrameVector3D();
 
-   private final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
-   private final FrameVector3D feedForwardLinearForce = new FrameVector3D();
-   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-   private final FrameVector3D biasLinearAcceleration = new FrameVector3D();
-   private final FrameVector3D achievedLinearAcceleration = new FrameVector3D();
+   protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
+   protected final FrameVector3D feedForwardLinearForce = new FrameVector3D();
+   protected final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
+   protected final FrameVector3D biasLinearAcceleration = new FrameVector3D();
+   protected final FrameVector3D achievedLinearAcceleration = new FrameVector3D();
 
-   private final FrameVector3D desiredLinearForce = new FrameVector3D();
+   protected final FrameVector3D desiredLinearForce = new FrameVector3D();
 
-   private final Twist currentTwist = new Twist();
+   protected final Twist currentTwist = new Twist();
 
-   private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
-   private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
-   private final VirtualForceCommand virtualModelControlOutput = new VirtualForceCommand();
-   private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   protected final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
+   protected final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   protected final VirtualForceCommand virtualModelControlOutput = new VirtualForceCommand();
+   protected final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
+   protected final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final YoPID3DGains gains;
-   private final Matrix3D tempGainMatrix = new Matrix3D();
-   private final YoSE3OffsetFrame controlFrame;
+   protected final YoPID3DGains gains;
+   protected final Matrix3D tempGainMatrix = new Matrix3D();
+   protected final YoSE3OffsetFrame controlFrame;
 
-   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   private RigidBodyBasics base;
-   private ReferenceFrame controlBaseFrame;
-   private ReferenceFrame linearGainsFrame;
+   protected RigidBodyBasics base;
+   protected ReferenceFrame controlBaseFrame;
+   protected ReferenceFrame linearGainsFrame;
 
-   private final RigidBodyBasics rootBody;
-   private final RigidBodyBasics endEffector;
+   protected final RigidBodyBasics rootBody;
+   protected final RigidBodyBasics endEffector;
 
-   private final double dt;
-   private final boolean isRootBody;
-   private final boolean computeIntegralTerm;
+   protected final double dt;
+   protected final boolean isRootBody;
+   protected final boolean computeIntegralTerm;
 
-   private final int controllerIndex;
-   private int currentCommandId;
+   protected final int controllerIndex;
+   protected int currentCommandId;
 
    public PointFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
                                   YoRegistry parentRegistry)
@@ -338,9 +338,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoErrorPositionIntegrated.setToZero(worldFrame);
    }
 
-   private final FrameVector3D proportionalFeedback = new FrameVector3D();
-   private final FrameVector3D derivativeFeedback = new FrameVector3D();
-   private final FrameVector3D integralFeedback = new FrameVector3D();
+   protected final FrameVector3D proportionalFeedback = new FrameVector3D();
+   protected final FrameVector3D derivativeFeedback = new FrameVector3D();
+   protected final FrameVector3D integralFeedback = new FrameVector3D();
 
    @Override
    public void computeInverseDynamics()
@@ -441,7 +441,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       }
    }
 
-   private void computeFeedbackForce()
+   protected void computeFeedbackForce()
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
@@ -472,7 +472,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoDesiredLinearForce.setCommandId(currentCommandId);
    }
 
-   private final SpatialAcceleration achievedSpatialAccelerationVector = new SpatialAcceleration();
+   protected final SpatialAcceleration achievedSpatialAccelerationVector = new SpatialAcceleration();
 
    @Override
    public void computeAchievedAcceleration()
@@ -498,7 +498,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   private void computeProportionalTerm(FrameVector3D feedbackTermToPack)
+   protected void computeProportionalTerm(FrameVector3D feedbackTermToPack)
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
@@ -541,7 +541,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified
     */
-   private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
+   protected void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
@@ -601,7 +601,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   private void computeIntegralTerm(FrameVector3D feedbackTermToPack)
+   protected void computeIntegralTerm(FrameVector3D feedbackTermToPack)
    {
       if (!computeIntegralTerm)
       {
@@ -662,7 +662,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     *                                   subtracted. Its frame is changed to {@code controlFrame}.
     *                                   Modified.
     */
-   private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
+   protected void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
@@ -689,7 +689,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
     *                                   added. Its frame is changed to {@code worldFrame}. Modified.
     */
-   private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
+   protected void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
