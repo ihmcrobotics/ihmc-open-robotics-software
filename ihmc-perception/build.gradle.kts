@@ -23,7 +23,8 @@ ihmc {
 
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
-//   api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
+   // For experimenting with local OpenCV:
+   // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
@@ -66,7 +67,7 @@ openpnpDependencies {
 }
 
 bytedecoDependencies {
-   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
+   api("org.bytedeco:opencv-platform:4.5.1-1.5.5-SNAPSHOT")
 }
 
 javacvDependencies {
