@@ -1,13 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 
 public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeIntervalBasics
@@ -125,24 +120,24 @@ public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeInterval
       return xEstimator.getStartTime();
    }
 
-   public void addObjectivePosition(double time, Point3DReadOnly value)
+   public void addObjectivePosition(double time, Tuple3DReadOnly value)
    {
       addObjectivePosition(defaultWeight, time, value);
    }
 
-   public void addObjectivePosition(double weight, double time, Point3DReadOnly value)
+   public void addObjectivePosition(double weight, double time, Tuple3DReadOnly value)
    {
       xEstimator.addObjectivePosition(weight, time, value.getX());
       yEstimator.addObjectivePosition(weight, time, value.getY());
       zEstimator.addObjectivePosition(weight, time, value.getZ());
    }
 
-   public void addObjectiveVelocity(double time, Vector3DReadOnly value)
+   public void addObjectiveVelocity(double time, Tuple3DReadOnly value)
    {
       addObjectiveVelocity(defaultWeight, time, value);
    }
 
-   public void addObjectiveVelocity(double weight, double time, Vector3DReadOnly value)
+   public void addObjectiveVelocity(double weight, double time, Tuple3DReadOnly value)
    {
       xEstimator.addObjectiveVelocity(weight, time, value.getX());
       yEstimator.addObjectiveVelocity(weight, time, value.getY());
