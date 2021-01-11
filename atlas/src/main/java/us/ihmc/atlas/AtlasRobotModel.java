@@ -20,16 +20,17 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -53,6 +54,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -63,6 +65,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -246,6 +249,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public CoPTrajectoryParameters getCoPTrajectoryParameters()
+   {
+      return new AtlasCoPTrajectoryParameters();
+   }
+
+   @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       return stateEstimatorParameters;
@@ -422,6 +431,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public AtlasSensorSuiteManager getSensorSuiteManager()
    {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public AtlasSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
+   {
       if (sensorSuiteManager == null)
       {
          sensorSuiteManager = new AtlasSensorSuiteManager(getSimpleRobotName(),
@@ -431,7 +446,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                           sensorInformation,
                                                           getJointMap(),
                                                           getPhysicalProperties(),
-                                                          target);
+                                                          target,
+                                                          ros2Node);
       }
       return sensorSuiteManager;
    }
@@ -855,7 +871,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
-      return new DefaultVisibilityGraphParameters();
+      return new AtlasVisibilityGraphParameters();
    }
 
    @Override
@@ -868,12 +884,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
    {
       return new AtlasSwingPlannerParameters(fileNameSuffix);
-   }
-
-   @Override
-   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
-   {
-      return new AtlasSplitFractionCalculatorParameters();
    }
 
    @Override

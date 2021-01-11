@@ -1,19 +1,10 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -43,7 +34,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -72,6 +62,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
@@ -157,9 +155,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+      request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      request.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(request);
    }
@@ -193,7 +191,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      requestPacket.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(requestPacket);
    }
@@ -315,8 +312,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          request.getStartFootPoses().get(side).set(footPose);
          request.getStartFootholds().get(side).set(defaultSolePolygon);
       }
-
-      footstepPlanningModule.getPositionBasedSplitFractionCalculator().computeSplitFractions(request, footstepPlan);
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                     swingDuration,

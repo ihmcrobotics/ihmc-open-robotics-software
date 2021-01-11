@@ -9,14 +9,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -26,7 +27,6 @@ import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RobotAndMapViewer
 {
@@ -48,11 +48,11 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false));
-//         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
+         view3dFactory.addNodeToView(new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false));
+//         view3dFactory.addNodeToView(new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+         footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
          view3dFactory.addNodeToView(footstepPlanGraphic);
 
          bodyPathPlanGraphic = new BodyPathPlanGraphic();
@@ -97,11 +97,11 @@ public class RobotAndMapViewer
          footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
-      footstepPlanGraphic.generateMeshesAsynchronously(footstepLocations);
+      footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepLocations));
    }
 
-   public void setBodyPathPlanToVisualize(List<Point3DReadOnly> bodyPath)
+   public void setBodyPathPlanToVisualize(List<? extends Pose3DReadOnly> bodyPath)
    {
-      bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPath.stream().map(Point3D::new).collect(Collectors.toList())); // deep copy
+      bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPath);
    }
 }

@@ -7,8 +7,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPostProcessing.AvatarPostProcessingTests;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -44,17 +42,6 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
             parametersBasics.setMinimumAdjustmentIncrementDistance(0.03);
             parametersBasics.setMinimumHeightAboveFloorForCollision(0.03);
 
-            return parametersBasics;
-         }
-
-         @Override
-         public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
-         {
-            SplitFractionCalculatorParametersBasics parametersBasics = new DefaultSplitFractionCalculatorParameters();
-            parametersBasics.setStepHeightForLargeStepDown(0.05);
-            parametersBasics.setLargestStepDownHeight(0.3);
-            parametersBasics.setTransferSplitFractionAtFullDepth(0.15);
-            parametersBasics.setTransferWeightDistributionAtFullDepth(0.8);
             return parametersBasics;
          }
       };

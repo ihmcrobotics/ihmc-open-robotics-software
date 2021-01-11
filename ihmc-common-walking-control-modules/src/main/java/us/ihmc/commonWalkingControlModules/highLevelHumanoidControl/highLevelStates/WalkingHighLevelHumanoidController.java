@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -112,8 +113,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
-
-   private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -545,13 +544,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
-   private final FrameVector2D desiredICPVelocityAsFrameVector = new FrameVector2D();
    private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
 
    private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
 
    public void doAction()
    {
@@ -578,8 +575,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
          stateMachine.doTransitions();
-      // This updates the ICP plan continuously.
-      balanceManager.update();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
 
@@ -606,7 +601,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
-      balanceManager.endTick();
       firstTick = false;
    }
 
@@ -624,14 +618,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.updateCurrentICPPlan();
+      balanceManager.computeICPPlan();
    }
 
    public void updateFailureDetection()
    {
-      balanceManager.getCapturePoint(capturePoint2d);
-      balanceManager.getDesiredICP(desiredCapturePoint2d);
-      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, desiredCapturePoint2d);
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
@@ -658,10 +651,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateManagers(WalkingState currentState)
    {
-      desiredICPVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
-      desiredCoMVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
-      balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
-      balanceManager.getDesiredCoMVelocity(desiredCoMVelocityAsFrameVector);
+      desiredCoMVelocityAsFrameVector.setIncludingFrame(balanceManager.getDesiredCoMVelocity());
 
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
@@ -685,23 +675,21 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       pelvisOrientationManager.compute();
 
-      comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector,
-                                                                                               desiredCoMVelocityAsFrameVector,
-                                                                                               isInDoubleSupport,
-                                                                                               omega0,
-                                                                                               isRecoveringFromPush,
-                                                                                               feetManager));
+      comHeightManager.compute(balanceManager.getDesiredICPVelocity(),
+                               desiredCoMVelocityAsFrameVector,
+                               isInDoubleSupport,
+                               omega0,
+                               isRecoveringFromPush,
+                               feetManager);
+      FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
-                                controlHeightWithMomentum);
+         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
       else
-         balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
-                                controlHeightWithMomentum);
+         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
    }
 
    private void reportStatusMessages()

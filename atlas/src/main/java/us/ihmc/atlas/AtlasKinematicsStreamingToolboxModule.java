@@ -11,13 +11,14 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
@@ -31,7 +32,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
    private static Map<String, Double> initialConfiguration(DRCRobotModel robotModel)
    {
       Map<String, Double> initialConfigurationMap = new HashMap<>();
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      HumanoidJointNameMap jointMap = robotModel.getJointMap();
 
       initialConfigurationMap.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
       initialConfigurationMap.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);
@@ -78,13 +79,19 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
 
       DRCRobotModel robotModel;
 
+      String robotVersionString = config.getString("robotModel");
+      if (robotVersionString == null)
+      {
+         robotVersionString = "ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ";
+      }
+      LogTools.info("Using robot version: {}", robotVersionString);
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(robotVersionString, RobotTarget.SCS, false);
       }
       catch (IllegalArgumentException e)
       {
-         System.err.println("Incorrect robot model " + config.getString("robotModel"));
+         System.err.println("Incorrect robot model " + robotVersionString);
          System.out.println(jsap.getHelp());
 
          return;
@@ -92,6 +99,7 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
 
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
+      LogTools.info("Using ROS 2 {} mode.", pubSubImplementation.name());
       new AtlasKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
    }
 }

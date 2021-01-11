@@ -23,7 +23,8 @@ import java.util.List;
 public class SphereJumpVisualizer
 {
    private static final boolean include1 = true;
-   private static final boolean include2 = true;
+   private static final boolean include2 = false;
+   private static final boolean include3 = true;
 
    private final static double desiredHeight = 0.75;
    private final static double controlDT = 0.001;
@@ -33,14 +34,15 @@ public class SphereJumpVisualizer
 
    private final SphereControllerInterface controller1;
    private final SphereControllerInterface controller2;
+   private final SphereControllerInterface controller3;
 
    private final HashMap<SphereControllerInterface, Vector3DReadOnly> shift = new HashMap<>();
 
    public SphereJumpVisualizer()
    {
       List<Robot> robots = new ArrayList<>();
-      YoGraphicsListRegistry yoGraphicsListRegistry1, yoGraphicsListRegistry2;
-      PusherController pushController1, pushController2;
+      YoGraphicsListRegistry yoGraphicsListRegistry1, yoGraphicsListRegistry2, yoGraphicsListRegistry3;
+      PusherController pushController1, pushController2, pushController3;
 
       if (include1)
       {
@@ -96,6 +98,33 @@ public class SphereJumpVisualizer
          pushController2 = null;
       }
 
+      if (include3)
+      {
+         Vector3D initialPosition3 = new Vector3D(0.0, 1.0, desiredHeight);
+         yoGraphicsListRegistry3 = new YoGraphicsListRegistry();
+         SphereRobot sphereRobot2 = new SphereRobot("SphereRobot3", gravity, controlDT, desiredHeight, yoGraphicsListRegistry3);
+         sphereRobot2.initRobot(initialPosition3, new Vector3D());
+
+         robots.add(sphereRobot2.getScsRobot());
+
+         YoRegistry registry = sphereRobot2.getScsRobot().getRobotsYoRegistry();
+         CoMTrajectoryPlanner dcmPlan = new CoMTrajectoryPlanner(gravity, desiredHeight, registry);
+         dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry3));
+
+         controller3 = new LQRJumpSphereController(sphereRobot2, dcmPlan, yoGraphicsListRegistry3);
+
+         pushController3 = createPusher(sphereRobot2, yoGraphicsListRegistry3);
+         setupGroundContactModel(sphereRobot2.getScsRobot());
+
+         shift.put(controller3, initialPosition3);
+      }
+      else
+      {
+         controller3 = null;
+         yoGraphicsListRegistry3 = null;
+         pushController3 = null;
+      }
+
       Robot[] robotArray = robots.toArray(new Robot[robots.size()]);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -109,6 +138,8 @@ public class SphereJumpVisualizer
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry1);
       if (yoGraphicsListRegistry2 != null)
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry2);
+      if (yoGraphicsListRegistry3 != null)
+         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry3);
 
       plotterFactory.createOverheadPlotter();
 
@@ -119,6 +150,8 @@ public class SphereJumpVisualizer
          pushController1.bindSCSPushButton(button);
       if (pushController2 != null)
          pushController2.bindSCSPushButton(button);
+      if (pushController3 != null)
+         pushController3.bindSCSPushButton(button);
 
       scs.addButton(button);
 
@@ -169,6 +202,10 @@ public class SphereJumpVisualizer
       {
          controller2.solveForTrajectory(copyContactsWithShift(contacts, shift.get(controller2)));
       }
+      if (controller3 != null)
+      {
+         controller3.solveForTrajectory(copyContactsWithShift(contacts, shift.get(controller3)));
+      }
    }
 
    private static List<? extends ContactStateProvider> copyContactsWithShift(List<? extends ContactStateProvider> contacts, Vector3DReadOnly shift)
@@ -187,6 +224,7 @@ public class SphereJumpVisualizer
 
          newContact.setStartCopPosition(start);
          newContact.setEndCopPosition(end);
+         newContact.setContactState(contact.getContactState());
 
          newContacts.add(newContact);
       }
@@ -197,10 +235,12 @@ public class SphereJumpVisualizer
    private static final double initialTransferDuration = 1.0;
    private static final double finalTransferDuration = 1.0;
    private static final double settlingTime = 1.0;
-   private static final double stepDuration = 0.7;
-   private static final double stepLength = 0.5;
+   private static final double stepDuration = 0.6;
+   private static final double flightDuration = 0.3;
+   private static final double stepLength = 0.8;
    private static final double stepWidth = 0.15;
    private static final int numberOfSteps = 10;
+   private static final int numberOfRunningSteps = 4;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -249,6 +289,62 @@ public class SphereJumpVisualizer
       return contacts;
    }
 
+   private static List<ContactStateProvider> createRunningContacts()
+   {
+      List<ContactStateProvider> contacts = new ArrayList<>();
+
+      double contactPosition = 0.0;
+
+      double width = stepWidth;
+      SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
+      initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
+      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
+
+      contacts.add(initialContactStateProvider);
+
+      double currentTime = initialTransferDuration;
+
+      for (int i = 0; i < numberOfRunningSteps; i++)
+      {
+         SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
+
+         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
+         contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         contactStateProvider.setContactState(ContactState.IN_CONTACT);
+
+         contacts.add(contactStateProvider);
+
+         currentTime += stepDuration;
+
+
+         SettableContactStateProvider flightStateProvider = new SettableContactStateProvider();
+
+         flightStateProvider.getTimeInterval().setInterval(currentTime, currentTime + flightDuration);
+         flightStateProvider.setContactState(ContactState.FLIGHT);
+
+         contacts.add(flightStateProvider);
+
+         width = -width;
+         currentTime += flightDuration;
+
+         contactPosition += stepLength;
+      }
+
+      SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
+      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setContactState(ContactState.IN_CONTACT);
+
+      contacts.add(finalStateProvider);
+
+      return contacts;
+   }
+
+
    public static void main(String[] args)
    {
       SphereJumpVisualizer simulation = new SphereJumpVisualizer();
@@ -260,7 +356,7 @@ public class SphereJumpVisualizer
       List<ContactStateProvider> fakeProvider = new ArrayList<>();
       fakeProvider.add(fakeState);
 
-      simulation.setTrajectories(createContacts());
+      simulation.setTrajectories(createRunningContacts());
       //      simulation.setTrajectories(fakeProvider);
    }
 }

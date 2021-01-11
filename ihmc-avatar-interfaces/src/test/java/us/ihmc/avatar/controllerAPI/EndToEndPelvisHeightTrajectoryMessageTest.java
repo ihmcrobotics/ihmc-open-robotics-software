@@ -20,7 +20,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -63,7 +63,6 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-4;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -238,7 +237,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
+      String namespace = HeightOffsetHandler.class.getSimpleName();
       YoDouble offsetHeight = (YoDouble) scs.findVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -310,7 +309,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Would be nicer to check desired values but we currently have so many difference height control schemes that that would not be easy.
       referenceFrames.updateFrames();
       double finalPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
-      assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-5);
+      assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-3);
    }
 
    @Test

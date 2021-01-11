@@ -4,6 +4,7 @@
 #include "controller_msgs/msg/./FlatStepTypeMessage_.idl"
 #include "controller_msgs/msg/./QuixMotionStateMessage_.idl"
 #include "controller_msgs/msg/./QuixSideStepDirectionMessage_.idl"
+#include "controller_msgs/msg/./QuixSlopeStepTypeMessage_.idl"
 #include "controller_msgs/msg/./QuixStairsStepTypeMessage_.idl"
 module controller_msgs
 {
@@ -29,6 +30,9 @@ module controller_msgs
         controller_msgs::msg::dds::FlatStepTypeMessage flat_step_type;
         controller_msgs::msg::dds::QuixStairsStepTypeMessage stairs_step_type;
         controller_msgs::msg::dds::QuixSideStepDirectionMessage side_step_direction;
+        controller_msgs::msg::dds::QuixSlopeStepTypeMessage slope_step_type;
+        @defaultValue(value=255)
+        octet force_swing_side;
       };
     };
   };

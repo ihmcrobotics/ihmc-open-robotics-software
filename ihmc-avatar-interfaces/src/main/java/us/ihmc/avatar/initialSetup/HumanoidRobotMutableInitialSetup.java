@@ -13,22 +13,22 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class HumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    public final Point3D rootJointPosition = new Point3D();
    public final Quaternion rootJointOrientation = new Quaternion();
    public final Map<String, Double> jointPositions = new HashMap<>();
-   public final DRCRobotJointMap jointMap;
+   public final HumanoidJointNameMap jointMap;
 
-   public HumanoidRobotMutableInitialSetup(DRCRobotJointMap jointMap)
+   public HumanoidRobotMutableInitialSetup(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       robot.getRootJoint().setPosition(rootJointPosition);
       robot.getRootJoint().setOrientation(rootJointOrientation);
@@ -90,5 +90,25 @@ public class HumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<Hu
    @Override
    public void getOffset(Vector3D offsetToPack)
    {
+   }
+
+   public double getJointPosition(String jointName)
+   {
+      return jointPositions.get(jointName);
+   }
+
+   public Map<String, Double> getJointPositions()
+   {
+      return jointPositions;
+   }
+
+   public Point3D getRootJointPosition()
+   {
+      return rootJointPosition;
+   }
+
+   public Quaternion getRootJointOrientation()
+   {
+      return rootJointOrientation;
    }
 }

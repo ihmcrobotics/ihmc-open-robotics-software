@@ -53,6 +53,7 @@ public class ExperimentalPhysicsEngine
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robotMap = new HashMap<>();
    private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
    private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
+   private final List<ExternalWrenchProvider> externalWrenchProviders = new ArrayList<>();
    private final List<InertialMeasurementReader> inertialMeasurementReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
@@ -111,13 +112,21 @@ public class ExperimentalPhysicsEngine
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
                         MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
-                        MultiBodySystemStateReader physicsOutputReader)
+                        MultiBodySystemStateReader physicsOutputStateReader)
+   {
+      addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, null, physicsOutputStateReader);
+   }
+
+   public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
+                        MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
+                        MultiBodySystemStateWriter physicsInputStateWriter, MultiBodySystemStateReader physicsOutputStateReader)
    {
       PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotCollisionModel, physicsEngineGraphicsRegistry);
       YoRegistry robotRegistry = robot.getRobotRegistry();
       robot.setRobotInitialStateWriter(robotInitialStateWriter);
       robot.setControllerOutputWriter(controllerOutputWriter);
-      robot.addPhysicsOutputReader(physicsOutputReader);
+      robot.addPhysicsInputStateWriter(physicsInputStateWriter);
+      robot.addPhysicsOutputStateReader(physicsOutputStateReader);
       robotMap.put(robot.getRootBody(), robot);
       AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
       robotCollidableAppearance.setTransparency(0.5);
@@ -131,15 +140,20 @@ public class ExperimentalPhysicsEngine
       robotList.add(robot);
    }
 
-   public void addRobotPhysicsOutputReader(String robotName, MultiBodySystemStateReader physicsOutputReader)
+   public void addRobotPhysicsOutputStateReader(String robotName, MultiBodySystemStateReader physicsOutputReader)
    {
       PhysicsEngineRobotData physicsEngineRobotData = robotList.stream().filter(robot -> robot.getRobotName().equals(robotName)).findFirst().get();
-      physicsEngineRobotData.addPhysicsOutputReader(physicsOutputReader);
+      physicsEngineRobotData.addPhysicsOutputStateReader(physicsOutputReader);
    }
 
    public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
    {
       externalWrenchReaders.add(externalWrenchReader);
+   }
+
+   public void addExternalWrenchProvider(ExternalWrenchProvider externalWrenchProvider)
+   {
+      externalWrenchProviders.add(externalWrenchProvider);
    }
 
    public void addInertialMeasurementReader(InertialMeasurementReader reader)
@@ -167,7 +181,7 @@ public class ExperimentalPhysicsEngine
       for (PhysicsEngineRobotData robot : robotList)
       {
          robot.initialize();
-         robot.notifyPhysicsOutputReaders();
+         robot.notifyPhysicsOutputStateReaders();
 
          for (InertialMeasurementReader reader : inertialMeasurementReaders)
          {
@@ -197,7 +211,10 @@ public class ExperimentalPhysicsEngine
       {
          SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
          forwardDynamicsPlugin.resetExternalWrenches();
+         forwardDynamicsPlugin.applyExternalWrenches(externalWrenchProviders);
          forwardDynamicsPlugin.applyControllerOutput();
+         if (robotPlugin.notifyPhysicsInputStateWriters())
+            robotPlugin.updateFrames();
          forwardDynamicsPlugin.doScience(time.getValue(), dt, gravity);
          forwardDynamicsPlugin.readJointVelocities();
       }
@@ -260,7 +277,7 @@ public class ExperimentalPhysicsEngine
       {
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.updateFrames();
-         robot.notifyPhysicsOutputReaders();
+         robot.notifyPhysicsOutputStateReaders();
       }
 
       for (InertialMeasurementReader reader : inertialMeasurementReaders)

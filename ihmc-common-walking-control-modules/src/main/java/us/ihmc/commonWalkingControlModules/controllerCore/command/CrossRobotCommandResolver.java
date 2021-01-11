@@ -14,19 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -314,6 +302,9 @@ public class CrossRobotCommandResolver
          case MOMENTUM:
             resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
             break;
+         case MOMENTUM_COST:
+            resolveLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) commandToResolve, out.addLinearMomentumRateCostCommand());
+            break;
          case PLANE_CONTACT_STATE:
             resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
             break;
@@ -556,6 +547,15 @@ public class CrossRobotCommandResolver
    {
       out.setCommandId(in.getCommandId());
       out.setMomentumRate(in.getMomentumRate());
+      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveLinearMomentumRateCostCommand(LinearMomentumRateCostCommand in, LinearMomentumRateCostCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.setMomentumRateHessian(in.getMomentumRateHessian());
+      out.setMomentumRateGradient(in.getMomentumRateGradient());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
@@ -819,27 +819,15 @@ public class CrossRobotCommandResolver
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
-      resolveFrameTuple2D(in.getDesiredICPAtEndOfState(), out.getDesiredICPAtEndOfState());
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
-      out.setDesiredCenterOfMassHeightAcceleration(in.getDesiredCoMHeightAcceleration());
-      out.setSupportSide(in.getSupportSide());
-      out.setTransferToSide(in.getTransferToSide());
-      out.setInitializeForStanding(in.getInitializeForStanding());
-      out.setInitializeForSingleSupport(in.getInitializeForSingleSupport());
-      out.setInitializeForTransfer(in.getInitializeForTransfer());
+      out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
+      resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
+      out.setInitializeOnStateChange(in.getInitializeOnStateChange());
       out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
-      RecyclingArrayList<SimpleFootstep> outFootsteps = out.getFootsteps();
-      RecyclingArrayList<SimpleFootstep> inFootsteps = in.getFootsteps();
-      outFootsteps.clear();
-      for (int i = 0; i < inFootsteps.size(); i++)
-         resolveSimpleAdjustableFootstep(inFootsteps.get(i), outFootsteps.add());
-      out.setSwingDurations(in.getSwingDurations());
-      out.setTransferDurations(in.getTransferDurations());
-      out.setFinalTransferDuration(in.getFinalTransferDuration());
-      out.setRemainingTimeInSwingUnderDisturbance(in.getRemainingTimeInSwingUnderDisturbance());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
    }
@@ -847,10 +835,7 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
    {
       resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
-      resolveFrameTuple3D(in.getEffectiveICPAdjustment(), out.getEffectiveICPAdjustment());
-      out.setUsingStepAdjustment(in.getUsingStepAdjustment());
-      out.setFootstepWasAdjusted(in.getFootstepWasAdjusted());
-      resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
+      resolveFrameTuple2D(in.getResidualICPErrorForStepAdjustment(), out.getResidualICPErrorForStepAdjustment());
    }
 
    public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)

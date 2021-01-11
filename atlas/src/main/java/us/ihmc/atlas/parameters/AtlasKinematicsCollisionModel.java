@@ -17,13 +17,13 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public AtlasKinematicsCollisionModel(DRCRobotJointMap jointMap)
+   public AtlasKinematicsCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }

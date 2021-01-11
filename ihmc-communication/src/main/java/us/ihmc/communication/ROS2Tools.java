@@ -87,6 +87,8 @@ public class ROS2Tools
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
+   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
+
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
          = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
@@ -149,6 +151,11 @@ public class ROS2Tools
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
       return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
+   }
+
+   public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
+   {
+      return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);
    }
 
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
@@ -235,6 +242,16 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
+   }
+
+   public static ROS2Node createInterprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.FAST_RTPS, nodeName, RUNTIME_EXCEPTION);
+   }
+
+   public static ROS2Node createIntraprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.INTRAPROCESS, nodeName, RUNTIME_EXCEPTION);
    }
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)

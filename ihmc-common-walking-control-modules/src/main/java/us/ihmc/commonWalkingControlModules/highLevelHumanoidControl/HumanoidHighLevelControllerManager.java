@@ -77,7 +77,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters, ICPTrajectoryPlannerParameters icpPlannerParameters,
+                                             WalkingControllerParameters walkingControllerParameters,
                                              YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
@@ -98,7 +98,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper = new HighLevelControllerFactoryHelper();
       controllerFactoryHelper.setCommandInputManager(commandInputManager);
       controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
-      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters, icpPlannerParameters);
+      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters);
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);

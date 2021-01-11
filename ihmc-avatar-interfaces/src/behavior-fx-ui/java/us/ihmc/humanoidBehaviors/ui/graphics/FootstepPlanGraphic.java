@@ -6,50 +6,57 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class FootstepPlanGraphic extends Group
 {
    private final MeshView meshView = new MeshView();
+   private final Map<Pair<String, Integer>, LabelGraphic> labelRecycler = new HashMap<>();
+   private final ArrayList<LabelGraphic> existingLabels = new ArrayList<>();
+   private final ArrayList<LabelGraphic> labelsToAdd = new ArrayList<>();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+   private final ExecutorService executorService = ThreadTools.newSingleDaemonThreadExecutor(getClass().getSimpleName());
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;
    private Material material;
    private SideDependentList<Color> footstepColors = new SideDependentList<>();
+   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
-   public FootstepPlanGraphic(DRCRobotModel robotModel)
+   public FootstepPlanGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints)
    {
-      footstepColors.set(RobotSide.LEFT, Color.RED);
-      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
+      this();
 
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         robotModel.getContactPointParameters().getControllerFootGroundContactPoints().get(robotSide).forEach(point2D -> defaultFoothold.addVertex(point2D));
+         controllerFootGroundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
          defaultFoothold.update();
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
+   }
+
+   public FootstepPlanGraphic()
+   {
+      footstepColors.set(RobotSide.LEFT, Color.RED);
+      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
 
       getChildren().addAll(meshView);
 
@@ -62,44 +69,46 @@ public class FootstepPlanGraphic extends Group
       footstepColors.set(RobotSide.RIGHT, new Color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), opacity));
    }
 
+   public void setColor(RobotSide side, Color color)
+   {
+      double priorOpacity = footstepColors.get(side).getOpacity();
+      footstepColors.set(side, new Color(color.getRed(), color.getGreen(), color.getBlue(), priorOpacity));
+   }
+
    /**
     * To process in parallel.
     */
-   public void generateMeshesAsynchronously(ArrayList<Pair<RobotSide, Pose3D>> plan)
+   public void generateMeshesAsynchronously(ArrayList<MinimalFootstep> footsteps)
    {
       executorService.submit(() -> {
-         LogTools.trace("Received footstep plan containing {} steps", plan.size());
-         generateMeshes(plan);
+         generateMeshes(footsteps);
       });
    }
 
-   public void generateMeshes(ArrayList<Pair<RobotSide, Pose3D>> message)
+   public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
       meshBuilder.clear();
 
-      FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
 
-      FootstepPlan plan = new FootstepPlan();
-      message.forEach(pair -> plan.addFootstep(pair.getLeft(), new FramePose3D(pair.getRight())));
-
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      ArrayList<LabelGraphic> tempLabelsToAdd = new ArrayList<>();
+      for (int i = 0; i < footsteps.size(); i++)
       {
-         PlannedFootstep footstep = plan.getFootstep(i);
-         Color regionColor = footstepColors.get(footstep.getRobotSide());
+         MinimalFootstep minimalFootstep = footsteps.get(i);
+         Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
-         footstep.getFootstepPose(footPose);
-         footPose.get(transformToWorld);
+         minimalFootstep.getSolePoseInWorld().get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-         if (footstep.hasFoothold())
-         {
-            foothold.set(footstep.getFoothold());
-         }
+         if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
+            foothold.set(minimalFootstep.getFoothold());
+         else if (defaultContactPoints.containsKey(minimalFootstep.getSide()))
+            foothold.set(defaultContactPoints.get(minimalFootstep.getSide()));
          else
          {
-            foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+            LogTools.error("Must specify default or per footstep foothold");
+            throw new RuntimeException("Must specify default or per footstep foothold");
          }
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
@@ -110,6 +119,14 @@ public class FootstepPlanGraphic extends Group
 
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
+
+         if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().trim().isEmpty())
+         {
+            LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(Pair.of(minimalFootstep.getDescription(), i), key -> new LabelGraphic(key.getLeft()));
+            labelGraphic.getPose().set(minimalFootstep.getSolePoseInWorld());
+            labelGraphic.update();
+            tempLabelsToAdd.add(labelGraphic);
+         }
       }
 
       Mesh mesh = meshBuilder.generateMesh();
@@ -119,6 +136,9 @@ public class FootstepPlanGraphic extends Group
       {
          this.mesh = mesh;
          this.material = material;
+
+         labelsToAdd.clear();
+         labelsToAdd.addAll(tempLabelsToAdd);
       }
    }
 
@@ -128,11 +148,27 @@ public class FootstepPlanGraphic extends Group
       {
          meshView.setMesh(mesh);
          meshView.setMaterial(material);
+
+         for (LabelGraphic label : existingLabels)
+         {
+            getChildren().remove(label.getNode());
+         }
+         existingLabels.clear();
+         for (LabelGraphic label : labelsToAdd)
+         {
+            existingLabels.add(label);
+            getChildren().add(label.getNode());
+         }
       }
    }
 
    public void clear()
    {
       generateMeshes(new ArrayList<>());
+   }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
    }
 }

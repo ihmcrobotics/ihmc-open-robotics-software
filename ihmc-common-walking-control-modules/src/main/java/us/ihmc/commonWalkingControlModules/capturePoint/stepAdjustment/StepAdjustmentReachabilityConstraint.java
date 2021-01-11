@@ -55,7 +55,7 @@ public class StepAdjustmentReachabilityConstraint
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
-   public StepAdjustmentReachabilityConstraint(SideDependentList<ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
+   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
                                                SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
                                                YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

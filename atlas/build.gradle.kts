@@ -1,9 +1,9 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.ihmc-ci") version "6.4"
-   id("us.ihmc.ihmc-cd") version "1.14"
+   id("us.ihmc.ihmc-build")
+   id("us.ihmc.ihmc-ci") version "7.4"
+   id("us.ihmc.ihmc-cd") version "1.17"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools-plugin") version "0.5.0"
+   id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
 ihmc {
@@ -30,19 +30,19 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("com.github.wendykierp:JTransforms:3.1")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:euclid-geometry:0.15.1")
-   api("us.ihmc:euclid-frame:0.15.1")
-   api("us.ihmc:euclid-shape:0.15.1")
-   api("us.ihmc:euclid-frame-shape:0.15.1")
-   api("us.ihmc:mecano:0.7.1")
-   api("us.ihmc:mecano-yovariables:0.7.1")
-   api("us.ihmc:ihmc-yovariables:0.9.5")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.20.6")
-   api("us.ihmc:ihmc-graphics-description:0.19.1")
-   api("us.ihmc:ihmc-robot-description:0.20.1")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.1")
+   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid-geometry:0.16.1")
+   api("us.ihmc:euclid-frame:0.16.1")
+   api("us.ihmc:euclid-shape:0.16.1")
+   api("us.ihmc:euclid-frame-shape:0.16.1")
+   api("us.ihmc:mecano:0.7.4")
+   api("us.ihmc:mecano-yovariables:0.7.4")
+   api("us.ihmc:ihmc-yovariables:0.9.8")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
+   api("us.ihmc:simulation-construction-set:0.21.5")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:ihmc-robot-description:0.21.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
@@ -55,7 +55,6 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.1")
    api("us.ihmc:robotiq-hand-drivers:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
@@ -73,7 +72,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
-   api("us.ihmc:ihmc-commons-testing:0.30.3")
+   api("us.ihmc:ihmc-commons-testing:0.30.4")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
@@ -81,4 +80,5 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+   api("us.ihmc:ihmc-messager-test:0.1.7")
 }

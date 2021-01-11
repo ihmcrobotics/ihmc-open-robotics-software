@@ -17,7 +17,7 @@ public class AtlasSensorSuiteLauncher
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
 
-      AtlasSensorSuiteManager atlasSensorSuiteManager = (AtlasSensorSuiteManager) atlasRobotModel.getSensorSuiteManager();
+      AtlasSensorSuiteManager atlasSensorSuiteManager = atlasRobotModel.getSensorSuiteManager();
       URI rosCoreURI = NetworkParameters.getROSURI();
       atlasSensorSuiteManager.initializePhysicalSensors(rosCoreURI);
 

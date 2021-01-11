@@ -93,7 +93,6 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
    public void onBehaviorEntered()
    {
       succeeded = false;
-      doorLocationPacket.set(null);
       super.onBehaviorEntered();
    }
 
@@ -114,7 +113,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          public void onEntry()
          {
             super.onEntry();
-            doorLocationPacket.set(null);
+           // doorLocationPacket.set(null);
          }
 
          @Override
@@ -131,16 +130,16 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
             
          }
-         @Override
-         public boolean isDone()
-         {
-            //wait for the door to be located and a baseline set for open detection
-            if (doorLocationPacket.get() != null)
-            {
-               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
-            }
-            return doorLocationPacket.get() != null;
-         }
+//         @Override
+//         public boolean isDone()
+//         {
+//            //wait for the door to be located and a baseline set for open detection
+//            if (doorLocationPacket.get() != null)
+//            {
+//               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
+//            }
+//            return doorLocationPacket.get() != null;
+//         }
 
       };
       
@@ -165,7 +164,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             setAutomaticArmAbort(false);
 
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 1.041,  0.140,  1.127,
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 1.091,  0.140,  1.127,
                                                                                 -2.842152676032728, -0.014314520562289174, -0.18564764268543277,
                                                                                RobotSide.LEFT,
                                                                                "Moving Left Hand To Door",
@@ -275,7 +274,25 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          protected void setBehaviorInput()
          {
-            
+           
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.CLOSE);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+ 
+         }
+      };
+      
+      BehaviorAction moveRightHandToSafeLocation = new BehaviorAction(atlasPrimitiveActions.rightHandDesiredConfigurationBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.589,  1.055,  0.830,
+                                                                                -1.554026654268604, 0.759223557761935, -1.6572679687794496,
+                                                                                RobotSide.RIGHT,
+                                                                                "Move Right Hand Clear Of Closing Door",
+                                                                                2));
             
             HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
                                                                                                                           HandConfiguration.CLOSE);
@@ -302,7 +319,13 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                  -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
                                                                                 RobotSide.RIGHT,
                                                                                 "Turn Door Knob",
-                                                                                4));            
+                                                                                4));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.794,  0.186,  0.792 ,
+//                                                                                 -1.5431936567280218, 0.13501342218408519, -0.7156860167842839,
+//                                                                                RobotSide.RIGHT,
+//                                                                                "Turn Door Knob",
+//                                                                                4));
+
 //            
 //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.856,  0.125,  0.791,
 //                                                                                -1.2856865907790618, 0.0386255602637629, -0.9492873833196996,
@@ -354,6 +377,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                 RobotSide.RIGHT,
                                                                                 "Pull Door More",
                                                                                 2));
+            //
             //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
 
          }
@@ -372,7 +396,6 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                "Put Left Hand In Door",
                                                                                2));
          }
-
       };
       
       BehaviorAction releaseHandle = new BehaviorAction(atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
@@ -386,6 +409,8 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
             HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
                                                                                                                           HandConfiguration.OPEN);
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+
+          
  
          }
       };
@@ -396,14 +421,17 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          protected void setBehaviorInput()
          {
             //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.75, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Push Door A Little", 1));
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.589,  1.055,  0.830,
-                                                                                -1.554026654268604, 0.759223557761935, -1.6572679687794496,
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.492,  0.536,  0.949,
+                                                                                 -1.0010885536716199, 0.13559477363777, -1.5315488331624716,
                                                                                 RobotSide.RIGHT,
-                                                                                "Move Right Hand Clear",
+                                                                                "Removing Hand From Door Knob",
                                                                                 2));
-            //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
+          //  [mRIGHT hand in MultiClickdoor_0_objID184 ( 0.492,  0.536,  0.949 ) orientation -1.0010885536716199, 0.13559477363777, -1.5315488331624716
+
+            //
 
          }
+        
       };
       
       
@@ -479,7 +507,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.LOWER_HEIGHT);
       factory.addStateAndDoneTransition(OpenDoorState.LOWER_HEIGHT, lowerHeightTask, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION,moveLeftHandToDoor,OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.OPEN_RIGHT_HAND);
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.OPEN_RIGHT_HAND);
       
       factory.addStateAndDoneTransition(OpenDoorState.OPEN_RIGHT_HAND, openRightHand, OpenDoorState.GRAB_DOOR_KNOB);
@@ -510,7 +538,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addStateAndDoneTransition(OpenDoorState.PUT_LEFT_HAND_IN_DOOR, putLeftHandInDoor, OpenDoorState.RELEASE_DOOR_KNOB);
       factory.addStateAndDoneTransition(OpenDoorState.RELEASE_DOOR_KNOB, releaseHandle, OpenDoorState.MOVE_RIGHT_HAND_CLEAR);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_CLEAR, moveRightHandClear, OpenDoorState.SAFE_RIGHT_HAND);
-      factory.addStateAndDoneTransition(OpenDoorState.SAFE_RIGHT_HAND, closeRightHand, OpenDoorState.PUSH_OPEN_DOOR);
+      factory.addStateAndDoneTransition(OpenDoorState.SAFE_RIGHT_HAND, moveRightHandToSafeLocation, OpenDoorState.PUSH_OPEN_DOOR);
       factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
       factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
 
@@ -569,6 +597,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
    public void onBehaviorExited()
    {
       doorPoseFrame = null;
+      doorLocationPacket.set(null);
 
    }
 

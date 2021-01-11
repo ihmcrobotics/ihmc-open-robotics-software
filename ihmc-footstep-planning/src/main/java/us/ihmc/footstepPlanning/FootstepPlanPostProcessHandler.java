@@ -3,18 +3,12 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
-import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -33,14 +27,10 @@ public class FootstepPlanPostProcessHandler
 
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
-   private final SplitFractionCalculatorParametersBasics splitFractionParameters;
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
-
-   private final AreaBasedSplitFractionCalculator areaBasedSplitFractionCalculator;
-   private final PositionBasedSplitFractionCalculator positionBasedSplitFractionCalculator;
 
    private Consumer<FootstepPlannerOutput> statusCallback = result ->
    {
@@ -49,14 +39,12 @@ public class FootstepPlanPostProcessHandler
 
    public FootstepPlanPostProcessHandler(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                          SwingPlannerParametersBasics swingPlannerParameters,
-                                         SplitFractionCalculatorParametersBasics splitFractionParameters,
                                          WalkingControllerParameters walkingControllerParameters,
                                          SideDependentList<ConvexPolygon2D> footPolygons)
 
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
-      this.splitFractionParameters = splitFractionParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
       if (walkingControllerParameters == null)
@@ -71,9 +59,6 @@ public class FootstepPlanPostProcessHandler
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
       }
-
-      this.areaBasedSplitFractionCalculator = new AreaBasedSplitFractionCalculator(splitFractionParameters, footPolygons);
-      this.positionBasedSplitFractionCalculator = new PositionBasedSplitFractionCalculator(splitFractionParameters);
    }
 
    public YoRegistry getYoVariableRegistry()
@@ -88,10 +73,7 @@ public class FootstepPlanPostProcessHandler
          performPostProcessing(request.getPlanarRegionsList(),
                                output.getFootstepPlan(),
                                request.getStartFootPoses(),
-                               request.getStartFootholds(),
-                               request.getSwingPlannerType(),
-                               request.performPositionBasedSplitFractionCalculation(),
-                               request.performAreaBasedSplitFractionCalculation());
+                               request.getSwingPlannerType());
       }
 
       statusCallback.accept(output);
@@ -100,10 +82,7 @@ public class FootstepPlanPostProcessHandler
    public void performPostProcessing(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
-                                     SideDependentList<ConvexPolygon2D> startFootholds,
-                                     SwingPlannerType swingPlannerType,
-                                     boolean performPositionBasedSplitFractionCalculation,
-                                     boolean performAreaBasedSplitFractionCalculation)
+                                     SwingPlannerType swingPlannerType)
    {
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
@@ -118,15 +97,6 @@ public class FootstepPlanPostProcessHandler
       else if (swingPlannerType == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
       {
          computeSwingWaypoints(planarRegionsList, footstepPlan, startFootPoses);
-      }
-
-      if (performPositionBasedSplitFractionCalculation)
-      {
-         positionBasedSplitFractionCalculator.computeSplitFractions(footstepPlan, startFootPoses);
-      }
-      if (performAreaBasedSplitFractionCalculation)
-      {
-         areaBasedSplitFractionCalculator.computeSplitFractions(footstepPlan, startFootPoses, startFootholds);
       }
    }
 
@@ -224,11 +194,6 @@ public class FootstepPlanPostProcessHandler
       return swingPlannerParameters;
    }
 
-   public SplitFractionCalculatorParametersBasics getSplitFractionParameters()
-   {
-      return splitFractionParameters;
-   }
-
    public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
    {
       return adaptiveSwingTrajectoryCalculator;
@@ -237,15 +202,5 @@ public class FootstepPlanPostProcessHandler
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
       return swingOverPlanarRegionsTrajectoryExpander;
-   }
-
-   public AreaBasedSplitFractionCalculator getAreaBasedSplitFractionCalculator()
-   {
-      return areaBasedSplitFractionCalculator;
-   }
-
-   public PositionBasedSplitFractionCalculator getPositionBasedSplitFractionCalculator()
-   {
-      return positionBasedSplitFractionCalculator;
    }
 }

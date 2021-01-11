@@ -33,7 +33,7 @@ public class JavaFXStoredPropertyTable extends JavaFXParameterTable
          else if (parameterKey.getType().equals(Integer.class))
          {
             IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) parameterKey;
-            spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(-100, 100, storedPropertySet.get(integerKey), 1);
+            spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(-100, 200, storedPropertySet.get(integerKey), 1);
          }
          else if (parameterKey.getType().equals(Boolean.class))
          {

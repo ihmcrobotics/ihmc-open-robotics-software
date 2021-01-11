@@ -1,119 +1,181 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import com.sun.javafx.scene.CameraHelper;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Sphere;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorAPI;
+import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
+import static us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives.*;
 
 public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 {
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUI::new);
 
-   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
-
    @FXML private CheckBox exploreAreaCheckBox;
    @FXML private TextField stateTextField;
    @FXML private TableView parameterTable;
 
-   private Messager behaviorMessager;
+   private final JavaFXLivePlanarRegionsGraphic planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
+   private final GraphicGroup observationPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup potentialPointsToExploreGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup foundBodyPathToPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup planningToPointsGraphicGroup = new GraphicGroup(get3DGroup());
+   private final GraphicGroup boundingBoxGraphics = new GraphicGroup(get3DGroup());
+   private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
+   private final GraphicGroup pointToLookAtGroup = new GraphicGroup(get3DGroup());
 
-   private PlanarRegionsGraphic planarRegionsGraphic = null;
+   private final Sphere pointToLookAt = createSphere3D(new Point3D(100.0, 100.0, 0.0), Color.RED, 0.15);
+   private final SubScene sceneNode;
+   private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+   private final AtomicReference<Point3D> mouseMovedMeshIntersection = new AtomicReference<>();
+   private final AtomicReference<Point3D> mouseClickedMeshIntersection = new AtomicReference<>();
 
-   private ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
+   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
+   private final ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
+   private final HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
+   private final HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
+   private final HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
-   private HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
-   private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
-   private HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
+   private ExploreAreaBehavior.ExploreAreaBehaviorState currentState;
 
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public ExploreAreaBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
+
+      lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
+      get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
+      pointToLookAtGroup.add(pointToLookAt);
+
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
-                                             result -> Platform.runLater(() -> displayObservationPosition(result)));
+                                             position -> Platform.runLater(() -> displayObservationPosition(position)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
-                                             result -> Platform.runLater(() -> displayExplorationBoundingBoxes(result)));
+                                             boxes -> Platform.runLater(() -> displayExplorationBoundingBoxes(boxes)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
-                                             result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PlanningToPosition,
-                                             result -> Platform.runLater(() -> displayPlanningToPosition(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPathTo,
-                                             result -> Platform.runLater(() -> displayFoundBodyPathTo(result)));
+                                             points -> Platform.runLater(() -> displayPotentialPointsToExplore(points)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.WalkingToPose,
+                                             pose -> Platform.runLater(() -> displayPlanningToPose(pose)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
+                                             bodyPath -> Platform.runLater(() -> displayFoundBodyPathTo(bodyPath)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
-                                             result -> Platform.runLater(() -> clearPlanarRegions(result)));
+                                             unused -> Platform.runLater(this::clearPlanarRegions));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
-                                             result -> Platform.runLater(() -> addPlanarRegionToMap(result)));
+                                             region -> Platform.runLater(() -> addPlanarRegionToMap(region)));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
-                                             result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
+                                             polygon -> Platform.runLater(() -> addPolygonToPlanarRegion(polygon)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap,
+                                             unused -> Platform.runLater(this::drawMap));
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.CurrentState,
-                                             state -> Platform.runLater(() -> stateTextField.setText(state.name())));
+                                             state -> Platform.runLater(() ->
+                                             {
+                                                this.currentState = state;
+                                                stateTextField.setText(state.name());
+                                                lookAndStepVisualizationGroup.setEnabled(state == LookAndStep);
+                                             }));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, point -> Platform.runLater(() -> setPointToLookAt(point)));
+
+      sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
+      this.sceneNode = sceneNode;
    }
 
    @Override
    public void setEnabled(boolean enabled)
    {
+      planarRegionsGraphic.setEnabled(enabled);
 
+      observationPointsGraphicGroup.setEnabled(enabled);
+      potentialPointsToExploreGraphicGroup.setEnabled(enabled);
+      foundBodyPathToPointsGraphicGroup.setEnabled(enabled);
+      planningToPointsGraphicGroup.setEnabled(enabled);
+      boundingBoxGraphics.setEnabled(enabled);
+      lookAndStepVisualizationGroup.setEnabled(enabled && currentState == LookAndStep);
+      pointToLookAtGroup.setEnabled(enabled);
+
+      if (enabled)
+      {
+         Platform.runLater(() -> get3DGroup().getChildren().add(planarRegionsGraphic));
+      }
+      else
+      {
+         Platform.runLater(() -> get3DGroup().getChildren().remove(planarRegionsGraphic));
+      }
    }
 
    private void publishParameters()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());
    }
 
    @FXML
    public void exploreArea()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }
 
    @FXML
    public void randomPoseUpdate()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
    }
 
    @FXML
    public void doSlamButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.DoSlam, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.DoSlam, true);
    }
 
    @FXML
    public void clearMapButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ClearMap, true);
+      getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.ClearMap, true);
    }
 
    @FXML
@@ -122,55 +184,52 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       parameters.save();
    }
 
-   private BunchOfPointsDisplayer observationPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(this);
-   private BunchOfBoundingBoxesDisplayer boundingBoxesDisplayer = new BunchOfBoundingBoxesDisplayer(this);
-
    public void displayObservationPosition(Point3D observationPosition)
    {
-      observationPointsDisplayer.displayPoint(observationPosition, Color.AZURE, 0.04);
+      observationPointsGraphicGroup.add(createSphere3D(observationPosition, Color.AZURE, 0.04));
    }
 
    private void displayExplorationBoundingBoxes(ArrayList<BoundingBox3D> boxes)
    {
-      boundingBoxesDisplayer.clear();
+      boundingBoxGraphics.removeAll();
       Color[] boundingBoxColors = new Color[] {Color.INDIANRED, Color.DARKSEAGREEN, Color.CADETBLUE};
 
       for (int i = 0; i < boxes.size(); i++)
       {
          Color color = boundingBoxColors[i % boundingBoxColors.length];
-         boundingBoxesDisplayer.displayBoundingBox(boxes.get(i), color, 0.1);
+         boundingBoxGraphics.add(createBoundingBox3D(boxes.get(i), color, 0.02));
       }
+   }
+
+   private void setPointToLookAt(Point2D pointToLookAt)
+   {
+      JavaFXGraphicTools.setNodePosition(this.pointToLookAt, new Point3D(pointToLookAt.getX(), pointToLookAt.getY(), 0.4));
    }
 
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
    {
-      potentialPointsToExploreDisplayer.clear();
-      foundBodyPathToPointsDisplayer.clear();
-      planningToPointsDisplayer.clear();
-      potentialPointsToExploreDisplayer.displayPoints(potentialPointsToExplore, Color.BLACK, 0.01);
-   }
-
-   public void displayFoundBodyPathTo(Point3D foundBodyPathToPoint)
-   {
-      foundBodyPathToPointsDisplayer.displayPoint(foundBodyPathToPoint, Color.CORAL, 0.02);
-   }
-
-   public void displayPlanningToPosition(Point3D planningToPosition)
-   {
-      planningToPointsDisplayer.clear();
-      planningToPointsDisplayer.displayPoint(planningToPosition, Color.BLUEVIOLET, 0.1);
-   }
-
-   public void clearPlanarRegions(boolean input)
-   {
-      if (planarRegionsGraphic != null)
+      potentialPointsToExploreGraphicGroup.removeAll();
+      planningToPointsGraphicGroup.removeAll();
+      for (Point3D potentialPointToExplore : potentialPointsToExplore)
       {
-         getChildren().remove(planarRegionsGraphic);
+         potentialPointsToExploreGraphicGroup.add(createSphere3D(potentialPointToExplore, Color.BLACK, 0.01));
       }
-      planarRegionsGraphic = null;
+   }
+
+   public void displayFoundBodyPathTo(List<Pose3D> foundBodyPathToPoint)
+   {
+      foundBodyPathToPointsGraphicGroup.add(JavaFXGraphicPrimitives.createPath(foundBodyPathToPoint, Color.LIMEGREEN));
+   }
+
+   public void displayPlanningToPose(Pose3D planningToPosition)
+   {
+      planningToPointsGraphicGroup.removeAll();
+      planningToPointsGraphicGroup.add(createSphereWithArrow3D(planningToPosition, Color.BLUEVIOLET, 0.1));
+   }
+
+   public void clearPlanarRegions()
+   {
+      planarRegionsGraphic.clear();
 
       transformMap.clear();
       numberOfPolygonsMap.clear();
@@ -178,15 +237,9 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       polygonsMap.clear();
    }
 
-   public void drawMap(boolean input)
+   public void drawMap()
    {
-      if (planarRegionsGraphic != null)
-      {
-         getChildren().remove(planarRegionsGraphic);
-      }
-
-      planarRegionsGraphic = new PlanarRegionsGraphic(false);
-
+      planarRegionsGraphic.clear();
       planarRegions.clear();
 
       Set<Integer> indices = transformMap.keySet();
@@ -203,9 +256,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       }
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
-      planarRegionsGraphic.generateMeshes(planarRegionsList);
-      planarRegionsGraphic.update();
-      getChildren().add(planarRegionsGraphic);
+      planarRegionsGraphic.acceptPlanarRegions(planarRegionsList);
    }
 
    public void addPlanarRegionToMap(TemporaryPlanarRegionMessage planarRegionMessage)
@@ -224,76 +275,57 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 
       if (polygons == null)
       {
-         polygons = new ArrayList<ConvexPolygon2D>();
+         polygons = new ArrayList<>();
          polygonsMap.put(index, polygons);
       }
 
       polygons.add(polygon);
    }
 
-   private static class BunchOfPointsDisplayer
+   private void mouseMoved(MouseEvent event)
    {
-      private final Group group;
-      private final ArrayList<PositionGraphic> positionGraphics = new ArrayList<PositionGraphic>();
-
-      public BunchOfPointsDisplayer(Group group)
+      Point3D intersection = calculateMouseIntersection(event);
+      if (intersection != null)
       {
-         this.group = group;
-      }
-
-      public void clear()
-      {
-         for (PositionGraphic graphic : positionGraphics)
-         {
-            group.getChildren().remove(graphic.getNode());
-         }
-
-         positionGraphics.clear();
-      }
-
-      public void displayPoints(ArrayList<Point3D> points, Color color, double diameter)
-      {
-         for (Point3D point : points)
-         {
-            displayPoint(point, color, diameter);
-         }
-      }
-
-      public void displayPoint(Point3D point, Color color, double diameter)
-      {
-         PositionGraphic potentialPointToExploreGraphic = new PositionGraphic(color, diameter);
-         potentialPointToExploreGraphic.setPosition(point);
-         positionGraphics.add(potentialPointToExploreGraphic);
-         group.getChildren().add(potentialPointToExploreGraphic.getNode());
+         mouseMovedMeshIntersection.set(intersection);
       }
    }
 
-   private static class BunchOfBoundingBoxesDisplayer
+   private void mouseClicked(MouseEvent event)
    {
-      private final Group group;
-      private final ArrayList<BoundingBox3DGraphic> boundingBoxGraphics = new ArrayList<BoundingBox3DGraphic>();
-
-      public BunchOfBoundingBoxesDisplayer(Group group)
+      if (event.getButton() == MouseButton.SECONDARY)
       {
-         this.group = group;
-      }
-
-      public void clear()
-      {
-         for (BoundingBox3DGraphic graphic : boundingBoxGraphics)
+         LogTools.info("Mouse right clicked");
+         if (mouseMovedMeshIntersection.get() != null)
          {
-            group.getChildren().remove(graphic.getNode());
+            System.out.println(mouseMovedMeshIntersection.get());
+            getBehaviorMessager().submitMessage(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, mouseMovedMeshIntersection.get());
          }
 
-         boundingBoxGraphics.clear();
+         event.consume();
       }
+   }
 
-      public void displayBoundingBox(BoundingBox3D boundingBox, Color color, double lineWidth)
-      {
-         BoundingBox3DGraphic boundingBox3DGraphic = new BoundingBox3DGraphic(boundingBox, color, lineWidth);
-         boundingBoxGraphics.add(boundingBox3DGraphic);
-         group.getChildren().add(boundingBox3DGraphic.getNode());
-      }
+   private Point3D calculateMouseIntersection(MouseEvent event)
+   {
+      Point3D point1 = new Point3D();
+      point1.setX(sceneNode.getCamera().getLocalToSceneTransform().getTx());
+      point1.setY(sceneNode.getCamera().getLocalToSceneTransform().getTy());
+      point1.setZ(sceneNode.getCamera().getLocalToSceneTransform().getTz());
+
+      Point3D point2 = new Point3D();
+      javafx.geometry.Point3D pointOnProjectionPlane = CameraHelper.pickProjectPlane(sceneNode.getCamera(), event.getSceneX(), event.getSceneY());
+      point2.setX(pointOnProjectionPlane.getX());
+      point2.setY(pointOnProjectionPlane.getY());
+      point2.setZ(pointOnProjectionPlane.getZ());
+
+      Line3D line = new Line3D(point1, point2);
+
+      Point3DReadOnly pickPoint = new Point3D(0.0, 0.0, 0.0);
+      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Point3D pickDirection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, planeNormal, line.getPoint(), line.getDirection());
+
+      return pickDirection;
    }
 
    @Override

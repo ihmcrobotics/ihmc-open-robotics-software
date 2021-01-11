@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
@@ -214,7 +214,7 @@ public class GroundContactForceMomentumQPSolver
          solverInput_f.add(i, 0, -momentumAccelerationRegularization.getDoubleValue() * solverOutput_momentumRate.get(i, 0));
       }
    }
-   public void addMomentumInput(QPInput input)
+   public void addMomentumInput(QPInputTypeA input)
    {
       switch (input.getConstraintType())
       {

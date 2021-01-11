@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
@@ -36,6 +37,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final AtomicReference<FramePose3D> newGoalPose = new AtomicReference<>();
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+   private final AtomicDouble desiredHeading = new AtomicDouble();
+   private boolean squareUpEndSteps = true;
 
    private final FootstepListBehavior footstepListBehavior;
    private PlanPathToLocationBehavior planPathToLocationBehavior;
@@ -92,6 +95,16 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       goalLocationChanged = true;
    }
 
+   public void setHeading(double desiredHeading)
+   {
+      this.desiredHeading.set(desiredHeading);
+   }
+
+   public void setSquareUpEndSteps(boolean squareUpEndSteps)
+   {
+      this.squareUpEndSteps = squareUpEndSteps;
+   }
+
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
@@ -111,6 +124,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    public void onBehaviorEntered()
    {
       currentGoalPose.set(null);
+      desiredHeading.set(0.0);
       walkSucceded = false;
       planPathToLocationBehavior.onBehaviorEntered();
       footstepListBehavior.onBehaviorEntered();
@@ -157,7 +171,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             }
 
            
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround);
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get(), squareUpEndSteps);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
 
@@ -214,6 +228,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
       factory.addTransition(WalkToLocationStates.WAIT_FOR_GOAL, WalkToLocationStates.PLAN_PATH, t -> currentGoalPose.get() != null);
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.WALK_PATH, t -> isPlanPathComplete() && hasValidPlanPath());
+      factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_FAILED, t -> isPlanPathComplete() && !hasValidPlanPath());
+
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
       factory.addTransition(WalkToLocationStates.WALK_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
 

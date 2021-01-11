@@ -43,6 +43,10 @@ public class FootstepPlannerParametersTest
       parameters.setIdealFootstepLength(idealFootstepLength);
       assertEquals(idealFootstepLength, parameters.getIdealFootstepLength(), epsilon);
 
+      double idealStepLengthAtMaxStepZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setIdealStepLengthAtMaxStepZ(idealStepLengthAtMaxStepZ);
+      assertEquals(idealStepLengthAtMaxStepZ, parameters.getIdealStepLengthAtMaxStepZ(), epsilon);
+
       double maxStepReach = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepReach(maxStepReach);
       assertEquals(maxStepReach, parameters.getMaximumStepReach(), epsilon);
@@ -63,13 +67,17 @@ public class FootstepPlannerParametersTest
       parameters.setMaximumStepWidth(maxStepWidth);
       assertEquals(maxStepWidth, parameters.getMaximumStepWidth(), epsilon);
 
-      double maxLeftStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumLeftStepZ(maxLeftStepZ);
-      assertEquals(maxLeftStepZ, parameters.getMaximumLeftStepZ(), epsilon);
+      double maxStepZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumStepZ(maxStepZ);
+      assertEquals(maxStepZ, parameters.getMaxStepZ(), epsilon);
 
-      double maxRightStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumRightStepZ(maxRightStepZ);
-      assertEquals(maxRightStepZ, parameters.getMaximumRightStepZ(), epsilon);
+      double maxSwingZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSwingZ(maxSwingZ);
+      assertEquals(maxSwingZ, parameters.getMaxSwingZ(), epsilon);
+
+      double maxSwingReach = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSwingReach(maxSwingReach);
+      assertEquals(maxSwingReach, parameters.getMaxSwingReach(), epsilon);
 
       double maxStepXWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);
@@ -242,9 +250,5 @@ public class FootstepPlannerParametersTest
       double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
-
-      byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
-      parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);
-      assertEquals(RobotSide.fromByte(stepOnlyWithRequestedSide), parameters.getStepOnlyWithRequestedSide());
    }
 }

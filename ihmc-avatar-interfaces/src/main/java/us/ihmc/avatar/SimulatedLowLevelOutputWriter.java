@@ -50,6 +50,10 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
       {
 
          OneDegreeOfFreedomJoint pinJoint = revoluteJoints.first(i);
+
+         if (pinJoint == null)
+            continue; // Can happen for loop closures
+
          JointDesiredOutputReadOnly data = revoluteJoints.second(i);
 
 

@@ -92,6 +92,9 @@ public class GeneticAlgorithmSummaryPanel extends JPanel implements KeyListener,
          {
             double maxFitness = pop.getMaximumFitness();
             g.drawString(Double.toString(maxFitness), 160, i * FONT_SIZE + 10);
+
+            double averageFitness = pop.getAverageFitness();
+            g.drawString(Double.toString(averageFitness), 320, i * FONT_SIZE + 10);
          }
       }
    }

@@ -12,29 +12,28 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanPostProcessHandler;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -83,11 +82,11 @@ public class BehaviorHelper
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
+   private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2Node ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2NodeInterface ros2Node)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);
@@ -129,6 +128,21 @@ public class BehaviorHelper
       return environmentMap;
    }
 
+   public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
+   {
+      if (bodyPathPlanner == null)
+      {
+         bodyPathPlanner = newBodyPathPlanner();
+      }
+      return bodyPathPlanner;
+   }
+
+   public VisibilityGraphPathPlanner newBodyPathPlanner()
+   {
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+      return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
+   }
+
    public FootstepPlanningModule getOrCreateFootstepPlanner()
    {
       if (footstepPlanner == null)
@@ -147,12 +161,10 @@ public class BehaviorHelper
    {
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      SplitFractionCalculatorParametersBasics splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
       return new FootstepPlanPostProcessHandler(footstepPlannerParameters,
                                                 swingPlannerParameters,
-                                                splitFractionParameters,
                                                 walkingControllerParameters,
                                                 footPolygons);
    }
@@ -205,6 +217,11 @@ public class BehaviorHelper
    }
 
    public <T> void publishROS2(ROS2Topic<T> topic, T message)
+   {
+      ros2PublisherMap.publish(topic, message);
+   }
+
+   public void publishROS2(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);
    }

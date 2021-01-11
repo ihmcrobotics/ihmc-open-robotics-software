@@ -1,53 +1,20 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryBTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieICPOptimizationParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryBTest
 {
    @Override
    protected DRCRobotModel getRobotModel()
    {
-      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(RobotTarget.SCS)
-      {
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), RobotTarget.SCS)
-            {
-               @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
-               {
-                  return new ValkyrieICPOptimizationParameters(RobotTarget.SCS)
-                  {
-                     @Override
-                     public boolean useAngularMomentum()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-                  };
-               }
-            };
-
-         }
-      };
-
-      return valkyrieRobotModel;
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override
@@ -88,7 +55,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
-      percentWeight = 0.11; // Used to be 0.13 before PR #1326
+      percentWeight = 0.20; // Used to be 0.13 before PR #1326
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
@@ -97,7 +64,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
    {
-      percentWeight = 0.15;
+      percentWeight = 0.10;
       super.testPushICPOptimizationLongBackwardPushInSwing();
    }
 
@@ -106,10 +73,11 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
    {
-      percentWeight = 0.07;
+      percentWeight = 0.125;
       super.testPushICPOptimizationLongForwardPushInSwing();
    }
 
+   @Disabled // This test is covered by flat ground track and so many other tests that it is not really useful anymore.
    @Tag("humanoid-push-recovery")
    @Override
    @Test
@@ -123,7 +91,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
    {
-      percentWeight = 0.11;
+      percentWeight = 0.4;
       super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
@@ -132,7 +100,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
    {
-      percentWeight = 0.25;
+      percentWeight = 0.4;
       super.testPushICPOptimizationOutwardPushInSwing();
    }
 

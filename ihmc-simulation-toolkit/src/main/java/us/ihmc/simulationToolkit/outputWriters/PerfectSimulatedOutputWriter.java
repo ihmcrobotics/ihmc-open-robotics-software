@@ -10,6 +10,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -20,7 +21,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
-   private final JointDesiredOutputList jointDesiredOutputList;
+   private final JointDesiredOutputListReadOnly jointDesiredOutputList;
 
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
    {
@@ -32,7 +33,7 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       this(robot, fullRobotModel, null);
    }
 
-   public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputList jointDesiredOutputList)
+   public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputListReadOnly jointDesiredOutputList)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

@@ -288,7 +288,7 @@ public class FootstepPlanningModuleTest
       AtomicDouble timestampPrev = new AtomicDouble();
       AtomicDouble timestamp = new AtomicDouble();
       AtomicBoolean firstTick = new AtomicBoolean(true);
-      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> time >= customTimeout);
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> time >= customTimeout);
       planningModule.addIterationCallback(iteration ->
                                           {
                                              if (firstTick.getAndSet(false))
@@ -307,7 +307,7 @@ public class FootstepPlanningModuleTest
       // test iteration limit
       int iterationLimit = 29;
       planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> iterations >= iterationLimit);
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> iterations >= iterationLimit);
       output = planningModule.handleRequest(request);
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       Assertions.assertEquals(output.getPlannerTimings().getStepPlanningIterations(), iterationLimit);
@@ -316,7 +316,7 @@ public class FootstepPlanningModuleTest
       int stepLimit = 4;
       request.setAssumeFlatGround(true);
       planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> pathSize >= stepLimit);
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize >= stepLimit);
       output = planningModule.handleRequest(request);
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       Assertions.assertEquals(output.getFootstepPlan().getNumberOfSteps(), stepLimit);
@@ -325,7 +325,7 @@ public class FootstepPlanningModuleTest
       double xThreshold = 3.88;
       request.setAssumeFlatGround(true);
       planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> finalStep.getX() >= xThreshold);
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> finalStep.getTranslationX() >= xThreshold);
       output = planningModule.handleRequest(request);
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       FootstepPlan plan = output.getFootstepPlan();

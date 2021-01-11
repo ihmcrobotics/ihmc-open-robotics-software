@@ -99,7 +99,8 @@ public class ParameterSavingNode extends HBox
          getChildren().add(fileName);
       }
 
-      save.setOnAction(event -> {
+      save.setOnAction(event ->
+      {
          try
          {
             handleSave(event);
@@ -110,7 +111,8 @@ public class ParameterSavingNode extends HBox
          }
       });
 
-      saveAs.setOnAction(event -> {
+      saveAs.setOnAction(event ->
+      {
          try
          {
             handleSaveAs(event);
@@ -126,6 +128,8 @@ public class ParameterSavingNode extends HBox
    {
       List<GuiRegistry> rootRegistries = ParameterSavingTools.findRootRegistries(registries, rootRegistryNames);
 
+      boolean sortRegistries;
+
       List<GuiRegistry> registriesAfterModified;
       if (modified.isSelected())
       {
@@ -139,16 +143,20 @@ public class ParameterSavingNode extends HBox
       List<GuiRegistry> registriesAfterMerge;
       if (merge.isSelected() && activeFile.exists())
       {
+         sortRegistries = false;
          List<Registry> xmlRegistries = ParameterTuningTools.getParameters(activeFile);
          List<GuiRegistry> existingRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
          registriesAfterMerge = ParameterSavingTools.merge(existingRegistry, registriesAfterModified);
       }
       else
       {
+         sortRegistries = true;
          registriesAfterMerge = registriesAfterModified;
       }
 
       List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistriesFromGui(registriesAfterMerge);
+      if (sortRegistries)
+         ParameterTuningTools.sortRegistriesAlphabetically(xmlRegistries);
       ParameterSavingTools.save(activeFile, xmlRegistries);
       setDefaultFilePath(activeFile);
       informListeners();
@@ -190,7 +198,8 @@ public class ParameterSavingNode extends HBox
    }
 
    /**
-    * Stores the given file's path as the most-recently-used path. The path is persisted across program runs.
+    * Stores the given file's path as the most-recently-used path. The path is persisted across program
+    * runs.
     *
     * @param file the file
     */

@@ -1,9 +1,5 @@
 package us.ihmc.robotics.physics;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,6 +21,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CollidableVisualizer
 {
@@ -64,6 +64,10 @@ public class CollidableVisualizer
                                                                     (FrameConvexPolytope3DReadOnly) collidable.getShape(),
                                                                     registry,
                                                                     appearanceDefinition);
+      }
+      else if (collidable.getShape() instanceof FrameEllipsoid3DReadOnly)
+      {
+         shape3DGraphicUpdater = new EllipsoidGraphicUpdater(name, (FrameEllipsoid3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
       else
       {
@@ -333,5 +337,43 @@ public class CollidableVisualizer
       }
 
       return meshBuilder.generateMeshDataHolder();
+   }
+
+   private static class EllipsoidGraphicUpdater implements Shape3DGraphicUpdater
+   {
+      private final YoFramePoseUsingYawPitchRoll pose;
+      private final YoGraphicShape graphicEllipsoid;
+      private final FrameEllipsoid3DReadOnly shape;
+
+      private final FramePose3D tempPose = new FramePose3D();
+
+      public EllipsoidGraphicUpdater(String name, FrameEllipsoid3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
+      {
+         this.shape = shape;
+         pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
+         Graphics3DObject ellipsoidGraphicDefinition = new Graphics3DObject();
+         ellipsoidGraphicDefinition.addEllipsoid(shape.getRadiusX(), shape.getRadiusY(), shape.getRadiusZ(), appearanceDefinition);
+         graphicEllipsoid = new YoGraphicShape(name, ellipsoidGraphicDefinition, pose, 1.0);
+      }
+
+      @Override
+      public void hide()
+      {
+         pose.setToNaN();
+      }
+
+      @Override
+      public void update()
+      {
+         tempPose.setReferenceFrame(shape.getReferenceFrame());
+         tempPose.set(shape.getPose());
+         pose.setMatchingFrame(tempPose);
+      }
+
+      @Override
+      public YoGraphic getYoGraphic()
+      {
+         return graphicEllipsoid;
+      }
    }
 }

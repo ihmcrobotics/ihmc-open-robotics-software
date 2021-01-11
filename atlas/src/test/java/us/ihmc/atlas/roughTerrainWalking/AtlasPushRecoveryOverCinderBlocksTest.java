@@ -24,6 +24,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
 {
    @Override
    @Tag("humanoid-rough-terrain-2")
+   @Disabled
    @Test
    public void testNoPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -32,6 +33,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
 
    @Override
    @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testNoPushForwardWalkOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -40,6 +42,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
 
    @Override
    @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -48,6 +51,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
 
    @Override
    @Tag("humanoid-rough-terrain")
+   @Disabled
    @Test
    public void testNoPushForwardTiltedBlocks() throws SimulationExceededMaximumTimeException
    {

@@ -14,7 +14,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -32,19 +34,16 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d
  * space and creates third order trajectories. It can be used either to generate waypoint times as
  * velocities, or it can serve as an actual trajectory with the optimization taking place when the
- * trajectory is initialized.
- *
- * The trajectory is continuous in acceleration but does not have zero initial and final
- * acceleration. The optimization finds waypoint times and velocities such that the overall squared
- * acceleration is minimized.
+ * trajectory is initialized. The trajectory is continuous in acceleration but does not have zero
+ * initial and final acceleration. The optimization finds waypoint times and velocities such that
+ * the overall squared acceleration is minimized.
  *
  * @author gwiedebach
- *
  */
 public class PositionOptimizedTrajectoryGenerator
 {
    public static final int dimensions = 3;
-   public static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
+   public final ReferenceFrame trajectoryFrame;
 
    private final String namePrefix;
 
@@ -62,10 +61,6 @@ public class PositionOptimizedTrajectoryGenerator
    private final RecyclingArrayList<TDoubleArrayList> waypointPositions;
    private final TIntIntMap indexMap = new TIntIntHashMap(10, 0.5f, -1, -1);
 
-   private final TDoubleArrayList initialPositionArray = new TDoubleArrayList(dimensions);
-   private final TDoubleArrayList initialVelocityArray = new TDoubleArrayList(dimensions);
-   private final TDoubleArrayList finalPositionArray = new TDoubleArrayList(dimensions);
-   private final TDoubleArrayList finalVelocityArray = new TDoubleArrayList(dimensions);
    private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimensions);
 
    private final YoRegistry registry;
@@ -88,44 +83,66 @@ public class PositionOptimizedTrajectoryGenerator
 
    public PositionOptimizedTrajectoryGenerator()
    {
-      this("", null);
+      this("", null, ReferenceFrame.getWorldFrame());
    }
 
    public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints)
    {
-      this("", null, null, maxIterations, maxWaypoints);
+      this(maxIterations, maxWaypoints, ReferenceFrame.getWorldFrame());
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
+   public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints, ReferenceFrame trajectoryFrame)
    {
-      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
+      this("", null, null, maxIterations, maxWaypoints, trajectoryFrame);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, ReferenceFrame trajectoryFrame)
    {
-      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
+      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints, trajectoryFrame);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                               int maxIterations, int maxWaypoints)
+   public PositionOptimizedTrajectoryGenerator(String namePrefix,
+                                               YoRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry,
+                                               ReferenceFrame trajectoryFrame)
+   {
+      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints, trajectoryFrame);
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix,
+                                               YoRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry,
+                                               int maxIterations,
+                                               int maxWaypoints)
+   {
+      this(namePrefix, parentRegistry, graphicsListRegistry, maxIterations, maxWaypoints, ReferenceFrame.getWorldFrame());
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix,
+                                               YoRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry,
+                                               int maxIterations,
+                                               int maxWaypoints,
+                                               ReferenceFrame trajectoryFrame)
    {
       this.namePrefix = namePrefix;
+      this.trajectoryFrame = trajectoryFrame;
 
       coefficients = new RecyclingArrayList<>(0, () ->
-                                              {
-                                                 TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
-                                                 for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
-                                                    ret.add(0.0);
-                                                 return ret;
-                                              });
+      {
+         TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
+         for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
+            ret.add(0.0);
+         return ret;
+      });
 
       waypointPositions = new RecyclingArrayList<>(0, () ->
-                                                   {
-                                                      TDoubleArrayList ret = new TDoubleArrayList(dimensions);
-                                                      for (int i = 0; i < dimensions; i++)
-                                                         ret.add(0.0);
-                                                      return ret;
-                                                   });
+      {
+         TDoubleArrayList ret = new TDoubleArrayList(dimensions);
+         for (int i = 0; i < dimensions; i++)
+            ret.add(0.0);
+         return ret;
+      });
 
       registry = new YoRegistry(namePrefix + "Trajectory");
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, registry);
@@ -144,14 +161,6 @@ public class PositionOptimizedTrajectoryGenerator
       desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", trajectoryFrame, registry);
       desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", trajectoryFrame, registry);
 
-      for (int i = 0; i < dimensions; i++)
-      {
-         initialPositionArray.add(0.0);
-         initialVelocityArray.add(0.0);
-         finalPositionArray.add(0.0);
-         finalVelocityArray.add(0.0);
-      }
-
       for (Axis3D axis : Axis3D.values)
       {
          ArrayList<YoPolynomial> segments = new ArrayList<>();
@@ -167,7 +176,8 @@ public class PositionOptimizedTrajectoryGenerator
 
       if (graphicsListRegistry != null)
       {
-         List<YoPolynomial3D> yoPolynomial3Ds = YoPolynomial3D.createYoPolynomial3DList(trajectories.get(Axis3D.X), trajectories.get(Axis3D.Y),
+         List<YoPolynomial3D> yoPolynomial3Ds = YoPolynomial3D.createYoPolynomial3DList(trajectories.get(Axis3D.X),
+                                                                                        trajectories.get(Axis3D.Y),
                                                                                         trajectories.get(Axis3D.Z));
          trajectoryViz = new YoGraphicPolynomial3D(namePrefix + "Trajectory", null, yoPolynomial3Ds, waypointTimes, 0.01, 25, 8, registry);
          graphicsListRegistry.registerYoGraphic(namePrefix + "Trajectory", trajectoryViz);
@@ -215,7 +225,9 @@ public class PositionOptimizedTrajectoryGenerator
     * @param finalPosition
     * @param finalVelocity
     */
-   public void setEndpointConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, FramePoint3DReadOnly finalPosition,
+   public void setEndpointConditions(FramePoint3DReadOnly initialPosition,
+                                     FrameVector3DReadOnly initialVelocity,
+                                     FramePoint3DReadOnly finalPosition,
                                      FrameVector3DReadOnly finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -230,13 +242,43 @@ public class PositionOptimizedTrajectoryGenerator
 
       for (Axis3D axis : Axis3D.values)
       {
-         initialPositionArray.set(axis.ordinal(), this.initialPosition.getElement(axis.ordinal()));
-         initialVelocityArray.set(axis.ordinal(), this.initialVelocity.getElement(axis.ordinal()));
-         finalPositionArray.set(axis.ordinal(), this.finalPosition.getElement(axis.ordinal()));
-         finalVelocityArray.set(axis.ordinal(), this.finalVelocity.getElement(axis.ordinal()));
+         optimizer.setEndPoints(axis.ordinal(),
+                                this.initialPosition.getElement(axis),
+                                this.initialVelocity.getElement(axis),
+                                this.finalPosition.getElement(axis),
+                                this.finalVelocity.getElement(axis));
       }
+   }
 
-      optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
+   /**
+    * Sets the weights to use for the endpoint conditions.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up the condition as an objective.
+    * </p>
+    * 
+    * @param initialPositionWeight the weight for the initial position condition. If {@code null}, it
+    *                              is set up as a hard constraint. Not modified.
+    * @param initialVelocityWeight the weight for the initial velocity condition. If {@code null}, it
+    *                              is set up as a hard constraint. Not modified.
+    * @param finalPositionWeight   the weight for the final position condition. If {@code null}, it is
+    *                              set up as a hard constraint. Not modified.
+    * @param finalVelocityWeight   the weight for the final velocity condition. If {@code null}, it is
+    *                              set up as a hard constraint. Not modified.
+    */
+   public void setEndpointWeights(Tuple3DReadOnly initialPositionWeight,
+                                  Tuple3DReadOnly initialVelocityWeight,
+                                  Tuple3DReadOnly finalPositionWeight,
+                                  Tuple3DReadOnly finalVelocityWeight)
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         optimizer.setEndPointWeights(axis.ordinal(),
+                                      initialPositionWeight == null ? Double.POSITIVE_INFINITY : initialPositionWeight.getElement(axis),
+                                      initialVelocityWeight == null ? Double.POSITIVE_INFINITY : initialVelocityWeight.getElement(axis),
+                                      finalPositionWeight == null ? Double.POSITIVE_INFINITY : finalPositionWeight.getElement(axis),
+                                      finalVelocityWeight == null ? Double.POSITIVE_INFINITY : finalVelocityWeight.getElement(axis));
+      }
    }
 
    /**
@@ -283,8 +325,7 @@ public class PositionOptimizedTrajectoryGenerator
    /**
     * This method initialized the trajectory and does the optimization. This has to be called after
     * setting the end point conditions and waypoints. It has to be called regardless of whether is
-    * class is used as an actual trajectory or just to compute optimal waypoint times and
-    * velocities.
+    * class is used as an actual trajectory or just to compute optimal waypoint times and velocities.
     */
    public void initialize()
    {
@@ -340,6 +381,7 @@ public class PositionOptimizedTrajectoryGenerator
 
    /**
     * Attempt at improving the trajectory if iterative improvement is desired.
+    * 
     * @return whether an optimization step was done or not.
     */
    public boolean doOptimizationUpdate()
@@ -354,8 +396,8 @@ public class PositionOptimizedTrajectoryGenerator
    }
 
    /**
-    * Evaluates the trajectory at the given dimensionless time. Time is assumed to go from 0.0 at
-    * the start of the trajectory to 1.0 at the end.
+    * Evaluates the trajectory at the given dimensionless time. Time is assumed to go from 0.0 at the
+    * start of the trajectory to 1.0 at the end.
     *
     * @param time
     */
@@ -430,6 +472,78 @@ public class PositionOptimizedTrajectoryGenerator
          waypointVelocityToPack.setElement(d, this.waypointVelocity.get(d));
    }
 
+   /**
+    * Call this function after initialize to retrieve the optimal initial position.
+    * <p>
+    * Note that this method is only useful when the initial position is configured as an objective, in
+    * which case it can differ from the given position in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param initialPositionToPack
+    */
+   public void getInitialPosition(FrameVector3DBasics initialPositionToPack)
+   {
+      optimizer.getStartPosition(waypointVelocity);
+      initialPositionToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         initialPositionToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal initial velocity.
+    * <p>
+    * Note that this method is only useful when the initial velocity is configured as an objective, in
+    * which case it can differ from the given velocity in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param initialVelocityToPack
+    */
+   public void getInitialVelocity(FrameVector3DBasics initialVelocityToPack)
+   {
+      optimizer.getStartVelocity(waypointVelocity);
+      initialVelocityToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         initialVelocityToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after finalize to retrieve the optimal final position.
+    * <p>
+    * Note that this method is only useful when the final position is configured as an objective, in
+    * which case it can differ from the given position in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param finalPositionToPack
+    */
+   public void getFinalPosition(FrameVector3DBasics finalPositionToPack)
+   {
+      optimizer.getTargetPosition(waypointVelocity);
+      finalPositionToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         finalPositionToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal final velocity.
+    * <p>
+    * Note that this method is only useful when the final velocity is configured as an objective, in
+    * which case it can differ from the given velocity in
+    * {@link #setEndpointConditions(FramePoint3DReadOnly, FrameVector3DReadOnly, FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * 
+    * @param finalVelocityToPack
+    */
+   public void getFinalVelocity(FrameVector3DBasics finalVelocityToPack)
+   {
+      optimizer.getTargetVelocity(waypointVelocity);
+      finalVelocityToPack.setReferenceFrame(trajectoryFrame);
+      for (Axis3D axis : Axis3D.values)
+         finalVelocityToPack.setElement(axis, waypointVelocity.get(axis.ordinal()));
+   }
+
    public boolean isDone()
    {
       return isDone.getBooleanValue();
@@ -479,8 +593,9 @@ public class PositionOptimizedTrajectoryGenerator
    }
 
    /**
-    * Returns whether the trajectory optimization has converged or not. This is useful when continuously improving
-    * the solution quality instead of waiting for the optimizer to finish in the initialize method.
+    * Returns whether the trajectory optimization has converged or not. This is useful when
+    * continuously improving the solution quality instead of waiting for the optimizer to finish in the
+    * initialize method.
     *
     * @return whether the optimizer has converged or not
     */

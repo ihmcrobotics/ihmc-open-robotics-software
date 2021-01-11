@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -67,8 +68,7 @@ public class HighLevelControlManagerFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
+   private CoPTrajectoryParameters copTrajectoryParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -108,7 +108,6 @@ public class HighLevelControlManagerFactory
    {
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
@@ -131,9 +130,9 @@ public class HighLevelControlManagerFactory
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
-   public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
+   public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
-      this.capturePointPlannerParameters = capturePointPlannerParameters;
+      this.copTrajectoryParameters = copTrajectoryParameters;
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -145,12 +144,14 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
-      if (!hasCapturePointPlannerParameters(BalanceManager.class))
+      if (!hasCoPTrajectoryParameters(BalanceManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
+      balanceManager = new BalanceManager(controllerToolbox,
+                                          walkingControllerParameters,
+                                          copTrajectoryParameters,
                                           registry);
       return balanceManager;
    }
@@ -191,6 +192,8 @@ public class HighLevelControlManagerFactory
       if (!hasWalkingControllerParameters(RigidBodyControlManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
+         return null;
+      if (!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
          return null;
 
       // Gains
@@ -320,11 +323,11 @@ public class HighLevelControlManagerFactory
       return false;
    }
 
-   private boolean hasCapturePointPlannerParameters(Class<?> managerClass)
+   private boolean hasCoPTrajectoryParameters(Class<?> managerClass)
    {
-      if (capturePointPlannerParameters != null)
+      if (copTrajectoryParameters != null)
          return true;
-      missingObjectWarning(ICPTrajectoryPlannerParameters.class, managerClass);
+      missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
       return false;
    }
 

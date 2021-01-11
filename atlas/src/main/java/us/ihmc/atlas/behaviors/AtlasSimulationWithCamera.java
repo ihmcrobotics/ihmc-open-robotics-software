@@ -80,7 +80,7 @@ public class AtlasSimulationWithCamera
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),
-                                                                                                    robotModel.getCapturePointPlannerParameters());
+                                                                                                    robotModel.getCoPTrajectoryParameters());
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);

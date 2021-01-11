@@ -9,7 +9,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import controller_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.BarrierSchedulerTools;
+import us.ihmc.avatar.ControllerTask;
+import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.SimulationRobotVisualizer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
@@ -30,21 +36,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
@@ -54,14 +55,22 @@ import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderF
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationToolkit.controllers.*;
+import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
+import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
+import us.ihmc.simulationToolkit.controllers.PassiveJointController;
+import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -254,7 +263,7 @@ public class AvatarSimulationFactory
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
                                                        StampedPosePacket.class,
                                                        inputTopic,
-                                              s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+                                                       s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
@@ -363,8 +372,7 @@ public class AvatarSimulationFactory
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
                                                                          100000,
-                                                                         robotModel.getEstimatorDT(),
-                                                                         IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY);
+                                                                         robotModel.getEstimatorDT());
          estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
       }
 
@@ -469,36 +477,12 @@ public class AvatarSimulationFactory
 
    private void setupPositionControlledJointsForSimulation()
    {
-      String[] positionControlledJointNames = robotModel.get().getJointMap().getPositionControlledJointsForSimulation();
-      if (positionControlledJointNames != null)
-      {
-         for (String positionControlledJointName : positionControlledJointNames)
-         {
-            OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
-            FullRobotModel controllerFullRobotModel = controllerThread.getFullRobotModel();
-            OneDoFJointBasics controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
-
-            if (simulatedJoint == null || controllerJoint == null)
-               continue;
-
-            JointDesiredOutputListBasics controllerLowLevelDataList = controllerThread.getDesiredJointDataHolder();
-            JointDesiredOutputBasics controllerDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
-
-            JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
-            boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
-            boolean isBackJoint = jointRole == JointRole.SPINE;
-
-            JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint,
-                                                                                                                 controllerJoint,
-                                                                                                                 controllerDesiredOutput,
-                                                                                                                 isUpperBodyJoint,
-                                                                                                                 isBackJoint,
-                                                                                                                 false,
-                                                                                                                 controllerFullRobotModel.getTotalMass(),
-                                                                                                                 robotModel.get().getSimulateDT());
-            humanoidFloatingRootJointRobot.setController(positionControlSimulator);
-         }
-      }
+      RobotController lowLevelController = robotModel.get().getSimulationLowLevelControllerFactory()
+                                                     .createLowLevelController(controllerThread.getFullRobotModel(),
+                                                                               humanoidFloatingRootJointRobot,
+                                                                               controllerThread.getDesiredJointDataHolder());
+      if (lowLevelController != null)
+         humanoidFloatingRootJointRobot.setController(lowLevelController);
    }
 
    private void setupPassiveJoints()

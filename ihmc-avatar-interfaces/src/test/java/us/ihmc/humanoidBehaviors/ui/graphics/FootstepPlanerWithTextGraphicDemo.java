@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class FootstepPlanerWithTextGraphicDemo extends Application
 {
-   private FootstepPlanWithTextGraphic footstepPlanGraphic;
+   private FootstepPlanGraphic footstepPlanGraphic;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -27,7 +27,7 @@ public class FootstepPlanerWithTextGraphicDemo extends Application
       view3dFactory.addWorldCoordinateSystem(0.5);
       view3dFactory.addDefaultLighting();
 
-      footstepPlanGraphic = new FootstepPlanWithTextGraphic();
+      footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
 
       ArrayList<MinimalFootstep> footsteps = new ArrayList<>();

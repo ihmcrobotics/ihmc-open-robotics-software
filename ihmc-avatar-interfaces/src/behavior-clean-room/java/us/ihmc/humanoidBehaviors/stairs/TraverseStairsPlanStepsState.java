@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TraverseStairsPlanStepsState implements State
 {
    private static final String footstepPlannerParameterFileName = "atlasFootstepPlannerParameters_Stairs.ini";
+   private static final String swingParameterFileName = "atlasSwingPlannerParameters_Stairs.ini";
 
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
@@ -50,7 +51,7 @@ public class TraverseStairsPlanStepsState implements State
       this.parameters = parameters;
       helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
-         LogTools.debug("Received goal input: " + goalPose);
+         LogTools.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
@@ -58,6 +59,7 @@ public class TraverseStairsPlanStepsState implements State
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       planningModule.getFootstepPlannerParameters().load(footstepPlannerParameterFileName);
+      planningModule.getSwingPlannerParameters().load(swingParameterFileName);
 
       footstepListPublisher = new IHMCROS2Publisher<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
       new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
@@ -67,21 +69,19 @@ public class TraverseStairsPlanStepsState implements State
    @Override
    public void onEntry()
    {
-      LogTools.debug("Entering " + getClass().getSimpleName());
-
-      executeStepsSignaled.set(false);
-      planSteps.set(true);
+      LogTools.info("Entering " + getClass().getSimpleName());
+      reset();
 
       if (goalInput.get() == null)
       {
          String message = "No goal received in traverse stairs behavior";
-         LogTools.debug(message);
+         LogTools.info(message);
          throw new RuntimeException(message);
       }
       else if (planarRegions.get() == null)
       {
          String message = "No regions received in traverse stairs behavior";
-         LogTools.debug(message);
+         LogTools.info(message);
          throw new RuntimeException(message);
       }
    }
@@ -95,8 +95,27 @@ public class TraverseStairsPlanStepsState implements State
       }
    }
 
+   public void reset()
+   {
+      output = null;
+      executeStepsSignaled.set(false);
+      planSteps.set(true);
+   }
+
    private void planSteps()
    {
+      if (planningModule.isPlanning())
+      {
+         planningModule.halt();
+      }
+
+      while (planningModule.isPlanning())
+      {
+         // wait...
+         LogTools.info("Waiting for previous plan to complete...");
+         ThreadTools.sleep(10);
+      }
+
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
@@ -113,20 +132,24 @@ public class TraverseStairsPlanStepsState implements State
          solePoses.put(robotSide, new Pose3D(solePose));
       }
 
-      RobotSide steppingSide = planningModule.getFootstepPlannerParameters().getStepOnlyWithRequestedSide();
-      request.setRequestedInitialStanceSide(steppingSide.getOppositeSide());
-
       request.setStartFootPoses(solePoses.get(RobotSide.LEFT), solePoses.get(RobotSide.RIGHT));
       request.setSwingPlannerType(SwingPlannerType.PROPORTION);
       request.setTimeout(parameters.get(TraverseStairsBehaviorParameters.planningTimeout));
 
       int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
       planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
 
-      LogTools.debug(getClass().getSimpleName() + ": planning");
+      double onSameStairThreshold = 0.05;
+      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) ->
+                                                   {
+                                                      boolean longEnoughPath = bestPathSize >= targetNumberOfFootsteps;
+                                                      boolean finalStepsOnSameStair = Math.abs(bestPathFinalStep.getTranslationZ() - bestSecondToFinalState.getTranslationZ()) < onSameStairThreshold;
+                                                      return longEnoughPath && finalStepsOnSameStair;
+                                                   });
+
+      LogTools.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
-      LogTools.debug(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
+      LogTools.info(getClass().getSimpleName() + " numer of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
 
       // lower height of first step down
       mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));
