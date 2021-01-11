@@ -249,9 +249,18 @@ public class InvertedFourBarJointTest
             RigidBodyTransform actualConfiguration = new RigidBodyTransform();
             fourBarJoint.getJointConfiguration(actualConfiguration);
 
-            RigidBodyTransform expectedConfiguration = function.getJointD().getFrameAfterJoint()
-                                                               .getTransformToDesiredFrame(function.getJointA().getFrameBeforeJoint());
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedConfiguration, actualConfiguration, SMALL_EPSILON);
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               RigidBodyTransform expectedConfiguration = function.getJointD().getFrameAfterJoint()
+                                                                  .getTransformToDesiredFrame(function.getJointA().getFrameBeforeJoint());
+               EuclidCoreTestTools.assertRigidBodyTransformEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
+            }
+            else
+            {
+               RigidBodyTransform expectedConfiguration = function.getJointC().getFrameAfterJoint()
+                                                                  .getTransformToDesiredFrame(function.getJointB().getFrameBeforeJoint());
+               EuclidCoreTestTools.assertRigidBodyTransformEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
+            }
          }
       }
    }
@@ -381,14 +390,24 @@ public class InvertedFourBarJointTest
             function.updateState(true, false);
             function.getJointA().getPredecessor().updateFramesRecursively();
 
+            RevoluteJointBasics topJoint, bottomJoint;
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               topJoint = fourBarJoint.getJointA();
+               bottomJoint = fourBarJoint.getJointD();
+            }
+            else
+            {
+               topJoint = fourBarJoint.getJointB();
+               bottomJoint = fourBarJoint.getJointC();
+            }
+
             Twist expectedTwist = new Twist();
-            function.getJointD().getFrameAfterJoint().getTwistRelativeToOther(function.getJointA().getFrameBeforeJoint(), expectedTwist);
+            bottomJoint.getFrameAfterJoint().getTwistRelativeToOther(topJoint.getFrameBeforeJoint(), expectedTwist);
             TwistReadOnly actualTwist = fourBarJoint.getJointTwist();
 
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(function.getJointD().getFrameAfterJoint()
-                                                                       .getTransformToDesiredFrame(function.getJointA().getFrameBeforeJoint()),
-                                                               fourBarJoint.getJointD().getFrameAfterJoint()
-                                                                           .getTransformToDesiredFrame(fourBarJoint.getJointA().getFrameBeforeJoint()),
+            EuclidCoreTestTools.assertRigidBodyTransformEquals(bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
+                                                               bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
                                                                SMALL_EPSILON);
 
             assertEquals(function.getJointA().getQ(), fourBarJoint.getJointA().getQ(), SMALL_EPSILON);
@@ -513,9 +532,21 @@ public class InvertedFourBarJointTest
             function.updateState(true, false);
             function.getJointA().getPredecessor().updateFramesRecursively();
 
+            RevoluteJointBasics topJoint, bottomJoint;
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               topJoint = fourBarJoint.getJointA();
+               bottomJoint = fourBarJoint.getJointD();
+            }
+            else
+            {
+               topJoint = fourBarJoint.getJointB();
+               bottomJoint = fourBarJoint.getJointC();
+            }
+
             Twist expectedTwist = new Twist();
-            function.getJointD().getFrameAfterJoint().getTwistRelativeToOther(function.getJointA().getFrameBeforeJoint(), expectedTwist);
-            expectedTwist.scale(1.0 / (function.getJointA().getQd() + function.getJointD().getQd()));
+            bottomJoint.getFrameAfterJoint().getTwistRelativeToOther(topJoint.getFrameBeforeJoint(), expectedTwist);
+            expectedTwist.scale(1.0 / (topJoint.getQd() + bottomJoint.getQd()));
 
             TwistReadOnly actualTwist = fourBarJoint.getUnitJointTwist();
 
@@ -757,14 +788,24 @@ public class InvertedFourBarJointTest
             assertEqualsVarEpsilon(function.getJointC().getQdd(), fourBarJoint.getJointC().getQdd(), MID_EPSILON);
             assertEqualsVarEpsilon(function.getJointD().getQdd(), fourBarJoint.getJointD().getQdd(), MID_EPSILON);
 
-            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(function.getJointA().getPredecessor(), worldFrame);
-            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(spatialAccelerationCalculator.getRelativeAcceleration(function.getJointA()
-                                                                                                                                             .getPredecessor(),
-                                                                                                                                     function.getJointD()
-                                                                                                                                             .getSuccessor()));
-            expectedAcceleration.setBaseFrame(function.getJointA().getFrameBeforeJoint());
-            expectedAcceleration.setBodyFrame(function.getJointD().getFrameAfterJoint());
-            expectedAcceleration.changeFrame(function.getJointD().getFrameAfterJoint());
+            RevoluteJointBasics topJoint, bottomJoint;
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               topJoint = fourBarJoint.getJointA();
+               bottomJoint = fourBarJoint.getJointD();
+            }
+            else
+            {
+               topJoint = fourBarJoint.getJointB();
+               bottomJoint = fourBarJoint.getJointC();
+            }
+
+            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(topJoint.getPredecessor(), worldFrame);
+            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(spatialAccelerationCalculator.getRelativeAcceleration(topJoint.getPredecessor(),
+                                                                                                                                     bottomJoint.getSuccessor()));
+            expectedAcceleration.setBaseFrame(topJoint.getFrameBeforeJoint());
+            expectedAcceleration.setBodyFrame(bottomJoint.getFrameAfterJoint());
+            expectedAcceleration.changeFrame(bottomJoint.getFrameAfterJoint());
 
             SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getJointAcceleration();
 
@@ -876,14 +917,24 @@ public class InvertedFourBarJointTest
             assertEqualsVarEpsilon(function.getJointC().getQdd(), fourBarJoint.getJointC().getQdd(), MID_EPSILON);
             assertEqualsVarEpsilon(function.getJointD().getQdd(), fourBarJoint.getJointD().getQdd(), MID_EPSILON);
 
-            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(function.getJointA().getPredecessor(), worldFrame);
-            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(spatialAccelerationCalculator.getRelativeAcceleration(function.getJointA()
-                                                                                                                                             .getPredecessor(),
-                                                                                                                                     function.getJointD()
-                                                                                                                                             .getSuccessor()));
-            expectedAcceleration.setBaseFrame(function.getJointA().getFrameBeforeJoint());
-            expectedAcceleration.setBodyFrame(function.getJointD().getFrameAfterJoint());
-            expectedAcceleration.changeFrame(function.getJointD().getFrameAfterJoint());
+            RevoluteJointBasics topJoint, bottomJoint;
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               topJoint = fourBarJoint.getJointA();
+               bottomJoint = fourBarJoint.getJointD();
+            }
+            else
+            {
+               topJoint = fourBarJoint.getJointB();
+               bottomJoint = fourBarJoint.getJointC();
+            }
+
+            SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(topJoint.getPredecessor(), worldFrame);
+            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(spatialAccelerationCalculator.getRelativeAcceleration(topJoint.getPredecessor(),
+                                                                                                                                     bottomJoint.getSuccessor()));
+            expectedAcceleration.setBaseFrame(topJoint.getFrameBeforeJoint());
+            expectedAcceleration.setBodyFrame(bottomJoint.getFrameAfterJoint());
+            expectedAcceleration.changeFrame(bottomJoint.getFrameAfterJoint());
 
             SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getJointBiasAcceleration();
 
@@ -924,9 +975,21 @@ public class InvertedFourBarJointTest
             assertEqualsVarEpsilon(function.getJointC().getQdd(), fourBarJoint.getJointC().getQdd(), MID_EPSILON);
             assertEqualsVarEpsilon(function.getJointD().getQdd(), fourBarJoint.getJointD().getQdd(), MID_EPSILON);
 
-            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(function.getJointD().getFrameAfterJoint(),
-                                                                               function.getJointA().getFrameBeforeJoint(),
-                                                                               function.getJointD().getFrameAfterJoint());
+            RevoluteJointBasics topJoint, bottomJoint;
+            if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
+            {
+               topJoint = fourBarJoint.getJointA();
+               bottomJoint = fourBarJoint.getJointD();
+            }
+            else
+            {
+               topJoint = fourBarJoint.getJointB();
+               bottomJoint = fourBarJoint.getJointC();
+            }
+
+            SpatialAcceleration expectedAcceleration = new SpatialAcceleration(bottomJoint.getFrameAfterJoint(),
+                                                                               topJoint.getFrameBeforeJoint(),
+                                                                               bottomJoint.getFrameAfterJoint());
 
             SpatialAccelerationReadOnly actualAcceleration = fourBarJoint.getJointBiasAcceleration();
 
