@@ -54,6 +54,8 @@ public class CoMContinuousContinuityCalculatorTest
       contact2.setEndCopPosition(finalDesiredDCM);
       contact1.getTimeInterval().setInterval(0.0, firstDuration);
       contact2.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
+      contact1.setLinearCopVelocity();
+      contact2.setLinearCopVelocity();
 
       initialCoM.addZ(height);
       midpoint.addZ(height);

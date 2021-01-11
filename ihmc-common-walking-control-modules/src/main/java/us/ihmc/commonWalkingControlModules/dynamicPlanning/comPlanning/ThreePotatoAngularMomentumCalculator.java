@@ -50,6 +50,7 @@ public class ThreePotatoAngularMomentumCalculator
          estimator.setInterval(comTrajectories.get(i).getStartTime(), comTrajectories.get(i).getEndTime());
       }
 
+      // FIXME don't grow the angular momentum estimate if you don't need to
       while (activeCoMIdx > 0)
       {
          Trajectory3DReadOnly comTrajectory = comTrajectories.get(activeCoMIdx);

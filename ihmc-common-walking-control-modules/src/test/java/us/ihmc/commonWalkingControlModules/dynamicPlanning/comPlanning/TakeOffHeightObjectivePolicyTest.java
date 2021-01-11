@@ -30,6 +30,7 @@ public class TakeOffHeightObjectivePolicyTest
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
       contact0.setContactState(ContactState.IN_CONTACT);
       contact0.setEndCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, contactHeight));
+      contact0.setLinearCopVelocity();
       contact1.setContactState(ContactState.FLIGHT);
 
       contactSequence.add(contact0);

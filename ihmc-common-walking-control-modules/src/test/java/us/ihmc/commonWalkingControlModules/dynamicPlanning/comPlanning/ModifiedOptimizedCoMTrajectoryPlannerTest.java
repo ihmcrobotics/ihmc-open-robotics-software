@@ -51,14 +51,17 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       contact0.setStartCopPosition(initialCMP);
       contact0.setEndCopPosition(initialCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
+      contact0.setLinearCopVelocity();
 
       contact1.setStartCopPosition(initialCMP);
       contact1.setEndCopPosition(finalCMP);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
+      contact1.setLinearCopVelocity();
 
       contact2.setStartCopPosition(finalCMP);
       contact2.setEndCopPosition(finalCMP);
       contact2.getTimeInterval().setInterval(firstDuration + secondDuration, firstDuration + secondDuration + thirdDuration);
+      contact2.setLinearCopVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -139,6 +142,7 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       contact0.setStartCopPosition(initialCMP);
       contact0.setEndCopPosition(initialCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
+      contact0.setLinearCopVelocity();
 
       contact1.setContactState(ContactState.FLIGHT);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
@@ -146,6 +150,7 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       contact2.setStartCopPosition(finalCMP);
       contact2.setEndCopPosition(finalCMP);
       contact2.getTimeInterval().setInterval(firstDuration + secondDuration, firstDuration + secondDuration + thirdDuration);
+      contact2.setLinearCopVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -232,10 +237,12 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       contact0.setStartCopPosition(initialCMP);
       contact0.setEndCopPosition(finalCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
+      contact0.setLinearCopVelocity();
 
       contact1.setStartCopPosition(finalCMP);
       contact1.setEndCopPosition(finalCMP);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
+      contact1.setLinearCopVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -293,6 +300,7 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       contact0.setStartCopPosition(vrp);
       contact0.setEndCopPosition(vrp);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
+      contact0.setLinearCopVelocity();
 
       contactSequence.add(contact0);
 

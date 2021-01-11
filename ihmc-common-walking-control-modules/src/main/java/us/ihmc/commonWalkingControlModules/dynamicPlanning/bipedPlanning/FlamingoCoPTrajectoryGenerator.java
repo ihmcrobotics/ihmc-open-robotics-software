@@ -102,12 +102,14 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       contactStateProvider.setDuration(parameters.getDefaultTransferSplitFraction() * timings.getTransferTime());
       contactStateProvider.setEndCopPosition(midfootCoP);
+      contactStateProvider.setLinearCopVelocity();
 
       SettableContactStateProvider previousContactState = contactStateProvider;
       contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration((1.0 - parameters.getDefaultTransferSplitFraction()) * timings.getTransferTime());
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearCopVelocity();
 
       previousContactState = contactStateProvider;
       contactStateProvider = contactStateProviders.add();
@@ -116,6 +118,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(supportSide).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearCopVelocity();
 
       if (viewer != null)
          viewer.updateWaypoints(contactStateProviders);
