@@ -725,7 +725,8 @@ public class SwingState extends AbstractFootControlState
       if (appendFootstepPose)
       {
          modifyFinalOrientationForTouchdown(finalOrientation);
-         swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
+         if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && initializeOptimizer)
+            swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
          blendedSwingTrajectory.appendPositionWaypoint(swingDuration, finalPosition, finalLinearVelocity);
          blendedSwingTrajectory.appendOrientationWaypoint(swingDuration, finalOrientation, finalAngularVelocity);
       }
