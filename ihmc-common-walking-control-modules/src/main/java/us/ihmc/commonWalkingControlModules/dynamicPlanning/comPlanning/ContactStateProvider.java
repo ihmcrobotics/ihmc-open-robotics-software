@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -24,6 +25,16 @@ public interface ContactStateProvider extends TimeIntervalProvider
     * Provides the starting CoP position for the current contact state.
     */
    FramePoint3DReadOnly getCopEndPosition();
+
+   /**
+    * Provides the starting CoP velocity for the current contact state.
+    */
+   FrameVector3DReadOnly getCopStartVelocity();
+
+   /**
+    * Provides the ending CoP velocity for the current contact state.
+    */
+   FrameVector3DReadOnly getCopEndVelocity();
 
    /**
     * Specifies whether the current state is in contact or not.

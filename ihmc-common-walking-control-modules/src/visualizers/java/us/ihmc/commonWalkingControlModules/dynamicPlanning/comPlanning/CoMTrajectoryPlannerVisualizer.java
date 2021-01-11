@@ -154,6 +154,7 @@ public class CoMTrajectoryPlannerVisualizer
       initialContactStateProvider.getTimeInterval().setInterval(0.0, 0.5);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setLinearCopVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
 
@@ -168,6 +169,8 @@ public class CoMTrajectoryPlannerVisualizer
             contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
          else
             contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+         initialContactStateProvider.setLinearCopVelocity();
+
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -193,6 +196,7 @@ public class CoMTrajectoryPlannerVisualizer
       finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearCopVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);

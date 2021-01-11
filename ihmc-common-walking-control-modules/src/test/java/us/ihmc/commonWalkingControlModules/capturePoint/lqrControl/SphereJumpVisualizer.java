@@ -224,6 +224,7 @@ public class SphereJumpVisualizer
 
          newContact.setStartCopPosition(start);
          newContact.setEndCopPosition(end);
+         newContact.setLinearCopVelocity();
          newContact.setContactState(contact.getContactState());
 
          newContacts.add(newContact);
@@ -255,6 +256,7 @@ public class SphereJumpVisualizer
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setLinearCopVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -268,6 +270,7 @@ public class SphereJumpVisualizer
          contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
          contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         contactStateProvider.setLinearCopVelocity();
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
          contacts.add(contactStateProvider);
@@ -282,6 +285,7 @@ public class SphereJumpVisualizer
       finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
       finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearCopVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);
@@ -300,6 +304,7 @@ public class SphereJumpVisualizer
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setLinearCopVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -314,6 +319,7 @@ public class SphereJumpVisualizer
          contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
+         contactStateProvider.setLinearCopVelocity();
 
          contacts.add(contactStateProvider);
 
@@ -337,6 +343,7 @@ public class SphereJumpVisualizer
       finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
       finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearCopVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);
@@ -353,6 +360,7 @@ public class SphereJumpVisualizer
       fakeState.getTimeInterval().setInterval(0.0, 5.0);
       fakeState.setStartCopPosition(new FramePoint2D());
       fakeState.setEndCopPosition(new FramePoint2D());
+      fakeState.setLinearCopVelocity();
       List<ContactStateProvider> fakeProvider = new ArrayList<>();
       fakeProvider.add(fakeState);
 

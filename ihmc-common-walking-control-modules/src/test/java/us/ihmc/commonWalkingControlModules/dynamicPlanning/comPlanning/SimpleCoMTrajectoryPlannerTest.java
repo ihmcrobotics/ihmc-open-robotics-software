@@ -57,14 +57,17 @@ public class SimpleCoMTrajectoryPlannerTest
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
       firstContact.setStartCopPosition(vrpStart);
       firstContact.setEndCopPosition(vrpMiddle);
+      firstContact.setLinearCopVelocity();
 
       secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
       secondContact.setStartCopPosition(vrpMiddle);
       secondContact.setEndCopPosition(vrpMiddle2);
+      secondContact.setLinearCopVelocity();
 
       thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
       thirdContact.setStartCopPosition(vrpMiddle2);
       thirdContact.setEndCopPosition(vrpEnd);
+      thirdContact.setLinearCopVelocity();
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -296,14 +299,17 @@ public class SimpleCoMTrajectoryPlannerTest
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
       firstContact.setStartCopPosition(vrpStart);
       firstContact.setEndCopPosition(vrpMiddle);
+      firstContact.setLinearCopVelocity();
 
       secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
       secondContact.setStartCopPosition(vrpMiddle);
       secondContact.setEndCopPosition(vrpMiddle2);
+      secondContact.setLinearCopVelocity();
 
       thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
       thirdContact.setStartCopPosition(vrpMiddle2);
       thirdContact.setEndCopPosition(vrpEnd);
+      thirdContact.setLinearCopVelocity();
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);

@@ -55,6 +55,7 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
 
             copWaypointCalculator.computeCoPWaypoint(initialCoPWaypoint, initialPhase);
             contactStateProvider.setEndCopPosition(initialCoPWaypoint);
+            contactStateProvider.setLinearCopVelocity();
          }
          else
          {
@@ -90,6 +91,7 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
       SettableContactStateProvider finalContact = contactStates.getLast();
       copWaypointCalculator.computeCoPWaypoint(initialCoPWaypoint, finalPhase);
       finalContact.setEndCopPosition(initialCoPWaypoint);
+      finalContact.setLinearCopVelocity();
       finalContact.setContactState(getContactState(finalPhase));
 
       return contactStates;
@@ -144,6 +146,7 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
          copWaypointCalculator.computeCoPWaypoint(tempPreviousCoPWaypoint, previousContact);
          previousContactPhase.setEndCopPosition(tempPreviousCoPWaypoint);
       }
+      previousContactPhase.setLinearCopVelocity();
 
       if (previousContactPhase.getCopStartPosition().containsNaN())
          previousContactPhase.setStartCopPosition(previousContactPhase.getCopEndPosition());
@@ -151,7 +154,10 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
       contactPhase.setStartCopPosition(tempCoPWaypoint);
 
       if (!peekIsNextPhaseInContact(timedContactPhases, contactIndex))
+      {
          contactPhase.setEndCopPosition(tempCoPWaypoint);
+         contactPhase.setLinearCopVelocity();
+      }
    }
 
    private static <T extends TimedContactInterval> boolean isPhaseInContact(List<T> timedContactPhases, int contactPhases)

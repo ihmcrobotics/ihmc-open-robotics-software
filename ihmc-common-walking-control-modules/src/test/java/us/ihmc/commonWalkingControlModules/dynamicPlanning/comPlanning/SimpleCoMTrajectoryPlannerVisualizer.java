@@ -149,6 +149,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setLinearCopVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -163,6 +164,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
          contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, -verticalOffset));
          contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, -verticalOffset));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         contactStateProvider.setLinearCopVelocity();
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
          contacts.add(contactStateProvider);
@@ -177,6 +179,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, -finalVerticalOffsetBound));
       finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearCopVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);

@@ -64,18 +64,22 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       double segmentDuration = parameters.getDefaultFinalTransferSplitFraction() * state.getFinalTransferDuration();
       previousContactState.setEndCopPosition(tempPointForCoPCalculation);
       previousContactState.setDuration(segmentDuration);
+      previousContactState.setLinearCopVelocity();
 
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
+      contactState.setLinearCopVelocity();
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(previousContactState.getCopStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
+      contactState.setLinearCopVelocity();
+
    }
 
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()

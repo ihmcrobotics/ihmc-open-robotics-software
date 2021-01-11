@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -20,6 +22,8 @@ public class SettableContactStateProvider implements ContactStateProvider
    private ContactState contactState = ContactState.IN_CONTACT;
    private final FramePoint3D startCopPosition = new FramePoint3D();
    private final FramePoint3D endCopPosition = new FramePoint3D();
+   private final FrameVector3D startCopVelocity = new FrameVector3D();
+   private final FrameVector3D endCopVelocity = new FrameVector3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
    private final List<String> bodiesInContact = new ArrayList<>();
@@ -41,6 +45,8 @@ public class SettableContactStateProvider implements ContactStateProvider
    {
       setStartCopPosition(other.getCopStartPosition());
       setEndCopPosition(other.getCopEndPosition());
+      setStartCopVelocity(other.getCopStartVelocity());
+      setEndCopVelocity(other.getCopEndVelocity());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
    }
@@ -48,6 +54,11 @@ public class SettableContactStateProvider implements ContactStateProvider
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
    {
       this.startCopPosition.set(startCopPosition);
+   }
+
+   public void setStartCopVelocity(FrameVector3DReadOnly startCopVelocity)
+   {
+      this.startCopVelocity.set(startCopVelocity);
    }
 
    public void setStartCopPosition(FramePoint2DReadOnly startCopPosition)
@@ -65,9 +76,21 @@ public class SettableContactStateProvider implements ContactStateProvider
       this.endCopPosition.set(endCopPosition);
    }
 
+   public void setEndCopVelocity(FrameVector3DReadOnly endCopVelocity)
+   {
+      this.endCopVelocity.set(endCopVelocity);
+   }
+
    public void setEndCopPosition(FramePoint2DReadOnly endCopPosition)
    {
       this.endCopPosition.set(endCopPosition, 0.0);
+   }
+
+   public void setLinearCopVelocity()
+   {
+      startCopVelocity.sub(getCopEndPosition(), getCopStartPosition());
+      startCopVelocity.scale(1.0 / Math.min(getTimeInterval().getDuration(), 10.0));
+      endCopVelocity.set(startCopVelocity);
    }
 
    public void setEndCopPosition(Point2DReadOnly endCopPosition)
@@ -98,6 +121,16 @@ public class SettableContactStateProvider implements ContactStateProvider
    public FramePoint3DReadOnly getCopEndPosition()
    {
       return endCopPosition;
+   }
+
+   public FrameVector3DReadOnly getCopStartVelocity()
+   {
+      return startCopVelocity;
+   }
+
+   public FrameVector3DReadOnly getCopEndVelocity()
+   {
+      return endCopVelocity;
    }
 
    public ContactState getContactState()
