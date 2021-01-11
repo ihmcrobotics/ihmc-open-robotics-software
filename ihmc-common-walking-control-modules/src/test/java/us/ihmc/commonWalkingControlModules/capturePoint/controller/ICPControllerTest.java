@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -16,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -108,12 +106,12 @@ public class ICPControllerTest
 
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
-      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
-      controller.initializeForStanding();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -181,9 +179,10 @@ public class ICPControllerTest
       FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
+      FramePoint2D currentCoM = new FramePoint2D(currentICP);
 
-      controller.initializeForTransfer();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoM, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -249,12 +248,12 @@ public class ICPControllerTest
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
-      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
-      controller.initializeForStanding();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -330,12 +329,12 @@ public class ICPControllerTest
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
-      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
-      controller.initializeForStanding();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -420,12 +419,12 @@ public class ICPControllerTest
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
-      FrameVector2D currentICPVelocity = new FrameVector2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
-      controller.initializeForStanding();
-      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);

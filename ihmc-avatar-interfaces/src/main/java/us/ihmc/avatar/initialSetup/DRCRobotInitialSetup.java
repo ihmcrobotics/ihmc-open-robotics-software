@@ -7,14 +7,15 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 import java.util.List;
 
 public interface DRCRobotInitialSetup<T extends Robot>
 {
-   void initializeRobot(T robot, DRCRobotJointMap jointMap);
+   void initializeRobot(T robot, HumanoidJointNameMap jointMap);
 
    default List<Double> getInitialJointAngles()
    {

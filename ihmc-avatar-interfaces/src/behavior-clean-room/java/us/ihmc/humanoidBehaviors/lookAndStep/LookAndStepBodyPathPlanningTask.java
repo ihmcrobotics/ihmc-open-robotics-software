@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
@@ -36,14 +36,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LookAndStepBodyPathPlanningTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
-   protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
 
    protected final LookAndStepReview<List<? extends Pose3DReadOnly>> review = new LookAndStepReview<>();
@@ -55,44 +54,35 @@ public class LookAndStepBodyPathPlanningTask
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
-      private ControllerStatusTracker controllerStatusTracker;
-      private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private TypedInput<Pose3D> goalInput = new TypedInput<>();
-      private Timer mapRegionsExpirationTimer = new Timer();
+      private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
+      private final TypedInput<Pose3D> goalInput = new TypedInput<>();
+      private final Timer mapRegionsExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
       private double neckPitch;
-      private Timer neckTrajectoryTimer = new Timer();
+      private final Timer neckTrajectoryTimer = new Timer();
       private TimerSnapshotWithExpiration neckTrajectoryTimerSnapshot;
       private TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
       private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
       private LookAndStepBehavior.State behaviorState;
-      private int numberOfIncompleteFootsteps;
 
-      public void initialize(StatusLogger statusLogger,
-                             UIPublisher uiPublisher,
-                             Consumer<Double> commandPitchHeadWithRespectToChest,
-                             VisibilityGraphsParametersReadOnly visibilityGraphParameters,
-                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                             Supplier<Boolean> operatorReviewEnabled,
-                             RemoteSyncedRobotModel syncedRobot,
-                             Supplier<LookAndStepBehavior.State> behaviorStateReference,
-                             ControllerStatusTracker controllerStatusTracker,
-                             Consumer<List<? extends Pose3DReadOnly>> output,
-                             TypedNotification<Boolean> approvalNotification)
+      public void initialize(LookAndStepBehavior lookAndStep)
       {
-         this.statusLogger = statusLogger;
-         this.uiPublisher = uiPublisher;
-         this.visibilityGraphParameters = visibilityGraphParameters;
-         this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-         this.operatorReviewEnabled = operatorReviewEnabled;
-         this.syncedRobot = syncedRobot;
-         this.behaviorStateReference = behaviorStateReference;
-         this.output = output;
-         this.controllerStatusTracker = controllerStatusTracker;
+         statusLogger = lookAndStep.statusLogger;
+         uiPublisher = lookAndStep.helper::publishToUI;
+         visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
+         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         operatorReviewEnabled = lookAndStep.operatorReviewEnabledInput::get;
+         syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
+         behaviorStateReference = lookAndStep.behaviorStateReference::get;
+         output = lookAndStep::bodyPathPlanInput;
+         ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
 
-         review.initialize(statusLogger, "body path", approvalNotification, output);
+         Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;
+         RobotTarget robotTarget = lookAndStep.helper.getRobotModel().getTarget();
+
+         review.initialize(statusLogger, "body path", lookAndStep.approvalNotification, output);
 
          // don't run two body path plans at the same time
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -102,16 +92,20 @@ public class LookAndStepBodyPathPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
-         suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
-                                 () -> neckTrajectoryTimerSnapshot.isRunning());
-         suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
-                                                                               lookAndStepBehaviorParameters::getNeckPitchTolerance,
-                                           () ->
-                                           {
-                                              commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
-                                              neckTrajectoryTimer.reset();
-                                           }));
+         if (robotTarget == RobotTarget.SCS)
+         {
+            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.", robotTarget);
+            suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
+                                    () -> neckTrajectoryTimerSnapshot.isRunning());
+            suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
+                                                                                  lookAndStepParameters::getNeckPitchForBodyPath,
+                                                                                  lookAndStepParameters::getNeckPitchTolerance,
+                                                                                  () ->
+                                              {
+                                                 commandPitchHeadWithRespectToChest.accept(lookAndStepParameters.getNeckPitchForBodyPath());
+                                                 neckTrajectoryTimer.reset();
+                                              }));
+         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
                                  () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
@@ -160,11 +154,10 @@ public class LookAndStepBodyPathPlanningTask
          goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
-                                                     .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
-         mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
-         planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
+                                                     .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
+         mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
-         numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
 
          neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
@@ -188,10 +181,8 @@ public class LookAndStepBodyPathPlanningTask
 
       // calculate and send body path plan
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result =
-            lookAndStepBehaviorParameters.getFlatGroundBodyPathPlan() ?
-                  performTaskWithFlatGround() :
-                  performTaskWithVisibilityGraphPlanner();
+      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result
+            = lookAndStepParameters.getFlatGroundBodyPathPlan() ? performTaskWithFlatGround() : performTaskWithVisibilityGraphPlanner();
 
       statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
 
@@ -225,18 +216,11 @@ public class LookAndStepBodyPathPlanningTask
    {
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      YoRegistry parentRegistry = new YoRegistry(getClass().getSimpleName());
-      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
+      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
 
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
-      FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      bodyPathPlanner.setStanceFootPoses(syncedRobot.getReferenceFrames());
       planningStopwatch.start();
       BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();
       return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s

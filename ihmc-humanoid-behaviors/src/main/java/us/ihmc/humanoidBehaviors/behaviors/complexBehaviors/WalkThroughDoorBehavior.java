@@ -99,6 +99,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
 
+   // If the goal is within this proximity, the robot won't turn towards the goal but will maintain it's initial orientation while walking
+   private static final double proximityToGoalToMaintainOrientation = 1.5;
 
    public WalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                   FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
@@ -119,7 +121,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
-      searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
+      
+      
+      
+      searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoTime, referenceFrames, atlasPrimitiveActions);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
       openPushDoorBehavior = new OpenPushDoorBehavior(robotName,
@@ -214,6 +219,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //this is the first search for the door, once automated searching is in place, this should be an all the time thing.
       BehaviorAction searchForDoorFar = new BehaviorAction(searchForDoorBehavior)
       {
+         
+         @Override
+         protected void setBehaviorInput()
+         {
+            searchForDoorBehavior.setScanForDoor(true);
+            super.setBehaviorInput();
+         }
 
          @Override
          public void onEntry()
@@ -227,6 +239,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       BehaviorAction searchForDoorNear = new BehaviorAction(searchForDoorBehavior)
       {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            searchForDoorBehavior.setScanForDoor(true);
+
+            super.setBehaviorInput();
+         }
+
          @Override
          public void onEntry()
          {
@@ -258,6 +279,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             FramePoint3D point1 = offsetPointFromDoor(pushDoorOffsetPoint1);
             FramePoint3D point2 = offsetPointFromDoor(pushDoorOffsetPoint2);
 
+            walkToInteractableObjectBehavior.setProximityToGoalToKeepOrientation(proximityToGoalToMaintainOrientation);
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };
@@ -275,6 +297,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             FramePoint3D point1 = offsetPointFromDoor(pullDoorOffsetPoint1);
             FramePoint3D point2 = offsetPointFromDoor(pullDoorOffsetPoint2);
 
+            walkToInteractableObjectBehavior.setProximityToGoalToKeepOrientation(proximityToGoalToMaintainOrientation);
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };
@@ -305,7 +328,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                publishTextToSpeech("open door action");
             }
             //this should happen in the openDoorBehavior
-            openPushDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+            openPullDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
          }
       };
 

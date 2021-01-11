@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -47,18 +47,18 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       switch (state)
       {
-      case WALKING:
-         return getDesiredJointBehaviorForWalking();
-      case DO_NOTHING_BEHAVIOR:
-         return getDesiredJointBehaviorForDoNothing();
-      case STAND_PREP_STATE:
-      case STAND_READY:
-      case STAND_TRANSITION_STATE:
-      case EXIT_WALKING:
-      case CALIBRATION:
-         return getDesiredJointBehaviorForHangingAround();
-      default:
-         throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
+         case WALKING:
+            return getDesiredJointBehaviorForWalking();
+         case DO_NOTHING_BEHAVIOR:
+            return getDesiredJointBehaviorForDoNothing();
+         case STAND_PREP_STATE:
+         case STAND_READY:
+         case STAND_TRANSITION_STATE:
+         case EXIT_WALKING:
+         case CALIBRATION:
+            return getDesiredJointBehaviorForHangingAround();
+         default:
+            throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
       }
    }
 
@@ -223,7 +223,6 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return behaviors;
    }
 
-
    private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
    {
       if (target != RobotTarget.SCS)
@@ -241,37 +240,41 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return behaviors;
    }
 
-   private static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap, SpineJointName jointName,
-                                         JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                        SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
+      return jointBehavior;
    }
 
-   private static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap, NeckJointName jointName,
-                                         JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                        NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
+      return jointBehavior;
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
-                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
+      return jointBehavior;
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
-                                                  ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                                 ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
+      return jointBehavior;
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, LegJointName legJointName)
+   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -281,7 +284,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointNames;
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, ArmJointName armJointName)
+   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, ArmJointName armJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -340,17 +343,17 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       switch (state)
       {
-      case WALKING:
-         return getJointAccelerationIntegrationParametersForWalking();
-      case DO_NOTHING_BEHAVIOR:
-      case STAND_PREP_STATE:
-      case STAND_READY:
-      case STAND_TRANSITION_STATE:
-      case EXIT_WALKING:
-      case CALIBRATION:
-         return getJointAccelerationIntegrationParametersForHangingAround();
-      default:
-         throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
+         case WALKING:
+            return getJointAccelerationIntegrationParametersForWalking();
+         case DO_NOTHING_BEHAVIOR:
+         case STAND_PREP_STATE:
+         case STAND_READY:
+         case STAND_TRANSITION_STATE:
+         case EXIT_WALKING:
+         case CALIBRATION:
+            return getJointAccelerationIntegrationParametersForHangingAround();
+         default:
+            throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
       }
    }
 
@@ -441,5 +444,45 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       // Possible ass a single parameter that is shared between all joints here.
       return null;
+   }
+
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                                 ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                                 double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureSymmetricBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                                 double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureSymmetricBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                        NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                        double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                        SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                        double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
    }
 }

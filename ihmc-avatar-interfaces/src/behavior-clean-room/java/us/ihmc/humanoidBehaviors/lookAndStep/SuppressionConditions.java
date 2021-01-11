@@ -11,10 +11,11 @@ public class SuppressionConditions
                                                               Supplier<Double> epsilon,
                                                               Runnable correctiveAction)
    {
-      return new SuppressionCondition(StringTools.format3D("Neck at wrong angle: {} != {} +/- {}",
-                                                           currentNeckPitch.get(),
-                                                           desiredNeckPitch.get(),
-                                                           epsilon.get()),
+      return new SuppressionCondition(() -> StringTools.format3D("Neck at wrong angle: {} != {} +/- {}",
+                                                                 currentNeckPitch.get(),
+                                                                 desiredNeckPitch.get(),
+                                                                 epsilon.get())
+                                                       .get(),
                                       () -> Math.abs(currentNeckPitch.get() - desiredNeckPitch.get()) > epsilon.get(),
                                       correctiveAction);
    }

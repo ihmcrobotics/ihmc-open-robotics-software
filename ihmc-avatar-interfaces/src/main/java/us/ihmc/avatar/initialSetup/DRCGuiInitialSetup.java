@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
@@ -26,14 +27,16 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    public static final boolean MAKE_SLIDER_BOARD = false;
 
    private final SimulationConstructionSetParameters simulationConstructionSetParameters;
-
+   private boolean hasGraphics3DAdapterBeenSet = false;
+   private Graphics3DAdapter graphics3DAdapter = null;
 
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
 
-   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SimulationConstructionSetParameters simulationConstructionSetParameters)
+   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight,
+                             SimulationConstructionSetParameters simulationConstructionSetParameters)
    {
       this.groundProfileVisible = groundProfileVisible;
       this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
@@ -116,7 +119,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
 
       //TODO: Clean this up!
-//      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+      //      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
       if (MAKE_SLIDER_BOARD)
       {
@@ -143,23 +146,36 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       this.simulationConstructionSetParameters.setShowSplashScreen(showWindow);
       this.simulationConstructionSetParameters.setShowWindows(showWindow);
+   }
 
+   public void setGraphics3DAdapter(Graphics3DAdapter graphics3DAdapter)
+   {
+      if (hasGraphics3DAdapterBeenSet)
+         throw new IllegalOperationException("The graphics adapter has already been set.");
+      hasGraphics3DAdapterBeenSet = true;
+      this.graphics3DAdapter = graphics3DAdapter;
    }
 
    public Graphics3DAdapter getGraphics3DAdapter()
    {
-      if (simulationConstructionSetParameters.getCreateGUI() && is3dGraphicsShown)
+      if (!hasGraphics3DAdapterBeenSet)
       {
-         return new JMEGraphics3DAdapter();
+         hasGraphics3DAdapterBeenSet = true;
+
+         if (simulationConstructionSetParameters.getCreateGUI() && is3dGraphicsShown)
+         {
+            graphics3DAdapter = new JMEGraphics3DAdapter();
+         }
+         else if (simulationConstructionSetParameters.getCreateGUI())
+         {
+            graphics3DAdapter = new NullGraphics3DAdapter();
+         }
+         else
+         {
+            graphics3DAdapter = null;
+         }
       }
-      else if (simulationConstructionSetParameters.getCreateGUI())
-      {
-         return new NullGraphics3DAdapter();
-      }
-      else
-      {
-         return null;
-      }
+      return graphics3DAdapter;
    }
 
    public void setIs3dGraphicsShown(boolean is3dGraphicsShown)

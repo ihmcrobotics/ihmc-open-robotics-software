@@ -44,7 +44,6 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
-   private final AtomicBoolean enabledInternal = new AtomicBoolean();
 
    private final StateMachine<TraverseStairsStateName, State> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -72,7 +71,6 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
-      helper.createUICallback(Enabled, enabledInternal::set);
 
       completedPublisher = ROS2Tools.createPublisher(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
       supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getManagedROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
@@ -112,7 +110,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enable)
    {
-      LogTools.debug((enable ? "Enable" : "Disable") + " requested");
+      LogTools.info((enable ? "Enable" : "Disable") + " requested");
 
       if (enable)
       {
@@ -121,15 +119,18 @@ public class TraverseStairsBehavior implements BehaviorInterface
             return;
          }
 
-         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
-         supportRegionParametersMessage.setEnable(false);
-         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+         planStepsState.reset();
+         executeStepsState.clearWalkingCompleteFlag();
 
          hasPublishedCompleted.set(false);
          behaviorHasCrashed.set(false);
          helper.setCommunicationCallbacksEnabled(true);
          stateMachine.resetToInitialState();
          behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
+
+         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+         supportRegionParametersMessage.setEnable(false);
+         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
       }
       else
       {
@@ -145,6 +146,11 @@ public class TraverseStairsBehavior implements BehaviorInterface
             behaviorTask = null;
          }
 
+         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+         supportRegionParametersMessage.setEnable(true);
+         supportRegionParametersMessage.setSupportRegionScaleFactor(2.0);
+         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+
          helper.setCommunicationCallbacksEnabled(false);
       }
    }
@@ -158,16 +164,12 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
       try
       {
-         if (enabledInternal.get())
-         {
-            stateMachine.doActionAndTransition();
+         stateMachine.doActionAndTransition();
 
-            if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
-            {
-               completedPublisher.publish(new Empty());
-               hasPublishedCompleted.set(true);
-               enabledInternal.set(false);
-            }
+         if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
+         {
+            completedPublisher.publish(new Empty());
+            hasPublishedCompleted.set(true);
          }
       }
       catch (Exception e)

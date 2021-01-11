@@ -5,8 +5,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -50,7 +50,6 @@ public class FootstepPlanningModuleLauncher
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      SplitFractionCalculatorParametersBasics splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
@@ -59,7 +58,6 @@ public class FootstepPlanningModuleLauncher
                                         visibilityGraphsParameters,
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
-                                        splitFractionParameters,
                                         walkingControllerParameters,
                                         footPolygons);
    }
@@ -69,6 +67,7 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
+      LogTools.info("Starting footstep planning module in ROS 2 {} mode", pubSubImplementation.name());
       ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "footstep_planner");
       return createModule(ros2Node, robotModel);
    }
@@ -114,11 +113,6 @@ public class FootstepPlanningModuleLauncher
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getSwingPlannerParameters().set(s.takeNextData());
-      });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SplitFractionCalculatorParametersPacket.class, inputTopic, s ->
-      {
-         if (!footstepPlanningModule.isPlanning())
-            footstepPlanningModule.getSplitFractionParameters().set(s.takeNextData());
       });
    }
 

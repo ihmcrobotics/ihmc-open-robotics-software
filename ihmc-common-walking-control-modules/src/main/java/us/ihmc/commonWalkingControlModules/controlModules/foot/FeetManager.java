@@ -19,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -397,63 +395,72 @@ public class FeetManager
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff()} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
-    * @param nextFootstep next desired footstep to take.
-    * @param exitCMP exit CMP in the current foot
-    * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param nextFootstep    next desired footstep to take.
+    * @param exitCMP         exit CMP in the current foot
+    * @param desiredECMP     current desired ECMP from ICP feedback.
+    * @param desiredICP      current desired ICP from the reference trajectory.
+    * @param currentICP      current ICP based on the robot state.
+    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
-      toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff()} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
-    * @param trailingLeg robot side for the trailing leg
-    * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param trailingLeg     robot side for the trailing leg
+    * @param desiredECMP     current desired ECMP from ICP feedback.
+    * @param desiredICP      current desired ICP from the reference trajectory.
+    * @param currentICP      current ICP based on the robot state.
+    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
                                                Footstep nextFootstep,
@@ -461,10 +468,11 @@ public class FeetManager
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
    /**
@@ -498,7 +506,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
@@ -514,7 +522,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);

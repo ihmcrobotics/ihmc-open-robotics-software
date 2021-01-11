@@ -13,7 +13,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -27,7 +32,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -35,7 +40,11 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -77,7 +86,11 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -1204,7 +1217,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
+      String namespace = HeightOffsetHandler.class.getSimpleName();
       YoDouble offsetHeight = (YoDouble) scs.findVariable(namespace, "offsetHeightAboveGround");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -1437,7 +1450,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static boolean findControllerStopBooleanForHeight(SimulationConstructionSet scs)
    {
-      return ((YoBoolean) scs.findVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(),
+      return ((YoBoolean) scs.findVariable(HeightOffsetHandler.class.getSimpleName(),
                                           "isPelvisOffsetHeightTrajectoryStopped")).getBooleanValue();
    }
 

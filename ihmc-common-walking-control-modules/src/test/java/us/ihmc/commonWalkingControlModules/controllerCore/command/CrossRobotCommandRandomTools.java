@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.ejml.EjmlParameters;
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.reflections.Reflections;
@@ -35,19 +37,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -77,6 +67,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -1151,6 +1142,18 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static LinearMomentumRateCostCommand nextLinearMomentumRateCostCommand(Random random,  RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      LinearMomentumRateCostCommand next = new LinearMomentumRateCostCommand();
+      next.setCommandId(random.nextInt());
+      next.setLinearMomentumRateHessian(nextDMatrixRMaj(random, 3, 3));
+      next.setLinearMomentumRateGradient(nextDMatrixRMaj(random, 1, 3));
+      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+
+      return next;
+   }
+
    public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
@@ -1707,10 +1710,7 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setEffectiveICPAdjustment(nextFrameVector3D(random, possibleFrames));
-      next.setUsingStepAdjustment(random.nextBoolean());
-      next.setFootstepWasAdjusted(random.nextBoolean());
-      next.setFootstepSolution(nextFramePose3D(random, possibleFrames));
+      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 
@@ -1721,27 +1721,19 @@ public class CrossRobotCommandRandomTools
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
       next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
                                                                                   nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setUsePelvisHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
-      next.setDesiredICPAtEndOfState(nextFramePoint2D(random, possibleFrames));
-      next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
-      next.setFinalTransferDuration(random.nextDouble());
-      next.setFootsteps(nextRecyclingArrayList(SimpleFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
-      next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setInitializeForSingleSupport(random.nextBoolean());
-      next.setInitializeForStanding(random.nextBoolean());
-      next.setInitializeForTransfer(random.nextBoolean());
+      next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
       next.setOmega0(random.nextDouble());
       next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));
       next.setPerfectCoP(nextFramePoint2D(random, possibleFrames));
-      next.setRemainingTimeInSwingUnderDisturbance(random.nextDouble());
-      next.setSupportSide(nextElementIn(random, RobotSide.values));
-      next.setTransferToSide(nextElementIn(random, RobotSide.values));
       return next;
    }
 

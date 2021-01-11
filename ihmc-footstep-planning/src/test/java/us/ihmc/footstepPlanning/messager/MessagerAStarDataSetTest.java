@@ -42,16 +42,17 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 
    public static void main(String[] args) throws Exception
    {
-      MessagerAStarDataSetTest messagerAStarDataSetTest = new MessagerAStarDataSetTest();
-      messagerAStarDataSetTest.setup();
-      messagerAStarDataSetTest.testDataSets();
+//      MessagerAStarDataSetTest messagerAStarDataSetTest = new MessagerAStarDataSetTest();
+//      messagerAStarDataSetTest.setup();
+//      messagerAStarDataSetTest.testDataSets();
 
-/*
+//      20190219_182005_Wall
+//      20171215_211034_DoorwayNoCeiling
+
       MessagerAStarDataSetTest test = new MessagerAStarDataSetTest();
       test.VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171215_211034_DoorwayNoCeiling);
       test.tearDown();
-*/
    }
 }

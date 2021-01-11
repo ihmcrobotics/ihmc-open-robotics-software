@@ -19,8 +19,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.*;
@@ -47,7 +45,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -93,8 +91,6 @@ public class FootstepPlannerUI
    @FXML
    private SwingPlannerParametersUIController swingPlannerParametersUIController;
    @FXML
-   private SplitFractionParametersUIController splitFractionParametersUIController;
-   @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
    @FXML
    private MainTabController mainTabController;
@@ -115,7 +111,6 @@ public class FootstepPlannerUI
            new DefaultVisibilityGraphParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
-           new DefaultSplitFractionCalculatorParameters(),
            null,
            null,
            showTestDashboard,
@@ -127,7 +122,6 @@ public class FootstepPlannerUI
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
-                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
                             boolean showTestDashboard,
@@ -138,7 +132,6 @@ public class FootstepPlannerUI
            visibilityGraphsParameters,
            plannerParameters,
            swingPlannerParameters,
-           splitFractionCalculatorParameters,
            fullHumanoidRobotModelFactory,
            null,
            null,
@@ -153,10 +146,9 @@ public class FootstepPlannerUI
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
-                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
-                            DRCRobotJointMap jointMap,
+                            HumanoidJointNameMap jointMap,
                             WalkingControllerParameters walkingControllerParameters,
                             UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
@@ -182,7 +174,6 @@ public class FootstepPlannerUI
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       swingPlannerParametersUIController.setParameters(swingPlannerParameters);
-      splitFractionParametersUIController.setParameters(splitFractionCalculatorParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerStatusBarController.attachMessager(messager);
@@ -191,7 +182,6 @@ public class FootstepPlannerUI
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       swingPlannerParametersUIController.attachMessager(messager);
-      splitFractionParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       robotOperationTabController.attachMessager(messager);
@@ -205,7 +195,6 @@ public class FootstepPlannerUI
       visibilityGraphsParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
       swingPlannerParametersUIController.bindControls();
-      splitFractionParametersUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -425,7 +414,6 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
       swingPlannerParametersUIController.onPrimaryStageLoaded();
-      splitFractionParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()
@@ -467,10 +455,9 @@ public class FootstepPlannerUI
                                                     VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                                     FootstepPlannerParametersBasics plannerParameters,
                                                     SwingPlannerParametersBasics swingPlannerParameters,
-                                                    SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
-                                                    DRCRobotJointMap jointMap,
+                                                    HumanoidJointNameMap jointMap,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
                                                     UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
@@ -486,7 +473,6 @@ public class FootstepPlannerUI
                                    visibilityGraphsParameters,
                                    plannerParameters,
                                    swingPlannerParameters,
-                                   splitFractionCalculatorParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
                                    jointMap,

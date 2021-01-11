@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.*;
@@ -249,7 +249,12 @@ public class AtlasCorridorNavigationTest
          }
          if (VISUALIZE)
          {
-            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
+            ArrayList<Pose3DReadOnly> pathPoses = new ArrayList<>();
+            for (Point3DReadOnly pathPoint : pathPoints)
+            {
+               pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
+            }
+            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoses);
          }
 
          LogTools.info("Computing poses from path");
@@ -303,7 +308,7 @@ public class AtlasCorridorNavigationTest
 
          boolean useFastFlatInvalidFootsteps = true;
          footstepPlannerParameters.setMaximumStepYaw(1.5);
-         FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
+         FootstepPlannerBodyCollisionDetector collisionDetector = new FootstepPlannerBodyCollisionDetector(footstepPlannerParameters);
 
          LogTools.info("Creating planner");
          LogTools.info("Running footstep planner");

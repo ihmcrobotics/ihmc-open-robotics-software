@@ -4,6 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -52,6 +53,28 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    private final Point3D pushDoorLocation = new Point3D(7.5, -0.5 * ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0);
    private final Point3D stairsLocation = new Point3D(13.0, 0.0, 0.0);
    private final double doorYaw = 0.5 * Math.PI;
+
+   public enum StartingLocation
+   {
+      STARTING_BLOCK(-2.0, -1.0, 0.3, Math.toRadians(20.0)),
+      IN_FRONT_OF_PLATFORM(0.7, 0.0, 0.0, 0.0),
+      DEBRIS_PLATFORM(3.0, 0.0, 0.575, 0.0),
+      PUSH_DOOR(6.3, 0.0, 0.0, 0.0),
+      PULL_DOOR(8.8, 0.0, 0.0, 0.0),
+      STAIRS(11.75, 0.0, 0.0, 0.0);
+
+      private final Pose3D startingPose = new Pose3D();
+
+      StartingLocation(double x, double y, double z, double yaw)
+      {
+         startingPose.set(x, y, z, yaw, 0.0, 0.0);
+      }
+
+      public Pose3D getPose()
+      {
+         return startingPose;
+      }
+   }
 
    public PhaseOneDemoEnvironment(boolean pushDoor, boolean pullDoor, boolean debris, boolean barrel, boolean stairs, boolean cinderBlockField)
    {
@@ -103,8 +126,8 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       ConvexPolygon2D groundPolygon3 = new ConvexPolygon2D();
       groundPolygon3.addVertex(9.0, -1.0);
       groundPolygon3.addVertex(9.0, 1.0);
-      groundPolygon3.addVertex(13.0, -1.0);
-      groundPolygon3.addVertex(13.0, 1.0);
+      groundPolygon3.addVertex(18.0, -1.0);
+      groundPolygon3.addVertex(18.0, 1.0);
       groundPolygon3.update();
       PlanarRegion groundRegion3 = new PlanarRegion(new RigidBodyTransform(), groundPolygon3);
       addRegions(new PlanarRegionsList(groundRegion3), YoAppearance.LightGray());
@@ -242,6 +265,28 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    public PlanarRegionsList getDebrisRegions()
    {
       return debrisRegions;
+   }
+
+   public PlanarRegionsList getEnvironmentWithDebrisRegions()
+   {
+      PlanarRegionsList environmentWithoutDebrisRegions = getEnvironmentRegions();
+      PlanarRegionsList debrisRegions = getDebrisRegions();
+      PlanarRegionsList environmentWithDebrisRegions = new PlanarRegionsList();
+
+      for (int i = 0; i < environmentWithoutDebrisRegions.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion region = environmentWithoutDebrisRegions.getPlanarRegion(i);
+         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
+         environmentWithDebrisRegions.addPlanarRegion(region);
+      }
+      for (int i = 0; i < debrisRegions.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion region = debrisRegions.getPlanarRegion(i);
+         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
+         environmentWithDebrisRegions.addPlanarRegion(region);
+      }
+
+      return environmentWithDebrisRegions;
    }
 
    private void createBarrel()

@@ -14,22 +14,27 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.wholeBodyController.*;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
+import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -38,7 +43,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public abstract DRCRobotJointMap getJointMap();
+   public abstract HumanoidJointNameMap getJointMap();
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
@@ -58,7 +63,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new WallTimeBasedROSClockCalculator();
    }
 
-   public abstract DRCSensorSuiteManager getSensorSuiteManager();
+   public default DRCSensorSuiteManager getSensorSuiteManager()
+   {
+      return getSensorSuiteManager(null);
+   }
+
+   public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
 
    public default SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
@@ -110,6 +120,17 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    /**
+    * Returns a factory for creating low-level joint controller that can be used to simulate for
+    * instance a joint position controller.
+    * 
+    * @return the low-level controller factory to use in simulation.
+    */
+   public default SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
+   {
+      return new DefaultSimulationLowLevelControllerFactory(getJointMap(), getSimulateDT());
+   }
+
+   /**
     * @return parameters used in the user interface only.
     */
    public default UIParameters getUIParameters()
@@ -138,11 +159,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default SwingPlannerParametersBasics getSwingPlannerParameters()
-   {
-      return null;
-   }
-
-   default SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
    {
       return null;
    }

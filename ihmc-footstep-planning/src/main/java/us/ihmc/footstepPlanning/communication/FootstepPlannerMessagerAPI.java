@@ -10,13 +10,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
@@ -89,7 +88,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");
-   public static final Topic<SplitFractionCalculatorParametersReadOnly> SplitFractionParameters = topic("SplitFractionParameters");
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 
    // Graphics control
@@ -142,8 +140,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
    public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
    public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
-   public static final Topic<Boolean> PerformPositionBasedSplitFractionCalculation = topic("PerformPositionBasedSplitFractionCalculation");
-   public static final Topic<Boolean> PerformAreaBasedSplitFractionCalculation = topic("PerformAreaBasedSplitFractionCalculation");
 
    // Robot control
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
@@ -185,11 +181,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
-   public static final Topic<Triple<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
-   public static final Topic<Pair<FootstepNode, FootstepNodeSnapData>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
-   public static final Topic<FootstepPlannerEdgeData> LoggedCandidateStepToVisualize = topic("LoggedCandidateStepToVisualize");
+   public static final Topic<Triple<Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
+   public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StartOfSwingStepToVisualize = topic("StartOfSwingStepToVisualize");
+   public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
+   public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
 
+   public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
    public static final Topic<Boolean> ShowLoggedStanceStep = topic("ShowLoggedStanceStep");
    public static final Topic<Boolean> ShowLoggedUnsnappedCandidateStep = topic("ShowLoggedUnsnappedCandidateStep");
    public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");

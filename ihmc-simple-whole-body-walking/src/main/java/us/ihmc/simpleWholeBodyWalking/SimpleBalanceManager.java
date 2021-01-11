@@ -97,7 +97,7 @@ public class SimpleBalanceManager
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
    private final FrameVector2D icpError2d = new FrameVector2D();
@@ -125,13 +125,10 @@ public class SimpleBalanceManager
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
    private boolean initializeForTransfer = false;
-   private boolean footstepWasAdjusted = false;
-   private boolean usingStepAdjustment = false;
    private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
    private RobotSide transferToSide;
-   private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
@@ -140,7 +137,6 @@ public class SimpleBalanceManager
                                                                                                             new PlaneContactStateCommand());
 
    public SimpleBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                               ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
                                YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -171,7 +167,7 @@ public class SimpleBalanceManager
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
                                                        nominalHeightAboveGround, 
                                                        controllerToolbox.getOmega0Provider(),registry, yoGraphicsListRegistry,
-                                                       yoTime, icpPlannerParameters, bipedSupportPolygons);
+                                                       yoTime, bipedSupportPolygons);
       comPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
           
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -211,7 +207,7 @@ public class SimpleBalanceManager
       parentRegistry.addChild(registry);
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
@@ -219,12 +215,7 @@ public class SimpleBalanceManager
 
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
-      if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
-      {
-         return false;
-      }
-      footstep.setPose(footstepSolution);
-      return footstepWasAdjusted;
+      return false;
    }
 
    public void clearICPPlan()
@@ -257,14 +248,13 @@ public class SimpleBalanceManager
       controllerToolbox.getCoP(copEstimate);
 
       desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
-      desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
-      desiredCapturePointVelocity2d.setIncludingFrame(comPlanner.getDesiredDCMVelocity());
+      desiredCoM2d.setIncludingFrame(comPlanner.getDesiredCoMPosition());
       perfectCoP2d.setIncludingFrame(comPlanner.getDesiredCOPPosition());
-      yoDesiredCoMPosition.set(comPlanner.getDesiredCoMPosition());
+      yoDesiredICPVelocity.set(comPlanner.getDesiredDCMVelocity());
       yoDesiredCoMVelocity.set(comPlanner.getDesiredCoMVelocity());
 
-      pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
+      pelvisICPBasedTranslationManager.compute(supportLeg);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
@@ -275,12 +265,12 @@ public class SimpleBalanceManager
       // ---
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
-      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
+      yoDesiredCoMPosition.set(desiredCoM2d);
       yoPerfectCoP.set(perfectCoP2d);
 
       getICPError(icpError2d);
 
-      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -298,7 +288,7 @@ public class SimpleBalanceManager
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
-      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setVRPTrajectories(comPlanner.getVRPTrajectories());
       linearMomentumRateControlModuleInput.setTimeInContactPhase(comPlanner.getTimeInContactPhase());
       linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
@@ -563,10 +553,6 @@ public class SimpleBalanceManager
    public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
    {
       desiredCMP.set(output.getDesiredCMP());
-      effectiveICPAdjustment.set(output.getEffectiveICPAdjustment());
-      footstepSolution.set(output.getFootstepSolution());
-      footstepWasAdjusted = output.getFootstepWasAdjusted();
-      usingStepAdjustment = output.getUsingStepAdjustment();
    }
 
    public TaskspaceTrajectoryStatusMessage pollPelvisXYTranslationStatusToReport()

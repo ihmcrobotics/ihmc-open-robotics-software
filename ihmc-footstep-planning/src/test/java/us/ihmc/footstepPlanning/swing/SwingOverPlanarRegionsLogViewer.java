@@ -18,7 +18,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -73,7 +72,6 @@ public class SwingOverPlanarRegionsLogViewer
                                                                          new DefaultVisibilityGraphParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          parameters,
-                                                                         new DefaultSplitFractionCalculatorParameters(),
                                                                          walkingControllerParameters,
                                                                          footPolygons);
 

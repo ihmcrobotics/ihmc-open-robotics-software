@@ -592,6 +592,18 @@ public class Trajectory
       setCoefficientVariables();
    }
 
+   public void setQuadraticUsingPositionsAndAcceleration(double t0, double tFinal, double z0, double zf, double zdd)
+   {
+      reshape(3);
+      setTime(t0, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zf);
+      setAccelerationRow(2, t0, zdd);
+      solveForCoefficients();
+      setCoefficientVariables();
+   }
+
+
    public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal)
    {
       reshape(3);

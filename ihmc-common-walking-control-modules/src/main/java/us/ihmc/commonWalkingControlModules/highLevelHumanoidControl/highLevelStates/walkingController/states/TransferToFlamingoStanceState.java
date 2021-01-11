@@ -18,7 +18,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class TransferToFlamingoStanceState extends TransferState
 {
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFractions = new FootstepShiftFractions();
 
    public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -32,6 +31,8 @@ public class TransferToFlamingoStanceState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeFlamingoStateICPPlan();
+
       switchToToeOffIfPossible();
       super.doAction(timeInState);
    }
@@ -49,30 +50,16 @@ public class TransferToFlamingoStanceState extends TransferState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
-      Footstep footstep = walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide);
-      FixedFramePoint3DBasics transferFootPosition = footstep.getFootstepPose().getPosition();
-      RobotSide swingSide = transferToSide.getOppositeSide();
-      comHeightManager.transfer(transferFootPosition, initialTransferTime, swingSide, extraToeOffHeight);
 
       // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-      double swingTime = Double.POSITIVE_INFINITY;
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
 
-      double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
-      double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
-      double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
-      footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
 
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming, footstepShiftFractions);
-      balanceManager.setICPPlanTransferToSide(transferToSide);
-      balanceManager.initializeICPPlanForTransfer(swingTime, initialTransferTime, finalTransferTime);
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
+      balanceManager.initializeICPPlanForTransfer();
    }
 }

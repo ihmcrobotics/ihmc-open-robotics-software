@@ -10,6 +10,8 @@ public class FallbackNode extends BehaviorTreeControlFlowNodeBasics
    @Override
    public BehaviorTreeNodeStatus tick()
    {
+      super.tick();
+
       for (BehaviorTreeNode child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();

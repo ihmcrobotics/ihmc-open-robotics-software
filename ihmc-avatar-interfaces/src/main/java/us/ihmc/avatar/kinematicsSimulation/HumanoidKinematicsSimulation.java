@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -190,15 +191,11 @@ public class HumanoidKinematicsSimulation
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
                                                                               walkingControllerParameters.getDefaultSwingTime(),
                                                                               walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                               walkingControllerParameters.getDefaultFinalTransferTime(),
-                                                                              capturePointPlannerParameters.getSwingDurationShiftFraction(),
-                                                                              capturePointPlannerParameters.getSwingSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
@@ -218,7 +215,7 @@ public class HumanoidKinematicsSimulation
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(walkingInputManager,
@@ -277,7 +274,6 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getContactableFeet(),
                                                                             fullRobotModel.getElevator(),
                                                                             walkingControllerParameters,
-                                                                            controllerToolbox.getYoTime(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
@@ -295,22 +291,13 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          Path incomingLogsDirectory;
-         if (kinematicsSimulationParameters.getIncomingLogsDirectory() == null)
-         {
-            incomingLogsDirectory = IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY;
-         }
-         else
-         {
-            incomingLogsDirectory = kinematicsSimulationParameters.getIncomingLogsDirectory();
-         }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
                                                                          100000,
-                                                                         0.01,
-                                                                         incomingLogsDirectory);
+                                                                         0.01);
          intraprocessYoVariableLogger.start();
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())

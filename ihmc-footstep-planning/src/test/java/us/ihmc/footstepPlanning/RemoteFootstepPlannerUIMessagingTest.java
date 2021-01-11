@@ -388,9 +388,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
 
-         // step only with requested side is exception, has to be in interval [-1,1]
-         randomParameters.setStepOnlyWithRequestedSide((byte) (random.nextInt(2) - 1));
-
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
@@ -706,6 +703,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealSideStepWidth(), packet.getIdealSideStepWidth(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealBackStepLength(), packet.getIdealBackStepLength(), epsilon);
+      assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealStepLengthAtMaxStepZ(), packet.getIdealStepLengthAtMaxStepZ(), epsilon);
       assertEquals("Wiggle inside delta targets aren't equal.", parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon);
       assertEquals("Wiggle inside delta minimums aren't equal.", parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon);
       assertEquals("Maximum step reaches aren't equal.", parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon);
@@ -718,8 +718,9 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max X forward and down aren't equal", parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals("Max Z forward and down aren't equal", parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      assertEquals("Max left step z isn't equal.", parameters.getMaximumLeftStepZ(), packet.getMaximumLeftStepZ(), epsilon);
-      assertEquals("Max right step z isn't equal.", parameters.getMaximumRightStepZ(), packet.getMaximumRightStepZ(), epsilon);
+      assertEquals("Max step z isn't equal.", parameters.getMaxStepZ(), packet.getMaximumStepZ(), epsilon);
+      assertEquals("Max swing z isn't equal.", parameters.getMaxSwingZ(), packet.getMaximumSwingZ(), epsilon);
+      assertEquals("Max swing reach isn't equal.", parameters.getMaxSwingReach(), packet.getMaximumSwingReach(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
       assertEquals("Wiggle while planning isn't equal.", parameters.getWiggleWhilePlanning(), packet.getWiggleWhilePlanning());

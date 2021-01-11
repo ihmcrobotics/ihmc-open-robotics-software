@@ -56,7 +56,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -931,7 +931,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private class StandStillDoNothingPelvisPoseHistoryCorrectorController implements RobotController
    {
       private final YoRegistry controllerRegistry = new YoRegistry(getName());
-      private final DRCRobotJointMap jointMap;
+      private final HumanoidJointNameMap jointMap;
       private final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds;
       private final ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints;
 

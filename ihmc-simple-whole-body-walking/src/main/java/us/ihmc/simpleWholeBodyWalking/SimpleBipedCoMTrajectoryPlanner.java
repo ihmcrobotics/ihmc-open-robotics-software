@@ -84,12 +84,12 @@ public class SimpleBipedCoMTrajectoryPlanner
                                           DoubleProvider omega0, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(soleZUpFrames, gravityZ, nominalCoMHeight, omega0, parentRegistry, yoGraphicsListRegistry,
-           null, null, null);
+           null, null);
    }
    
       public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleZUpFrames, double gravityZ, double nominalCoMHeight,
                                              DoubleProvider omega0, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                             YoDouble yoTime, ICPPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons)
+                                             YoDouble yoTime, BipedSupportPolygons bipedSupportPolygons)
       {
       sequenceUpdater = new SimpleBipedContactSequenceUpdater(soleZUpFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(omega0);
@@ -98,8 +98,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       if (yoGraphicsListRegistry != null && VISUALIZE)
          ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
-      if (icpPlannerParameters != null)
-         numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+         numberFootstepsToConsider.set(3);
       parentRegistry.addChild(registry);
       
       defaultFinalTransferDuration.set(0.5);
@@ -276,6 +275,11 @@ public class SimpleBipedCoMTrajectoryPlanner
    public List<Trajectory3D> getVRPTrajectories()
    {
       return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
+   }
+
+   public List<? extends ContactStateProvider> getContactStateProviders()
+   {
+      return sequenceUpdater.getContactSequence();
    }
    
    public double getTimeInContactPhase()

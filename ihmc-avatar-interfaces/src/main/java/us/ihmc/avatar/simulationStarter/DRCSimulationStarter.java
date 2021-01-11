@@ -20,9 +20,9 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -34,7 +34,6 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -59,7 +58,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
@@ -81,6 +80,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
+   private boolean logToFile = false;
 
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
@@ -103,7 +103,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private final CoPTrajectoryParameters copTrajectoryParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
@@ -145,7 +145,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -293,6 +293,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       checkIfSimulationIsAlreadyCreated();
       this.robotInitialSetup = robotInitialSetup;
+   }
+
+   /**
+    * Whether to log intraprocess the dynamics simulation of Atlas.
+    *
+    * @param logToFile
+    */
+   public void setLogToFile(boolean logToFile)
+   {
+      this.logToFile = logToFile;
    }
 
    /**
@@ -463,7 +473,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 capturePointPlannerParameters);
+                                                                 copTrajectoryParameters);
       setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
@@ -496,6 +506,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setLogToFile(logToFile);
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
@@ -542,7 +553,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (createSCSSimulatedSensors)
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-         DRCRobotJointMap jointMap = robotModel.getJointMap();
+         HumanoidJointNameMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = avatarSimulation.getSimulatedRobotTimeProvider();
          HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();

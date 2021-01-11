@@ -9,20 +9,40 @@ import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
+import static us.ihmc.atlas.AtlasNetworkProcessor.NetworkProcessorMode.VR;
+
 public class AtlasNetworkProcessor
 {
-   private static final Application DEFAULT = AtlasNetworkProcessor::defaultNetworkProcessor;
-   private static final Application VR = AtlasNetworkProcessor::vrNetworkProcessor;
-   private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
-   private static final Application STAIRS = AtlasNetworkProcessor::stairsNetworkProcessor;
+   public enum NetworkProcessorMode
+   {
+      DEFAULT(AtlasNetworkProcessor::defaultNetworkProcessor),
+      VR(AtlasNetworkProcessor::vrNetworkProcessor),
+      BEHAVIOR(AtlasNetworkProcessor::behaviorNetworkProcessor),
+      MINIMAL(AtlasNetworkProcessor::minimalNetworkProcessor),
+      STAIRS(AtlasNetworkProcessor::stairsNetworkProcessor),
+      ;
 
-   private static final Application APPLICATION = DEFAULT;
+      private Application application;
+
+      NetworkProcessorMode(Application application)
+      {
+         this.application = application;
+      }
+
+      public Application getApplication()
+      {
+         return application;
+      }
+   }
+
+   private static final NetworkProcessorMode DEAFULT_MODE = VR;
 
    public static void main(String[] args) throws JSAPException
    {
       JSAP jsap = new JSAP();
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption modeOption = new FlaggedOption("mode").setLongFlag("mode").setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
@@ -36,6 +56,7 @@ public class AtlasNetworkProcessor
       jsap.registerParameter(robotModel);
 
       jsap.registerParameter(runningOnRealRobot);
+      jsap.registerParameter(modeOption);
       jsap.registerParameter(runningOnGazebo);
       jsap.registerParameter(leftHandHost);
       jsap.registerParameter(rightHandHost);
@@ -81,7 +102,14 @@ public class AtlasNetworkProcessor
       LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
 
       LogTools.info("Setting up network processor modules...");
-      APPLICATION.setup(args, model, networkProcessor);
+      NetworkProcessorMode mode = DEAFULT_MODE;
+      if (config.userSpecified(modeOption.getID()))
+      {
+         String userSpecifiedMode = config.getString(modeOption.getID());
+         LogTools.info("User specified mode: {}", userSpecifiedMode);
+         mode = NetworkProcessorMode.valueOf(userSpecifiedMode);
+      }
+      mode.getApplication().setup(args, model, networkProcessor);
 
       networkProcessor.setupShutdownHook();
 
@@ -100,16 +128,33 @@ public class AtlasNetworkProcessor
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
-      networkProcessor.setupKinematicsToolboxModule(false);
-      
+//      networkProcessor.setupKinematicsToolboxModule(false);
+
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
-      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
       
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
+   }
+
+   private static void behaviorNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
    }
 
    private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
@@ -117,6 +162,10 @@ public class AtlasNetworkProcessor
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
+
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableDepthPointCloudPublisher(false);
@@ -132,7 +181,7 @@ public class AtlasNetworkProcessor
       sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
 
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
    }
 

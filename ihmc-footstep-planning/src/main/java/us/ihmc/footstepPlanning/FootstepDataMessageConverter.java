@@ -25,8 +25,6 @@ public class FootstepDataMessageConverter
       footstepDataListMessage.setDefaultSwingDuration(defaultSwingTime);
       footstepDataListMessage.setDefaultTransferDuration(defaultTransferTime);
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
-      footstepDataListMessage.setFinalTransferSplitFraction(footstepPlan.getFinalTransferSplitFraction());
-      footstepDataListMessage.setFinalTransferWeightDistribution(footstepPlan.getFinalTransferWeightDistribution());
 
       appendPlanToMessage(footstepPlan, footstepDataListMessage);
 
@@ -51,9 +49,6 @@ public class FootstepDataMessageConverter
       {
          footstepPlan.addFootstep(PlannedFootstep.getFromMessage(footstepMessage));
       }
-
-      footstepPlan.setFinalTransferSplitFraction(footstepDataListMessage.getFinalTransferSplitFraction());
-      footstepPlan.setFinalTransferWeightDistribution(footstepDataListMessage.getFinalTransferWeightDistribution());
 
       return footstepPlan;
    }
