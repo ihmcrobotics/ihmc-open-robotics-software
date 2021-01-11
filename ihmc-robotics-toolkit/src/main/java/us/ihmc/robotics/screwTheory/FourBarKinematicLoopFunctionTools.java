@@ -226,10 +226,10 @@ public class FourBarKinematicLoopFunctionTools
       if (!EuclidFrameTools.areVector3DsParallel(axisA, axisD, epsilon))
          throw new IllegalArgumentException(String.format("The axes of the joint %s and %s are not parallel.", jointA.getName(), jointD.getName()));
 
-      converters[0].set(-Math.signum(axisA.getZ()), angleABC(originD, originA, originB));
-      converters[1].set(+Math.signum(axisB.getZ()), angleABC(originA, originB, originC));
-      converters[2].set(+Math.signum(axisC.getZ()), angleABC(originB, originC, originD));
-      converters[3].set(-Math.signum(axisD.getZ()), angleABC(originC, originD, originA));
+      converters[0].set(FourBarAngle.DAB, -Math.signum(axisA.getZ()), angleABC(originD, originA, originB));
+      converters[1].set(FourBarAngle.ABC, +Math.signum(axisB.getZ()), angleABC(originA, originB, originC));
+      converters[2].set(FourBarAngle.BCD, +Math.signum(axisC.getZ()), angleABC(originB, originC, originD));
+      converters[3].set(FourBarAngle.CDA, -Math.signum(axisD.getZ()), angleABC(originC, originD, originA));
 
       fourBar.setup(originA, originB, originC, originD);
 
@@ -437,6 +437,7 @@ public class FourBarKinematicLoopFunctionTools
 
    static class FourBarToJointConverter
    {
+      private FourBarAngle fourBarAngle;
       private double sign;
       private double interiorAngleAtZero;
 
@@ -444,8 +445,9 @@ public class FourBarKinematicLoopFunctionTools
       {
       }
 
-      public void set(double sign, double interiorAngleAtZero)
+      public void set(FourBarAngle fourBarAngle, double sign, double interiorAngleAtZero)
       {
+         this.fourBarAngle = fourBarAngle;
          this.sign = sign;
          this.interiorAngleAtZero = interiorAngleAtZero;
       }
@@ -470,6 +472,11 @@ public class FourBarKinematicLoopFunctionTools
          return sign * jointDerivative;
       }
 
+      public FourBarAngle getFourBarAngle()
+      {
+         return fourBarAngle;
+      }
+
       public double getSign()
       {
          return sign;
@@ -478,6 +485,12 @@ public class FourBarKinematicLoopFunctionTools
       public double getInteriorAngleAtZero()
       {
          return interiorAngleAtZero;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "Converter for vertex: " + fourBarAngle + ", sign= " + sign + ", int. angle at zero= " + interiorAngleAtZero;
       }
    }
 }

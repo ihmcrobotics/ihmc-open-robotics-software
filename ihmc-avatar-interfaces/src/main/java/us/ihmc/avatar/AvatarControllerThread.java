@@ -60,7 +60,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
-   private static final boolean ALLOW_MODEL_CORRUPTION = true;
+   private static final boolean ALLOW_MODEL_CORRUPTION = false;
 
    private final YoRegistry registry = new YoRegistry("DRCControllerThread");
 
