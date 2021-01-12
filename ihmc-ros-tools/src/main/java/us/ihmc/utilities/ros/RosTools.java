@@ -17,12 +17,14 @@ import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 
+import boofcv.struct.calib.CameraPinholeBrown;
 import org.ros.node.NodeConfiguration;
 
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
+import sensor_msgs.CameraInfo;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -32,6 +34,11 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class RosTools
 {
+   public static final String MULTISENSE_VIDEO = "/multisense/left/image_rect_color/compressed";
+   public static final String MULTISENSE_CAMERA_INFO = "/multisense/left/image_rect_color/camera_info";
+   public static final String D435_VIDEO = "/depthcam/color/image_raw/compressed";
+   public static final String D435_CAMERA_INFO = "/depthcam/color/camera_info";
+   public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {
@@ -63,6 +70,11 @@ public class RosTools
 
    public static BufferedImage bufferedImageFromRosMessageJpeg(ColorModel colorModel, sensor_msgs.CompressedImage imageMessage)
    {
+      return bufferedImageFromRosMessageJpeg(imageMessage);
+   }
+
+   public static BufferedImage bufferedImageFromRosMessageJpeg(sensor_msgs.CompressedImage imageMessage)
+   {
 
       BufferedImage ret = null;
       byte[] payload = imageMessage.getData().array();
@@ -77,6 +89,20 @@ public class RosTools
       }
 
       return ret;
+   }
+
+   public static CameraPinholeBrown cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)
+   {
+      CameraPinholeBrown cameraPinholeBrown = new CameraPinholeBrown();
+      double[] P = cameraInfo.getP();
+      cameraPinholeBrown.fx = P[0];
+      cameraPinholeBrown.skew = P[1];
+      cameraPinholeBrown.cx = P[2];
+      cameraPinholeBrown.fy = P[5];
+      cameraPinholeBrown.cy = P[6];
+      cameraPinholeBrown.width = cameraInfo.getWidth();
+      cameraPinholeBrown.height = cameraInfo.getHeight();
+      return cameraPinholeBrown;
    }
 
    public static NodeConfiguration createNodeConfiguration(URI master)

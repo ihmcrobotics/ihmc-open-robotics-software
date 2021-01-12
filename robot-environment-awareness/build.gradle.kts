@@ -36,21 +36,23 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-robot-data-logger:0.20.5")
 
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
+   apiBytedecoNatives("javacpp", "1.5.4")
+   apiBytedecoNatives("openblas", "0.3.10-1.5.4")
+   apiBytedecoNatives("opencv", "4.4.0-1.5.4")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, version: String)
+{
+   apiBytedecoSelective("org.bytedeco:$name:$version")
+   apiBytedecoSelective("org.bytedeco:$name:$version:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$version:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$version:macosx-x86_64")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
+{
+   api(dependencyNotation) {
+      exclude(group = "org.bytedeco")
    }
 }
 

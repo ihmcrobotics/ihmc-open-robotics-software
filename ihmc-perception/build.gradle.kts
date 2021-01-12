@@ -1,5 +1,3 @@
-import org.apache.commons.lang3.SystemUtils
-
 buildscript {
    dependencies {
       classpath("org.apache.commons:commons-lang3:3.9")
@@ -21,22 +19,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
-   }
+   api(ihmc.sourceSetProject("javacv"))
+   // For experimenting with local OpenCV:
+   // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
+
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("org.georegression:georegression:0.22")
@@ -66,6 +52,40 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+}
+
+openpnpDependencies {
+   api("org.openpnp:opencv:4.3.0-2")
+}
+
+val javaCVVersion = "1.5.4"
+
+bytedecoDependencies {
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
+}
+
+javacvDependencies {
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
+{
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
+{
+   api(dependencyNotation) {
+      exclude(group = "org.bytedeco")
+   }
 }
 
 testDependencies {
