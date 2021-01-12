@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
@@ -243,5 +245,11 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
    public List<Polynomial3D> getVRPTrajectories()
    {
       return vrpTrajectories;
+   }
+
+   @Override
+   public List<? extends Trajectory3DReadOnly> getCoMTrajectories()
+   {
+      throw new NotImplementedException();
    }
 }
