@@ -67,11 +67,11 @@ openpnpDependencies {
 }
 
 bytedecoDependencies {
-   api("org.bytedeco:opencv-platform:4.5.1-1.5.5-SNAPSHOT")
+   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
 }
 
 javacvDependencies {
-   api("org.bytedeco:javacv-platform:1.5.5-SNAPSHOT") {
+   api("org.bytedeco:javacv-platform:1.5.4") {
       exclude("org.bytedeco:librealsense2")
    }
 }
