@@ -23,10 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ECMPTrajectoryCalculator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
@@ -78,6 +75,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean computeAngularMomentum = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -510,13 +508,29 @@ public class BalanceManager
       }
       copTrajectory.compute(copTrajectoryState);
 
-      angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
-      angularMomentumCalculator.computeAngularMomentumTrajectories(comTrajectoryPlanner.getCoMTrajectories());
-      angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      if (copTrajectoryState.getNumberOfFootstep() > 0 && computeAngularMomentum)
+      {
+         if (!comTrajectoryPlanner.hasTrajectories())
+         {
+            DynamicPlanningFootstep footstep = copTrajectoryState.getFootstep(0);
+            PlanningTiming timing = copTrajectoryState.getTiming(0);
+            comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
+         }
 
-      ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getAngularMomentumTrajectories());
+         angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
+         angularMomentumCalculator.computeAngularMomentumTrajectories(comTrajectoryPlanner.getCoMTrajectories());
+         angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
 
-      comTrajectoryPlanner.solveForTrajectory(ecmpTrajectory.getContactStateProviders());
+         ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getAngularMomentumTrajectories());
+         contactStateProviders = ecmpTrajectory.getContactStateProviders();
+      }
+      else
+      {
+         comTrajectoryPlanner.reset();
+      }
+
+      comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
       comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());

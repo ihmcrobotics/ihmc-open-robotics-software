@@ -43,7 +43,7 @@ public class ECMPTrajectoryCalculator
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
          Trajectory3DReadOnly angularMomentumTrajectory = internalAngularMomentumTrajectories.get(i);
 
-         if (copTrajectory.getTimeInterval().epsilonEquals(angularMomentumTrajectory, 1e-4))
+         if (!copTrajectory.getTimeInterval().epsilonEquals(angularMomentumTrajectory, 1e-4))
             throw new IllegalArgumentException("The time intervals are not proper.");
 
          double startTime = angularMomentumTrajectory.getStartTime();
@@ -64,7 +64,6 @@ public class ECMPTrajectoryCalculator
 
          eCMPTrajectory.setStartCopPosition(ecmpPosition);
          eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
-
 
          double endTime = angularMomentumTrajectory.getEndTime();
 

@@ -57,14 +57,13 @@ public class FootTrajectoryPredictor
       RobotSide swingSide = footstep.getRobotSide();
       RobotSide stanceSide = swingSide.getOppositeSide();
 
-      double duration = timing.getSwingTime() + timing.getTransferTime();
-      setFootTrajectoryInContact(timing.getTransferTime(),
-                                 duration,
+      setFootTrajectoryInContact(0.0,
+                                 timing.getSwingTime(),
                                  state.getFootPose(stanceSide).getPosition(),
                                  footTrajectories.get(stanceSide).add());
 
-      predictSwingFootTrajectory(timing.getTransferTime(),
-                                 duration,
+      predictSwingFootTrajectory(0.0,
+                                 timing.getSwingTime(),
                                  swingHeight,
                                  state.getFootPose(swingSide).getPosition(),
                                  footstep.getFootstepPose().getPosition(),
