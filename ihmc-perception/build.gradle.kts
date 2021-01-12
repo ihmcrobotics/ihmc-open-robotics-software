@@ -52,24 +52,19 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
-   api("us.ihmc:joctomap:1.11.0")
-   api("us.ihmc:ihmc-path-planning:source")
-   api("us.ihmc:ihmc-footstep-planning:source")
-   api("us.ihmc:robot-environment-awareness:source")
 }
 
 openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
+val javaCVVersion = "1.5.4"
+
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.10-")
    apiBytedecoNatives("opencv", "4.4.0-")
 }
-
-val javaCVVersion = "1.5.4"
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
