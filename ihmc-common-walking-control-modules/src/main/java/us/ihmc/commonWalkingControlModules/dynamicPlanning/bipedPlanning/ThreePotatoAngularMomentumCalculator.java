@@ -1,11 +1,17 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.trajectories.PolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,6 +23,8 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
+   private final YoFrameVector3D predictedAngularMomentum = new YoFrameVector3D("predictedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D predictedAngularMomentumRate = new YoFrameVector3D("predictedAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
 
    private final FrameVector3D totalAngularMomentum = new FrameVector3D();
    private final FrameVector3D angularMomentum = new FrameVector3D();
@@ -26,6 +34,8 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final RecyclingArrayList<PolynomialEstimator3D> angularMomentumEstimators = new RecyclingArrayList<>(PolynomialEstimator3D::new);
 
+   private final FootTrajectoryPredictor footTrajectoryPredictor = new FootTrajectoryPredictor();
+
    public ThreePotatoAngularMomentumCalculator(double potatoMass, YoRegistry parentRegistry)
    {
       this.potatoMass.set(potatoMass);
@@ -33,9 +43,29 @@ public class ThreePotatoAngularMomentumCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void compute(List<Trajectory3DReadOnly> comTrajectories,
-                       List<Trajectory3DReadOnly> secondPotatoTrajectories,
-                       List<Trajectory3DReadOnly> thirdPotatoTrajectories)
+   public void predictFootTrajectories(CoPTrajectoryGeneratorState state)
+   {
+      footTrajectoryPredictor.compute(state);
+   }
+
+   public void computeAngularMomentum(double time)
+   {
+      int segment = getSegmentContainingTime(time, 0, angularMomentumEstimators);
+      Trajectory3DReadOnly angularMomentumTrajectory = angularMomentumEstimators.get(segment);
+      angularMomentumTrajectory.compute(time);
+
+      predictedAngularMomentum.set(angularMomentumTrajectory.getPosition());
+      predictedAngularMomentumRate.set(angularMomentumTrajectory.getVelocity());
+   }
+
+   public void computeAngularMomentumTrajectories(List<? extends Trajectory3DReadOnly> comTrajectories)
+   {
+      computeAngularMomentumTrajectories(comTrajectories, footTrajectoryPredictor.getPredictedLeftFootTrajectories(), footTrajectoryPredictor.getPredictedRightFootTrajectories());
+   }
+
+   public void computeAngularMomentumTrajectories(List<? extends Trajectory3DReadOnly> comTrajectories,
+                                                  List<? extends Trajectory3DReadOnly> secondPotatoTrajectories,
+                                                  List<? extends Trajectory3DReadOnly> thirdPotatoTrajectories)
    {
       angularMomentumEstimators.clear();
       int activeSecondPotatoIdx = 0;

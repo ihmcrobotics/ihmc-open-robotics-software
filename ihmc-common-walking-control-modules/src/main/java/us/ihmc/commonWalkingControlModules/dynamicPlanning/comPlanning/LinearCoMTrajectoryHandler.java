@@ -16,7 +16,6 @@ import java.util.List;
 
 public class LinearCoMTrajectoryHandler
 {
-
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
    private final RecyclingArrayList<CoMTrajectory> trajectories = new RecyclingArrayList<>(CoMTrajectory::new);
