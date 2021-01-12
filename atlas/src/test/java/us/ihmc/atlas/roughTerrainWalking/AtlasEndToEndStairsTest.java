@@ -1,20 +1,19 @@
-package us.ihmc.valkyrie.roughTerrainWalking;
+package us.ihmc.atlas.roughTerrainWalking;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
-public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
+public class AtlasEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
    }
 
    @Test
@@ -32,7 +31,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Test
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
-      testStairs(testInfo, false, true, 0.9, 0.25, 0.0);
+      testStairs(testInfo, false, true, 0.9, 0.25, 0.04);
    }
 
    @Test
