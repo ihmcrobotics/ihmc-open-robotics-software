@@ -241,7 +241,7 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
                                                             sixthCoefficient, time, omega);
 
 
-      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPosition);
+      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
       CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
    }
