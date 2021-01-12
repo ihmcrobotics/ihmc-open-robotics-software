@@ -253,7 +253,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
       };
       
       
-      BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior, atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -271,6 +271,11 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
 //                                                                                RobotSide.RIGHT,
 //                                                                                "Moving Hand To Door Knob",
 //                                                                                4));
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.PINCH_GRIP);
+
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 
          }
       };
@@ -283,7 +288,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
            
             HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
-                                                                                                                          HandConfiguration.PINCH_GRIP);
+                                                                                                                          HandConfiguration.CLOSE);
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
  
          }
@@ -422,7 +427,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
       };
       
-      BehaviorAction moveRightHandClear = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveRightHandClear = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior, atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -436,13 +441,16 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
           //  [mRIGHT hand in MultiClickdoor_0_objID184 ( 0.492,  0.536,  0.949 ) orientation -1.0010885536716199, 0.13559477363777, -1.5315488331624716
 
             //
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.BASIC_GRIP);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 
          }
         
       };
       
       
-      BehaviorAction pushDoorOpen = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      BehaviorAction pushDoorOpen = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior, atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -454,6 +462,10 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                RobotSide.LEFT,
                                                                                "Pushing Door Open With Left Hand",
                                                                                2));
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.CLOSE);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
          }
 
       };
