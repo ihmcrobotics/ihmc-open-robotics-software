@@ -648,9 +648,9 @@ public class BalanceManager
    public FramePoint3DReadOnly getFirstExitCMPForToeOff(boolean isInTransfer)
    {
       if (isInTransfer)
-         return copTrajectory.getContactStateProviders().get(0).getCopStartPosition();
+         return copTrajectory.getContactStateProviders().get(0).getECMPStartPosition();
       else
-         return copTrajectory.getContactStateProviders().get(4).getCopEndPosition();
+         return copTrajectory.getContactStateProviders().get(4).getECMPEndPosition();
    }
 
    public double getTimeRemainingInCurrentState()

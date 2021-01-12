@@ -166,7 +166,7 @@ public class CoMTrajectoryPlannerVisualizer
 
          contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
          if (includeFlight)
-            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
+            contactStateProvider.setEndCopPosition(contactStateProvider.getECMPStartPosition());
          else
             contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
          initialContactStateProvider.setLinearCopVelocity();

@@ -148,8 +148,8 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
       }
       previousContactPhase.setLinearCopVelocity();
 
-      if (previousContactPhase.getCopStartPosition().containsNaN())
-         previousContactPhase.setStartCopPosition(previousContactPhase.getCopEndPosition());
+      if (previousContactPhase.getECMPStartPosition().containsNaN())
+         previousContactPhase.setStartCopPosition(previousContactPhase.getECMPEndPosition());
 
       contactPhase.setStartCopPosition(tempCoPWaypoint);
 

@@ -81,7 +81,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      FramePoint3D desiredDCM = new FramePoint3D(firstContact.getCopStartPosition());
+      FramePoint3D desiredDCM = new FramePoint3D(firstContact.getECMPStartPosition());
       desiredDCM.addZ(nominalHeight);
       FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
@@ -173,7 +173,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      FramePoint3D finalDCM = new FramePoint3D(secondContact.getCopStartPosition());
+      FramePoint3D finalDCM = new FramePoint3D(secondContact.getECMPStartPosition());
       finalDCM.addZ(nominalHeight);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPosition, planner.getDesiredCoMPosition(), epsilon);
@@ -186,8 +186,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       FramePoint3D initialDCM = new FramePoint3D();
       CapturePointTools.computeCapturePointPosition(comPosition, comVelocity, omega.getDoubleValue(), initialDCM);
       DCMTrajectoryTestTools
-            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
-                                      firstContact.getCopStartPosition(), initialDCM);
+            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getECMPStartPosition(), secondContact.getECMPStartPosition(),
+                                      firstContact.getECMPStartPosition(), initialDCM);
       initialDCM.addZ(nominalHeight);
 
       planner.compute(0.0);
@@ -197,8 +197,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 
       FramePoint3D initialVRP = new FramePoint3D();
       FramePoint3D finalVRP = new FramePoint3D();
-      initialVRP.set(firstContact.getCopStartPosition());
-      finalVRP.set(firstContact.getCopEndPosition());
+      initialVRP.set(firstContact.getECMPStartPosition());
+      finalVRP.set(firstContact.getECMPEndPosition());
       initialVRP.addZ(nominalHeight);
       finalVRP.addZ(nominalHeight);
 
@@ -242,7 +242,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      FramePoint3D finalICP = new FramePoint3D(secondContact.getCopStartPosition());
+      FramePoint3D finalICP = new FramePoint3D(secondContact.getECMPStartPosition());
       finalICP.addZ(nominalHeight);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPosition, planner.getDesiredCoMPosition(), epsilon);
@@ -258,11 +258,11 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
 
       FramePoint3D initialVRP = new FramePoint3D();
-      initialVRP.set(firstContact.getCopStartPosition());
+      initialVRP.set(firstContact.getECMPStartPosition());
       initialVRP.addZ(nominalHeight);
 
       FramePoint3D finalVRP = new FramePoint3D();
-      finalVRP.set(firstContact.getCopEndPosition());
+      finalVRP.set(firstContact.getECMPEndPosition());
       finalVRP.addZ(nominalHeight);
 
       Random random = new Random(1738L);
@@ -319,8 +319,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialDCM, planner.getDesiredDCMPosition(), epsilon);
 
-      FramePoint3D initialVRP = new FramePoint3D(firstContact.getCopStartPosition());
-      FramePoint3D finalVRP = new FramePoint3D(firstContact.getCopEndPosition());
+      FramePoint3D initialVRP = new FramePoint3D(firstContact.getECMPStartPosition());
+      FramePoint3D finalVRP = new FramePoint3D(firstContact.getECMPEndPosition());
       initialVRP.addZ(nominalHeight);
       finalVRP.addZ(nominalHeight);
 
@@ -346,14 +346,14 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    private FramePoint3DReadOnly recursivelyComputeInitialDCMLinear(List<ContactStateProvider> contactPhases, double nominalHeight, double omega)
    {
       int numberOfPhases = contactPhases.size();
-      FramePoint3D lastDCM = new FramePoint3D(contactPhases.get(numberOfPhases - 1).getCopStartPosition());
+      FramePoint3D lastDCM = new FramePoint3D(contactPhases.get(numberOfPhases - 1).getECMPStartPosition());
       lastDCM.addZ(nominalHeight);
       FramePoint3D initialDCM = new FramePoint3D(lastDCM);
       for (int i = numberOfPhases - 2; i >= 0; i--)
       {
          FramePoint3D endDCM = new FramePoint3D(initialDCM);
-         FramePoint3D initialVRP = new FramePoint3D(contactPhases.get(i).getCopStartPosition());
-         FramePoint3D endVRP = new FramePoint3D(contactPhases.get(i).getCopEndPosition());
+         FramePoint3D initialVRP = new FramePoint3D(contactPhases.get(i).getECMPStartPosition());
+         FramePoint3D endVRP = new FramePoint3D(contactPhases.get(i).getECMPEndPosition());
          initialVRP.addZ(nominalHeight);
          endVRP.addZ(nominalHeight);
 
@@ -405,7 +405,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 
             contactPhase = new SettableContactStateProvider();
             contactPhase.setTimeInterval(new TimeInterval(currentStartTime, segmentDuration + currentStartTime));
-            contactPhase.setStartCopPosition(contactSequence.get(contactIndex - 1).getCopEndPosition());
+            contactPhase.setStartCopPosition(contactSequence.get(contactIndex - 1).getECMPEndPosition());
 
             currentCoPPosition.add(EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 1.0, 0.0)));
 
@@ -434,8 +434,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM,
                                                               initialDCM.distance(new Point3D()) * epsilon);
 
-         FramePoint3D initialVRP = new FramePoint3D(contactSequence.get(0).getCopStartPosition());
-         FramePoint3D finalVRP = new FramePoint3D(contactSequence.get(0).getCopEndPosition());
+         FramePoint3D initialVRP = new FramePoint3D(contactSequence.get(0).getECMPStartPosition());
+         FramePoint3D finalVRP = new FramePoint3D(contactSequence.get(0).getECMPEndPosition());
          initialVRP.addZ(nominalHeight);
          finalVRP.addZ(nominalHeight);
 
@@ -543,8 +543,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 
-      FramePoint3D secondVRP = new FramePoint3D(firstContact.getCopStartPosition());
-      FramePoint3D thirdVRP = new FramePoint3D(secondContact.getCopStartPosition());
+      FramePoint3D secondVRP = new FramePoint3D(firstContact.getECMPStartPosition());
+      FramePoint3D thirdVRP = new FramePoint3D(secondContact.getECMPStartPosition());
       secondVRP.addZ(nominalHeight);
       thirdVRP.addZ(nominalHeight);
 

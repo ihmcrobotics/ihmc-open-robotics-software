@@ -94,7 +94,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
       vrpWaypointPools.clear();
       vrpWaypoints.clear();
 
-      FramePoint3DReadOnly finalCoP = contactSequence.get(contactSequence.size() - 1).getCopEndPosition();
+      FramePoint3DReadOnly finalCoP = contactSequence.get(contactSequence.size() - 1).getECMPEndPosition();
       FramePoint3D finalDCM = dcmCornerPointPool.add();
       finalDCM.set(finalCoP);
       finalDCM.addZ(nominalCoMHeight);
@@ -106,8 +106,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
          ContactStateProvider contact = contactSequence.get(i);
          double duration = contact.getTimeInterval().getDuration();
 
-         finalVRP.set(contact.getCopEndPosition());
-         startVRP.set(contact.getCopStartPosition());
+         finalVRP.set(contact.getECMPEndPosition());
+         startVRP.set(contact.getECMPStartPosition());
          finalVRP.addZ(nominalCoMHeight);
          startVRP.addZ(nominalCoMHeight);
 

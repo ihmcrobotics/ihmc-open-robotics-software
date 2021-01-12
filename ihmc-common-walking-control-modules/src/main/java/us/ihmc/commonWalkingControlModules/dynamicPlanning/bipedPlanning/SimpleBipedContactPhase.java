@@ -54,7 +54,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");
@@ -63,7 +63,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");
@@ -72,7 +72,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FrameVector3DReadOnly getCopStartVelocity()
+   public FrameVector3DReadOnly getECMPStartVelocity()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");
@@ -81,7 +81,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FrameVector3DReadOnly getCopEndVelocity()
+   public FrameVector3DReadOnly getECMPEndVelocity()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");

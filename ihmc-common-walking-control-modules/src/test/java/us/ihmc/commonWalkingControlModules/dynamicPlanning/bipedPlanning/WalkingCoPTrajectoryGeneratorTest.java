@@ -100,7 +100,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getCopEndPosition(), contactStateProviders.get(i + 1).getCopStartPosition(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
          assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
       }
 

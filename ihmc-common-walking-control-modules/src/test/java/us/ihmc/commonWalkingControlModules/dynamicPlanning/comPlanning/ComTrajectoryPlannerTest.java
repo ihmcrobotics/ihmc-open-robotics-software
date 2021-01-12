@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrix;
-import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -63,8 +62,8 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 
-      FramePoint3D secondVRP = new FramePoint3D(firstContact.getCopStartPosition());
-      FramePoint3D thirdVRP = new FramePoint3D(secondContact.getCopStartPosition());
+      FramePoint3D secondVRP = new FramePoint3D(firstContact.getECMPStartPosition());
+      FramePoint3D thirdVRP = new FramePoint3D(secondContact.getECMPStartPosition());
       secondVRP.addZ(nominalHeight);
       thirdVRP.addZ(nominalHeight);
 
