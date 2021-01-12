@@ -1,5 +1,3 @@
-import org.apache.commons.lang3.SystemUtils
-
 buildscript {
    dependencies {
       classpath("org.apache.commons:commons-lang3:3.9")
@@ -71,8 +69,25 @@ bytedecoDependencies {
 
 javacvDependencies {
    api("org.bytedeco:javacv-platform:1.5.4") {
-      exclude("org.bytedeco:librealsense2")
+      excludeBytedecoDependency("ffmpeg")
+      excludeBytedecoDependency("flycapture")
+      excludeBytedecoDependency("libdc1394")
+      excludeBytedecoDependency("libfreenect")
+      excludeBytedecoDependency("libfreenect2")
+      excludeBytedecoDependency("librealsense")
+      excludeBytedecoDependency("librealsense2")
+      excludeBytedecoDependency("videoinput")
+      excludeBytedecoDependency("artoolkitplus")
+      excludeBytedecoDependency("flandmark")
+      excludeBytedecoDependency("leptonica")
+      excludeBytedecoDependency("tesseract")
    }
+}
+
+fun ExternalModuleDependency.excludeBytedecoDependency(name: String)
+{
+   exclude(group = "org.bytedeco", module = name)
+   exclude(group = "org.bytedeco", module = "$name-platform")
 }
 
 testDependencies {
