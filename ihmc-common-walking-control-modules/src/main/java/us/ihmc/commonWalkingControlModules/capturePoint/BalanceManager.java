@@ -201,7 +201,7 @@ public class BalanceManager
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
    // fixme static mass
-   private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(10.0, registry);
+   private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator;
    private final ECMPTrajectoryCalculator ecmpTrajectory;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
@@ -223,6 +223,9 @@ public class BalanceManager
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
+
+      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(10.0, registry, controllerToolbox.getCenterOfMassJacobian(),
+                                                                           controllerToolbox.getReferenceFrames().getSoleFrames(), yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -519,7 +522,7 @@ public class BalanceManager
          }
 
          angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
-         angularMomentumCalculator.computeAngularMomentumTrajectories(comTrajectoryPlanner.getCoMTrajectories());
+         angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectories());
          angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
 
          ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getAngularMomentumTrajectories());
