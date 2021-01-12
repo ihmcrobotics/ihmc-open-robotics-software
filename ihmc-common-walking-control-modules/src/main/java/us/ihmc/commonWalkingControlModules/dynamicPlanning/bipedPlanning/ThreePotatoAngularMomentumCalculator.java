@@ -50,7 +50,7 @@ public class ThreePotatoAngularMomentumCalculator
 
    public void computeAngularMomentum(double time)
    {
-      int segment = getSegmentContainingTime(time, 0, angularMomentumEstimators);
+      int segment = getSegmentNumber(time, angularMomentumEstimators);
       Trajectory3DReadOnly angularMomentumTrajectory = angularMomentumEstimators.get(segment);
       angularMomentumTrajectory.compute(time);
 
@@ -60,7 +60,9 @@ public class ThreePotatoAngularMomentumCalculator
 
    public void computeAngularMomentumTrajectories(List<? extends Trajectory3DReadOnly> comTrajectories)
    {
-      computeAngularMomentumTrajectories(comTrajectories, footTrajectoryPredictor.getPredictedLeftFootTrajectories(), footTrajectoryPredictor.getPredictedRightFootTrajectories());
+      computeAngularMomentumTrajectories(comTrajectories,
+                                         footTrajectoryPredictor.getPredictedLeftFootTrajectories(),
+                                         footTrajectoryPredictor.getPredictedRightFootTrajectories());
    }
 
    public void computeAngularMomentumTrajectories(List<? extends Trajectory3DReadOnly> comTrajectories,
@@ -68,8 +70,8 @@ public class ThreePotatoAngularMomentumCalculator
                                                   List<? extends Trajectory3DReadOnly> thirdPotatoTrajectories)
    {
       angularMomentumEstimators.clear();
-      int activeSecondPotatoIdx = 0;
-      int activeThirdPotatoIdx = 0;
+
+      double globalStartTime = 0.0;
 
       for (int activeCoMIdx = 0; activeCoMIdx < comTrajectories.size(); activeCoMIdx++)
       {
@@ -78,48 +80,49 @@ public class ThreePotatoAngularMomentumCalculator
          angularMomentumTrajectory.reshape(5);
 
          Trajectory3DReadOnly comTrajectory = comTrajectories.get(activeCoMIdx);
-         double startTime = comTrajectory.getStartTime();
-         double endTime = comTrajectory.getStartTime();
-         angularMomentumTrajectory.setInterval(startTime, endTime);
+         double duration = Math.min(comTrajectory.getDuration(), 10.0);
 
-         activeSecondPotatoIdx = getSegmentContainingTime(startTime, activeSecondPotatoIdx, secondPotatoTrajectories);
-         activeThirdPotatoIdx = getSegmentContainingTime(startTime, activeThirdPotatoIdx, thirdPotatoTrajectories);
+         angularMomentumTrajectory.setInterval(0.0, duration);
 
-         double segmentDt = Math.min((endTime - startTime) / 5, estimationDt);
+         double segmentDt = Math.min(duration / 5, estimationDt);
 
-         if (activeSecondPotatoIdx > 0 && activeThirdPotatoIdx > 0)
+         for (double time = 0.0; time <= duration; time += segmentDt)
          {
-            for (double time = startTime; time <= endTime; time += segmentDt)
+            double globalTime = time + globalStartTime;
+            int activeSecondPotatoIdx = getSegmentNumber(globalTime, secondPotatoTrajectories);
+            int activeThirdPotatoIdx = getSegmentNumber(globalTime, thirdPotatoTrajectories);
+
+            if (activeSecondPotatoIdx < 0 && activeThirdPotatoIdx < 0)
+               break;
+
+            comTrajectory.compute(time);
+            totalAngularMomentum.setToZero();
+
+            if (activeSecondPotatoIdx > -1)
             {
-               comTrajectory.compute(time);
+               Trajectory3DReadOnly secondPotatoTrajectory = secondPotatoTrajectories.get(activeSecondPotatoIdx);
+               double timeInSegment = getTimeInSegment(activeSecondPotatoIdx, globalTime, secondPotatoTrajectories);
+               secondPotatoTrajectory.compute(timeInSegment);
 
-               totalAngularMomentum.setToZero();
-
-               if (activeSecondPotatoIdx > 0)
-               {
-                  Trajectory3DReadOnly secondPotatoTrajectory = secondPotatoTrajectories.get(activeSecondPotatoIdx);
-                  secondPotatoTrajectory.compute(time);
-
-                  computeAngularMomentumAtInstant(comTrajectory, secondPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum);
-                  totalAngularMomentum.add(angularMomentum);
-               }
-
-               if (activeThirdPotatoIdx > 0)
-               {
-                  Trajectory3DReadOnly thirdPotatoTrajectory = thirdPotatoTrajectories.get(activeThirdPotatoIdx);
-                  thirdPotatoTrajectory.compute(time);
-
-                  computeAngularMomentumAtInstant(comTrajectory, thirdPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum);
-                  totalAngularMomentum.add(angularMomentum);
-               }
-
-               angularMomentumEstimators.get(activeCoMIdx).addObjectivePosition(time, totalAngularMomentum);
-
-               activeSecondPotatoIdx = getSegmentContainingTime(time, activeSecondPotatoIdx, secondPotatoTrajectories);
-               activeThirdPotatoIdx = getSegmentContainingTime(time, activeThirdPotatoIdx, thirdPotatoTrajectories);
+               computeAngularMomentumAtInstant(comTrajectory, secondPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum);
+               totalAngularMomentum.add(angularMomentum);
             }
+
+            if (activeThirdPotatoIdx > -1)
+            {
+               Trajectory3DReadOnly thirdPotatoTrajectory = thirdPotatoTrajectories.get(activeThirdPotatoIdx);
+               double timeInSegment = getTimeInSegment(activeThirdPotatoIdx, globalTime, thirdPotatoTrajectories);
+               thirdPotatoTrajectory.compute(timeInSegment);
+
+               computeAngularMomentumAtInstant(comTrajectory, thirdPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum);
+               totalAngularMomentum.add(angularMomentum);
+            }
+
+            angularMomentumEstimators.get(activeCoMIdx).addObjectivePosition(time, totalAngularMomentum);
          }
 
+
+         globalStartTime += duration;
          angularMomentumTrajectory.solve();
       }
    }
@@ -129,7 +132,10 @@ public class ThreePotatoAngularMomentumCalculator
       return angularMomentumEstimators;
    }
 
-   private void computeAngularMomentumAtInstant(Trajectory3DReadOnly comTrajectory, Trajectory3DReadOnly potatoTrajectory, double potatoMass, Vector3DBasics angularMomentumToPack)
+   private void computeAngularMomentumAtInstant(Trajectory3DReadOnly comTrajectory,
+                                                Trajectory3DReadOnly potatoTrajectory,
+                                                double potatoMass,
+                                                Vector3DBasics angularMomentumToPack)
    {
       relativePotatoPosition.sub(potatoTrajectory.getPosition(), comTrajectory.getPosition());
       relativePotatoVelocity.sub(potatoTrajectory.getVelocity(), comTrajectory.getVelocity());
@@ -138,23 +144,25 @@ public class ThreePotatoAngularMomentumCalculator
       angularMomentumToPack.scale(potatoMass);
    }
 
-   public static int getSegmentContainingTime(double time, int previousCheckedSegment, List<? extends TimeIntervalReadOnly> segments)
+   public int getSegmentNumber(double time, List<? extends TimeIntervalReadOnly> segments)
    {
+      double startTime = 0.0;
       for (int i = 0; i < segments.size(); i++)
       {
-         int wrappedIdx = wrapIndex(previousCheckedSegment + i, segments);
-         if (segments.get(wrappedIdx).intervalContains(time))
-            return wrappedIdx;
+         if (segments.get(i).intervalContains(time - startTime))
+            return i;
+
+         startTime += segments.get(i).getDuration();
       }
 
       return -1;
    }
 
-   public static int wrapIndex(int idx, List<?> list)
+   public double getTimeInSegment(int segmentNumber, double time, List<? extends TimeIntervalReadOnly> segments)
    {
-      if (idx > list.size() - 1)
-         return idx - list.size();
+      for (int i = 0; i < segmentNumber; i++)
+         time -= segments.get(i).getDuration();
 
-      return idx;
+      return time;
    }
 }
