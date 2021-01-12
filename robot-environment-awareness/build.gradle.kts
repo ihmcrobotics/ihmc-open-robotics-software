@@ -36,9 +36,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-robot-data-logger:0.20.5")
 
-   api("org.bytedeco:javacv-platform:1.5.4") {
-      exclude("org.bytedeco:librealsense2")
-   }
+   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
 }
 
 applicationDependencies {
