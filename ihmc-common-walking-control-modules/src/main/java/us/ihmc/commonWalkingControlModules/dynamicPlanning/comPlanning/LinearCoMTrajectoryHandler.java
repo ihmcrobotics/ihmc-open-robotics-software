@@ -98,13 +98,14 @@ public class LinearCoMTrajectoryHandler
          TimeIntervalReadOnly timeInterval = contacts.get(i).getTimeInterval();
          CoMTrajectory comTrajectory = comTrajectories.add();
          comTrajectory.setCoefficients(coefficientArray, startRow);
-         comTrajectory.set(timeInterval);
+         comTrajectory.setInterval(0.0, timeInterval.getDuration());
          comTrajectory.setOmega(omega);
-         startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
 
          computeVRPBoundaryConditionsFromCoefficients(startRow, coefficientArray, omega, timeInterval.getDuration(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          Polynomial3D vrpTrajectory = vrpTrajectories.add();
          vrpTrajectory.setCubic(timeInterval.getStartTime(), timeInterval.getEndTime(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+
+         startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
 
       hasTrajectory = true;
