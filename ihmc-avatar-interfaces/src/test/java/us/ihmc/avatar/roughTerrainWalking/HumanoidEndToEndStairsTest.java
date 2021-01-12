@@ -37,7 +37,6 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
