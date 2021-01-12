@@ -64,60 +64,33 @@ openpnpDependencies {
 }
 
 bytedecoDependencies {
-   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
 }
 
 val javaCVVersion = "1.5.4"
 
 javacvDependencies {
-   apiExcludingBytedeco("org.bytedeco:javacv-platform:$javaCVVersion")
-   apiExcludingBytedeco("org.bytedeco:javacv:$javaCVVersion")
-   includeBytedecoForOSes("javacpp")
-   includeBytedecoForOSes("openblas", "0.3.10-")
-   includeBytedecoForOSes("opencv", "4.4.0-")
-
-//   includeJavaCVForOS("linux-x86_64")
-//   includeJavaCVForOS("windows-x86_64")
-//   includeJavaCVForOS("macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
 }
 
-fun us.ihmc.build.IHMCDependenciesExtension.includeBytedecoForOSes(name: String, versionPrefix: String = "")
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiExcludingBytedeco("org.bytedeco:$name:$versionPrefix$javaCVVersion")
-   apiExcludingBytedeco("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
-   apiExcludingBytedeco("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
-   apiExcludingBytedeco("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
 }
 
-fun us.ihmc.build.IHMCDependenciesExtension.apiExcludingBytedeco(dependencyNotation: String)
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
 {
    api(dependencyNotation) {
       exclude(group = "org.bytedeco")
    }
-}
-
-fun us.ihmc.build.IHMCDependenciesExtension.includeJavaCVForOS(os: String)
-{
-   api("org.bytedeco:javacv-platform:$javaCVVersion:$os") {
-      excludeBytedecoDependency("ffmpeg")
-      excludeBytedecoDependency("flycapture")
-      excludeBytedecoDependency("libdc1394")
-      excludeBytedecoDependency("libfreenect")
-      excludeBytedecoDependency("libfreenect2")
-      excludeBytedecoDependency("librealsense")
-      excludeBytedecoDependency("librealsense2")
-      excludeBytedecoDependency("videoinput")
-      excludeBytedecoDependency("artoolkitplus")
-      excludeBytedecoDependency("flandmark")
-      excludeBytedecoDependency("leptonica")
-      excludeBytedecoDependency("tesseract")
-   }
-}
-
-fun ExternalModuleDependency.excludeBytedecoDependency(name: String)
-{
-   exclude(group = "org.bytedeco", module = name)
-   exclude(group = "org.bytedeco", module = "$name-platform")
 }
 
 testDependencies {
