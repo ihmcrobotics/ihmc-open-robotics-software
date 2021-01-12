@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
 import java.util.List;
 
@@ -37,19 +38,27 @@ public class ECMPTrajectoryCalculator
          contactStateProviders.add().set(copTrajectories.get(i));
       }
 
-      for (int i = 0; i < Math.min(copTrajectories.size(), internalAngularMomentumTrajectories.size()); i++)
+      for (int i = 0; i < copTrajectories.size(); i++)
       {
          ContactStateProvider copTrajectory = copTrajectories.get(i);
+         double startTime = copTrajectory.getTimeInterval().getStartTime();
+         int amStartSegmentId = getSegmentNumber(startTime, internalAngularMomentumTrajectories);
+         double amStartTime = getTimeInSegment(amStartSegmentId, startTime, internalAngularMomentumTrajectories);
+
+         double endTime = copTrajectory.getTimeInterval().getEndTime();
+         int amEndSegmentId = getSegmentNumber(endTime, internalAngularMomentumTrajectories);
+         double amEndTime = getTimeInSegment(amEndSegmentId, endTime, internalAngularMomentumTrajectories);
+
+         if (amStartSegmentId < 0 || amEndSegmentId < 0)
+            return;
+
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
-         Trajectory3DReadOnly angularMomentumTrajectory = internalAngularMomentumTrajectories.get(i);
 
-         if (!copTrajectory.getTimeInterval().epsilonEquals(angularMomentumTrajectory, 1e-4))
-            throw new IllegalArgumentException("The time intervals are not proper.");
+         Trajectory3DReadOnly angularMomentumTrajectoryAtStart = internalAngularMomentumTrajectories.get(amStartSegmentId);
+         angularMomentumTrajectoryAtStart.compute(amStartTime);
 
-         double startTime = angularMomentumTrajectory.getStartTime();
-         angularMomentumTrajectory.compute(startTime);
-         Vector3DReadOnly initialAngularRate = angularMomentumTrajectory.getVelocity();
-         Vector3DReadOnly initialAngularAcceleration = angularMomentumTrajectory.getAcceleration();
+         Vector3DReadOnly initialAngularRate = angularMomentumTrajectoryAtStart.getVelocity();
+         Vector3DReadOnly initialAngularAcceleration = angularMomentumTrajectoryAtStart.getAcceleration();
 
          // These are scaled by a negative one because we want the total angular momentum to be zero
          ecmpPosition.setX(initialAngularRate.getY());
@@ -65,11 +74,12 @@ public class ECMPTrajectoryCalculator
          eCMPTrajectory.setStartCopPosition(ecmpPosition);
          eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
 
-         double endTime = angularMomentumTrajectory.getEndTime();
+         // Make sure to do this separately, as they may be the same trajectory objects
+         Trajectory3DReadOnly angularMomentumTrajectoryAtEnd = internalAngularMomentumTrajectories.get(amEndSegmentId);
+         angularMomentumTrajectoryAtEnd.compute(amEndTime);
 
-         angularMomentumTrajectory.compute(endTime);
-         Vector3DReadOnly finalAngularRate = angularMomentumTrajectory.getVelocity();
-         Vector3DReadOnly finalAngularAcceleration = angularMomentumTrajectory.getAcceleration();
+         Vector3DReadOnly finalAngularRate = angularMomentumTrajectoryAtEnd.getVelocity();
+         Vector3DReadOnly finalAngularAcceleration = angularMomentumTrajectoryAtEnd.getAcceleration();
 
          ecmpPosition.setX(finalAngularRate.getY());
          ecmpPosition.setY(-finalAngularRate.getX());
@@ -84,6 +94,28 @@ public class ECMPTrajectoryCalculator
          eCMPTrajectory.setEndCopPosition(ecmpPosition);
          eCMPTrajectory.setEndCopVelocity(ecmpVelocity);
       }
+   }
+
+   public int getSegmentNumber(double time, List<? extends TimeIntervalReadOnly> segments)
+   {
+      double startTime = 0.0;
+      for (int i = 0; i < segments.size(); i++)
+      {
+         if (segments.get(i).intervalContains(time - startTime))
+            return i;
+
+         startTime += segments.get(i).getDuration();
+      }
+
+      return -1;
+   }
+
+   public double getTimeInSegment(int segmentNumber, double time, List<? extends TimeIntervalReadOnly> segments)
+   {
+      for (int i = 0; i < segmentNumber; i++)
+         time -= segments.get(i).getDuration();
+
+      return time;
    }
 
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()

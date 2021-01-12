@@ -201,7 +201,7 @@ public class BalanceManager
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
    // fixme static mass
-   private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(5.0, registry);
+   private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(20.0, registry);
    private final ECMPTrajectoryCalculator ecmpTrajectory;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
