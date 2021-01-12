@@ -3,6 +3,7 @@ package us.ihmc.utilities.ros;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
@@ -22,10 +23,13 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import sensor_msgs.CameraInfo;
+import sensor_msgs.CompressedImage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.ROS1Subscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class RosMainNode implements NodeMain
@@ -106,6 +110,22 @@ public class RosMainNode implements NodeMain
       subscribers.put(topicName, subscriber);
    }
 
+   public <T extends Message> void attachSubscriber(String topicName, Class<T> type, Consumer<T> callback)
+   {
+      if (type.equals(CompressedImage.class))
+      {
+         attachSubscriber(topicName, new ROS1Subscriber<>(CompressedImage._TYPE, callback).getSubscriber());
+      }
+      else if (type.equals(CameraInfo.class))
+      {
+         attachSubscriber(topicName, new ROS1Subscriber<>(CameraInfo._TYPE, callback).getSubscriber());
+      }
+      else
+      {
+         throw new RuntimeException("Implement type: " + type);
+      }
+   }
+
    public void removeSubscriber(RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       if (subscribers.containsValue(subscriber) && rosSubscribers.containsKey(subscriber))
@@ -132,6 +152,7 @@ public class RosMainNode implements NodeMain
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
+   @Override
    public void onStart(ConnectedNode connectedNode)
    {
       parameters = connectedNode.getParameterTree();
@@ -204,17 +225,22 @@ public class RosMainNode implements NodeMain
       return connectedNode.getCurrentTime();
    }
 
+   @Override
    public void onShutdown(Node node)
    {
       isShutdownInProgress = true;
    }
 
+   @Override
    public void onShutdownComplete(Node node)
    {
+
    }
 
+   @Override
    public void onError(Node node, Throwable throwable)
    {
+
    }
 
    public final GraphName getDefaultNodeName()

@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.DirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
-import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXVideoViewOverlay;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -23,9 +23,9 @@ public class BehaviorDirectRobotUI extends Group
    private JavaFXLivePlanarRegionsGraphic realsenseRegionsGraphic;
    private JavaFXLivePlanarRegionsGraphic mapRegionsGraphic;
    private JavaFXLivePlanarRegionsGraphic supportRegionsGraphic;
-   private JavaFXROS2VideoViewOverlay multisenseVideoOverlay;
+   private JavaFXVideoViewOverlay multisenseVideoOverlay;
    private StackPane multisenseVideoStackPane;
-   private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
+   private JavaFXVideoViewOverlay realsenseVideoOverlay;
    private StackPane realsenseVideoStackPane;
 
    public BehaviorDirectRobotUI()
@@ -57,7 +57,7 @@ public class BehaviorDirectRobotUI extends Group
       supportRegionsGraphic.setEnabled(false);
       getChildren().add(supportRegionsGraphic);
 
-      multisenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
+      multisenseVideoOverlay = new JavaFXVideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
       multisenseVideoStackPane = new StackPane(multisenseVideoOverlay.getNode());
       multisenseVideoStackPane.setVisible(false);
       AnchorPane.setTopAnchor(multisenseVideoStackPane, 10.0);
@@ -65,7 +65,7 @@ public class BehaviorDirectRobotUI extends Group
       multisenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> multisenseVideoOverlay.toggleMode());
       mainAnchorPane.getChildren().add(multisenseVideoStackPane);
 
-      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 640, 480, false, false));
+      realsenseVideoOverlay = new JavaFXVideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 640, 480, false, false));
       realsenseVideoStackPane = new StackPane(realsenseVideoOverlay.getNode());
       realsenseVideoStackPane.setVisible(false);
       AnchorPane.setBottomAnchor(realsenseVideoStackPane, 10.0);
