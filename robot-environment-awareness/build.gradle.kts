@@ -53,6 +53,7 @@ mainDependencies {
    {
       api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
    }
+   api("us.ihmc:ihmc-ros-tools:source")
 }
 
 applicationDependencies {

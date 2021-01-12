@@ -10,12 +10,26 @@ import java.util.List;
 
 public class RawGPUPlanarRegionSubscriber extends AbstractRosTopicSubscriber<map_sense.RawGPUPlanarRegionList> {
 
+    private RawGPUPlanarRegionList planarRegionList;
+    private boolean regionListAvailable = false;
+
+    public boolean regionListIsAvailable() {
+        return regionListAvailable;
+    }
+
+    public RawGPUPlanarRegionList getPlanarRegionList() {
+        this.regionListAvailable = false;
+        return planarRegionList;
+    }
+
     public RawGPUPlanarRegionSubscriber() {
         super(RawGPUPlanarRegionList._TYPE);
     }
 
     @Override
     public void onNewMessage(RawGPUPlanarRegionList message) {
+        this.planarRegionList = message;
+        this.regionListAvailable = true;
         System.out.println("Received Message:" + message.getNumOfRegions());
         for (int i = 0; i < message.getNumOfRegions(); i++) {
             List<RawGPUPlanarRegion> regions = message.getRegions();
