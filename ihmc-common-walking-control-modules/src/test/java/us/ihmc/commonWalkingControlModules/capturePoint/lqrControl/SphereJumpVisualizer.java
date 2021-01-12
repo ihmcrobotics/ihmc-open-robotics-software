@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -216,8 +215,8 @@ public class SphereJumpVisualizer
       {
          SettableContactStateProvider newContact = new SettableContactStateProvider();
          newContact.getTimeInterval().set(contact.getTimeInterval());
-         FramePoint2D start = new FramePoint2D(contact.getCopStartPosition());
-         FramePoint2D end = new FramePoint2D(contact.getCopEndPosition());
+         FramePoint2D start = new FramePoint2D(contact.getECMPStartPosition());
+         FramePoint2D end = new FramePoint2D(contact.getECMPEndPosition());
 
          start.add(shift.getX(), shift.getY());
          end.add(shift.getX(), shift.getY());

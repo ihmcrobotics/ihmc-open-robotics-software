@@ -12,11 +12,9 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -218,8 +216,8 @@ public class LQRMomentumControllerSimulation
       {
          SettableContactStateProvider newContact = new SettableContactStateProvider();
          newContact.getTimeInterval().set(contact.getTimeInterval());
-         FramePoint2D start = new FramePoint2D(contact.getCopStartPosition());
-         FramePoint2D end = new FramePoint2D(contact.getCopEndPosition());
+         FramePoint2D start = new FramePoint2D(contact.getECMPStartPosition());
+         FramePoint2D end = new FramePoint2D(contact.getECMPEndPosition());
 
          start.add(shift.getX(), shift.getY());
          end.add(shift.getX(), shift.getY());

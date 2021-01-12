@@ -55,8 +55,8 @@ public class CoPPointViewer
 
       for (;i < Math.min(vrpSegments.size(), maxPoints); i++)
       {
-         copStartPoints.get(i).set(vrpSegments.get(i).getCopStartPosition());
-         copEndPoints.get(i).set(vrpSegments.get(i).getCopEndPosition());
+         copStartPoints.get(i).set(vrpSegments.get(i).getECMPStartPosition());
+         copEndPoints.get(i).set(vrpSegments.get(i).getECMPEndPosition());
       }
       for (;i < maxPoints; i++)
       {

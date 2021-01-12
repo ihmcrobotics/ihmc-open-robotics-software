@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,7 +73,7 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getCopStartPosition());
+      contactState.setEndCopPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
       contactState.setLinearCopVelocity();
 

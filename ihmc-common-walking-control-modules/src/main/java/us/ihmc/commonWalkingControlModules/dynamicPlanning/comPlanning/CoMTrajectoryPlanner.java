@@ -697,7 +697,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       if (contactState.isLoadBearing())
       {
          constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
-         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, contactSequence.get(sequenceId).getCopStartVelocity());
+         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, contactSequence.get(sequenceId).getECMPStartVelocity());
       }
       else
       {
@@ -720,7 +720,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       if (contactState.isLoadBearing())
       {
          constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
-         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, contactSequence.get(sequenceId).getCopEndVelocity());
+         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, contactSequence.get(sequenceId).getECMPEndVelocity());
       }
       else
       {

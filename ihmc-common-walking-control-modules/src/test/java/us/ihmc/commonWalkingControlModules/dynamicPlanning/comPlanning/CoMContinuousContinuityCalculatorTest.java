@@ -113,9 +113,9 @@ public class CoMContinuousContinuityCalculatorTest
       assertEquals(CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(0.0), calculator.coefficientMultipliersSparse.get(row, 4), epsilon);
       assertEquals(CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction(), calculator.coefficientMultipliersSparse.get(row, 5), epsilon);
 
-      assertEquals(contact1.getCopStartPosition().getX(), calculator.xEquivalents.get(row, 0), epsilon);
-      assertEquals(contact1.getCopStartPosition().getY(), calculator.yEquivalents.get(row, 0), epsilon);
-      assertEquals(contact1.getCopStartPosition().getZ() + height, calculator.zEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getX(), calculator.xEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getY(), calculator.yEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getZ() + height, calculator.zEquivalents.get(row, 0), epsilon);
 
       // set the VRP velocity at the beginning being equivalent to the end of the segment
       row = 3;

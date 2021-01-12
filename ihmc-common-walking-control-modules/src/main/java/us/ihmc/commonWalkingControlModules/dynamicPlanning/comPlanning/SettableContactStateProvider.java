@@ -43,10 +43,10 @@ public class SettableContactStateProvider implements ContactStateProvider
 
    public void set(ContactStateProvider other)
    {
-      setStartCopPosition(other.getCopStartPosition());
-      setEndCopPosition(other.getCopEndPosition());
-      setStartCopVelocity(other.getCopStartVelocity());
-      setEndCopVelocity(other.getCopEndVelocity());
+      setStartCopPosition(other.getECMPStartPosition());
+      setEndCopPosition(other.getECMPEndPosition());
+      setStartCopVelocity(other.getECMPStartVelocity());
+      setEndCopVelocity(other.getECMPEndVelocity());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
    }
@@ -88,7 +88,7 @@ public class SettableContactStateProvider implements ContactStateProvider
 
    public void setLinearCopVelocity()
    {
-      startCopVelocity.sub(getCopEndPosition(), getCopStartPosition());
+      startCopVelocity.sub(getECMPEndPosition(), getECMPStartPosition());
       startCopVelocity.scale(1.0 / Math.min(getTimeInterval().getDuration(), 10.0));
       endCopVelocity.set(startCopVelocity);
    }
@@ -113,22 +113,22 @@ public class SettableContactStateProvider implements ContactStateProvider
       bodiesInContact.add(name);
    }
 
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
       return startCopPosition;
    }
 
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
       return endCopPosition;
    }
 
-   public FrameVector3DReadOnly getCopStartVelocity()
+   public FrameVector3DReadOnly getECMPStartVelocity()
    {
       return startCopVelocity;
    }
 
-   public FrameVector3DReadOnly getCopEndVelocity()
+   public FrameVector3DReadOnly getECMPEndVelocity()
    {
       return endCopVelocity;
    }
@@ -161,7 +161,7 @@ public class SettableContactStateProvider implements ContactStateProvider
    public void setStartFromEnd(ContactStateProvider previousContactState)
    {
       setStartTime(previousContactState.getTimeInterval().getEndTime());
-      setStartCopPosition(previousContactState.getCopEndPosition());
+      setStartCopPosition(previousContactState.getECMPEndPosition());
    }
 
    public List<String> getBodiesInContact()

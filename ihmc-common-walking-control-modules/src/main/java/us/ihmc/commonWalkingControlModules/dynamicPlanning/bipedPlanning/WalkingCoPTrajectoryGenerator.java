@@ -295,7 +295,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          if (contactStateProvider.getTimeInterval().intervalContains(time))
          {
             double alpha = (time - contactStateProvider.getTimeInterval().getStartTime()) / contactStateProvider.getTimeInterval().getDuration();
-            desiredCoP.interpolate(contactStateProvider.getCopStartPosition(), contactStateProvider.getCopEndPosition(), alpha);
+            desiredCoP.interpolate(contactStateProvider.getECMPStartPosition(), contactStateProvider.getECMPEndPosition(), alpha);
             break;
          }
          else
@@ -346,7 +346,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getCopStartPosition());
+      contactState.setEndCopPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
       contactState.setLinearCopVelocity();
    }
@@ -386,7 +386,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                     boolean setupForContinuityMaintaining)
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      previousCoPPosition.setIncludingFrame(previousContactState.getCopStartPosition());
+      previousCoPPosition.setIncludingFrame(previousContactState.getECMPStartPosition());
       previousCoPPosition.changeFrameAndProjectToXYPlane(previousPolygon.getReferenceFrame());
 
       if (!previousPolygon.isPointInside(previousCoPPosition))
