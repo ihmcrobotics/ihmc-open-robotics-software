@@ -139,7 +139,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                       yoTime,
                                                       ros2Node,
                                                       atlasPrimitiveActions,
-                                                      doorOpenDetectorBehaviorService,
+                                                      doorOpenDetectorBehaviorService,referenceFrames,
                                                       yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       
