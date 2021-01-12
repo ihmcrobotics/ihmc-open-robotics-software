@@ -29,7 +29,7 @@ public class ECMPTrajectoryCalculator
    private final FrameVector3D ecmpVelocity = new FrameVector3D();
 
    // TODO in its current form, this assumes that the desired net angular momentum rate is zero.
-   public void computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, List<Trajectory3DReadOnly> internalAngularMomentumTrajectories)
+   public void computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, List<? extends Trajectory3DReadOnly> internalAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
       for (int i = 0; i < copTrajectories.size(); i++)
