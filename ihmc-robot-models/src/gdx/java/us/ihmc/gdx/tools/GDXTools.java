@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;

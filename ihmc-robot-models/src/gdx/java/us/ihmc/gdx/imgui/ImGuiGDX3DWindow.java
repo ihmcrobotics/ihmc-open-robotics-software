@@ -3,9 +3,9 @@ package us.ihmc.gdx.imgui;
 import imgui.ImColor;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
-import us.ihmc.gdx.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 
-import static us.ihmc.gdx.GDX3DSceneManager.CLEAR_COLOR;
+import static us.ihmc.gdx.sceneManager.GDX3DSceneManager.CLEAR_COLOR;
 
 public class ImGuiGDX3DWindow
 {

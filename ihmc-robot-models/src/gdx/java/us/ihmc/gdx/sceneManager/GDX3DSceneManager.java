@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -14,8 +14,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.gdx.application.GDXRenderable;
-import us.ihmc.gdx.application.GDXSceneLevel;
+import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.mesh;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import com.badlogic.gdx.graphics.*;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static us.ihmc.gdx.GDXDataTypeTools.*;
+import static us.ihmc.gdx.tools.GDXDataTypeTools.*;
 
 public class GDXMeshDataInterpreter
 {

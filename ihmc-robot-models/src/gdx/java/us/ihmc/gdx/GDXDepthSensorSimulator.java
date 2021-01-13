@@ -11,7 +11,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.gdx.application.GDXSceneLevel;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 
 import java.util.Random;
 

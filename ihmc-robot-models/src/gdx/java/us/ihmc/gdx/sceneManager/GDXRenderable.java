@@ -1,4 +1,4 @@
-package us.ihmc.gdx.application;
+package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 
