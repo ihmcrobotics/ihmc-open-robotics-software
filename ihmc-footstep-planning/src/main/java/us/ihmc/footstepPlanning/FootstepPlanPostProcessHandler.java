@@ -19,6 +19,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class FootstepPlanPostProcessHandler
@@ -32,9 +34,7 @@ public class FootstepPlanPostProcessHandler
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   private Consumer<FootstepPlannerOutput> statusCallback = result ->
-   {
-   };
+   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
    private double nominalSwingTrajectoryLength;
 
    public FootstepPlanPostProcessHandler(FootstepPlannerParametersReadOnly footstepPlannerParameters,
@@ -76,7 +76,7 @@ public class FootstepPlanPostProcessHandler
                                request.getSwingPlannerType());
       }
 
-      statusCallback.accept(output);
+      statusCallbacks.forEach(callback -> callback.accept(output));
    }
 
    public void performPostProcessing(PlanarRegionsList planarRegionsList,
@@ -184,9 +184,9 @@ public class FootstepPlanPostProcessHandler
                                      + (1.0 - 2.0 * nominalSwingProportion) * nominalSwingLength;
    }
 
-   public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)
+   public void setStatusCallbacks(List<Consumer<FootstepPlannerOutput>> statusCallbacks)
    {
-      this.statusCallback = statusCallback;
+      this.statusCallbacks = statusCallbacks;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()
