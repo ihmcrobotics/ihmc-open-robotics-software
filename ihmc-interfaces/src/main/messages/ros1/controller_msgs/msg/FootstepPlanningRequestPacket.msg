@@ -21,12 +21,6 @@ geometry_msgs/Pose start_left_foot_pose
 # Starting right foot pose
 geometry_msgs/Pose start_right_foot_pose
 
-# Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-geometry_msgs/Point[] initial_left_contact_points_2d
-
-# Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-geometry_msgs/Point[] initial_right_contact_points_2d
-
 # Goal left foot pose
 geometry_msgs/Pose goal_left_foot_pose
 
