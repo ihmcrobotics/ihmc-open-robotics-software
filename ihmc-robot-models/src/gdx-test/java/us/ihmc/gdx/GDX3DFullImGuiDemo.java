@@ -8,6 +8,9 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
 import us.ihmc.gdx.imgui.ImGuiGDX3DWindow;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.tools.string.StringTools;
 
 public class GDX3DFullImGuiDemo

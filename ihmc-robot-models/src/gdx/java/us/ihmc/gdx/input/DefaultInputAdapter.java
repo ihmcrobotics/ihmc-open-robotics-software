@@ -1,7 +1,8 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.InputProcessor;
 
+// TODO: Delete?
 public interface DefaultInputAdapter extends InputProcessor
 {
    @Override

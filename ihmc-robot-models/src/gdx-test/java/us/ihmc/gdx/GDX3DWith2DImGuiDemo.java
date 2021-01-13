@@ -10,6 +10,9 @@ import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 
 import static org.lwjgl.glfw.GLFW.*;
 

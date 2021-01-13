@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.mesh;
 
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.euclid.axisAngle.AxisAngle;

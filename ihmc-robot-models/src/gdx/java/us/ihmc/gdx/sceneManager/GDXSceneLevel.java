@@ -1,4 +1,4 @@
-package us.ihmc.gdx.application;
+package us.ihmc.gdx.sceneManager;
 
 public enum GDXSceneLevel
 {
