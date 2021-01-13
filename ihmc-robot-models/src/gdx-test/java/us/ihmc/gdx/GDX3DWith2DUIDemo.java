@@ -18,66 +18,65 @@ public class GDX3DWith2DUIDemo
 
    public GDX3DWith2DUIDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
-   }
-
-   class PrivateGDXApplication extends GDX3DApplication
-   {
-      @Override
-      public void create()
+      GDX3DApplication baseApplication = new GDX3DApplication();
+      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         super.create();
+         @Override
+         public void create()
+         {
+            baseApplication.create();
 
-         setViewportBounds(0,
-                           (int) (getCurrentWindowHeight() * 1.0 / 4.0),
-                           (int) (getCurrentWindowWidth() * 1.0),
-                           (int) (getCurrentWindowHeight() * 3.0 / 4.0));
+            baseApplication.setViewportBounds(0,
+                              (int) (baseApplication.getCurrentWindowHeight() * 1.0 / 4.0),
+                              (int) (baseApplication.getCurrentWindowWidth() * 1.0),
+                              (int) (baseApplication.getCurrentWindowHeight() * 3.0 / 4.0));
 
-         coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-         boxes = new BoxesDemoModel().newInstance();
+            coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+            boxes = new BoxesDemoModel().newInstance();
 
-         stage = new Stage(new ScreenViewport());
-         addInputProcessor(stage);
+            stage = new Stage(new ScreenViewport());
+            baseApplication.addInputProcessor(stage);
 
-         table = new Table();
-         table.setFillParent(true);
-         //      table.setDebug(true);
-         stage.addActor(table);
+            table = new Table();
+            table.setFillParent(true);
+            //      table.setDebug(true);
+            stage.addActor(table);
 
-         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+            Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-         table.left();
-         table.top();
-         TextButton button1 = new TextButton("Button 1", skin);
-         table.add(button1);
+            table.left();
+            table.top();
+            TextButton button1 = new TextButton("Button 1", skin);
+            table.add(button1);
 
-         TextButton button2 = new TextButton("Button 2", skin);
-         table.add(button2);
-      }
+            TextButton button2 = new TextButton("Button 2", skin);
+            table.add(button2);
+         }
 
-      @Override
-      public void render()
-      {
-         renderBefore();
+         @Override
+         public void render()
+         {
+            baseApplication.renderBefore();
 
-         getModelBatch().render(coordinateFrame, getEnvironment());
-         getModelBatch().render(boxes, getEnvironment());
+            baseApplication.getModelBatch().render(coordinateFrame, baseApplication.getEnvironment());
+            baseApplication.getModelBatch().render(boxes, baseApplication.getEnvironment());
 
-         renderAfter();
+            baseApplication.renderAfter();
 
-         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
-         stage.getViewport().update(getCurrentWindowWidth(), getCurrentWindowHeight() * 1 / 4, true);
+            Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
+            stage.getViewport().update(baseApplication.getCurrentWindowWidth(), baseApplication.getCurrentWindowHeight() * 1 / 4, true);
 
-         stage.act(Gdx.graphics.getDeltaTime());
-         stage.draw();
-      }
+            stage.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
+         }
 
-      @Override
-      public void dispose()
-      {
-         super.dispose();
-         stage.dispose();
-      }
+         @Override
+         public void dispose()
+         {
+            baseApplication.dispose();
+            stage.dispose();
+         }
+      }, getClass().getSimpleName(), 1100, 800);
    }
 
    public static void main(String[] args)
