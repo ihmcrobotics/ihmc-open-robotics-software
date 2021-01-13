@@ -30,14 +30,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
    /**
-            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_left_contact_points_2d_;
-   /**
-            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_right_contact_points_2d_;
-   /**
             * Goal left foot pose
             */
    public us.ihmc.euclid.geometry.Pose3D goal_left_foot_pose_;
@@ -128,8 +120,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       start_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       start_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      initial_left_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
-      initial_right_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
       goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
@@ -149,8 +139,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_left_foot_pose_, start_left_foot_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_right_foot_pose_, start_right_foot_pose_);
-      initial_left_contact_points_2d_.set(other.initial_left_contact_points_2d_);
-      initial_right_contact_points_2d_.set(other.initial_right_contact_points_2d_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_left_foot_pose_, goal_left_foot_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
       requested_initial_stance_side_ = other.requested_initial_stance_side_;
@@ -222,24 +210,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
       return start_right_foot_pose_;
-   }
-
-
-   /**
-            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialLeftContactPoints2d()
-   {
-      return initial_left_contact_points_2d_;
-   }
-
-
-   /**
-            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialRightContactPoints2d()
-   {
-      return initial_right_contact_points_2d_;
    }
 
 
@@ -559,20 +529,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!this.start_left_foot_pose_.epsilonEquals(other.start_left_foot_pose_, epsilon)) return false;
       if (!this.start_right_foot_pose_.epsilonEquals(other.start_right_foot_pose_, epsilon)) return false;
-      if (this.initial_left_contact_points_2d_.size() != other.initial_left_contact_points_2d_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.initial_left_contact_points_2d_.size(); i++)
-         {  if (!this.initial_left_contact_points_2d_.get(i).epsilonEquals(other.initial_left_contact_points_2d_.get(i), epsilon)) return false; }
-      }
-
-      if (this.initial_right_contact_points_2d_.size() != other.initial_right_contact_points_2d_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.initial_right_contact_points_2d_.size(); i++)
-         {  if (!this.initial_right_contact_points_2d_.get(i).epsilonEquals(other.initial_right_contact_points_2d_.get(i), epsilon)) return false; }
-      }
-
       if (!this.goal_left_foot_pose_.epsilonEquals(other.goal_left_foot_pose_, epsilon)) return false;
       if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_initial_stance_side_, other.requested_initial_stance_side_, epsilon)) return false;
@@ -634,8 +590,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!this.start_left_foot_pose_.equals(otherMyClass.start_left_foot_pose_)) return false;
       if (!this.start_right_foot_pose_.equals(otherMyClass.start_right_foot_pose_)) return false;
-      if (!this.initial_left_contact_points_2d_.equals(otherMyClass.initial_left_contact_points_2d_)) return false;
-      if (!this.initial_right_contact_points_2d_.equals(otherMyClass.initial_right_contact_points_2d_)) return false;
       if (!this.goal_left_foot_pose_.equals(otherMyClass.goal_left_foot_pose_)) return false;
       if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
       if(this.requested_initial_stance_side_ != otherMyClass.requested_initial_stance_side_) return false;
@@ -690,10 +644,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.start_left_foot_pose_);      builder.append(", ");
       builder.append("start_right_foot_pose=");
       builder.append(this.start_right_foot_pose_);      builder.append(", ");
-      builder.append("initial_left_contact_points_2d=");
-      builder.append(this.initial_left_contact_points_2d_);      builder.append(", ");
-      builder.append("initial_right_contact_points_2d=");
-      builder.append(this.initial_right_contact_points_2d_);      builder.append(", ");
       builder.append("goal_left_foot_pose=");
       builder.append(this.goal_left_foot_pose_);      builder.append(", ");
       builder.append("goal_right_foot_pose=");

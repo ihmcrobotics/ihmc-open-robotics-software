@@ -46,12 +46,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -114,16 +108,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartLeftFootPose(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartRightFootPose(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getInitialLeftContactPoints2d().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getInitialLeftContactPoints2d().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getInitialRightContactPoints2d().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getInitialRightContactPoints2d().get(i0), current_alignment);}
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalLeftFootPose(), current_alignment);
 
@@ -197,14 +181,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getStartLeftFootPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getStartRightFootPose(), cdr);
-      if(data.getInitialLeftContactPoints2d().size() <= 10)
-      cdr.write_type_e(data.getInitialLeftContactPoints2d());else
-          throw new RuntimeException("initial_left_contact_points_2d field exceeds the maximum length");
-
-      if(data.getInitialRightContactPoints2d().size() <= 10)
-      cdr.write_type_e(data.getInitialRightContactPoints2d());else
-          throw new RuntimeException("initial_right_contact_points_2d field exceeds the maximum length");
-
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalLeftFootPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalRightFootPose(), cdr);
       cdr.write_type_9(data.getRequestedInitialStanceSide());
@@ -254,8 +230,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getStartLeftFootPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getStartRightFootPose(), cdr);	
-      cdr.read_type_e(data.getInitialLeftContactPoints2d());	
-      cdr.read_type_e(data.getInitialRightContactPoints2d());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalLeftFootPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalRightFootPose(), cdr);	
       data.setRequestedInitialStanceSide(cdr.read_type_9());
@@ -305,8 +279,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.write_type_e("initial_left_contact_points_2d", data.getInitialLeftContactPoints2d());
-      ser.write_type_e("initial_right_contact_points_2d", data.getInitialRightContactPoints2d());
       ser.write_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
 
       ser.write_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
@@ -341,8 +313,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.read_type_e("initial_left_contact_points_2d", data.getInitialLeftContactPoints2d());
-      ser.read_type_e("initial_right_contact_points_2d", data.getInitialRightContactPoints2d());
       ser.read_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
 
       ser.read_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
