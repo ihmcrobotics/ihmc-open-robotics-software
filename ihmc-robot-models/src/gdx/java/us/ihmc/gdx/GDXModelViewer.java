@@ -7,23 +7,23 @@ public class GDXModelViewer
 {
    public GDXModelViewer(String modelFileName)
    {
-      GDX3DApplication baseApplication = new GDX3DApplication();
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            baseApplication.create();
-            baseApplication.addCoordinateFrame(1.0);
+            sceneManager.create();
+            sceneManager.addCoordinateFrame(1.0);
 
             Model model = GDXModelLoader.loadG3DModel(modelFileName);
-            baseApplication.addModelInstance(new ModelInstance(model));
+            sceneManager.addModelInstance(new ModelInstance(model));
          }
 
          @Override
          public void render()
          {
-            baseApplication.render();
+            sceneManager.render();
          }
       }, "Model Viewer", 1100, 800);
    }

@@ -7,19 +7,13 @@ import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLOnlyTextureData;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.application.GDXSceneLevel;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
-
-import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_COMPONENT16;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
@@ -76,11 +70,11 @@ public class GDXDepthSensorSimulator
       floatframeBuffer = new FloatFrameBuffer((int) viewportWidth, (int) viewportHeight, true);
    }
 
-   public void render(GDX3DApplication gdx3DApplication)
+   public void render(GDX3DSceneManager gdx3DSceneManager)
    {
       frameBuffer.begin();
       floatframeBuffer.begin();
-      gdx3DApplication.glClearGrayscale();
+      gdx3DSceneManager.glClearGray();
 
       Random random = new Random();
 //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
@@ -91,7 +85,7 @@ public class GDXDepthSensorSimulator
 
       Gdx.gl.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
 
-      gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      gdx3DSceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 

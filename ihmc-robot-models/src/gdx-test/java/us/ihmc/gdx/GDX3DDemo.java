@@ -4,23 +4,23 @@ public class GDX3DDemo
 {
    public GDX3DDemo()
    {
-      GDX3DApplication baseApplication = new GDX3DApplication();
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            baseApplication.create();
+            sceneManager.create();
 
-            baseApplication.addCoordinateFrame(0.3);
-            baseApplication.addModelInstance(new BoxesDemoModel().newInstance());
+            sceneManager.addCoordinateFrame(0.3);
+            sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
          }
 
          @Override
          public void render()
          {
-            baseApplication.glClearGrayscale();
-            baseApplication.render();
+            sceneManager.glClearGray();
+            sceneManager.render();
          }
       }, "GDX3DDemo", 1100, 800);
    }
