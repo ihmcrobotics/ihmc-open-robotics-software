@@ -14,15 +14,16 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.gdx.application.GDXRenderable;
+import us.ihmc.gdx.application.GDXSceneLevel;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
  * TODO: Pause and resume?
  */
-public class GDX3DApplication extends Lwjgl3ApplicationAdapter
+public class GDX3DApplication
 {
    public static final float CLEAR_COLOR = 0.5019608f;
    private InputMultiplexer inputMultiplexer;
@@ -37,12 +38,10 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
    private int height = -1;
 
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private final HashSet<RenderableProvider> renderableProviders = new HashSet<>();
-   private final ArrayList<Runnable> preRenderTasks = new ArrayList<>();
+   private final HashSet<GDXRenderable> renderables = new HashSet<>();
 
    private boolean firstRenderStarted = false;
 
-   @Override
    public void create()
    {
       new GLProfiler(Gdx.graphics).enable();
@@ -82,22 +81,17 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
    }
 
-   @Override
-   public void resize(int width, int height)
+   public void renderBefore()
    {
+      renderBefore(GDXSceneLevel.VIRTUAL);
    }
 
-   public void renderBefore()
+   public void renderBefore(GDXSceneLevel sceneLevel)
    {
       if (!firstRenderStarted)
       {
          firstRenderStarted = true;
          LogTools.info("Starting first render.");
-      }
-
-      for (Runnable preRenderTask : preRenderTasks)
-      {
-         preRenderTask.run();
       }
 
       if (width < 0)
@@ -111,18 +105,22 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
       Gdx.gl.glViewport(x, y, width, height);
 
-      renderRegisteredObjectsWithEnvironment(modelBatch);
+      renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
    }
 
    public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch)
    {
-      for (ModelInstance modelInstance : modelInstances)
+      renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.VIRTUAL);
+   }
+
+   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
+   {
+      for (GDXRenderable renderable : renderables)
       {
-         modelBatch.render(modelInstance, environment);
-      }
-      for (RenderableProvider renderableProvider : renderableProviders)
-      {
-         modelBatch.render(renderableProvider, environment);
+         if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
+         {
+            modelBatch.render(renderable.getRenderableProvider(), environment);
+         }
       }
    }
 
@@ -138,14 +136,17 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       renderAfter();
    }
 
-   @Override
    public void render()
    {
-      renderBefore();
+      render(GDXSceneLevel.VIRTUAL);
+   }
+
+   public void render(GDXSceneLevel sceneLevel)
+   {
+      renderBefore(sceneLevel);
       renderAfter();
    }
 
-   @Override
    public void dispose()
    {
       for (ModelInstance modelInstance : modelInstances)
@@ -157,7 +158,6 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
       modelBatch.dispose();
    }
 
-   @Override
    public boolean closeRequested()
    {
       return true;
@@ -165,27 +165,33 @@ public class GDX3DApplication extends Lwjgl3ApplicationAdapter
 
    public void addModelInstance(ModelInstance modelInstance)
    {
+      addModelInstance(modelInstance, GDXSceneLevel.REAL_ENVIRONMENT);
+   }
+
+   public void addModelInstance(ModelInstance modelInstance, GDXSceneLevel sceneLevel)
+   {
+      addRenderableProvider(modelInstance, sceneLevel);
       modelInstances.add(modelInstance);
    }
 
    public void addCoordinateFrame(double size)
    {
-      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size));
+      addModelInstance(GDXModelPrimitives.createCoordinateFrameInstance(size), GDXSceneLevel.VIRTUAL);
    }
 
    public void addRenderableProvider(RenderableProvider renderableProvider)
    {
-      renderableProviders.add(renderableProvider);
+      addRenderableProvider(renderableProvider, GDXSceneLevel.REAL_ENVIRONMENT);
+   }
+
+   public void addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
+   {
+      renderables.add(new GDXRenderable(renderableProvider, sceneLevel));
    }
 
    public void addInputProcessor(InputProcessor inputProcessor)
    {
       inputMultiplexer.addProcessor(inputProcessor);
-   }
-
-   public void addPreRenderTask(Runnable task)
-   {
-      preRenderTasks.add(task);
    }
 
    /**

@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.gdx.application.GDXSceneLevel;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -90,7 +91,7 @@ public class GDXDepthSensorSimulator
 
       Gdx.gl.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
 
-      gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch);
+      gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 

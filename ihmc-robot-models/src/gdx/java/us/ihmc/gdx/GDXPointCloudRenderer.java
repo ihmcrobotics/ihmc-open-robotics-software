@@ -1,15 +1,16 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import org.lwjgl.opengl.GL32;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
-public class GDXPointCloudRenderer
+public class GDXPointCloudRenderer implements RenderableProvider
 {
    private Renderable renderable;
    private float[] vertices;
@@ -34,22 +35,24 @@ public class GDXPointCloudRenderer
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      int capacity = 480000;
-      vertices = new float[capacity * CPU_VERTEX_SIZE];
+      int initialCapacity = 10;
+      vertices = new float[initialCapacity * CPU_VERTEX_SIZE];
       if (renderable.meshPart.mesh != null) renderable.meshPart.mesh.dispose();
-      renderable.meshPart.mesh = new Mesh(false, capacity, 0, CPU_ATTRIBUTES);
+      renderable.meshPart.mesh = new Mesh(false, initialCapacity, 0, CPU_ATTRIBUTES);
    }
 
    public void setPointsToRender(Point3D32[] pointsToRender)
    {
       this.pointsToRender = pointsToRender;
+      if (pointsToRender.length > vertices.length)
+      {
+         vertices = new float[pointsToRender.length * CPU_VERTEX_SIZE];
+         renderable.meshPart.mesh = new Mesh(false, pointsToRender.length, 0, CPU_ATTRIBUTES);
+      }
    }
 
-   public void render(GDX3DApplication gdx3DApplication)
+   public void render()
    {
-      Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
-      Gdx.gl.glEnable(GL32.GL_POINT_SPRITE);
-
       if (pointsToRender != null)
       {
          for (int i = 0; i < pointsToRender.length; i++)
@@ -71,8 +74,17 @@ public class GDXPointCloudRenderer
          renderable.meshPart.size = pointsToRender.length;
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.length * CPU_VERTEX_SIZE);
          renderable.meshPart.update();
-
-         gdx3DApplication.getModelBatch().render(renderable);
       }
+   }
+
+   public Renderable getRenderable()
+   {
+      return renderable;
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      renderables.add(renderable);
    }
 }
