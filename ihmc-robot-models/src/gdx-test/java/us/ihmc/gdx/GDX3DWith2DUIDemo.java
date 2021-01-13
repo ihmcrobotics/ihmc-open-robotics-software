@@ -18,24 +18,24 @@ public class GDX3DWith2DUIDemo
 
    public GDX3DWith2DUIDemo()
    {
-      GDX3DApplication baseApplication = new GDX3DApplication();
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            baseApplication.create();
+            sceneManager.create();
 
-            baseApplication.setViewportBounds(0,
-                              (int) (baseApplication.getCurrentWindowHeight() * 1.0 / 4.0),
-                              (int) (baseApplication.getCurrentWindowWidth() * 1.0),
-                              (int) (baseApplication.getCurrentWindowHeight() * 3.0 / 4.0));
+            sceneManager.setViewportBounds(0,
+                              (int) (sceneManager.getCurrentWindowHeight() * 1.0 / 4.0),
+                              (int) (sceneManager.getCurrentWindowWidth() * 1.0),
+                              (int) (sceneManager.getCurrentWindowHeight() * 3.0 / 4.0));
 
             coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
             boxes = new BoxesDemoModel().newInstance();
 
             stage = new Stage(new ScreenViewport());
-            baseApplication.addInputProcessor(stage);
+            sceneManager.addInputProcessor(stage);
 
             table = new Table();
             table.setFillParent(true);
@@ -56,15 +56,15 @@ public class GDX3DWith2DUIDemo
          @Override
          public void render()
          {
-            baseApplication.renderBefore();
+            sceneManager.renderBefore();
 
-            baseApplication.getModelBatch().render(coordinateFrame, baseApplication.getEnvironment());
-            baseApplication.getModelBatch().render(boxes, baseApplication.getEnvironment());
+            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
+            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
 
-            baseApplication.renderAfter();
+            sceneManager.renderAfter();
 
             Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
-            stage.getViewport().update(baseApplication.getCurrentWindowWidth(), baseApplication.getCurrentWindowHeight() * 1 / 4, true);
+            stage.getViewport().update(sceneManager.getCurrentWindowWidth(), sceneManager.getCurrentWindowHeight() * 1 / 4, true);
 
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
@@ -73,7 +73,7 @@ public class GDX3DWith2DUIDemo
          @Override
          public void dispose()
          {
-            baseApplication.dispose();
+            sceneManager.dispose();
             stage.dispose();
          }
       }, getClass().getSimpleName(), 1100, 800);

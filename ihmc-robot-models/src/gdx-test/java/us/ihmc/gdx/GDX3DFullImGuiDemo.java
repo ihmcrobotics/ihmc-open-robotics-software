@@ -12,7 +12,7 @@ import us.ihmc.tools.string.StringTools;
 
 public class GDX3DFullImGuiDemo
 {
-   private final GDX3DApplication application = new GDX3DApplication();
+   private final GDX3DSceneManager application = new GDX3DSceneManager();
    private final GDXImGuiWindowAndDockSystem imGui = new GDXImGuiWindowAndDockSystem();
    private final ImGuiGDX3DWindow gdx3DWindow = new ImGuiGDX3DWindow();
 
@@ -36,7 +36,7 @@ public class GDX3DFullImGuiDemo
          @Override
          public void render()
          {
-            application.glClearGrayscale(0.3f);
+            application.glClearGray(0.3f);
             imGui.beforeWindowManagement();
             gdx3DWindow.renderBeforeOtherWindows(application);
 

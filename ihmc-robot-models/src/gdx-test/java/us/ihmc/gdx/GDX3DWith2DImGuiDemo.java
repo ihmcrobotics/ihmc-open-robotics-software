@@ -24,13 +24,13 @@ public class GDX3DWith2DImGuiDemo
 
    public GDX3DWith2DImGuiDemo()
    {
-      GDX3DApplication baseApplication = new GDX3DApplication();
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            baseApplication.create();
+            sceneManager.create();
 
             coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
             boxes = new BoxesDemoModel().newInstance();
@@ -79,12 +79,12 @@ public class GDX3DWith2DImGuiDemo
             Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
             Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
-            baseApplication.renderBefore();
+            sceneManager.renderBefore();
 
-            baseApplication.getModelBatch().render(coordinateFrame, baseApplication.getEnvironment());
-            baseApplication.getModelBatch().render(boxes, baseApplication.getEnvironment());
+            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
+            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
 
-            baseApplication.renderAfter();
+            sceneManager.renderAfter();
 
             imGuiGlfw.newFrame();
             ImGui.newFrame();
@@ -112,7 +112,7 @@ public class GDX3DWith2DImGuiDemo
          @Override
          public void dispose()
          {
-            baseApplication.dispose();
+            sceneManager.dispose();
             imGuiGl3.dispose();
             imGuiGlfw.dispose();
 

@@ -23,7 +23,7 @@ import java.util.HashSet;
 /**
  * TODO: Pause and resume?
  */
-public class GDX3DApplication
+public class GDX3DSceneManager
 {
    public static final float CLEAR_COLOR = 0.5019608f;
    private InputMultiplexer inputMultiplexer;
@@ -77,7 +77,7 @@ public class GDX3DApplication
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
-      glClearGrayscale();
+      glClearGray();
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
    }
 
@@ -207,12 +207,12 @@ public class GDX3DApplication
       camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
    }
 
-   public void glClearGrayscale()
+   public void glClearGray()
    {
-      glClearGrayscale(CLEAR_COLOR);
+      glClearGray(CLEAR_COLOR);
    }
 
-   public void glClearGrayscale(float color)
+   public void glClearGray(float color)
    {
       Gdx.gl.glClearColor(color, color, color, 1.0f);
       Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);

@@ -5,6 +5,9 @@ import us.ihmc.gdx.vr.GDXVRApplication;
 
 public class GDXVRDemo
 {
+   private GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+   private GDXVRApplication vr = new GDXVRApplication(sceneManager::renderVRCamera);
+
    public GDXVRDemo()
    {
       GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), getClass());
@@ -12,17 +15,14 @@ public class GDXVRDemo
 
    class PrivateGDXApplication extends Lwjgl3ApplicationAdapter
    {
-      GDX3DApplication base = new GDX3DApplication();
-      GDXVRApplication vr = new GDXVRApplication(base::renderVRCamera);
-
       @Override
       public void create()
       {
-         base.create();
+         sceneManager.create();
          vr.create();
 
-         base.addCoordinateFrame(0.3);
-         base.addModelInstance(new BoxesDemoModel().newInstance());
+         sceneManager.addCoordinateFrame(0.3);
+         sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
       }
 
       @Override
@@ -30,10 +30,11 @@ public class GDXVRDemo
       {
          for (ModelInstance modelInstance : vr.getModelInstances())
          {
-            base.addModelInstance(modelInstance);
+            sceneManager.addModelInstance(modelInstance);
          }
 
-         base.render();
+         sceneManager.glClearGray();
+         sceneManager.render();
          vr.render();
       }
 
@@ -41,7 +42,7 @@ public class GDXVRDemo
       public void dispose()
       {
          vr.dispose();
-         base.dispose();
+         sceneManager.dispose();
       }
    }
 
