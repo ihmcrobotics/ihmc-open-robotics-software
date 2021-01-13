@@ -64,7 +64,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarFootstepPlanner aStarFootstepPlanner;
    private final List<VariableDescriptor> variableDescriptors;
 
-   private final FootstepPlanPostProcessHandler postProcessHandler;
+   private final SwingPlanningModule postProcessHandler;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -105,10 +105,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
-      this.postProcessHandler = new FootstepPlanPostProcessHandler(footstepPlannerParameters,
-                                                                   swingPlannerParameters,
-                                                                   walkingControllerParameters,
-                                                                   footPolygons);
+      this.postProcessHandler = new SwingPlanningModule(footstepPlannerParameters,
+                                                        swingPlannerParameters,
+                                                        walkingControllerParameters,
+                                                        footPolygons);
       registry.addChild(postProcessHandler.getYoVariableRegistry());
       aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
       this.variableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
@@ -421,7 +421,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return postProcessHandler.getSwingOverPlanarRegionsTrajectoryExpander();
    }
 
-   public FootstepPlanPostProcessHandler getPostProcessHandler()
+   public SwingPlanningModule getPostProcessHandler()
    {
       return postProcessHandler;
    }

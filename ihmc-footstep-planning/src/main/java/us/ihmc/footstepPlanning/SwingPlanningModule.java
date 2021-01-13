@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class FootstepPlanPostProcessHandler
+public class SwingPlanningModule
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -37,10 +37,10 @@ public class FootstepPlanPostProcessHandler
    private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
    private double nominalSwingTrajectoryLength;
 
-   public FootstepPlanPostProcessHandler(FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                         SwingPlannerParametersBasics swingPlannerParameters,
-                                         WalkingControllerParameters walkingControllerParameters,
-                                         SideDependentList<ConvexPolygon2D> footPolygons)
+   public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                              SwingPlannerParametersBasics swingPlannerParameters,
+                              WalkingControllerParameters walkingControllerParameters,
+                              SideDependentList<ConvexPolygon2D> footPolygons)
 
    {
       this.footstepPlannerParameters = footstepPlannerParameters;

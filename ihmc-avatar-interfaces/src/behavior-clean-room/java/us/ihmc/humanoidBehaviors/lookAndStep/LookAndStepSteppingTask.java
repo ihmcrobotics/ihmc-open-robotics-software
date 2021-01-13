@@ -29,7 +29,7 @@ public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected FootstepPlanPostProcessHandler footstepPlanPostProcessor;
+   protected SwingPlanningModule footstepPlanPostProcessor;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
