@@ -12,7 +12,6 @@ import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -75,8 +74,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
 
-   private Consumer<FootstepPlannerRequest> requestCallback = request -> {};
-   private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
+   private List<Consumer<FootstepPlannerRequest>> requestCallbacks = new ArrayList<>();
+   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
 
    public FootstepPlanningModule(String name)
    {
@@ -146,7 +145,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setRequestId(request.getRequestId());
          output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
-         statusCallback.accept(output);
+         statusCallbacks.forEach(callback -> callback.accept(output));
          isPlanning.set(false);
          return output;
       }
@@ -155,7 +154,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);
-      requestCallback.accept(request);
+      requestCallbacks.forEach(callback -> callback.accept(request));
       output.setRequestId(request.getRequestId());
       isPlanning.set(true);
       bodyPathPlanHolder.getPlan().clear();
@@ -183,7 +182,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          {
             reportBodyPathPlan(bodyPathPlannerResult);
             output.setBodyPathPlanningResult(bodyPathPlannerResult);
-            statusCallback.accept(output);
+            statusCallbacks.forEach(callback -> callback.accept(output));
             isPlanning.set(false);
             return;
          }
@@ -216,7 +215,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPerformAStarSearch())
       {
-         postProcessHandler.setStatusCallback(statusCallback);
+         postProcessHandler.setStatusCallbacks(statusCallbacks);
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else
@@ -243,7 +242,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
          postProcessHandler.handleRequest(request, output);
-         statusCallback.accept(output);
+         statusCallbacks.forEach(callback -> callback.accept(output));
       }
 
       isPlanning.set(false);
@@ -266,12 +265,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setBodyPathPlanningResult(bodyPathPlanningResult);
       output.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
       output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap());
-      statusCallback.accept(output);
+      statusCallbacks.forEach(callback -> callback.accept(output));
    }
 
    public void addRequestCallback(Consumer<FootstepPlannerRequest> callback)
    {
-      requestCallback = requestCallback.andThen(callback);
+      requestCallbacks.add(callback);
    }
 
    public void addIterationCallback(Consumer<AStarIterationData<FootstepGraphNode>> callback)
@@ -281,7 +280,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public void addStatusCallback(Consumer<FootstepPlannerOutput> callback)
    {
-      statusCallback = statusCallback.andThen(callback);
+      statusCallbacks.add(callback);
    }
 
    public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
