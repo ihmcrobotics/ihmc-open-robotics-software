@@ -1,6 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
 public class SettablePositionProvider implements PositionProvider
 {
@@ -11,14 +13,20 @@ public class SettablePositionProvider implements PositionProvider
       framePoint = new FramePoint3D();
    }
 
-   public void set(FramePoint3D framePoint)
+   public void set(FramePoint3DReadOnly framePoint)
    {
       this.framePoint.setIncludingFrame(framePoint);
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(framePoint);
+      return framePoint.getReferenceFrame();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getPosition()
+   {
+      return framePoint;
    }
 }

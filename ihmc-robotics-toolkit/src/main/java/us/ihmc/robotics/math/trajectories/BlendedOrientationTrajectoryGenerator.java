@@ -113,7 +113,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       computeInitialConstraintTrajectory(initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FrameQuaternionReadOnly initialPose, FrameVector3D initialAngularVelocity, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FrameQuaternionReadOnly initialPose, FrameVector3DReadOnly initialAngularVelocity, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
       computeInitialConstraintError(initialPose, initialAngularVelocity, initialTime);
@@ -135,21 +135,27 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      orientationToPack.setIncludingFrame(orientation);
+      return trajectoryFrame;
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      angularVelocityToPack.setIncludingFrame(angularVelocity);
+      return orientation;
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      angularAccelerationToPack.setIncludingFrame(angularAcceleration);
+      return angularVelocity;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getAngularAcceleration()
+   {
+      return angularAcceleration;
    }
 
    @Override

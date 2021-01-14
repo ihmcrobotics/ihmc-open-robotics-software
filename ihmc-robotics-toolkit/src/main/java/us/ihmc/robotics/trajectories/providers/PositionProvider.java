@@ -1,8 +1,22 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
-public interface PositionProvider
+public interface PositionProvider extends ReferenceFrameHolder
 {
-   public abstract void getPosition(FramePoint3D positionToPack);
+   default void getPosition(FramePoint3DBasics positionToPack)
+   {
+      positionToPack.setReferenceFrame(this.getReferenceFrame());
+      getPosition((FixedFramePoint3DBasics) positionToPack);
+   }
+
+   default void getPosition(FixedFramePoint3DBasics positionToPack)
+   {
+      positionToPack.setMatchingFrame(getPosition());
+   }
+
+   FramePoint3DReadOnly getPosition();
 }
