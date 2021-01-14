@@ -85,11 +85,7 @@ public class SwingPlanningModule
    }
 
    // TODO make this a method of the swing trajectory solver after moving it to this package
-   @Deprecated
-   /**
-    * Use {@link FootstepPlanningModule#handleRequest} and set the swing planner type so that the swing plan data is logged
-    */
-   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
+   private void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses)
    {
