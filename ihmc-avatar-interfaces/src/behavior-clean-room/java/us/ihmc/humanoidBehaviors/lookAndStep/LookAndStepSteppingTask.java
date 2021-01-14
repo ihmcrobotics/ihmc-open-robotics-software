@@ -112,7 +112,7 @@ public class LookAndStepSteppingTask
       PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
       shortenedFootstepPlan.addFootstep(footstepToTake);
 
-      footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
+      footstepPlanPostProcessor.computeSwingWaypoints(footstepPlanEtc.getPlanarRegions(),
                                                       shortenedFootstepPlan,
                                                       footstepPlanEtc.getStartFootPoses(),
                                                       footstepPlanEtc.getSwingPlannerType());

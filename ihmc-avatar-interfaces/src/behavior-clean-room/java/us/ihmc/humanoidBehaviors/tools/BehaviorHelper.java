@@ -162,11 +162,9 @@ public class BehaviorHelper
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
       return new SwingPlanningModule(footstepPlannerParameters,
                                      swingPlannerParameters,
-                                     walkingControllerParameters,
-                                     footPolygons);
+                                     walkingControllerParameters);
    }
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)

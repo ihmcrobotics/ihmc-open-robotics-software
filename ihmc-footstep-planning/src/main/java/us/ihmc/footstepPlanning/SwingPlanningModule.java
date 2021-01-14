@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -34,13 +33,11 @@ public class SwingPlanningModule
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
    private double nominalSwingTrajectoryLength;
 
    public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
-                              WalkingControllerParameters walkingControllerParameters,
-                              SideDependentList<ConvexPolygon2D> footPolygons)
+                              WalkingControllerParameters walkingControllerParameters)
 
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -66,20 +63,18 @@ public class SwingPlanningModule
       return registry;
    }
 
-   public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput output)
+   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlannerOutput output)
    {
       if (!request.getAssumeFlatGround())
       {
-         performPostProcessing(request.getPlanarRegionsList(),
+         computeSwingWaypoints(request.getPlanarRegionsList(),
                                output.getFootstepPlan(),
                                request.getStartFootPoses(),
                                request.getSwingPlannerType());
       }
-
-      statusCallbacks.forEach(callback -> callback.accept(output));
    }
 
-   public void performPostProcessing(PlanarRegionsList planarRegionsList,
+   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
@@ -182,11 +177,6 @@ public class SwingPlanningModule
       // trapezoidal approximation of swing trajectory
       nominalSwingTrajectoryLength = 2.0 * EuclidGeometryTools.pythagorasGetHypotenuse(nominalSwingProportion * nominalSwingLength, nominalSwingHeight)
                                      + (1.0 - 2.0 * nominalSwingProportion) * nominalSwingLength;
-   }
-
-   public void setStatusCallbacks(List<Consumer<FootstepPlannerOutput>> statusCallbacks)
-   {
-      this.statusCallbacks = statusCallbacks;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()
