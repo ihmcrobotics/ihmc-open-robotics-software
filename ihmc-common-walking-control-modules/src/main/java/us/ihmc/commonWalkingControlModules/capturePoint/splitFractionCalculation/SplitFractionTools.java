@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
+package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
 public class SplitFractionTools
 {
