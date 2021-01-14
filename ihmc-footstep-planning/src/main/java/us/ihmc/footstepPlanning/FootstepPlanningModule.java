@@ -275,7 +275,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                              .computeSwingWaypoints(request.getPlanarRegionsList(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
-                                                    request.getSwingPlannerType());
+                                                    swingPlannerType);
          swingReplanStatusCallbacks.forEach(callback -> callback.accept(output.getFootstepPlan()));
          return output.getFootstepPlan();
       }

@@ -134,9 +134,9 @@ public class FootstepPlanningModuleLauncher
          new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
 
-      ROS2Tools.createCallbackSubscription(ros2Node, Byte.class, FootstepPlannerAPI.swingReplanRequestTopic(robotName), s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlanningRequestPacket.class, inputTopic, s ->
       {
-         SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(s.takeNextData());
+         SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(s.takeNextData().getRequestedSwingPlanner());
          if (swingPlannerType == SwingPlannerType.NONE)
          {
             LogTools.info("Received swing replanning request with type NONE, ignoring message");
@@ -165,6 +165,7 @@ public class FootstepPlanningModuleLauncher
                                                });
       footstepPlanningModule.addSwingReplanStatusCallback(footstepPlan ->
                                                           {
+                                                             LogTools.info("Publishing replanned swings");
                                                              FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0);
                                                              swingReplanPublisher.publish(footstepDataListMessage);
                                                           });
