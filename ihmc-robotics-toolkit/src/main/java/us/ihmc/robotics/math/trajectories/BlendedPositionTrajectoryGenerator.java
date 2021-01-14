@@ -101,7 +101,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, FrameVector3D initialVelocity, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
       computeInitialConstraintError(initialPosition, initialVelocity, initialTime);
@@ -128,22 +128,29 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(position);
+      return trajectoryFrame;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      velocityToPack.setIncludingFrame(velocity);
+      return position;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      accelerationToPack.setIncludingFrame(acceleration);
+      return velocity;
    }
+
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
+   {
+      return acceleration;
+   }
+
 
    @Override
    public void showVisualization()

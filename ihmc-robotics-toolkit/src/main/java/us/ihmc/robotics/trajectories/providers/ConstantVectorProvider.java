@@ -1,18 +1,28 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
+@Deprecated
 public class ConstantVectorProvider implements VectorProvider
 {
    private final FrameVector3D frameVector;
 
    public ConstantVectorProvider(FrameVector3D frameVector)
    {
-      this.frameVector = frameVector;
+      this.frameVector = new FrameVector3D(frameVector);
    }
 
-   public void get(FrameVector3D frameVectorToPack)
+   @Override
+   public ReferenceFrame getReferenceFrame()
    {
-      frameVectorToPack.setIncludingFrame(frameVector);
+      return frameVector.getReferenceFrame();
+   }
+
+   @Override
+   public FrameVector3DReadOnly get()
+   {
+      return frameVector;
    }
 }

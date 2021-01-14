@@ -1,11 +1,15 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 
 /**
  * @author twan
  *         Date: 5/29/13
+ *         Note this class is only used in tests
  */
+@Deprecated
 public class ConstantOrientationProvider implements OrientationProvider
 {
    private final FrameQuaternion orientation;
@@ -15,8 +19,15 @@ public class ConstantOrientationProvider implements OrientationProvider
       this.orientation = new FrameQuaternion(orientation);
    }
 
-   public void getOrientation(FrameQuaternion orientationToPack)
+   @Override
+   public ReferenceFrame getReferenceFrame()
    {
-      orientationToPack.setIncludingFrame(orientation);
+      return getOrientation().getReferenceFrame();
+   }
+
+   @Override
+   public FrameQuaternionReadOnly getOrientation()
+   {
+      return orientation;
    }
 }

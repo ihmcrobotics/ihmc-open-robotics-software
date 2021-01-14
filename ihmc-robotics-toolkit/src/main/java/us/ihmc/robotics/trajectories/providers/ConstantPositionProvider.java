@@ -1,7 +1,13 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
+/**
+ * This class is only used in tests.
+ */
+@Deprecated
 public class ConstantPositionProvider implements PositionProvider
 {
    private final FramePoint3D framePoint;
@@ -11,9 +17,15 @@ public class ConstantPositionProvider implements PositionProvider
       this.framePoint = new FramePoint3D(position);
    }
 
-   public void getPosition(FramePoint3D positionToPack)
+   @Override
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(framePoint);
+      return framePoint.getReferenceFrame();
    }
 
+   @Override
+   public FramePoint3DReadOnly getPosition()
+   {
+      return framePoint;
+   }
 }
