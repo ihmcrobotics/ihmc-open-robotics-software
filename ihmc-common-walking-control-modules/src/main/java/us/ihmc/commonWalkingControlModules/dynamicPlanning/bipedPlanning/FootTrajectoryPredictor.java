@@ -9,8 +9,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -25,6 +30,13 @@ public class FootTrajectoryPredictor
    private final RecyclingArrayList<Trajectory3D> rightFootTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
    private final SideDependentList<RecyclingArrayList<Trajectory3D>> footTrajectories = new SideDependentList<>(leftFootTrajectories, rightFootTrajectories);
+
+   private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
+
+   public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   {
+      this.swingTrajectory = swingTrajectory;
+   }
 
    public void compute(CoPTrajectoryGeneratorState state)
    {
@@ -57,17 +69,21 @@ public class FootTrajectoryPredictor
       RobotSide swingSide = footstep.getRobotSide();
       RobotSide stanceSide = swingSide.getOppositeSide();
 
-      setFootTrajectoryInContact(0.0,
-                                 timing.getSwingTime(),
-                                 state.getFootPose(stanceSide).getPosition(),
-                                 footTrajectories.get(stanceSide).add());
+      setFootTrajectoryInContact(0.0, timing.getSwingTime(), state.getFootPose(stanceSide).getPosition(), footTrajectories.get(stanceSide).add());
 
-      predictSwingFootTrajectory(0.0,
-                                 timing.getSwingTime(),
-                                 swingHeight,
-                                 state.getFootPose(swingSide).getPosition(),
-                                 footstep.getFootstepPose().getPosition(),
-                                 footTrajectories.get(swingSide).add());
+      if (swingTrajectory == null)
+      {
+         predictSwingFootTrajectory(0.0,
+                                    timing.getSwingTime(),
+                                    swingHeight,
+                                    state.getFootPose(swingSide).getPosition(),
+                                    footstep.getFootstepPose().getPosition(),
+                                    footTrajectories.get(swingSide).add());
+      }
+      else
+      {
+         setSwingFootTrajectory(swingTrajectory.getPositionTrajectory(), footTrajectories.get(swingSide));
+      }
    }
 
    public List<? extends Trajectory3DReadOnly> getPredictedLeftFootTrajectories()
@@ -89,11 +105,11 @@ public class FootTrajectoryPredictor
    private final FramePoint3D midpoint2 = new FramePoint3D();
 
    void predictSwingFootTrajectory(double startTime,
-                                          double endTime,
-                                          double swingHeight,
-                                          FramePoint3DReadOnly startPosition,
-                                          FramePoint3DReadOnly endPosition,
-                                          Trajectory3D trajectoryToPack)
+                                   double endTime,
+                                   double swingHeight,
+                                   FramePoint3DReadOnly startPosition,
+                                   FramePoint3DReadOnly endPosition,
+                                   Trajectory3D trajectoryToPack)
    {
       double time1 = InterpolationTools.linearInterpolate(startTime, endTime, interpolationFactor);
       midpoint1.interpolate(startPosition, endPosition, interpolationFactor);
@@ -105,5 +121,22 @@ public class FootTrajectoryPredictor
 
       trajectoryToPack.setInterval(startTime, endTime);
       trajectoryToPack.setCubicUsingIntermediatePoints(startTime, time1, time2, endTime, startPosition, midpoint1, midpoint2, endPosition);
+   }
+
+   private static void setSwingFootTrajectory(MultipleWaypointsPositionTrajectoryGenerator trajectory, RecyclingArrayList<Trajectory3D> trajectoriesToPack)
+   {
+      for (int waypointIdx = 0; waypointIdx < trajectory.getCurrentNumberOfWaypoints() - 1; waypointIdx++)
+      {
+         YoFrameEuclideanTrajectoryPoint start = trajectory.getWaypoint(waypointIdx);
+         YoFrameEuclideanTrajectoryPoint end = trajectory.getWaypoint(waypointIdx + 1);
+
+         trajectoriesToPack.add()
+                           .setCubic(0.0,
+                                     end.getTime() - start.getTime(),
+                                     start.getPosition(),
+                                     start.getLinearVelocity(),
+                                     end.getPosition(),
+                                     end.getLinearVelocity());
+      }
    }
 }
