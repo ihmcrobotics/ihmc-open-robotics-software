@@ -55,6 +55,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -374,11 +376,19 @@ public class BalanceManager
       return footstepWasAdjusted;
    }
 
+   private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = null;
+
    public void clearICPPlan()
    {
+      swingTrajectory = null;
       copTrajectoryState.clear();
       footsteps.clear();
       footstepTimings.clear();
+   }
+
+   public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   {
+      this.swingTrajectory = swingTrajectory;
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
@@ -521,6 +531,7 @@ public class BalanceManager
             comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
          }
 
+         angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
          angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
          angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectories());
          angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
