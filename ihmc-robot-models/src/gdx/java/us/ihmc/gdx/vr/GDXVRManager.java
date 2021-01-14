@@ -56,7 +56,6 @@ public class GDXVRManager implements RenderableProvider
                }
                else if(device.getType() == GDXVRContext.VRDeviceType.Controller)
                {
-                  // TODO: Better logic for handling which is which
                   if (device.getControllerRole() == GDXVRContext.VRControllerRole.LeftHand)
                   {
                      controllers.set(RobotSide.LEFT, device);
@@ -65,7 +64,20 @@ public class GDXVRManager implements RenderableProvider
                   {
                      controllers.set(RobotSide.RIGHT, device);
                   }
+                  else
+                  {
+                     if (!controllers.containsKey(RobotSide.LEFT))
+                     {
+                        controllers.set(RobotSide.LEFT, device);
+                     }
+                     else if (!controllers.containsKey(RobotSide.RIGHT))
+                     {
+                        controllers.set(RobotSide.RIGHT, device);
+                     }
+                  }
                }
+
+               LogTools.info("{} controllers registered.", controllers.sides());
             }
          }
 
