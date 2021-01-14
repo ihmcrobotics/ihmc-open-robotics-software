@@ -88,8 +88,6 @@ public class MainTabController
    @FXML
    private Button computePath;
    @FXML
-   private Button postProcess;
-   @FXML
    private Button abortPlanning;
 
    @FXML
@@ -139,20 +137,18 @@ public class MainTabController
    }
 
    @FXML
+   public void computeSwing()
+   {
+      messager.submitMessage(ReplanSwing, true);
+   }
+
+   @FXML
    public void abortPlanning()
    {
       if (verbose)
          LogTools.info("Clicked abort planning...");
 
       messager.submitMessage(HaltPlanning, true);
-   }
-
-   @FXML
-   public void postProcess()
-   {
-      if (verbose)
-         LogTools.info("Clicked post process...");
-      messager.submitMessage(PostProcessPlan, true);
    }
 
    @FXML

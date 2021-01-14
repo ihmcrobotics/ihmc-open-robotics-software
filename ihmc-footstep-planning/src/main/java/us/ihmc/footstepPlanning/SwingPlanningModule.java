@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,9 +18,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
-public class FootstepPlanPostProcessHandler
+public class SwingPlanningModule
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -32,15 +33,11 @@ public class FootstepPlanPostProcessHandler
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   private Consumer<FootstepPlannerOutput> statusCallback = result ->
-   {
-   };
    private double nominalSwingTrajectoryLength;
 
-   public FootstepPlanPostProcessHandler(FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                         SwingPlannerParametersBasics swingPlannerParameters,
-                                         WalkingControllerParameters walkingControllerParameters,
-                                         SideDependentList<ConvexPolygon2D> footPolygons)
+   public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                              SwingPlannerParametersBasics swingPlannerParameters,
+                              WalkingControllerParameters walkingControllerParameters)
 
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -66,20 +63,7 @@ public class FootstepPlanPostProcessHandler
       return registry;
    }
 
-   public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput output)
-   {
-      if (!request.getAssumeFlatGround())
-      {
-         performPostProcessing(request.getPlanarRegionsList(),
-                               output.getFootstepPlan(),
-                               request.getStartFootPoses(),
-                               request.getSwingPlannerType());
-      }
-
-      statusCallback.accept(output);
-   }
-
-   public void performPostProcessing(PlanarRegionsList planarRegionsList,
+   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
@@ -100,13 +84,8 @@ public class FootstepPlanPostProcessHandler
       }
    }
 
-   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
-   {
-      computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses());
-   }
-
    // TODO make this a method of the swing trajectory solver after moving it to this package
-   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
+   private void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses)
    {
@@ -182,11 +161,6 @@ public class FootstepPlanPostProcessHandler
       // trapezoidal approximation of swing trajectory
       nominalSwingTrajectoryLength = 2.0 * EuclidGeometryTools.pythagorasGetHypotenuse(nominalSwingProportion * nominalSwingLength, nominalSwingHeight)
                                      + (1.0 - 2.0 * nominalSwingProportion) * nominalSwingLength;
-   }
-
-   public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)
-   {
-      this.statusCallback = statusCallback;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()
