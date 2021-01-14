@@ -139,6 +139,12 @@ public class MainTabController
    }
 
    @FXML
+   public void computeSwing()
+   {
+      // TODO
+   }
+
+   @FXML
    public void abortPlanning()
    {
       if (verbose)
