@@ -1,83 +1,87 @@
 package us.ihmc.gdx.vr;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
-import org.lwjgl.opengl.GL32;
+import com.badlogic.gdx.utils.Pool;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.log.LogTools;
 
-import java.util.function.Consumer;
+import java.util.HashSet;
 
 /**
  * Adapted from:
  * https://github.com/badlogic/gdx-vr/blob/master/src/com/badlogic/gdx/vr/VRContext.java
  */
-public class GDXVRApplication
+public class GDXVRApplication implements RenderableProvider
 {
    private static final String TAG = GDXVRApplication.class.getSimpleName();
 
    private GDXVRContext context;
-   private final Consumer<Camera> renderer;
-   private Array<ModelInstance> modelInstances = new Array<>();
-
-   public GDXVRApplication(Consumer<Camera> renderer)
-   {
-      this.renderer = renderer;
-   }
+   private HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private ModelInstance headsetModelInstance;
+   private boolean skipHeadset = false;
 
    public void create()
    {
       context = new GDXVRContext();
 
-      // Set the far clip plane distance on the camera of each eye
-      // All units are in meters.
       context.getEyeData(GDXVRContext.Eye.Left).camera.far = 100f;
       context.getEyeData(GDXVRContext.Eye.Right).camera.far = 100f;
 
-      // Register a VRDeviceListener to get notified when
-      // controllers are (dis-)connected and their buttons
-      // are pressed. Note that we add/remove a ModelInstance for
-      // controllers for rendering on (dis-)connect.
-      context.addListener(new GDXVRContext.VRDeviceListener() {
+      context.addListener(new GDXVRContext.VRDeviceListener()
+      {
          @Override
-         public void connected(GDXVRContext.VRDevice device) {
-            Gdx.app.log(TAG, device + " connected");
-            if (device.getType() == GDXVRContext.VRDeviceType.Controller && device.getModelInstance() != null)
+         public void connected(GDXVRContext.VRDevice device)
+         {
+            LogTools.info("{} connected", device);
+            if (device.getModelInstance() != null)
+            {
                modelInstances.add(device.getModelInstance());
+
+               if (device.getType() == GDXVRContext.VRDeviceType.HeadMountedDisplay)
+               {
+                  headsetModelInstance = device.getModelInstance();
+               }
+            }
          }
 
          @Override
-         public void disconnected(GDXVRContext.VRDevice device) {
-            Gdx.app.log(TAG, device + " disconnected");
-            if (device.getType() == GDXVRContext.VRDeviceType.Controller && device.getModelInstance() != null)
-               modelInstances.removeValue(device.getModelInstance(), true);
+         public void disconnected(GDXVRContext.VRDevice device)
+         {
+            LogTools.info("{} disconnected", device);
          }
 
          @Override
-         public void buttonPressed(GDXVRContext.VRDevice device, int button) {
-            Gdx.app.log(TAG, device + " button pressed: " + button);
+         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         {
+            LogTools.info("{} button pressed: {}", device, button);
          }
 
          @Override
-         public void buttonReleased(GDXVRContext.VRDevice device, int button) {
-            Gdx.app.log(TAG, device + " button released: " + button);
+         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         {
+            LogTools.info("{} button released: {}", device, button);
          }
       });
    }
 
-   public void render() {
-      // poll the latest tracking data.
-      // must be called before context.begin()
+   public void render(GDX3DSceneManager sceneManager)
+   {
       context.pollEvents();
 
-      // render the scene for the left/right eye
       context.begin();
-      renderScene(GDXVRContext.Eye.Left);
-      renderScene(GDXVRContext.Eye.Right);
+      renderScene(GDXVRContext.Eye.Left, sceneManager);
+      renderScene(GDXVRContext.Eye.Right, sceneManager);
       context.end();
    }
 
-   private void renderScene(GDXVRContext.Eye eye) {
+   private void renderScene(GDXVRContext.Eye eye, GDX3DSceneManager sceneManager)
+   {
       GDXVRCamera camera = context.getEyeData(eye).camera;
 
       context.beginEye(eye);
@@ -86,20 +90,35 @@ public class GDXVRApplication
       int height = context.getEyeData(eye).getFrameBuffer().getHeight();
       Gdx.gl.glViewport(0, 0, width, height);
 
-      Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+      sceneManager.glClearGray();
 
-      renderer.accept(camera);
+      skipHeadset = true;
+      sceneManager.renderToCamera(camera);
+      skipHeadset = false;
+
       context.endEye();
    }
 
-   public void dispose() {
+   public void dispose()
+   {
       if (context != null)
          context.dispose();
+
+      for (ModelInstance modelInstance : modelInstances)
+      {
+         ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
+      }
    }
 
-   public Array<ModelInstance> getModelInstances()
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      return modelInstances;
+      for (ModelInstance modelInstance : modelInstances)
+      {
+         if (!skipHeadset || !(modelInstance == headsetModelInstance))
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
    }
 }

@@ -130,7 +130,7 @@ public class GDX3DSceneManager
       modelBatch.end();
    }
 
-   public void renderVRCamera(Camera camera)
+   public void renderToCamera(Camera camera)
    {
       modelBatch.begin(camera);
       renderRegisteredObjectsWithEnvironment(modelBatch);
