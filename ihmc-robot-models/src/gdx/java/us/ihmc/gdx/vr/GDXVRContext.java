@@ -862,6 +862,7 @@ public class GDXVRContext implements Disposable {
 			                 .mul(pose.transform);
 			GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
 			worldTransformEuclid.appendOrientation(toZUpXForward);
+			GDXTools.toGDX(worldTransformEuclid, worldTransformGDX);
 
 			referenceFrame.setX(worldTransformEuclid.getTranslation().getX());
 			referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
