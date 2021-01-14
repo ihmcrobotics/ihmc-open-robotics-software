@@ -47,67 +47,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
       this.referenceFrame = referenceFrame;
    }
 
-   public static FrameTrajectory3D[] createFrameTrajectory3DArray(Trajectory[] xTrajectory, Trajectory[] yTrajectory, Trajectory[] zTrajectory,
-                                                                  ReferenceFrame referenceFrame)
-   {
-      if (xTrajectory.length != yTrajectory.length || xTrajectory.length != zTrajectory.length)
-         throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
-
-      FrameTrajectory3D[] trajectory3Ds = new FrameTrajectory3D[xTrajectory.length];
-
-      for (int i = 0; i < xTrajectory.length; i++)
-      {
-         trajectory3Ds[i] = new FrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame);
-      }
-      return trajectory3Ds;
-   }
-
-   public static FrameTrajectory3D[] createFrameTrajectory3DArray(List<Trajectory> xTrajectory, List<Trajectory> yTrajectory,
-                                                                  List<Trajectory> zTrajectory, ReferenceFrame referenceFrame)
-   {
-      if (xTrajectory.size() != yTrajectory.size() || xTrajectory.size() != zTrajectory.size())
-         throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
-
-      FrameTrajectory3D[] trajectory3Ds = new FrameTrajectory3D[xTrajectory.size()];
-
-      for (int i = 0; i < xTrajectory.size(); i++)
-      {
-         trajectory3Ds[i] = new FrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame);
-      }
-
-      return trajectory3Ds;
-   }
-
-   public static List<FrameTrajectory3D> createFrameTrajectory3DList(Trajectory[] xTrajectory, Trajectory[] yTrajectory, Trajectory[] zTrajectory,
-                                                                     ReferenceFrame referenceFrame)
-   {
-      if (xTrajectory.length != yTrajectory.length || xTrajectory.length != zTrajectory.length)
-         throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
-
-      List<FrameTrajectory3D> trajectory3Ds = new ArrayList<>(xTrajectory.length);
-
-      for (int i = 0; i < xTrajectory.length; i++)
-      {
-         trajectory3Ds.add(new FrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame));
-      }
-      return trajectory3Ds;
-   }
-
-   public static List<FrameTrajectory3D> createFrameTrajectoryl3DList(List<Trajectory> xTrajectory, List<Trajectory> yTrajectory,
-                                                                      List<Trajectory> zTrajectory, ReferenceFrame referenceFrame)
-   {
-      if (xTrajectory.size() != yTrajectory.size() || xTrajectory.size() != zTrajectory.size())
-         throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
-
-      List<FrameTrajectory3D> trajectory3Ds = new ArrayList<>(xTrajectory.size());
-
-      for (int i = 0; i < xTrajectory.size(); i++)
-      {
-         trajectory3Ds.add(new FrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame));
-      }
-      return trajectory3Ds;
-   }
-
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;

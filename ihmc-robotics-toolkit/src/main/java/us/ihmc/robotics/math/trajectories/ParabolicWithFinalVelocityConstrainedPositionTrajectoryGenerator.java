@@ -22,7 +22,8 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
 
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
-   
+
+   private final ReferenceFrame referenceFrame;
    private final YoFramePoint3D initialPosition;
    private final YoDouble intermediateZPosition;
 
@@ -35,6 +36,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
 
    public ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
+      this.referenceFrame = referenceFrame;
       registry = new YoRegistry(name);
       
       initialPosition = new YoFramePoint3D(name + "InitialPosition", referenceFrame, registry);
@@ -161,61 +163,27 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(currentPosition);
-   }
-
-   public void get(YoFramePoint3D positionToPack)
-   {
-      positionToPack.set(currentPosition);
-   }
-
-   public void get(Point3D positionToPack)
-   {
-      positionToPack.set(currentPosition);
+      return referenceFrame;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      velocityToPack.setIncludingFrame(currentVelocity);
-   }
-
-   public void getVelocity(YoFrameVector3D velocityToPack)
-   {
-      velocityToPack.set(currentVelocity);
-   }
-
-   public void getVelocity(Vector3D velocityToPack)
-   {
-      velocityToPack.set(currentVelocity);
+      return currentPosition;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      accelerationToPack.setIncludingFrame(currentAcceleration);
-   }
-
-   public void getAcceleration(Vector3D accelerationToPack)
-   {
-      accelerationToPack.set(currentAcceleration);
+      return currentVelocity;
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
-   }
-
-   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
-   {
-      positionToPack.set(currentPosition);
-      velocityToPack.set(currentVelocity);
-      accelerationToPack.set(currentAcceleration);
+      return currentAcceleration;
    }
 
    @Override
