@@ -16,7 +16,7 @@ import us.ihmc.log.LogTools;
 
 import java.util.HashSet;
 
-public class GDXVRApplication implements RenderableProvider
+public class GDXVRManager implements RenderableProvider
 {
    private GDXVRContext context;
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
