@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
-public class FootstepPostProcessingMeshViewer extends AnimationTimer
+public class SwingPlanMeshViewer extends AnimationTimer
 {
    private static Color footWaypointColor = Color.WHITE;
    private static Color midpointColor = Color.GREEN;
@@ -52,7 +52,7 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-   public FootstepPostProcessingMeshViewer(Messager messager)
+   public SwingPlanMeshViewer(Messager messager)
    {
       leftFootPose = messager.createInput(LeftFootPose, null);
       rightFootPose = messager.createInput(RightFootPose, null);

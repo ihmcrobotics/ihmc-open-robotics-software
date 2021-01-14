@@ -55,7 +55,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalTools;
 
-public class MainTabController
+public class QuadrupedMainTabController
 {
    private static final boolean verbose = true;
 

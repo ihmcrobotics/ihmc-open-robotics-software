@@ -15,7 +15,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlanPostProcessHandler;
+import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -157,16 +157,14 @@ public class BehaviorHelper
       return statusLogger;
    }
 
-   public FootstepPlanPostProcessHandler createFootstepPlanPostProcessor()
+   public SwingPlanningModule createFootstepPlanPostProcessor()
    {
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
-      return new FootstepPlanPostProcessHandler(footstepPlannerParameters,
-                                                swingPlannerParameters,
-                                                walkingControllerParameters,
-                                                footPolygons);
+      return new SwingPlanningModule(footstepPlannerParameters,
+                                     swingPlannerParameters,
+                                     walkingControllerParameters);
    }
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
