@@ -275,7 +275,15 @@ public class AStarFootstepPlanner
       }
 
       outputToPack.setPlanarRegionsList(request.getPlanarRegionsList());
-      swingPlanningModule.computeSwingWaypoints(request, outputToPack);
+
+      if (!request.getAssumeFlatGround())
+      {
+         swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                   outputToPack.getFootstepPlan(),
+                                                   request.getStartFootPoses(),
+                                                   request.getSwingPlannerType());
+      }
+
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
