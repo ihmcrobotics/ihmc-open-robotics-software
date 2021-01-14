@@ -48,7 +48,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -811,8 +811,9 @@ public class GDXVRContext implements Disposable {
 		private final Vector3 zAxisWorld = new Vector3();
 
 		private final Matrix4 worldTransformGDX = new Matrix4();
-		private final RigidBodyTransform worldTransformEuclid = new RigidBodyTransform();
+		private final AffineTransform worldTransformEuclid = new AffineTransform();
 		private final PoseReferenceFrame referenceFrame;
+		private final YawPitchRoll toZUpXForward = new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0));
 
 		private final Vector3 vecTmp = new Vector3();
 		private final Matrix4 matTmp = new Matrix4();
@@ -859,8 +860,13 @@ public class GDXVRContext implements Disposable {
 			                 .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
 			                 .mul(trackerSpaceToWorldspaceRotationOffset)
 			                 .mul(pose.transform);
-//			GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
-//			referenceFrame.setPoseAndUpdate(worldTransformEuclid);
+			GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
+			worldTransformEuclid.appendOrientation(toZUpXForward);
+
+			referenceFrame.setX(worldTransformEuclid.getTranslation().getX());
+			referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
+			referenceFrame.setZ(worldTransformEuclid.getTranslation().getZ());
+			referenceFrame.setOrientationAndUpdate(worldTransformEuclid.getRotationView());
 		}
 		
 		/**
