@@ -19,11 +19,6 @@ public class FootstepPlannerAPI
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }
 
-   public static ROS2Topic<Byte> swingReplanRequestTopic(String robotName)
-   {
-      return inputTopic(robotName).withInput().withType(Byte.class).withSuffix("/replan_swing");
-   }
-
    public static ROS2Topic<FootstepDataListMessage> swingReplanOutputTopic(String robotName)
    {
       return outputTopic(robotName).withInput().withType(FootstepDataListMessage.class).withSuffix("/replan_swing");

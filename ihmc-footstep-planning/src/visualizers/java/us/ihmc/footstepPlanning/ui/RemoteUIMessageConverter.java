@@ -89,7 +89,7 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<Byte> swingReplanRequestPublisher;
+   private IHMCRealtimeROS2Publisher<SwingPlanningRequestPacket> swingReplanRequestPublisher;
 
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
@@ -186,7 +186,11 @@ public class RemoteUIMessageConverter
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            FootstepPlannerAPI.swingReplanOutputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, s.takeNextData()));
+                                           s ->
+                                           {
+                                              LogTools.info("Received replanned swing");
+                                              messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, s.takeNextData());
+                                           });
 
       /* controller messages */
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
@@ -213,7 +217,7 @@ public class RemoteUIMessageConverter
       swingPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                            SwingPlannerParametersPacket.class,
                                                                            ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
-      swingReplanRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerAPI.swingReplanRequestTopic(robotName));
+      swingReplanRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, SwingPlanningRequestPacket.class, FootstepPlannerAPI.inputTopic(robotName));
 
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerAPI.inputTopic(robotName));
@@ -237,7 +241,9 @@ public class RemoteUIMessageConverter
       {
          if (requestedSwingPlanner.get() != SwingPlannerType.NONE)
          {
-            swingReplanRequestPublisher.publish(requestedSwingPlanner.get().toByte());
+            SwingPlanningRequestPacket swingPlanningRequestPacket = new SwingPlanningRequestPacket();
+            swingPlanningRequestPacket.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
+            swingReplanRequestPublisher.publish(swingPlanningRequestPacket);
          }
       });
 
