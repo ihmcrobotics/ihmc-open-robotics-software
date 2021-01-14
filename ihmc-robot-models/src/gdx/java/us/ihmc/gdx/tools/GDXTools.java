@@ -10,6 +10,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 
@@ -125,5 +126,10 @@ public class GDXTools
    public static Vector2 toGDX(Tuple2DReadOnly euclidTuple)
    {
       return new Vector2(euclidTuple.getX32(), euclidTuple.getY32());
+   }
+
+   public static void toGDX(Tuple3DReadOnly euclidTuple, Vector3 gdxVector3)
+   {
+      gdxVector3.set(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
    }
 }
