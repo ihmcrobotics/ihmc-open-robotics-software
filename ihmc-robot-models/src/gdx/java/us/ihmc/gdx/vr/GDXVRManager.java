@@ -13,6 +13,8 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashSet;
 
@@ -21,6 +23,7 @@ public class GDXVRManager implements RenderableProvider
    private GDXVRContext context;
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
+   private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
 
    public void create()
@@ -51,6 +54,18 @@ public class GDXVRManager implements RenderableProvider
                {
                   headsetModelInstance = device.getModelInstance();
                }
+               else if(device.getType() == GDXVRContext.VRDeviceType.Controller)
+               {
+                  // TODO: Better logic for handling which is which
+                  if (device.getControllerRole() == GDXVRContext.VRControllerRole.LeftHand)
+                  {
+                     controllers.set(RobotSide.LEFT, device);
+                  }
+                  else if (device.getControllerRole() == GDXVRContext.VRControllerRole.RightHand)
+                  {
+                     controllers.set(RobotSide.RIGHT, device);
+                  }
+               }
             }
          }
 
@@ -74,10 +89,13 @@ public class GDXVRManager implements RenderableProvider
       });
    }
 
-   public void render(GDX3DSceneManager sceneManager)
+   public void pollEvents()
    {
       context.pollEvents();
+   }
 
+   public void render(GDX3DSceneManager sceneManager)
+   {
       context.begin();
       renderScene(GDXVRContext.Eye.Left, sceneManager);
       renderScene(GDXVRContext.Eye.Right, sceneManager);
@@ -101,6 +119,11 @@ public class GDXVRManager implements RenderableProvider
       skipHeadset = false;
 
       context.endEye();
+   }
+
+   public SideDependentList<GDXVRContext.VRDevice> getControllers()
+   {
+      return controllers;
    }
 
    public void dispose()
