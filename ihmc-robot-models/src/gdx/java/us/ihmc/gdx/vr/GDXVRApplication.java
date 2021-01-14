@@ -8,19 +8,16 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
 import java.util.HashSet;
 
-/**
- * Adapted from:
- * https://github.com/badlogic/gdx-vr/blob/master/src/com/badlogic/gdx/vr/VRContext.java
- */
 public class GDXVRApplication implements RenderableProvider
 {
-   private static final String TAG = GDXVRApplication.class.getSimpleName();
-
    private GDXVRContext context;
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
@@ -29,6 +26,13 @@ public class GDXVRApplication implements RenderableProvider
    public void create()
    {
       context = new GDXVRContext();
+
+      // transform space to Z up, X forward
+      YawPitchRoll yawPitchRoll = new YawPitchRoll();
+      yawPitchRoll.setRoll(Math.toRadians(90.0));
+      yawPitchRoll.setYaw(Math.toRadians(-90.0));
+      RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
+      GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
 
       context.getEyeData(GDXVRContext.Eye.Left).camera.far = 100f;
       context.getEyeData(GDXVRContext.Eye.Right).camera.far = 100f;
