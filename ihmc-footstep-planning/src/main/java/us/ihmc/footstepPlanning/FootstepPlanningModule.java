@@ -73,8 +73,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
 
-   private List<Consumer<FootstepPlannerRequest>> requestCallbacks = new ArrayList<>();
-   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
+   private final List<Consumer<FootstepPlannerRequest>> requestCallbacks = new ArrayList<>();
+   private final List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
+
+   private final List<Consumer<SwingPlannerType>> swingReplanRequestCallbacks = new ArrayList<>();
+   private final List<Consumer<FootstepPlan>> swingReplanStatusCallbacks = new ArrayList<>();
 
    public FootstepPlanningModule(String name)
    {
@@ -248,7 +251,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    /**
     * Requires that {@link #handleRequest(FootstepPlannerRequest)} has already been called. Replans the swing waypoints for the last planned path.
     */
-   public FootstepPlannerOutput recomputeSwingTrajectories(SwingPlannerType swingPlannerType)
+   public FootstepPlan recomputeSwingTrajectories(SwingPlannerType swingPlannerType)
    {
       if (isPlanning.get())
       {
@@ -267,12 +270,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       try
       {
+         swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
          aStarFootstepPlanner.getSwingPlanningModule()
                              .computeSwingWaypoints(request.getPlanarRegionsList(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
                                                     request.getSwingPlannerType());
-         return output;
+         swingReplanStatusCallbacks.forEach(callback -> callback.accept(output.getFootstepPlan()));
+         return output.getFootstepPlan();
       }
       catch (Exception e)
       {
@@ -357,6 +362,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlannerOutput getOutput()
    {
       return output;
+   }
+
+   public void addSwingReplanRequestCallback(Consumer<SwingPlannerType> callback)
+   {
+      swingReplanRequestCallbacks.add(callback);
+   }
+
+   public void addSwingReplanStatusCallback(Consumer<FootstepPlan> callback)
+   {
+      swingReplanStatusCallbacks.add(callback);
    }
 
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
