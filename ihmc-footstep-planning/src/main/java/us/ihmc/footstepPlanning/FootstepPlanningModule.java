@@ -234,7 +234,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request, output);
+         aStarFootstepPlanner.getSwingPlanningModule()
+                             .computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                    output.getFootstepPlan(),
+                                                    request.getStartFootPoses(),
+                                                    request.getSwingPlannerType());
          statusCallbacks.forEach(callback -> callback.accept(output));
       }
 
@@ -263,7 +267,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       try
       {
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request, output);
+         aStarFootstepPlanner.getSwingPlanningModule()
+                             .computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                    output.getFootstepPlan(),
+                                                    request.getStartFootPoses(),
+                                                    request.getSwingPlannerType());
          return output;
       }
       catch (Exception e)

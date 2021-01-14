@@ -63,17 +63,6 @@ public class SwingPlanningModule
       return registry;
    }
 
-   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlannerOutput output)
-   {
-      if (!request.getAssumeFlatGround())
-      {
-         computeSwingWaypoints(request.getPlanarRegionsList(),
-                               output.getFootstepPlan(),
-                               request.getStartFootPoses(),
-                               request.getSwingPlannerType());
-      }
-   }
-
    public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
@@ -95,12 +84,11 @@ public class SwingPlanningModule
       }
    }
 
-   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
-   {
-      computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses());
-   }
-
    // TODO make this a method of the swing trajectory solver after moving it to this package
+   @Deprecated
+   /**
+    * Use {@link FootstepPlanningModule#handleRequest} and set the swing planner type so that the swing plan data is logged
+    */
    public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses)
