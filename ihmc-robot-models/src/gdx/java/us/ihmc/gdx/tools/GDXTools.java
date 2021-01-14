@@ -3,8 +3,13 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import org.apache.logging.log4j.Level;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 
 public class GDXTools
@@ -48,5 +53,28 @@ public class GDXTools
       gdxAffineToPack.val[Matrix4.M03] = (float) euclidAffine.getM03();
       gdxAffineToPack.val[Matrix4.M13] = (float) euclidAffine.getM13();
       gdxAffineToPack.val[Matrix4.M23] = (float) euclidAffine.getM23();
+   }
+
+   public static void toGDX(RotationMatrix euclidRotationMatrix, Matrix4 gdxRotationMatrix)
+   {
+      gdxRotationMatrix.val[Matrix4.M00] = (float) euclidRotationMatrix.getM00();
+      gdxRotationMatrix.val[Matrix4.M01] = (float) euclidRotationMatrix.getM01();
+      gdxRotationMatrix.val[Matrix4.M02] = (float) euclidRotationMatrix.getM02();
+      gdxRotationMatrix.val[Matrix4.M10] = (float) euclidRotationMatrix.getM10();
+      gdxRotationMatrix.val[Matrix4.M11] = (float) euclidRotationMatrix.getM11();
+      gdxRotationMatrix.val[Matrix4.M12] = (float) euclidRotationMatrix.getM12();
+      gdxRotationMatrix.val[Matrix4.M20] = (float) euclidRotationMatrix.getM20();
+      gdxRotationMatrix.val[Matrix4.M21] = (float) euclidRotationMatrix.getM21();
+      gdxRotationMatrix.val[Matrix4.M22] = (float) euclidRotationMatrix.getM22();
+   }
+
+   public static Vector3 toGDX(Tuple3DReadOnly euclidTuple)
+   {
+      return new Vector3(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
+   }
+
+   public static Vector2 toGDX(Tuple2DReadOnly euclidTuple)
+   {
+      return new Vector2(euclidTuple.getX32(), euclidTuple.getY32());
    }
 }
