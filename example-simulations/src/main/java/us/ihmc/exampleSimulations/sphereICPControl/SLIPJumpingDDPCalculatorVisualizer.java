@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footLengthForControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footWidthForControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.toeWidthForControl;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
+import static us.ihmc.exampleSimulations.sphereICPControl.BasicCoPPlannerVisualizer.defaultLeftColor;
+import static us.ihmc.exampleSimulations.sphereICPControl.BasicCoPPlannerVisualizer.defaultRightColor;
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 import java.awt.Color;

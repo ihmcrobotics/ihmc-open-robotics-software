@@ -3,8 +3,6 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import us.ihmc.exampleSimulations.sphereICPControl.controllers.BasicSphereController;
 import us.ihmc.exampleSimulations.sphereICPControl.controllers.GenericSphereController;
 import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereControlToolbox;
-import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereICPOptimizationController;
-import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereNewICPController;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -37,12 +35,6 @@ public class SphereController implements RobotController
       {
       case BASIC:
          sphereController = new BasicSphereController(controlToolbox, registry);
-         break;
-      case NEW_ICP:
-         sphereController = new SphereNewICPController(controlToolbox, registry);
-         break;
-      case ICP_OPTIMIZATION:
-         sphereController = new SphereICPOptimizationController(controlToolbox, registry);
          break;
       default:
          sphereController = new BasicSphereController(controlToolbox, registry);

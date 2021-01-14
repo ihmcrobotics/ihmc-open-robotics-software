@@ -57,6 +57,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static boolean verbose = false;
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   public static final double sufficientlyLong = 1e2;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
