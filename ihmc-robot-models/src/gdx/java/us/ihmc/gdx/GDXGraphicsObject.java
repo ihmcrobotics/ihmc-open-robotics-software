@@ -321,7 +321,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         GDXTools.convertEuclidAffineToGDXAffine(worldTransform, modelInstance.transform);
+         GDXTools.toGDX(worldTransform, modelInstance.transform);
       }
    }
 

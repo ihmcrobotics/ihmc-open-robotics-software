@@ -46,6 +46,11 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -804,10 +809,14 @@ public class GDXVRContext implements Disposable {
 		private final Vector3 xAxisWorld = new Vector3();
 		private final Vector3 yAxisWorld = new Vector3();
 		private final Vector3 zAxisWorld = new Vector3();
-		
+
+		private final Matrix4 worldTransformGDX = new Matrix4();
+		private final RigidBodyTransform worldTransformEuclid = new RigidBodyTransform();
+		private final PoseReferenceFrame referenceFrame;
+
 		private final Vector3 vecTmp = new Vector3();
 		private final Matrix4 matTmp = new Matrix4();
-		
+
 		VRDevice(VRDevicePose pose, VRDeviceType type, VRControllerRole role) {
 			this.pose = pose;
 			this.type = type;
@@ -815,6 +824,11 @@ public class GDXVRContext implements Disposable {
 			Model model = loadRenderModel(getStringProperty(VRDeviceProperty.RenderModelName_String));			
 			this.modelInstance = model != null ? new ModelInstance(model) : null;
 			if (model != null) this.modelInstance.transform.set(pose.transform);
+
+			String roleName = role == VRControllerRole.LeftHand ? role.name() : "";
+			roleName += role == VRControllerRole.RightHand ? role.name() : "";
+			String name = type.name() + roleName;
+			referenceFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
 		}			
 
 		/**
@@ -840,6 +854,13 @@ public class GDXVRContext implements Disposable {
 			xAxisWorld.set(xAxis).mul(matTmp);
 			yAxisWorld.set(yAxis).mul(matTmp);
 			zAxisWorld.set(zAxis).mul(matTmp);
+
+			worldTransformGDX.idt()
+			                 .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
+			                 .mul(trackerSpaceToWorldspaceRotationOffset)
+			                 .mul(pose.transform);
+//			GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
+//			referenceFrame.setPoseAndUpdate(worldTransformEuclid);
 		}
 		
 		/**
@@ -869,7 +890,17 @@ public class GDXVRContext implements Disposable {
 		public Vector3 getDirection(Space space) {
 			return space == Space.Tracker ? zAxis : zAxisWorld;
 		}
-		
+
+		public PoseReferenceFrame getReferenceFrame()
+		{
+			return referenceFrame;
+		}
+
+		public Matrix4 getWorldTransformGDX()
+		{
+			return worldTransformGDX;
+		}
+
 		/**
 		 * @return the {@link VRDeviceType}
 		 */
