@@ -12,9 +12,9 @@ import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
@@ -22,6 +22,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -64,8 +65,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarFootstepPlanner aStarFootstepPlanner;
    private final List<VariableDescriptor> variableDescriptors;
 
-   private final SwingPlanningModule postProcessHandler;
-
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepPlannerOutput output = new FootstepPlannerOutput();
@@ -104,13 +103,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                             registry);
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
-      this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
-      this.postProcessHandler = new SwingPlanningModule(footstepPlannerParameters,
-                                                        swingPlannerParameters,
-                                                        walkingControllerParameters,
-                                                        footPolygons);
-      registry.addChild(postProcessHandler.getYoVariableRegistry());
-      aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
+      this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder, swingPlannerParameters, walkingControllerParameters);
       this.variableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
@@ -215,7 +208,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPerformAStarSearch())
       {
-         postProcessHandler.setStatusCallbacks(statusCallbacks);
+         aStarFootstepPlanner.setStatusCallbacks(statusCallbacks);
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else
@@ -241,11 +234,43 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
-         postProcessHandler.handleRequest(request, output);
+         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request, output);
          statusCallbacks.forEach(callback -> callback.accept(output));
       }
 
       isPlanning.set(false);
+   }
+
+   /**
+    * Requires that {@link #handleRequest(FootstepPlannerRequest)} has already been called. Replans the swing waypoints for the last planned path.
+    */
+   public FootstepPlannerOutput recomputeSwingTrajectories(SwingPlannerType swingPlannerType)
+   {
+      if (isPlanning.get())
+      {
+         LogTools.info("Received swing planning request packet but planner is currently running");
+         return null;
+      }
+      else if (output.getFootstepPlan().isEmpty())
+      {
+         LogTools.info("Must plan a path before recomputing swing trajectory. Ignoring request.");
+         return null;
+      }
+      else
+      {
+         LogTools.info("Handling swing planner request...");
+      }
+
+      try
+      {
+         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request, output);
+         return output;
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
 
    private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
@@ -338,7 +363,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
-      return postProcessHandler.getSwingPlannerParameters();
+      return aStarFootstepPlanner.getSwingPlanningModule().getSwingPlannerParameters();
    }
 
    public SideDependentList<ConvexPolygon2D> getFootPolygons()
@@ -413,17 +438,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
    {
-      return postProcessHandler.getAdaptiveSwingTrajectoryCalculator();
+      return aStarFootstepPlanner.getSwingPlanningModule().getAdaptiveSwingTrajectoryCalculator();
    }
 
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
-      return postProcessHandler.getSwingOverPlanarRegionsTrajectoryExpander();
+      return aStarFootstepPlanner.getSwingPlanningModule().getSwingOverPlanarRegionsTrajectoryExpander();
    }
 
-   public SwingPlanningModule getPostProcessHandler()
+   public SwingPlanningModule getSwingPlanningModule()
    {
-      return postProcessHandler;
+      return aStarFootstepPlanner.getSwingPlanningModule();
    }
 
    public YoRegistry getYoVariableRegistry()
