@@ -797,6 +797,7 @@ public class GDXVRContext implements Disposable {
 		private long buttons = 0;
 		private final VRControllerState state = VRControllerState.create();
 		private final ModelInstance modelInstance;
+		private String name;
 		
 		// tracker space
 		private final Vector3 position = new Vector3();
@@ -828,7 +829,7 @@ public class GDXVRContext implements Disposable {
 
 			String roleName = role == VRControllerRole.LeftHand ? role.name() : "";
 			roleName += role == VRControllerRole.RightHand ? role.name() : "";
-			String name = type.name() + roleName;
+			name = type.name() + roleName;
 			referenceFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
 		}			
 

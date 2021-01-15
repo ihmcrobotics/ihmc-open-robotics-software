@@ -7,12 +7,19 @@ import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.Random;
 
@@ -21,9 +28,10 @@ import java.util.Random;
  */
 public class GDXDepthSensorSimulator
 {
-   private float fieldOfViewY;
-   private float viewportWidth;
-   private float viewportHeight;
+   private final Random random = new Random();
+   private final float fieldOfViewY;
+   private final float viewportWidth;
+   private final float viewportHeight;
    private PerspectiveCamera camera;
    private int framebufferId;
    private DepthShaderProvider depthShaderProvider;
@@ -34,7 +42,13 @@ public class GDXDepthSensorSimulator
    private FrameBuffer frameBuffer;
    private FloatFrameBuffer floatframeBuffer;
 
-   private Point3D32[] points;
+   private RecyclingArrayList<Point3D32> points;
+   private final Color tempGDXColor = new Color();
+   private final Vector3 depthPoint = new Vector3();
+
+   private final AffineTransform tempWorldTransform = new AffineTransform();
+   private final PoseReferenceFrame cameraReferenceFrame = new PoseReferenceFrame("depthCameraFrame", ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
 
    public GDXDepthSensorSimulator(float fieldOfViewY, float viewportWidth, float viewportHeight)
    {
@@ -46,6 +60,8 @@ public class GDXDepthSensorSimulator
    public void create()
    {
       camera = new PerspectiveCamera(fieldOfViewY, viewportWidth, viewportHeight);
+      camera.near = 0.01f;
+      camera.far = 2000.0f;
       viewport = new ScreenViewport(camera);
 
       DepthShader.Config depthShaderConfig = new DepthShader.Config();
@@ -53,8 +69,8 @@ public class GDXDepthSensorSimulator
 //      depthShaderConfig.numPointLights = 0;
 //      depthShaderConfig.numSpotLights = 0;
 //      depthShaderConfig.numBones = 0;
-      depthShaderConfig.defaultCullFace = -1;
-      depthShaderConfig.defaultAlphaTest = 0.5f;
+      depthShaderConfig.defaultCullFace = GL20.GL_BACK;
+      depthShaderConfig.defaultAlphaTest = 1.0f;
 //      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
 //      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
       //      config.depthBufferOnly = true;
@@ -69,16 +85,19 @@ public class GDXDepthSensorSimulator
 //      GLFrameBuffer.FloatFrameBufferBuilder depthBufferBuilder = new GLFrameBuffer.FloatFrameBufferBuilder((int) viewportWidth, (int) viewportHeight);
 //      frameBuffer = new FloatFrameBuffer()FrameBuffer(depthBufferBuilder);
       floatframeBuffer = new FloatFrameBuffer((int) viewportWidth, (int) viewportHeight, true);
+
+      points = new RecyclingArrayList<>(frameBuffer.getWidth() * frameBuffer.getHeight(), Point3D32::new);
    }
 
    public void render(GDX3DSceneManager gdx3DSceneManager)
    {
+      camera.near = 0.01f;
+
       frameBuffer.begin();
       floatframeBuffer.begin();
       gdx3DSceneManager.glClearGray();
 
-      Random random = new Random();
-//      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
+      //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
 //      viewport.getCamera().position
 
       viewport.update((int) viewportWidth, (int) viewportHeight);
@@ -101,28 +120,30 @@ public class GDXDepthSensorSimulator
       frameBuffer.end();
       floatframeBuffer.end();
 
-      points = new Point3D32[width * height];
-
+      points.clear();
 
 //            GLOnlyTextureData textureData = (GLOnlyTextureData) frameBuffer.getColorBufferTexture().getTextureData();
 //      Pixmap pixmap = textureData.consumePixmap();
-      for (int y = 0; y < height; y++)
+      for (int y = 0; y < height; y++) // comes out flipped
       {
          for (int x = 0; x < width; x++)
          {
             int color = pixmap.getPixel(x, y);
-            float depthReading = new Color(color).r;
-            Vector3 worldRangePoint = viewport.unproject(new Vector3(x, y, depthReading));
-            int arrayIndex = y * width + x;
-            int arrayLength = width * height;
-            if (arrayIndex < arrayLength)
+            tempGDXColor.set(color);
+            float depthReading = tempGDXColor.r;
+            depthPoint.set((float) x, (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+            viewport.unproject(depthPoint);
+
+//            if (depthPoint.z < camera.near)
             {
-               points[arrayIndex] = new Point3D32(worldRangePoint.x, worldRangePoint.y, worldRangePoint.z);
-               points[arrayIndex].addZ(random.nextDouble() * 0.007);
-            }
-            else
-            {
-               System.out.println("why");
+               tempFramePoint.setToZero(cameraReferenceFrame);
+               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
+//               tempFramePoint.set(depthPoint.x, depthPoint.y - (height / 2.0f), depthPoint.z);
+//               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+               Point3D32 point = points.add();
+               point.set(tempFramePoint);
+               point.addZ(random.nextDouble() * 0.007);
             }
          }
       }
@@ -139,12 +160,25 @@ public class GDXDepthSensorSimulator
       Gdx.gl.glDeleteTexture(depthTextureId);
    }
 
+   public void setCameraWorldTransform(Matrix4 worldTransform)
+   {
+      camera.position.setZero();
+      camera.up.set(0.0f, 0.0f, 1.0f);
+      camera.direction.set(1.0f, 0.0f, 0.0f);
+      camera.transform(worldTransform);
+      GDXTools.toEuclid(worldTransform, tempWorldTransform);
+      cameraReferenceFrame.setX(tempWorldTransform.getTranslation().getX());
+      cameraReferenceFrame.setY(tempWorldTransform.getTranslation().getY());
+      cameraReferenceFrame.setZ(tempWorldTransform.getTranslation().getZ());
+      cameraReferenceFrame.setOrientationAndUpdate(tempWorldTransform.getRotationView());
+   }
+
    public PerspectiveCamera getCamera()
    {
       return camera;
    }
 
-   public Point3D32[] getPoints()
+   public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
    }
