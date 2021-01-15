@@ -164,7 +164,7 @@ public class BasicCoPPlannerVisualizer
             midFeetZUpFrame.update();
          }
       });
-      copPlanner = new BasicCoPPlanner(contactableFeet, midFeetZUpFrame, registry);
+      copPlanner = new BasicCoPPlanner(contactableFeet, registry);
 
       YoGraphicPosition desiredCoPGraphic = new YoGraphicPosition("desiredCoP", yoDesiredCoP, 0.01, YoAppearance.Black(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerYoGraphic("desiredCoP", desiredCoPGraphic);

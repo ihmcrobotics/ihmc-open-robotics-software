@@ -34,9 +34,6 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    private final PositionProvider initialPositionProvider;
    private final PositionProvider finalPositionProvider;
 
-   private final FramePoint3D tempInitialPosition;
-   private final FramePoint3D tempFinalPosition;
-
    private final YoBoolean continuouslyUpdateFinalPosition;
    private final DoubleProvider trajectoryTimeProvider;
 
@@ -62,9 +59,6 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;
 
-      tempInitialPosition = new FramePoint3D(referenceFrame);
-      tempFinalPosition = new FramePoint3D(referenceFrame);
-
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
    }
@@ -82,16 +76,12 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
 
    private void updateInitialPosition()
    {
-      initialPositionProvider.getPosition(tempInitialPosition);
-      tempInitialPosition.changeFrame(initialPosition.getReferenceFrame());
-      initialPosition.set(tempInitialPosition);
+      initialPosition.setMatchingFrame(initialPositionProvider.getPosition());
    }
 
    private void updateFinalPosition()
    {
-      finalPositionProvider.getPosition(tempFinalPosition);
-      tempFinalPosition.changeFrame(finalPosition.getReferenceFrame());
-      finalPosition.set(tempFinalPosition);
+      finalPosition.setMatchingFrame(finalPositionProvider.getPosition());
    }
 
    @Override
