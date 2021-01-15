@@ -336,21 +336,21 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      positionToPack.setIncludingFrame(currentPosition);
+      return currentPosition;
    }
 
    @Override
-   public void getVelocity(FrameVector3D linearVelocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      linearVelocityToPack.setIncludingFrame(currentVelocity);
+      return currentVelocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D linearAccelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      linearAccelerationToPack.setIncludingFrame(currentAcceleration);
+      return currentAcceleration;
    }
 
    public int getCurrentNumberOfWaypoints()

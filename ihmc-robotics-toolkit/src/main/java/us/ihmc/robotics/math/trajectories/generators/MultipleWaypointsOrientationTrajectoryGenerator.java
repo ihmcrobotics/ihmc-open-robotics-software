@@ -279,27 +279,21 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      subTrajectory.getOrientation(orientationToPack);
+      return subTrajectory.getOrientation();
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      subTrajectory.getAngularVelocity(angularVelocityToPack);
+      return subTrajectory.getAngularVelocity();
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      subTrajectory.getAngularAcceleration(angularAccelerationToPack);
-   }
-
-   @Override
-   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
-   {
-      subTrajectory.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+      return subTrajectory.getAngularAcceleration();
    }
 
    public int getCurrentNumberOfWaypoints()

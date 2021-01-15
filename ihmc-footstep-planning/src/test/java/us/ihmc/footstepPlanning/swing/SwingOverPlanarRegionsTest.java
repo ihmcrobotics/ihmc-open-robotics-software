@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -464,8 +465,7 @@ public class SwingOverPlanarRegionsTest
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
-         FramePoint3D desiredPosition = new FramePoint3D();
-         twoWaypointSwingGenerator.getPosition(desiredPosition);
+         FramePoint3DReadOnly desiredPosition = twoWaypointSwingGenerator.getPosition();
 
          foot.getPosition().set(desiredPosition);
          foot.getPosition().addX(0.5 * (heelLength - toeLength));

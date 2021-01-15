@@ -3,7 +3,6 @@ package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
