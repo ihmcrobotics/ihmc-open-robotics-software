@@ -5,16 +5,12 @@ import static us.ihmc.robotics.Assert.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -45,9 +41,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       StraightLinePositionTrajectoryGenerator simpleTrajectory;
       
       
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame, 1.0, 0.0, 1.0));
-      PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame,   0.2, 1.0, 0.4));
+      DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
+      PositionProvider initialPositionProvider = () -> new FramePoint3D(worldFrame, 1.0, 0.0, 1.0);
+      PositionProvider finalPositionProvider = () -> new FramePoint3D(worldFrame,   0.2, 1.0, 0.4);
       simpleTrajectory = new StraightLinePositionTrajectoryGenerator("simpleTraj", worldFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, registry);
       simpleTrajectory.initialize();
 

@@ -5,6 +5,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -19,14 +23,34 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
 
    private ReferenceFrame activeFrame;
 
-   private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
+   private final FramePose3DReadOnly pose;
 
    public MultipleWaypointsPoseTrajectoryGenerator(String namePrefix, int maxNumberOfWaypoints, YoRegistry parentRegistry)
    {
       positionTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, maxNumberOfWaypoints, worldFrame, parentRegistry);
       orientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, maxNumberOfWaypoints, worldFrame, parentRegistry);
       activeFrame = worldFrame;
+
+      pose = new FramePose3DReadOnly()
+      {
+         @Override
+         public FramePoint3DReadOnly getPosition()
+         {
+            return positionTrajectory.getPosition();
+         }
+
+         @Override
+         public FrameQuaternionReadOnly getOrientation()
+         {
+            return orientationTrajectory.getOrientation();
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return activeFrame;
+         }
+      };
    }
 
    public void clear(ReferenceFrame referenceFrame)
@@ -106,47 +130,39 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionTrajectory.getPosition(positionToPack);
+      return activeFrame;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePose3DReadOnly getPose()
    {
-      positionTrajectory.getVelocity(velocityToPack);
+      return pose;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      positionTrajectory.getAcceleration(accelerationToPack);
+      return positionTrajectory.getVelocity();
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      orientationTrajectory.getOrientation(orientationToPack);
+      return positionTrajectory.getAcceleration();
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      orientationTrajectory.getAngularVelocity(angularVelocityToPack);
+      return orientationTrajectory.getAngularVelocity();
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      orientationTrajectory.getAngularAcceleration(angularAccelerationToPack);
-   }
-
-   @Override
-   public void getPose(FramePose3D framePoseToPack)
-   {
-      getPosition(desiredPosition);
-      getOrientation(desiredOrientation);
-      framePoseToPack.set(desiredPosition, desiredOrientation);
+      return orientationTrajectory.getAngularAcceleration();
    }
 
    @Override

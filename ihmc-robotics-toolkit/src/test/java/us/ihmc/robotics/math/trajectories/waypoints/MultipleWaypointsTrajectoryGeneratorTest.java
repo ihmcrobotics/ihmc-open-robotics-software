@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MultipleWaypointsTrajectoryGeneratorTest
 {
@@ -29,13 +29,13 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       CubicPolynomialTrajectoryGenerator simpleTrajectory;
       MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectory;
 
-      YoVariableDoubleProvider trajectoryTimeProvider;
+      YoDouble trajectoryTimeProvider;
 
-      trajectoryTimeProvider = new YoVariableDoubleProvider("trajectoryTime", registry);
+      trajectoryTimeProvider = new YoDouble("trajectoryTime", registry);
       trajectoryTimeProvider.set(trajectoryTime);
 
-      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(0.0);
-      DoubleProvider finalPositionProvider = new ConstantDoubleProvider(1.0);
+      DoubleProvider initialPositionProvider = () -> 0.0;
+      DoubleProvider finalPositionProvider = () -> 1.0;
 
       simpleTrajectory = new CubicPolynomialTrajectoryGenerator("simpleTraj", initialPositionProvider, finalPositionProvider, trajectoryTimeProvider, registry);
       simpleTrajectory.initialize();

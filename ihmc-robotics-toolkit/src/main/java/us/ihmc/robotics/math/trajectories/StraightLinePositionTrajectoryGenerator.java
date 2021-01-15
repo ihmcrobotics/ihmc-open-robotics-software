@@ -4,6 +4,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -15,6 +17,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    protected final YoRegistry registry;
+
+   private final ReferenceFrame referenceFrame;
    private final YoDouble currentTime;
    private final YoFramePoint3D currentPosition;
    private final YoFrameVector3D currentVelocity;
@@ -39,6 +43,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    public StraightLinePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
          PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoRegistry parentRegistry)
    {
+      this.referenceFrame = referenceFrame;
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
@@ -120,34 +125,32 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(currentPosition);
+      return referenceFrame;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      velocityToPack.setIncludingFrame(currentVelocity);
+      return currentPosition;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      accelerationToPack.setIncludingFrame(currentAcceleration);
+      return currentVelocity;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
+   {
+      return currentAcceleration;
    }
 
    public void setContinuouslyUpdateFinalPosition(boolean val)
    {
       continuouslyUpdateFinalPosition.set(val);
-   }
-
-   @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
    }
 
    @Override

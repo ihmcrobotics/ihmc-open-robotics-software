@@ -2,8 +2,6 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.List;
 
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
-
 public interface SegmentedFrameTrajectory3DInterface
 {
    void reset();

@@ -6,9 +6,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -20,9 +17,9 @@ public class ConstantVelocityTrajectoryGeneratorTest
 	@Test
    public void testSimpleTrajectory()
    {
-      DoubleProvider initialPosition = new ConstantDoubleProvider(0.0);
-      DoubleProvider velocity = new ConstantDoubleProvider(1.0);
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(5.0);
+      DoubleProvider initialPosition = () -> 0.0;
+      DoubleProvider velocity = () -> 1.0;
+      DoubleProvider trajectoryTimeProvider = () -> 5.0;
       
       ConstantVelocityTrajectoryGenerator simpleLinearTrajectory = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTimeProvider, new YoRegistry("Dummy"));
       simpleLinearTrajectory.initialize();
@@ -42,9 +39,9 @@ public class ConstantVelocityTrajectoryGeneratorTest
       
       for(int i = 0; i < numberOfIterations; i++)
       {
-         DoubleProvider initialPosition = new ConstantDoubleProvider(2 * random.nextDouble() - 1);
-         DoubleProvider velocity = new ConstantDoubleProvider(2 * random.nextDouble() - 1);
-         DoubleProvider trajectoryTime = new ConstantDoubleProvider(random.nextDouble() + minimumTrajectoryTime);
+         DoubleProvider initialPosition = () -> 2 * random.nextDouble() - 1;
+         DoubleProvider velocity = () -> 2 * random.nextDouble() - 1;
+         DoubleProvider trajectoryTime = () -> random.nextDouble() + minimumTrajectoryTime;
          
          constantVelocityTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTime, new YoRegistry("Dummy"));
          constantVelocityTrajectoryGenerator.initialize();

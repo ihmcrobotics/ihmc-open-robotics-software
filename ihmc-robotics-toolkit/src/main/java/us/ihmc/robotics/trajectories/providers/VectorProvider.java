@@ -1,6 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -17,6 +18,11 @@ public interface VectorProvider extends ReferenceFrameHolder
    default void get(FixedFrameVector3DBasics frameVectorToPack)
    {
       frameVectorToPack.setMatchingFrame(get());
+   }
+
+   default ReferenceFrame getReferenceFrame()
+   {
+      return get().getReferenceFrame();
    }
 
    FrameVector3DReadOnly get();

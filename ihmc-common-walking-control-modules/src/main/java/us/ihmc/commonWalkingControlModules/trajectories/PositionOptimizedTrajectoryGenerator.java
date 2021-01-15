@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
@@ -40,7 +41,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;
@@ -549,27 +550,24 @@ public class PositionOptimizedTrajectoryGenerator
       return isDone.getBooleanValue();
    }
 
-   public void getPosition(FramePoint3D positionToPack)
+   @Override
+   public FramePoint3DReadOnly getPosition()
    {
-      positionToPack.setIncludingFrame(desiredPosition);
+      return desiredPosition;
    }
 
-   public void getVelocity(FrameVector3D velocityToPack)
+   @Override
+   public FrameVector3DReadOnly getVelocity()
    {
-      velocityToPack.setIncludingFrame(desiredVelocity);
+      return desiredVelocity;
    }
 
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
    {
-      accelerationToPack.setIncludingFrame(desiredAcceleration);
+      return desiredAcceleration;
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
-   }
 
    public void informDone()
    {

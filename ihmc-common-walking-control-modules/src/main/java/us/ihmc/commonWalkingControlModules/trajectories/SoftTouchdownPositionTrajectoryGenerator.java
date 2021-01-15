@@ -75,21 +75,21 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      positionTouchdownTrajectory.getPosition(positionToPack);
+      return positionTouchdownTrajectory.getPosition();
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      positionTouchdownTrajectory.getVelocity(velocityToPack);
+      return positionTouchdownTrajectory.getVelocity();
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      positionTouchdownTrajectory.getAcceleration(accelerationToPack);
+      return positionTouchdownTrajectory.getAcceleration();
    }
 
    @Override

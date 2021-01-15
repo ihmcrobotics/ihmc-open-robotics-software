@@ -23,8 +23,6 @@ public class BasicCoPPlanner
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final ArrayList<FootstepTiming> upcomingTimings = new ArrayList<>();
 
-   private final FrameTrajectory3D finalTransferTrajectory = new FrameTrajectory3D(5, worldFrame);
-
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
    private final FramePoint3D desiredCoPPosition = new FramePoint3D();
@@ -39,7 +37,7 @@ public class BasicCoPPlanner
    private double initialTime = 0.0;
    private final YoDouble timeInCurrentStateRemaining;
 
-   public BasicCoPPlanner(SideDependentList<? extends ContactablePlaneBody> contactableFeet, ReferenceFrame midFootZUpGroundFrame, YoRegistry registry)
+   public BasicCoPPlanner(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoRegistry registry)
    {
       this.contactableFeet = contactableFeet;
 
