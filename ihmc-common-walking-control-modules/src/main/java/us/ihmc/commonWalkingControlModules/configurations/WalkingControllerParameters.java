@@ -408,12 +408,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when
-    * angular momentum rates are considered in the ICP planner.
-    */
-   public abstract ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters();
-
-   /**
     * This parameter is used when the controller checks if it is safe to transition from transfer to single
     * support state when walking. The transition is considered safe if the ICP tracking error lies within
     * an ellipse with the axes aligned with the z-up ankle frame of the stance foot. This parameter defines

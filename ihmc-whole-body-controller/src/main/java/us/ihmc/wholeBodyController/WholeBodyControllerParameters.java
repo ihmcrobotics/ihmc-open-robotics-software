@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController;
 
 import java.io.InputStream;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
@@ -23,8 +22,6 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    }
 
    public StateEstimatorParameters getStateEstimatorParameters();
-
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
 
    public CoPTrajectoryParameters getCoPTrajectoryParameters();
 

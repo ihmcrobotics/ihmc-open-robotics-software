@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
-
 public interface SplitFractionCalculatorParametersReadOnly
 {
    boolean calculateSplitFractionsFromPositions();

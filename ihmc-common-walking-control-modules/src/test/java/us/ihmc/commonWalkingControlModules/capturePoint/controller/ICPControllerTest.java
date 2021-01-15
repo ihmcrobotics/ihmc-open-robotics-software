@@ -722,12 +722,6 @@ public class ICPControllerTest
       }
 
       @Override
-      public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-      {
-         return null;
-      }
-
-      @Override
       public double getMaxICPErrorBeforeSingleSupportForwardX()
       {
          return 0;
