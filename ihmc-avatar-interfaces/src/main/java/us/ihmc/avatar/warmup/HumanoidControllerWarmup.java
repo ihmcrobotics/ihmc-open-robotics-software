@@ -6,7 +6,6 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;

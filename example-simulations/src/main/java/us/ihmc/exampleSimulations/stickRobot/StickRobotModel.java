@@ -10,7 +10,6 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -27,7 +26,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -49,7 +47,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private static final boolean PRINT_MODEL = false;
 
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
    private final HighLevelControllerParameters highLevelControllerParameters;
@@ -122,7 +119,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), sdf, this);
 
       //TODO currently set to null: change for walking
-      capturePointPlannerParameters = null;
       walkingControllerParameters = null;
       stateEstimatorParamaters = null;
       highLevelControllerParameters = null;
@@ -191,12 +187,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       return sdfRobot;
-   }
-
-   @Override
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-   {
-      return capturePointPlannerParameters;
    }
 
    @Override

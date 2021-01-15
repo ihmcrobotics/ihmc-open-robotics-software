@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
