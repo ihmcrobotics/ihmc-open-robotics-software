@@ -32,7 +32,7 @@ public class QuadrupedSwingTrajectoryGenerator
    private final RobotQuadrant robotQuadrant;
 
    private final YoRegistry registry;
-   private final YoVariableDoubleProvider swingTimeDoubleProvider;
+   private final YoDouble swingTimeDoubleProvider;
    
    private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
@@ -52,7 +52,7 @@ public class QuadrupedSwingTrajectoryGenerator
       this.robotQuadrant = robotQuadrant;
       String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
       registry = new YoRegistry(prefix + "QuadrupedSwingTrajectoryGenerator");
-      swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
+      swingTimeDoubleProvider = new YoDouble(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
       cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(prefix + "swingLegTraj", ReferenceFrame.getWorldFrame(), registry);

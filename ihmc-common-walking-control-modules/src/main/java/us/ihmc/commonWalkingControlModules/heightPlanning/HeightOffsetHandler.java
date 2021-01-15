@@ -32,9 +32,9 @@ public class HeightOffsetHandler
 
    private final YoDouble offsetHeightAboveGroundPrevValue = new YoDouble("offsetHeightAboveGroundPrevValue", registry);
    private final YoDouble offsetHeightAboveGroundChangedTime = new YoDouble("offsetHeightAboveGroundChangedTime", registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput",
+   private final YoDouble offsetHeightAboveGroundTrajectoryOutput = new YoDouble("offsetHeightAboveGroundTrajectoryOutput",
                                                                                                                  registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryTimeProvider",
+   private final YoDouble offsetHeightAboveGroundTrajectoryTimeProvider = new YoDouble("offsetHeightAboveGroundTrajectoryTimeProvider",
                                                                                                                        registry);
    private final MultipleWaypointsTrajectoryGenerator offsetHeightTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("pelvisHeightOffset",
                                                                                                                                  registry);

@@ -6,13 +6,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -42,8 +39,8 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       orientation = new FrameQuaternion(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);
-      initialOrientationProvider = new ConstantOrientationProvider(orientation);
-      finalOrientationProvider = new ConstantOrientationProvider(orientation);
+      initialOrientationProvider = () -> orientation;
+      finalOrientationProvider = () -> orientation;
       parentRegistry = new YoRegistry("registry");
    }
    

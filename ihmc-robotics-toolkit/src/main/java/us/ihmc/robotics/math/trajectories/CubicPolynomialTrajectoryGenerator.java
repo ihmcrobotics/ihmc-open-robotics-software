@@ -2,7 +2,6 @@ package us.ihmc.robotics.math.trajectories;
 
 import org.apache.commons.math3.util.Precision;
 
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -16,7 +15,7 @@ public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGene
    public CubicPolynomialTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider finalPositionProvider,
          DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
-      this(namePrefix, initialPositionProvider, new ConstantDoubleProvider(0.0), finalPositionProvider, new ConstantDoubleProvider(0.0), trajectoryTimeProvider,
+      this(namePrefix, initialPositionProvider, () -> 0.0, finalPositionProvider, () -> 0.0, trajectoryTimeProvider,
             parentRegistry);
    }
 

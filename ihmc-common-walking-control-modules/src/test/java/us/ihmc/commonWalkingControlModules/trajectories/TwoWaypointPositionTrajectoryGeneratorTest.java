@@ -15,11 +15,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.*;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TwoWaypointPositionTrajectoryGeneratorTest
 {
@@ -47,10 +46,10 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
 
    private void testSimpleTrajectory(int numDesiredSplines)
    {
-      YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoRegistry("Dummy"));
+      YoDouble stepTimeProvider = new YoDouble("", new YoRegistry("Dummy"));
       stepTimeProvider.set(0.8);
-      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame, new double[] {-0.1, 2.3, 0.0}));
-      VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.2, 0.0, -0.05}));
+      FramePositionProvider initialPositionProvider = () -> new FramePoint3D(worldFrame, new double[] {-0.1, 2.3, 0.0});
+      VectorProvider initialVelocityProvider = () -> new FrameVector3D(worldFrame, new double[] {0.2, 0.0, -0.05});
 
       Point3D firstIntermediatePosition = new Point3D(new double[] {0.12, 2.4, 0.2});
       Point3D secondIntermediatePosition = new Point3D(new double[] {0.16, 2.3, 0.15});
@@ -60,8 +59,8 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
 
       YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoRegistry("Dummy"));
       finalPosition.set(new FramePoint3D(worldFrame, new double[] {0.2, 2.35, 0.03}));
-      YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
-      VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.1, 0.01, -0.02}));
+      FramePositionProvider finalPositionProvider = () -> finalPosition;
+      VectorProvider finalVelocityProvider = () -> new FrameVector3D(worldFrame, new double[] {0.1, 0.01, -0.02});
 
       TrajectoryParameters trajectoryParameters = new TrajectoryParameters();
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
@@ -105,5 +104,14 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
       assertEquals(actualVel.getY(), expectedVel.getY(), 1e-7);
       assertEquals(actualVel.getZ(), expectedVel.getZ(), 1e-7);
       assertTrue(trajectory.isDone());
+   }
+
+   private interface FramePositionProvider extends PositionProvider
+   {
+      @Override
+      default ReferenceFrame getReferenceFrame()
+      {
+         return getPosition().getReferenceFrame();
+      }
    }
 }

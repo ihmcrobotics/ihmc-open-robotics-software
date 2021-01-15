@@ -19,5 +19,10 @@ public interface OrientationProvider extends ReferenceFrameHolder
       orientationToPack.setMatchingFrame(getOrientation());
    }
 
+   default ReferenceFrame getReferenceFrame()
+   {
+      return getOrientation().getReferenceFrame();
+   }
+
    FrameQuaternionReadOnly getOrientation();
 }

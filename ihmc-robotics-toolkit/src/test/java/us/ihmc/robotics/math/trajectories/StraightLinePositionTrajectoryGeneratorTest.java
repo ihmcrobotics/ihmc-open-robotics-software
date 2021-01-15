@@ -6,14 +6,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -43,9 +39,9 @@ public class StraightLinePositionTrajectoryGeneratorTest
       parentRegistry = new YoRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
-      initialPositionProvider = new ConstantPositionProvider(position);
-      finalPositionProvider = new ConstantPositionProvider(position);
-      trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
+      initialPositionProvider = () -> position;
+      finalPositionProvider = () -> position;
+      trajectoryTimeProvider = () -> 10.0;
    }
 
    @AfterEach
