@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import us.ihmc.robotics.math.trajectories.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.List;
 

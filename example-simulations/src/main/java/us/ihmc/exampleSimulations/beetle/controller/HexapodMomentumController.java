@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;

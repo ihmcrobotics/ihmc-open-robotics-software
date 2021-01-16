@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.math.trajectories.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.robotics.math.trajectories.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.List;
 

@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;

@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableC
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;

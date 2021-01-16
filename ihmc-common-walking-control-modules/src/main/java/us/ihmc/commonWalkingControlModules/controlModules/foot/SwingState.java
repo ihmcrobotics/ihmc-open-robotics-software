@@ -45,7 +45,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -549,7 +549,7 @@ public class SwingState extends AbstractFootControlState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      PoseTrajectoryGenerator activeTrajectory;
+      FramePoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
          activeTrajectory = touchdownTrajectory;
       else

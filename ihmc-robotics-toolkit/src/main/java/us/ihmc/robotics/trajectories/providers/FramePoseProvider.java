@@ -3,19 +3,8 @@ package us.ihmc.robotics.trajectories.providers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 
-public interface SE3ConfigurationProvider extends FramePositionProvider, FrameOrientationProvider
+public interface FramePoseProvider extends FramePositionProvider, FrameOrientationProvider, PoseProvider
 {
-   default void getPose(FramePose3DBasics poseToPack)
-   {
-      poseToPack.setReferenceFrame(this.getReferenceFrame());
-      getPose((FixedFramePose3DBasics) poseToPack);
-   }
-
-   default void getPose(FixedFramePose3DBasics poseToPack)
-   {
-      poseToPack.setMatchingFrame(getPose());
-   }
-
    @Override
    default ReferenceFrame getReferenceFrame()
    {
@@ -29,7 +18,7 @@ public interface SE3ConfigurationProvider extends FramePositionProvider, FrameOr
    }
 
    @Override
-   default FrameQuaternionReadOnly getOrientation()
+   default FrameOrientation3DReadOnly getOrientation()
    {
       return getPose().getOrientation();
    }

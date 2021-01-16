@@ -1,8 +1,8 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-interface PolynomialReadOnly extends TimeIntervalProvider, DoubleTrajectoryGenerator
+public interface PolynomialReadOnly extends TimeIntervalProvider, DoubleTrajectoryGenerator
 {
    int getMaximumNumberOfCoefficients();
 

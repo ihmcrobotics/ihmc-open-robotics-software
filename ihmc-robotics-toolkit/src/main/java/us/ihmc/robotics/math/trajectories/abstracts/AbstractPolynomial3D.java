@@ -1,10 +1,14 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.abstracts;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.core.Trajectory3DFactories;
+import us.ihmc.robotics.math.trajectories.interfaces.*;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoSpline3D;
 
 import java.util.List;
 
@@ -21,39 +25,22 @@ import java.util.List;
  *
  * @author Sylvain Bertrand
  */
-public class AbstractPolynomial3D extends Axis3DPositionTrajectoryGenerator implements Polynomial3DBasics
+public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTrajectoryGenerator
 {
-   protected final PolynomialBasics xPolynomial;
-   protected final PolynomialBasics yPolynomial;
-   protected final PolynomialBasics zPolynomial;
+   private final PolynomialBasics xPolynomial;
+   private final PolynomialBasics yPolynomial;
+   private final PolynomialBasics zPolynomial;
 
    private final PolynomialBasics[] polynomials;
-
 
    private double xIntegralResult = Double.NaN;
    private double yIntegralResult = Double.NaN;
    private double zIntegralResult = Double.NaN;
 
-   private final Tuple3DReadOnly integralResult = new Tuple3DReadOnly()
-   {
-      @Override
-      public double getX()
-      {
-         return xIntegralResult;
-      }
-
-      @Override
-      public double getY()
-      {
-         return yIntegralResult;
-      }
-
-      @Override
-      public double getZ()
-      {
-         return zIntegralResult;
-      }
-   };
+   private final Point3DReadOnly position;
+   private final Vector3DReadOnly velocity;
+   private final Vector3DReadOnly acceleration;
+   private final Tuple3DReadOnly integralResult;
 
    public AbstractPolynomial3D(PolynomialBasics[] yoPolynomials)
    {
@@ -75,12 +62,15 @@ public class AbstractPolynomial3D extends Axis3DPositionTrajectoryGenerator impl
 
    public AbstractPolynomial3D(PolynomialBasics xPolynomial, PolynomialBasics yPolynomial, PolynomialBasics zPolynomial)
    {
-      super(xPolynomial, yPolynomial, zPolynomial);
-
       this.xPolynomial = xPolynomial;
       this.yPolynomial = yPolynomial;
       this.zPolynomial = zPolynomial;
       polynomials = new PolynomialBasics[] {xPolynomial, yPolynomial, zPolynomial};
+
+      position = Trajectory3DFactories.newLinkedPoint3DReadOnly(xPolynomial, yPolynomial, zPolynomial);
+      velocity = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
+      acceleration = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
+      integralResult = Trajectory3DFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
    }
 
    @Override
@@ -91,6 +81,24 @@ public class AbstractPolynomial3D extends Axis3DPositionTrajectoryGenerator impl
    @Override
    public void hideVisualization()
    {
+   }
+
+   @Override
+   public Point3DReadOnly getPosition()
+   {
+      return position;
+   }
+
+   @Override
+   public Vector3DReadOnly getVelocity()
+   {
+      return velocity;
+   }
+
+   @Override
+   public Vector3DReadOnly getAcceleration()
+   {
+      return acceleration;
    }
 
    public Tuple3DReadOnly getIntegral(double from, double to)
@@ -149,7 +157,6 @@ public class AbstractPolynomial3D extends Axis3DPositionTrajectoryGenerator impl
          coefficientsToPack.set(ordinal, 0, getAxis(ordinal).getCoefficient(i));
       }
    }
-
 
    public void offsetTrajectoryPosition(double offsetX, double offsetY, double offsetZ)
    {

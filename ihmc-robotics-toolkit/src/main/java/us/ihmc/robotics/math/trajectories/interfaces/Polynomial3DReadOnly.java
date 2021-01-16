@@ -1,10 +1,10 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public interface Polynomial3DReadOnly extends FramePositionTrajectoryGenerator, TimeIntervalProvider
+public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeIntervalProvider
 {
    PolynomialReadOnly getAxis(int ordinal);
 

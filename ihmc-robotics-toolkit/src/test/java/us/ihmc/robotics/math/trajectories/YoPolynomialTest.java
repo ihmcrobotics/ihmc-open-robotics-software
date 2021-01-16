@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoPolynomialTest

@@ -68,7 +68,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;

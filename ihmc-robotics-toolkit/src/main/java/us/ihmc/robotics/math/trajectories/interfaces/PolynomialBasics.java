@@ -1,9 +1,9 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.interfaces;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 
-interface PolynomialBasics extends PolynomialReadOnly
+public interface PolynomialBasics extends PolynomialReadOnly
 {
    void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero);
 
