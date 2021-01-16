@@ -25,8 +25,6 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       double trajectoryTime = 1.0;
       double dt = 0.001;
 
-      CubicPolynomialTrajectoryGenerator simpleTrajectory;
-      YoPolynomial simpleTrajectory;
       MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectory;
 
       YoDouble trajectoryTimeProvider;
@@ -37,8 +35,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       DoubleProvider initialPositionProvider = () -> 0.0;
       DoubleProvider finalPositionProvider = () -> 1.0;
 
-      simpleTrajectory = new CubicPolynomialTrajectoryGenerator("simpleTraj", initialPositionProvider, finalPositionProvider, trajectoryTimeProvider, registry);
-      simpleTrajectory.initialize();
+      YoPolynomial simpleTrajectory = new YoPolynomial("simpleTraj", 4, registry);
+      simpleTrajectory.setCubic(0.0, trajectoryTimeProvider.getDoubleValue(), initialPositionProvider.getValue(), finalPositionProvider.getValue());
 
       int numberOfWaypoints = 11;
 

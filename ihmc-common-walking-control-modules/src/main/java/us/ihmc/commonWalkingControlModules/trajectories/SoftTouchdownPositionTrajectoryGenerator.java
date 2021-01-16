@@ -6,12 +6,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.FramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class SoftTouchdownPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry;

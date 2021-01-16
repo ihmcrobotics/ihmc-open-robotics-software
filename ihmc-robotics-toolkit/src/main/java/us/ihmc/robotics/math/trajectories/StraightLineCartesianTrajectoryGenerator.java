@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.Alph
 /**
  * WARNING this is super not realtime safe and makes a ton of garbage.
  */
-public class StraightLineCartesianTrajectoryGenerator implements PositionTrajectoryGenerator
+public class StraightLineCartesianTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    private final YoRegistry registry;
    private final ReferenceFrame referenceFrame;

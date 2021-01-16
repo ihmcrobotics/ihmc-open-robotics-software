@@ -165,7 +165,7 @@ public class QuadrupedBodyICPBasedTranslationManager
                positionTrajectoryGenerator.compute(deltaTime);
             }
          }
-         positionTrajectoryGenerator.getPosition(tempPosition);
+         tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          tempPosition.changeFrame(desiredBodyPosition.getReferenceFrame());
          desiredBodyPosition.set(tempPosition);
       }
@@ -304,7 +304,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
-            positionTrajectoryGenerator.getPosition(tempPosition);
+            tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          else
             tempPosition.setToZero(centerFeetZUpFrame);
          tempPosition.changeFrame(centerFeetZUpFrame);

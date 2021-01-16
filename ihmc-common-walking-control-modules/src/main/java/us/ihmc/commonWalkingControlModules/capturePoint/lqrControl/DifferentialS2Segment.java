@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class DifferentialS2Segment implements S2Segment
    }
 
    public void set(S1Function s1Segment,
-                   Trajectory3D vrpTrajectory,
+                   Polynomial3D vrpTrajectory,
                    LQRCommonValues lqrCommonValues,
                    DMatrixRMaj s2AtEnd)
    {
@@ -46,7 +46,7 @@ public class DifferentialS2Segment implements S2Segment
    }
 
    public void set(S1Function s1Segment,
-                   Trajectory3D vrpTrajectory,
+                   Polynomial3D vrpTrajectory,
                    DMatrixRMaj Q,
                    DMatrixRMaj R1Inverse,
                    DMatrixRMaj NTranspose,
@@ -61,7 +61,7 @@ public class DifferentialS2Segment implements S2Segment
       s2Trajectory.clear();
       s2ReverseTrajectory.add().set(s2AtEnd);
 
-      double duration = vrpTrajectory.getDuration();
+      double duration = vrpTrajectory.getTimeInterval().getDuration();
 
       for (double t = duration - dt; t >= 0.0; t -= dt)
       {

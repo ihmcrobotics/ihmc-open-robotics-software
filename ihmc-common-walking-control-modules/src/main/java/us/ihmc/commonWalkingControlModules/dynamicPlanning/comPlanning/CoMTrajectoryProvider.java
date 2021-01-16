@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 
 import java.util.List;
 
 public interface CoMTrajectoryProvider extends CoMTrajectoryPlannerInterface
 {
-   List<Trajectory3D> getVRPTrajectories();
+   List<Polynomial3D> getVRPTrajectories();
 
    @Override
    default int getSegmentNumber(double time)

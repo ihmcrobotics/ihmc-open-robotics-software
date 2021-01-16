@@ -6,9 +6,8 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 
 public class AlgebraicS2Segment implements S2Segment
 {
@@ -24,12 +23,12 @@ public class AlgebraicS2Segment implements S2Segment
    private final DMatrixRMaj alpha = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<DMatrixRMaj> betas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
 
-   public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, LQRCommonValues lqrCommonValues)
+   public void set(DMatrixRMaj endValue, Polynomial3D vrpTrajectory, LQRCommonValues lqrCommonValues)
    {
       set(endValue, vrpTrajectory, lqrCommonValues.getA2(), lqrCommonValues.getA2Inverse(), lqrCommonValues.getA2InverseB2());
    }
 
-   public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
+   public void set(DMatrixRMaj endValue, Polynomial3D vrpTrajectory, DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
    {
       this.A2.set(A2);
 
@@ -61,7 +60,7 @@ public class AlgebraicS2Segment implements S2Segment
          betaLocalPrevious = betaLocal;
       }
 
-      double duration = Math.min(vrpTrajectory.getDuration(), 1e1);
+      double duration = Math.min(vrpTrajectory.getTimeInterval().getDuration(), 1e1);
       summedBetas.zero();
       for (int i = 0; i <= k; i++)
          CommonOps_DDRM.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(i));

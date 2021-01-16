@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.FramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
@@ -41,7 +41,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;
@@ -623,7 +623,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       for (double time = 0.0; time <= 1.0; time += timeIncrement)
       {
          compute(time);
-         getVelocity(tempVelocity);
+         tempVelocity.setIncludingFrame(getVelocity());
          double speed = tempVelocity.length();
          if (speed > maxSpeed.getDoubleValue())
          {

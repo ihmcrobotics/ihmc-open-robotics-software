@@ -16,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
+import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -38,14 +38,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = () -> 10.0;
       FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      PositionProvider initialPositionProvider = () -> initialPosition;
+      FramePositionProvider initialPositionProvider = () -> initialPosition;
       FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      PositionProvider finalPositionProvider = () -> initialPosition;
+      FramePositionProvider finalPositionProvider = () -> initialPosition;
 
       FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider initialOrientationProvider = () -> initialOrientation;
+      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider finalOrientationProvider = () -> finalOrientation;
+      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
       StraightLinePositionTrajectoryGenerator originalPosition = new StraightLinePositionTrajectoryGenerator("position", worldFrame, trajectoryTimeProvider,
             initialPositionProvider, finalPositionProvider, registry);
@@ -194,14 +194,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = () -> 10.0;
       final FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      PositionProvider initialPositionProvider = () -> initialPosition;
+      FramePositionProvider initialPositionProvider = () -> initialPosition;
       final FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      PositionProvider finalPositionProvider = () -> finalPosition;
+      FramePositionProvider finalPositionProvider = () -> finalPosition;
 
       final FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider initialOrientationProvider = () -> initialOrientation;
+      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       final FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider finalOrientationProvider = () -> finalOrientation;
+      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
       StraightLinePositionTrajectoryGenerator originalPosition = new StraightLinePositionTrajectoryGenerator("position1", worldFrame, trajectoryTimeProvider,
             initialPositionProvider, finalPositionProvider, registry);

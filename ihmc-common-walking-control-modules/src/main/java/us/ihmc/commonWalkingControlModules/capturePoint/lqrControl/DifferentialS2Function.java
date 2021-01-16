@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class DifferentialS2Function implements S2Function
    }
 
    public void set(DifferentialS1Function s1Function,
-                   List<Trajectory3D> vrpTrajectories,
+                   List<Polynomial3D> vrpTrajectories,
                    DMatrixRMaj Q,
                    DMatrixRMaj q2,
                    DMatrixRMaj R1,

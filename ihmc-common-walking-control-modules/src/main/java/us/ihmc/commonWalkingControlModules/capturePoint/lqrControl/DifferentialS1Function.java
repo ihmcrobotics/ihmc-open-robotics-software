@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class DifferentialS1Function implements S1Function
       s1Segments = new RecyclingArrayList<>(() -> new DifferentialS1Segment(dt));
    }
 
-   public void set(DMatrixRMaj Q1, DMatrixRMaj R1, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj S1AtEnd, List<Trajectory3D> vrpTrajectories)
+   public void set(DMatrixRMaj Q1, DMatrixRMaj R1, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj S1AtEnd, List<Polynomial3D> vrpTrajectories)
    {
       s1Segments.clear();
       for (int i = 0; i < vrpTrajectories.size(); i++)
@@ -25,7 +25,7 @@ public class DifferentialS1Function implements S1Function
       endValueLocal.set(S1AtEnd);
       for (int i = vrpTrajectories.size() - 1; i >= 0; i--)
       {
-         s1Segments.get(i).set(Q1, R1, NTranspose, A, B, endValueLocal, vrpTrajectories.get(i).getDuration());
+         s1Segments.get(i).set(Q1, R1, NTranspose, A, B, endValueLocal, vrpTrajectories.get(i).getTimeInterval().getDuration());
          s1Segments.get(i).compute(0, endValueLocal);
       }
    }

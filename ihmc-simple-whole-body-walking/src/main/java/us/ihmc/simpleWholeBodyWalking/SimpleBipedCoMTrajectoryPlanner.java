@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -271,7 +271,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       return comTrajectoryPlanner.getDesiredVRPPosition();
    }
 
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<Polynomial3D> getVRPTrajectories()
    {
       return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
    }

@@ -3,7 +3,7 @@ package us.ihmc.robotics.trajectories.providers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 
-public interface SE3ConfigurationProvider extends PositionProvider, OrientationProvider
+public interface SE3ConfigurationProvider extends FramePositionProvider, FrameOrientationProvider
 {
    default void getPose(FramePose3DBasics poseToPack)
    {

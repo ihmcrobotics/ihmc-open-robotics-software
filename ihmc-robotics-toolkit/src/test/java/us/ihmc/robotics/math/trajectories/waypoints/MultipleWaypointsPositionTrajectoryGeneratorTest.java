@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -42,8 +42,8 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       
       
       DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
-      PositionProvider initialPositionProvider = () -> new FramePoint3D(worldFrame, 1.0, 0.0, 1.0);
-      PositionProvider finalPositionProvider = () -> new FramePoint3D(worldFrame,   0.2, 1.0, 0.4);
+      FramePositionProvider initialPositionProvider = () -> new FramePoint3D(worldFrame, 1.0, 0.0, 1.0);
+      FramePositionProvider finalPositionProvider = () -> new FramePoint3D(worldFrame, 0.2, 1.0, 0.4);
       simpleTrajectory = new StraightLinePositionTrajectoryGenerator("simpleTraj", worldFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, registry);
       simpleTrajectory.initialize();
 
@@ -60,8 +60,8 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       {
          double timeAtWaypoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTrajectory.compute(timeAtWaypoint);
-         simpleTrajectory.getPosition(waypointPosition);
-         simpleTrajectory.getVelocity(waypointVelocity);
+         waypointPosition.setIncludingFrame(simpleTrajectory.getPosition());
+         waypointVelocity.setIncludingFrame(simpleTrajectory.getVelocity());
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointPosition, waypointVelocity);
       }
       multipleWaypointTrajectory.initialize();

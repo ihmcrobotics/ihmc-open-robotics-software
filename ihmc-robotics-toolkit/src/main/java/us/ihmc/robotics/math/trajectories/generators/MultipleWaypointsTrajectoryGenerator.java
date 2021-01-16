@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
@@ -34,7 +35,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final SettableDoubleProvider finalPositionProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider finalVelocityProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider trajectoryTimeProvider = new SettableDoubleProvider();
-   private final CubicPolynomialTrajectoryGenerator subTrajectory;
+   private final YoPolynomial subTrajectory;
 
    public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
@@ -55,8 +56,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new CubicPolynomialTrajectoryGenerator(namePrefix + "SubTrajectory", initialPositionProvider, initialVelocityProvider,
-            finalPositionProvider, finalVelocityProvider, trajectoryTimeProvider, registry);
+      subTrajectory = new YoPolynomial(namePrefix + "SubTrajectory", 4, registry);
 
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
@@ -156,7 +156,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          finalPositionProvider.setValue(firstWaypoint.getPosition());
          finalVelocityProvider.setValue(firstWaypoint.getVelocity());
          trajectoryTimeProvider.setValue(0.0);
-         subTrajectory.initialize();
+
+         subTrajectory.setLinear(0.0, initialPositionProvider.getValue(), initialVelocityProvider.getValue());
       }
       else
       {
@@ -179,7 +180,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       double subTrajectoryTime = end.getTime() - start.getTime();
       trajectoryTimeProvider.setValue(subTrajectoryTime);
 
-      subTrajectory.initialize();
+      subTrajectory.setCubic(0.0,
+                             trajectoryTimeProvider.getValue(),
+                             initialPositionProvider.getValue(),
+                             initialVelocityProvider.getValue(),
+                             finalPositionProvider.getValue(),
+                             finalVelocityProvider.getValue());
    }
 
    @Override

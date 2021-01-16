@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -57,7 +57,7 @@ public class SimpleLinearMomentumRateControlModuleInput
    /*
     * Desired VRP trajectories passed form the SImpleCOMTrajectoryPlanner to the LQR Momentum Controller.
     */
-   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final List<Polynomial3D> vrpTrajectories = new ArrayList<>();
    
    /*
     * Time in the current contact phase of the VRP trajectory
@@ -273,13 +273,13 @@ public class SimpleLinearMomentumRateControlModuleInput
       return perfectCoP;
    }
    
-   public void setVRPTrajectories(List<Trajectory3D> vrpTrajectories)
+   public void setVRPTrajectories(List<Polynomial3D> vrpTrajectories)
    {
       this.vrpTrajectories.clear();
       this.vrpTrajectories.addAll(vrpTrajectories);
    }
    
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<Polynomial3D> getVRPTrajectories()
    {
       return vrpTrajectories;
    }

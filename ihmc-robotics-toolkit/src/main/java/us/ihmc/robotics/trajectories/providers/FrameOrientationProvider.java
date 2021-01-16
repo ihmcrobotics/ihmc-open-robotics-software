@@ -6,19 +6,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
-public interface OrientationProvider extends ReferenceFrameHolder
+public interface FrameOrientationProvider extends ReferenceFrameHolder
 {
-   default void getOrientation(FrameQuaternionBasics orientationToPack)
-   {
-      orientationToPack.setReferenceFrame(this.getReferenceFrame());
-      getOrientation((FixedFrameQuaternionBasics) orientationToPack);
-   }
-
-   default void getOrientation(FixedFrameQuaternionBasics orientationToPack)
-   {
-      orientationToPack.setMatchingFrame(getOrientation());
-   }
-
    default ReferenceFrame getReferenceFrame()
    {
       return getOrientation().getReferenceFrame();

@@ -11,11 +11,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterface
+public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
 {
    private final int maximumNumberOfCoefficients;
    private double pos, vel, acc, jerk, dPos;
    private final YoDouble[] a;
+   private final double[] coefficientsCopy;
+   private final YoDouble currentTime;
    private final YoInteger numberOfCoefficients;
    private final DMatrixRMaj constraintMatrix;
    private final DMatrixRMaj constraintVector;
@@ -23,8 +25,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
    private final double[] xPowers;
 
    private final TimeIntervalBasics timeInterval = new TimeInterval();
-   private double tCurrent;
-
 
    // Stores the (n-th order) derivative of the xPowers vector
    private final DMatrixRMaj xPowersDerivativeVector;
@@ -33,41 +33,39 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
 
    public YoPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
-      this.maximumNumberOfCoefficients = maximumNumberOfCoefficients;
+      this(createCoefficientsArray(name, maximumNumberOfCoefficients, registry),
+           new YoInteger(name + "_nCoeffs", registry),
+           new YoDouble(name + "_tCurrent", registry));
+   }
+
+   public YoPolynomial(YoDouble[] coefficients, YoInteger numberOfCoefficients,
+                       YoDouble currentTime)
+   {
+      this.a = coefficients;
+      this.numberOfCoefficients = numberOfCoefficients;
+      this.currentTime = currentTime;
+
+      maximumNumberOfCoefficients = coefficients.length;
+      this.coefficientsCopy = new double[maximumNumberOfCoefficients];
 
       solver = LinearSolverFactory_DDRM.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
-      a = new YoDouble[maximumNumberOfCoefficients];
       constraintMatrix = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
       constraintVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
       coefficientVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
 
       xPowersDerivativeVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
+   }
 
-      numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
-
+   private static YoDouble[] createCoefficientsArray(String name, int maximumNumberOfCoefficients, YoRegistry registry)
+   {
+      YoDouble[] a = new YoDouble[maximumNumberOfCoefficients];
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
          a[i] = new YoDouble(name + "_a" + i, registry);
       }
-   }
-
-   public YoPolynomial(YoDouble[] coefficients, YoInteger numberOfCoefficients)
-   {
-      a = coefficients;
-      this.numberOfCoefficients = numberOfCoefficients;
-
-      maximumNumberOfCoefficients = coefficients.length;
-
-      solver = LinearSolverFactory_DDRM.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-
-      constraintMatrix = new DMatrixRMaj(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
-      constraintVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
-      coefficientVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
-      xPowers = new double[maximumNumberOfCoefficients];
-
-      xPowersDerivativeVector = new DMatrixRMaj(maximumNumberOfCoefficients, 1);
+      return a;
    }
 
    @Override
@@ -88,27 +86,49 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       return acc;
    }
 
-   public double getJerk()
-   {
-      return jerk;
-   }
-
+   @Override
    public double getCoefficient(int i)
    {
       return a[i].getDoubleValue();
    }
 
-   /**
-    * To be used only for testing. Garbage creating function
-    */
+   @Override
+   public void setNumberOfCoefficients(int numberOfCoefficients)
+   {
+      this.numberOfCoefficients.set(numberOfCoefficients);
+   }
+
+   public double getJerk()
+   {
+      return jerk;
+   }
+
+   @Override
    public double[] getCoefficients()
    {
-      double[] ret = new double[numberOfCoefficients.getIntegerValue()];
-      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         ret[i] = a[i].getDoubleValue();
-      }
-      return ret;
+      setCoefficientsCopy();
+      return coefficientsCopy;
+   }
+
+   @Override
+   public double getCurrentTime()
+   {
+      return currentTime.getDoubleValue();
+   }
+
+   @Override
+   public void setCurrentTime(double currentTime)
+   {
+      this.currentTime.set(currentTime);
+   }
+
+   private void setCoefficientsCopy()
+   {
+      int row = 0;
+      for (; row < getNumberOfCoefficients(); row++)
+         coefficientsCopy[row] = a[row].getDoubleValue();
+      for (; row < maximumNumberOfCoefficients; row++)
+         coefficientsCopy[row] = Double.NaN;
    }
 
    public DMatrixRMaj getCoefficientsVector()
@@ -122,53 +142,18 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       return a;
    }
 
-   public void reset()
-   {
-      getTimeInterval().reset();
-      numberOfCoefficients.set(0);
-      for (int i = 0; i < maximumNumberOfCoefficients; i++)
-         a[i].setToNaN();
-   }
-
-   public void set(YoPolynomial other)
-   {
-      reset();
-
-      reshape(other.getNumberOfCoefficients());
-
-      for (int i = 0; i < other.getNumberOfCoefficients(); i++)
-         a[i].set(other.getCoefficient(i));
-   }
-
-   protected void solveForCoefficients()
+   @Override
+   public void solveForCoefficients()
    {
       solver.setA(constraintMatrix);
       solver.solve(constraintVector, coefficientVector);
    }
 
-   public void setDirectly(DMatrixRMaj coefficients)
-   {
-      reshape(coefficients.getNumRows());
-      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         a[i].set(coefficients.get(i, 0));
-      }
-   }
-
-   public void setDirectly(double[] coefficients)
-   {
-      reshape(coefficients.length);
-      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         a[i].set(coefficients[i]);
-      }
-   }
-
    public void setDirectly(int power, double coefficient)
    {
       if (power >= maximumNumberOfCoefficients)
-         throw new RuntimeException("Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't set coefficient as it requires: " + power + 1
-               + " coefficients");
+         throw new RuntimeException(
+               "Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't set coefficient as it requires: " + power + 1 + " coefficients");
 
       if (power >= getNumberOfCoefficients())
       {
@@ -183,22 +168,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       a[power].set(coefficient);
    }
 
-   /**
-    * Set a specific coefficient of the polynomial. A sequence of calls to this function should
-    * typically be followed by a call to {@code reshape(int)} later.
-    *
-    * @param power
-    * @param coefficient
-    */
-   public void setDirectlyFast(int power, double coefficient)
-   {
-      if (power >= maximumNumberOfCoefficients)
-         return;
-      if (power >= getNumberOfCoefficients())
-         numberOfCoefficients.set(power + 1);
-      a[power].set(coefficient);
-   }
-
    public void setDirectlyReverse(double[] coefficients)
    {
       ArrayUtils.reverse(coefficients);
@@ -208,7 +177,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
    @Override
    public void compute(double x)
    {
-      tCurrent = x;
+      setCurrentTime(x);
       setXPowers(xPowers, x);
 
       pos = vel = acc = jerk = 0.0;
@@ -233,28 +202,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       }
    }
 
-   public double getIntegral(double from, double to)
-   {
-      double[] fromPowers = new double[numberOfCoefficients.getIntegerValue() + 1];
-      double[] toPowers = new double[numberOfCoefficients.getIntegerValue() + 1];
-      setXPowers(fromPowers, from);
-      setXPowers(toPowers, to);
-      double integral = 0;
-      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         integral += 1.0 / (i + 1.0) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
-      }
-      return integral;
-   }
-
-   public void setXPowers(double[] xPowers, double x)
-   {
-      xPowers[0] = 1.0;
-      for (int i = 1; i < xPowers.length; i++)
-      {
-         xPowers[i] = xPowers[i - 1] * x;
-      }
-   }
 
    // Returns the order-th derivative of the polynomial at x
    public double getDerivative(int order, double x)
@@ -306,6 +253,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       return coeff;
    }
 
+   @Override
    public int getNumberOfCoefficients()
    {
       return numberOfCoefficients.getIntegerValue();
@@ -328,7 +276,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
    {
       double xPower = 1.0;
 
-      for (int col = derivativeOrderWithPositionBeingZero; col < numberOfCoefficients.getIntegerValue(); col++)
+      for (int col = derivativeOrderWithPositionBeingZero; col < getNumberOfCoefficients(); col++)
       {
          double columnPower = 1.0;
          for (int i = 0; i < derivativeOrderWithPositionBeingZero; i++)
@@ -340,27 +288,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
       }
 
       constraintVector.set(row, 0, desiredZDerivative);
-   }
-
-   protected void setYoVariables()
-   {
-      for (int row = 0; row < numberOfCoefficients.getIntegerValue(); row++)
-      {
-         a[row].set(coefficientVector.get(row, 0));
-      }
-   }
-
-   @Override
-   public void initialize()
-   {
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return tCurrent >= getTimeInterval().getEndTime();
    }
 
    public void reshape(int numberOfCoefficientsRequired)
@@ -377,6 +304,12 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterfa
 
       for (int i = numberOfCoefficientsRequired; i < maximumNumberOfCoefficients; i++)
          a[i].set(Double.NaN);
+   }
+
+   @Override
+   public void setCoefficient(int idx, double value)
+   {
+      a[idx].set(value);
    }
 
    @Override

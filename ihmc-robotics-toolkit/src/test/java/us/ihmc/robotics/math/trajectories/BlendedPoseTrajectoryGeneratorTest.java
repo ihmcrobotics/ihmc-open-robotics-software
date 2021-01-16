@@ -461,20 +461,20 @@ public class BlendedPoseTrajectoryGeneratorTest
       blendedTrajectory.blendFinalConstraint(finalState.getPose(), finalState.getTwist(), trajectoryDuration, 0.3);
 
       blendedTrajectory.compute(startIntegrationTime - dt);
-      blendedTrajectory.getPosition(positionFromIntegration);
-      blendedTrajectory.getVelocity(linearVelocityFromIntegration);
-      blendedTrajectory.getOrientation(orientationFromIntegration);
-      blendedTrajectory.getAngularVelocity(angularVelocityFromIntegration);
+      positionFromIntegration.setIncludingFrame(blendedTrajectory.getPosition());
+      linearVelocityFromIntegration.setIncludingFrame(blendedTrajectory.getVelocity());
+      orientationFromIntegration.setIncludingFrame(blendedTrajectory.getOrientation());
+      angularVelocityFromIntegration.setIncludingFrame(blendedTrajectory.getAngularVelocity());
 
       for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
       {
          blendedTrajectory.compute(time);
-         blendedTrajectory.getPosition(currentPosition);
-         blendedTrajectory.getOrientation(currentOrientation);
-         blendedTrajectory.getVelocity(currentLinearVelocity);
-         blendedTrajectory.getAngularVelocity(currentAngularVelocity);
-         blendedTrajectory.getAcceleration(currentLinearAcceleration);
-         blendedTrajectory.getAngularAcceleration(currentAngularAcceleration);
+         currentPosition.setIncludingFrame(blendedTrajectory.getPosition());
+         currentOrientation.setIncludingFrame(blendedTrajectory.getOrientation());
+         currentLinearVelocity.setIncludingFrame(blendedTrajectory.getVelocity());
+         currentAngularVelocity.setIncludingFrame(blendedTrajectory.getAngularVelocity());
+         currentLinearAcceleration.setIncludingFrame(blendedTrajectory.getAcceleration());
+         currentAngularAcceleration.setIncludingFrame(blendedTrajectory.getAngularAcceleration());
 
          integratedLinearVelocity.set(currentLinearVelocity);
          integratedLinearVelocity.scale(dt);
@@ -609,7 +609,7 @@ public class BlendedPoseTrajectoryGeneratorTest
          double time = i * trajectoryDuration / (numberOfSamples - 1);
 
          blendedTrajectory.compute(time);
-         blendedTrajectory.getOrientation(orientation); // this doesn't change throughout the trajectory
+         orientation.setIncludingFrame(blendedTrajectory.getOrientation()); // this doesn't change throughout the trajectory
 
          EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, orientation, 1e-1);
       }

@@ -143,7 +143,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       z0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubic(t0, tFinal, z0, zFinal);
+      super.setCubic(t0, tFinal, z0, zFinal);
    }
 
    public void setCubic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
