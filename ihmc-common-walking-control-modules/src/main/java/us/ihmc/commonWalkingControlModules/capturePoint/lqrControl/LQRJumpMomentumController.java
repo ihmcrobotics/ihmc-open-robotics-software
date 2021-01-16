@@ -146,7 +146,7 @@ public class LQRJumpMomentumController
          Polynomial3D relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
+         relativeTrajectory.shiftTrajectory(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
 
          this.contactStateProviders.add().set(contactStateProviders.get(i));
       }

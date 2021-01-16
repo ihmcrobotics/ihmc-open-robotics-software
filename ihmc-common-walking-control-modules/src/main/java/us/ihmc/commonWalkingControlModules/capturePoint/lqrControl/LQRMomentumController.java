@@ -136,7 +136,7 @@ public class LQRMomentumController
          Polynomial3D relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
+         relativeTrajectory.shiftTrajectory(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
       }
    }
 
