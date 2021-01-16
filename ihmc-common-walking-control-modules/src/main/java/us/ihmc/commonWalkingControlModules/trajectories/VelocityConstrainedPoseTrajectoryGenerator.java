@@ -469,12 +469,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       if (!isDone())
       {
          // Linear Part
-         currentPose.getPosition().set(xPolynomial.getPosition(), yPolynomial.getPosition(), zPolynomial.getPosition());
+         currentPose.getPosition().set(xPolynomial.getValue(), yPolynomial.getValue(), zPolynomial.getValue());
          currentVelocity.set(xPolynomial.getVelocity(), yPolynomial.getVelocity(), zPolynomial.getVelocity());
          currentAcceleration.set(xPolynomial.getAcceleration(), yPolynomial.getAcceleration(), zPolynomial.getAcceleration());
 
          // Rotational Part: Transformation from interpolationFrame to trajectoryFrame
-         tempVector.set(xRotPolynomial.getPosition(), yRotPolynomial.getPosition(), zRotPolynomial.getPosition());
+         tempVector.set(xRotPolynomial.getValue(), yRotPolynomial.getValue(), zRotPolynomial.getValue());
          vectorLength = tempVector.length();
          if (vectorLength > 0.0)
          {
@@ -498,7 +498,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          yRotPolynomial.compute(time + FDdt);
          zRotPolynomial.compute(time + FDdt);
 
-         tempVector.set(xRotPolynomial.getPosition(), yRotPolynomial.getPosition(), zRotPolynomial.getPosition());
+         tempVector.set(xRotPolynomial.getValue(), yRotPolynomial.getValue(), zRotPolynomial.getValue());
          vectorLength = tempVector.length();
          if (vectorLength > 0.0)
          {
@@ -518,7 +518,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          yRotPolynomial.compute(time - FDdt);
          zRotPolynomial.compute(time - FDdt);
 
-         tempVector.set(xRotPolynomial.getPosition(), yRotPolynomial.getPosition(), zRotPolynomial.getPosition());
+         tempVector.set(xRotPolynomial.getValue(), yRotPolynomial.getValue(), zRotPolynomial.getValue());
          vectorLength = tempVector.length();
          if (vectorLength > 0.0)
          {

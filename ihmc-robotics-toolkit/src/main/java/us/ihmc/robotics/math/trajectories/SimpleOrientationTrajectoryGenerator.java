@@ -1,8 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -99,7 +97,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
       if (!isDone() && trajectoryTime.getValue() >= 1.0e-6)
       {
-         currentOrientation.interpolate(initialOrientation, finalOrientation, parameterPolynomial.getPosition());
+         currentOrientation.interpolate(initialOrientation, finalOrientation, parameterPolynomial.getValue());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaDot);
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaDDot);
       }

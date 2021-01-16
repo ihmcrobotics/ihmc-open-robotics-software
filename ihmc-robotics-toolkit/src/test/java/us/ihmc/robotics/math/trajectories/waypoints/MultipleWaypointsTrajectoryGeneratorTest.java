@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -26,6 +26,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       double dt = 0.001;
 
       CubicPolynomialTrajectoryGenerator simpleTrajectory;
+      YoPolynomial simpleTrajectory;
       MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectory;
 
       YoDouble trajectoryTimeProvider;

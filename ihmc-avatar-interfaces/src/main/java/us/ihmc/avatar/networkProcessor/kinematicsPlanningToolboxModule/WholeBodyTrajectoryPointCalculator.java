@@ -253,7 +253,7 @@ public class WholeBodyTrajectoryPointCalculator
                Trajectory trajectory = jointNameToTrajectoryHolderMap.get(jointName).getTrajectory(indexOfTrajectory);
                trajectory.compute(time);
 
-               positionFW.write(String.format("\t%.4f", trajectory.getPosition()));
+               positionFW.write(String.format("\t%.4f", trajectory.getValue()));
                velocityFW.write(String.format("\t%.4f", trajectory.getVelocity()));
             }
 

@@ -4,8 +4,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,7 +28,7 @@ public class BasicCoPPlanner
    private final FrameVector3D desiredCoPVelocity = new FrameVector3D();
    private final FrameVector3D desiredCoPAcceleration = new FrameVector3D();
 
-   private final SegmentedFrameTrajectory3D copTrajectory;
+   private final MultipleWaypointsPositionTrajectoryGenerator copTrajectory;
 
    private boolean isInTransfer = false;
    private boolean isInStanding = true;
@@ -44,14 +43,14 @@ public class BasicCoPPlanner
       timeInCurrentStateRemaining = new YoDouble("timeInCurrentStateRemaining", registry);
 
       desiredCoPPosition.setToZero();
-      copTrajectory = new SegmentedFrameTrajectory3D(10, 5);
+      copTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("copTrajectory", worldFrame, registry);
    }
 
    public void clearPlan()
    {
       upcomingFootsteps.clear();
       upcomingTimings.clear();
-      copTrajectory.reset();
+      copTrajectory.clear();
    }
 
    public void submitFootstep(Footstep footstep, FootstepTiming timing)
@@ -70,6 +69,8 @@ public class BasicCoPPlanner
       isInTransfer = false;
    }
 
+   private final FrameVector3D zeroVelocity = new FrameVector3D();
+
    public void initializeForTransfer(double currentTime)
    {
       initialTime = currentTime;
@@ -83,50 +84,42 @@ public class BasicCoPPlanner
       desiredCoPPosition.changeFrame(worldFrame);
       finalSegmentCoP.changeFrame(worldFrame);
 
-      double startTime = 0.0;
       double endTime = upcomingTimings.get(0).getTransferTime();
-      FrameTrajectory3D transferTrajectory = copTrajectory.add();
-      transferTrajectory.setCubic(startTime, endTime, desiredCoPPosition, finalSegmentCoP);
+      copTrajectory.appendWaypoint(0.0, desiredCoPPosition, zeroVelocity);
+      copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
-      startTime = endTime;
       endTime += upcomingTimings.get(0).getSwingTime();
 
-      FrameTrajectory3D swingTrajectory = copTrajectory.add();
-      swingTrajectory.setConstant(startTime, endTime, finalSegmentCoP);
+      copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
       Footstep previousFootstep = currentFootstep;
 
       int stepIndex;
       for (stepIndex = 1; stepIndex < Math.min(numberOfStepsToCompute, upcomingFootsteps.size()); stepIndex++)
       {
-         startTime = endTime;
          endTime += upcomingTimings.get(stepIndex).getTransferTime();
          initialSegmentCoP.set(finalSegmentCoP);
          finalSegmentCoP.setToZero(previousFootstep.getSoleReferenceFrame());
          finalSegmentCoP.changeFrame(worldFrame);
 
-         transferTrajectory = copTrajectory.add();
-         transferTrajectory.setCubic(startTime, endTime, initialSegmentCoP, finalSegmentCoP);
+         copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
-         startTime = endTime;
          endTime += upcomingTimings.get(stepIndex).getSwingTime();
 
-         swingTrajectory = copTrajectory.add();
-         swingTrajectory.setConstant(startTime, endTime, finalSegmentCoP);
+         copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
          previousFootstep = upcomingFootsteps.get(stepIndex);
       }
 
       upcomingFootsteps.get(stepIndex - 1).getPosition(footstepPosition);
 
-      startTime = endTime;
       endTime += finalTransferDuration;
 
       initialSegmentCoP.set(finalSegmentCoP);
       finalSegmentCoP.interpolate(initialSegmentCoP, footstepPosition, 0.5);
 
-      FrameTrajectory3D finalTransferTrajectory = copTrajectory.add();
-      finalTransferTrajectory.setCubic(startTime, endTime, initialSegmentCoP, finalSegmentCoP);
+      copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
+      copTrajectory.initialize();
    }
 
    public void initializeForSingleSupport(double currentTime)
@@ -142,48 +135,40 @@ public class BasicCoPPlanner
       desiredCoPPosition.changeFrame(worldFrame);
       finalSegmentCoP.changeFrame(worldFrame);
 
-      double startTime = 0.0;
       double endTime = upcomingTimings.get(0).getSwingTime();
 
-      FrameTrajectory3D swingTrajectory = copTrajectory.add();
-      swingTrajectory.setCubic(startTime, endTime, desiredCoPPosition, finalSegmentCoP);
+      copTrajectory.appendWaypoint(0.0, desiredCoPPosition, zeroVelocity);
+      copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
       Footstep previousFootstep = currentFootstep;
 
       int stepIndex;
       for (stepIndex = 1; stepIndex < Math.min(numberOfStepsToCompute, upcomingFootsteps.size()); stepIndex++)
       {
-         startTime = endTime;
          endTime += upcomingTimings.get(stepIndex).getTransferTime();
          initialSegmentCoP.set(finalSegmentCoP);
          finalSegmentCoP.setToZero(previousFootstep.getSoleReferenceFrame());
          finalSegmentCoP.changeFrame(worldFrame);
 
-         FrameTrajectory3D transferTrajectory = copTrajectory.add();
-         transferTrajectory.setCubic(startTime, endTime, initialSegmentCoP, finalSegmentCoP);
+         copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
-         startTime = endTime;
          endTime += upcomingTimings.get(stepIndex).getSwingTime();
 
-         swingTrajectory = copTrajectory.add();
-         swingTrajectory.setConstant(startTime, endTime, finalSegmentCoP);
+         copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
 
          previousFootstep = upcomingFootsteps.get(stepIndex);
       }
 
       upcomingFootsteps.get(stepIndex - 1).getPosition(footstepPosition);
 
-      startTime = endTime;
       endTime += finalTransferDuration;
 
       initialSegmentCoP.set(finalSegmentCoP);
       finalSegmentCoP.interpolate(initialSegmentCoP, footstepPosition, 0.5);
 
-      FrameTrajectory3D finalTransferTrajectory = copTrajectory.add();
-      finalTransferTrajectory.setCubic(startTime, endTime, initialSegmentCoP, finalSegmentCoP);
+      copTrajectory.appendWaypoint(endTime, finalSegmentCoP, zeroVelocity);
+      copTrajectory.initialize();
    }
-
-
 
    public void compute(double time)
    {
@@ -195,7 +180,12 @@ public class BasicCoPPlanner
          desiredCoPAcceleration.setToZero();
       }
       else
-         copTrajectory.update(timeInCurrentState, desiredCoPPosition, desiredCoPVelocity, desiredCoPAcceleration);
+      {
+         copTrajectory.compute(timeInCurrentState);
+         desiredCoPPosition.set(copTrajectory.getPosition());
+         desiredCoPVelocity.set(copTrajectory.getVelocity());
+         desiredCoPAcceleration.set(copTrajectory.getAcceleration());
+      }
    }
 
    public double getCurrentStateDuration()
@@ -206,7 +196,7 @@ public class BasicCoPPlanner
          return upcomingTimings.get(0).getSwingTime();
    }
 
-   public SegmentedFrameTrajectory3D getCoPTrajectory()
+   public MultipleWaypointsPositionTrajectoryGenerator getCoPTrajectory()
    {
       return copTrajectory;
    }

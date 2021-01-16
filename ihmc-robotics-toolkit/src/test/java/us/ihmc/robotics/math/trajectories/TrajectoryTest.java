@@ -31,9 +31,9 @@ public class TrajectoryTest
       assertEquals(1, traj.getInitialTime(), SMALL_EPSILON);
       assertEquals(2, traj.getFinalTime(), SMALL_EPSILON);
       traj.compute(traj.getInitialTime());
-      assertEquals(3.0, traj.getPosition(), SMALL_EPSILON);
+      assertEquals(3.0, traj.getValue(), SMALL_EPSILON);
       traj.compute(traj.getFinalTime());
-      assertEquals(5.0, traj.getPosition(), SMALL_EPSILON);
+      assertEquals(5.0, traj.getValue(), SMALL_EPSILON);
       assertEquals(2, traj.getCoefficient(1), SMALL_EPSILON);
       assertEquals(1, traj.getCoefficient(0), SMALL_EPSILON);
    }
@@ -62,7 +62,7 @@ public class TrajectoryTest
          for (double t = t0; t <= tf; t += (tf - t0) / 1000)
          {
             trajectory.compute(t);
-            assertEquals(z, trajectory.getPosition(), SMALL_EPSILON);
+            assertEquals(z, trajectory.getValue(), SMALL_EPSILON);
             assertEquals(0, trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
          }
@@ -96,24 +96,24 @@ public class TrajectoryTest
          derivative.setConstant(t0, tf, zDot);
 
          trajectory.compute(t0);
-         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(z0, trajectory.getValue(), SMALL_EPSILON);
          assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
          assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
 
          trajectory.compute(tf);
-         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zf, trajectory.getValue(), SMALL_EPSILON);
          assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
          assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
 
          for (double t = t0; t <= tf; t += (tf - t0) / 1000)
          {
             trajectory.compute(t);
-            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getPosition(), SMALL_EPSILON);
+            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getValue(), SMALL_EPSILON);
             assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
 
             derivative.compute(t);
-            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
          }
       }
@@ -143,11 +143,11 @@ public class TrajectoryTest
          trajectory.setQuadratic(t0, tf, z0, zd0, zf);
 
          trajectory.compute(t0);
-         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(z0, trajectory.getValue(), SMALL_EPSILON);
          assertEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
 
          trajectory.compute(tf);
-         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zf, trajectory.getValue(), SMALL_EPSILON);
 
          Trajectory derivative = new Trajectory(2);
          derivative.setLinear(t0, tf, zd0, trajectory.getVelocity());
@@ -159,13 +159,13 @@ public class TrajectoryTest
             trajectory.compute(t);
             derivative.compute(t);
 
-            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             trajectory.compute(t + dt);
-            double nextPosition = trajectory.getPosition();
+            double nextPosition = trajectory.getValue();
             trajectory.compute(t - dt);
-            double lastPosition = trajectory.getPosition();
+            double lastPosition = trajectory.getValue();
             assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 1.0e-6);
 
          }
@@ -197,14 +197,14 @@ public class TrajectoryTest
          trajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
 
          trajectory.compute(t0);
-         assertEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(z0, trajectory.getValue(), SMALL_EPSILON);
          assertEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
 
          Trajectory derivative = new Trajectory(3);
          derivative.setQuadratic(t0, tf, zd0, trajectory.getAcceleration(), zdf);
 
          trajectory.compute(tf);
-         assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         assertEquals(zf, trajectory.getValue(), SMALL_EPSILON);
 
          double dt = 1.0e-8;
 
@@ -213,13 +213,13 @@ public class TrajectoryTest
             trajectory.compute(t);
             derivative.compute(t);
 
-            assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             trajectory.compute(t + dt);
-            double nextPosition = trajectory.getPosition();
+            double nextPosition = trajectory.getValue();
             trajectory.compute(t - dt);
-            double lastPosition = trajectory.getPosition();
+            double lastPosition = trajectory.getValue();
             assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 5.0e-6);
 
          }
@@ -683,7 +683,7 @@ public class TrajectoryTest
          {
             trajectory.compute(t);
 
-            assertEquals(trajectory.getPosition(), trajectory.getDerivative(0, t), SMALL_EPSILON);
+            assertEquals(trajectory.getValue(), trajectory.getDerivative(0, t), SMALL_EPSILON);
             assertEquals(trajectory.getVelocity(), trajectory.getDerivative(1, t), SMALL_EPSILON);
             assertEquals(trajectory.getAcceleration(), trajectory.getDerivative(2, t), SMALL_EPSILON);
          }
@@ -698,24 +698,24 @@ public class TrajectoryTest
       quinticTrajectory.setQuintic(0.0, 1.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
 
       quinticTrajectory.compute(0.0);
-      assertEquals(quinticTrajectory.getPosition(), 1.0, 1e-7);
+      assertEquals(quinticTrajectory.getValue(), 1.0, 1e-7);
       assertEquals(quinticTrajectory.getVelocity(), 2.0, 1e-7);
       assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
 
       quinticTrajectory.compute(1.0);
-      assertEquals(quinticTrajectory.getPosition(), 4.0, 1e-7);
+      assertEquals(quinticTrajectory.getValue(), 4.0, 1e-7);
       assertEquals(quinticTrajectory.getVelocity(), 5.0, 1e-7);
       assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
 
       quinticTrajectory.setQuintic(-1.0, 1.0, 1.0, -2.0, 3.0, -4.0, -5.0, 6.0);
 
       quinticTrajectory.compute(-1.0);
-      assertEquals(quinticTrajectory.getPosition(), 1.0, 1e-7);
+      assertEquals(quinticTrajectory.getValue(), 1.0, 1e-7);
       assertEquals(quinticTrajectory.getVelocity(), -2.0, 1e-7);
       assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
 
       quinticTrajectory.compute(1.0);
-      assertEquals(quinticTrajectory.getPosition(), -4.0, 1e-7);
+      assertEquals(quinticTrajectory.getValue(), -4.0, 1e-7);
       assertEquals(quinticTrajectory.getVelocity(), -5.0, 1e-7);
       assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
    }

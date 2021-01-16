@@ -70,7 +70,7 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
       }
       else
       {
-         currentPosition.set(polynomial.getPosition());
+         currentPosition.set(polynomial.getValue());
          currentVelocity.set(polynomial.getVelocity());
          currentAcceleration.set(polynomial.getAcceleration());
       }

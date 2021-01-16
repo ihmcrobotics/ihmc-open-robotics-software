@@ -101,7 +101,7 @@ public class StandPrepControllerState extends HighLevelControllerState
          YoDouble desiredPosition = trajectoryData.getDesiredJointConfiguration();
 
          trajectory.compute(timeInTrajectory);
-         desiredPosition.set(trajectory.getPosition());
+         desiredPosition.set(trajectory.getValue());
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();

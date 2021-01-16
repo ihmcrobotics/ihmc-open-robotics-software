@@ -63,7 +63,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
       double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getValue());
       transitionRatioTrajectory.compute(timeInBlending);
-      double gainRatio = transitionRatioTrajectory.getPosition();
+      double gainRatio = transitionRatioTrajectory.getValue();
       standTransitionRatioCurrentValue.set(gainRatio);
 
       JointDesiredOutputListReadOnly standReadyJointCommand = initialControllerState.getOutputForLowLevelController();

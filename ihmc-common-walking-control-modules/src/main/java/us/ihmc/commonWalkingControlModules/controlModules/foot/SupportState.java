@@ -469,8 +469,8 @@ public class SupportState extends AbstractFootControlState
       if (liftOff.getValue() && currentTime < pitchTrajectoryEndTime.getValue())
       {
          pitchTrajectory.compute(currentTime);
-         desiredPitch.set(pitchTrajectory.getPosition());
-         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+         desiredPitch.set(pitchTrajectory.getValue());
+         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getValue(), desiredOrientation.getRoll());
          desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
          desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
       }
@@ -488,8 +488,8 @@ public class SupportState extends AbstractFootControlState
          else
          {
             pitchTrajectory.compute(currentTime);
-            desiredPitch.set(pitchTrajectory.getPosition());
-            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+            desiredPitch.set(pitchTrajectory.getValue());
+            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getValue(), desiredOrientation.getRoll());
             desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
             desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
          }

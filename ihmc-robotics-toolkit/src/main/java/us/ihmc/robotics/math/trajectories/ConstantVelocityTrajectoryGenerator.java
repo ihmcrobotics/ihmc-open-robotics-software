@@ -50,7 +50,7 @@ public class ConstantVelocityTrajectoryGenerator implements DoubleTrajectoryGene
 
    public double getValue()
    {
-      return polynomial.getPosition();
+      return polynomial.getValue();
    }
 
    public double getVelocity()

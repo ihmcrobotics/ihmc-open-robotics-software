@@ -273,7 +273,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
             if (currentTime >= startTime && currentTime <= endTime)
             {
                polynomial.compute(currentTime - startTime);
-               double normalizedLeftSidePressure = polynomial.getPosition();
+               double normalizedLeftSidePressure = polynomial.getValue();
                double numberOfEndContacts = getNumberOfEndContacts(robotEnd, contactStateAtCurrentTime);
                double numberOfOppositeEndContacts = getNumberOfEndContacts(robotEnd.getOppositeEnd(), contactStateAtCurrentTime);
                if (numberOfEndContacts == 0)

@@ -286,7 +286,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       for (int i = 0; i < 3; i++)
       {
          initialConstraintPolynomial[i].compute(time);
-         initialConstraintPositionOffset.setElement(i, initialConstraintPolynomial[i].getPosition());
+         initialConstraintPositionOffset.setElement(i, initialConstraintPolynomial[i].getValue());
          initialConstraintVelocityOffset.setElement(i, initialConstraintPolynomial[i].getVelocity());
          initialConstraintAccelerationOffset.setElement(i, initialConstraintPolynomial[i].getAcceleration());
       }
@@ -301,7 +301,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       for (int i = 0; i < 3; i++)
       {
          finalConstraintPolynomial[i].compute(time);
-         finalConstraintPositionOffset.setElement(i, finalConstraintPolynomial[i].getPosition());
+         finalConstraintPositionOffset.setElement(i, finalConstraintPolynomial[i].getValue());
          finalConstraintVelocityOffset.setElement(i, finalConstraintPolynomial[i].getVelocity());
          finalConstraintAccelerationOffset.setElement(i, finalConstraintPolynomial[i].getAcceleration());
       }

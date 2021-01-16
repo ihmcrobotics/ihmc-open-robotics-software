@@ -275,7 +275,7 @@ public class WayPointVelocityOptimizerTest
             Trajectory trajectory = trajectories.get(indexOfTrajectory);
             trajectory.compute(time);
 
-            positionFW.write(String.format("\t%.4f\t%.4f\t%.4f", trajectory.getPosition(), trajectory.getVelocity(), trajectory.getAcceleration()));
+            positionFW.write(String.format("\t%.4f\t%.4f\t%.4f", trajectory.getValue(), trajectory.getVelocity(), trajectory.getAcceleration()));
 
             positionFW.write(System.lineSeparator());
             time += timeTick;

@@ -162,7 +162,7 @@ public class YoFourPointCubicSpline1D
       else
       {
          spline.compute(xQuery);
-         y.set(spline.getPosition());
+         y.set(spline.getValue());
          yDot.set(spline.getVelocity());
          yDDot.set(spline.getAcceleration());
       }

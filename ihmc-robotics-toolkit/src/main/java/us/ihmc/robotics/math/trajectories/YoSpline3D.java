@@ -365,7 +365,7 @@ public class YoSpline3D
 
       for (Axis3D axis : Axis3D.values)
       {
-         position.setElement(axis.ordinal(), polynomials.get(axis).getPosition());
+         position.setElement(axis.ordinal(), polynomials.get(axis).getValue());
       }
 
       for (Axis3D axis : Axis3D.values)

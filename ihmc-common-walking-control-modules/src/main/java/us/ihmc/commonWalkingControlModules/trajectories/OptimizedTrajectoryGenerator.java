@@ -344,7 +344,7 @@ public class OptimizedTrajectoryGenerator
 
       YoPolynomial polynomial = trajectories.get(activeSegment);
       polynomial.compute(time);
-      desiredPosition.set(polynomial.getPosition());
+      desiredPosition.set(polynomial.getValue());
       desiredVelocity.set(polynomial.getVelocity());
       desiredAcceleration.set(polynomial.getAcceleration());
       desiredJerk.set(polynomial.getJerk());
