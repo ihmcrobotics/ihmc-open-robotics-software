@@ -1,17 +1,15 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 
-public interface FrameOrientationProvider extends ReferenceFrameHolder
+public interface FrameOrientationProvider extends ReferenceFrameHolder, OrientationProvider
 {
    default ReferenceFrame getReferenceFrame()
    {
       return getOrientation().getReferenceFrame();
    }
 
-   FrameQuaternionReadOnly getOrientation();
+   @Override
+   FrameOrientation3DReadOnly getOrientation();
 }
