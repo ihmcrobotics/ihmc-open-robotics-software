@@ -72,7 +72,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
          setCoefficient(index, Double.NaN);
    }
 
-   default void offsetTrajectoryPosition(double offsetValue)
+   default void shiftTrajectory(double offsetValue)
    {
       setCoefficient(0, getCoefficient(0) + offsetValue);
    }

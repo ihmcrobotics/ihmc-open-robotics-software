@@ -277,8 +277,8 @@ public class LQRJumpMomentumControllerTest
       initialVRPTrajectory.set(coMTrajectoryPlanner.getVRPTrajectories().get(0));
       relativeVRPTrajectory.compute(relativeVRPTrajectory.getTimeInterval().getEndTime());
       Point3DReadOnly finalPosition = relativeVRPTrajectory.getPosition();
-      relativeVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
-      initialVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+      relativeVRPTrajectory.shiftTrajectory(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+      initialVRPTrajectory.shiftTrajectory(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
 
       commonValues.computeS2ConstantStateMatrices(expectedStartOfS13);
       finalS2Function.set(new DMatrixRMaj(6, 1), relativeVRPTrajectory, commonValues);

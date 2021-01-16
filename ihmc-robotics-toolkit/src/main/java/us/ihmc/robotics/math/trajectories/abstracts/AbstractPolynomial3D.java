@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.trajectories.abstracts;
 
-import org.ejml.data.DMatrixRMaj;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Trajectory3DFactories;
-import us.ihmc.robotics.math.trajectories.interfaces.*;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoSpline3D;
 
@@ -42,6 +43,8 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    private final Vector3DReadOnly acceleration;
    private final Tuple3DReadOnly integralResult;
 
+   private final Tuple3DBasics[] coefficients;
+
    public AbstractPolynomial3D(PolynomialBasics[] yoPolynomials)
    {
       this(yoPolynomials[0], yoPolynomials[1], yoPolynomials[2]);
@@ -71,6 +74,24 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
       velocity = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
       acceleration = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
       integralResult = Trajectory3DFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
+
+      coefficients = new Tuple3DBasics[getMaximumNumberOfCoefficients()];
+      coefficients[0] = Trajectory3DFactories.newLinkedPoint3DBasics(() -> xPolynomial.getCoefficient(0),
+                                                                     (d) -> xPolynomial.setCoefficient(0, d),
+                                                                     () -> yPolynomial.getCoefficient(0),
+                                                                     (d) -> yPolynomial.setCoefficient(0, d),
+                                                                     () -> zPolynomial.getCoefficient(0),
+                                                                     (d) -> zPolynomial.setCoefficient(0, d));
+      for (int i = 1; i < getMaximumNumberOfCoefficients(); i++)
+      {
+         final int index = i;
+         coefficients[index] = Trajectory3DFactories.newLinkedVector3DBasics(() -> xPolynomial.getCoefficient(index),
+                                                                        (d) -> xPolynomial.setCoefficient(index, d),
+                                                                        () -> yPolynomial.getCoefficient(index),
+                                                                        (d) -> yPolynomial.setCoefficient(index, d),
+                                                                        () -> zPolynomial.getCoefficient(index),
+                                                                        (d) -> zPolynomial.setCoefficient(index, d));
+      }
    }
 
    @Override
@@ -101,6 +122,12 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
       return acceleration;
    }
 
+   @Override
+   public Tuple3DBasics[] getCoefficients()
+   {
+      return coefficients;
+   }
+
    public Tuple3DReadOnly getIntegral(double from, double to)
    {
       xIntegralResult = xPolynomial.getIntegral(from, to);
@@ -109,60 +136,10 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
       return integralResult;
    }
 
-   public PolynomialBasics getAxis(Axis3D axis)
-   {
-      return getAxis(axis.ordinal());
-   }
-
    @Override
    public PolynomialBasics getAxis(int index)
    {
       return polynomials[index];
-   }
-
-   public void reset()
-   {
-      for (int index = 0; index < 3; index++)
-         getAxis(index).reset();
-   }
-
-   public void set(AbstractPolynomial3D other)
-   {
-      for (int i = 0; i < 3; i++)
-         getAxis(i).set(other.getAxis(i));
-   }
-
-   public int getNumberOfCoefficients()
-   {
-      if (getNumberOfCoefficients(0) == getNumberOfCoefficients(1) && getNumberOfCoefficients(0) == getNumberOfCoefficients(2))
-         return getNumberOfCoefficients(0);
-      else
-         return -1;
-   }
-
-   public int getNumberOfCoefficients(Axis3D dir)
-   {
-      return getAxis(dir.ordinal()).getNumberOfCoefficients();
-   }
-
-   public int getNumberOfCoefficients(int index)
-   {
-      return getAxis(index).getNumberOfCoefficients();
-   }
-
-   public void getCoefficients(int i, DMatrixRMaj coefficientsToPack)
-   {
-      for (int ordinal = 0; ordinal < 3; ordinal++)
-      {
-         coefficientsToPack.set(ordinal, 0, getAxis(ordinal).getCoefficient(i));
-      }
-   }
-
-   public void offsetTrajectoryPosition(double offsetX, double offsetY, double offsetZ)
-   {
-      getAxis(Axis3D.X).offsetTrajectoryPosition(offsetX);
-      getAxis(Axis3D.Y).offsetTrajectoryPosition(offsetY);
-      getAxis(Axis3D.Z).offsetTrajectoryPosition(offsetZ);
    }
 
    @Override

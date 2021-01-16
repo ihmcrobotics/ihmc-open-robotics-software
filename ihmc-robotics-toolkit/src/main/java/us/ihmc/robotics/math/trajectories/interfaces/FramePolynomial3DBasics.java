@@ -1,11 +1,10 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 
-public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, FrameMutable
+public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, FrameChangeable
 {
-   void setReferenceFrame(ReferenceFrame referenceFrame);
-
    default void setIncludingReferenceFrame(FixedFramePolynomial3DBasics other)
    {
       setReferenceFrame(other.getReferenceFrame());
@@ -17,6 +16,4 @@ public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, F
       setReferenceFrame(referenceFrame);
       FixedFramePolynomial3DBasics.super.set(referenceFrame, other);
    }
-
-
 }

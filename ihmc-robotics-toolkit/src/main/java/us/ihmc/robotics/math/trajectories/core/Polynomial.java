@@ -131,7 +131,7 @@ public class Polynomial implements PolynomialBasics
    public void solveForCoefficients()
    {
       solver.setA(constraintMatrix);
-      solver.solve(constraintVector, getCoefficientsVector());
+      solver.solve(constraintVector, coefficientVector);
    }
 
    public void setDirectly(int power, double coefficient)
@@ -144,7 +144,7 @@ public class Polynomial implements PolynomialBasics
       {
          for (int i = getNumberOfCoefficients(); i <= power; i++)
             this.coefficients[i] = 0.0;
-         getCoefficientsVector().reshape(power + 1, 1);
+         this.coefficientVector.reshape(power + 1, 1);
          this.constraintMatrix.reshape(power + 1, power + 1);
          this.constraintVector.reshape(power + 1, 1);
          this.xPowersDerivativeVector.reshape(1, power + 1);

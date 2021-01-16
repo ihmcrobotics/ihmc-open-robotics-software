@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
@@ -12,6 +14,8 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
    {
       return getAxis(axis.ordinal());
    }
+
+   Tuple3DReadOnly[] getCoefficients();
 
    default void compute(double t)
    {
@@ -48,5 +52,52 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
    default boolean timeIntervalContains(double timeToCheck)
    {
       return getTimeInterval().intervalContains(timeToCheck);
+   }
+
+   default int getNumberOfCoefficients()
+   {
+      if (getNumberOfCoefficients(0) == getNumberOfCoefficients(1) && getNumberOfCoefficients(0) == getNumberOfCoefficients(2))
+         return getNumberOfCoefficients(0);
+      else
+         return -1;
+   }
+
+   default int getNumberOfCoefficients(Axis3D dir)
+   {
+      return getAxis(dir.ordinal()).getNumberOfCoefficients();
+   }
+
+   default int getNumberOfCoefficients(int index)
+   {
+      return getAxis(index).getNumberOfCoefficients();
+   }
+
+   default int getMaximumNumberOfCoefficients()
+   {
+      if (getMaximumNumberOfCoefficients(0) == getMaximumNumberOfCoefficients(1) && getMaximumNumberOfCoefficients(0) == getMaximumNumberOfCoefficients(2))
+         return getMaximumNumberOfCoefficients(0);
+      else
+         return -1;
+   }
+
+   default int getMaximumNumberOfCoefficients(Axis3D dir)
+   {
+      return getAxis(dir.ordinal()).getNumberOfCoefficients();
+   }
+
+   default int getMaximumNumberOfCoefficients(int index)
+   {
+      return getAxis(index).getNumberOfCoefficients();
+   }
+
+
+   default void getCoefficients(int idx, DMatrixRMaj coefficientsToPack)
+   {
+      getCoefficients(idx).get(coefficientsToPack);
+   }
+
+   default Tuple3DReadOnly getCoefficients(int i)
+   {
+      return getCoefficients()[i];
    }
 }

@@ -1,10 +1,14 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface Polynomial3DBasics extends Polynomial3DReadOnly
+public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
 {
    @Override
    default PolynomialBasics getAxis(Axis3D axis)
@@ -15,7 +19,39 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly
    @Override
    PolynomialBasics getAxis(int ordinal);
 
+   @Override
+   Tuple3DBasics[] getCoefficients();
+
+   @Override
+   default Tuple3DBasics getCoefficients(int i)
+   {
+      return getCoefficients()[i];
+   }
+
+   default void shiftTrajectory(Tuple3DReadOnly offset)
+   {
+      shiftTrajectory(offset.getX(), offset.getY(), offset.getZ());
+   }
+
+   default void shiftTrajectory(double offsetX, double offsetY, double offsetZ)
+   {
+      getCoefficients(0).add(offsetX, offsetY, offsetZ);
+      commitCoefficientsToMemory();
+   }
+
+   default void reset()
+   {
+      for (int index = 0; index < 3; index++)
+         getAxis(index).reset();
+   }
+
    default void initialize()
+   {
+      for (int index = 0; index < 3; index++)
+         getAxis(index).initialize();
+   }
+
+   default void commitCoefficientsToMemory()
    {
       for (int index = 0; index < 3; index++)
          getAxis(index).initialize();
@@ -31,6 +67,21 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly
       getAxis(Axis3D.X).set(xPolynomial);
       getAxis(Axis3D.Y).set(yPolynomial);
       getAxis(Axis3D.Z).set(zPolynomial);
+   }
+
+
+   @Override
+   default void applyTransform(Transform transform)
+   {
+      for (int i = 0; i < getNumberOfCoefficients(); i++)
+         getCoefficients(i).applyTransform(transform);
+   }
+
+   @Override
+   default void applyInverseTransform(Transform transform)
+   {
+      for (int i = 0; i < getNumberOfCoefficients(); i++)
+         getCoefficients(i).applyInverseTransform(transform);
    }
 
    default void setConstant(Point3DReadOnly z)
