@@ -1,10 +1,11 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.yoVariables;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.Polynomial3DVariableHolder;
+import us.ihmc.robotics.math.trajectories.abstracts.AbstractPolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Arrays;

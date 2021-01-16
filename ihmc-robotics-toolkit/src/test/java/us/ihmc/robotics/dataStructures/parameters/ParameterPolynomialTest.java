@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

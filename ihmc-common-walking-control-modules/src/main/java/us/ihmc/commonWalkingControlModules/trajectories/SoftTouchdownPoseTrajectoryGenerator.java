@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -10,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoSpline3D;
+import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoSpline3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGenerator
+public class SoftTouchdownPoseTrajectoryGenerator implements FramePoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry;

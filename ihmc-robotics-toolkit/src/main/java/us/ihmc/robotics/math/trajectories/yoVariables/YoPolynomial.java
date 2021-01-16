@@ -1,10 +1,11 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.yoVariables;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;

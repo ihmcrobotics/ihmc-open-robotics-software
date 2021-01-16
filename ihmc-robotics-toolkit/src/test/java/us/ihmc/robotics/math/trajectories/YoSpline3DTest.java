@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoSpline3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSpline3DTest

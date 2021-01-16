@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.*;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;

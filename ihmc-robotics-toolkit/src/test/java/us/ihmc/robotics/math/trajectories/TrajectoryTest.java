@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 
 public class TrajectoryTest
 {

@@ -7,7 +7,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.math.trajectories.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 public class AlgebraicS2Segment implements S2Segment
 {

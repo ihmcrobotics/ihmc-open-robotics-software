@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner

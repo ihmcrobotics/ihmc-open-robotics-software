@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

@@ -1,11 +1,8 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public interface OrientationTrajectoryGenerator extends TrajectoryGenerator, OrientationProvider

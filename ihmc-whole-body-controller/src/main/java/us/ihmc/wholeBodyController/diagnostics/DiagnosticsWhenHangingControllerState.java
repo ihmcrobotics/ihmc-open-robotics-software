@@ -25,7 +25,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;

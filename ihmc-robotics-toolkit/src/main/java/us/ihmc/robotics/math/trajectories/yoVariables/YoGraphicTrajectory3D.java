@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.yoVariables;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicJob;
+import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;

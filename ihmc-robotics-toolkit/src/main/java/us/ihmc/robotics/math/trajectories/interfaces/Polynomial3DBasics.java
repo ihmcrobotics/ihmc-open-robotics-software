@@ -1,10 +1,8 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public interface Polynomial3DBasics extends Polynomial3DReadOnly
 {
@@ -13,8 +11,8 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly
    {
       return getAxis(axis.ordinal());
    }
-   @Override
 
+   @Override
    PolynomialBasics getAxis(int ordinal);
 
    default void initialize()

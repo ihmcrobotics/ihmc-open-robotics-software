@@ -1,23 +1,18 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 
-public abstract class Axis3DPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public abstract class Axis3DPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final DoubleTrajectoryGenerator xTrajectory;
    private final DoubleTrajectoryGenerator yTrajectory;
    private final DoubleTrajectoryGenerator zTrajectory;
 
-   private final FramePoint3DReadOnly position = new FramePoint3DReadOnly()
+   private final Point3DReadOnly position = new Point3DReadOnly()
    {
-      @Override
-      public ReferenceFrame getReferenceFrame()
-      {
-         return ReferenceFrame.getWorldFrame();
-      }
-
       @Override
       public double getX()
       {
@@ -37,14 +32,8 @@ public abstract class Axis3DPositionTrajectoryGenerator implements FramePosition
       }
    };
 
-   private final FrameVector3DReadOnly velocity = new FrameVector3DReadOnly()
+   private final Vector3DReadOnly velocity = new Vector3DReadOnly()
    {
-      @Override
-      public ReferenceFrame getReferenceFrame()
-      {
-         return ReferenceFrame.getWorldFrame();
-      }
-
       @Override
       public double getX()
       {
@@ -64,14 +53,8 @@ public abstract class Axis3DPositionTrajectoryGenerator implements FramePosition
       }
    };
 
-   private final FrameVector3DReadOnly acceleration = new FrameVector3DReadOnly()
+   private final Vector3DReadOnly acceleration = new Vector3DReadOnly()
    {
-      @Override
-      public ReferenceFrame getReferenceFrame()
-      {
-         return ReferenceFrame.getWorldFrame();
-      }
-
       @Override
       public double getX()
       {
@@ -99,19 +82,19 @@ public abstract class Axis3DPositionTrajectoryGenerator implements FramePosition
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public Point3DReadOnly getPosition()
    {
       return position;
    }
 
    @Override
-   public FrameVector3DReadOnly getVelocity()
+   public Vector3DReadOnly getVelocity()
    {
       return velocity;
    }
 
    @Override
-   public FrameVector3DReadOnly getAcceleration()
+   public Vector3DReadOnly getAcceleration()
    {
       return acceleration;
    }
