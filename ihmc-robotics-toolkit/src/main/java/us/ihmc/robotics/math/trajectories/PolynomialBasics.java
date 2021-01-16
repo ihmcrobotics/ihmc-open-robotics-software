@@ -1,15 +1,127 @@
 package us.ihmc.robotics.math.trajectories;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 
-interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGenerator
+interface PolynomialBasics extends PolynomialReadOnly
 {
    void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero);
 
    void reshape(int numberOfCoefficientsRequired);
 
-   int getMaximumNumberOfCoefficients();
+   void setCoefficient(int idx, double value);
+
+   double getCoefficient(int idx);
+
+   void setNumberOfCoefficients(int numberOfCoefficients);
+
+   void setCurrentTime(double currentTime);
+
+   DMatrixRMaj getCoefficientsVector();
+
+   void solveForCoefficients();
+
+   @Override
+   default void initialize()
+   {
+      solveForCoefficients();
+      commitCoefficientsToMemory();
+   }
+
+   default void set(PolynomialReadOnly other)
+   {
+      reset();
+
+      reshape(other.getNumberOfCoefficients());
+      setNumberOfCoefficients(other.getNumberOfCoefficients());
+      setCurrentTime(getCurrentTime());
+
+      int index = 0;
+      for (; index < other.getNumberOfCoefficients(); index++)
+         setCoefficient(index, other.getCoefficient(index));
+      for (; index < getMaximumNumberOfCoefficients(); index++)
+         setCoefficient(index, Double.NaN);
+   }
+
+   default void setDirectlyFast(int power, double coefficient)
+   {
+      if (power >= getMaximumNumberOfCoefficients())
+         return;
+      if (power >= getNumberOfCoefficients())
+         setNumberOfCoefficients(power + 1);
+      setCoefficient(power, coefficient);
+   }
+
+   default void setDirectly(DMatrixRMaj coefficients)
+   {
+      reshape(coefficients.getNumRows());
+      int index = 0;
+      for (; index < getNumberOfCoefficients(); index++)
+         setCoefficient(index, coefficients.get(index, 0));
+      for (; index < getMaximumNumberOfCoefficients(); index++)
+         setCoefficient(index, Double.NaN);
+   }
+
+   default void setDirectly(double[] coefficients)
+   {
+      reshape(coefficients.length);
+      int index = 0;
+      for (; index < getNumberOfCoefficients(); index++)
+         setCoefficient(index, coefficients[index]);
+      for (; index < getMaximumNumberOfCoefficients(); index++)
+         setCoefficient(index, Double.NaN);
+   }
+
+   default void offsetTrajectoryPosition(double offsetValue)
+   {
+      setCoefficient(0, getCoefficient(0) + offsetValue);
+   }
+
+   /**
+    * Dont use this. It creates garbage
+    *
+    * @param from
+    * @param to
+    * @return
+    */
+   default double getIntegral(double from, double to)
+   {
+      double[] fromPowers = new double[getNumberOfCoefficients() + 1];
+      double[] toPowers = new double[getNumberOfCoefficients() + 1];
+      setXPowers(fromPowers, from);
+      setXPowers(toPowers, to);
+      double integral = 0;
+      for (int i = 0; i < getNumberOfCoefficients(); i++)
+      {
+         integral += (1.0 / ((double) i + 1.0)) * getCoefficient(i) * (toPowers[i + 1] - fromPowers[i + 1]);
+      }
+      return integral;
+   }
+
+   /**
+    * Sets the given array to be:
+    * <br> [1, x, x<sup>2</sup>, ..., x<sup>N</sup>]
+    * <br> where N+1 is the length of the given array
+    *
+    * @param xPowers vector to set
+    * @param x base of the power series
+    */
+   default void setXPowers(double[] xPowers, double x)
+   {
+      xPowers[0] = 1.0;
+      for (int i = 1; i < xPowers.length; i++)
+      {
+         xPowers[i] = xPowers[i - 1] * x;
+      }
+   }
+
+   default void reset()
+   {
+      getTimeInterval().reset();
+      setNumberOfCoefficients(0);
+      for (int i = 0; i < getMaximumNumberOfCoefficients(); i++)
+         setCoefficient(i, Double.NaN);
+   }
 
    default void setTime(double t0, double tFinal)
    {
@@ -24,31 +136,6 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
    default void setInitialTime(double t0)
    {
       getTimeInterval().setStartTime(t0);
-   }
-
-   default double getFinalTime()
-   {
-      return getTimeInterval().getEndTime();
-   }
-
-   default double getInitialTime()
-   {
-      return getTimeInterval().getStartTime();
-   }
-
-   default double getDuration()
-   {
-      return getTimeInterval().getDuration();
-   }
-
-   default boolean timeIntervalContains(double timeToCheck, double EPSILON)
-   {
-      return getTimeInterval().epsilonContains(timeToCheck, EPSILON);
-   }
-
-   default boolean timeIntervalContains(double timeToCheck)
-   {
-      return getTimeInterval().intervalContains(timeToCheck);
    }
 
    default void setZero()
@@ -100,8 +187,15 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                       double zdf)
+   default void setQuinticUsingWayPoint(double t0,
+                                        double tIntermediate,
+                                        double tFinal,
+                                        double z0,
+                                        double zd0,
+                                        double zdd0,
+                                        double zIntermediate,
+                                        double zf,
+                                        double zdf)
    {
       setTime(t0, tFinal);
       reshape(6);
@@ -114,8 +208,15 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate,
-                                        double zdIntermediate, double zf)
+   default void setQuinticUsingWayPoint2(double t0,
+                                         double tIntermediate,
+                                         double tFinal,
+                                         double z0,
+                                         double zd0,
+                                         double zdd0,
+                                         double zIntermediate,
+                                         double zdIntermediate,
+                                         double zf)
    {
       setTime(t0, tFinal);
       reshape(6);
@@ -128,8 +229,16 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                                      double zIntermediate1, double zf, double zdf)
+   default void setQuinticTwoWaypoints(double t0,
+                                       double tIntermediate0,
+                                       double tIntermediate1,
+                                       double tFinal,
+                                       double z0,
+                                       double zd0,
+                                       double zIntermediate0,
+                                       double zIntermediate1,
+                                       double zf,
+                                       double zdf)
    {
       setTime(t0, tFinal);
       reshape(6);
@@ -142,8 +251,15 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate,
-                                                                  double zddIntermediate, double zFinal, double zdFinal)
+   default void setQuinticUsingIntermediateVelocityAndAcceleration(double t0,
+                                                                   double tIntermediate,
+                                                                   double tFinal,
+                                                                   double z0,
+                                                                   double zd0,
+                                                                   double zdIntermediate,
+                                                                   double zddIntermediate,
+                                                                   double zFinal,
+                                                                   double zdFinal)
    {
       setTime(t0, tFinal);
       reshape(6);
@@ -156,8 +272,15 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0,
-                                                      double zIntermediate1, double zFinal, double zdIntermediate1)
+   default void setQuarticUsingOneIntermediateVelocity(double t0,
+                                                       double tIntermediate0,
+                                                       double tIntermediate1,
+                                                       double tFinal,
+                                                       double z0,
+                                                       double zIntermediate0,
+                                                       double zIntermediate1,
+                                                       double zFinal,
+                                                       double zdIntermediate1)
    {
       setTime(t0, tFinal);
       reshape(5);
@@ -174,8 +297,16 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
    }
 
-   default void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                      double zdf, double zddf)
+   default void setSexticUsingWaypoint(double t0,
+                                       double tIntermediate,
+                                       double tFinal,
+                                       double z0,
+                                       double zd0,
+                                       double zdd0,
+                                       double zIntermediate,
+                                       double zf,
+                                       double zdf,
+                                       double zddf)
    {
       setTime(t0, tFinal);
       reshape(7);
@@ -189,8 +320,18 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                         double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   default void setSeptic(double t0,
+                          double tIntermediate0,
+                          double tIntermediate1,
+                          double tFinal,
+                          double z0,
+                          double zd0,
+                          double zIntermediate0,
+                          double zdIntermediate0,
+                          double zIntermediate1,
+                          double zdIntermediate1,
+                          double zf,
+                          double zdf)
    {
       setTime(t0, tFinal);
       reshape(8);
@@ -205,8 +346,18 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zdd0,
-                                                    double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
+   default void setSepticInitialAndFinalAcceleration(double t0,
+                                                     double tIntermediate0,
+                                                     double tIntermediate1,
+                                                     double tFinal,
+                                                     double z0,
+                                                     double zd0,
+                                                     double zdd0,
+                                                     double zIntermediate0,
+                                                     double zIntermediate1,
+                                                     double zf,
+                                                     double zdf,
+                                                     double zddf)
    {
       setTime(t0, tFinal);
       reshape(8);
@@ -221,8 +372,18 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                        double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   default void setNonic(double t0,
+                         double tIntermediate0,
+                         double tIntermediate1,
+                         double tFinal,
+                         double z0,
+                         double zd0,
+                         double zIntermediate0,
+                         double zdIntermediate0,
+                         double zIntermediate1,
+                         double zdIntermediate1,
+                         double zf,
+                         double zdf)
    {
       setTime(t0, tFinal);
       reshape(10);
@@ -239,8 +400,16 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0,
-                                                             double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
+   default void setSexticUsingWaypointVelocityAndAcceleration(double t0,
+                                                              double tIntermediate,
+                                                              double tFinal,
+                                                              double z0,
+                                                              double zd0,
+                                                              double zdd0,
+                                                              double zdIntermediate,
+                                                              double zddIntermediate,
+                                                              double zFinal,
+                                                              double zdFinal)
    {
       setTime(t0, tFinal);
       reshape(7);
@@ -254,8 +423,14 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal,
-                                                   double zdFinal)
+   default void setQuarticUsingIntermediateVelocity(double t0,
+                                                    double tIntermediate,
+                                                    double tFinal,
+                                                    double z0,
+                                                    double zd0,
+                                                    double zdIntermediate,
+                                                    double zFinal,
+                                                    double zdFinal)
    {
       setTime(t0, tFinal);
       reshape(5);
@@ -331,8 +506,13 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0,
-                                                                            double zIntermediate, double zFinal)
+   default void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0,
+                                                                             double tIntermediate,
+                                                                             double tFinal,
+                                                                             double z0,
+                                                                             double zd0,
+                                                                             double zIntermediate,
+                                                                             double zFinal)
    {
       setTime(t0, tFinal);
       reshape(4);
@@ -343,8 +523,13 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate,
-                                                                          double zFinal, double zdFinal)
+   default void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0,
+                                                                           double tIntermediate,
+                                                                           double tFinal,
+                                                                           double z0,
+                                                                           double zIntermediate,
+                                                                           double zFinal,
+                                                                           double zdFinal)
    {
       setTime(t0, tFinal);
       reshape(4);
@@ -366,7 +551,6 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-
    default void setPositionRow(int row, double x, double z)
    {
       setConstraintRow(row, x, z, 0);
@@ -377,8 +561,7 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       setConstraintRow(row, x, zVelocity, 1);
    }
 
-   default void setAccelerationRow(
-         int row, double x, double zAcceleration)
+   default void setAccelerationRow(int row, double x, double zAcceleration)
    {
       setConstraintRow(row, x, zAcceleration, 2);
    }
@@ -446,8 +629,14 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       initialize();
    }
 
-   default void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                               double zIntermediate2, double zFinal)
+   default void setCubicUsingIntermediatePoints(double t0,
+                                                double tIntermediate1,
+                                                double tIntermediate2,
+                                                double tFinal,
+                                                double z0,
+                                                double zIntermediate1,
+                                                double zIntermediate2,
+                                                double zFinal)
    {
       setTime(t0, tFinal);
       reshape(4);
@@ -505,5 +694,14 @@ interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGene
       }
 
       initialize();
+   }
+
+   default void commitCoefficientsToMemory()
+   {
+      int row = 0;
+      for (; row < getNumberOfCoefficients(); row++)
+         setCoefficient(row, getCoefficientsVector().get(row, 0));
+      for (; row < getMaximumNumberOfCoefficients(); row++)
+         setCoefficient(row, Double.NaN);
    }
 }

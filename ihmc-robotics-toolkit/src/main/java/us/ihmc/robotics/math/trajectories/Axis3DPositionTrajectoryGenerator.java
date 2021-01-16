@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
-public abstract class Axis3DPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public abstract class Axis3DPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    private final DoubleTrajectoryGenerator xTrajectory;
    private final DoubleTrajectoryGenerator yTrajectory;
@@ -111,7 +111,6 @@ public abstract class Axis3DPositionTrajectoryGenerator implements PositionTraje
    }
 
    @Override
-
    public FrameVector3DReadOnly getAcceleration()
    {
       return acceleration;

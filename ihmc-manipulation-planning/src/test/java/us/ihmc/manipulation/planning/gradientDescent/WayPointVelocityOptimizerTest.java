@@ -8,7 +8,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
@@ -39,7 +39,7 @@ public class WayPointVelocityOptimizerTest
       initialVelocities.add(0.0);
       initialVelocities.addAll(initial);
       initialVelocities.add(0.0);
-      List<Trajectory> originalTrajectories = calculateTrajectories(times, positions, initialVelocities);
+      List<Polynomial> originalTrajectories = calculateTrajectories(times, positions, initialVelocities);
       saveJointPositionAndVelocity("initialTrajectory", originalTrajectories, times, velocitOptimizerDT);
 
       runOptimizer(OptimizationType.Velocity, initial);
@@ -102,7 +102,7 @@ public class WayPointVelocityOptimizerTest
       }
       velocities.add(0.0);
 
-      List<Trajectory> optimalTrajectories;
+      List<Polynomial> optimalTrajectories;
       if (optimizeTimes)
       {
          TDoubleArrayList optimizedTimes = new TDoubleArrayList();
@@ -142,7 +142,7 @@ public class WayPointVelocityOptimizerTest
       finalVelocities.add(0.0);
       finalVelocities.addAll(optimalSolution);
       finalVelocities.add(0.0);
-      List<Trajectory> optimalTrajectories = calculateTrajectories(times, positions, finalVelocities);
+      List<Polynomial> optimalTrajectories = calculateTrajectories(times, positions, finalVelocities);
       saveJointPositionAndVelocity("optimalTrajectory_" + optimizationType.toString(), optimalTrajectories, times, velocitOptimizerDT);
 
       System.out.println("optimal " + optimizationType.toString() + optimizer.getOptimalQuery());
@@ -170,13 +170,13 @@ public class WayPointVelocityOptimizerTest
             velocities.add(0.0);
             velocities.addAll(values);
             velocities.add(0.0);
-            List<Trajectory> trajectories = calculateTrajectories(times, positions, velocities);
-            Trajectory trajectory = trajectories.get(indexOfTrajectory);
+            List<Polynomial> trajectories = calculateTrajectories(times, positions, velocities);
+            Polynomial trajectory = trajectories.get(indexOfTrajectory);
             trajectory.compute(time);
 
             double previousTime = time - velocitOptimizerDT;
             int indexOfTrajectoryForPreviousTick = findTrajectoryIndex(times, previousTime);
-            Trajectory trajectoryForPreviousTick = trajectories.get(indexOfTrajectoryForPreviousTick);
+            Polynomial trajectoryForPreviousTick = trajectories.get(indexOfTrajectoryForPreviousTick);
             trajectoryForPreviousTick.compute(previousTime);
 
             switch (optimizationType)
@@ -232,13 +232,13 @@ public class WayPointVelocityOptimizerTest
       return indexOfTrajectory;
    }
 
-   private static List<Trajectory> calculateTrajectories(TDoubleArrayList times, TDoubleArrayList positions, TDoubleArrayList velocities)
+   private static List<Polynomial> calculateTrajectories(TDoubleArrayList times, TDoubleArrayList positions, TDoubleArrayList velocities)
    {
-      List<Trajectory> trajectories = new ArrayList<Trajectory>();
+      List<Polynomial> trajectories = new ArrayList<Polynomial>();
 
       for (int j = 0; j < times.size() - 1; j++)
       {
-         Trajectory cubic = new Trajectory(4);
+         Polynomial cubic = new Polynomial(4);
          cubic.setCubic(times.get(j), times.get(j + 1), positions.get(j), velocities.get(j), positions.get(j + 1), velocities.get(j + 1));
          trajectories.add(cubic);
       }
@@ -255,7 +255,7 @@ public class WayPointVelocityOptimizerTest
       return velocities;
    }
 
-   private static void saveJointPositionAndVelocity(String namePrefix, List<Trajectory> trajectories, TDoubleArrayList times, double timeTick)
+   private static void saveJointPositionAndVelocity(String namePrefix, List<Polynomial> trajectories, TDoubleArrayList times, double timeTick)
    {
       int numberOfTicks = (int) (times.get(times.size() - 1) / timeTick);
       FileWriter positionFW;
@@ -272,7 +272,7 @@ public class WayPointVelocityOptimizerTest
             int indexOfTrajectory = findTrajectoryIndex(times, time);
 
             positionFW.write(String.format("%.4f (%d)", time, indexOfTrajectory));
-            Trajectory trajectory = trajectories.get(indexOfTrajectory);
+            Polynomial trajectory = trajectories.get(indexOfTrajectory);
             trajectory.compute(time);
 
             positionFW.write(String.format("\t%.4f\t%.4f\t%.4f", trajectory.getValue(), trajectory.getVelocity(), trajectory.getAcceleration()));

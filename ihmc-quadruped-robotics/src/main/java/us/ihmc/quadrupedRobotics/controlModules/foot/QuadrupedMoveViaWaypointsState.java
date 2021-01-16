@@ -124,9 +124,9 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       currentTrajectoryTime.set(robotTime.getDoubleValue() - taskStartTime.getValue());
 
       quadrupedWaypointsPositionTrajectoryGenerator.compute(currentTrajectoryTime.getDoubleValue());
-      quadrupedWaypointsPositionTrajectoryGenerator.getPosition(desiredFootPosition);
-      quadrupedWaypointsPositionTrajectoryGenerator.getVelocity(desiredFootVelocity);
-      quadrupedWaypointsPositionTrajectoryGenerator.getAcceleration(desiredFootAcceleration);
+      desiredFootPosition.setIncludingFrame(quadrupedWaypointsPositionTrajectoryGenerator.getPosition());
+      desiredFootVelocity.setIncludingFrame(quadrupedWaypointsPositionTrajectoryGenerator.getVelocity());
+      desiredFootAcceleration.setIncludingFrame(quadrupedWaypointsPositionTrajectoryGenerator.getAcceleration());
 
       desiredFootPosition.changeFrame(worldFrame);
       desiredFootVelocity.changeFrame(worldFrame);

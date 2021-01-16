@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
@@ -11,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.Polynomial3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
@@ -26,9 +25,9 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPointPool = new RecyclingArrayList<>(FramePoint3D::new);
    final List<FramePoint3D> dcmCornerPoints = new ArrayList<>();
-   private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final RecyclingArrayList<Polynomial3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    private final RecyclingArrayList<LineSegment3D> vrpWaypointPools = new RecyclingArrayList<>(LineSegment3D::new);
-   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final List<Polynomial3D> vrpTrajectories = new ArrayList<>();
    private final List<LineSegment3D> vrpWaypoints = new ArrayList<>();
 
    final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
@@ -117,7 +116,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
          CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega0.getValue(), duration, duration, finalDCM, startVRP, finalVRP, nextCornerPoint);
 
          LineSegment3D vrpSegment = vrpWaypointPools.add();
-         Trajectory3D vrpTrajectory = vrpTrajectoryPool.add();
+         Polynomial3D vrpTrajectory = vrpTrajectoryPool.add();
          vrpTrajectories.add(vrpTrajectory);
          vrpWaypoints.add(vrpSegment);
          vrpTrajectory.setLinear(0, duration, startVRP, finalVRP);
@@ -165,7 +164,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
                        FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
    {
-      Trajectory3D vrpTrajectory = vrpTrajectories.get(segmentId);
+      Polynomial3D vrpTrajectory = vrpTrajectories.get(segmentId);
       LineSegment3DReadOnly vrpSegment = vrpWaypoints.get(segmentId);
       startVRP.set(vrpSegment.getFirstEndpoint());
       finalVRP.set(vrpSegment.getSecondEndpoint());
@@ -241,7 +240,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
    @Override
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<Polynomial3D> getVRPTrajectories()
    {
       return vrpTrajectories;
    }

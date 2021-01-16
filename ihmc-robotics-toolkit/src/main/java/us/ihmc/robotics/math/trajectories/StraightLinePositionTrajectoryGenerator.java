@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class StraightLinePositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    protected final YoRegistry registry;
 
@@ -29,14 +29,14 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
 
    private final YoFrameVector3D differenceVector;
 
-   private final PositionProvider initialPositionProvider;
-   private final PositionProvider finalPositionProvider;
+   private final FramePositionProvider initialPositionProvider;
+   private final FramePositionProvider finalPositionProvider;
 
    private final YoBoolean continuouslyUpdateFinalPosition;
    private final DoubleProvider trajectoryTimeProvider;
 
    public StraightLinePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoRegistry parentRegistry)
+                                                  FramePositionProvider initialPositionProvider, FramePositionProvider finalPositionProvider, YoRegistry parentRegistry)
    {
       this.referenceFrame = referenceFrame;
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());

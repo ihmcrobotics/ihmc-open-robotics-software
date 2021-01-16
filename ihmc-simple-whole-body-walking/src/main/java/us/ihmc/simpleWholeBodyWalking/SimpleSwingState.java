@@ -482,7 +482,7 @@ public class SimpleSwingState extends SimpleFootControlState
       if (replanTrajectory.getBooleanValue())
       {
          activeTrajectory.compute(time); // compute to get the current unadjusted position
-         activeTrajectory.getPosition(unadjustedPosition);
+         unadjustedPosition.setIncludingFrame(activeTrajectory.getPosition());
          footstepWasAdjusted = true;
       }
 
@@ -714,8 +714,7 @@ public class SimpleSwingState extends SimpleFootControlState
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
             blendedSwingTrajectory.compute(swingWaypoints.get(i).getTime());
-            blendedSwingTrajectory.getPosition(tempWaypoint);
-            swingWaypointsForViz.get(i).setMatchingFrame(tempWaypoint);
+            swingWaypointsForViz.get(i).setMatchingFrame(blendedSwingTrajectory.getPosition());
          }
       }
    }

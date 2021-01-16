@@ -10,9 +10,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class BlendedPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
-   private final PositionTrajectoryGenerator trajectory;
+   private final FramePositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
@@ -42,8 +42,8 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FrameVector3D tempAcceleration = new FrameVector3D();
 
-   public BlendedPositionTrajectoryGenerator(String prefix, PositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-         YoRegistry parentRegistry)
+   public BlendedPositionTrajectoryGenerator(String prefix, FramePositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
+                                             YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
@@ -174,9 +174,9 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    public void compute(double time)
    {
       trajectory.compute(time);
-      trajectory.getPosition(position);
-      trajectory.getVelocity(velocity);
-      trajectory.getAcceleration(acceleration);
+      position.setIncludingFrame(trajectory.getPosition());
+      velocity.setIncludingFrame(trajectory.getVelocity());
+      acceleration.setIncludingFrame(trajectory.getAcceleration());
 
       position.changeFrame(trajectoryFrame);
       velocity.changeFrame(trajectoryFrame);
@@ -204,7 +204,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       trajectory.compute(initialTime);
       trajectoryFrame.checkReferenceFrameMatch(initialPosition.getReferenceFrame());
 
-      trajectory.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(trajectory.getPosition());
       tempPosition.changeFrame(trajectoryFrame);
       initialConstraintPositionError.set(initialPosition);
       initialConstraintPositionError.sub(tempPosition);
@@ -215,7 +215,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       computeInitialConstraintError(initialPosition, initialTime);
       trajectoryFrame.checkReferenceFrameMatch(initialVelocity.getReferenceFrame());
 
-      trajectory.getVelocity(tempVelocity);
+      tempVelocity.setIncludingFrame(trajectory.getVelocity());
       tempVelocity.changeFrame(trajectoryFrame);
       initialConstraintVelocityError.set(initialVelocity);
       initialConstraintVelocityError.sub(tempVelocity);
@@ -226,7 +226,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       trajectory.compute(finalTime);
       trajectoryFrame.checkReferenceFrameMatch(finalPosition.getReferenceFrame());
 
-      trajectory.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(trajectory.getPosition());
       tempPosition.changeFrame(trajectoryFrame);
       finalConstraintPositionError.set(finalPosition);
       finalConstraintPositionError.sub(tempPosition);
@@ -237,7 +237,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       computeFinalConstraintError(finalPosition, finalTime);
       trajectoryFrame.checkReferenceFrameMatch(finalVelocity.getReferenceFrame());
 
-      trajectory.getVelocity(tempVelocity);
+      tempVelocity.setIncludingFrame(trajectory.getVelocity());
       tempVelocity.changeFrame(trajectoryFrame);
       finalConstraintVelocityError.set(finalVelocity);
       finalConstraintVelocityError.sub(tempVelocity);

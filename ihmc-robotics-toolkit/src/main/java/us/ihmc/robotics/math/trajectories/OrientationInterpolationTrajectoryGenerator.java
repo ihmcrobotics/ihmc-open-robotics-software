@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class OrientationInterpolationTrajectoryGenerator implements OrientationTrajectoryGenerator
+public class OrientationInterpolationTrajectoryGenerator implements FrameOrientationTrajectoryGenerator
 {
    private final YoRegistry registry;
    private final YoDouble currentTime;
@@ -29,8 +29,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final YoFrameVector3D desiredAngularAcceleration;
 
    private final DoubleProvider trajectoryTimeProvider;
-   private final OrientationProvider initialOrientationProvider;
-   private final OrientationProvider finalOrientationProvider;
+   private final FrameOrientationProvider initialOrientationProvider;
+   private final FrameOrientationProvider finalOrientationProvider;
 
    private final YoBoolean continuouslyUpdateFinalOrientation;
    
@@ -40,7 +40,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
    public OrientationInterpolationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-                                                      OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
+                                                      FrameOrientationProvider initialOrientationProvider, FrameOrientationProvider finalOrientationProvider,
                                                       YoRegistry parentRegistry)
    {
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -90,17 +90,13 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    private void updateInitialOrientation()
    {
-      initialOrientationProvider.getOrientation(tempInitialOrientation);      
-      tempInitialOrientation.changeFrame(initialOrientation.getReferenceFrame());
-      initialOrientation.set(tempInitialOrientation);
+      initialOrientation.setMatchingFrame(initialOrientationProvider.getOrientation());
       initialOrientation.checkIfUnitary();
    }
 
    private void updateFinalOrientation()
    {
-      finalOrientationProvider.getOrientation(tempFinalOrientation);
-      tempFinalOrientation.changeFrame(finalOrientation.getReferenceFrame());
-      finalOrientation.set(tempFinalOrientation);
+      finalOrientation.setMatchingFrame(finalOrientationProvider.getOrientation());
       finalOrientation.checkIfUnitary();
    }
 

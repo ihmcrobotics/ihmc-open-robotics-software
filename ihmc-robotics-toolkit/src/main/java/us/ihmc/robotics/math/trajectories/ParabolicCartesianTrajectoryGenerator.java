@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ParabolicCartesianTrajectoryGenerator implements PositionTrajectoryGenerator
+public class ParabolicCartesianTrajectoryGenerator implements FramePositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoRegistry registry;
@@ -133,20 +133,11 @@ public class ParabolicCartesianTrajectoryGenerator implements PositionTrajectory
 
    }
 
-   public void computeNextTick(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
-   {
-      timeIntoStep.add(deltaT);
-      compute(timeIntoStep.getDoubleValue());
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
-   }
-
    public void computeNextTick(FramePoint3D positionToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
-      getPosition(positionToPack);
+      positionToPack.setIncludingFrame(getPosition());
    }
 
    @Override

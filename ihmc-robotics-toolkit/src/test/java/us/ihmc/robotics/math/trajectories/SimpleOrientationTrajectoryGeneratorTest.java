@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -34,9 +34,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
       DoubleProvider trajectoryTimeProvider = () -> 10.0;
 
       FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider initialOrientationProvider = () -> initialOrientation;
+      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider finalOrientationProvider = () -> finalOrientation;
+      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
       OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation", worldFrame,
             trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
@@ -147,9 +147,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
       DoubleProvider trajectoryTimeProvider = () -> 10.0;
 
       final FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider initialOrientationProvider = () -> initialOrientation;
+      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       final FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      OrientationProvider finalOrientationProvider = () -> finalOrientation;
+      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
       OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation1", worldFrame,
             trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);

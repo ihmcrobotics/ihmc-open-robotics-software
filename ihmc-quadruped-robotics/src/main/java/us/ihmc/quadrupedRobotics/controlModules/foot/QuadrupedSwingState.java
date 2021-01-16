@@ -25,7 +25,7 @@ import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.FramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -309,7 +309,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          timeRemainingInStateWithSwingSpeedUp.set(swingDuration.getDoubleValue() - time);
       }
 
-      PositionTrajectoryGenerator activeTrajectory;
+      FramePositionTrajectoryGenerator activeTrajectory;
       if (!timeRemainingInStateWithSwingSpeedUp.isNaN() && timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
          activeTrajectory = touchdownTrajectory;
       else if (timeRemainingInState.getValue() < 0.0)
@@ -323,9 +323,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
          fillAndInitializeTrajectories(false);
 
       activeTrajectory.compute(time);
-      activeTrajectory.getPosition(desiredPosition);
-      activeTrajectory.getVelocity(desiredVelocity);
-      activeTrajectory.getAcceleration(desiredAcceleration);
+      desiredPosition.setIncludingFrame(activeTrajectory.getPosition());
+      desiredVelocity.setIncludingFrame(activeTrajectory.getVelocity());
+      desiredAcceleration.setIncludingFrame(activeTrajectory.getAcceleration());
 
       if (isSwingSpeedUpEnabled.getValue() && !timeInStateWithSwingSpeedUp.isNaN())
       {

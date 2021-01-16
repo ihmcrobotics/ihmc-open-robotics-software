@@ -6,38 +6,33 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public interface Polynomial3DInterface extends PositionTrajectoryGenerator, TimeIntervalProvider
+public interface Polynomial3DBasics extends Polynomial3DReadOnly
 {
-   PolynomialInterface getAxis(int ordinal);
-
-
-
-   default void compute(double t)
+   @Override
+   default PolynomialBasics getAxis(Axis3D axis)
    {
-      for (int index = 0; index < 3; index++)
-         getAxis(index).compute(t);
+      return getAxis(axis.ordinal());
    }
+   @Override
 
-   default boolean isDone()
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         if (!getAxis(i).isDone())
-            return false;
-      }
-
-      return true;
-   }
-
-   default TimeIntervalBasics getTimeInterval()
-   {
-      return getAxis(0).getTimeInterval();
-   }
+   PolynomialBasics getAxis(int ordinal);
 
    default void initialize()
    {
       for (int index = 0; index < 3; index++)
          getAxis(index).initialize();
+   }
+
+   default void set(Polynomial3DReadOnly other)
+   {
+      set(other.getAxis(Axis3D.X), other.getAxis(Axis3D.Y), other.getAxis(Axis3D.Z));
+   }
+
+   default void set(PolynomialReadOnly xPolynomial, PolynomialReadOnly yPolynomial, PolynomialReadOnly zPolynomial)
+   {
+      getAxis(Axis3D.X).set(xPolynomial);
+      getAxis(Axis3D.Y).set(yPolynomial);
+      getAxis(Axis3D.Z).set(zPolynomial);
    }
 
    default void setConstant(Point3DReadOnly z)

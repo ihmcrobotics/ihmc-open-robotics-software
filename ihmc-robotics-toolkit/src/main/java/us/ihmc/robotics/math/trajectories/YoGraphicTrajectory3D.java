@@ -71,7 +71,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    private final boolean hasPoseDefined;
    private final YoFramePose3D poseToWorldFrame;
 
-   private final PositionTrajectoryGenerator trajectoryGenerator;
+   private final FramePositionTrajectoryGenerator trajectoryGenerator;
 
    private final DoubleProvider trajectoryDuration;
 
@@ -87,7 +87,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
    public YoGraphicTrajectory3D(String name,
-                                PositionTrajectoryGenerator trajectoryGenerator,
+                                FramePositionTrajectoryGenerator trajectoryGenerator,
                                 YoDouble trajectoryDuration,
                                 double radius,
                                 int resolution,
@@ -99,7 +99,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
 
    public YoGraphicTrajectory3D(String name,
                                 YoFramePose3D poseFromTrajectoryFrameToWorldFrame,
-                                PositionTrajectoryGenerator trajectoryGenerator,
+                                FramePositionTrajectoryGenerator trajectoryGenerator,
                                 DoubleProvider trajectoryDuration,
                                 double radius,
                                 int resolution,
@@ -258,9 +258,9 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
          double t = i / (resolution - 1.0) * trajectoryDuration.getValue();
 
          trajectoryGenerator.compute(t);
-         trajectoryGenerator.getPosition(intermediatePositions[i]);
-         trajectoryGenerator.getVelocity(intermediateVelocities[i]);
-         trajectoryGenerator.getAcceleration(intermediateAccelerations[i]);
+         intermediatePositions[i].setIncludingFrame(trajectoryGenerator.getPosition());
+         intermediateVelocities[i].setIncludingFrame(trajectoryGenerator.getVelocity());
+         intermediateAccelerations[i].setIncludingFrame(trajectoryGenerator.getAcceleration());
 
          maxVelocity = Math.max(maxVelocity, intermediateVelocities[i].lengthSquared());
          maxAcceleration = Math.max(maxAcceleration, intermediateAccelerations[i].lengthSquared());
