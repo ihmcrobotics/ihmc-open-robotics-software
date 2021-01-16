@@ -153,7 +153,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             trajectory.compute(timeInTrajectory);
-            double desiredPosition = trajectory.getPosition();
+            double desiredPosition = trajectory.getValue();
 
             JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
@@ -269,7 +269,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             trajectory.compute(timeInTrajectory);
-            double desiredPosition = trajectory.getPosition();
+            double desiredPosition = trajectory.getValue();
 
             JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();

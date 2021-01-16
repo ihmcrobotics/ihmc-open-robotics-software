@@ -181,7 +181,7 @@ public class ControllerBasedBodyPathTest
                double percent = (double) i / (double) (numberOfPoints - 1);
                xPoly.compute(percent);
                yPoly.compute(percent);
-               Point3D point2d = new Point3D(xPoly.getPosition(), yPoly.getPosition(), 0.0);
+               Point3D point2d = new Point3D(xPoly.getValue(), yPoly.getValue(), 0.0);
                waypoints.add(point2d);
             }
 

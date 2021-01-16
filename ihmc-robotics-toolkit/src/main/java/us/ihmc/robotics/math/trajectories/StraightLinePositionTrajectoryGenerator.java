@@ -1,8 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -97,7 +95,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       parameterPolynomial.compute(time);
       differenceVector.sub(finalPosition, initialPosition);
 
-      double parameter = isDone() ? 1.0 : parameterPolynomial.getPosition();
+      double parameter = isDone() ? 1.0 : parameterPolynomial.getValue();
       double parameterd = isDone() ? 0.0 : parameterPolynomial.getVelocity();
       double parameterdd = isDone() ? 0.0 : parameterPolynomial.getAcceleration();
 

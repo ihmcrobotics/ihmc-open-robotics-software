@@ -26,6 +26,6 @@ public class PolynomialProcessorYoVariable extends YoDouble implements Processin
    public void update()
    {
       polynomial.compute(input.getDoubleValue());
-      this.set(polynomial.getPosition());
+      this.set(polynomial.getValue());
    }
 }

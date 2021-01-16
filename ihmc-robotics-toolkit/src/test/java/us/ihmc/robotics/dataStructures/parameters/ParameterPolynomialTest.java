@@ -37,10 +37,10 @@ public class ParameterPolynomialTest
             double x = 100.0 * (random.nextDouble() - 0.5);
 
             yoPolynomial.compute(x);
-            double yoResult = yoPolynomial.getPosition();
+            double yoResult = yoPolynomial.getValue();
 
             parameterPolynomial.compute(x);
-            double parameterResult = parameterPolynomial.getPosition();
+            double parameterResult = parameterPolynomial.getValue();
 
             Assert.assertEquals(yoResult, parameterResult, Double.MIN_VALUE);
          }

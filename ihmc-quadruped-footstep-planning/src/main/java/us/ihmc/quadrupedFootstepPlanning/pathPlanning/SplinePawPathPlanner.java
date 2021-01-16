@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
-import com.jme3.animation.Pose;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -47,8 +45,8 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
          zPoly.compute(percent);
          yawPoly.compute(percent);
          Pose3D pose = new Pose3D();
-         pose.getPosition().set(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
-         pose.getOrientation().setYawPitchRoll(yawPoly.getPosition(), 0.0, 0.0);
+         pose.getPosition().set(xPoly.getValue(), yPoly.getValue(), zPoly.getValue());
+         pose.getOrientation().setYawPitchRoll(yawPoly.getValue(), 0.0, 0.0);
          waypoints.add(pose);
       }
 

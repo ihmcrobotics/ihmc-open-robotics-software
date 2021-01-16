@@ -1,0 +1,509 @@
+package us.ihmc.robotics.math.trajectories;
+
+import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.time.TimeIntervalProvider;
+
+interface PolynomialInterface extends TimeIntervalProvider, DoubleTrajectoryGenerator
+{
+   void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero);
+
+   void reshape(int numberOfCoefficientsRequired);
+
+   int getMaximumNumberOfCoefficients();
+
+   default void setTime(double t0, double tFinal)
+   {
+      getTimeInterval().setInterval(t0, tFinal);
+   }
+
+   default void setFinalTime(double tFinal)
+   {
+      getTimeInterval().setEndTime(tFinal);
+   }
+
+   default void setInitialTime(double t0)
+   {
+      getTimeInterval().setStartTime(t0);
+   }
+
+   default double getFinalTime()
+   {
+      return getTimeInterval().getEndTime();
+   }
+
+   default double getInitialTime()
+   {
+      return getTimeInterval().getStartTime();
+   }
+
+   default double getDuration()
+   {
+      return getTimeInterval().getDuration();
+   }
+
+   default boolean timeIntervalContains(double timeToCheck, double EPSILON)
+   {
+      return getTimeInterval().epsilonContains(timeToCheck, EPSILON);
+   }
+
+   default boolean timeIntervalContains(double timeToCheck)
+   {
+      return getTimeInterval().intervalContains(timeToCheck);
+   }
+
+   default void setZero()
+   {
+      this.setConstant(0.0);
+   }
+
+   default void setConstant(double z)
+   {
+      setConstant(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, z);
+   }
+
+   default void setConstant(double t0, double tFinal, double z)
+   {
+      setTime(t0, tFinal);
+      reshape(1);
+      setPositionRow(0, 0.0, z);
+      initialize();
+   }
+
+   default void setLinear(double t0, double tFinal, double z0, double zf)
+   {
+      setTime(t0, tFinal);
+      reshape(2);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zf);
+      initialize();
+   }
+
+   default void setLinear(double t, double z, double zd)
+   {
+      setTime(t, Double.POSITIVE_INFINITY);
+      reshape(2);
+      setPositionRow(0, t, z);
+      setVelocityRow(1, t, zd);
+      initialize();
+   }
+
+   default void setQuintic(double t0, double tFinal, double z0, double zd0, double zdd0, double zf, double zdf, double zddf)
+   {
+      setTime(t0, tFinal);
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tFinal, zf);
+      setVelocityRow(4, tFinal, zdf);
+      setAccelerationRow(5, tFinal, zddf);
+      initialize();
+   }
+
+   default void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
+                                       double zdf)
+   {
+      setTime(t0, tFinal);
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tIntermediate, zIntermediate);
+      setPositionRow(4, tFinal, zf);
+      setVelocityRow(5, tFinal, zdf);
+      initialize();
+   }
+
+   default void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate,
+                                        double zdIntermediate, double zf)
+   {
+      setTime(t0, tFinal);
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tIntermediate, zIntermediate);
+      setVelocityRow(4, tIntermediate, zdIntermediate);
+      setPositionRow(5, tFinal, zf);
+      initialize();
+   }
+
+   default void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                                      double zIntermediate1, double zf, double zdf)
+   {
+      setTime(t0, tFinal);
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tIntermediate0, zIntermediate0);
+      setPositionRow(3, tIntermediate1, zIntermediate1);
+      setPositionRow(4, tFinal, zf);
+      setVelocityRow(5, tFinal, zdf);
+      initialize();
+   }
+
+   default void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate,
+                                                                  double zddIntermediate, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setVelocityRow(2, tIntermediate, zdIntermediate);
+      setAccelerationRow(3, tIntermediate, zddIntermediate);
+      setPositionRow(4, tFinal, zFinal);
+      setVelocityRow(5, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0,
+                                                      double zIntermediate1, double zFinal, double zdIntermediate1)
+   {
+      setTime(t0, tFinal);
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate0, zIntermediate0);
+      setPositionRow(2, tIntermediate1, zIntermediate1);
+      setVelocityRow(3, tIntermediate1, zdIntermediate1);
+      setPositionRow(4, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
+   }
+
+   default void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
+                                      double zdf, double zddf)
+   {
+      setTime(t0, tFinal);
+      reshape(7);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tIntermediate, zIntermediate);
+      setPositionRow(4, tFinal, zf);
+      setVelocityRow(5, tFinal, zdf);
+      setAccelerationRow(6, tFinal, zddf);
+      initialize();
+   }
+
+   default void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                         double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   {
+      setTime(t0, tFinal);
+      reshape(8);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tIntermediate0, zIntermediate0);
+      setVelocityRow(3, tIntermediate0, zdIntermediate0);
+      setPositionRow(4, tIntermediate1, zIntermediate1);
+      setVelocityRow(5, tIntermediate1, zdIntermediate1);
+      setPositionRow(6, tFinal, zf);
+      setVelocityRow(7, tFinal, zdf);
+      initialize();
+   }
+
+   default void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zdd0,
+                                                    double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
+   {
+      setTime(t0, tFinal);
+      reshape(8);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tIntermediate0, zIntermediate0);
+      setPositionRow(4, tIntermediate1, zIntermediate1);
+      setPositionRow(5, tFinal, zf);
+      setVelocityRow(6, tFinal, zdf);
+      setAccelerationRow(7, tFinal, zddf);
+      initialize();
+   }
+
+   default void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                        double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   {
+      setTime(t0, tFinal);
+      reshape(10);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tIntermediate0, zIntermediate0);
+      setVelocityRow(3, tIntermediate0, zdIntermediate0);
+      setPositionRow(4, tIntermediate1, zIntermediate1);
+      setVelocityRow(5, tIntermediate1, zdIntermediate1);
+      setPositionRow(6, tFinal, zf);
+      setVelocityRow(7, tFinal, zdf);
+      setAccelerationRow(8, t0, 0.0);
+      setAccelerationRow(9, tFinal, 0.0);
+      initialize();
+   }
+
+   default void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0,
+                                                             double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(7);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setVelocityRow(3, tIntermediate, zdIntermediate);
+      setAccelerationRow(4, tIntermediate, zddIntermediate);
+      setPositionRow(5, tFinal, zFinal);
+      setVelocityRow(6, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal,
+                                                   double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setVelocityRow(2, tIntermediate, zdIntermediate);
+      setPositionRow(3, tFinal, zFinal);
+      setVelocityRow(4, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setQuartic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tFinal, zFinal);
+      setVelocityRow(4, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setQuarticUsingMidPoint(double t0, double tFinal, double z0, double zd0, double zMid, double zFinal, double zdFinal)
+   {
+      double tMid = t0 + (tFinal - t0) / 2.0;
+      setQuarticUsingWayPoint(t0, tMid, tFinal, z0, zd0, zMid, zFinal, zdFinal);
+   }
+
+   default void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zIntermediate, double zf, double zdf)
+   {
+      setTime(t0, tFinal);
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tIntermediate, zIntermediate);
+      setPositionRow(3, tFinal, zf);
+      setVelocityRow(4, tFinal, zdf);
+      initialize();
+   }
+
+   default void setQuarticUsingFinalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal, double zddFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, zdFinal);
+      setAccelerationRow(4, tFinal, zddFinal);
+      initialize();
+   }
+
+   default void setCubic(double t0, double tFinal, double z0, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, 0.0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, 0.0);
+      initialize();
+   }
+
+   default void setCubic(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0,
+                                                                            double zIntermediate, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tIntermediate, zIntermediate);
+      setPositionRow(3, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate,
+                                                                          double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate, zIntermediate);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setCubicBezier(double t0, double tFinal, double z0, double zR1, double zR2, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, t0, 3 * (zR1 - z0) / (tFinal - t0));
+      setVelocityRow(3, tFinal, 3 * (zFinal - zR2) / (tFinal - t0));
+      initialize();
+   }
+
+
+   default void setPositionRow(int row, double x, double z)
+   {
+      setConstraintRow(row, x, z, 0);
+   }
+
+   default void setVelocityRow(int row, double x, double zVelocity)
+   {
+      setConstraintRow(row, x, zVelocity, 1);
+   }
+
+   default void setAccelerationRow(
+         int row, double x, double zAcceleration)
+   {
+      setConstraintRow(row, x, zAcceleration, 2);
+   }
+
+   default void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, double z0, double zd0, double zdFinal, double zddFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setVelocityRow(2, tFinal, zdFinal);
+      setAccelerationRow(3, tFinal, zddFinal);
+      initialize();
+   }
+
+   default void setQuadratic(double t0, double tFinal, double z0, double zd0, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(3);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, double z0, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(3);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, tFinal, zdFinal);
+      initialize();
+   }
+
+   default void setQuadraticUsingInitialAcceleration(double t0, double tFinal, double z0, double zd0, double zdd0)
+   {
+      setTime(t0, tFinal);
+      reshape(3);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      initialize();
+   }
+
+   default void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(3);
+      MathTools.checkIntervalContains(tIntermediate, t0, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate, zIntermediate);
+      setPositionRow(2, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, double z0, double zIntermediate1, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      MathTools.checkIntervalContains(tIntermediate1, t0, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate1, zIntermediate1);
+      setPositionRow(2, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
+                                               double zIntermediate2, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
+      MathTools.checkIntervalContains(tIntermediate2, tIntermediate1, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate1, zIntermediate1);
+      setPositionRow(2, tIntermediate2, zIntermediate2);
+      setPositionRow(3, tFinal, zFinal);
+      initialize();
+   }
+
+   default void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setAccelerationRow(2, t0, zdd0);
+      setPositionRow(3, tFinal, zFinal);
+
+      initialize();
+   }
+
+   default void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, double z0, double zFinal, double zdFinal, double zddFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, tFinal, zdFinal);
+      setAccelerationRow(3, tFinal, zddFinal);
+
+      initialize();
+   }
+
+   default void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      if (getMaximumNumberOfCoefficients() < 4)
+         throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");
+      setTime(t0, tFinal);
+      reshape(getMaximumNumberOfCoefficients());
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, zdFinal);
+
+      int order = 2;
+
+      for (int row = 4; row < getMaximumNumberOfCoefficients(); row++)
+      {
+         setConstraintRow(row, tFinal, 0.0, order++);
+      }
+
+      initialize();
+   }
+}

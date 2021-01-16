@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
+public class ParabolicCartesianTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoRegistry registry;
@@ -21,6 +21,13 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    private final YoDouble timeIntoStep;
    private final DoubleProvider stepTimeProvider;
    private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+   private final FramePoint3D desiredPosition;
+   private final FrameVector3D desiredVelocity;
+   private final FrameVector3D desiredAcceleration;
+
+   private final FramePoint3D initialDesiredPosition = new FramePoint3D();
+   private final FramePoint3D finalDesiredPosition = new FramePoint3D();
 
    public ParabolicCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, double groundClearance,
                                                 YoRegistry parentRegistry)
@@ -33,31 +40,22 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       this.timeIntoStep = new YoDouble("timeIntoStep", registry);
       parentRegistry.addChild(registry);
 
+      desiredPosition = new FramePoint3D(referenceFrame);
+      desiredVelocity = new FrameVector3D(referenceFrame);
+      desiredAcceleration = new FrameVector3D(referenceFrame);
+
       this.stepTimeProvider = stepTimeProvider;
       this.groundClearance.set(groundClearance);
    }
 
-   @Override
-   public void initialize(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint3D finalDesiredPosition,
-                          FrameVector3D finalDesiredVelocity)
+   public void setInitialDesiredPosition(FramePoint3DReadOnly initialDesiredPosition)
    {
-      timeIntoStep.set(0.0);
-      this.stepTime.set(stepTimeProvider.getValue());
-
-      if (stepTime.getDoubleValue() < 1e-10)
-      {
-         stepTime.set(1e-10);
-      }
-
-      minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, stepTime.getDoubleValue());
-      double middleOfTrajectoryParameter = 0.5;
-      parabolicTrajectoryGenerator.initialize(initialPosition, finalDesiredPosition, groundClearance.getDoubleValue(), middleOfTrajectoryParameter);
-
+      this.initialDesiredPosition.setIncludingFrame(initialDesiredPosition);
    }
 
-   public void updateFinalDesiredPosition(FramePoint3D finalDesiredPosition)
+   public void setFinalDesiredPosition(FramePoint3DReadOnly finalDesiredPosition)
    {
-      // empty
+      this.finalDesiredPosition.setIncludingFrame(finalDesiredPosition);
    }
 
    public ReferenceFrame getReferenceFrame()
@@ -85,33 +83,54 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       return this.groundClearance.getDoubleValue();
    }
 
-   public void getPosition(FramePoint3D positionToPack)
+   @Override
+   public FramePoint3DReadOnly getPosition()
    {
       double parameter = minimumJerkTrajectory.getPosition();
 
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
 
-      parabolicTrajectoryGenerator.getPosition(positionToPack, parameter);
+      parabolicTrajectoryGenerator.getPosition(desiredPosition, parameter);
+
+      return desiredPosition;
    }
 
-   public void getVelocity(FrameVector3D velocityToPack)
+   @Override
+   public FrameVector3DReadOnly getVelocity()
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
       parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
-      velocityToPack.setIncludingFrame(tempVector);
-      velocityToPack.scale(minimumJerkTrajectory.getVelocity());
+      desiredVelocity.setIncludingFrame(tempVector);
+      desiredVelocity.scale(minimumJerkTrajectory.getVelocity());
+
+      return desiredVelocity;
    }
 
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
-      parabolicTrajectoryGenerator.getAcceleration(accelerationToPack);
-      accelerationToPack.scale(minimumJerkTrajectory.getVelocity() * minimumJerkTrajectory.getVelocity());
+      parabolicTrajectoryGenerator.getAcceleration(desiredAcceleration);
+      desiredAcceleration.scale(minimumJerkTrajectory.getVelocity() * minimumJerkTrajectory.getVelocity());
       parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       tempVector.scale(minimumJerkTrajectory.getAcceleration());
-      accelerationToPack.add(tempVector);
+      desiredAcceleration.add(tempVector);
+
+      return desiredAcceleration;
+   }
+
+   @Override
+   public void showVisualization()
+   {
+
+   }
+
+   @Override
+   public void hideVisualization()
+   {
+
    }
 
    public void computeNextTick(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
@@ -128,6 +147,22 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
       getPosition(positionToPack);
+   }
+
+   @Override
+   public void initialize()
+   {
+      timeIntoStep.set(0.0);
+      this.stepTime.set(stepTimeProvider.getValue());
+
+      if (stepTime.getDoubleValue() < 1e-10)
+      {
+         stepTime.set(1e-10);
+      }
+
+      minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, stepTime.getDoubleValue());
+      double middleOfTrajectoryParameter = 0.5;
+      parabolicTrajectoryGenerator.initialize(initialDesiredPosition, finalDesiredPosition, groundClearance.getDoubleValue(), middleOfTrajectoryParameter);
    }
 
    public void compute(double time)

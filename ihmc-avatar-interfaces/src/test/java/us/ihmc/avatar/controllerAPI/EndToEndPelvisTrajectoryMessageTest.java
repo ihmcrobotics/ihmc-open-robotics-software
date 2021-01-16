@@ -836,7 +836,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       {
          anglePolynomial.compute(t);
 
-         double angle = anglePolynomial.getPosition();
+         double angle = anglePolynomial.getValue();
          double angleDot = anglePolynomial.getVelocity();
          if (i == 0 || i == numberOfWaypoints - 1)
          {

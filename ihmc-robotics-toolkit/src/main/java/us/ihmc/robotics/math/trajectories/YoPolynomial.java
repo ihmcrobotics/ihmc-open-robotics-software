@@ -4,15 +4,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-
-import us.ihmc.commons.MathTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
-import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolder
+public class YoPolynomial implements PolynomialVariableHolder, PolynomialInterface
 {
    private final int maximumNumberOfCoefficients;
    private double pos, vel, acc, jerk, dPos;
@@ -22,6 +21,10 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    private final DMatrixRMaj constraintVector;
    private final DMatrixRMaj coefficientVector;
    private final double[] xPowers;
+
+   private final TimeIntervalBasics timeInterval = new TimeInterval();
+   private double tCurrent;
+
 
    // Stores the (n-th order) derivative of the xPowers vector
    private final DMatrixRMaj xPowersDerivativeVector;
@@ -68,16 +71,18 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    }
 
    @Override
-   public double getPosition()
+   public double getValue()
    {
       return pos;
    }
 
+   @Override
    public double getVelocity()
    {
       return vel;
    }
 
+   @Override
    public double getAcceleration()
    {
       return acc;
@@ -119,6 +124,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
 
    public void reset()
    {
+      getTimeInterval().reset();
       numberOfCoefficients.set(0);
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
          a[i].setToNaN();
@@ -132,434 +138,6 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
 
       for (int i = 0; i < other.getNumberOfCoefficients(); i++)
          a[i].set(other.getCoefficient(i));
-   }
-
-   public void setConstant(double z)
-   {
-      reshape(1);
-      coefficientVector.set(0, 0, z);
-      setYoVariables();
-   }
-
-   public void setLinear(double t0, double tFinal, double z0, double zf)
-   {
-      reshape(2);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setLinear(double t, double z, double zd)
-   {
-      reshape(2);
-      setPositionRow(0, t, z);
-      setVelocityRow(1, t, zd);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuintic(double t0, double tFinal, double z0, double zd0, double zdd0, double zf, double zdf, double zddf)
-   {
-      reshape(6);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zf);
-      setVelocityRow(4, tFinal, zdf);
-      setAccelerationRow(5, tFinal, zddf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                       double zdf)
-   {
-      reshape(6);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate,
-                                        double zdIntermediate, double zf)
-   {
-      reshape(6);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setVelocityRow(4, tIntermediate, zdIntermediate);
-      setPositionRow(5, tFinal, zf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                                      double zIntermediate1, double zf, double zdf)
-   {
-      reshape(6);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setPositionRow(3, tIntermediate1, zIntermediate1);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate,
-                                                                  double zddIntermediate, double zFinal, double zdFinal)
-   {
-      reshape(6);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tIntermediate, zdIntermediate);
-      setAccelerationRow(3, tIntermediate, zddIntermediate);
-      setPositionRow(4, tFinal, zFinal);
-      setVelocityRow(5, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0,
-                                                      double zIntermediate1, double zFinal, double zdIntermediate1)
-   {
-      reshape(5);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate0, zIntermediate0);
-      setPositionRow(2, tIntermediate1, zIntermediate1);
-      setVelocityRow(3, tIntermediate1, zdIntermediate1);
-      setPositionRow(4, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
-   }
-
-   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                      double zdf, double zddf)
-   {
-      reshape(7);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      setAccelerationRow(6, tFinal, zddf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                         double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
-   {
-      reshape(8);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setVelocityRow(3, tIntermediate0, zdIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setVelocityRow(5, tIntermediate1, zdIntermediate1);
-      setPositionRow(6, tFinal, zf);
-      setVelocityRow(7, tFinal, zdf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zdd0,
-                                                    double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
-   {
-      reshape(8);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate0, zIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setPositionRow(5, tFinal, zf);
-      setVelocityRow(6, tFinal, zdf);
-      setAccelerationRow(7, tFinal, zddf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                        double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
-   {
-      reshape(10);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setVelocityRow(3, tIntermediate0, zdIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setVelocityRow(5, tIntermediate1, zdIntermediate1);
-      setPositionRow(6, tFinal, zf);
-      setVelocityRow(7, tFinal, zdf);
-      setAccelerationRow(8, t0, 0.0);
-      setAccelerationRow(9, tFinal, 0.0);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0,
-                                                             double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
-   {
-      reshape(7);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setVelocityRow(3, tIntermediate, zdIntermediate);
-      setAccelerationRow(4, tIntermediate, zddIntermediate);
-      setPositionRow(5, tFinal, zFinal);
-      setVelocityRow(6, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal,
-                                                   double zdFinal)
-   {
-      reshape(5);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tIntermediate, zdIntermediate);
-      setPositionRow(3, tFinal, zFinal);
-      setVelocityRow(4, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuartic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal)
-   {
-      reshape(5);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zFinal);
-      setVelocityRow(4, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuarticUsingMidPoint(double t0, double tFinal, double z0, double zd0, double zMid, double zFinal, double zdFinal)
-   {
-      double tMid = t0 + (tFinal - t0) / 2.0;
-      setQuarticUsingWayPoint(t0, tMid, tFinal, z0, zd0, zMid, zFinal, zdFinal);
-   }
-
-   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zIntermediate, double zf, double zdf)
-   {
-      reshape(5);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate, zIntermediate);
-      setPositionRow(3, tFinal, zf);
-      setVelocityRow(4, tFinal, zdf);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuarticUsingFinalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal, double zddFinal)
-   {
-      reshape(5);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      setAccelerationRow(4, tFinal, zddFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubic(double t0, double tFinal, double z0, double zFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, 0.0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, 0.0);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubic(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0,
-                                                                            double zIntermediate, double zFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate, zIntermediate);
-      setPositionRow(3, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate,
-                                                                          double zFinal, double zdFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate, zIntermediate);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicBezier(double t0, double tFinal, double z0, double zR1, double zR2, double zFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, t0, 3 * (zR1 - z0) / (tFinal - t0));
-      setVelocityRow(3, tFinal, 3 * (zFinal - zR2) / (tFinal - t0));
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      if (maximumNumberOfCoefficients < 4)
-         throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");
-      reshape(maximumNumberOfCoefficients);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-
-      int order = 2;
-
-      for (int row = 4; row < maximumNumberOfCoefficients; row++)
-      {
-         setConstraintRow(row, tFinal, 0.0, order++);
-      }
-
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, double z0, double zd0, double zdFinal, double zddFinal)
-   {
-      reshape(4);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tFinal, zdFinal);
-      setAccelerationRow(3, tFinal, zddFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuadratic(double t0, double tFinal, double z0, double zd0, double zFinal)
-   {
-      reshape(3);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, double z0, double zFinal, double zdFinal)
-   {
-      reshape(3);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, tFinal, zdFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuadraticUsingInitialAcceleration(double t0, double tFinal, double z0, double zd0, double zdd0)
-   {
-      reshape(3);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal)
-   {
-      reshape(3);
-      MathTools.checkIntervalContains(tIntermediate, t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate, zIntermediate);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, double z0, double zIntermediate1, double zFinal)
-   {
-      reshape(4);
-      MathTools.checkIntervalContains(tIntermediate1, t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate1, zIntermediate1);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                               double zIntermediate2, double zFinal)
-   {
-      reshape(4);
-      MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
-      MathTools.checkIntervalContains(tIntermediate2, tIntermediate1, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate1, zIntermediate1);
-      setPositionRow(2, tIntermediate2, zIntermediate2);
-      setPositionRow(3, tFinal, zFinal);
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal)
-   {
-      reshape(4);
-
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zFinal);
-
-      solveForCoefficients();
-      setYoVariables();
-   }
-
-   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, double z0, double zFinal, double zdFinal, double zddFinal)
-   {
-      reshape(4);
-
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, tFinal, zdFinal);
-      setAccelerationRow(3, tFinal, zddFinal);
-
-      solveForCoefficients();
-      setYoVariables();
    }
 
    protected void solveForCoefficients()
@@ -630,6 +208,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    @Override
    public void compute(double x)
    {
+      tCurrent = x;
       setXPowers(xPowers, x);
 
       pos = vel = acc = jerk = 0.0;
@@ -738,12 +317,14 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       return numberOfCoefficients;
    }
 
+   @Override
    public int getMaximumNumberOfCoefficients()
    {
       return maximumNumberOfCoefficients;
    }
 
-   private void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
+   @Override
+   public void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
    {
       double xPower = 1.0;
 
@@ -761,27 +342,25 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       constraintVector.set(row, 0, desiredZDerivative);
    }
 
-   protected void setPositionRow(int row, double x, double z)
-   {
-      setConstraintRow(row, x, z, 0);
-   }
-
-   protected void setVelocityRow(int row, double x, double zVelocity)
-   {
-      setConstraintRow(row, x, zVelocity, 1);
-   }
-
-   protected void setAccelerationRow(int row, double x, double zAcceleration)
-   {
-      setConstraintRow(row, x, zAcceleration, 2);
-   }
-
    protected void setYoVariables()
    {
       for (int row = 0; row < numberOfCoefficients.getIntegerValue(); row++)
       {
          a[row].set(coefficientVector.get(row, 0));
       }
+   }
+
+   @Override
+   public void initialize()
+   {
+      solveForCoefficients();
+      setYoVariables();
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return tCurrent >= getTimeInterval().getEndTime();
    }
 
    public void reshape(int numberOfCoefficientsRequired)
@@ -812,5 +391,11 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
          inString += a[i].getDoubleValue() + " x^" + i;
       }
       return inString;
+   }
+
+   @Override
+   public TimeIntervalBasics getTimeInterval()
+   {
+      return timeInterval;
    }
 }

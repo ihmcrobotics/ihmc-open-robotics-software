@@ -2,7 +2,6 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -114,7 +113,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       parameterPolynomial.compute(time);
       
-      double parameter = isDone() ? 1.0 : parameterPolynomial.getPosition();
+      double parameter = isDone() ? 1.0 : parameterPolynomial.getValue();
       desiredOrientation.interpolate(initialOrientation, finalOrientation, parameter);
       double parameterd = isDone() ? 0.0 : parameterPolynomial.getVelocity();
       orientationInterpolationCalculator.computeAngularVelocity(desiredAngularVelocity, initialOrientation, finalOrientation, parameterd);

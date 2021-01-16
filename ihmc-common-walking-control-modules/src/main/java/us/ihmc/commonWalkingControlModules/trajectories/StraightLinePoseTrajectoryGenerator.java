@@ -279,13 +279,13 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       }
       else
       {
-         currentPose.getPosition().interpolate(initialPosition, finalPosition, quinticParameterPolynomial.getPosition());
+         currentPose.getPosition().interpolate(initialPosition, finalPosition, quinticParameterPolynomial.getValue());
          currentVelocity.sub(finalPosition, initialPosition);
          currentVelocity.scale(alphaVel);
          currentAcceleration.sub(finalPosition, initialPosition);
          currentAcceleration.scale(alphaAcc);
 
-         currentPose.getOrientation().interpolate(initialOrientation, finalOrientation, quinticParameterPolynomial.getPosition());
+         currentPose.getOrientation().interpolate(initialOrientation, finalOrientation, quinticParameterPolynomial.getValue());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAngAcc);
       }

@@ -5,14 +5,14 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
-import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 
 /**
  * Simple trajectory class. Does not use the {@code Polynomial} class since its weird
  * Coefficients are stored with lowest order at the lowest index (what else would you do?)
  */
-public class Trajectory
+public class Trajectory implements PolynomialInterface
 {
    private final int maximumNumberOfCoefficients;
    private final double[] coefficients;
@@ -22,8 +22,8 @@ public class Trajectory
    private final DMatrixRMaj coefficientVector;
    private final LinearSolverDense<DMatrixRMaj> solver;
 
-   private double tInitial;
-   private double tFinal;
+   private final TimeIntervalBasics timeInterval = new TimeInterval();
+   private double currentTime;
    private int numberOfCoefficients;
    private double f, df, ddf;
    private final double[] xPowers;
@@ -54,19 +54,18 @@ public class Trajectory
 
    public void reset()
    {
+      getTimeInterval().reset();
       numberOfCoefficients = 0;
-      tInitial = Double.NaN;
-      tFinal = Double.NaN;
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
-         //xPowers[i] = Double.NaN;
          coefficients[i] = Double.NaN;
       }
-      //xPowersDerivativeVector.zero();
    }
 
+   @Override
    public void compute(double x)
    {
+      this.currentTime = x;
       setXPowers(xPowers, x);
       ddf = df = f = 0.0;
       for (int i = 0; i < numberOfCoefficients; i++)
@@ -75,6 +74,12 @@ public class Trajectory
          df += coefficients[i] * (i) * xPowers[i - 1];
       for (int i = 2; i < numberOfCoefficients; i++)
          ddf += coefficients[i] * (i - 1) * (i) * xPowers[i - 2];
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return currentTime >= getTimeInterval().getEndTime();
    }
 
    /**
@@ -153,16 +158,19 @@ public class Trajectory
       return coeff;
    }
 
-   public double getPosition()
+   @Override
+   public double getValue()
    {
       return f;
    }
 
+   @Override
    public double getVelocity()
    {
       return df;
    }
 
+   @Override
    public double getAcceleration()
    {
       return ddf;
@@ -188,8 +196,7 @@ public class Trajectory
    public void set(Trajectory other)
    {
       reset();
-      this.tInitial = other.tInitial;
-      this.tFinal = other.tFinal;
+      getTimeInterval().set(other.getTimeInterval());
       reshape(other.getNumberOfCoefficients());
       int index = 0;
       for (; index < other.getNumberOfCoefficients(); index++)
@@ -200,474 +207,9 @@ public class Trajectory
 
    public void setZero()
    {
-      setConstant(tInitial, tFinal, 0.0);
+      this.setConstant(0.0);
    }
 
-   public void setConstant(double t0, double tFinal, double z)
-   {
-      reshape(1);
-      setTime(t0, tFinal);
-      coefficientVector.set(0, 0, z);
-      setCoefficientVariables();
-   }
-
-   public void setLinear(double t0, double tFinal, double z0, double zf)
-   {
-      reshape(2);
-      setTime(t0, tFinal);
-      double c1 = (zf - z0) / (tFinal - t0);
-      coefficientVector.set(0, 0, z0 - c1 * t0);
-      coefficientVector.set(1, 0, c1);
-      setCoefficientVariables();
-   }
-
-   public void setQuintic(double t0, double tFinal, double z0, double zd0, double zdd0, double zf, double zdf, double zddf)
-   {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zf);
-      setVelocityRow(4, tFinal, zdf);
-      setAccelerationRow(5, tFinal, zddf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                       double zdf)
-   {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate,
-                                        double zdIntermediate, double zf)
-   {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setVelocityRow(4, tIntermediate, zdIntermediate);
-      setPositionRow(5, tFinal, zf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                                      double zIntermediate1, double zf, double zdf)
-   {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setPositionRow(3, tIntermediate1, zIntermediate1);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate,
-                                                                  double zddIntermediate, double zFinal, double zdFinal)
-   {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tIntermediate, zdIntermediate);
-      setAccelerationRow(3, tIntermediate, zddIntermediate);
-      setPositionRow(4, tFinal, zFinal);
-      setVelocityRow(5, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0,
-                                                      double zIntermediate1, double zFinal, double zdIntermediate1)
-   {
-      reshape(5);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate0, zIntermediate0);
-      setPositionRow(2, tIntermediate1, zIntermediate1);
-      setVelocityRow(3, tIntermediate1, zdIntermediate1);
-      setPositionRow(4, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuinticWithZeroTerminalVelocityAndAcceleration(double t0, double tFinal, double z0, double zFinal)
-   {
-      setQuintic(t0, tFinal, z0, 0.0, 0.0, zFinal, 0.0, 0.0);
-   }
-
-   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
-   }
-
-   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
-                                      double zdf, double zddf)
-   {
-      reshape(7);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate, zIntermediate);
-      setPositionRow(4, tFinal, zf);
-      setVelocityRow(5, tFinal, zdf);
-      setAccelerationRow(6, tFinal, zddf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                         double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
-   {
-      reshape(8);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setVelocityRow(3, tIntermediate0, zdIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setVelocityRow(5, tIntermediate1, zdIntermediate1);
-      setPositionRow(6, tFinal, zf);
-      setVelocityRow(7, tFinal, zdf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zdd0,
-                                                    double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
-   {
-      reshape(8);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tIntermediate0, zIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setPositionRow(5, tFinal, zf);
-      setVelocityRow(6, tFinal, zdf);
-      setAccelerationRow(7, tFinal, zddf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
-                        double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
-   {
-      reshape(10);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate0, zIntermediate0);
-      setVelocityRow(3, tIntermediate0, zdIntermediate0);
-      setPositionRow(4, tIntermediate1, zIntermediate1);
-      setVelocityRow(5, tIntermediate1, zdIntermediate1);
-      setPositionRow(6, tFinal, zf);
-      setVelocityRow(7, tFinal, zdf);
-      setAccelerationRow(8, t0, 0.0);
-      setAccelerationRow(9, tFinal, 0.0);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0,
-                                                             double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
-   {
-      reshape(7);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setVelocityRow(3, tIntermediate, zdIntermediate);
-      setAccelerationRow(4, tIntermediate, zddIntermediate);
-      setPositionRow(5, tFinal, zFinal);
-      setVelocityRow(6, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal,
-                                                   double zdFinal)
-   {
-      reshape(5);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tIntermediate, zdIntermediate);
-      setPositionRow(3, tFinal, zFinal);
-      setVelocityRow(4, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuartic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal)
-   {
-      reshape(5);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zFinal);
-      setVelocityRow(4, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuarticUsingMidPoint(double t0, double tFinal, double z0, double zd0, double zMid, double zFinal, double zdFinal)
-   {
-      double tMid = t0 + (tFinal - t0) / 2.0;
-      setQuarticUsingWayPoint(t0, tMid, tFinal, z0, zd0, zMid, zFinal, zdFinal);
-   }
-
-   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zIntermediate, double zf, double zdf)
-   {
-      reshape(5);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate, zIntermediate);
-      setPositionRow(3, tFinal, zf);
-      setVelocityRow(4, tFinal, zdf);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuarticUsingFinalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal, double zddFinal)
-   {
-      reshape(5);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      setAccelerationRow(4, tFinal, zddFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubic(double t0, double tFinal, double z0, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, 0.0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, 0.0);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubic(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0,
-                                                                            double zIntermediate, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tIntermediate, zIntermediate);
-      setPositionRow(3, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate,
-                                                                          double zFinal, double zdFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate, zIntermediate);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicBezier(double t0, double tFinal, double z0, double zR1, double zR2, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, t0, 3 * (zR1 - z0) / (tFinal - t0));
-      setVelocityRow(3, tFinal, 3 * (zFinal - zR2) / (tFinal - t0));
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      if (maximumNumberOfCoefficients < 4)
-         throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");
-      reshape(maximumNumberOfCoefficients);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      setVelocityRow(3, tFinal, zdFinal);
-
-      int order = 2;
-
-      for (int row = 4; row < maximumNumberOfCoefficients; row++)
-      {
-         setConstraintRow(row, tFinal, 0.0, order++);
-      }
-
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, double z0, double zd0, double zdFinal, double zddFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setVelocityRow(2, tFinal, zdFinal);
-      setAccelerationRow(3, tFinal, zddFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuadratic(double t0, double tFinal, double z0, double zd0, double zFinal)
-   {
-      reshape(3);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, double z0, double zFinal, double zdFinal)
-   {
-      reshape(3);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, tFinal, zdFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuadraticUsingInitialAcceleration(double t0, double tFinal, double z0, double zd0, double zdd0)
-   {
-      reshape(3);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setQuadraticUsingPositionsAndAcceleration(double t0, double tFinal, double z0, double zf, double zdd)
-   {
-      reshape(3);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zf);
-      setAccelerationRow(2, t0, zdd);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-
-   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal)
-   {
-      reshape(3);
-      setTime(t0, tFinal);
-      MathTools.checkIntervalContains(tIntermediate, t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate, zIntermediate);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, double z0, double zIntermediate1, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      MathTools.checkIntervalContains(tIntermediate1, t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate1, zIntermediate1);
-      setPositionRow(2, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                               double zIntermediate2, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
-      MathTools.checkIntervalContains(tIntermediate2, tIntermediate1, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tIntermediate1, zIntermediate1);
-      setPositionRow(2, tIntermediate2, zIntermediate2);
-      setPositionRow(3, tFinal, zFinal);
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setVelocityRow(1, t0, zd0);
-      setAccelerationRow(2, t0, zdd0);
-      setPositionRow(3, tFinal, zFinal);
-
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
-
-   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, double z0, double zFinal, double zdFinal, double zddFinal)
-   {
-      reshape(4);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, tFinal, zdFinal);
-      setAccelerationRow(3, tFinal, zddFinal);
-
-      solveForCoefficients();
-      setCoefficientVariables();
-   }
 
    public void solveForCoefficients()
    {
@@ -714,22 +256,6 @@ public class Trajectory
       coefficients[power] = coefficient;
    }
 
-   public void setTime(double t0, double tFinal)
-   {
-      setInitialTime(t0);
-      setFinalTime(tFinal);
-   }
-
-   public void setFinalTime(double tFinal)
-   {
-      this.tFinal = tFinal;
-   }
-
-   public void setInitialTime(double t0)
-   {
-      this.tInitial = t0;
-   }
-
    public void setInitialTimeMaintainingBounds(double tInitial)
    {
       int numStartingConstraints = (int) Math.ceil(getNumberOfCoefficients() / 2.0);
@@ -738,19 +264,19 @@ public class Trajectory
       int constraintNumber = 0;
       for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
       {
-         double value = getDerivative(order, this.tInitial);
+         double value = getDerivative(order, getTimeInterval().getStartTime());
          setConstraintRow(constraintNumber, tInitial, value, order);
       }
       for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
       {
-         double value = getDerivative(order, tFinal);
-         setConstraintRow(constraintNumber, tFinal, value, order);
+         double value = getDerivative(order, getTimeInterval().getEndTime());
+         setConstraintRow(constraintNumber, getTimeInterval().getEndTime(), value, order);
       }
 
       solveForCoefficients();
-      setCoefficientVariables();
+      initialize();
 
-      this.tInitial = tInitial;
+      getTimeInterval().setStartTime(tInitial);
    }
 
    public void setFinalTimeMaintainingBounds(double tFinal)
@@ -761,45 +287,20 @@ public class Trajectory
       int constraintNumber = 0;
       for (int order = 0; order < numStartingConstraints; order++, constraintNumber++)
       {
-         double value = getDerivative(order, tInitial);
-         setConstraintRow(constraintNumber, tInitial, value, order);
+         double value = getDerivative(order, getTimeInterval().getStartTime());
+         setConstraintRow(constraintNumber, getTimeInterval().getStartTime(), value, order);
       }
       for (int order = 0; order < numEndingConstraints; order++, constraintNumber++)
       {
-         double value = getDerivative(order, this.tFinal);
+         double value = getDerivative(order, getTimeInterval().getEndTime());
          setConstraintRow(constraintNumber, tFinal, value, order);
       }
 
       solveForCoefficients();
-      setCoefficientVariables();
-
-      this.tFinal = tFinal;
-   }
+      initialize();
 
 
-   public double getFinalTime()
-   {
-      return this.tFinal;
-   }
-
-   public double getInitialTime()
-   {
-      return this.tInitial;
-   }
-
-   public double getDuration()
-   {
-      return tFinal - tInitial;
-   }
-
-   public boolean timeIntervalContains(double timeToCheck, double EPSILON)
-   {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), EPSILON);
-   }
-
-   public boolean timeIntervalContains(double timeToCheck)
-   {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
+      getTimeInterval().setEndTime(tFinal);
    }
 
    /**
@@ -875,23 +376,11 @@ public class Trajectory
       constraintVector.set(row, 0, desiredZDerivative);
    }
 
-   private void setPositionRow(int row, double x, double z)
+   @Override
+   public void initialize()
    {
-      setConstraintRow(row, x, z, 0);
-   }
+      solveForCoefficients();
 
-   private void setVelocityRow(int row, double x, double zVelocity)
-   {
-      setConstraintRow(row, x, zVelocity, 1);
-   }
-
-   private void setAccelerationRow(int row, double x, double zAcceleration)
-   {
-      setConstraintRow(row, x, zAcceleration, 2);
-   }
-
-   public void setCoefficientVariables()
-   {
       int row = 0;
       for (; row < numberOfCoefficients; row++)
          coefficients[row] = coefficientVector.get(row, 0);
@@ -923,6 +412,8 @@ public class Trajectory
 
    public String toString()
    {
+      double tInitial = getTimeInterval().getStartTime();
+      double tFinal = getTimeInterval().getEndTime();
       String inString = "Polynomial: " + coefficients[0];
       for (int i = 1; i < getNumberOfCoefficients(); i++)
       {
@@ -936,6 +427,8 @@ public class Trajectory
 
    public String toString2()
    {
+      double tInitial = getTimeInterval().getStartTime();
+      double tFinal = getTimeInterval().getEndTime();
       compute(tInitial);
       String retString = "TInitial: " + tInitial + " Val: " + f;
       compute(tFinal);
@@ -949,5 +442,11 @@ public class Trajectory
       for (int i = 0; retVal && i < numberOfCoefficients; i++)
          retVal &= Double.isFinite(coefficients[i]);
       return retVal;
+   }
+
+   @Override
+   public TimeIntervalBasics getTimeInterval()
+   {
+      return timeInterval;
    }
 }

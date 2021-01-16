@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.trajectories.generators;
 import java.util.ArrayList;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;

@@ -440,7 +440,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          Axis3D axis = Axis3D.values[dimension];
          YoPolynomial polynomial = trajectories.get(axis).get(activeSegment);
          polynomial.compute(time);
-         desiredPosition.setElement(dimension, polynomial.getPosition());
+         desiredPosition.setElement(dimension, polynomial.getValue());
          desiredVelocity.setElement(dimension, polynomial.getVelocity());
          desiredAcceleration.setElement(dimension, polynomial.getAcceleration());
       }

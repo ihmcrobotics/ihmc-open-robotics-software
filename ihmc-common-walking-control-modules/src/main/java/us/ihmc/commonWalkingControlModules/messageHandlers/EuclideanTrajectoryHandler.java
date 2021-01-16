@@ -231,7 +231,7 @@ public class EuclideanTrajectoryHandler
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);
 
-         position.setElement(i, polynomial.getPosition());
+         position.setElement(i, polynomial.getValue());
          velocity.setElement(i, polynomial.getVelocity());
          acceleration.setElement(i, polynomial.getAcceleration());
       }
