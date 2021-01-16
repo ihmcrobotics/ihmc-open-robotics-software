@@ -239,7 +239,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          updateSplines();
 
          dcmFirstSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getFramePosition());
+         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getPosition());
          return;
       }
       else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
@@ -253,7 +253,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       updateSplines();
 
       dcmSecondSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getFramePosition());
+      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getPosition());
    }
 
    private void computeTransitionTrajectory()
@@ -276,7 +276,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          updateSplines();
 
          dcmFirstSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getFramePosition());
+         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getPosition());
          return;
       }
       else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
@@ -292,7 +292,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       updateSplines();
 
       dcmSecondSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getFramePosition());
+      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getPosition());
    }
 
    private void setFirstSplineStartFromCurrentState()
@@ -373,16 +373,16 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
             isInFirstSpline.set(true);
             isInSecondSpline.set(false);
             dcmFirstSpline.compute(currentTime);
-            desiredDCMPosition.setMatchingFrame(dcmFirstSpline.getFramePosition());
-            desiredDCMVelocity.setMatchingFrame(dcmFirstSpline.getFrameVelocity());
+            desiredDCMPosition.setMatchingFrame(dcmFirstSpline.getPosition());
+            desiredDCMVelocity.setMatchingFrame(dcmFirstSpline.getVelocity());
          }
          else if (MathTools.intervalContains(currentTime, secondSplineStartTime.getDoubleValue(), secondSplineEndTime.getDoubleValue(), Epsilons.ONE_MILLIONTH))
          {
             isInFirstSpline.set(false);
             isInSecondSpline.set(true);
             dcmSecondSpline.compute(currentTime);
-            desiredDCMPosition.setMatchingFrame(dcmSecondSpline.getFramePosition());
-            desiredDCMVelocity.setMatchingFrame(dcmSecondSpline.getFrameVelocity());
+            desiredDCMPosition.setMatchingFrame(dcmSecondSpline.getPosition());
+            desiredDCMVelocity.setMatchingFrame(dcmSecondSpline.getVelocity());
          }
          else
          {
