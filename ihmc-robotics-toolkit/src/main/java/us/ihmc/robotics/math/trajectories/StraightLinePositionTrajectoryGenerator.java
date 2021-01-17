@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class StraightLinePositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public class StraightLinePositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    protected final YoRegistry registry;
 

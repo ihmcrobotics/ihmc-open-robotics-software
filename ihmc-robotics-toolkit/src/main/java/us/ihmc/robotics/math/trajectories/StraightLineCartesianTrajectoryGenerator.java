@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.Alph
 /**
  * WARNING this is super not realtime safe and makes a ton of garbage.
  */
-public class StraightLineCartesianTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public class StraightLineCartesianTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private final YoRegistry registry;
    private final ReferenceFrame referenceFrame;

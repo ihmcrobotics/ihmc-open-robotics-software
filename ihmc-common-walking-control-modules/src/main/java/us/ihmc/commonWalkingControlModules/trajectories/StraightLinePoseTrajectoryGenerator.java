@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class StraightLinePoseTrajectoryGenerator implements FramePoseTrajectoryGenerator
+public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
    private final YoRegistry registry;
 

@@ -7,14 +7,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BlendedPositionTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public class BlendedPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
-   private final FramePositionTrajectoryGenerator trajectory;
+   private final FixedFramePositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
@@ -44,7 +44,7 @@ public class BlendedPositionTrajectoryGenerator implements FramePositionTrajecto
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FrameVector3D tempAcceleration = new FrameVector3D();
 
-   public BlendedPositionTrajectoryGenerator(String prefix, FramePositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
+   public BlendedPositionTrajectoryGenerator(String prefix, FixedFramePositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
                                              YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;

@@ -42,7 +42,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -472,7 +472,7 @@ public class SimpleSwingState extends SimpleFootControlState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      FramePoseTrajectoryGenerator activeTrajectory;
+      FixedFramePoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
          activeTrajectory = touchdownTrajectory;
       else

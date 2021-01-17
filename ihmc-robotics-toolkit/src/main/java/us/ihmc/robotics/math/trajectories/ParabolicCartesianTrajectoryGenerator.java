@@ -6,14 +6,14 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoParabolicTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ParabolicCartesianTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public class ParabolicCartesianTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoRegistry registry;

@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -55,7 +55,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       private final ReferenceFrame baseFrame;
       private final ReferenceFrame expressedInFrame;
 
-      public PoseTrajectoryState(FramePoseTrajectoryGenerator trajectory, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
+      public PoseTrajectoryState(FixedFramePoseTrajectoryGenerator trajectory, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
                                  ReferenceFrame expressedInFrame)
       {
          this.position = new FramePoint3D(expressedInFrame);
@@ -120,7 +120,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   private FramePoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, int numberOfWaypoints, double duration, ReferenceFrame referenceFrame, YoRegistry registry)
+   private FixedFramePoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, int numberOfWaypoints, double duration, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       MultipleWaypointsPoseTrajectoryGenerator referenceTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("referenceTrajectory", 10, registry);
       for (int i = 0; i < numberOfWaypoints; i++)
@@ -144,7 +144,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Check if blended trajectory is equal to reference trajectory
@@ -170,7 +170,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend initial constraint
@@ -208,7 +208,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend initial constraint
@@ -245,7 +245,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -296,7 +296,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -344,7 +344,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend final constraint
@@ -382,7 +382,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
       YoRegistry registry = new YoRegistry("trajectory");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
       // Blend initial constraints
@@ -447,7 +447,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       Vector3D integratedAngularAcceleration = new Vector3D();
 
       YoRegistry registry = new YoRegistry("null");
-      FramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 2, trajectoryDuration, worldFrame, registry);
+      FixedFramePoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 2, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blended", referenceTrajectory, worldFrame, registry);
       blendedTrajectory.initialize();
 

@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class VelocityConstrainedPoseTrajectoryGenerator implements FramePoseTrajectoryGenerator
+public class VelocityConstrainedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

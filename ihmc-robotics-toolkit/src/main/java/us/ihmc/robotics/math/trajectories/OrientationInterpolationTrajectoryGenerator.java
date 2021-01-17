@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFrameOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class OrientationInterpolationTrajectoryGenerator implements FrameOrientationTrajectoryGenerator
+public class OrientationInterpolationTrajectoryGenerator implements FixedFrameOrientationTrajectoryGenerator
 {
    private final YoRegistry registry;
    private final YoDouble currentTime;
