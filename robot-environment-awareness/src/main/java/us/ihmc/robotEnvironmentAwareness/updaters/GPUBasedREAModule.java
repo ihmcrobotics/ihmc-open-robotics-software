@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -35,17 +36,18 @@ public class GPUBasedREAModule implements PerceptionModule {
     }
 
     void mainUpdate(){
+        LogTools.info("Regions Available:{}", gpuPlanarRegionSubscriber.regionListIsAvailable());
         if(gpuPlanarRegionSubscriber.regionListIsAvailable()){
             this.rawGPUPlanarRegionList = gpuPlanarRegionSubscriber.getPlanarRegionList();
             for (int i = 0; i < rawGPUPlanarRegionList.getNumOfRegions(); i++) {
                 List<RawGPUPlanarRegion> regions = rawGPUPlanarRegionList.getRegions();
-                System.out.println("\tRegion:" + regions.get(i).getId());
-                System.out.println("\t\tNormal:" + "X:" + regions.get(i).getNormal().getX() + "\tY:" + regions.get(i).getNormal().getY() + "\tZ:" + regions.get(i).getNormal().getZ());
-                System.out.println("\t\tCentroid:" + "X:" + regions.get(i).getCentroid().getX() + "\tY:" + regions.get(i).getCentroid().getY() + "\tZ:" + regions.get(i).getCentroid().getZ());
-//            for (int j = 0; j < regions.get(i).getVertices().size(); j++) {
-//                geometry_msgs.Point point = regions.get(i).getVertices().get(j);
-//                System.out.println("\t\tPoint:" + "X:" + point.getX() + "\tY:" + point.getY() + "\tZ:" + point.getZ());
-//            }
+                System.out.println("Region: " + regions.get(i).getId());
+                System.out.println("Normal: " + "X:" + regions.get(i).getNormal().getX() + "\tY:" + regions.get(i).getNormal().getY() + "\tZ:" + regions.get(i).getNormal().getZ());
+                System.out.println("Centroid: " + "X:" + regions.get(i).getCentroid().getX() + "\tY:" + regions.get(i).getCentroid().getY() + "\tZ:" + regions.get(i).getCentroid().getZ());
+                for (int j = 0; j < regions.get(i).getVertices().size(); j++) {
+                    geometry_msgs.Point point = regions.get(i).getVertices().get(j);
+                    System.out.println(point.getX() + "," + point.getY() + "," + point.getZ());
+                }
             }
         }
     }
