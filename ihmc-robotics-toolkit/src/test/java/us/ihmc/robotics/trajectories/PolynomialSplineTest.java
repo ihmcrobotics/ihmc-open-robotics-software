@@ -156,7 +156,14 @@ public class PolynomialSplineTest
 
       for (int i = 1; i < coefficients.length; i++)
       {
-         assertEquals(0.0, coefficients[i], epsilon);
+         assertEquals(Double.NaN, coefficients[i], epsilon);
+      }
+      for (double time = -10.0; time <= 10.0; time += 0.05)
+      {
+         spline.compute(time);
+         assertEquals(z, spline.getValue(), epsilon);
+         assertEquals(0.0, spline.getVelocity(), epsilon);
+         assertEquals(0.0, spline.getAcceleration(), epsilon);
       }
    }
 

@@ -114,6 +114,33 @@ public class PolynomialTest
             assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
             assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
          }
+
+         trajectory.setLinear(t0, z0, zDot);
+
+         derivative = new Polynomial(1);
+         derivative.setConstant(t0, tf, zDot);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getValue(), SMALL_EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getValue(), SMALL_EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getValue(), SMALL_EPSILON);
+            assertEquals(zDot, trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), SMALL_EPSILON);
+
+            derivative.compute(t);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
+         }
       }
    }
 
@@ -259,13 +286,4 @@ public class PolynomialTest
       assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
    }
 
-   private static int getCoefficientMultiplierForDerivative(int order, int exponent)
-   {
-      int coeff = 1;
-      for (int i = exponent; i > exponent - order; i--)
-      {
-         coeff *= i;
-      }
-      return coeff;
-   }
 }

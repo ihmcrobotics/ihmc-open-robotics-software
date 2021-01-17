@@ -191,6 +191,11 @@ public class Polynomial implements PolynomialBasics
       this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
       this.constraintVector.reshape(numberOfCoefficientsRequired, 1);
       this.xPowersDerivativeVector.reshape(1, numberOfCoefficientsRequired);
+
+      constraintMatrix.zero();
+      constraintVector.zero();
+      coefficientVector.zero();
+
       setNumberOfCoefficients(numberOfCoefficientsRequired);
 
       for (int i = numberOfCoefficientsRequired; i < getMaximumNumberOfCoefficients(); i++)
