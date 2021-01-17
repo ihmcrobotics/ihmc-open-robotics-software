@@ -1,15 +1,23 @@
 package us.ihmc.robotics.math.trajectories;
 
 import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.fail;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.Random;
+
 public class YoPolynomialTest
 {
+   private static final int ITERATIONS = 1000;
    private static double EPSILON = 1e-6;
    
    String namePrefix = "YoPolynomialTest";
@@ -244,5 +252,274 @@ public class YoPolynomialTest
          }
          assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, EPSILON);
       }
+   }
+
+   @Test
+   public void testLinearSet()
+   {
+      YoPolynomial traj = new YoPolynomial("", 2, new YoRegistry("test"));
+      assertEquals(0, traj.getNumberOfCoefficients());
+      traj.setLinear(1, 2, 3, 5);
+      assertEquals(1, traj.getInitialTime(), EPSILON);
+      assertEquals(2, traj.getFinalTime(), EPSILON);
+      traj.compute(traj.getInitialTime());
+      assertEquals(3.0, traj.getValue(), EPSILON);
+      traj.compute(traj.getFinalTime());
+      assertEquals(5.0, traj.getValue(), EPSILON);
+      assertEquals(2, traj.getCoefficient(1), EPSILON);
+      assertEquals(1, traj.getCoefficient(0), EPSILON);
+   }
+
+   @Test
+   public void testSetConstant() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         YoPolynomial trajectory = new YoPolynomial("", maxNumberOfCoefficients, new YoRegistry("test"));
+         double t0 = random.nextDouble();
+         double tf = t0 + random.nextDouble();
+         double z = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 1)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setConstant(t0, tf, z));
+            continue;
+         }
+
+         trajectory.setConstant(t0, tf, z);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(z, trajectory.getValue(), EPSILON);
+            assertEquals(0, trajectory.getVelocity(), EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), EPSILON);
+         }
+      }
+   }
+
+   @Test
+   public void testSetLinear() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         YoPolynomial trajectory = new YoPolynomial("", maxNumberOfCoefficients, new YoRegistry("test"));
+         double t0 = random.nextDouble();
+         double tf = t0 + random.nextDouble();
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 2)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setLinear(t0, tf, z0, zf));
+            continue;
+         }
+
+         trajectory.setLinear(t0, tf, z0, zf);
+
+         double zDot = (zf - z0) / (tf - t0);
+         Polynomial derivative = new Polynomial(1);
+         derivative.setConstant(t0, tf, zDot);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getValue(), EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getValue(), EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getValue(), EPSILON);
+            assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+            derivative.compute(t);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), EPSILON);
+         }
+
+         trajectory.setLinear(t0, z0, zDot);
+
+         zDot = (zf - z0) / (tf - t0);
+         derivative = new Polynomial(1);
+         derivative.setConstant(t0, tf, zDot);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getValue(), EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getValue(), EPSILON);
+         assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+         assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            assertEquals(EuclidCoreTools.interpolate(z0, zf, (t - t0) / (tf - t0)), trajectory.getValue(), EPSILON);
+            assertEquals(zDot, trajectory.getVelocity(), EPSILON);
+            assertEquals(0, trajectory.getAcceleration(), EPSILON);
+
+            derivative.compute(t);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), EPSILON);
+         }
+      }
+   }
+
+   @Test
+   public void testSetQuadratic() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         YoPolynomial trajectory = new YoPolynomial("", maxNumberOfCoefficients, new YoRegistry("test"));
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 3)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setQuadratic(t0, tf, z0, zd0, zf));
+            continue;
+         }
+
+         trajectory.setQuadratic(t0, tf, z0, zd0, zf);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getValue(), EPSILON);
+         assertEquals(zd0, trajectory.getVelocity(), EPSILON);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getValue(), EPSILON);
+
+         Polynomial derivative = new Polynomial(2);
+         derivative.setLinear(t0, tf, zd0, trajectory.getVelocity());
+
+         double dt = 1.0e-8;
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            derivative.compute(t);
+
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), EPSILON);
+
+            trajectory.compute(t + dt);
+            double nextPosition = trajectory.getValue();
+            trajectory.compute(t - dt);
+            double lastPosition = trajectory.getValue();
+            assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 1.0e-6);
+
+         }
+      }
+   }
+
+   @Test
+   public void testSetCubic() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = random.nextInt(10);
+         YoPolynomial trajectory = new YoPolynomial("", maxNumberOfCoefficients, new YoRegistry("test"));
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+         double zdf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 4)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setCubic(t0, tf, z0, zd0, zf, zdf));
+            continue;
+         }
+
+         trajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+
+         trajectory.compute(t0);
+         assertEquals(z0, trajectory.getValue(), EPSILON);
+         assertEquals(zd0, trajectory.getVelocity(), EPSILON);
+
+         YoPolynomial derivative = new YoPolynomial("", 3, new YoRegistry("test"));
+         derivative.setQuadratic(t0, tf, zd0, trajectory.getAcceleration(), zdf);
+
+         trajectory.compute(tf);
+         assertEquals(zf, trajectory.getValue(), EPSILON);
+
+         double dt = 1.0e-8;
+
+         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         {
+            trajectory.compute(t);
+            derivative.compute(t);
+
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), EPSILON);
+
+            trajectory.compute(t + dt);
+            double nextPosition = trajectory.getValue();
+            trajectory.compute(t - dt);
+            double lastPosition = trajectory.getValue();
+            assertEquals(0.5 * (nextPosition - lastPosition) / dt, trajectory.getVelocity(), 5.0e-6);
+
+         }
+      }
+   }
+
+
+
+
+
+
+   @Test
+   public void testQuinticTrajectory()
+   {
+      Polynomial quinticTrajectoryBase = new Polynomial(-10.0, 10.0, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
+      YoPolynomial quinticTrajectory = new YoPolynomial("", 6, new YoRegistry("test"));
+      quinticTrajectory.set(quinticTrajectoryBase);
+
+      quinticTrajectory.setQuintic(0.0, 1.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+
+      quinticTrajectory.compute(0.0);
+      assertEquals(quinticTrajectory.getValue(), 1.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), 2.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
+
+      quinticTrajectory.compute(1.0);
+      assertEquals(quinticTrajectory.getValue(), 4.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), 5.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
+
+      quinticTrajectory.setQuintic(-1.0, 1.0, 1.0, -2.0, 3.0, -4.0, -5.0, 6.0);
+
+      quinticTrajectory.compute(-1.0);
+      assertEquals(quinticTrajectory.getValue(), 1.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), -2.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
+
+      quinticTrajectory.compute(1.0);
+      assertEquals(quinticTrajectory.getValue(), -4.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), -5.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
    }
 }

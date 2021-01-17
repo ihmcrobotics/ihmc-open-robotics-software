@@ -152,8 +152,9 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       setTime(t0, tFinal);
       reshape(1);
+      setCoefficient(0, z);
       setPositionRow(0, 0.0, z);
-      initialize();
+//      initialize();
    }
 
    default void setLinear(double t0, double tFinal, double z0, double zf)
