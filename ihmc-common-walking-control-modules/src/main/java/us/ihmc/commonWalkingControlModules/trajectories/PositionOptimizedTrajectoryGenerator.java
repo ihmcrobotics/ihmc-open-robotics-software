@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
@@ -41,7 +41,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator implements FramePositionTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;

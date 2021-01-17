@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicJob;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -72,7 +72,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    private final boolean hasPoseDefined;
    private final YoFramePose3D poseToWorldFrame;
 
-   private final FramePositionTrajectoryGenerator trajectoryGenerator;
+   private final FixedFramePositionTrajectoryGenerator trajectoryGenerator;
 
    private final DoubleProvider trajectoryDuration;
 
@@ -88,7 +88,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
    public YoGraphicTrajectory3D(String name,
-                                FramePositionTrajectoryGenerator trajectoryGenerator,
+                                FixedFramePositionTrajectoryGenerator trajectoryGenerator,
                                 YoDouble trajectoryDuration,
                                 double radius,
                                 int resolution,
@@ -100,7 +100,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
 
    public YoGraphicTrajectory3D(String name,
                                 YoFramePose3D poseFromTrajectoryFrameToWorldFrame,
-                                FramePositionTrajectoryGenerator trajectoryGenerator,
+                                FixedFramePositionTrajectoryGenerator trajectoryGenerator,
                                 DoubleProvider trajectoryDuration,
                                 double radius,
                                 int resolution,

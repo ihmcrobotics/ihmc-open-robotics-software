@@ -12,13 +12,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFrameOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BlendedOrientationTrajectoryGenerator implements FrameOrientationTrajectoryGenerator
+public class BlendedOrientationTrajectoryGenerator implements FixedFrameOrientationTrajectoryGenerator
 {
-   private final FrameOrientationTrajectoryGenerator trajectory;
+   private final FixedFrameOrientationTrajectoryGenerator trajectory;
    private final HermiteCurveBasedOrientationTrajectoryGenerator initialConstraintTrajectory;
    private final HermiteCurveBasedOrientationTrajectoryGenerator finalConstraintTrajectory;
    private final ReferenceFrame trajectoryFrame;
@@ -52,7 +52,7 @@ public class BlendedOrientationTrajectoryGenerator implements FrameOrientationTr
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public BlendedOrientationTrajectoryGenerator(String prefix, FrameOrientationTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
+   public BlendedOrientationTrajectoryGenerator(String prefix, FixedFrameOrientationTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
                                                 YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;

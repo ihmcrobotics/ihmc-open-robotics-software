@@ -11,7 +11,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 
-public class TrajectoryTest
+public class PolynomialTest
 {
    private static final int ITERATIONS = 1000;
    private static final double LARGE_EPSILON = 1.0e-2;

@@ -6,17 +6,17 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class BlendedPoseTrajectoryGenerator implements FramePoseTrajectoryGenerator
+public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
    private final BlendedPositionTrajectoryGenerator blendedPositionTrajectory;
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
 
-   private final FramePoseTrajectoryGenerator trajectory;
+   private final FixedFramePoseTrajectoryGenerator trajectory;
 
-   public BlendedPoseTrajectoryGenerator(String prefix, FramePoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
+   public BlendedPoseTrajectoryGenerator(String prefix, FixedFramePoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
