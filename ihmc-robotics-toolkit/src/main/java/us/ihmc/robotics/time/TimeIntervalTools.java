@@ -1,5 +1,7 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.MathTools;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +9,18 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
+   public static boolean checkTimeSequenceIsContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
+   {
+      for (int index = 0; index < contactStateSequence.size() - 1; index++)
+      {
+         if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(),
+                                      contactStateSequence.get(index + 1).getTimeInterval().getStartTime(), 5e-3))
+            return false;
+      }
+
+      return true;
+   }
+
    public static boolean doIntervalsOverlap(TimeIntervalReadOnly intervalA, TimeIntervalReadOnly intervalB)
    {
       if (intervalA.intervalContains(intervalB.getStartTime()))
