@@ -87,7 +87,7 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
 
    default int getMaximumNumberOfCoefficients(int index)
    {
-      return getAxis(index).getNumberOfCoefficients();
+      return getAxis(index).getMaximumNumberOfCoefficients();
    }
 
 
