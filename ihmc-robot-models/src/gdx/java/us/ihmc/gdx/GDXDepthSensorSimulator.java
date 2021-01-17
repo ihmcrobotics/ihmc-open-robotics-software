@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +22,10 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
+
+import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_COMPONENT16;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
@@ -70,9 +74,9 @@ public class GDXDepthSensorSimulator
 //      depthShaderConfig.numSpotLights = 0;
 //      depthShaderConfig.numBones = 0;
       depthShaderConfig.defaultCullFace = GL20.GL_BACK;
-      depthShaderConfig.defaultAlphaTest = 1.0f;
-//      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
-//      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
+//      depthShaderConfig.defaultAlphaTest = 0.0f;
+      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
+      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
       //      config.depthBufferOnly = true;
       depthShaderProvider = new DepthShaderProvider(depthShaderConfig);
 
@@ -80,21 +84,22 @@ public class GDXDepthSensorSimulator
 //      modelBatch = new ModelBatch();
 
       boolean hasDepth = true;
-      boolean hasStencil = true;
-      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) viewportWidth, (int) viewportHeight, hasDepth, hasStencil);
+      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) viewportWidth, (int) viewportHeight, hasDepth);
 //      GLFrameBuffer.FloatFrameBufferBuilder depthBufferBuilder = new GLFrameBuffer.FloatFrameBufferBuilder((int) viewportWidth, (int) viewportHeight);
 //      frameBuffer = new FloatFrameBuffer()FrameBuffer(depthBufferBuilder);
-      floatframeBuffer = new FloatFrameBuffer((int) viewportWidth, (int) viewportHeight, true);
+
+//      floatframeBuffer = new FloatFrameBuffer((int) viewportWidth, (int) viewportHeight, hasDepth);
 
       points = new RecyclingArrayList<>(frameBuffer.getWidth() * frameBuffer.getHeight(), Point3D32::new);
    }
 
    public void render(GDX3DSceneManager gdx3DSceneManager)
    {
-      camera.near = 0.01f;
+      camera.near = 0.05f;
+      camera.far = 50.0f;
 
       frameBuffer.begin();
-      floatframeBuffer.begin();
+//      floatframeBuffer.begin();
       gdx3DSceneManager.glClearGray();
 
       //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
@@ -114,11 +119,13 @@ public class GDXDepthSensorSimulator
 //      frameBuffer.getDepthBufferHandle();
       Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, width, height);
 
+
+
 //      ByteBuffer underlyingBuffer = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels();
-//      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL32.GL_HIGH_FLOAT, underlyingBuffer);
+//      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL32.GL_FLOAT, underlyingBuffer);
 
       frameBuffer.end();
-      floatframeBuffer.end();
+//      floatframeBuffer.end();
 
       points.clear();
 
@@ -131,7 +138,13 @@ public class GDXDepthSensorSimulator
             int color = pixmap.getPixel(x, y);
             tempGDXColor.set(color);
             float depthReading = tempGDXColor.r;
-            depthPoint.set((float) x, (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+//            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
+//            System.out.println(depthReading);
+//            depthPoint.set(x * depthReading, y * depthReading, depthReading);
+
+
+
             viewport.unproject(depthPoint);
 
 //            if (depthPoint.z < camera.near)
