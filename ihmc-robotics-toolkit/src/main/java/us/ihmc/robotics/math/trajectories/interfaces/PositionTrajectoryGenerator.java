@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
