@@ -45,9 +45,10 @@ public class YoGraphicPolynomial3DTest
 
          for (int i = 0; i < numberOfPolynomials; i++)
          {
-            YoPolynomial xPolynomial = new YoPolynomial(name + "XPoly" + i, random.nextInt(20) + 1, registry);
-            YoPolynomial yPolynomial = new YoPolynomial(name + "YPoly" + i, random.nextInt(20) + 1, registry);
-            YoPolynomial zPolynomial = new YoPolynomial(name + "ZPoly" + i, random.nextInt(20) + 1, registry);
+            int maxsize = random.nextInt(20) + 1;
+            YoPolynomial xPolynomial = new YoPolynomial(name + "XPoly" + i, maxsize, registry);
+            YoPolynomial yPolynomial = new YoPolynomial(name + "YPoly" + i, maxsize, registry);
+            YoPolynomial zPolynomial = new YoPolynomial(name + "ZPoly" + i, maxsize, registry);
             yoPolynomial3Ds.add(new YoPolynomial3D(xPolynomial, yPolynomial, zPolynomial));
             waypointTimes.add(new YoDouble(name + "WaypointTime" + i, registry));
          }
