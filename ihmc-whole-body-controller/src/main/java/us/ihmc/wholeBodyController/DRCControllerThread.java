@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -36,7 +37,6 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
