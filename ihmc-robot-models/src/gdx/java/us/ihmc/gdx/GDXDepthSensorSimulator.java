@@ -96,11 +96,13 @@ public class GDXDepthSensorSimulator
    public void render(GDX3DSceneManager gdx3DSceneManager)
    {
       camera.near = 0.05f;
-      camera.far = 50.0f;
+      camera.far = 1.0f;
 
       frameBuffer.begin();
 //      floatframeBuffer.begin();
-      gdx3DSceneManager.glClearGray();
+
+      Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
       //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
 //      viewport.getCamera().position
@@ -138,7 +140,9 @@ public class GDXDepthSensorSimulator
             int color = pixmap.getPixel(x, y);
             tempGDXColor.set(color);
             float depthReading = tempGDXColor.r;
-            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+            int flippedY = height - y;
+            depthPoint.set(x , flippedY, depthReading);
+//            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
 //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
 //            System.out.println(depthReading);
 //            depthPoint.set(x * depthReading, y * depthReading, depthReading);
@@ -149,13 +153,14 @@ public class GDXDepthSensorSimulator
 
 //            if (depthPoint.z < camera.near)
             {
-               tempFramePoint.setToZero(cameraReferenceFrame);
-               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
+//               tempFramePoint.setToZero(cameraReferenceFrame);
+//               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y - (height / 2.0f), depthPoint.z);
 //               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
                Point3D32 point = points.add();
-               point.set(tempFramePoint);
+//               point.set(tempFramePoint);
+               point.set(depthPoint.x, depthPoint.y, depthPoint.z);
                point.addZ(random.nextDouble() * 0.007);
             }
          }
