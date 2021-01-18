@@ -1128,8 +1128,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + YoPolynomial3D.class.getSimpleName();
-         String variableName = jointName + subTrajectory + "CurrentValue";
+         String subTrajectoryName = jointName + MultipleWaypointsTrajectoryGenerator.class.getSimpleName();
+         String variableName = jointName + subTrajectory + "CurrentPosition";
          YoDouble q_d = (YoDouble) scs.findVariable(subTrajectoryName, variableName);
          controllerDesiredJointPositions[i] = q_d.getDoubleValue();
       }
@@ -1143,7 +1143,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + YoPolynomial3D.class.getSimpleName();
+         String subTrajectoryName = jointName + MultipleWaypointsTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentVelocity";
          YoDouble qd_d = (YoDouble) scs.findVariable(subTrajectoryName, variableName);
          controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();

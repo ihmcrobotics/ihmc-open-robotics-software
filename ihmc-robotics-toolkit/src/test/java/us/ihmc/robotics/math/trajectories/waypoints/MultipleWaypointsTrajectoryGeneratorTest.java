@@ -132,10 +132,31 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       assertEquals(0.0, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
 
-      // FIXME this was a non-zero velocity. I don't know why that's a desirable functionality, so it's now zero,
       trajectory.compute(timeAtWaypoint);
       assertEquals(positionAtWaypoint, trajectory.getValue());
-      assertEquals(0.0, trajectory.getVelocity());
+      assertEquals(velocityAtWaypoint, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
+   }
+
+   @Test
+   public void testEdgeCase()
+   {
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      int maxNumberOfWaypoints = 5;
+      MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);
+      trajectory.clear();
+
+      trajectory.appendWaypoint(0.0, 0.0, 0.0);
+      trajectory.appendWaypoint(0.5, 0.026337062843167836, 0.0);
+      trajectory.initialize();
+
+      trajectory.compute(0.0);
+      assertEquals(0.0, trajectory.getValue(), 1e-5);
+      assertEquals(0.0, trajectory.getVelocity(), 1e-5);
+
+      trajectory.compute(0.5);
+      assertEquals(0.026337062843167836, trajectory.getValue(), 1e-5);
+      assertEquals(0.0, trajectory.getVelocity(), 1e-5);
    }
 }

@@ -2,13 +2,19 @@ package us.ihmc.robotics.math.trajectories.generators;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -30,6 +36,9 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    private final ArrayList<YoOneDoFTrajectoryPoint> waypoints;
 
+   private final YoDouble currentPosition;
+   private final YoDouble currentVelocity;
+   private final YoDouble currentAcceleration;
    private final YoPolynomial subTrajectory;
 
    public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
@@ -51,8 +60,6 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new YoPolynomial(namePrefix + "SubTrajectory", 4, registry);
-
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
@@ -60,6 +67,17 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          YoOneDoFTrajectoryPoint waypoint = new YoOneDoFTrajectoryPoint(namePrefix, "AtWaypoint" + i, registry);
          waypoints.add(waypoint);
       }
+
+      namePrefix += "SubTrajectory";
+      String currentPositionName = namePrefix + "CurrentPosition";
+      String currentVelocityName = namePrefix + "CurrentVelocity";
+      String currentAccelerationName = namePrefix + "CurrentAcceleration";
+
+      currentPosition = new YoDouble(currentPositionName, registry);
+      currentVelocity = new YoDouble(currentVelocityName, registry);
+      currentAcceleration = new YoDouble(currentAccelerationName, registry);
+
+      subTrajectory = new YoPolynomial(namePrefix, 4, registry);
 
       clear();
    }
@@ -198,8 +216,39 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 
+      int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
+      YoOneDoFTrajectoryPoint start = waypoints.get(currentWaypointIndex.getValue());
+      YoOneDoFTrajectoryPoint end = waypoints.get(secondWaypointIndex);
+
+      if (time < start.getTime())
+      {
+         currentPosition.set(start.getPosition());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+      if (time > end.getTime())
+      {
+         currentPosition.set(end.getPosition());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+
+      if (Precision.equals(start.getTime(), end.getTime()))
+      {
+         currentPosition.set(start.getPosition());
+         currentVelocity.set(start.getVelocity());
+         currentAcceleration.set(0.0);
+         return;
+      }
+
       double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
       subTrajectory.compute(subTrajectoryTime);
+
+      currentPosition.set(subTrajectory.getValue());
+      currentVelocity.set(subTrajectory.getVelocity());
+      currentAcceleration.set(subTrajectory.getAcceleration());
    }
 
    @Override
@@ -223,19 +272,19 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    @Override
    public double getValue()
    {
-      return subTrajectory.getValue();
+      return currentPosition.getValue();
    }
 
    @Override
    public double getVelocity()
    {
-      return subTrajectory.getVelocity();
+      return currentVelocity.getDoubleValue();
    }
 
    @Override
    public double getAcceleration()
    {
-      return subTrajectory.getAcceleration();
+      return currentAcceleration.getDoubleValue();
    }
 
    public int getCurrentNumberOfWaypoints()
