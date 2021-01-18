@@ -19,6 +19,14 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
    private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                           double length, YoRegistry parentRegistry)
+   {
+      this(rootBody, yoGraphicsListRegistry, length);
+      parentRegistry.addChild(registry);
+   }
+   
+   
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
          double length)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
