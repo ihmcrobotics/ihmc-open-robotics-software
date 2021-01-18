@@ -155,7 +155,7 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
    @Override
    public double getMaxForwardStepLength()
    {
-      return 0.55;
+      return 0.525;
    }
 
    @Test
