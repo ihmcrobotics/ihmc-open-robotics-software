@@ -141,6 +141,9 @@ public class GDXDepthSensorSimulator
             int color = pixmap.getPixel(x, y);
             tempGDXColor.set(color);
             float depthReading = tempGDXColor.r;
+            depthReading += tempGDXColor.g / 256.0;
+            depthReading += tempGDXColor.b / 65536.0;
+            depthReading += tempGDXColor.a / 16777216.0;
 
             if (depthReading > camera.near)
             {
