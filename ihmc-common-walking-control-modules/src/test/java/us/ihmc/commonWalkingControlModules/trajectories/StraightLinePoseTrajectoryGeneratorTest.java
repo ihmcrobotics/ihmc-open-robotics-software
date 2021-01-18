@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -28,7 +29,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-   private static final double EPSILON = 1.0e-10;
+   private static final double EPSILON = 1e-8;
 
    @Test
    public void testCompareWithSingleFrameTrajectoryGenerators()
@@ -87,12 +88,12 @@ public class StraightLinePoseTrajectoryGeneratorTest
          trajToTest.getLinearData(position2, velocity2, acceleration2);
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(position1.epsilonEquals(position2, EPSILON));
-         assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
-         assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position1, position2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(velocity1, velocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(acceleration1, acceleration2, EPSILON);
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation1, orientation2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
    }
 
@@ -133,12 +134,12 @@ public class StraightLinePoseTrajectoryGeneratorTest
       trajToTest.getLinearData(position2, velocity2, acceleration2);
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-      assertTrue(position1.epsilonEquals(position2, EPSILON));
-      assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
-      assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
-      assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-      assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-      assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position1, position2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(velocity1, velocity2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(acceleration1, acceleration2, EPSILON);
+      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation1, orientation2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity1, angularVelocity2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration1, angularAcceleration2, EPSILON);
    }
 
    @Test
@@ -178,12 +179,12 @@ public class StraightLinePoseTrajectoryGeneratorTest
       trajToTest.getLinearData(position2, velocity2, acceleration2);
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-      assertTrue(position1.epsilonEquals(position2, EPSILON));
-      assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
-      assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
-      assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-      assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-      assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position1, position2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(velocity1, velocity2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(acceleration1, acceleration2, EPSILON);
+      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation1, orientation2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity1, angularVelocity2, EPSILON);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration1, angularAcceleration2, EPSILON);
    }
 
    @Test
@@ -243,12 +244,12 @@ public class StraightLinePoseTrajectoryGeneratorTest
          trajToTest.getLinearData(position2, velocity2, acceleration2);
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(position1.epsilonEquals(position2, EPSILON));
-         assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
-         assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position1, position2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(velocity1, velocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(acceleration1, acceleration2, EPSILON);
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation1, orientation2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
 
       // Do the same in another frame
@@ -284,12 +285,12 @@ public class StraightLinePoseTrajectoryGeneratorTest
          trajToTest.getLinearData(position2, velocity2, acceleration2);
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(position1.epsilonEquals(position2, EPSILON));
-         assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
-         assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position1, position2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(velocity1, velocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(acceleration1, acceleration2, EPSILON);
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation1, orientation2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
    }
 }

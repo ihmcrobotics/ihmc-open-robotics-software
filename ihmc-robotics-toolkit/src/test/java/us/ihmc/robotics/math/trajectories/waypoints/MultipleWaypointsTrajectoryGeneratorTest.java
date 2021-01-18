@@ -132,9 +132,10 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       assertEquals(0.0, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
 
+      // FIXME this was a non-zero velocity. I don't know why that's a desirable functionality, so it's now zero,
       trajectory.compute(timeAtWaypoint);
       assertEquals(positionAtWaypoint, trajectory.getValue());
-      assertEquals(velocityAtWaypoint, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
    }
 }

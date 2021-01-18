@@ -32,6 +32,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       reset();
 
+      getTimeInterval().set(other.getTimeInterval());
       reshape(other.getNumberOfCoefficients());
       setNumberOfCoefficients(other.getNumberOfCoefficients());
       setCurrentTime(getCurrentTime());
