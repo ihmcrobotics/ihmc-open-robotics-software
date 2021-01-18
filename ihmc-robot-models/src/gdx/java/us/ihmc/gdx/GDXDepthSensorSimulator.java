@@ -101,7 +101,8 @@ public class GDXDepthSensorSimulator
       frameBuffer.begin();
 //      floatframeBuffer.begin();
 
-      Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      float clear = 0.0f;
+      Gdx.gl.glClearColor(clear, clear, clear, 1.0f);
       Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
       //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
@@ -140,19 +141,16 @@ public class GDXDepthSensorSimulator
             int color = pixmap.getPixel(x, y);
             tempGDXColor.set(color);
             float depthReading = tempGDXColor.r;
-            int flippedY = height - y;
-            depthPoint.set(x , flippedY, depthReading);
-//            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
-//            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
-//            System.out.println(depthReading);
-//            depthPoint.set(x * depthReading, y * depthReading, depthReading);
 
-
-
-            viewport.unproject(depthPoint);
-
-//            if (depthPoint.z < camera.near)
+            if (depthReading > camera.near)
             {
+               int flippedY = height - y;
+               depthPoint.set(x , flippedY, depthReading);
+   //            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+   //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
+   //            System.out.println(depthReading);
+   //            depthPoint.set(x * depthReading, y * depthReading, depthReading);
+               viewport.unproject(depthPoint);
 //               tempFramePoint.setToZero(cameraReferenceFrame);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y - (height / 2.0f), depthPoint.z);
