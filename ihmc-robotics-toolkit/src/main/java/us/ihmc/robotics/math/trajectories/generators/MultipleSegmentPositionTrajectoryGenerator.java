@@ -150,7 +150,8 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       if (!TimeIntervalTools.checkTimeSequenceIsContinuous(segments))
          throw new RuntimeException("The segments do not represent a continuous time trajectory.");
 
-      if (time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
+      if (currentSegmentIndex.getIntegerValue() > numberOfSegments.getIntegerValue() - 1
+          && time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
       {
          currentSegmentIndex.set(0);
          changedSubTrajectory = true;

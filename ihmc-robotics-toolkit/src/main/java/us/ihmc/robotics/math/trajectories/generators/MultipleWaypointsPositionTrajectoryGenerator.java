@@ -248,7 +248,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       currentTrajectoryTime.set(time);
       boolean changedSubTrajectory = false;
 
-      if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
+      if (currentWaypointIndex.getIntegerValue() > numberOfWaypoints.getIntegerValue() - 1
+          && time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
          changedSubTrajectory = true;
