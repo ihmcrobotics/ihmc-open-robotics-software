@@ -145,7 +145,9 @@ public class GDXDepthSensorSimulator
             if (depthReading > camera.near)
             {
                int flippedY = height - y;
-               depthPoint.set(x , flippedY, depthReading);
+               int halfWidth = width / 2;
+               int halfHeight = height / 2;
+               depthPoint.set(x, flippedY + halfHeight, depthReading);
    //            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
    //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
    //            System.out.println(depthReading);
