@@ -173,7 +173,9 @@ public interface PolynomialBasics extends PolynomialReadOnly
       reshape(2);
       setPositionRow(0, t, z);
       setVelocityRow(1, t, zd);
-      initialize();
+      setCoefficient(0, z - zd * t);
+      setCoefficient(1, zd);
+//      initialize();
    }
 
    default void setQuintic(double t0, double tFinal, double z0, double zd0, double zdd0, double zf, double zdf, double zddf)
