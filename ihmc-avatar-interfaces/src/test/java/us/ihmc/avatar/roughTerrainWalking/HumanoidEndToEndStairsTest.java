@@ -2,6 +2,9 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Random;
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -14,9 +17,11 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,6 +62,13 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 
    public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset) throws Exception
    {
+      testStairs(testInfo, slow, up, swingDuration, transferDuration, heightOffset, null);
+   }
+
+   public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset,
+                          Consumer<FootstepDataListMessage> corruptor)
+         throws Exception
+   {
       DRCRobotModel robotModel = getRobotModel();
       double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
       double startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
@@ -83,6 +95,8 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       else
          translate(footsteps, new Vector3D(1.8 - 0.045 - actualFootLength / 2.0 + (numberOfSteps + 1) * stepLength, 0.0, startZ));
       setStepDurations(footsteps, swingDuration, transferDuration);
+      if (corruptor != null)
+         corruptor.accept(footsteps);
       publishHeightOffset(heightOffset);
 
       scs.setInPoint();
@@ -191,5 +205,25 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
 
       return footsteps;
+   }
+
+   public static Consumer<FootstepDataListMessage> createFootstepCorruptor(Random random, double rangeX, double rangeY, double rangeZ, double rangeYaw,
+                                                                           double rangePitch, double rangeRoll)
+   {
+      return footstepDataList ->
+      {
+         for (int i = 0; i < footstepDataList.getFootstepDataList().size(); i++)
+         {
+            FootstepDataMessage footstep = footstepDataList.getFootstepDataList().get(i);
+            footstep.getLocation().addX(EuclidCoreRandomTools.nextDouble(random, rangeX));
+            footstep.getLocation().addY(EuclidCoreRandomTools.nextDouble(random, rangeY));
+            footstep.getLocation().addZ(EuclidCoreRandomTools.nextDouble(random, rangeZ));
+            YawPitchRoll yawPitchRoll = new YawPitchRoll(footstep.getOrientation());
+            yawPitchRoll.addYaw(EuclidCoreRandomTools.nextDouble(random, rangeYaw));
+            yawPitchRoll.addPitch(EuclidCoreRandomTools.nextDouble(random, rangePitch));
+            yawPitchRoll.addRoll(EuclidCoreRandomTools.nextDouble(random, rangeRoll));
+            footstep.getOrientation().set(yawPitchRoll);
+         }
+      };
    }
 }
