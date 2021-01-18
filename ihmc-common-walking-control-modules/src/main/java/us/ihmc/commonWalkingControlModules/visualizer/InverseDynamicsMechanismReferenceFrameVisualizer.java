@@ -9,32 +9,53 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotController
 {
+   public enum FrameToDisplay
+   {
+      BODY_FIXED_FRAME, AFTER_JOINT_FRAME
+   }
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
-   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                           double length, YoRegistry parentRegistry)
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length, FrameToDisplay frameToDisplay,
+                                                           YoRegistry parentRegistry)
    {
-      this(rootBody, yoGraphicsListRegistry, length);
+      this(rootBody, yoGraphicsListRegistry, length, frameToDisplay);
       parentRegistry.addChild(registry);
    }
-   
-   
+
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length)
+   {
+      this(rootBody, yoGraphicsListRegistry, length, FrameToDisplay.BODY_FIXED_FRAME);
+   }
+
    public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
-         double length)
+         double length, FrameToDisplay frameToDisplay)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
       List<JointBasics> jointStack = new ArrayList<JointBasics>(rootBody.getChildrenJoints());
       while (!jointStack.isEmpty())
       {
          JointBasics joint = jointStack.get(0);
-         ReferenceFrame referenceFrame = joint.getSuccessor().getBodyFixedFrame();
+         ReferenceFrame referenceFrame;
+         switch(frameToDisplay)
+         {
+            case BODY_FIXED_FRAME:
+               referenceFrame = joint.getSuccessor().getBodyFixedFrame();
+               break;
+            case AFTER_JOINT_FRAME:
+               referenceFrame= joint.getFrameAfterJoint();
+               break;
+            default:
+                  throw new RuntimeException("Invalid frame to display: " + frameToDisplay);
+            
+         }
          YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame, registry, false, length);
          yoGraphicsList.add(yoGraphicReferenceFrame);
          yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
