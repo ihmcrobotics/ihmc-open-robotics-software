@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSetTools.util.visualizers;
+package us.ihmc.commonWalkingControlModules.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +64,9 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
    @Override
    public void doControl()
    {
-      for (YoGraphicReferenceFrame yoGraphicReferenceFrame : yoGraphicReferenceFrames)
+      for (int i = 0; i < yoGraphicReferenceFrames.size(); i++)
       {
-         yoGraphicReferenceFrame.update();
+         yoGraphicReferenceFrames.get(i).update();
       }
    }
 }
