@@ -77,7 +77,7 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
       if (getMaximumNumberOfCoefficients(0) == getMaximumNumberOfCoefficients(1) && getMaximumNumberOfCoefficients(0) == getMaximumNumberOfCoefficients(2))
          return getMaximumNumberOfCoefficients(0);
       else
-         return -1;
+         throw new RuntimeException("The maximum number of coefficients are not the same for all three axes.");
    }
 
    default int getMaximumNumberOfCoefficients(Axis3D dir)
