@@ -14,14 +14,13 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 
 public class MPTCGainsCalculator
 {
    private final RigidBodyBasics rootBody;
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final CompositeRigidBodyMassMatrixCalculator inertiaMatrixCalculator;
-   private final GravityCoriolisExternalWrenchMatrixCalculator coriolisCalculator;
+   private final CoriolisCalculator coriolisCalculator;
    private final JointIndexHandler jointIndexHandler;
    private final int numberOfDoFs;
 
@@ -32,7 +31,7 @@ public class MPTCGainsCalculator
       jointIndexHandler = new JointIndexHandler(joints);
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       inertiaMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
-      coriolisCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootBody);
+      coriolisCalculator = new CoriolisCalculator(rootBody);
    }
 
    private final DMatrixRMaj proportionalGains = new DMatrixRMaj(6, 6);
@@ -155,29 +154,11 @@ public class MPTCGainsCalculator
    {
       geometricJacobianCalculator.setKinematicChain(rootBody, endEffector);
       geometricJacobianCalculator.setJacobianFrame(controlFrame);
-      DMatrixRMaj initialJointVelocities = new DMatrixRMaj(geometricJacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-      JointBasics[] jacobianJoints = MultiBodySystemTools.createJointPath(rootBody, endEffector);
-      MultiBodySystemTools.extractJointsState(jacobianJoints, JointStateType.VELOCITY, initialJointVelocities);
-
-      DMatrixRMaj compactJacobianRateMatrix = new DMatrixRMaj(6, geometricJacobianCalculator.getNumberOfDegreesOfFreedom());
-      DMatrixRMaj jointVelocitiesUnitary = new DMatrixRMaj(geometricJacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-
-      for (int i = 0; i < geometricJacobianCalculator.getNumberOfDegreesOfFreedom(); i++)
-      {
-         jointVelocitiesUnitary.zero();
-         jointVelocitiesUnitary.set(i, 0, 1.0);
-         MultiBodySystemTools.insertJointsState(jacobianJoints, JointStateType.VELOCITY, jointVelocitiesUnitary);
-         rootBody.updateFramesRecursively();
-         geometricJacobianCalculator.reset();
-         CommonOps_DDRM.insert(geometricJacobianCalculator.getConvectiveTermMatrix(), compactJacobianRateMatrix, 0, i);
-      }
-      MultiBodySystemTools.insertJointsState(jacobianJoints, JointStateType.VELOCITY, initialJointVelocities);
-      rootBody.updateFramesRecursively();
-      DMatrixRMaj fullJacobianRateMatrix = new DMatrixRMaj(6, numberOfDoFs);
+      DMatrixRMaj jacobianRateMatrix = new DMatrixRMaj(geometricJacobianCalculator.getJacobianRateMatrix().getNumRows(), numberOfDoFs);
       jointIndexHandler.compactBlockToFullBlock(geometricJacobianCalculator.getJointsFromBaseToEndEffector(),
-                                                compactJacobianRateMatrix,
-                                                fullJacobianRateMatrix);
-      return fullJacobianRateMatrix;
+                                                geometricJacobianCalculator.getJacobianRateMatrix(),
+                                                jacobianRateMatrix);
+      return jacobianRateMatrix;
    }
 
    /**
@@ -223,29 +204,10 @@ public class MPTCGainsCalculator
       return Ck;
    }
 
-   private DMatrixRMaj computeSystemCoriolisAndCentrifugalMatrix()
+   // FIXME failing, this is probably wrong.
+   DMatrixRMaj computeSystemCoriolisAndCentrifugalMatrix()
    {
-      JointBasics[] joints = MultiBodySystemTools.collectSubtreeJoints(rootBody);
-      DMatrixRMaj initialJointVelocities = new DMatrixRMaj(numberOfDoFs, 1);
-      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, initialJointVelocities);
-
-      DMatrixRMaj coriolisMatrix = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
-      DMatrixRMaj jointVelocitiesUnitary = new DMatrixRMaj(numberOfDoFs, 1);
-
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         jointVelocitiesUnitary.zero();
-         jointVelocitiesUnitary.set(i, 0, 1.0);
-         MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, jointVelocitiesUnitary);
-         rootBody.updateFramesRecursively();
-         coriolisCalculator.compute();
-         CommonOps_DDRM.insert(coriolisCalculator.getJointTauMatrix(), coriolisMatrix, 0, i);
-      }
-
-      MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, initialJointVelocities);
-      rootBody.updateFramesRecursively();
-
-      return coriolisMatrix;
+      return coriolisCalculator.getCoriolis();
    }
 
    /**
