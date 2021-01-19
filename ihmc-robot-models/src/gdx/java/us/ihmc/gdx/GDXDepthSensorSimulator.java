@@ -22,10 +22,7 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
-
-import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_COMPONENT16;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
@@ -34,8 +31,8 @@ public class GDXDepthSensorSimulator
 {
    private final Random random = new Random();
    private final float fieldOfViewY;
-   private final float viewportWidth;
-   private final float viewportHeight;
+   private final int imageWidth;
+   private final int imageHeight;
    private PerspectiveCamera camera;
    private int framebufferId;
    private DepthShaderProvider depthShaderProvider;
@@ -54,18 +51,18 @@ public class GDXDepthSensorSimulator
    private final PoseReferenceFrame cameraReferenceFrame = new PoseReferenceFrame("depthCameraFrame", ReferenceFrame.getWorldFrame());
    private final FramePoint3D tempFramePoint = new FramePoint3D();
 
-   public GDXDepthSensorSimulator(float fieldOfViewY, float viewportWidth, float viewportHeight)
+   public GDXDepthSensorSimulator(float fieldOfViewY, int imageWidth, int imageHeight)
    {
       this.fieldOfViewY = fieldOfViewY;
-      this.viewportWidth = viewportWidth;
-      this.viewportHeight = viewportHeight;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
    }
 
    public void create()
    {
-      camera = new PerspectiveCamera(fieldOfViewY, viewportWidth, viewportHeight);
-      camera.near = 0.01f;
-      camera.far = 2000.0f;
+      camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
+      camera.near = 0.05f;
+      camera.far = 5.0f;
       viewport = new ScreenViewport(camera);
 
       DepthShader.Config depthShaderConfig = new DepthShader.Config();
@@ -84,7 +81,7 @@ public class GDXDepthSensorSimulator
 //      modelBatch = new ModelBatch();
 
       boolean hasDepth = true;
-      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) viewportWidth, (int) viewportHeight, hasDepth);
+      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, imageWidth, imageHeight, hasDepth);
 //      GLFrameBuffer.FloatFrameBufferBuilder depthBufferBuilder = new GLFrameBuffer.FloatFrameBufferBuilder((int) viewportWidth, (int) viewportHeight);
 //      frameBuffer = new FloatFrameBuffer()FrameBuffer(depthBufferBuilder);
 
@@ -95,8 +92,8 @@ public class GDXDepthSensorSimulator
 
    public void render(GDX3DSceneManager gdx3DSceneManager)
    {
-      camera.near = 0.05f;
-      camera.far = 1.0f;
+//      camera.near = 0.05f;
+//      camera.far = 1.0f;
 
       frameBuffer.begin();
 //      floatframeBuffer.begin();
@@ -108,21 +105,17 @@ public class GDXDepthSensorSimulator
       //      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
 //      viewport.getCamera().position
 
-      viewport.update((int) viewportWidth, (int) viewportHeight);
+      viewport.update(imageWidth, imageHeight);
       modelBatch.begin(camera);
 
-      Gdx.gl.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
+      Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
 
       gdx3DSceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
-      int width = frameBuffer.getWidth();
-      int height = frameBuffer.getHeight();
 //      frameBuffer.getDepthBufferHandle();
-      Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, width, height);
-
-
+      Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, imageWidth, imageHeight);
 
 //      ByteBuffer underlyingBuffer = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels();
 //      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL32.GL_FLOAT, underlyingBuffer);
@@ -134,9 +127,9 @@ public class GDXDepthSensorSimulator
 
 //            GLOnlyTextureData textureData = (GLOnlyTextureData) frameBuffer.getColorBufferTexture().getTextureData();
 //      Pixmap pixmap = textureData.consumePixmap();
-      for (int y = 0; y < height; y++) // comes out flipped
+      for (int y = 0; y < imageHeight; y++) // comes out flipped
       {
-         for (int x = 0; x < width; x++)
+         for (int x = 0; x < imageWidth; x++)
          {
             int color = pixmap.getPixel(x, y);
             tempGDXColor.set(color);
@@ -145,25 +138,25 @@ public class GDXDepthSensorSimulator
             depthReading += tempGDXColor.b / 65536.0;
             depthReading += tempGDXColor.a / 16777216.0;
 
-            if (depthReading > camera.near)
+//            if (depthReading > camera.near)
             {
-               int flippedY = height - y;
-               int halfWidth = width / 2;
-               int halfHeight = height / 2;
+               int flippedY = imageHeight - y;
+               int halfWidth = imageWidth / 2;
+               int halfHeight = imageHeight / 2;
                depthPoint.set(x, flippedY + halfHeight, depthReading);
    //            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
    //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
    //            System.out.println(depthReading);
    //            depthPoint.set(x * depthReading, y * depthReading, depthReading);
                viewport.unproject(depthPoint);
-//               tempFramePoint.setToZero(cameraReferenceFrame);
-//               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
+               tempFramePoint.setToZero(cameraReferenceFrame);
+               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y - (height / 2.0f), depthPoint.z);
 //               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
                Point3D32 point = points.add();
-//               point.set(tempFramePoint);
-               point.set(depthPoint.x, depthPoint.y, depthPoint.z);
+               point.set(tempFramePoint);
+//               point.set(depthPoint.x, depthPoint.y, depthPoint.z);
                point.addZ(random.nextDouble() * 0.007);
             }
          }
