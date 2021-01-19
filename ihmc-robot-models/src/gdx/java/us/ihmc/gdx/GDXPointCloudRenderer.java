@@ -25,6 +25,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final int vertexColorOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.ColorUnpacked).offset / 4);
 
    private RecyclingArrayList<Point3D32> pointsToRender;
+   private static final Color COLOR = Color.WHITE;
 
    public void create(int size)
    {
@@ -57,11 +58,10 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + vertexPositionOffset + 1] = point.getY32();
             vertices[offset + vertexPositionOffset + 2] = point.getZ32();
 
-            Color color = Color.WHITE;
-            vertices[offset + vertexColorOffset] = color.r;
-            vertices[offset + vertexColorOffset + 1] = color.g;
-            vertices[offset + vertexColorOffset + 2] = color.b;
-            vertices[offset + vertexColorOffset + 3] = color.a;
+            vertices[offset + vertexColorOffset] = COLOR.r;
+            vertices[offset + vertexColorOffset + 1] = COLOR.g;
+            vertices[offset + vertexColorOffset + 2] = COLOR.b;
+            vertices[offset + vertexColorOffset + 3] = COLOR.a;
          }
 
          renderable.meshPart.size = pointsToRender.size();
