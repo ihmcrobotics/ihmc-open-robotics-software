@@ -90,7 +90,6 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
       return getAxis(index).getMaximumNumberOfCoefficients();
    }
 
-
    default void getCoefficients(int idx, DMatrixRMaj coefficientsToPack)
    {
       getCoefficients(idx).get(coefficientsToPack);

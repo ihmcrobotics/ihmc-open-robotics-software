@@ -102,10 +102,8 @@ public class StraightLinePositionTrajectoryGenerator implements FixedFramePositi
       double parameterdd = isDone() ? 0.0 : parameterPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, parameter);
-      currentVelocity.set(differenceVector);
-      currentVelocity.scale(parameterd);
-      currentAcceleration.set(differenceVector);
-      currentAcceleration.scale(parameterdd);
+      currentVelocity.setAndScale(parameterd, differenceVector);
+      currentAcceleration.setAndScale(parameterdd, differenceVector);
    }
 
    @Override

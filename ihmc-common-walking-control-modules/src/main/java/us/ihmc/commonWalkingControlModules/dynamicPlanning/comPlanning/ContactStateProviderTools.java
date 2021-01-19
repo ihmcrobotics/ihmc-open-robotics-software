@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.List;
@@ -22,7 +21,7 @@ public class ContactStateProviderTools
 
    static boolean checkContactSequenceIsContinuous(List<? extends ContactStateProvider> contactStateSequence)
    {
-      return TimeIntervalTools.checkTimeSequenceIsContinuous(contactStateSequence, epsilonForContinuity);
+      return TimeIntervalTools.isTimeSequenceContinuous(contactStateSequence, epsilonForContinuity);
    }
 
    static boolean checkContactSequenceDoesNotEndInFlight(List<? extends ContactStateProvider> contactStateSequence)

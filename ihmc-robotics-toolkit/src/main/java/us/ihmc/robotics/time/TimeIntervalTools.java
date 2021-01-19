@@ -10,12 +10,12 @@ import java.util.List;
 public class TimeIntervalTools
 {
 
-   public static boolean checkTimeSequenceIsContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
    {
-      return checkTimeSequenceIsContinuous(contactStateSequence, 5e-3);
+      return isTimeSequenceContinuous(contactStateSequence, 5e-3);
    }
 
-   public static boolean checkTimeSequenceIsContinuous(List<? extends TimeIntervalProvider> contactStateSequence, double epsilon)
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence, double epsilon)
    {
       for (int index = 0; index < contactStateSequence.size() - 1; index++)
       {

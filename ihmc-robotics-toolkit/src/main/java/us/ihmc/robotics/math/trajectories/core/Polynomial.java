@@ -24,6 +24,8 @@ public class Polynomial implements PolynomialBasics
    private final double[] xPowers;
    private final DMatrixRMaj xPowersDerivativeVector;
 
+   private boolean isConstraintMatrixUpToDate = false;
+
    public Polynomial(int maxNumberOfCoefficients)
    {
       this.maximumNumberOfCoefficients = maxNumberOfCoefficients;
@@ -134,6 +136,18 @@ public class Polynomial implements PolynomialBasics
       solver.solve(constraintVector, coefficientVector);
    }
 
+   @Override
+   public void setIsConstraintMatrixUpToDate(boolean isConstraintMatrixUpToDate)
+   {
+      this.isConstraintMatrixUpToDate = isConstraintMatrixUpToDate;
+   }
+
+   @Override
+   public boolean isConstraintMatrixUpToDate()
+   {
+      return isConstraintMatrixUpToDate;
+   }
+
    public void setDirectly(int power, double coefficient)
    {
       if (power >= getMaximumNumberOfCoefficients())
@@ -203,7 +217,7 @@ public class Polynomial implements PolynomialBasics
    }
 
    @Override
-   public void setCoefficient(int idx, double value)
+   public void setCoefficientUnsafe(int idx, double value)
    {
       coefficients[idx] = value;
    }

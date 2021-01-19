@@ -29,6 +29,8 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
 
    private final YoMutableFramePoint3D initialPosition;
    private final YoMutableFramePoint3D finalPosition;
+   private final YoMutableFrameVector3D differenceVector;
+
 
    private final YoMutableFrameVector3D currentVelocity;
    private final YoMutableFrameVector3D currentAcceleration;
@@ -78,6 +80,7 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
 
       initialPosition = new YoMutableFramePoint3D(namePrefix + "InitialPosition", "", registry, referenceFrame);
       finalPosition = new YoMutableFramePoint3D(namePrefix + "FinalPosition", "", registry, referenceFrame);
+      differenceVector = new YoMutableFrameVector3D(namePrefix + "DifferenceVector", "", registry, referenceFrame);
 
       currentVelocity = new YoMutableFrameVector3D(namePrefix + "CurrentVelocity", "", registry, referenceFrame);
       currentAcceleration = new YoMutableFrameVector3D(namePrefix + "CurrentAcceleration", "", registry, referenceFrame);
@@ -161,6 +164,7 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
    {
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
+      differenceVector.changeFrame(referenceFrame);
       currentPose.changeFrame(referenceFrame);
       currentVelocity.changeFrame(referenceFrame);
       currentAcceleration.changeFrame(referenceFrame);
@@ -175,6 +179,8 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
    {
       initialPosition.setToZero(referenceFrame);
       finalPosition.setToZero(referenceFrame);
+      differenceVector.setToZero(referenceFrame);
+
       currentPose.setToZero(referenceFrame);
       currentVelocity.setToZero(referenceFrame);
       currentAcceleration.setToZero(referenceFrame);
@@ -246,10 +252,9 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       quinticParameterPolynomial.compute(time);
       boolean isDone = isDone();
+      double alphaPosition = isDone ? 1.0 : quinticParameterPolynomial.getValue();
       double alphaVel = isDone ? 0.0 : quinticParameterPolynomial.getVelocity();
       double alphaAcc = isDone ? 0.0 : quinticParameterPolynomial.getAcceleration();
-      double alphaAngVel = isDone ? 0.0 : quinticParameterPolynomial.getVelocity();
-      double alphaAngAcc = isDone ? 0.0 : quinticParameterPolynomial.getAcceleration();
 
       if (isDone)
       {
@@ -263,15 +268,15 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
       }
       else
       {
-         currentPose.getPosition().interpolate(initialPosition, finalPosition, quinticParameterPolynomial.getValue());
-         currentVelocity.sub(finalPosition, initialPosition);
-         currentVelocity.scale(alphaVel);
-         currentAcceleration.sub(finalPosition, initialPosition);
-         currentAcceleration.scale(alphaAcc);
+         differenceVector.sub(finalPosition, initialPosition);
 
-         currentPose.getOrientation().interpolate(initialOrientation, finalOrientation, quinticParameterPolynomial.getValue());
-         orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);
-         orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAngAcc);
+         currentPose.getPosition().interpolate(initialPosition, finalPosition, alphaPosition);
+         currentVelocity.setAndScale(alphaVel, differenceVector);
+         currentAcceleration.setAndScale(alphaAcc, differenceVector);
+
+         currentPose.getOrientation().interpolate(initialOrientation, finalOrientation, alphaPosition);
+         orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaVel);
+         orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAcc);
       }
 
       currentOrientationForViz.setMatchingFrame(currentPose.getOrientation());
