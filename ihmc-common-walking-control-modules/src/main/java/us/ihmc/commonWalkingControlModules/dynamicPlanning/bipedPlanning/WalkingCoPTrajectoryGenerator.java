@@ -105,8 +105,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       finalTransferWeightDistribution = new YoDouble("processedFinalTransferWeightDistribution", registry);
       finalTransferSplitFraction = new YoDouble("processedFinalTransferSplitFraction", registry);
 
-      transferSplitFractions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferSplitFraction" + shiftFractionCounter++, registry), CoPTrajectoryParameters.maxNumberOfStepsToConsider);
-      transferWeightDistributions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferWeightDistribution" + weightDistributionCounter++, registry), CoPTrajectoryParameters.maxNumberOfStepsToConsider);
+      transferSplitFractions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferSplitFraction" + shiftFractionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
+      transferWeightDistributions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferWeightDistribution" + weightDistributionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
 
       positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionParameters);
 
@@ -529,7 +529,18 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       double supportToSwingStepHeight = tempFramePoint1.getZ() - tempFramePoint2.getZ();
       if (supportFootPolygon.getArea() == 0.0)
       { // FIXME this is bad if it's a line, right?
-         framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
+         if (supportFootPolygon.getNumberOfVertices() == 2)
+         {
+            framePointToPack.setToZero(supportFootPolygon.getReferenceFrame());
+            framePointToPack.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
+            framePointToPack.addY(supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
+            supportFootPolygon.orthogonalProjection(framePointToPack);
+         }
+         else
+         {
+            framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
+
+         }
          framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
       }
