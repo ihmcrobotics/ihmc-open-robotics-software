@@ -41,8 +41,13 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 
    public CoPTrajectoryGeneratorState(YoRegistry registry)
    {
-      footsteps = new YoPreallocatedList<>(DynamicPlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, CoPTrajectoryParameters.maxNumberOfStepsToConsider);
-      footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, CoPTrajectoryParameters.maxNumberOfStepsToConsider);
+      this(registry, 3);
+   }
+
+   public CoPTrajectoryGeneratorState(YoRegistry registry, int maxNumberOfStepsToConsider)
+   {
+      footsteps = new YoPreallocatedList<>(DynamicPlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, maxNumberOfStepsToConsider);
+      footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, maxNumberOfStepsToConsider);
       registerVariableToSave(footsteps.getYoPosition());
       registerVariableToSave(footstepTimings.getYoPosition());
 

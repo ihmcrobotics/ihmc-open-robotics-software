@@ -739,6 +739,24 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * Whether the height of the pelvis should be controlled instead of the center of mass height.
+    */
+   public boolean controlPelvisHeightInsteadOfCoMHeight()
+   {
+      return true;
+   }
+
+   /**
+    * Whether the height should be controlled with the rate of change of momentum or using a feedback
+    * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
+    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
+    */
+   public boolean controlHeightWithMomentum()
+   {
+      return true;
+   }
+
+   /**
     * Parameter for the CoM height trajectory generation.
     */
    @Deprecated // Remove this. It is not actually doing anything.
