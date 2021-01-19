@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
+import us.ihmc.robotics.math.trajectories.core.PolynomialTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -36,6 +37,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
 
    public YoPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
+
       this(createCoefficientsArray(name, maximumNumberOfCoefficients, registry),
            new YoInteger(name + "_nCoeffs", registry),
            new YoDouble(name + "_tCurrent", registry));
@@ -63,6 +65,9 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
 
    private static YoDouble[] createCoefficientsArray(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
+      if (maximumNumberOfCoefficients < 1)
+         throw new IllegalArgumentException("You have to make the polynomial to have at least 1 coefficient!");
+
       YoDouble[] a = new YoDouble[maximumNumberOfCoefficients];
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
@@ -194,7 +199,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
    public void compute(double x)
    {
       setCurrentTime(x);
-      setXPowers(xPowers, x);
+      PolynomialTools.setXPowers(xPowers, x);
 
       pos = vel = acc = jerk = 0.0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -216,57 +221,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
       {
          jerk += (i - 2) * (i - 1) * i * a[i].getDoubleValue() * xPowers[i - 3];
       }
-   }
-
-
-   // Returns the order-th derivative of the polynomial at x
-   public double getDerivative(int order, double x)
-   {
-      setXPowers(xPowers, x);
-
-      dPos = 0.0;
-      int derivativeCoefficient = 0;
-      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         derivativeCoefficient = getDerivativeCoefficient(order, i);
-         dPos += derivativeCoefficient * a[i].getDoubleValue() * xPowers[i - order];
-      }
-      return dPos;
-   }
-
-   /**
-    * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the
-    * YoPolynomials order-th derivative at x)
-    *
-    * @param order
-    * @param x
-    * @return
-    */
-   public DMatrixRMaj getXPowersDerivativeVector(int order, double x)
-   {
-      setXPowers(xPowers, x);
-      xPowersDerivativeVector.zero();
-
-      int derivativeCoefficient = 0;
-      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         derivativeCoefficient = getDerivativeCoefficient(order, i);
-         xPowersDerivativeVector.set(i, derivativeCoefficient * xPowers[i - order]);
-      }
-
-      return xPowersDerivativeVector;
-   }
-
-   // Returns the constant coefficient at the exponent-th entry of the order-th derivative vector
-   // Example: order = 4, exponent = 5 ==> returns 5*4*3*2
-   public int getDerivativeCoefficient(int order, int exponent)
-   {
-      int coeff = 1;
-      for (int i = exponent; i > exponent - order; i--)
-      {
-         coeff *= i;
-      }
-      return coeff;
    }
 
    @Override

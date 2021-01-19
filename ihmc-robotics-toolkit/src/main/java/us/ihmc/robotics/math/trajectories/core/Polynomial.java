@@ -28,6 +28,8 @@ public class Polynomial implements PolynomialBasics
 
    public Polynomial(int maxNumberOfCoefficients)
    {
+      if (maxNumberOfCoefficients < 1)
+         throw new IllegalArgumentException("You have to make the polynomial to have at least 1 coefficient!");
       this.maximumNumberOfCoefficients = maxNumberOfCoefficients;
       this.coefficients = new double[maxNumberOfCoefficients];
       this.coefficientsCopy = new double[maxNumberOfCoefficients];
@@ -54,7 +56,7 @@ public class Polynomial implements PolynomialBasics
    public void compute(double x)
    {
       this.currentTime = x;
-      setXPowers(xPowers, x);
+      PolynomialTools.setXPowers(xPowers, x);
       ddf = df = f = 0.0;
       for (int i = 0; i < numberOfCoefficients; i++)
          f += coefficients[i] * xPowers[i];
