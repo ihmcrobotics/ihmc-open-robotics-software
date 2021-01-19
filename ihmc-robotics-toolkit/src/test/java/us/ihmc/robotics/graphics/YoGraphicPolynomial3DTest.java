@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
@@ -54,8 +55,8 @@ public class YoGraphicPolynomial3DTest
          }
 
          double radius = random.nextDouble();
-         int resolution = random.nextInt(50);
-         int radialResolution = random.nextInt(50);
+         int resolution = RandomNumbers.nextInt(random, 1, 50);
+         int radialResolution = RandomNumbers.nextInt(random, 1, 50);
          YoGraphicPolynomial3D yoGraphicWriter = new YoGraphicPolynomial3D(name, poseToPolynomialFrame, yoPolynomial3Ds, waypointTimes, radius, resolution,
                                                                            radialResolution, registry);
 
