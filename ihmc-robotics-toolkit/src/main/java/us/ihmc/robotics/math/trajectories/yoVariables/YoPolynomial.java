@@ -9,6 +9,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -26,6 +27,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
    private final double[] xPowers;
 
    private final TimeIntervalBasics timeInterval = new TimeInterval();
+   private boolean isConstraintMatrixUpToDate = false;
 
    // Stores the (n-th order) derivative of the xPowers vector
    private final DMatrixRMaj xPowersDerivativeVector;
@@ -150,8 +152,21 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
       solver.solve(constraintVector, coefficientVector);
    }
 
+   @Override
+   public void setIsConstraintMatrixUpToDate(boolean isConstraintMatrixUpToDate)
+   {
+      this.isConstraintMatrixUpToDate = isConstraintMatrixUpToDate;
+   }
+
+   @Override
+   public boolean isConstraintMatrixUpToDate()
+   {
+      return isConstraintMatrixUpToDate;
+   }
+
    public void setDirectly(int power, double coefficient)
    {
+      setIsConstraintMatrixUpToDate(false);
       if (power >= maximumNumberOfCoefficients)
          throw new RuntimeException(
                "Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't set coefficient as it requires: " + power + 1 + " coefficients");
@@ -312,7 +327,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
    }
 
    @Override
-   public void setCoefficient(int idx, double value)
+   public void setCoefficientUnsafe(int idx, double value)
    {
       a[idx].set(value);
    }

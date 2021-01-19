@@ -9,7 +9,13 @@ public interface PolynomialBasics extends PolynomialReadOnly
 
    void reshape(int numberOfCoefficientsRequired);
 
-   void setCoefficient(int idx, double value);
+   default void setCoefficient(int idx, double value)
+   {
+      setIsConstraintMatrixUpToDate(false);
+      setCoefficientUnsafe(idx, value);
+   }
+
+   void setCoefficientUnsafe(int idx, double value);
 
    double getCoefficient(int idx);
 
@@ -20,6 +26,10 @@ public interface PolynomialBasics extends PolynomialReadOnly
    DMatrixRMaj getCoefficientsVector();
 
    void solveForCoefficients();
+
+   void setIsConstraintMatrixUpToDate(boolean isConstraintMatrixUpToDate);
+
+   boolean isConstraintMatrixUpToDate();
 
    @Override
    default void initialize()
@@ -42,15 +52,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
          setCoefficient(index, other.getCoefficient(index));
       for (; index < getMaximumNumberOfCoefficients(); index++)
          setCoefficient(index, Double.NaN);
-   }
-
-   default void setDirectlyFast(int power, double coefficient)
-   {
-      if (power >= getMaximumNumberOfCoefficients())
-         return;
-      if (power >= getNumberOfCoefficients())
-         setNumberOfCoefficients(power + 1);
-      setCoefficient(power, coefficient);
+      setIsConstraintMatrixUpToDate(false);
    }
 
    default void setDirectly(DMatrixRMaj coefficients)
@@ -61,6 +63,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
          setCoefficient(index, coefficients.get(index, 0));
       for (; index < getMaximumNumberOfCoefficients(); index++)
          setCoefficient(index, Double.NaN);
+      setIsConstraintMatrixUpToDate(false);
    }
 
    default void setDirectly(double[] coefficients)
@@ -71,6 +74,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
          setCoefficient(index, coefficients[index]);
       for (; index < getMaximumNumberOfCoefficients(); index++)
          setCoefficient(index, Double.NaN);
+      setIsConstraintMatrixUpToDate(false);
    }
 
    default void shiftTrajectory(double offsetValue)
@@ -120,6 +124,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       getTimeInterval().reset();
       setNumberOfCoefficients(0);
+      setIsConstraintMatrixUpToDate(false);
       for (int i = 0; i < getMaximumNumberOfCoefficients(); i++)
          setCoefficient(i, Double.NaN);
    }
@@ -153,9 +158,11 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       setTime(t0, tFinal);
       reshape(1);
-      setCoefficient(0, z);
       setPositionRow(0, 0.0, z);
-//      initialize();
+      setIsConstraintMatrixUpToDate(true);
+
+      setCoefficient(0, z);
+      //      initialize();
    }
 
    default void setLinear(double t0, double tFinal, double z0, double zf)
@@ -164,6 +171,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       reshape(2);
       setPositionRow(0, t0, z0);
       setPositionRow(1, tFinal, zf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -173,6 +182,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       reshape(2);
       setPositionRow(0, t, z);
       setVelocityRow(1, t, zd);
+      setIsConstraintMatrixUpToDate(true);
+
       setCoefficient(0, z - zd * t);
       setCoefficient(1, zd);
 //      initialize();
@@ -188,6 +199,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(3, tFinal, zf);
       setVelocityRow(4, tFinal, zdf);
       setAccelerationRow(5, tFinal, zddf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -209,6 +222,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(3, tIntermediate, zIntermediate);
       setPositionRow(4, tFinal, zf);
       setVelocityRow(5, tFinal, zdf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -230,6 +245,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(3, tIntermediate, zIntermediate);
       setVelocityRow(4, tIntermediate, zdIntermediate);
       setPositionRow(5, tFinal, zf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -252,6 +269,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(3, tIntermediate1, zIntermediate1);
       setPositionRow(4, tFinal, zf);
       setVelocityRow(5, tFinal, zdf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -273,6 +292,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setAccelerationRow(3, tIntermediate, zddIntermediate);
       setPositionRow(4, tFinal, zFinal);
       setVelocityRow(5, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -293,6 +314,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(2, tIntermediate1, zIntermediate1);
       setVelocityRow(3, tIntermediate1, zdIntermediate1);
       setPositionRow(4, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -321,6 +344,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(4, tFinal, zf);
       setVelocityRow(5, tFinal, zdf);
       setAccelerationRow(6, tFinal, zddf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -347,6 +372,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(5, tIntermediate1, zdIntermediate1);
       setPositionRow(6, tFinal, zf);
       setVelocityRow(7, tFinal, zdf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -373,6 +400,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(5, tFinal, zf);
       setVelocityRow(6, tFinal, zdf);
       setAccelerationRow(7, tFinal, zddf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -401,6 +430,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(7, tFinal, zdf);
       setAccelerationRow(8, t0, 0.0);
       setAccelerationRow(9, tFinal, 0.0);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -424,6 +455,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setAccelerationRow(4, tIntermediate, zddIntermediate);
       setPositionRow(5, tFinal, zFinal);
       setVelocityRow(6, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -443,6 +476,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(2, tIntermediate, zdIntermediate);
       setPositionRow(3, tFinal, zFinal);
       setVelocityRow(4, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -455,6 +490,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setAccelerationRow(2, t0, zdd0);
       setPositionRow(3, tFinal, zFinal);
       setVelocityRow(4, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -473,6 +510,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(2, tIntermediate, zIntermediate);
       setPositionRow(3, tFinal, zf);
       setVelocityRow(4, tFinal, zdf);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -485,6 +524,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(2, tFinal, zFinal);
       setVelocityRow(3, tFinal, zdFinal);
       setAccelerationRow(4, tFinal, zddFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -496,6 +537,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(1, t0, 0.0);
       setPositionRow(2, tFinal, zFinal);
       setVelocityRow(3, tFinal, 0.0);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -507,6 +550,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(1, t0, zd0);
       setPositionRow(2, tFinal, zFinal);
       setVelocityRow(3, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -524,6 +569,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(1, t0, zd0);
       setPositionRow(2, tIntermediate, zIntermediate);
       setPositionRow(3, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -541,6 +588,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(1, tIntermediate, zIntermediate);
       setPositionRow(2, tFinal, zFinal);
       setVelocityRow(3, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
       initialize();
    }
 
@@ -552,23 +600,10 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(1, tFinal, zFinal);
       setVelocityRow(2, t0, 3 * (zR1 - z0) / (tFinal - t0));
       setVelocityRow(3, tFinal, 3 * (zFinal - zR2) / (tFinal - t0));
+      setIsConstraintMatrixUpToDate(true);
       initialize();
    }
 
-   default void setPositionRow(int row, double x, double z)
-   {
-      setConstraintRow(row, x, z, 0);
-   }
-
-   default void setVelocityRow(int row, double x, double zVelocity)
-   {
-      setConstraintRow(row, x, zVelocity, 1);
-   }
-
-   default void setAccelerationRow(int row, double x, double zAcceleration)
-   {
-      setConstraintRow(row, x, zAcceleration, 2);
-   }
 
    default void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, double z0, double zd0, double zdFinal, double zddFinal)
    {
@@ -578,6 +613,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(1, t0, zd0);
       setVelocityRow(2, tFinal, zdFinal);
       setAccelerationRow(3, tFinal, zddFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -588,6 +625,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(0, t0, z0);
       setVelocityRow(1, t0, zd0);
       setPositionRow(2, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -598,6 +637,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(0, t0, z0);
       setPositionRow(1, tFinal, zFinal);
       setVelocityRow(2, tFinal, zdFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -608,6 +649,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(0, t0, z0);
       setVelocityRow(1, t0, zd0);
       setAccelerationRow(2, t0, zdd0);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -619,6 +662,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(0, t0, z0);
       setPositionRow(1, tIntermediate, zIntermediate);
       setPositionRow(2, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -630,6 +675,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(0, t0, z0);
       setPositionRow(1, tIntermediate1, zIntermediate1);
       setPositionRow(2, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -650,6 +697,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(1, tIntermediate1, zIntermediate1);
       setPositionRow(2, tIntermediate2, zIntermediate2);
       setPositionRow(3, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
+
       initialize();
    }
 
@@ -662,6 +711,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setVelocityRow(1, t0, zd0);
       setAccelerationRow(2, t0, zdd0);
       setPositionRow(3, tFinal, zFinal);
+      setIsConstraintMatrixUpToDate(true);
 
       initialize();
    }
@@ -675,6 +725,8 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setPositionRow(1, tFinal, zFinal);
       setVelocityRow(2, tFinal, zdFinal);
       setAccelerationRow(3, tFinal, zddFinal);
+
+      setIsConstraintMatrixUpToDate(true);
 
       initialize();
    }
@@ -696,12 +748,35 @@ public interface PolynomialBasics extends PolynomialReadOnly
       {
          setConstraintRow(row, tFinal, 0.0, order++);
       }
+      setIsConstraintMatrixUpToDate(true);
 
       initialize();
    }
 
+
+   default void setPositionRow(int row, double x, double z)
+   {
+      setIsConstraintMatrixUpToDate(false);
+      setConstraintRow(row, x, z, 0);
+   }
+
+   default void setVelocityRow(int row, double x, double zVelocity)
+   {
+      setIsConstraintMatrixUpToDate(false);
+      setConstraintRow(row, x, zVelocity, 1);
+   }
+
+   default void setAccelerationRow(int row, double x, double zAcceleration)
+   {
+      setIsConstraintMatrixUpToDate(false);
+      setConstraintRow(row, x, zAcceleration, 2);
+   }
+
    default void commitCoefficientsToMemory()
    {
+      if (!isConstraintMatrixUpToDate())
+         throw new RuntimeException("The constraint matrix is out of date, setting from it will change data.");
+
       int row = 0;
       for (; row < getNumberOfCoefficients(); row++)
          setCoefficient(row, getCoefficientsVector().get(row, 0));

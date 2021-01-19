@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -8,7 +7,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.time.TimeIntervalBasics;
 
 public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
 {
@@ -27,6 +25,8 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
    @Override
    default Tuple3DBasics getCoefficients(int i)
    {
+      for (int axis = 0; axis < 3; axis++)
+         getAxis(axis).setIsConstraintMatrixUpToDate(false);
       return getCoefficients()[i];
    }
 
@@ -38,6 +38,8 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
    default void shiftTrajectory(double offsetX, double offsetY, double offsetZ)
    {
       getCoefficients(0).add(offsetX, offsetY, offsetZ);
+      for (int i = 0; i < 3; i++)
+         getAxis(i).setIsConstraintMatrixUpToDate(false);
    }
 
    default void reset()
