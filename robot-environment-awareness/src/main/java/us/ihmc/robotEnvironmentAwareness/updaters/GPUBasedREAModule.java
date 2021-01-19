@@ -2,8 +2,11 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RawGPUPlanarRegionSubscriber;
@@ -17,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GPUBasedREAModule implements PerceptionModule {
 
-    private static final int THREAD_PERIOD_MILLISECONDS = 200;
+    private static final int THREAD_PERIOD_MILLISECONDS = 100;
 
     private RosMainNode rosMainNode;
     private RawGPUPlanarRegionList rawGPUPlanarRegionList;
@@ -38,17 +41,9 @@ public class GPUBasedREAModule implements PerceptionModule {
     void mainUpdate(){
         LogTools.info("Regions Available:{}", gpuPlanarRegionSubscriber.regionListIsAvailable());
         if(gpuPlanarRegionSubscriber.regionListIsAvailable()){
-            this.rawGPUPlanarRegionList = gpuPlanarRegionSubscriber.getPlanarRegionList();
-            for (int i = 0; i < rawGPUPlanarRegionList.getNumOfRegions(); i++) {
-                List<RawGPUPlanarRegion> regions = rawGPUPlanarRegionList.getRegions();
-                System.out.println("Region: " + regions.get(i).getId());
-                System.out.println("Normal: " + "X:" + regions.get(i).getNormal().getX() + "\tY:" + regions.get(i).getNormal().getY() + "\tZ:" + regions.get(i).getNormal().getZ());
-                System.out.println("Centroid: " + "X:" + regions.get(i).getCentroid().getX() + "\tY:" + regions.get(i).getCentroid().getY() + "\tZ:" + regions.get(i).getCentroid().getZ());
-                for (int j = 0; j < regions.get(i).getVertices().size(); j++) {
-                    geometry_msgs.Point point = regions.get(i).getVertices().get(j);
-                    System.out.println(point.getX() + "," + point.getY() + "," + point.getZ());
-                }
-            }
+            this.rawGPUPlanarRegionList = gpuPlanarRegionSubscriber.getRawPlanarRegionList();
+            PlanarRegionsList regionList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+            LogTools.info("Raw:{} Generated:{}", rawGPUPlanarRegionList.getNumOfRegions(), regionList.getNumberOfPlanarRegions());
         }
     }
 

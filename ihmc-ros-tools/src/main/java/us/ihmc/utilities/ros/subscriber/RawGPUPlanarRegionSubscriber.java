@@ -17,7 +17,7 @@ public class RawGPUPlanarRegionSubscriber extends AbstractRosTopicSubscriber<map
         return regionListAvailable;
     }
 
-    public RawGPUPlanarRegionList getPlanarRegionList() {
+    public RawGPUPlanarRegionList getRawPlanarRegionList() {
         this.regionListAvailable = false;
         return planarRegionList;
     }
