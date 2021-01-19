@@ -2,19 +2,15 @@ package us.ihmc.robotics.math.trajectories.core;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.abstracts.AbstractFramePolynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FramePolynomial3D extends AbstractFramePolynomial3D
 {
-   public FramePolynomial3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoRegistry registry)
+   public FramePolynomial3D(int maximumNumberOfCoefficients, ReferenceFrame referenceFrame)
    {
-      super(new YoPolynomial3D(name, maximumNumberOfCoefficients, registry), referenceFrame);
+      super(new Polynomial3D(maximumNumberOfCoefficients), referenceFrame);
    }
 
    public FramePolynomial3D(Polynomial xPolynomial, Polynomial yPolynomial, Polynomial zPolynomial, ReferenceFrame referenceFrame)

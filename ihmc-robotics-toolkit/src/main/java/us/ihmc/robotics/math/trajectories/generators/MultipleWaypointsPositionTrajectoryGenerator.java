@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
@@ -248,8 +249,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       currentTrajectoryTime.set(time);
       boolean changedSubTrajectory = false;
 
-      if (currentWaypointIndex.getIntegerValue() > numberOfWaypoints.getIntegerValue() - 1
-          && time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
+      if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
          changedSubTrajectory = true;
