@@ -9,8 +9,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoSpline3D;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -18,8 +19,8 @@ public class SoftTouchdownPoseTrajectoryGenerator implements FixedFramePoseTraje
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry;
-   
-   private final YoSpline3D positionTouchdownTrajectory;
+
+   private final FixedFramePolynomial3DBasics positionTouchdownTrajectory;
 
    private final YoDouble timeInitial;
    private final YoDouble timeFinal;
@@ -40,7 +41,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements FixedFramePoseTraje
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       
-      positionTouchdownTrajectory = new YoSpline3D(3, 3, worldFrame, registry, namePrefix + "Trajectory");
+      positionTouchdownTrajectory = new YoFramePolynomial3D(namePrefix + "Trajectory", 3, worldFrame, registry);
       timeInitial = new YoDouble(namePrefix + "TimeInitial", registry);
       timeFinal = new YoDouble(namePrefix + "TimeFinal", registry);
       timeIntoTouchdown = new YoDouble(namePrefix + "TimeIntoTouchdown", registry);
@@ -103,7 +104,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements FixedFramePoseTraje
    {
       double t0 = timeInitial.getDoubleValue();
       double tf = timeFinal.getDoubleValue();
-      positionTouchdownTrajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
+      positionTouchdownTrajectory.setQuadraticUsingInitialAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
    }
 
    @Override
