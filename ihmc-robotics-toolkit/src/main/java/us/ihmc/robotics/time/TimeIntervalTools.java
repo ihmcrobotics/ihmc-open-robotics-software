@@ -9,12 +9,18 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
+
    public static boolean checkTimeSequenceIsContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
+   {
+      return checkTimeSequenceIsContinuous(contactStateSequence, 5e-3);
+   }
+
+   public static boolean checkTimeSequenceIsContinuous(List<? extends TimeIntervalProvider> contactStateSequence, double epsilon)
    {
       for (int index = 0; index < contactStateSequence.size() - 1; index++)
       {
          if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(),
-                                      contactStateSequence.get(index + 1).getTimeInterval().getStartTime(), 5e-3))
+                                      contactStateSequence.get(index + 1).getTimeInterval().getStartTime(), epsilon))
             return false;
       }
 

@@ -406,7 +406,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertTrue(success);
 
       YoDouble controllerHeight = EndToEndTestTools.findYoDouble(CenterOfMassHeightControlState.class.getSimpleName(), "desiredCoMHeightFromTrajectory", scs);
-      YoDouble controllerHeightRate = EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentVelocity", scs);
+      YoDouble controllerHeightRate = EndToEndTestTools.findYoDouble("pelvisHeightOffsetMultipleWaypointsTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentVelocity", scs);
 
       assertEquals(desiredHeight.getValue(), controllerHeight.getValue(), 5.0e-4);
       assertEquals(desiredHeightRate.getValue(), controllerHeightRate.getValue(), 1.0e-7);

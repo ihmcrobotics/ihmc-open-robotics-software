@@ -22,7 +22,7 @@ public class ContactStateProviderTools
 
    static boolean checkContactSequenceIsContinuous(List<? extends ContactStateProvider> contactStateSequence)
    {
-      return TimeIntervalTools.checkTimeSequenceIsContinuous(contactStateSequence);
+      return TimeIntervalTools.checkTimeSequenceIsContinuous(contactStateSequence, epsilonForContinuity);
    }
 
    static boolean checkContactSequenceDoesNotEndInFlight(List<? extends ContactStateProvider> contactStateSequence)
