@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.trajectories.interfaces;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.math.trajectories.core.PolynomialTools;
 
 public interface PolynomialBasics extends PolynomialReadOnly
 {
@@ -93,31 +94,14 @@ public interface PolynomialBasics extends PolynomialReadOnly
    {
       double[] fromPowers = new double[getNumberOfCoefficients() + 1];
       double[] toPowers = new double[getNumberOfCoefficients() + 1];
-      setXPowers(fromPowers, from);
-      setXPowers(toPowers, to);
+      PolynomialTools.setXPowers(fromPowers, from);
+      PolynomialTools.setXPowers(toPowers, to);
       double integral = 0;
       for (int i = 0; i < getNumberOfCoefficients(); i++)
       {
          integral += (1.0 / ((double) i + 1.0)) * getCoefficient(i) * (toPowers[i + 1] - fromPowers[i + 1]);
       }
       return integral;
-   }
-
-   /**
-    * Sets the given array to be:
-    * <br> [1, x, x<sup>2</sup>, ..., x<sup>N</sup>]
-    * <br> where N+1 is the length of the given array
-    *
-    * @param xPowers vector to set
-    * @param x base of the power series
-    */
-   default void setXPowers(double[] xPowers, double x)
-   {
-      xPowers[0] = 1.0;
-      for (int i = 1; i < xPowers.length; i++)
-      {
-         xPowers[i] = xPowers[i - 1] * x;
-      }
    }
 
    default void reset()
@@ -782,5 +766,7 @@ public interface PolynomialBasics extends PolynomialReadOnly
          setCoefficient(row, getCoefficientsVector().get(row, 0));
       for (; row < getMaximumNumberOfCoefficients(); row++)
          setCoefficient(row, Double.NaN);
+
+      setIsConstraintMatrixUpToDate(true);
    }
 }

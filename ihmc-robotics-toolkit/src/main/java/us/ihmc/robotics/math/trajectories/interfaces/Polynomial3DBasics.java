@@ -98,7 +98,7 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
          getAxis(index).setZero();
    }
 
-   default void setConstant(double t0, double tFinal, Point3DReadOnly z)
+   default void setConstant(double t0, double tFinal, Tuple3DReadOnly z)
    {
       for (int index = 0; index < 3; index++)
          getAxis(index).setConstant(t0, tFinal, z.getElement(index));
@@ -186,6 +186,15 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
       for (int index = 0; index < 3; index++)
          getAxis(index).setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getElement(index), zd0.getElement(index),
                                                                                       zFinal.getElement(index), zdFinal.getElement(index));
+   }
+
+   default void setLinear(double t0, Point3DReadOnly z0, Vector3DReadOnly zDot)
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         int index = axis.ordinal();
+         getAxis(index).setLinear(t0, z0.getElement(index), zDot.getElement(index));
+      }
    }
 
    default void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
