@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -49,9 +50,6 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
 
-   private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
    // For viz
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
@@ -64,7 +62,7 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
-   private YoFrameYawPitchRoll currentOrientationForViz;
+   private final YoFrameYawPitchRoll currentOrientationForViz;
 
    private final List<ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D>> visualizationUpdatables = new ArrayList<>();
 
@@ -192,17 +190,12 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
       trajectoryTime.set(newTrajectoryTime);
    }
 
-   public void setInitialPose(FramePose3D initialPose)
+   public void setInitialPose(FramePose3DReadOnly initialPose)
    {
-      initialPose.get(tempPosition, tempOrientation);
-
-      initialPosition.setMatchingFrame(tempPosition);
-      initialOrientation.setMatchingFrame(tempOrientation);
-
-      initialOrientationForViz.setMatchingFrame(tempOrientation);
+      setInitialPose(initialPose.getPosition(), initialPose.getOrientation());
    }
 
-   public void setInitialPose(FramePoint3D initialPosition, FrameQuaternion initialOrientation)
+   public void setInitialPose(FramePoint3DReadOnly initialPosition, FrameOrientation3DReadOnly initialOrientation)
    {
       this.initialPosition.setMatchingFrame(initialPosition);
       this.initialOrientation.setMatchingFrame(initialOrientation);
@@ -210,26 +203,17 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
       initialOrientationForViz.setMatchingFrame(initialOrientation);
    }
 
-   public void setFinalPose(FramePose3D finalPose)
+   public void setFinalPose(FramePose3DReadOnly finalPose)
    {
-      finalPose.get(tempPosition, tempOrientation);
-
-      finalPosition.setMatchingFrame(tempPosition);
-      finalOrientation.setMatchingFrame(tempOrientation);
-
-      finalOrientationForViz.setMatchingFrame(tempOrientation);
+      setFinalPose(finalPose.getPosition(), finalPose.getOrientation());
    }
 
-   public void setFinalPose(FramePoint3D finalPosition, FrameQuaternion finalOrientation)
+   public void setFinalPose(FramePoint3DReadOnly finalPosition, FrameOrientation3DReadOnly finalOrientation)
    {
       this.finalPosition.setMatchingFrame(finalPosition);
       this.finalOrientation.setMatchingFrame(finalOrientation);
 
       finalOrientationForViz.setMatchingFrame(finalOrientation);
-
-      tempPosition.setIncludingFrame(finalPosition);
-      tempOrientation.setIncludingFrame(finalOrientation);
-      finalOrientationForViz.setMatchingFrame(tempOrientation);
    }
 
    @Override
@@ -290,9 +274,7 @@ public class StraightLinePoseTrajectoryGenerator implements FixedFramePoseTrajec
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAngAcc);
       }
 
-      tempOrientation.setIncludingFrame(currentPose.getOrientation());
-      tempOrientation.changeFrame(currentOrientationForViz.getReferenceFrame());
-      currentOrientationForViz.set(tempOrientation);
+      currentOrientationForViz.setMatchingFrame(currentPose.getOrientation());
       for (int i = 0; i < visualizationUpdatables.size(); i++)
       {
          ImmutablePair<FramePoint3DReadOnly, YoFramePoint3D> pair = visualizationUpdatables.get(i);

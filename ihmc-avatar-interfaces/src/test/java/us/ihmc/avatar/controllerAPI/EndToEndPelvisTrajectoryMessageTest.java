@@ -1374,7 +1374,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                       .getValue());
       FrameVector3D controllerDesiredLinearVelocity = new FrameVector3D(supportFrame, findControllerDesiredLinearVelocityXY(scs));
       controllerDesiredLinearVelocity.changeFrame(worldFrame);
-      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator",
+      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetMultipleWaypointsTrajectoryGenerator",
                                                                           "pelvisHeightOffsetSubTrajectoryCurrentVelocity",
                                                                           scs)
                                                             .getValue());
@@ -1395,7 +1395,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                       .getValue());
       controllerDesiredLinearVelocity = new FrameVector3D(supportFrame, findControllerDesiredLinearVelocityXY(scs));
       controllerDesiredLinearVelocity.changeFrame(worldFrame);
-      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator",
+      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetMultipleWaypointsTrajectoryGenerator",
                                                                           "pelvisHeightOffsetSubTrajectoryCurrentVelocity",
                                                                           scs)
                                                             .getValue());

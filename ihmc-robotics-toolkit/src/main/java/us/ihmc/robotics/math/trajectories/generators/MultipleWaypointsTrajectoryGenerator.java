@@ -197,8 +197,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       currentTrajectoryTime.set(time);
       boolean changedSubTrajectory = false;
 
-      if (currentWaypointIndex.getIntegerValue() > numberOfWaypoints.getIntegerValue() - 1
-          && time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
+      if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
          changedSubTrajectory = true;

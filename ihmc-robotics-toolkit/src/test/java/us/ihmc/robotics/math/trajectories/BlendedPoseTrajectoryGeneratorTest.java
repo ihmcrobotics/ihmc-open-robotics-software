@@ -136,7 +136,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    @Test
    public void testNoConstraints()
    {
-      Random random = new Random();
+      Random random = new Random(1738L);
       double trajectoryDuration = 1.0;
       int numberOfSamples = 10;
 
@@ -161,7 +161,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    @Test
    public void testInitialPoseConstraint()
    {
-      Random random = new Random();
+      Random random = new Random(1738L);
       double initialBlendDuration = 0.25;
       double trajectoryDuration = 1.0;
       int numberOfSamples = 10;
@@ -372,7 +372,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    @Test
    public void testInitialAndFinalConstraint()
    {
-      Random random = new Random();
+      Random random = new Random(1738L);
       double initialBlendDuration = 0.25;
       double finalBlendDuration = 0.25;
       double trajectoryDuration = 1.0;

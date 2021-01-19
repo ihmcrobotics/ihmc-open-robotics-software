@@ -1,5 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -15,6 +18,11 @@ public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryG
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
 
    private final FixedFramePoseTrajectoryGenerator trajectory;
+
+   private final FramePoint3D tempPosition = new FramePoint3D();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public BlendedPoseTrajectoryGenerator(String prefix, FixedFramePoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
    {
@@ -54,8 +62,10 @@ public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryG
 
    public void blendInitialConstraint(FramePose3DReadOnly initialPose, TwistReadOnly initialTwist, double initialTime, double blendDuration)
    {
-      blendedPositionTrajectory.blendInitialConstraint(initialPose.getPosition(), initialTwist.getLinearPart(), initialTime, blendDuration);
-      blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), initialTwist.getAngularPart(), initialTime, blendDuration);
+      tempVelocity.setIncludingFrame(initialTwist.getLinearPart());
+      tempAngularVelocity.setIncludingFrame(initialTwist.getAngularPart());
+      blendedPositionTrajectory.blendInitialConstraint(initialPose.getPosition(), tempVelocity, initialTime, blendDuration);
+      blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), tempAngularVelocity, initialTime, blendDuration);
    }
 
    public void blendFinalConstraint(FramePose3DReadOnly finalPose, double finalTime, double blendDuration)
@@ -66,8 +76,10 @@ public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryG
 
    public void blendFinalConstraint(FramePose3DReadOnly finalPose, TwistReadOnly finalTwist, double finalTime, double blendDuration)
    {
-      blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), finalTwist.getLinearPart(), finalTime, blendDuration);
-      blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), finalTwist.getAngularPart(), finalTime, blendDuration);
+      tempVelocity.setIncludingFrame(finalTwist.getLinearPart());
+      tempAngularVelocity.setIncludingFrame(finalTwist.getAngularPart());
+      blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), tempVelocity, finalTime, blendDuration);
+      blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), tempAngularVelocity, finalTime, blendDuration);
    }
 
    public void initializeTrajectory()

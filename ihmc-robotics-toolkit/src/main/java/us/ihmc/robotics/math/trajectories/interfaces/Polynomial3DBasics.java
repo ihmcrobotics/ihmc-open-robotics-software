@@ -90,6 +90,12 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
       setConstant(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, z);
    }
 
+   default void setZero()
+   {
+      for (int index = 0; index < 3; index++)
+         getAxis(index).setZero();
+   }
+
    default void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
       for (int index = 0; index < 3; index++)
@@ -345,8 +351,8 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
 
    }
 
-   default void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
-                                                      Vector3DReadOnly zdFinal)
+   default void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Tuple3DReadOnly z0, Tuple3DReadOnly zd0, Tuple3DReadOnly zFinal,
+                                                       Tuple3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
          getAxis(index).setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
