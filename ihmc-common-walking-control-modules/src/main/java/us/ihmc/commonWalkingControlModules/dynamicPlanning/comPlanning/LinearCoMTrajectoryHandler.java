@@ -80,6 +80,7 @@ public class LinearCoMTrajectoryHandler
       comTrajectory.setFifthCoefficient(ReferenceFrame.getWorldFrame(), rateX, rateY, rateZ);
       comTrajectory.setSixthCoefficient(ReferenceFrame.getWorldFrame(), start.getX(), start.getY(), start.getZ());
       this.comTrajectory.appendSegment(comTrajectory);
+      this.comTrajectory.initialize();
 
       Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
       vrpTrajectory.setLinear(0.0, duration, start, end);
@@ -113,18 +114,18 @@ public class LinearCoMTrajectoryHandler
          TimeIntervalReadOnly timeInterval = contacts.get(i).getTimeInterval();
          CoMTrajectory comTrajectory = comTrajectoryPool.add();
          comTrajectory.setCoefficients(coefficientArray, startRow);
-         comTrajectory.getTimeInterval().setInterval(0.0, timeInterval.getDuration());
+         comTrajectory.getTimeInterval().set(timeInterval);
          comTrajectory.setOmega(omega);
          this.comTrajectory.appendSegment(comTrajectory);
 
          computeVRPBoundaryConditionsFromCoefficients(startRow, coefficientArray, omega, timeInterval.getDuration(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
-         vrpTrajectory.setCubic(timeInterval.getStartTime(), timeInterval.getEndTime(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         vrpTrajectory.setCubic(0.0, timeInterval.getDuration(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          this.vrpTrajectories.add(vrpTrajectory);
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
-
       }
+      comTrajectory.initialize();
 
 
       hasTrajectory = true;

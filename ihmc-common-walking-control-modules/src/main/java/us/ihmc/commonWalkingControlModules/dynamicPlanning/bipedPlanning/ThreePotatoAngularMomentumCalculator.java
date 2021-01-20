@@ -15,9 +15,11 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.PolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
@@ -67,8 +69,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final FrameVector3D relativePotatoVelocity = new FrameVector3D();
    private final FrameVector3D relativePotatoAcceleration = new FrameVector3D();
 
-   private final RecyclingArrayList<PolynomialEstimator3D> angularMomentumEstimators = new RecyclingArrayList<>(PolynomialEstimator3D::new);
-   private final MultipleSegmentPositionTrajectoryGenerator<FramePolynomial3DBasics> angularMomentumTrajectory;
+   private final RecyclingArrayList<FixedFramePolynomialEstimator3D> angularMomentumEstimators = new RecyclingArrayList<>(() -> new FixedFramePolynomialEstimator3D(ReferenceFrame.getWorldFrame()));
+   private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> angularMomentumTrajectory;
 
    private final FootTrajectoryPredictor footTrajectoryPredictor = new FootTrajectoryPredictor(registry);
 
@@ -89,7 +91,7 @@ public class ThreePotatoAngularMomentumCalculator
       this.soleFrames = soleFrames;
       this.potatoMass.set(potatoMass);
 
-     angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum", 5, ReferenceFrame.getWorldFrame(), registry);
+     angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum", 50, ReferenceFrame.getWorldFrame(), registry);
 
       if (visualize)
       {
@@ -192,13 +194,13 @@ public class ThreePotatoAngularMomentumCalculator
       for (int i = 0; i < timeIntervals.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = timeIntervals.get(i).getTimeInterval();
-         PolynomialEstimator3D angularMomentumTrajectory = angularMomentumEstimators.add();
+         FixedFramePolynomialEstimator3D angularMomentumTrajectory = angularMomentumEstimators.add();
          angularMomentumTrajectory.reset();
          angularMomentumTrajectory.reshape(5);
 
          double duration = Math.min(timeInterval.getDuration(), sufficientlyLong);
 
-         angularMomentumTrajectory.getTimeInterval().setInterval(0.0, duration);
+         angularMomentumTrajectory.getTimeInterval().set(timeInterval);
 
          double segmentDt = Math.min(duration / 5, estimationDt);
          double globalStartTime = timeInterval.getStartTime();
@@ -237,6 +239,10 @@ public class ThreePotatoAngularMomentumCalculator
 
          angularMomentumTrajectory.initialize();
       }
+
+      angularMomentumTrajectory.clear();
+      angularMomentumTrajectory.appendSegments(angularMomentumEstimators);
+      angularMomentumTrajectory.initialize();
 
       visualize(comTrajectories, secondPotatoTrajectories, thirdPotatoTrajectories);
    }
@@ -311,27 +317,5 @@ public class ThreePotatoAngularMomentumCalculator
 
       angularMomentumToPack.cross(relativePotatoPosition, relativePotatoVelocity);
       angularMomentumToPack.scale(potatoMass);
-   }
-
-   public int getSegmentNumber(double time, List<? extends TimeIntervalReadOnly> segments)
-   {
-      double startTime = 0.0;
-      for (int i = 0; i < segments.size(); i++)
-      {
-         if (segments.get(i).intervalContains(time - startTime))
-            return i;
-
-         startTime += segments.get(i).getDuration();
-      }
-
-      return -1;
-   }
-
-   public double getTimeInSegment(int segmentNumber, double time, List<? extends TimeIntervalReadOnly> segments)
-   {
-      for (int i = 0; i < segmentNumber; i++)
-         time -= segments.get(i).getDuration();
-
-      return time;
    }
 }
