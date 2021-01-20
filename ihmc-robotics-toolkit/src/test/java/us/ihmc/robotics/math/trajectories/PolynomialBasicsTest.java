@@ -5,6 +5,7 @@ import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -296,9 +297,10 @@ public abstract class PolynomialBasicsTest
    @Test
    public void testMinimumJerkRandomInitialFinalConditions()
    {
-      PolynomialBasics minimumJerkTrajectory = getPolynomial(6);
+      PolynomialBasics trajectory = getPolynomial(6);
+      YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("Test", new YoRegistry("Test"));
 
-      int numberOfTests = 1000000;
+      int numberOfTests = 100000;
       double epsilon = 1e-3;
 
       Random random = new Random(1738L);
@@ -314,20 +316,31 @@ public abstract class PolynomialBasicsTest
          double t0 = RandomNumbers.nextDouble(random, -10.0, 10.0);
          double tf = t0 + RandomNumbers.nextDouble(random, 0.1, 10.0);
 
-         minimumJerkTrajectory.setMinimumJerk( t0, tf, x0, v0, a0, xf, vf, af);
+         trajectory.setQuintic( t0, tf, x0, v0, a0, xf, vf, af);
 
-         minimumJerkTrajectory.compute(RandomNumbers.nextDouble(random, -10.0, 10.0));
+         trajectory.compute(RandomNumbers.nextDouble(random, -10.0, 10.0));
 
-         minimumJerkTrajectory.compute(t0);
-         assertEquals(x0, minimumJerkTrajectory.getValue(), epsilon);
-         assertEquals(v0, minimumJerkTrajectory.getVelocity(), epsilon);
-         assertEquals(a0, minimumJerkTrajectory.getAcceleration(), epsilon);
+         trajectory.compute(t0);
+         assertEquals(x0, trajectory.getValue(), epsilon);
+         assertEquals(v0, trajectory.getVelocity(), epsilon);
+         assertEquals(a0, trajectory.getAcceleration(), epsilon);
 
-         minimumJerkTrajectory.compute(tf);
-         assertEquals(xf, minimumJerkTrajectory.getValue(), epsilon);
-         assertEquals(vf, minimumJerkTrajectory.getVelocity(), epsilon);
-         assertEquals(af, minimumJerkTrajectory.getAcceleration(), epsilon);
+         trajectory.compute(tf);
+         assertEquals(xf, trajectory.getValue(), epsilon);
+         assertEquals(vf, trajectory.getVelocity(), epsilon);
+         assertEquals(af, trajectory.getAcceleration(), epsilon);
 
+         minimumJerkTrajectory.setParams(x0, v0, a0, xf, vf, af, t0, tf);
+
+         for (double time = t0; time <= tf; time += 0.005)
+         {
+            trajectory.compute(time);
+            minimumJerkTrajectory.computeTrajectory(time);
+
+            assertEquals(minimumJerkTrajectory.getPosition(), trajectory.getValue(), 5e-3);
+            assertEquals(minimumJerkTrajectory.getVelocity(), trajectory.getVelocity(), 5e-2);
+            assertEquals(minimumJerkTrajectory.getAcceleration(), trajectory.getAcceleration(), 5e-1);
+         }
          //       System.out.println("i=" + i);
       }
    }
@@ -340,7 +353,7 @@ public abstract class PolynomialBasicsTest
       PolynomialBasics minimumJerkTrajectory = getPolynomial(6);
 
       double t = 0.5e-7;
-      minimumJerkTrajectory.setMinimumJerk(0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      minimumJerkTrajectory.setQuintic(0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       minimumJerkTrajectory.compute(t);
 
       if (Double.isNaN(minimumJerkTrajectory.getValue()) || Double.isNaN(minimumJerkTrajectory.getVelocity()) || Double.isNaN(minimumJerkTrajectory.getAcceleration()))
@@ -348,7 +361,7 @@ public abstract class PolynomialBasicsTest
          throw new RuntimeException("TestMinimumJerkTrajectory.testZeroLength: failed on zero displacement");
       }
 
-      minimumJerkTrajectory.setMinimumJerk(0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0);
+      minimumJerkTrajectory.setQuintic(0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0);
       minimumJerkTrajectory.compute(t);
 
       if (Double.isNaN(minimumJerkTrajectory.getValue()) || Double.isNaN(minimumJerkTrajectory.getVelocity()) || Double.isNaN(minimumJerkTrajectory.getAcceleration()))

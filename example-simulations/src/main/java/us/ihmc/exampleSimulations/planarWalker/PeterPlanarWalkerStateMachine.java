@@ -195,7 +195,7 @@ public class PeterPlanarWalkerStateMachine
          startingHipAngle.set(robot.getHipPosition(swingLeg));
          double currentKneePosition = robot.getKneePosition(swingLeg);
          double desiredRetractedPosition = 0.1;
-         trajectorySwingKnee.setMinimumJerk(0.0, swingTime.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
+         trajectorySwingKnee.setQuintic(0.0, swingTime.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
 
          //retract knee
          robot.setKneeTorque(swingLeg, -10.0);
@@ -207,14 +207,14 @@ public class PeterPlanarWalkerStateMachine
          if ((timeInState > swingTime.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
          {
             double currentKneePosition = robot.getKneePosition(swingLeg);
-            trajectorySwingKnee.setMinimumJerk(0.0, swingTime.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
+            trajectorySwingKnee.setQuintic(0.0, swingTime.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
             initalizedKneeExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
          else if ((timeInState > swingTime.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg);
-            trajectorySwingKnee.setMinimumJerk(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
+            trajectorySwingKnee.setQuintic(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
             initalizedKneeDoubleExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
@@ -225,8 +225,8 @@ public class PeterPlanarWalkerStateMachine
          controlKneeToPosition(swingLeg, desiredKneePositon, desiredKneeVelocity);
 
          desiredSwingLegHipAngle.set(getDesireHipAngle());
-         trajectorySwingHip.setMinimumJerk(0.0,
-                                           swingTime.getDoubleValue(), startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0);
+         trajectorySwingHip.setQuintic(0.0,
+                                       swingTime.getDoubleValue(), startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0);
 
          trajectorySwingHip.compute(timeInState);
          double desiredHipAngle = trajectorySwingHip.getValue();

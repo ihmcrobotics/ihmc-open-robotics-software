@@ -305,15 +305,6 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
                                          zdf.getElement(index), zddf.getElement(index));
    }
 
-   default void setMinimumJerk(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zf, Vector3DReadOnly zdf,
-                           Vector3DReadOnly zddf)
-   {
-      for (int index = 0; index < 3; index++)
-         getAxis(index).setMinimumJerk(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zf.getElement(index),
-                                   zdf.getElement(index), zddf.getElement(index));
-   }
-
-
    default void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
                                       Point3DReadOnly zIntermediate0, Point3DReadOnly zIntermediate1, Point3DReadOnly zf, Vector3DReadOnly zdf)
    {

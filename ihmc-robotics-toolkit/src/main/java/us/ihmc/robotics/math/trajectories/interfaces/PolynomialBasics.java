@@ -188,29 +188,6 @@ public interface PolynomialBasics extends PolynomialReadOnly
       initialize();
    }
 
-   default void setMinimumJerk(double t0, double tFinal, double z0, double zd0, double zdd0, double zf, double zdf, double zddf)
-   {
-      setTime(t0, tFinal);
-      reshape(6);
-
-      double dt = tFinal - t0;
-      double dt2 = dt * dt;
-
-      setCoefficientUnsafe(0, z0);
-      setCoefficientUnsafe(1, zd0 * dt);
-      setCoefficientUnsafe(2, 0.5 * zdd0 * dt2);
-
-      double c3 = -10.0 * z0 - 6.0 * zd0 * dt - 1.50 * zdd0 * dt2 + 10.0000 * zf - 4.0 * zdf * dt + 0.50 * zddf * dt2;
-      double c4 = 15.0 * z0 + 8.0 * zd0 * dt + 1.5 * zdd0 * dt2 - 15.0 * zf + 7.0 * zdf * dt - 1.0 * zddf * dt2;
-      double c5 = -6.0 * z0 - 3.0 * zd0 * dt - 0.5 * zdd0 * dt2 + 6.0 * zf - 3.0 * zdf * dt + 0.5 * zddf * dt2;
-
-      setCoefficientUnsafe(3, c3);
-      setCoefficientUnsafe(4, c4);
-      setCoefficientUnsafe(5, c5);
-
-      setIsConstraintMatrixUpToDate(false);
-   }
-
    default void setQuinticUsingWayPoint(double t0,
                                         double tIntermediate,
                                         double tFinal,
