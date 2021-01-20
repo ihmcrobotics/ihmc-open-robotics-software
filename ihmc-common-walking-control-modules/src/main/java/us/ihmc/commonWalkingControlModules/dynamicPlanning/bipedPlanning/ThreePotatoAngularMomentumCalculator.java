@@ -19,6 +19,7 @@ import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.PolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
@@ -49,6 +50,10 @@ public class ThreePotatoAngularMomentumCalculator
                                                                                        registry);
    private final YoFrameVector3D predictedAngularMomentum = new YoFrameVector3D("predictedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedAngularMomentumRate = new YoFrameVector3D("predictedAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
+
+
+   private final YoFramePoint3D predictedFirstPotatoPosition = new YoFramePoint3D("predictedFirstPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D predictedFirstPotatoVelocity = new YoFrameVector3D("predictedFirstPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D predictedSecondPotatoPosition = new YoFramePoint3D("predictedSecondPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedSecondPotatoVelocity = new YoFrameVector3D("predictedSecondPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D predictedThirdPotatoPosition = new YoFramePoint3D("predictedThirdPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -57,8 +62,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFrameVector3D actualPotatoModelMomentum = new YoFrameVector3D("actualPotatoModelMomentum", ReferenceFrame.getWorldFrame(), registry);
 
    private MultipleSegmentPositionTrajectoryGenerator<?> predictedCoMTrajectory;
-   private MultipleSegmentPositionTrajectoryGenerator<?> predictedSecondPotatoTrajectory;
-   private MultipleSegmentPositionTrajectoryGenerator<?> predictedThirdPotatoTrajectory;
+   private MultipleWaypointsPositionTrajectoryGenerator predictedSecondPotatoTrajectory;
+   private MultipleWaypointsPositionTrajectoryGenerator predictedThirdPotatoTrajectory;
 
    private final FrameVector3D totalAngularMomentum = new FrameVector3D();
    private final FrameVector3D totalTorque = new FrameVector3D();
@@ -145,9 +150,9 @@ public class ThreePotatoAngularMomentumCalculator
 
       totalAngularMomentum.setToZero();
       totalTorque.setToZero();
-      if (time > predictedCoMTrajectory.getEndTime() || time > predictedSecondPotatoTrajectory.getEndTime() || time > predictedThirdPotatoTrajectory.getEndTime())
-         return;
 
+      if (time > predictedCoMTrajectory.getEndTime() || time > predictedSecondPotatoTrajectory.getLastWaypointTime() || time > predictedThirdPotatoTrajectory.getLastWaypointTime())
+         return;
 
       predictedCoMTrajectory.compute(time);
       predictedSecondPotatoTrajectory.compute(time);
@@ -160,6 +165,8 @@ public class ThreePotatoAngularMomentumCalculator
       totalAngularMomentum.add(angularMomentum);
       totalTorque.add(torque);
 
+      predictedFirstPotatoPosition.set(predictedCoMTrajectory.getPosition());
+      predictedFirstPotatoVelocity.set(predictedCoMTrajectory.getVelocity());
       predictedSecondPotatoPosition.set(predictedSecondPotatoTrajectory.getPosition());
       predictedSecondPotatoVelocity.set(predictedSecondPotatoTrajectory.getVelocity());
       predictedThirdPotatoPosition.set(predictedThirdPotatoTrajectory.getPosition());
@@ -182,8 +189,8 @@ public class ThreePotatoAngularMomentumCalculator
 
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
-                                                  MultipleSegmentPositionTrajectoryGenerator<?> secondPotatoTrajectories,
-                                                  MultipleSegmentPositionTrajectoryGenerator<?> thirdPotatoTrajectories)
+                                                  MultipleWaypointsPositionTrajectoryGenerator secondPotatoTrajectories,
+                                                  MultipleWaypointsPositionTrajectoryGenerator thirdPotatoTrajectories)
    {
       this.predictedCoMTrajectory = comTrajectories;
       this.predictedSecondPotatoTrajectory = secondPotatoTrajectories;
@@ -203,38 +210,37 @@ public class ThreePotatoAngularMomentumCalculator
          angularMomentumTrajectory.getTimeInterval().set(timeInterval);
 
          double segmentDt = Math.min(duration / 5, estimationDt);
-         double globalStartTime = timeInterval.getStartTime();
 
-         for (double time = 0.0; time <= duration; time += segmentDt)
+         for (double timeInInterval = 0.0; timeInInterval <= duration; timeInInterval += segmentDt)
          {
-            double globalTime = time + globalStartTime;
+            double time = timeInInterval + timeInterval.getStartTime();
 
-            if (globalTime > secondPotatoTrajectories.getEndTime() && globalTime > thirdPotatoTrajectories.getEndTime() || globalStartTime > comTrajectories.getEndTime())
+            if (time > secondPotatoTrajectories.getLastWaypointTime() && time > thirdPotatoTrajectories.getLastWaypointTime() || time > comTrajectories.getEndTime())
                break;
 
-            comTrajectories.compute(time);
+            comTrajectories.compute(timeInInterval);
             totalAngularMomentum.setToZero();
             totalTorque.setToZero();
 
-            if (globalTime > secondPotatoTrajectories.getEndTime())
+            if (time > secondPotatoTrajectories.getLastWaypointTime())
             {
-               secondPotatoTrajectories.compute(globalTime);
+               secondPotatoTrajectories.compute(time);
                computeAngularMomentumAtInstant(comTrajectories, secondPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
                totalAngularMomentum.add(angularMomentum);
 
                totalTorque.add(torque);
             }
 
-            if (globalTime > thirdPotatoTrajectories.getEndTime())
+            if (time > thirdPotatoTrajectories.getLastWaypointTime())
             {
-               thirdPotatoTrajectories.compute(globalTime);
+               thirdPotatoTrajectories.compute(time);
                computeAngularMomentumAtInstant(comTrajectories, thirdPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
                totalAngularMomentum.add(angularMomentum);
 
                totalTorque.add(torque);
             }
 
-            angularMomentumTrajectory.addObjectivePosition(time, totalAngularMomentum);
+            angularMomentumTrajectory.addObjectivePosition(timeInInterval, totalAngularMomentum);
          }
 
          angularMomentumTrajectory.initialize();
@@ -248,13 +254,13 @@ public class ThreePotatoAngularMomentumCalculator
    }
 
    private void visualize(MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
-                          MultipleSegmentPositionTrajectoryGenerator<?> secondPotatoTrajectories,
-                          MultipleSegmentPositionTrajectoryGenerator<?> thirdPotatoTrajectories)
+                          MultipleWaypointsPositionTrajectoryGenerator secondPotatoTrajectories,
+                          MultipleWaypointsPositionTrajectoryGenerator thirdPotatoTrajectories)
    {
       if (!visualize)
          return;
 
-      double duration = Math.min(comTrajectories.getEndTime(), Math.min(secondPotatoTrajectories.getEndTime(), Math.min(thirdPotatoTrajectories.getEndTime(), sufficientlyLong)));
+      double duration = Math.min(comTrajectories.getEndTime(), Math.min(secondPotatoTrajectories.getLastWaypointTime(), Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLong)));
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();
