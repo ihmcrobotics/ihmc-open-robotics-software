@@ -42,14 +42,55 @@ public class Polynomial implements PolynomialBasics
       reset();
    }
 
-   public Polynomial(double tInitial, double tFinal, double[] coefficents)
+   public Polynomial(double constant)
    {
-      this(coefficents.length);
+      this(new double[] {constant});
+   }
 
-      setNumberOfCoefficients(coefficents.length);
+   public Polynomial(double coefficient1, double constant)
+   {
+      this(new double[] {constant, coefficient1});
+   }
+
+   public Polynomial(double coefficient2, double coefficient1, double constant)
+   {
+      this(new double[] {constant, coefficient1, coefficient2});
+   }
+
+   public Polynomial(double coefficient3, double coefficient2, double coefficient1, double constant)
+   {
+      this(new double[] {constant, coefficient1, coefficient2, coefficient3});
+   }
+
+   public Polynomial(double tInitial, double tFinal, double[] coefficients)
+   {
+      this(tInitial, tFinal, coefficients, true);
+   }
+
+   public Polynomial(double[] coefficients)
+   {
+      this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, coefficients, true);
+   }
+
+   public Polynomial(double[] coefficients, boolean coefficientsAreLowestOrderFirst)
+   {
+      this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, coefficients, coefficientsAreLowestOrderFirst);
+   }
+
+   public Polynomial(double tInitial, double tFinal, double[] coefficients, boolean coefficientsAreLowestOrderFirst)
+   {
+      this(coefficients.length);
+
+      setNumberOfCoefficients(coefficients.length);
       setTime(tInitial, tFinal);
+
       for (int i = 0; i < Math.min(getMaximumNumberOfCoefficients(), getNumberOfCoefficients()); i++)
-         setCoefficient(i, coefficents[i]);
+      {
+         if (coefficientsAreLowestOrderFirst)
+            setCoefficient(i, coefficients[i]);
+         else
+            setCoefficient(i, coefficients[coefficients.length - 1 - i]);
+      }
    }
 
    @Override

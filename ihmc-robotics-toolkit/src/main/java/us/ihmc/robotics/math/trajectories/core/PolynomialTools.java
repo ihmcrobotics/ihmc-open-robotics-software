@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.core;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 
 public class PolynomialTools
 {
@@ -46,7 +48,7 @@ public class PolynomialTools
     * @param x
     * @return
     */
-   public void getXPowersDerivativeVector(double[] xPowersToPack, DMatrixRMaj xPowersDerivativeVectorToPack, int order, double x, int numberOfCoefficients)
+   public static void getXPowersDerivativeVector(double[] xPowersToPack, DMatrixRMaj xPowersDerivativeVectorToPack, int order, double x, int numberOfCoefficients)
    {
       PolynomialTools.setXPowers(xPowersToPack, x);
       xPowersDerivativeVectorToPack.zero();
@@ -57,5 +59,20 @@ public class PolynomialTools
          derivativeCoefficient = PolynomialTools.getDerivativeCoefficient(order, i);
          xPowersDerivativeVectorToPack.set(i, derivativeCoefficient * xPowersToPack[i - order]);
       }
+   }
+
+   public static ComplexNumber evaluate(PolynomialBasics polynomialBasics, ComplexNumber input)
+   {
+      ComplexNumber x_n = new ComplexNumber(1.0, 0.0);
+      ComplexNumber ret = new ComplexNumber(0.0, 0.0);
+
+      for (int i = 0; i < polynomialBasics.getNumberOfCoefficients(); i++)
+      {
+         double coefficient = polynomialBasics.getCoefficient(i);
+         ret = ret.plus(x_n.times(coefficient));
+         x_n = x_n.times(input);
+      }
+
+      return ret;
    }
 }
