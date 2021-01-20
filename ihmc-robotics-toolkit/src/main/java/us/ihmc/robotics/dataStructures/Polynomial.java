@@ -13,6 +13,7 @@ import us.ihmc.commons.MathTools;
  * @author IHMC Biped Team
  * @version 1.0
  */
+@Deprecated
 public class Polynomial
 {
    private final double[] coefficients;
