@@ -1,11 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
@@ -159,6 +156,20 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
       xEstimator.addObjectiveVelocity(weight, time, value.getX());
       yEstimator.addObjectiveVelocity(weight, time, value.getY());
       zEstimator.addObjectiveVelocity(weight, time, value.getZ());
+   }
+
+   public void addConstraintPosition(double time, Tuple3DReadOnly value)
+   {
+      xEstimator.addConstraintPosition(time, value.getX());
+      yEstimator.addConstraintPosition(time, value.getY());
+      zEstimator.addConstraintPosition(time, value.getZ());
+   }
+
+   public void addConstraintVelocity(double time, Tuple3DReadOnly value)
+   {
+      xEstimator.addConstraintVelocity(time, value.getX());
+      yEstimator.addConstraintVelocity(time, value.getY());
+      zEstimator.addConstraintVelocity(time, value.getZ());
    }
 
    @Override

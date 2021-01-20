@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.matrixlib.MatrixTools;
@@ -15,6 +16,14 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    private final DMatrixRMaj hessian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj gradient = new DMatrixRMaj(0, 0);
+
+   private final DMatrixRMaj equalityConstraintJacobian = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj equalityConstraintJacobianTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj equalityConstraintObjective = new DMatrixRMaj(0, 0);
+
+   private final DMatrixRMaj A = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj b = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj coefficientsAndLagrangeMultipliers = new DMatrixRMaj(0, 0);
 
    private final DMatrixRMaj coefficients = new DMatrixRMaj(0, 0);
 
@@ -51,9 +60,15 @@ public class PolynomialEstimator implements TimeIntervalBasics
       gradient.reshape(order, 1);
       coefficients.reshape(order, 1);
 
+      equalityConstraintJacobian.reshape(0, order);
+      equalityConstraintObjective.reshape(0, 0);
+
       hessian.zero();
       gradient.zero();
       coefficients.zero();
+
+      equalityConstraintJacobian.zero();
+      equalityConstraintObjective.zero();
    }
 
    @Override
@@ -172,12 +187,86 @@ public class PolynomialEstimator implements TimeIntervalBasics
       }
    }
 
+   public void addConstraintPosition(double time, double value)
+   {
+      int previousSize = equalityConstraintObjective.getNumRows();
+      int problemSize = equalityConstraintJacobian.getNumCols();
+
+      equalityConstraintJacobian.reshape(previousSize + 1, problemSize, true);
+      equalityConstraintObjective.reshape(previousSize + 1, 1, true);
+
+      double timeI = 1.0;
+      for (int idx = 0; idx < order; idx++)
+      {
+         equalityConstraintJacobian.set(previousSize, idx, timeI);
+         timeI *= time;
+      }
+
+      equalityConstraintObjective.set(previousSize, 0, value);
+   }
+
+   public void addConstraintVelocity(double time, double value)
+   {
+      int previousSize = equalityConstraintObjective.getNumRows();
+      int problemSize = equalityConstraintJacobian.getNumCols();
+
+      equalityConstraintJacobian.reshape(previousSize + 1, problemSize, true);
+      equalityConstraintObjective.reshape(previousSize + 1, 1, true);
+
+      double timeI = 1.0;
+      for (int idx = 1; idx < order; idx++)
+      {
+         equalityConstraintJacobian.set(previousSize, idx, idx * timeI);
+         timeI *= time;
+      }
+
+      equalityConstraintObjective.set(previousSize, 0, value);
+   }
+
+   public void addConstraintAcceleration(double time, double value)
+   {
+      int previousSize = equalityConstraintObjective.getNumRows();
+      int problemSize = equalityConstraintJacobian.getNumCols();
+
+      equalityConstraintJacobian.reshape(previousSize + 1, problemSize, true);
+      equalityConstraintObjective.reshape(previousSize + 1, 1, true);
+
+      double timeI = 1.0;
+      for (int idx = 2; idx < order; idx++)
+      {
+         equalityConstraintJacobian.set(previousSize, idx, idx * (idx - 1) * timeI);
+         timeI *= time;
+      }
+
+      equalityConstraintObjective.set(previousSize, 0, value);
+   }
+
    public void solve()
    {
       MatrixTools.addDiagonal(hessian, regularization);
 
-      solver.setA(hessian);
-      solver.solve(gradient, coefficients);
+      int constraints = equalityConstraintObjective.getNumRows();
+      A.reshape(order + constraints, order + constraints);
+      b.reshape(order + constraints, 1);
+      coefficientsAndLagrangeMultipliers.reshape(order + constraints, 1);
+
+      A.zero();
+      b.zero();
+
+      equalityConstraintJacobianTranspose.reshape(order, constraints);
+      CommonOps_DDRM.transpose(equalityConstraintJacobian, equalityConstraintJacobianTranspose);
+
+      MatrixTools.setMatrixBlock(A, 0, 0, hessian, 0, 0, order, order, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, order, equalityConstraintJacobianTranspose, 0, 0, order, constraints, 1.0);
+      MatrixTools.setMatrixBlock(A, order, 0, equalityConstraintJacobian, 0, 0, constraints, order, 1.0);
+
+      MatrixTools.setMatrixBlock(b, 0, 0, gradient, 0, 0, order, 1, 1.0);
+      MatrixTools.setMatrixBlock(b, order, 0, equalityConstraintObjective, 0, 0, constraints, 1, 1.0);
+
+      solver.setA(A);
+      solver.solve(b, coefficientsAndLagrangeMultipliers);
+
+      MatrixTools.setMatrixBlock(coefficients, 0, 0, coefficientsAndLagrangeMultipliers, 0, 0, order, 1, 1.0);
    }
 
    public void compute(double time)
