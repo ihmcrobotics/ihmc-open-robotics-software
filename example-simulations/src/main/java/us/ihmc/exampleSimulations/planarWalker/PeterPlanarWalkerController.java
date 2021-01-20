@@ -158,7 +158,7 @@ public class PeterPlanarWalkerController implements RobotController
          if ((timeInState > swingTimeForThisStep.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setMinimumJerk(0.0,
+            trajectorySwingKnee.setQuintic(0.0,
                                                swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
             initalizedKneeExtension.set(true);
             kneeMoveStartTime.set(timeInState);
@@ -166,7 +166,7 @@ public class PeterPlanarWalkerController implements RobotController
          else if ((timeInState > swingTimeForThisStep.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setMinimumJerk(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
+            trajectorySwingKnee.setQuintic(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
             initalizedKneeDoubleExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
@@ -177,8 +177,8 @@ public class PeterPlanarWalkerController implements RobotController
          controlKneeToPosition(swingLeg.getEnumValue(), desiredKneePositon, desiredKneeVelocity);
 
          desiredSwingLegHipAngle.set(getDesireHipAngle());
-         trajectorySwingHip.setMinimumJerk(0.0,
-                                      swingTimeForThisStep.getDoubleValue(), startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0);
+         trajectorySwingHip.setQuintic(0.0,
+                                       swingTimeForThisStep.getDoubleValue(), startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0);
 
          trajectorySwingHip.compute(timeInState);
          double desiredHipAngle = trajectorySwingHip.getValue();
@@ -218,7 +218,7 @@ public class PeterPlanarWalkerController implements RobotController
 
          double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
          double desiredRetractedPosition = 0.1;
-         trajectorySwingKnee.setMinimumJerk(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
+         trajectorySwingKnee.setQuintic(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
 
          //retract knee
          robot.setKneeTorque(swingLeg.getEnumValue(), -10.0);

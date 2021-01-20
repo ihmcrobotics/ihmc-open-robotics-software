@@ -435,7 +435,7 @@ public class SimpleWalkerController implements RobotController
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
             trajectorySwingKnee
-                  .setMinimumJerk(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
+                  .setQuintic(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
             initalizedKneeExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
@@ -443,7 +443,7 @@ public class SimpleWalkerController implements RobotController
          else if ((timeInState > swingTimeForThisStep.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setMinimumJerk(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
+            trajectorySwingKnee.setQuintic(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
             initalizedKneeDoubleExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
@@ -455,13 +455,13 @@ public class SimpleWalkerController implements RobotController
 
 
          desiredSwingLegHipPitchAngle.set(getDesiredHipPitchAngle(nextFootStepX.getDoubleValue()));
-         trajectorySwingHipPitch.setMinimumJerk(0.0,
-                                                swingTimeForThisStep.getDoubleValue(), startingHipPitchAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipPitchAngle.getDoubleValue(), 0.0, 0.0);
+         trajectorySwingHipPitch.setQuintic(0.0,
+                                            swingTimeForThisStep.getDoubleValue(), startingHipPitchAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipPitchAngle.getDoubleValue(), 0.0, 0.0);
 
          desiredSwingLegHipRollAngle.set(getDesiredHipRollAngle());
-         trajectorySwingHipRoll.setMinimumJerk(0.0,
+         trajectorySwingHipRoll.setQuintic(0.0,
 
-                                          swingTimeForThisStep.getDoubleValue(), startingHipRollAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipRollAngle.getDoubleValue(), 0.0, 0.0);
+                                           swingTimeForThisStep.getDoubleValue(), startingHipRollAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipRollAngle.getDoubleValue(), 0.0, 0.0);
 
          /**
           * Control part.
@@ -639,7 +639,7 @@ public class SimpleWalkerController implements RobotController
 
          double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
          double desiredRetractedPosition = 0.1;
-         trajectorySwingKnee.setMinimumJerk(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
+         trajectorySwingKnee.setQuintic(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
 
          //retract knee
          robot.setKneeTorque(swingLeg.getEnumValue(), -10.0);

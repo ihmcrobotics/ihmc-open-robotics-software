@@ -155,7 +155,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
          stepTime.set(1e-10);
       }
 
-      minimumJerkTrajectory.setMinimumJerk(0.0, stepTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+      minimumJerkTrajectory.setQuintic(0.0, stepTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
       double middleOfTrajectoryParameter = 0.5;
       parabolicTrajectoryGenerator.initialize(initialDesiredPosition, finalDesiredPosition, groundClearance.getDoubleValue(), middleOfTrajectoryParameter);
    }

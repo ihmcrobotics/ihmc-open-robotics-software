@@ -612,7 +612,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          PolynomialBasics spline = transitionSplines.get(oneDoFJoint);
          double initialPosition = initialPositions.get(oneDoFJoint).getDoubleValue();
          double finalPositon = finalPositions.get(oneDoFJoint).getDoubleValue();
-         spline.setMinimumJerk(0.0, splineDuration.getDoubleValue(), initialPosition, 0.0, 0.0, finalPositon, 0.0, 0.0);
+         spline.setQuintic(0.0, splineDuration.getDoubleValue(), initialPosition, 0.0, 0.0, finalPositon, 0.0, 0.0);
       }
    }
 
