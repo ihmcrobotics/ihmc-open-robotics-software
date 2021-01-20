@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -324,16 +325,15 @@ public abstract class Polynomial3DBasicsTest
    @Test
    public void testTransformCubic() throws Exception
    {
-      fail();
       Random random = new Random(3453);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
-         Polynomial3DBasics trajectory = getPolynomial(maxNumberOfCoefficients);
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 4, 10);
+         Polynomial3DBasics transformedTrajectory = getPolynomial(maxNumberOfCoefficients);
+         Polynomial3DBasics trajectoryWithTransformedInputs = getPolynomial(maxNumberOfCoefficients);
          double t0 = random.nextDouble();
          double tf = t0 + 0.5;
-
 
 
          Point3D z0 = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
@@ -341,45 +341,94 @@ public abstract class Polynomial3DBasicsTest
          Point3D zf = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
          Vector3D zdf = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
-         if (maxNumberOfCoefficients < 4)
+         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+
+         transformedTrajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+         transformedTrajectory.applyTransform(transform);
+
+         Point3D transformedz0 = new Point3D(z0);
+         Vector3D transformedzd0 = new Vector3D(zd0);
+         Point3D transformedzf = new Point3D(zf);
+         Vector3D transformedzdf = new Vector3D(zdf);
+
+         transformedz0.applyTransform(transform);
+         transformedzd0.applyTransform(transform);
+         transformedzf.applyTransform(transform);
+         transformedzdf.applyTransform(transform);
+
+         transformedTrajectory.compute(t0);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(transformedz0, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformedzd0, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+
+         transformedTrajectory.compute(tf);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(transformedzf, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformedzdf, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+
+         trajectoryWithTransformedInputs.setCubic(t0, tf, transformedz0, transformedzd0, transformedzf, transformedzdf);
+
+         double dt = 1.0e-3;
+
+         for (double t = t0; t <= tf; t += dt)
          {
-            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setCubic(t0, tf, z0, zd0, zf, zdf));
-            continue;
+            transformedTrajectory.compute(t);
+            trajectoryWithTransformedInputs.compute(t);
+
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectoryWithTransformedInputs.getPosition(), transformedTrajectory.getPosition(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getVelocity(), transformedTrajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getAcceleration(), transformedTrajectory.getAcceleration(), SMALL_EPSILON);
+
          }
+      }
 
-         assertEquals(maxNumberOfCoefficients, trajectory.getMaximumNumberOfCoefficients());
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 4, 10);
+         Polynomial3DBasics transformedTrajectory = getPolynomial(maxNumberOfCoefficients);
+         Polynomial3DBasics trajectoryWithTransformedInputs = getPolynomial(maxNumberOfCoefficients);
+         double t0 = random.nextDouble();
+         double tf = t0 + 0.5;
 
 
-         trajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+         Point3D z0 = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
+         Vector3D zd0 = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Point3D zf = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
+         Vector3D zdf = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
-         trajectory.compute(t0);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(z0, trajectory.getPosition(), SMALL_EPSILON);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
+         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
-         Polynomial3DBasics derivative = getPolynomial(3);
-         derivative.setQuadratic(t0, tf, new Point3D(zd0), trajectory.getAcceleration(), new Point3D(zdf));
+         transformedTrajectory.setCubic(t0, tf, z0, zd0, zf, zdf);
+         transformedTrajectory.applyInverseTransform(transform);
 
-         trajectory.compute(tf);
-         EuclidCoreTestTools.assertTuple3DEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         Point3D transformedz0 = new Point3D(z0);
+         Vector3D transformedzd0 = new Vector3D(zd0);
+         Point3D transformedzf = new Point3D(zf);
+         Vector3D transformedzdf = new Vector3D(zdf);
 
-         double dt = 1.0e-8;
+         transformedz0.applyInverseTransform(transform);
+         transformedzd0.applyInverseTransform(transform);
+         transformedzf.applyInverseTransform(transform);
+         transformedzdf.applyInverseTransform(transform);
 
-         for (double t = t0; t <= tf; t += (tf - t0) / 1000)
+         transformedTrajectory.compute(t0);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(transformedz0, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformedzd0, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+
+         transformedTrajectory.compute(tf);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(transformedzf, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformedzdf, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+
+         trajectoryWithTransformedInputs.setCubic(t0, tf, transformedz0, transformedzd0, transformedzf, transformedzdf);
+
+         double dt = 1.0e-3;
+
+         for (double t = t0; t <= tf; t += dt)
          {
-            trajectory.compute(t);
-            derivative.compute(t);
+            transformedTrajectory.compute(t);
+            trajectoryWithTransformedInputs.compute(t);
 
-            EuclidCoreTestTools.assertTuple3DEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
-            EuclidCoreTestTools.assertVector3DGeometricallyEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
-
-            trajectory.compute(t + dt);
-            Point3DReadOnly nextPosition = new Point3D(trajectory.getPosition());
-            trajectory.compute(t - dt);
-            Point3DReadOnly lastPosition = new Point3D(trajectory.getPosition());
-            Vector3D velocityExpected = new Vector3D();
-            velocityExpected.sub(nextPosition, lastPosition);
-            velocityExpected.scale(0.5 / dt);
-            EuclidCoreTestTools.assertVector3DGeometricallyEquals(velocityExpected, trajectory.getVelocity(), 5.0e-6);
+            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectoryWithTransformedInputs.getPosition(), transformedTrajectory.getPosition(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getVelocity(), transformedTrajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getAcceleration(), transformedTrajectory.getAcceleration(), SMALL_EPSILON);
 
          }
       }
