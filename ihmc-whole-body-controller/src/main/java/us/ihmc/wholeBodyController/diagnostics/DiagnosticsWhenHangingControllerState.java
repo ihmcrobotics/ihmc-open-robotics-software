@@ -25,7 +25,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -58,7 +59,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final LinkedHashMap<OneDoFJointBasics, PDController> pdControllers = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> initialPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> finalPositions = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJointBasics, YoMinimumJerkTrajectory> transitionSplines = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJointBasics, PolynomialBasics> transitionSplines = new LinkedHashMap<>();
 
    private final YoBoolean manualMode = new YoBoolean("diagnosticsWhenHangingManualMode", registry);
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> desiredPositions = new LinkedHashMap<>();
@@ -463,7 +464,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       {
          for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            YoMinimumJerkTrajectory spline = transitionSplines.get(oneDoFJoints.get(i));
+            PolynomialBasics spline = transitionSplines.get(oneDoFJoints.get(i));
             if (timeInCurrentState < spline.getFinalTime())
                return false;
          }
@@ -549,8 +550,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private void updatePDController(OneDoFJointBasics oneDoFJoint, double timeInCurrentState)
    {
       PDController pdController = pdControllers.get(oneDoFJoint);
-      YoMinimumJerkTrajectory transitionSpline = transitionSplines.get(oneDoFJoint);
-      double desiredPosition = transitionSpline.getPosition();
+      PolynomialBasics transitionSpline = transitionSplines.get(oneDoFJoint);
+      double desiredPosition = transitionSpline.getValue();
       double desiredVelocity = transitionSpline.getVelocity();
 
       // Setting the desired positions via SCS ui.
@@ -581,8 +582,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    private void updateTrajectory(OneDoFJointBasics oneDoFJoint, double timeInCurrentState)
    {
-      YoMinimumJerkTrajectory transitionSpline = transitionSplines.get(oneDoFJoint);
-      transitionSpline.computeTrajectory(timeInCurrentState);
+      PolynomialBasics transitionSpline = transitionSplines.get(oneDoFJoint);
+      transitionSpline.compute(timeInCurrentState);
    }
 
    private void createTransitionSplines()
@@ -590,7 +591,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints.get(i);
-         YoMinimumJerkTrajectory spline = new YoMinimumJerkTrajectory(oneDoFJoint.getName() + "TransitionSpline", registry);
+         PolynomialBasics spline = new YoPolynomial(oneDoFJoint.getName() + "TransitionSpline", 6, registry);
          transitionSplines.put(oneDoFJoint, spline);
 
          //       spline.setParams(initialPositions.get(oneDoFJoint), 0.0, 0.0, finalPositions.get(oneDoFJoint), 0.0, 0.0, 0.0, 3.0);
@@ -608,10 +609,10 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints.get(i);
-         YoMinimumJerkTrajectory spline = transitionSplines.get(oneDoFJoint);
+         PolynomialBasics spline = transitionSplines.get(oneDoFJoint);
          double initialPosition = initialPositions.get(oneDoFJoint).getDoubleValue();
          double finalPositon = finalPositions.get(oneDoFJoint).getDoubleValue();
-         spline.setParams(initialPosition, 0.0, 0.0, finalPositon, 0.0, 0.0, 0.0, splineDuration.getDoubleValue());
+         spline.setMinimumJerk(0.0, splineDuration.getDoubleValue(), initialPosition, 0.0, 0.0, finalPositon, 0.0, 0.0);
       }
    }
 

@@ -15,7 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -106,10 +107,10 @@ public class SimpleWalkerController implements RobotController
    private AlphaFilteredYoVariable filteredDesiredVelocityY = new AlphaFilteredYoVariable("filteredDesiredVelocityY", registry, alphaFilterVariableY,
                                                                                           desiredBodyVelocityY);
 
-   private YoMinimumJerkTrajectory trajectorySwingHipPitch;
-   private YoMinimumJerkTrajectory trajectorySwingHipRoll;
-   private YoMinimumJerkTrajectory trajectorySwingKnee;
-   private YoMinimumJerkTrajectory trajectorySupportKnee;
+   private PolynomialBasics trajectorySwingHipPitch;
+   private PolynomialBasics trajectorySwingHipRoll;
+   private PolynomialBasics trajectorySwingKnee;
+   private PolynomialBasics trajectorySupportKnee;
 
    private final YoFramePoint3D centerOfMassPosition;
    private final YoFramePoint2D centerOfMassPosition2D;
@@ -340,10 +341,10 @@ public class SimpleWalkerController implements RobotController
 
       }
 
-      trajectorySwingHipPitch = new YoMinimumJerkTrajectory("trajectorySwingHipPitch", registry);
-      trajectorySwingHipRoll = new YoMinimumJerkTrajectory("trajectorySwingHipRoll", registry);
-      trajectorySwingKnee = new YoMinimumJerkTrajectory("trajectorySwingKnee", registry);
-      trajectorySupportKnee = new YoMinimumJerkTrajectory("trajectorySupportKnee", registry);
+      trajectorySwingHipPitch = new YoPolynomial("trajectorySwingHipPitch", 6, registry);
+      trajectorySwingHipRoll = new YoPolynomial("trajectorySwingHipRoll", 6, registry);
+      trajectorySwingKnee = new YoPolynomial("trajectorySwingKnee", 6, registry);
+      trajectorySupportKnee = new YoPolynomial("trajectorySupportKnee", 6, registry);
 
       desiredHeight.set(robot.nominalHeight);
       desiredKneeStance.set(robot.lowerLinkLength / 2.0);
@@ -434,7 +435,7 @@ public class SimpleWalkerController implements RobotController
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
             trajectorySwingKnee
-                  .setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0, 0.0, swingTimeForThisStep.getDoubleValue() / 2.0);
+                  .setMinimumJerk(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
             initalizedKneeExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
@@ -442,33 +443,33 @@ public class SimpleWalkerController implements RobotController
          else if ((timeInState > swingTimeForThisStep.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0, 0.0, 0.125);
+            trajectorySwingKnee.setMinimumJerk(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
             initalizedKneeDoubleExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
 
-         trajectorySwingKnee.computeTrajectory(timeInState - kneeMoveStartTime.getDoubleValue());
-         double desiredKneePosition = trajectorySwingKnee.getPosition();
+         trajectorySwingKnee.compute(timeInState - kneeMoveStartTime.getDoubleValue());
+         double desiredKneePosition = trajectorySwingKnee.getValue();
          double desiredKneeVelocity = trajectorySwingKnee.getVelocity();
          controlKneeToPosition(swingLeg.getEnumValue(), desiredKneePosition, desiredKneeVelocity);
 
 
          desiredSwingLegHipPitchAngle.set(getDesiredHipPitchAngle(nextFootStepX.getDoubleValue()));
-         trajectorySwingHipPitch.setParams(startingHipPitchAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipPitchAngle.getDoubleValue(), 0.0, 0.0, 0.0,
-                                           swingTimeForThisStep.getDoubleValue());
+         trajectorySwingHipPitch.setMinimumJerk(0.0,
+                                                swingTimeForThisStep.getDoubleValue(), startingHipPitchAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipPitchAngle.getDoubleValue(), 0.0, 0.0);
 
          desiredSwingLegHipRollAngle.set(getDesiredHipRollAngle());
-         trajectorySwingHipRoll.setParams(startingHipRollAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipRollAngle.getDoubleValue(), 0.0, 0.0, 0.0,
+         trajectorySwingHipRoll.setMinimumJerk(0.0,
 
-                                          swingTimeForThisStep.getDoubleValue());
+                                          swingTimeForThisStep.getDoubleValue(), startingHipRollAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipRollAngle.getDoubleValue(), 0.0, 0.0);
 
          /**
           * Control part.
           */
          // pitch
 
-         trajectorySwingHipPitch.computeTrajectory(timeInState);
-         double desiredHipPitchAngle = trajectorySwingHipPitch.getPosition();
+         trajectorySwingHipPitch.compute(timeInState);
+         double desiredHipPitchAngle = trajectorySwingHipPitch.getValue();
          double desiredHipPitchAngleRate = trajectorySwingHipPitch.getVelocity();
          double currentHipPitchAngle = robot.getHipPitchPosition(swingLeg.getEnumValue());
          double currentHipPitchAngleRate = robot.getHipPitchVelocity(swingLeg.getEnumValue());
@@ -478,8 +479,8 @@ public class SimpleWalkerController implements RobotController
          robot.setHipPitchTorque(swingLeg.getEnumValue(), controlEffortPitch);
 
          // roll
-         trajectorySwingHipRoll.computeTrajectory(timeInState);
-         double desiredHipRollAngle = trajectorySwingHipRoll.getPosition();
+         trajectorySwingHipRoll.compute(timeInState);
+         double desiredHipRollAngle = trajectorySwingHipRoll.getValue();
          double desiredHipRollAngleRate = trajectorySwingHipRoll.getVelocity();
          double currentHipRollAngle = robot.getHipRollPosition(swingLeg.getEnumValue());
          double currentHipRollAngleRate = robot.getHipRollVelocity(swingLeg.getEnumValue());
@@ -638,7 +639,7 @@ public class SimpleWalkerController implements RobotController
 
          double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
          double desiredRetractedPosition = 0.1;
-         trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0, 0.0, swingTimeForThisStep.getDoubleValue() / 2.0);
+         trajectorySwingKnee.setMinimumJerk(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
 
          //retract knee
          robot.setKneeTorque(swingLeg.getEnumValue(), -10.0);

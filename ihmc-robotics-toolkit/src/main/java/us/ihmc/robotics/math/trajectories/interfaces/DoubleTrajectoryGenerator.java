@@ -6,4 +6,13 @@ public interface DoubleTrajectoryGenerator extends TrajectoryGenerator, DoublePr
 {
    double getVelocity();
    double getAcceleration();
+
+   /**
+    * Use the {@link #getValue()} method instead.
+    */
+   @Deprecated
+   default double getPosition()
+   {
+      return getValue();
+   }
 }
