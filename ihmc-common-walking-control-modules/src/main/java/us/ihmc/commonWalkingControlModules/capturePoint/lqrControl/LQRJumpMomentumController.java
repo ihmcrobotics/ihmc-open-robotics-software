@@ -132,7 +132,7 @@ public class LQRJumpMomentumController
       shouldUpdateP = true;
    }
 
-   public void setVRPTrajectory(List<Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
+   public void setVRPTrajectory(List<? extends Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
    {
       relativeVRPTrajectories.clear();
       this.contactStateProviders.clear();
