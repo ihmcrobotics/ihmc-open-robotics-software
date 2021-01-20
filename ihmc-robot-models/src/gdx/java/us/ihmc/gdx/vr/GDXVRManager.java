@@ -16,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class GDXVRManager implements RenderableProvider
@@ -25,6 +26,7 @@ public class GDXVRManager implements RenderableProvider
    private ModelInstance headsetModelInstance;
    private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
+   private HashMap<Integer, Runnable> buttonCallbacks = new HashMap<>();
 
    public void create()
    {
@@ -91,6 +93,11 @@ public class GDXVRManager implements RenderableProvider
          public void buttonPressed(GDXVRContext.VRDevice device, int button)
          {
             LogTools.info("{} button pressed: {}", device, button);
+            buttonCallbacks.computeIfPresent(button, (key, value) ->
+            {
+               value.run();
+               return value;
+            });
          }
 
          @Override
@@ -159,5 +166,10 @@ public class GDXVRManager implements RenderableProvider
             modelInstance.getRenderables(renderables, pool);
          }
       }
+   }
+
+   public void addButtonCallback(int button, Runnable runnable)
+   {
+      buttonCallbacks.put(button, runnable);
    }
 }
