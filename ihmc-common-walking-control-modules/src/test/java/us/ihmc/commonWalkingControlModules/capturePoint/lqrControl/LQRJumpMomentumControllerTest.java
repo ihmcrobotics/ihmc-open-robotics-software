@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class LQRJumpMomentumControllerTest
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
       Polynomial3D vrpTrajectory = new Polynomial3D(4);
       vrpTrajectory.setLinear(0.0, 1.0, vrpStart, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
       SettableContactStateProvider contact = new SettableContactStateProvider();
