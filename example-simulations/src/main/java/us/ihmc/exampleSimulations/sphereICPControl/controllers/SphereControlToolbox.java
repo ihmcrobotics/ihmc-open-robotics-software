@@ -8,14 +8,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -120,7 +117,6 @@ public class SphereControlToolbox
    private FootstepTestHelper footstepTestHelper;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private SmoothCMPPlannerParameters smoothICPPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
 
    private YoDouble yoTime;
@@ -196,7 +192,6 @@ public class SphereControlToolbox
       twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
-      smoothICPPlannerParameters = createNewICPPlannerParameters();
       icpOptimizationParameters = createICPOptimizationParameters();
 
       parentRegistry.addChild(registry);
@@ -346,11 +341,6 @@ public class SphereControlToolbox
    public SideDependentList<FramePose3D> getFootPosesAtTouchdown()
    {
       return footPosesAtTouchdown;
-   }
-
-   public SmoothCMPPlannerParameters getNewCapturePointPlannerParameters()
-   {
-      return smoothICPPlannerParameters;
    }
 
    public ICPOptimizationParameters getICPOptimizationParameters()
@@ -578,51 +568,6 @@ public class SphereControlToolbox
 
       capturePoint2d.changeFrame(icp.getReferenceFrame());
       icp.set(capturePoint2d, 0.0);
-   }
-
-   private SmoothCMPPlannerParameters createNewICPPlannerParameters()
-   {
-      return new SphereSmoothCMPPlannerParameters();
-   }
-
-   public static class SphereSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
-   {
-      public SphereSmoothCMPPlannerParameters()
-      {
-         super();
-         endCoPName = CoPPointName.MIDFEET_COP;
-         entryCoPName = CoPPointName.ENTRY_COP;
-         exitCoPName = CoPPointName.EXIT_COP;
-         swingCopPointsToPlan = new CoPPointName[]{CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
-         transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
-
-         stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 1.0 / 3.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFOOT_COP, 1.0 / 8.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.EXIT_COP, 1.0 / 3.0);
-
-         copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
-         copOffsetsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(0.0, -0.005));
-         copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
-         copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
-
-         copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
-         copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
-         copOffsetBoundsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.055));
-         copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
-      }
-
-      @Override
-      public boolean planSwingAngularMomentum()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean planTransferAngularMomentum()
-      {
-         return true;
-      }
    }
 
    public ICPOptimizationParameters createICPOptimizationParameters()
