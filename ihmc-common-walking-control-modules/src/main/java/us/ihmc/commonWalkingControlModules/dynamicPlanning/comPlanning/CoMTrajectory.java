@@ -8,10 +8,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
+public class CoMTrajectory implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider
 {
    private final FramePoint3D firstCoefficient = new FramePoint3D();
    private final FramePoint3D secondCoefficient = new FramePoint3D();
@@ -29,13 +32,13 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
    private final FramePoint3D vrpPosition = new FramePoint3D();
    private final FrameVector3D vrpVelocity = new FrameVector3D();
 
+   private double currentTime;
    private double omega = 3.0;
-   private double tInitial;
-   private double tFinal;
+   private final TimeIntervalBasics timeInterval = new TimeInterval();
 
-   @Override
    public void reset()
    {
+      currentTime = Double.NaN;
       firstCoefficient.setToNaN();
       secondCoefficient.setToNaN();
       thirdCoefficient.setToNaN();
@@ -43,32 +46,13 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
       fifthCoefficient.setToNaN();
       sixthCoefficient.setToNaN();
 
-      tInitial = Double.NaN;
-      tFinal = Double.NaN;
+      timeInterval.reset();
    }
 
    @Override
-   public void setEndTime(double tFinal)
+   public TimeIntervalBasics getTimeInterval()
    {
-      this.tFinal = tFinal;
-   }
-
-   @Override
-   public void setStartTime(double t0)
-   {
-      this.tInitial = t0;
-   }
-
-   @Override
-   public double getEndTime()
-   {
-      return this.tFinal;
-   }
-
-   @Override
-   public double getStartTime()
-   {
-      return this.tInitial;
+      return timeInterval;
    }
 
    public void setCoefficients(DMatrixRMaj coefficients)
@@ -219,6 +203,11 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
    }
 
    @Override
+   public void initialize()
+   {
+   }
+
+   @Override
    public void compute(double time)
    {
       compute(time, comPosition, comVelocity, comAcceleration, dcmPosition, dcmVelocity, vrpPosition, vrpVelocity);
@@ -233,6 +222,7 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
                        FixedFramePoint3DBasics vrpPositionToPack,
                        FixedFrameVector3DBasics vrpVelocityTPack)
    {
+      currentTime = time;
       computeCoMPosition(time, comPositionToPack);
       computeCoMVelocity(time, comVelocityToPack);
       computeCoMAcceleration(time, comAccelerationToPack);
@@ -247,25 +237,40 @@ public class CoMTrajectory implements Trajectory3DReadOnly, TimeIntervalBasics
    }
 
    @Override
-   public Point3DReadOnly getPosition()
+   public FramePoint3DReadOnly getPosition()
    {
       return comPosition;
    }
 
    @Override
-   public Vector3DReadOnly getVelocity()
+   public FrameVector3DReadOnly getVelocity()
    {
       return comVelocity;
    }
 
    @Override
-   public Vector3DReadOnly getAcceleration()
+   public FrameVector3DReadOnly getAcceleration()
    {
       return comAcceleration;
    }
 
-   public Point3DReadOnly getDCMPosition()
+   public FramePoint3DReadOnly getDCMPosition()
    {
       return dcmPosition;
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return currentTime >= getTimeInterval().getEndTime();
+   }
+
+   @Override
+   public void hideVisualization()
+   {}
+
+   @Override
+   public void showVisualization()
+   {
    }
 }

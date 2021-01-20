@@ -12,23 +12,37 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LinearCoMTrajectoryHandler
 {
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
-   private final RecyclingArrayList<CoMTrajectory> comTrajectories = new RecyclingArrayList<>(CoMTrajectory::new);
-   private final RecyclingArrayList<Polynomial3D> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
+   private final RecyclingArrayList<CoMTrajectory> comTrajectoryPool = new RecyclingArrayList<>(CoMTrajectory::new);
+   private final MultipleSegmentPositionTrajectoryGenerator<CoMTrajectory> comTrajectory;
+   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
+   private final List<Polynomial3DReadOnly> vrpTrajectories = new ArrayList<>();
 
    private boolean hasTrajectory = false;
 
+   public LinearCoMTrajectoryHandler(YoRegistry registry)
+   {
+      comTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("desiredComTrajectory", ReferenceFrame.getWorldFrame(), registry);
+   }
+
    public void clearTrajectory()
    {
-      comTrajectories.clear();
+      comTrajectory.clear();
       vrpTrajectories.clear();
+      comTrajectoryPool.clear();
+      vrpTrajectoryPool.clear();
       hasTrajectory = false;
    }
 
@@ -37,12 +51,12 @@ public class LinearCoMTrajectoryHandler
       return hasTrajectory;
    }
 
-   public RecyclingArrayList<CoMTrajectory> getComTrajectories()
+   public MultipleSegmentPositionTrajectoryGenerator<?> getComTrajectory()
    {
-      return comTrajectories;
+      return comTrajectory;
    }
 
-   public RecyclingArrayList<Polynomial3D> getVrpTrajectories()
+   public List<Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
    }
@@ -54,21 +68,22 @@ public class LinearCoMTrajectoryHandler
 
    public void setLinear(FramePoint3DReadOnly start, FramePoint3DReadOnly end, double omega, double duration)
    {
-      comTrajectories.clear();
-      vrpTrajectories.clear();
+      clearTrajectory();
 
       double rateX = (end.getX() - start.getX()) / duration;
       double rateY = (end.getY() - start.getY()) / duration;
       double rateZ = (end.getZ() - start.getZ()) / duration;
 
-      CoMTrajectory comTrajectory = comTrajectories.add();
+      CoMTrajectory comTrajectory = comTrajectoryPool.add();
       comTrajectory.setOmega(omega);
-      comTrajectory.setInterval(0.0, duration);
+      comTrajectory.getTimeInterval().setInterval(0.0, duration);
       comTrajectory.setFifthCoefficient(ReferenceFrame.getWorldFrame(), rateX, rateY, rateZ);
       comTrajectory.setSixthCoefficient(ReferenceFrame.getWorldFrame(), start.getX(), start.getY(), start.getZ());
+      this.comTrajectory.appendSegment(comTrajectory);
 
-      Polynomial3D vrpTrajectory = vrpTrajectories.add();
+      Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
       vrpTrajectory.setLinear(0.0, duration, start, end);
+      this.vrpTrajectories.add(vrpTrajectory);
 
       hasTrajectory = true;
    }
@@ -90,23 +105,27 @@ public class LinearCoMTrajectoryHandler
       MatrixTools.setMatrixBlock(coefficientArray, 0, 1, ySolution, 0, 0, numRows, 1, 1.0);
       MatrixTools.setMatrixBlock(coefficientArray, 0, 2, zSolution, 0, 0, numRows, 1, 1.0);
 
-      comTrajectories.clear();
-      vrpTrajectories.clear();
+      clearTrajectory();
+
       int startRow = 0;
       for (int i = 0; i < contacts.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = contacts.get(i).getTimeInterval();
-         CoMTrajectory comTrajectory = comTrajectories.add();
+         CoMTrajectory comTrajectory = comTrajectoryPool.add();
          comTrajectory.setCoefficients(coefficientArray, startRow);
-         comTrajectory.setInterval(0.0, timeInterval.getDuration());
+         comTrajectory.getTimeInterval().setInterval(0.0, timeInterval.getDuration());
          comTrajectory.setOmega(omega);
+         this.comTrajectory.appendSegment(comTrajectory);
 
          computeVRPBoundaryConditionsFromCoefficients(startRow, coefficientArray, omega, timeInterval.getDuration(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
-         Polynomial3D vrpTrajectory = vrpTrajectories.add();
+         Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
          vrpTrajectory.setCubic(timeInterval.getStartTime(), timeInterval.getEndTime(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         this.vrpTrajectories.add(vrpTrajectory);
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
+
       }
+
 
       hasTrajectory = true;
    }
@@ -147,22 +166,22 @@ public class LinearCoMTrajectoryHandler
 
    public void computeCoMPosition(int segment, double timeInSegment, FixedFramePoint3DBasics comPositionToPack)
    {
-      comTrajectories.get(segment).computeCoMPosition(timeInSegment, comPositionToPack);
+      comTrajectoryPool.get(segment).computeCoMPosition(timeInSegment, comPositionToPack);
    }
 
    public void computeCoMVelocity(int segment, double timeInSegment, FixedFrameVector3DBasics comVelocityToPack)
    {
-      comTrajectories.get(segment).computeCoMVelocity(timeInSegment, comVelocityToPack);
+      comTrajectoryPool.get(segment).computeCoMVelocity(timeInSegment, comVelocityToPack);
    }
 
    public void computeCoMAcceleration(int segment, double timeInSegment, FixedFrameVector3DBasics comAccelerationToPack)
    {
-      comTrajectories.get(segment).computeCoMAcceleration(timeInSegment, comAccelerationToPack);
+      comTrajectoryPool.get(segment).computeCoMAcceleration(timeInSegment, comAccelerationToPack);
    }
 
    public void computeVRPVelocity(int segment, double timeInSegment, FixedFrameVector3DBasics vrpVelocityToPack)
    {
-      comTrajectories.get(segment).computeVRPVelocity(timeInSegment, vrpVelocityToPack);
+      comTrajectoryPool.get(segment).computeVRPVelocity(timeInSegment, vrpVelocityToPack);
    }
 
    public void compute(int segment,
@@ -175,8 +194,8 @@ public class LinearCoMTrajectoryHandler
                        FixedFramePoint3DBasics vrpPositionToPack,
                        FixedFrameVector3DBasics vrpVelocityToPack)
    {
-      comTrajectories.get(segment)
-                     .compute(timeInSegment,
+      comTrajectoryPool.get(segment)
+                       .compute(timeInSegment,
                               comPositionToPack,
                               comVelocityToPack,
                               comAccelerationToPack,

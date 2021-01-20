@@ -26,7 +26,7 @@ public class PolynomialEstimator3DTest
       estimator.addObjectivePosition(0.0, startPosition);
       estimator.addObjectivePosition(duration, endPosition);
 
-      estimator.solve();
+      estimator.initialize();
 
       estimator.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(startPosition, estimator.getPosition(), epsilon);
@@ -44,7 +44,7 @@ public class PolynomialEstimator3DTest
       estimator.addObjectivePosition(10.0, 0.0, startPosition);
       estimator.addObjectivePosition(10.0, duration, endPosition);
 
-      estimator.solve();
+      estimator.initialize();
 
       estimator.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(startPosition, estimator.getPosition(), epsilon);
@@ -62,7 +62,7 @@ public class PolynomialEstimator3DTest
       estimator.addObjectivePosition(0.0, startPosition);
       estimator.addObjectiveVelocity(0.0, velocity);
 
-      estimator.solve();
+      estimator.initialize();
 
       estimator.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(startPosition, estimator.getPosition(), epsilon);
@@ -93,7 +93,7 @@ public class PolynomialEstimator3DTest
       estimator.addObjectivePosition(duration, endPosition);
       estimator.addObjectiveVelocity(duration, endVelocity);
 
-      estimator.solve();
+      estimator.initialize();
 
 
 
@@ -113,7 +113,7 @@ public class PolynomialEstimator3DTest
       estimator.addObjectivePosition(10.0, duration, endPosition);
       estimator.addObjectiveVelocity(10.0, duration, endVelocity);
 
-      estimator.solve();
+      estimator.initialize();
 
       estimator.compute(0.0);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(startPosition, estimator.getPosition(), epsilon);

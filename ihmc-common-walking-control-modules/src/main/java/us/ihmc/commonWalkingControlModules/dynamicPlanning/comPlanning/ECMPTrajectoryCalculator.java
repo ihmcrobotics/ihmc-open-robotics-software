@@ -3,10 +3,9 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class ECMPTrajectoryCalculator
    private final FrameVector3D ecmpVelocity = new FrameVector3D();
 
    // TODO in its current form, this assumes that the desired net angular momentum rate is zero.
-   public void computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, List<? extends Trajectory3DReadOnly> internalAngularMomentumTrajectories)
+   public void computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> internalAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
       for (int i = 0; i < copTrajectories.size(); i++)
@@ -42,23 +41,17 @@ public class ECMPTrajectoryCalculator
       {
          ContactStateProvider copTrajectory = copTrajectories.get(i);
          double startTime = copTrajectory.getTimeInterval().getStartTime();
-         int amStartSegmentId = getSegmentNumber(startTime, internalAngularMomentumTrajectories);
-         double amStartTime = getTimeInSegment(amStartSegmentId, startTime, internalAngularMomentumTrajectories);
-
          double endTime = copTrajectory.getTimeInterval().getEndTime();
-         int amEndSegmentId = getSegmentNumber(endTime, internalAngularMomentumTrajectories);
-         double amEndTime = getTimeInSegment(amEndSegmentId, endTime, internalAngularMomentumTrajectories);
 
-         if (amStartSegmentId < 0 || amEndSegmentId < 0)
+         if (startTime > internalAngularMomentumTrajectories.getEndTime() || endTime > internalAngularMomentumTrajectories.getEndTime())
             return;
 
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
 
-         Trajectory3DReadOnly angularMomentumTrajectoryAtStart = internalAngularMomentumTrajectories.get(amStartSegmentId);
-         angularMomentumTrajectoryAtStart.compute(amStartTime);
+         internalAngularMomentumTrajectories.compute(startTime);
 
-         Vector3DReadOnly initialAngularRate = angularMomentumTrajectoryAtStart.getVelocity();
-         Vector3DReadOnly initialAngularAcceleration = angularMomentumTrajectoryAtStart.getAcceleration();
+         Vector3DReadOnly initialAngularRate = internalAngularMomentumTrajectories.getVelocity();
+         Vector3DReadOnly initialAngularAcceleration = internalAngularMomentumTrajectories.getAcceleration();
 
          // These are scaled by a negative one because we want the total angular momentum to be zero
          ecmpPosition.setX(initialAngularRate.getY());
@@ -75,11 +68,10 @@ public class ECMPTrajectoryCalculator
          eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
 
          // Make sure to do this separately, as they may be the same trajectory objects
-         Trajectory3DReadOnly angularMomentumTrajectoryAtEnd = internalAngularMomentumTrajectories.get(amEndSegmentId);
-         angularMomentumTrajectoryAtEnd.compute(amEndTime);
+         internalAngularMomentumTrajectories.compute(endTime);
 
-         Vector3DReadOnly finalAngularRate = angularMomentumTrajectoryAtEnd.getVelocity();
-         Vector3DReadOnly finalAngularAcceleration = angularMomentumTrajectoryAtEnd.getAcceleration();
+         Vector3DReadOnly finalAngularRate = internalAngularMomentumTrajectories.getVelocity();
+         Vector3DReadOnly finalAngularAcceleration = internalAngularMomentumTrajectories.getAcceleration();
 
          ecmpPosition.setX(finalAngularRate.getY());
          ecmpPosition.setY(-finalAngularRate.getX());
@@ -94,28 +86,6 @@ public class ECMPTrajectoryCalculator
          eCMPTrajectory.setEndCopPosition(ecmpPosition);
          eCMPTrajectory.setEndCopVelocity(ecmpVelocity);
       }
-   }
-
-   public int getSegmentNumber(double time, List<? extends TimeIntervalReadOnly> segments)
-   {
-      double startTime = 0.0;
-      for (int i = 0; i < segments.size(); i++)
-      {
-         if (segments.get(i).intervalContains(time - startTime))
-            return i;
-
-         startTime += segments.get(i).getDuration();
-      }
-
-      return -1;
-   }
-
-   public double getTimeInSegment(int segmentNumber, double time, List<? extends TimeIntervalReadOnly> segments)
-   {
-      for (int i = 0; i < segmentNumber; i++)
-         time -= segments.get(i).getDuration();
-
-      return time;
    }
 
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()

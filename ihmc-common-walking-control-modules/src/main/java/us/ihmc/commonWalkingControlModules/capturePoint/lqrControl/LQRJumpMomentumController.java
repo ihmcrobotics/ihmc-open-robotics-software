@@ -9,6 +9,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -130,20 +132,20 @@ public class LQRJumpMomentumController
       shouldUpdateP = true;
    }
 
-   public void setVRPTrajectory(List<Polynomial3D> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
+   public void setVRPTrajectory(List<Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
    {
       relativeVRPTrajectories.clear();
       this.contactStateProviders.clear();
 
-      Polynomial3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
+      Polynomial3DReadOnly lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
       lastTrajectory.compute(Math.min(sufficientlyLongTime, lastTrajectory.getTimeInterval().getEndTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 
       for (int i = 0; i < vrpTrajectory.size(); i++)
       {
-         Polynomial3D trajectory = vrpTrajectory.get(i);
-         Polynomial3D relativeTrajectory = relativeVRPTrajectories.add();
+         Polynomial3DReadOnly trajectory = vrpTrajectory.get(i);
+         Polynomial3DBasics relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
          relativeTrajectory.shiftTrajectory(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
