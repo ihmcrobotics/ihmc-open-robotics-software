@@ -51,7 +51,6 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFrameVector3D predictedAngularMomentum = new YoFrameVector3D("predictedAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedAngularMomentumRate = new YoFrameVector3D("predictedAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
 
-
    private final YoFramePoint3D predictedFirstPotatoPosition = new YoFramePoint3D("predictedFirstPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D predictedFirstPotatoVelocity = new YoFrameVector3D("predictedFirstPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D predictedSecondPotatoPosition = new YoFramePoint3D("predictedSecondPotatoPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -218,11 +217,11 @@ public class ThreePotatoAngularMomentumCalculator
             if (time > secondPotatoTrajectories.getLastWaypointTime() && time > thirdPotatoTrajectories.getLastWaypointTime() || time > comTrajectories.getEndTime())
                break;
 
-            comTrajectories.compute(timeInInterval);
+            comTrajectories.compute(time);
             totalAngularMomentum.setToZero();
             totalTorque.setToZero();
 
-            if (time > secondPotatoTrajectories.getLastWaypointTime())
+            if (time <= secondPotatoTrajectories.getLastWaypointTime())
             {
                secondPotatoTrajectories.compute(time);
                computeAngularMomentumAtInstant(comTrajectories, secondPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
@@ -231,7 +230,7 @@ public class ThreePotatoAngularMomentumCalculator
                totalTorque.add(torque);
             }
 
-            if (time > thirdPotatoTrajectories.getLastWaypointTime())
+            if (time <= thirdPotatoTrajectories.getLastWaypointTime())
             {
                thirdPotatoTrajectories.compute(time);
                computeAngularMomentumAtInstant(comTrajectories, thirdPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
@@ -243,7 +242,7 @@ public class ThreePotatoAngularMomentumCalculator
             angularMomentumTrajectory.addObjectivePosition(timeInInterval, totalAngularMomentum);
          }
 
-         if (i > 0)
+         if (false)//i > 0)
          {
             FixedFramePolynomialEstimator3D previousEstimator = angularMomentumEstimators.get(i - 1);
             previousEstimator.compute(timeIntervals.get(i - 1).getTimeInterval().getDuration());
