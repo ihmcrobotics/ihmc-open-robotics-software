@@ -225,7 +225,7 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(10.0, registry, controllerToolbox.getCenterOfMassJacobian(),
+      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(7.5, registry, controllerToolbox.getCenterOfMassJacobian(),
                                                                            controllerToolbox.getReferenceFrames().getSoleFrames(), yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
