@@ -227,6 +227,59 @@ public class PolynomialEstimatorTest
    }
 
    @Test
+   public void testCubicWithInitialConstraints()
+   {
+      PolynomialEstimator unboundedEstimator = new PolynomialEstimator();
+      PolynomialEstimator boundedEstimator = new PolynomialEstimator();
+      unboundedEstimator.reshape(4);
+      boundedEstimator.reshape(7);
+
+      double duration = 2.0;
+      double x0 = 2.0;
+      double xf = 4.0;
+      double v0 = 2.0;
+      double vf = -2.0;
+      unboundedEstimator.addObjectivePosition(0.0, x0);
+      unboundedEstimator.addObjectiveVelocity(0.0, v0);
+      unboundedEstimator.addObjectivePosition(duration, xf);
+      unboundedEstimator.addObjectiveVelocity(duration, vf);
+
+      unboundedEstimator.solve();
+
+      double c2 = 3.0 / (duration * duration) * (xf - x0) - 1.0 / duration * (2.0 * v0 + vf);
+      double c3 = 2.0 / (duration * duration * duration) * (x0 - xf) + 1.0 / (duration * duration) * (v0 + vf);
+
+      double a0 = 2.0 * c2;
+      double af = a0 + 6.0 * duration * c3;
+
+      x0 = 3.0;
+      v0 = 2.0;
+
+      boundedEstimator.addConstraintPosition(0.0, x0);
+      boundedEstimator.addConstraintVelocity(0.0, v0);
+      boundedEstimator.addConstraintAcceleration(0.0, a0);
+
+      for (double time = 0.0; time < duration; time += 0.005)
+      {
+         unboundedEstimator.compute(time);
+         boundedEstimator.addObjectivePosition(time, unboundedEstimator.getPosition());
+      }
+
+         unboundedEstimator.compute(duration);
+         boundedEstimator.addObjectivePosition(100.0, duration, unboundedEstimator.getPosition());
+
+      boundedEstimator.solve();
+
+      boundedEstimator.compute(0.0);
+      assertEquals(x0, boundedEstimator.getPosition(), epsilon);
+      assertEquals(v0, boundedEstimator.getVelocity(), epsilon);
+      assertEquals(a0, boundedEstimator.getAcceleration(), epsilon);
+
+      boundedEstimator.compute(duration);
+      assertEquals(xf, boundedEstimator.getPosition(), 1e-1);
+   }
+
+   @Test
    public void testQuartic()
    {
       PolynomialEstimator estimator = new PolynomialEstimator();

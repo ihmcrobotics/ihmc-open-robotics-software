@@ -75,6 +75,18 @@ public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajec
       estimator.addObjectiveVelocity(weight, time, value);
    }
 
+   public void addConstraintPosition(double time, FrameTuple3DReadOnly value)
+   {
+      checkReferenceFrameMatch(value);
+      estimator.addConstraintPosition(time, value);
+   }
+
+   public void addConstraintVelocity(double time, FrameTuple3DReadOnly value)
+   {
+      checkReferenceFrameMatch(value);
+      estimator.addConstraintVelocity(time, value);
+   }
+
    @Override
    public void initialize()
    {
