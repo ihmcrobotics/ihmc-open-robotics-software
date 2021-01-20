@@ -21,8 +21,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.Trajectory3DReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -30,7 +31,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -95,7 +95,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final double gravityZ;
 
    private final CoMTrajectoryPlannerIndexHandler indexHandler = new CoMTrajectoryPlannerIndexHandler();
-   private final LinearCoMTrajectoryHandler trajectoryHandler = new LinearCoMTrajectoryHandler();
+   private final LinearCoMTrajectoryHandler trajectoryHandler = new LinearCoMTrajectoryHandler(registry);
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -847,7 +847,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
    @Override
-   public List<Polynomial3D> getVRPTrajectories()
+   public List<Polynomial3DReadOnly> getVRPTrajectories()
    {
       if (!hasTrajectories())
          throw new RuntimeException("VRP Trajectories are not calculated");
@@ -856,11 +856,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
    @Override
-   public List<? extends Trajectory3DReadOnly> getCoMTrajectories()
+   public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
    {
       if (!hasTrajectories())
          throw new RuntimeException("CoM Trajectories are not calculated");
 
-      return trajectoryHandler.getComTrajectories();
+      return trajectoryHandler.getComTrajectory();
    }
 }

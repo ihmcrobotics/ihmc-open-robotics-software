@@ -55,7 +55,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -533,7 +532,7 @@ public class BalanceManager
 
          angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
          angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
-         angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectories());
+         angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectory());
          angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
 
          ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getAngularMomentumTrajectories());

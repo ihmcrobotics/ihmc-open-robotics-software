@@ -3,12 +3,45 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeIntervalBasics
+public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeIntervalProvider
 {
    private static final double regularization = 1e-5;
    private static final double defaultWeight = 1.0;
+
+   private final TimeIntervalBasics timeInterval = new TimeIntervalBasics()
+   {
+      @Override
+      public void setStartTime(double startTime)
+      {
+         xEstimator.setStartTime(startTime);
+         yEstimator.setStartTime(startTime);
+         zEstimator.setStartTime(startTime);
+      }
+
+      @Override
+      public void setEndTime(double endTime)
+      {
+         xEstimator.setEndTime(endTime);
+         yEstimator.setEndTime(endTime);
+         zEstimator.setEndTime(endTime);
+      }
+
+      @Override
+      public double getStartTime()
+      {
+         return xEstimator.getStartTime();
+      }
+
+      @Override
+      public double getEndTime()
+      {
+         return xEstimator.getEndTime();
+      }
+   };
 
    private final Point3DReadOnly position = new Point3DReadOnly()
    {
@@ -73,13 +106,15 @@ public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeInterval
       }
    };
 
+   private double currentTime = 0.0;
+
    private final PolynomialEstimator xEstimator = new PolynomialEstimator();
    private final PolynomialEstimator yEstimator = new PolynomialEstimator();
    private final PolynomialEstimator zEstimator = new PolynomialEstimator();
 
-   @Override
    public void reset()
    {
+      currentTime = Double.NaN;
       xEstimator.reset();
       yEstimator.reset();
       zEstimator.reset();
@@ -93,31 +128,9 @@ public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeInterval
    }
 
    @Override
-   public void setEndTime(double tFinal)
+   public TimeIntervalBasics getTimeInterval()
    {
-      xEstimator.setEndTime(tFinal);
-      yEstimator.setEndTime(tFinal);
-      zEstimator.setEndTime(tFinal);
-   }
-
-   @Override
-   public void setStartTime(double t0)
-   {
-      xEstimator.setStartTime(t0);
-      yEstimator.setStartTime(t0);
-      zEstimator.setStartTime(t0);
-   }
-
-   @Override
-   public double getEndTime()
-   {
-      return xEstimator.getEndTime();
-   }
-
-   @Override
-   public double getStartTime()
-   {
-      return xEstimator.getStartTime();
+      return timeInterval;
    }
 
    public void addObjectivePosition(double time, Tuple3DReadOnly value)
@@ -144,13 +157,15 @@ public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeInterval
       zEstimator.addObjectiveVelocity(weight, time, value.getZ());
    }
 
-   public void solve()
+   @Override
+   public void initialize()
    {
       xEstimator.solve();
       yEstimator.solve();
       zEstimator.solve();
    }
 
+   @Override
    public void compute(double time)
    {
       xEstimator.compute(time);
@@ -158,18 +173,37 @@ public class PolynomialEstimator3D implements Trajectory3DReadOnly, TimeInterval
       zEstimator.compute(time);
    }
 
+   @Override
    public Point3DReadOnly getPosition()
    {
       return position;
    }
 
+   @Override
    public Vector3DReadOnly getVelocity()
    {
       return velocity;
    }
 
+   @Override
    public Vector3DReadOnly getAcceleration()
    {
       return acceleration;
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return currentTime >= getTimeInterval().getEndTime();
+   }
+
+   @Override
+   public void showVisualization()
+   {
+   }
+
+   @Override
+   public void hideVisualization()
+   {
    }
 }
