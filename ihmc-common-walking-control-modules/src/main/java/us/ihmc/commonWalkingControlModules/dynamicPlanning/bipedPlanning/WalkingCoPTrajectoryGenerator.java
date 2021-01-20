@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.*;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.MathTools;
@@ -262,7 +262,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                 currentPolygon,
                                                 supportSide,
                                                 footstepIndex == 0);
-            computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
+            computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), CoMTrajectoryPlanner.sufficientlyLong),
                                              parameters.getDefaultSwingDurationShiftFraction(),
                                              parameters.getDefaultSwingSplitFraction(),
                                              currentPolygon,

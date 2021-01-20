@@ -1,6 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
-
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
 public interface SplitFractionCalculatorParametersReadOnly
 {

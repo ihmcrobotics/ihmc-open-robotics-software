@@ -1,6 +1,5 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
+package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
-import cern.colt.function.IntDoubleFunction;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
