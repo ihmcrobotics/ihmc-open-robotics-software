@@ -21,8 +21,8 @@ import static us.ihmc.robotics.Assert.*;
 
 public abstract class Polynomial3DBasicsTest
 {
-   private static final int ITERATIONS = 1000;
-   private static final double SMALL_EPSILON = 1.0e-12;
+   protected static final int ITERATIONS = 1000;
+   protected static final double SMALL_EPSILON = 1.0e-12;
 
    public abstract Polynomial3DBasics getPolynomial(int maxNumberOfCoefficients);
 
