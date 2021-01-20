@@ -243,6 +243,14 @@ public class ThreePotatoAngularMomentumCalculator
             angularMomentumTrajectory.addObjectivePosition(timeInInterval, totalAngularMomentum);
          }
 
+         if (i > 0)
+         {
+            FixedFramePolynomialEstimator3D previousEstimator = angularMomentumEstimators.get(i - 1);
+            previousEstimator.compute(timeIntervals.get(i - 1).getTimeInterval().getDuration());
+
+            angularMomentumTrajectory.addConstraintPosition(0.0, previousEstimator.getPosition());
+         }
+
          angularMomentumTrajectory.initialize();
       }
 
@@ -252,6 +260,7 @@ public class ThreePotatoAngularMomentumCalculator
 
       visualize(comTrajectories, secondPotatoTrajectories, thirdPotatoTrajectories);
    }
+
 
    private void visualize(MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
                           MultipleWaypointsPositionTrajectoryGenerator secondPotatoTrajectories,
