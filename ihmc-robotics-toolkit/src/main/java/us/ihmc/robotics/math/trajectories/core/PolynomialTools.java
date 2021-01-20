@@ -4,6 +4,8 @@ import org.ejml.data.DMatrixRMaj;
 
 public class PolynomialTools
 {
+   public static final boolean DEBUG = false;
+
    /**
     * Sets the given array to be:
     * <br> [1, x, x<sup>2</sup>, ..., x<sup>N</sup>]
@@ -56,5 +58,4 @@ public class PolynomialTools
          xPowersDerivativeVectorToPack.set(i, derivativeCoefficient * xPowersToPack[i - order]);
       }
    }
-
 }

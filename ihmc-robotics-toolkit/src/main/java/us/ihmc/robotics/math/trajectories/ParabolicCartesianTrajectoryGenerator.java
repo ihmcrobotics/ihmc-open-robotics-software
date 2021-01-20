@@ -7,8 +7,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoParabolicTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,7 +18,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoRegistry registry;
-   private final YoMinimumJerkTrajectory minimumJerkTrajectory;
+   private final PolynomialBasics minimumJerkTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
    protected final YoDouble groundClearance;
    private final YoDouble stepTime;
@@ -36,7 +37,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
                                                 YoRegistry parentRegistry)
    {
       this.registry = new YoRegistry(namePrefix + namePostFix);
-      this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
+      this.minimumJerkTrajectory = new YoPolynomial(namePrefix, 6, registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
       this.groundClearance = new YoDouble("groundClearance", registry);
       this.stepTime = new YoDouble("stepTime", registry);
@@ -89,7 +90,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
    @Override
    public FramePoint3DReadOnly getPosition()
    {
-      double parameter = minimumJerkTrajectory.getPosition();
+      double parameter = minimumJerkTrajectory.getValue();
 
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
 
@@ -101,7 +102,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
    @Override
    public FrameVector3DReadOnly getVelocity()
    {
-      double parameter = minimumJerkTrajectory.getPosition();
+      double parameter = minimumJerkTrajectory.getValue();
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
       parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       desiredVelocity.setIncludingFrame(tempVector);
@@ -113,7 +114,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
    @Override
    public FrameVector3DReadOnly getAcceleration()
    {
-      double parameter = minimumJerkTrajectory.getPosition();
+      double parameter = minimumJerkTrajectory.getValue();
       parameter = MathTools.clamp(parameter, 0.0, 1.0);
       parabolicTrajectoryGenerator.getAcceleration(desiredAcceleration);
       desiredAcceleration.scale(minimumJerkTrajectory.getVelocity() * minimumJerkTrajectory.getVelocity());
@@ -154,7 +155,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
          stepTime.set(1e-10);
       }
 
-      minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, stepTime.getDoubleValue());
+      minimumJerkTrajectory.setMinimumJerk(0.0, stepTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
       double middleOfTrajectoryParameter = 0.5;
       parabolicTrajectoryGenerator.initialize(initialDesiredPosition, finalDesiredPosition, groundClearance.getDoubleValue(), middleOfTrajectoryParameter);
    }
@@ -162,7 +163,7 @@ public class ParabolicCartesianTrajectoryGenerator implements FixedFramePosition
    public void compute(double time)
    {
       timeIntoStep.set(time);
-      minimumJerkTrajectory.computeTrajectory(time);
+      minimumJerkTrajectory.compute(time);
    }
 
    public YoDouble getTimeIntoStep()
