@@ -73,6 +73,7 @@ public class FootTrajectoryPredictor
                                                                    Double.POSITIVE_INFINITY,
                                                                    state.getFootPose(robotSide).getPosition(),
                                                                    footTrajectoryPool.get(robotSide).add()));
+         footTrajectories.get(robotSide).initialize();
       }
    }
 
@@ -100,8 +101,8 @@ public class FootTrajectoryPredictor
       if (swingTrajectory == null)
       {
          footTrajectories.get(swingSide)
-                         .appendSegment(predictSwingFootTrajectory(0.0,
-                                                                   timing.getSwingTime(),
+                         .appendSegment(predictSwingFootTrajectory(timing.getTransferTime(),
+                                                                   timing.getSwingTime() + timing.getTransferTime(),
                                                                    swingHeight,
                                                                    state.getFootPose(swingSide).getPosition(),
                                                                    footstep.getFootstepPose().getPosition(),
@@ -111,6 +112,9 @@ public class FootTrajectoryPredictor
       {
          footTrajectories.get(swingSide).appendSegments(setSwingFootTrajectory(swingTrajectory.getPositionTrajectory(), footTrajectoryPool.get(swingSide)));
       }
+
+      leftFootTrajectory.initialize();
+      rightFootTrajectory.initialize();
    }
 
    public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomial3DBasics> getPredictedLeftFootTrajectories()
@@ -165,8 +169,8 @@ public class FootTrajectoryPredictor
          YoFrameEuclideanTrajectoryPoint end = trajectory.getWaypoint(waypointIdx + 1);
 
          trajectoriesToPack.add()
-                           .setCubic(0.0,
-                                     end.getTime() - start.getTime(),
+                           .setCubic(start.getTime(),
+                                     end.getTime(),
                                      start.getPosition(),
                                      start.getLinearVelocity(),
                                      end.getPosition(),

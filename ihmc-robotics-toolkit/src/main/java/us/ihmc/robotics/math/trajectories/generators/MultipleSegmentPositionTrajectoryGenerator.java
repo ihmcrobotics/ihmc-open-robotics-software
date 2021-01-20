@@ -120,7 +120,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       if (getCurrentNumberOfSegments() == 0)
          return;
 
-      if (MathTools.epsilonEquals(segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime(), segment.getTimeInterval().getStartTime(), 5e-3))
+      if (!MathTools.epsilonEquals(segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime(), segment.getTimeInterval().getStartTime(), 5e-3))
          throw new RuntimeException("The next segment doesn't start where the previous one ended.");
    }
 
