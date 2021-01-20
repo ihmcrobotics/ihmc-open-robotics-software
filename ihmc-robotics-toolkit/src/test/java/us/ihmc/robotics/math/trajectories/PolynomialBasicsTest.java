@@ -79,7 +79,7 @@ public abstract class PolynomialBasicsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int maxNumberOfCoefficients = random.nextInt(10);
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
          PolynomialBasics trajectory = getPolynomial(maxNumberOfCoefficients);
          double t0 = random.nextDouble();
          double tf = t0 + random.nextDouble();
@@ -112,7 +112,7 @@ public abstract class PolynomialBasicsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int maxNumberOfCoefficients = random.nextInt(10);
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
          PolynomialBasics trajectory = getPolynomial(maxNumberOfCoefficients);
          double t0 = random.nextDouble();
          double tf = t0 + random.nextDouble();
@@ -192,7 +192,7 @@ public abstract class PolynomialBasicsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int maxNumberOfCoefficients = random.nextInt(10);
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
          PolynomialBasics trajectory = getPolynomial(maxNumberOfCoefficients);
          double t0 = random.nextDouble();
          double tf = t0 + 0.5;
@@ -248,7 +248,7 @@ public abstract class PolynomialBasicsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int maxNumberOfCoefficients = random.nextInt(10);
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
          PolynomialBasics trajectory = getPolynomial(maxNumberOfCoefficients);
          double t0 = random.nextDouble();
          double tf = t0 + 0.5;
