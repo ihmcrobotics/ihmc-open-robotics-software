@@ -98,7 +98,7 @@ public class GDXDepthSensorSimulator
    public void render(GDX3DSceneManager gdx3DSceneManager)
    {
       camera.near = 0.05f;
-      camera.far = 200.0f;
+      camera.far = 5.0f;
 
       frameBuffer.begin();
 //      floatframeBuffer.begin();
@@ -143,37 +143,37 @@ public class GDXDepthSensorSimulator
             depthReading += tempGDXColor.b / 65536.0;
             depthReading += tempGDXColor.a / 16777216.0;
 
-            if (depthReading < 1e-7 && depthReading > -1e-7)
-               continue;
+//            if (depthReading < 1e-7 && depthReading > -1e-7)
+//               continue;
 
 //            if (depthReading > camera.near)
             {
                int flippedY = imageHeight - y;
                int halfWidth = imageWidth / 2;
                int halfHeight = imageHeight / 2;
-//               depthPoint.set(x, y, depthReading);
-               depthPoint.set(x, flippedY + halfHeight, depthReading);
-//               depthPoint.set(x - halfWidth, flippedY + halfHeight, depthReading);
-   //            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
-   //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
-   //            System.out.println(depthReading);
-   //            depthPoint.set(x * depthReading, y * depthReading, depthReading);
-
-               //               GDXTools.toEuclid(depthPoint, euclidDepthPoint);
-
-
-
-               euclidDepthPoint.setX(((2.0f * x) / imageWidth) - 1.0f);
-               euclidDepthPoint.setY(((2.0f * (imageHeight - flippedY)) / imageHeight) - 1.0f);
-//               euclidDepthPoint.setZ((2.0f * depthReading) - 1.0f);
-//               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far - camera.near), 0.0, 1.0));
-               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far), 0.0, 1.0));
-
-               euclidDepthPoint.setX(random.nextDouble() - 0.5);
-               euclidDepthPoint.setY(random.nextDouble() - 0.5);
-               euclidDepthPoint.setZ(random.nextDouble());
-
-               euclidDepthPoint.set(x, y, depthReading);
+////               depthPoint.set(x, y, depthReading);
+//               depthPoint.set(x, flippedY + halfHeight, depthReading);
+////               depthPoint.set(x - halfWidth, flippedY + halfHeight, depthReading);
+//   //            depthPoint.set((float) x , (3.0f * (float) height / 2.0f) - (float) y, depthReading);
+//   //            depthPoint.set(((float) x / width) * depthReading, ((float) y / height) * depthReading, depthReading);
+//   //            System.out.println(depthReading);
+//   //            depthPoint.set(x * depthReading, y * depthReading, depthReading);
+//
+//               //               GDXTools.toEuclid(depthPoint, euclidDepthPoint);
+//
+//
+//
+//               euclidDepthPoint.setX(((2.0f * x) / imageWidth) - 1.0f);
+//               euclidDepthPoint.setY(((2.0f * (imageHeight - flippedY)) / imageHeight) - 1.0f);
+////               euclidDepthPoint.setZ((2.0f * depthReading) - 1.0f);
+////               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far - camera.near), 0.0, 1.0));
+//               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far), 0.0, 1.0));
+//
+//               euclidDepthPoint.setX(random.nextDouble() - 0.5);
+//               euclidDepthPoint.setY(random.nextDouble() - 0.5);
+//               euclidDepthPoint.setZ(random.nextDouble());
+//
+//               euclidDepthPoint.set(x, y, depthReading);
 
 //               GDXTools.toEuclid(camera.projection, inverseProjectionView);
 //               inverseProjectionView.invert();
@@ -199,19 +199,37 @@ public class GDXDepthSensorSimulator
                float anglePerPixelY = fovY / (float) imageHeight;
                float angleX = (float) pixelX * anglePerPixelX;
                float angleY = (float) pixelY * anglePerPixelY;
+               float percentX = (float) pixelX / (float) imageWidth / 2.0f;
+               float percentY = (float) pixelY / (float) imageHeight / 2.0f;
 //               float viewX = depthReading * (float) Math.sin(angleX);
 //               float viewY = depthReading * (float) Math.sin(angleY);
 
                float alpha = (float) Math.sqrt(angleY * angleY + angleX * angleX);
 //               float viewZ = (float) Math.sqrt(depthReading * depthReading - Math.pow(depthReading * Math.sin(alpha), 2.0));
+//               depthReading = depthReading - 0.6f;
                float viewZ = depthReading * (float) Math.cos(alpha);
                float viewX = viewZ * (float) Math.tan(angleX);
                float viewY = viewZ * (float) Math.tan(angleY);
 
 //               float viewZ = depthReading * (float) Math.cos(angleX);
-               euclidDepthPoint.setX(viewZ);
-               euclidDepthPoint.setY(-viewX);
-               euclidDepthPoint.setZ(-viewY);
+               euclidDepthPoint.setX(viewX);
+               euclidDepthPoint.setY(viewY);
+               euclidDepthPoint.setZ(viewZ);
+//               euclidDepthPoint.setX(viewZ);
+//               euclidDepthPoint.setY(-viewX);
+//               euclidDepthPoint.setZ(-viewY);
+
+               depthPoint.set(pixelX + 0.5f * imageWidth, pixelY + 2.6f * imageHeight, depthReading);
+               viewport.unproject(depthPoint);
+               GDXTools.toEuclid(depthPoint, euclidDepthPoint);
+
+
+               //               depthPoint.set(percentX, percentY, depthReading);
+//               depthPoint.prj(camera.invProjectionView);
+////               viewport.unproject(depthPoint);
+//
+//               GDXTools.toEuclid(depthPoint, euclidDepthPoint);
+//               camera.invProjectionView.
 
 //               float viewX =
 //               inverseProjection.idt();
@@ -238,7 +256,7 @@ public class GDXDepthSensorSimulator
                tempFramePoint.set(euclidDepthPoint);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y, depthPoint.z);
 //               tempFramePoint.set(depthPoint.x, depthPoint.y - (height / 2.0f), depthPoint.z);
-               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+//               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
                Point3D32 point = points.add();
                point.set(tempFramePoint);
