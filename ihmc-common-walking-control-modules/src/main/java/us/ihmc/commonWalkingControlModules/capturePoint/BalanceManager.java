@@ -225,7 +225,7 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(7.5, registry, controllerToolbox.getCenterOfMassJacobian(),
+      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(gravityZ, 7.5, registry, controllerToolbox.getCenterOfMassJacobian(),
                                                                            controllerToolbox.getReferenceFrames().getSoleFrames(), yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -535,7 +535,7 @@ public class BalanceManager
          angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectory());
          angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
 
-         ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getAngularMomentumTrajectories());
+         ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getHeightScaledAngularMomentumTrajectories());
          contactStateProviders = ecmpTrajectory.getContactStateProviders();
       }
       else
