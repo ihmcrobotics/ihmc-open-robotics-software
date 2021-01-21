@@ -18,6 +18,7 @@ import java.util.List;
 
 import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
+// TODO, make the trajectory also extend settable, so that we can do a recyclingarraylist
 public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePositionTrajectoryGenerator & TimeIntervalProvider> implements FixedFramePositionTrajectoryGenerator
 {
    private final String namePrefix;
@@ -35,8 +36,6 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
    private final FixedFramePoint3DBasics currentPosition;
    private final FixedFrameVector3DBasics currentVelocity;
    private final FixedFrameVector3DBasics currentAcceleration;
-
-   private T activeSubTrajectory;
 
    public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
@@ -133,7 +132,6 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       }
 
       currentSegmentIndex.set(0);
-      activeSubTrajectory = segments.get(0);
    }
 
    @Override
@@ -145,7 +143,6 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       }
 
       currentSegmentTime.set(time);
-      boolean changedSubTrajectory = false;
 
       if (!TimeIntervalTools.isTimeSequenceContinuous(segments))
          throw new RuntimeException("The segments do not represent a continuous time trajectory.");
@@ -153,31 +150,23 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       if (time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
       {
          currentSegmentIndex.set(0);
-         changedSubTrajectory = true;
       }
 
       while (currentSegmentIndex.getIntegerValue() < numberOfSegments.getIntegerValue() - 1
-             && time >= segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getEndTime())
+             && time > segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getEndTime())
       {
          currentSegmentIndex.increment();
-         changedSubTrajectory = true;
-      }
-
-      if (changedSubTrajectory)
-      {
-         activeSubTrajectory = segments.get(currentSegmentIndex.getIntegerValue());
       }
 
       T segment = segments.get(currentSegmentIndex.getValue());
       TimeIntervalReadOnly timeInterval = segment.getTimeInterval();
-      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
 
       double subTrajectoryTime = MathTools.clamp(time - timeInterval.getStartTime(), 0.0, timeInterval.getDuration());
-      activeSubTrajectory.compute(subTrajectoryTime);
+      segment.compute(subTrajectoryTime);
 
-      currentPosition.set(activeSubTrajectory.getPosition());
-      currentVelocity.set(activeSubTrajectory.getVelocity());
-      currentAcceleration.set(activeSubTrajectory.getAcceleration());
+      currentPosition.set(segment.getPosition());
+      currentVelocity.set(segment.getVelocity());
+      currentAcceleration.set(segment.getAcceleration());
    }
 
    @Override
@@ -186,7 +175,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       if (isEmpty())
          return true;
 
-      boolean isLastWaypoint = currentSegmentIndex.getIntegerValue() >= numberOfSegments.getIntegerValue() - 2;
+      boolean isLastWaypoint = currentSegmentIndex.getIntegerValue() >= numberOfSegments.getIntegerValue() - 1;
       if (!isLastWaypoint)
          return false;
       return currentSegmentTime.getValue() >= getEndTime();
