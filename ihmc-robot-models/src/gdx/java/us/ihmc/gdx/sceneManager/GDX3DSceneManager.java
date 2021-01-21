@@ -5,9 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -26,7 +23,6 @@ import java.util.HashSet;
  */
 public class GDX3DSceneManager
 {
-   public static final float CLEAR_COLOR = 0.5019608f;
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
@@ -45,28 +41,15 @@ public class GDX3DSceneManager
 
    public void create()
    {
+      create(GDX3DSceneTools.createDefaultEnvironment());
+   }
+
+   public void create(Environment environment)
+   {
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
-      environment = new Environment();
-      float ambientColor = 0.7f;
-      float pointColor = 0.07f;
-      float pointDistance = 2.0f;
-      float pointIntensity = 1.0f;
-      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, ambientColor, ambientColor, ambientColor, 1.0f));
-      // Point lights not working; not sure why @dcalvert
-      //      PointLightsAttribute pointLights = new PointLightsAttribute();
-      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, pointDistance, pointIntensity));
-      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, pointDistance, pointIntensity));
-      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, pointDistance, pointIntensity));
-      //      pointLights.lights.add(new PointLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, pointDistance, pointIntensity));
-      //      environment.set(pointLights);
-      DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
-      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, -pointDistance, -pointDistance, -pointDistance));
-      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, pointDistance, -pointDistance, -pointDistance));
-      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, pointDistance, pointDistance, -pointDistance));
-      directionalLights.lights.add(new DirectionalLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, -pointDistance));
-      environment.set(directionalLights);
+      this.environment = environment;
 
       modelBatch = new ModelBatch();
 
@@ -78,7 +61,7 @@ public class GDX3DSceneManager
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
-      glClearGray();
+      GDX3DSceneTools.glClearGray();
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
    }
 
@@ -206,17 +189,6 @@ public class GDX3DSceneManager
       this.height = height;
 
       camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
-   }
-
-   public void glClearGray()
-   {
-      glClearGray(CLEAR_COLOR);
-   }
-
-   public void glClearGray(float color)
-   {
-      Gdx.gl.glClearColor(color, color, color, 1.0f);
-      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
    }
 
    public int getCurrentWindowWidth()

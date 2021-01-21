@@ -72,7 +72,7 @@ public class GDXDepthSensorSimulator
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
    }
 
-   public void render(GDX3DSceneManager gdx3DSceneManager)
+   public void render(GDX3DSceneManager sceneManager)
    {
       frameBuffer.begin();
 
@@ -84,7 +84,7 @@ public class GDXDepthSensorSimulator
       modelBatch.begin(camera);
       Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
 
-      gdx3DSceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
