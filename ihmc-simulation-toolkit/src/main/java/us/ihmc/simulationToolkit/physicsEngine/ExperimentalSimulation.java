@@ -11,17 +11,20 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -32,11 +35,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
@@ -50,8 +56,10 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.robotDescription.BallAndSocketJointDescription;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.BallAndSocketJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -63,7 +71,6 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -283,6 +290,7 @@ public class ExperimentalSimulation extends Simulation
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
+            robot.update();
             robot.doControllers();
          }
 
@@ -391,6 +399,27 @@ public class ExperimentalSimulation extends Simulation
                      }
                   });
                }
+               else if (joint instanceof SphericalJointReadOnly)
+               {
+                  SphericalJointReadOnly idJoint = (SphericalJointReadOnly) joint;
+                  BallAndSocketJoint scsJoint = (BallAndSocketJoint) scsRobot.getJoint(joint.getName());
+
+                  stateCopiers.add(new Runnable()
+                  {
+                     @Override
+                     public void run()
+                     {
+                        scsJoint.setOrientation(idJoint.getJointOrientation());
+                        scsJoint.setAngularVelocityInBody(idJoint.getJointTwist().getAngularPart());
+                        scsJoint.setAngularAccelerationInBody(idJoint.getJointAcceleration().getAngularPart());
+                        scsJoint.setJointTorque(idJoint.getJointTorque());
+                     }
+                  });
+               }
+               else
+               {
+                  throw new UnsupportedOperationException("Unsupported joint type: " + joint);
+               }
             }
          }
       };
@@ -419,6 +448,20 @@ public class ExperimentalSimulation extends Simulation
                   OneDoFJointBasics idJoint = (OneDoFJointBasics) joint;
                   OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) scsRobot.getJoint(joint.getName());
                   stateCopiers.add(() -> idJoint.setTau(scsJoint.getTau()));
+               }
+               else if (joint instanceof SixDoFJointBasics)
+               {
+                  // No torques, so do nothing.
+               }
+               else if (joint instanceof SphericalJoint)
+               {
+                  SphericalJointBasics idJoint = (SphericalJointBasics) joint;
+                  BallAndSocketJoint scsJoint = (BallAndSocketJoint) scsRobot.getJoint(joint.getName());
+                  stateCopiers.add(() -> idJoint.setJointTorque(scsJoint.getJointTorque()));
+               }
+               else
+               {
+                  throw new UnsupportedOperationException("Unsupported joint type: " + joint);
                }
             }
          }
@@ -546,6 +589,24 @@ public class ExperimentalSimulation extends Simulation
                   jointTwist.getLinearPart().set(linearVelocity);
                   jointTwist.getAngularPart().set(scsSixDoFJoint.getAngularVelocityInBody());
                }
+               else if (idJoint instanceof SphericalJointBasics)
+               {
+                  BallAndSocketJoint scsBallAndSocketJoint = (BallAndSocketJoint) robot.getJoint(idJoint.getName());
+                  SphericalJointBasics idSphericalJoint = (SphericalJointBasics) idJoint;
+
+                  QuaternionBasics jointOrientation = idSphericalJoint.getJointOrientation();
+                  FixedFrameVector3DBasics jointAngularVelocity = idSphericalJoint.getJointAngularVelocity();
+
+                  if (!stateChanged)
+                     stateChanged = !jointOrientation.epsilonEquals(scsBallAndSocketJoint.getQuaternion(), epsilon);
+
+                  jointOrientation.set(scsBallAndSocketJoint.getQuaternion());
+
+                  if (!stateChanged)
+                     stateChanged = !jointAngularVelocity.epsilonEquals(scsBallAndSocketJoint.getAngularVelocityInBody(), epsilon);
+
+                  jointAngularVelocity.set(scsBallAndSocketJoint.getAngularVelocityInBody());
+               }
                else
                {
                   throw new UnsupportedOperationException("Unsupported joint type: " + idJoint);
@@ -617,6 +678,12 @@ public class ExperimentalSimulation extends Simulation
          RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.getTranslation().set(jointOffset);
          joint = new SixDoFJoint(name, parentBody, transformToParent);
+      }
+      else if (jointDescription instanceof BallAndSocketJointDescription)
+      {
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.getTranslation().set(jointOffset);
+         joint = new SphericalJoint(name, parentBody, transformToParent);
       }
       else
       {

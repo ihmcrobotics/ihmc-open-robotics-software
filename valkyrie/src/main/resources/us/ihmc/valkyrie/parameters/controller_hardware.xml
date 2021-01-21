@@ -88,6 +88,8 @@
                      <registry name="PrecomputedICPPlanner">
                         <parameter name="PrecomputedICPVelocityFilterBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                      </registry>
+                     <parameter name="maintainInitialCoMVelocityContinuitySingleSupport" type="BooleanParameter" value="true" />
+                     <parameter name="maintainInitialCoMVelocityContinuityTransfer" type="BooleanParameter" value="true" />
                      <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />

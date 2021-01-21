@@ -310,7 +310,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          FramePose3D footPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(side));
          footPose.changeFrame(ReferenceFrame.getWorldFrame());
          request.getStartFootPoses().get(side).set(footPose);
-         request.getStartFootholds().get(side).set(defaultSolePolygon);
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
