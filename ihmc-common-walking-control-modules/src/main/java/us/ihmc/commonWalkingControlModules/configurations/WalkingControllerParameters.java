@@ -408,12 +408,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the {@link ICPAngularMomentumModifierParameters} for this robot. The parameters are used when
-    * angular momentum rates are considered in the ICP planner.
-    */
-   public abstract ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters();
-
-   /**
     * This parameter is used when the controller checks if it is safe to transition from transfer to single
     * support state when walking. The transition is considered safe if the ICP tracking error lies within
     * an ellipse with the axes aligned with the z-up ankle frame of the stance foot. This parameter defines
@@ -737,6 +731,24 @@ public abstract class WalkingControllerParameters
     * Parameter for the CoM height trajectory generation.
     */
    public abstract double maximumHeightAboveAnkle();
+
+   /**
+    * Whether the height of the pelvis should be controlled instead of the center of mass height.
+    */
+   public boolean controlPelvisHeightInsteadOfCoMHeight()
+   {
+      return true;
+   }
+
+   /**
+    * Whether the height should be controlled with the rate of change of momentum or using a feedback
+    * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
+    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
+    */
+   public boolean controlHeightWithMomentum()
+   {
+      return true;
+   }
 
    /**
     * Parameter for the CoM height trajectory generation.

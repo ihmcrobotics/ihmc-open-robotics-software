@@ -273,7 +273,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
 //                                                                                4));
             
             HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
-                                                                                                                          HandConfiguration.PINCH_GRIP);
+                                                                                                                          HandConfiguration.BASIC_GRIP);
 
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 

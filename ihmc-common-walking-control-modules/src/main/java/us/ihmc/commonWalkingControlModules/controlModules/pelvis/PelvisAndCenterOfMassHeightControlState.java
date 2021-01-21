@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -35,6 +34,8 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    FeedbackControlCommand<?> getFeedbackControlCommand();
 
    FeedbackControlCommand<?> getHeightControlCommand();
+
+   boolean getControlHeightWithMomentum();
 
    /**
     * This method is intended to reset the internal state of this control state to be identical to

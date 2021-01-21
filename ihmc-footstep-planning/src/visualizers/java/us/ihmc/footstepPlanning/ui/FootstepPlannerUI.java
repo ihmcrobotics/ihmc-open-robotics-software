@@ -69,7 +69,7 @@ public class FootstepPlannerUI
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final GoalOrientationViewer goalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
-   private final FootstepPostProcessingMeshViewer postProcessingViewer;
+   private final SwingPlanMeshViewer postProcessingViewer;
    private final GoalOrientationEditor orientationEditor;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
@@ -218,7 +218,7 @@ public class FootstepPlannerUI
                                                          null, GoalOrientationEditModeEnabled);
       this.orientationEditor = new GoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
-      this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
+      this.postProcessingViewer = new SwingPlanMeshViewer(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);

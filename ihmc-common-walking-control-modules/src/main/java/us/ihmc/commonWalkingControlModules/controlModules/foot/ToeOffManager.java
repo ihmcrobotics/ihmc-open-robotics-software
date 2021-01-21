@@ -738,6 +738,21 @@ public class ToeOffManager
       return extraCoMMaxHeightWithToes.getValue();
    }
 
+   /**
+    * Call after any of the following methods to get whether the upcoming footstep corresponds to a step up or not:
+    * <ul>
+    * <li>{@link #canDoToeOff(Footstep, RobotSide)}
+    * <li>{@link #canDoSingleSupportToeOff(Footstep, RobotSide)}
+    * <li>{@link #canDoDoubleSupportToeOff(Footstep, RobotSide)}
+    * </ul>
+    * 
+    * @return whether the upcoming footstep corresponds to a step up or not.
+    */
+   public boolean isSteppingUp()
+   {
+      return isSteppingUp.getValue();
+   }
+
    private enum ToeContact
    {
       POINT, LINE

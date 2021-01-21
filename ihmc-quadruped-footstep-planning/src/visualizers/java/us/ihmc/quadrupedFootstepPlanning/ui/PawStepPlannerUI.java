@@ -13,7 +13,6 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
@@ -70,7 +69,7 @@ public class PawStepPlannerUI
    @FXML
    private PawStepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
-   private MainTabController mainTabController;
+   private QuadrupedMainTabController quadrupedMainTabController;
    @FXML
    private PawStepPlannerVisualizationController pawStepPlannerVizController;
    @FXML
@@ -110,7 +109,7 @@ public class PawStepPlannerUI
       plannerReachParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
-      mainTabController.attachMessager(messager);
+      quadrupedMainTabController.attachMessager(messager);
       pawStepPlannerMenuUIController.attachMessager(messager);
       pawPlannerParametersUIController.attachMessager(messager);
       plannerReachParametersUIController.attachMessager(messager);
@@ -127,7 +126,7 @@ public class PawStepPlannerUI
 
       pawStepPlannerMenuUIController.setMainWindow(primaryStage);
 
-      mainTabController.bindControls();
+      quadrupedMainTabController.bindControls();
       pawPlannerParametersUIController.bindControls();
       plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
@@ -184,7 +183,7 @@ public class PawStepPlannerUI
       {
          robotVisualizer = new JavaFXQuadrupedVisualizer(fullQuadrupedRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
-         mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
+         quadrupedMainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
       }
@@ -197,13 +196,13 @@ public class PawStepPlannerUI
       {
          walkingPreviewVisualizer = new JavaFXQuadrupedVisualizer(previewModelFactory);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
-         mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
+         quadrupedMainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
          walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
          walkingPreviewVisualizer.start();
       }
 
 
-      mainTabController.setPreviewFootstepPositions(pathViewer.getPreviewFootstepPositions());
+      quadrupedMainTabController.setPreviewFootstepPositions(pathViewer.getPreviewFootstepPositions());
 
 
       planarRegionViewer.start();
@@ -262,30 +261,30 @@ public class PawStepPlannerUI
 
    private void setMainTabTopics()
    {
-      mainTabController.setPlannerTypeTopic(PawStepPlannerMessagerAPI.PlannerTypeTopic);
-      mainTabController.setPlannerRequestIdTopic(PawStepPlannerMessagerAPI.PlannerRequestIdTopic);
-      mainTabController.setReceivedPlanIdTopic(PawStepPlannerMessagerAPI.ReceivedPlanIdTopic);
-      mainTabController.setFootstepPlanTopic(PawStepPlannerMessagerAPI.ShowFootstepPlanTopic, PawStepPlannerMessagerAPI.FootstepPlanTopic);
-      mainTabController.setPlanarRegionDataTopic(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
-      mainTabController.setPlannerTimeTakenTopic(PawStepPlannerMessagerAPI.PlannerTimeTakenTopic);
-      mainTabController.setPlannerTimeoutTopic(PawStepPlannerMessagerAPI.PlannerTimeoutTopic);
-      mainTabController.setComputePathTopic(PawStepPlannerMessagerAPI.ComputePathTopic);
-      mainTabController.setAbortPlanningTopic(PawStepPlannerMessagerAPI.AbortPlanningTopic);
-      mainTabController.setAcceptNewPlanarRegionsTopic(PawStepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
-      mainTabController.setPlanningResultTopic(PawStepPlannerMessagerAPI.PlanningResultTopic);
-      mainTabController.setPlannerStatusTopic(PawStepPlannerMessagerAPI.PlannerStatusTopic);
-      mainTabController.setPlannerHorizonLengthTopic(PawStepPlannerMessagerAPI.PlannerHorizonLengthTopic);
-      mainTabController.setStartGoalTopics(PawStepPlannerMessagerAPI.EditModeEnabledTopic, PawStepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
-                                           PawStepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, PawStepPlannerMessagerAPI.InitialSupportQuadrantTopic,
-                                           PawStepPlannerMessagerAPI.StartPositionTopic, PawStepPlannerMessagerAPI.StartOrientationTopic,
-                                           PawStepPlannerMessagerAPI.GoalPositionTopic, PawStepPlannerMessagerAPI.GoalOrientationTopic,
-                                           PawStepPlannerMessagerAPI.StartTargetTypeTopic, PawStepPlannerMessagerAPI.StartFeetPositionTopic);
-      mainTabController.setAssumeFlatGroundTopic(PawStepPlannerMessagerAPI.AssumeFlatGroundTopic);
-      mainTabController.setGlobalResetTopic(PawStepPlannerMessagerAPI.GlobalResetTopic);
-      mainTabController.setPlannerPlaybackFractionTopic(PawStepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
-      mainTabController.setXGaitSettingsTopic(PawStepPlannerMessagerAPI.XGaitSettingsTopic);
-      mainTabController.setShowFootstepPreviewTopic(PawStepPlannerMessagerAPI.ShowFootstepPreviewTopic);
-      mainTabController.setStepListMessageTopic(PawStepPlannerMessagerAPI.FootstepDataListTopic);
+      quadrupedMainTabController.setPlannerTypeTopic(PawStepPlannerMessagerAPI.PlannerTypeTopic);
+      quadrupedMainTabController.setPlannerRequestIdTopic(PawStepPlannerMessagerAPI.PlannerRequestIdTopic);
+      quadrupedMainTabController.setReceivedPlanIdTopic(PawStepPlannerMessagerAPI.ReceivedPlanIdTopic);
+      quadrupedMainTabController.setFootstepPlanTopic(PawStepPlannerMessagerAPI.ShowFootstepPlanTopic, PawStepPlannerMessagerAPI.FootstepPlanTopic);
+      quadrupedMainTabController.setPlanarRegionDataTopic(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
+      quadrupedMainTabController.setPlannerTimeTakenTopic(PawStepPlannerMessagerAPI.PlannerTimeTakenTopic);
+      quadrupedMainTabController.setPlannerTimeoutTopic(PawStepPlannerMessagerAPI.PlannerTimeoutTopic);
+      quadrupedMainTabController.setComputePathTopic(PawStepPlannerMessagerAPI.ComputePathTopic);
+      quadrupedMainTabController.setAbortPlanningTopic(PawStepPlannerMessagerAPI.AbortPlanningTopic);
+      quadrupedMainTabController.setAcceptNewPlanarRegionsTopic(PawStepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
+      quadrupedMainTabController.setPlanningResultTopic(PawStepPlannerMessagerAPI.PlanningResultTopic);
+      quadrupedMainTabController.setPlannerStatusTopic(PawStepPlannerMessagerAPI.PlannerStatusTopic);
+      quadrupedMainTabController.setPlannerHorizonLengthTopic(PawStepPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      quadrupedMainTabController.setStartGoalTopics(PawStepPlannerMessagerAPI.EditModeEnabledTopic, PawStepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
+                                                    PawStepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, PawStepPlannerMessagerAPI.InitialSupportQuadrantTopic,
+                                                    PawStepPlannerMessagerAPI.StartPositionTopic, PawStepPlannerMessagerAPI.StartOrientationTopic,
+                                                    PawStepPlannerMessagerAPI.GoalPositionTopic, PawStepPlannerMessagerAPI.GoalOrientationTopic,
+                                                    PawStepPlannerMessagerAPI.StartTargetTypeTopic, PawStepPlannerMessagerAPI.StartFeetPositionTopic);
+      quadrupedMainTabController.setAssumeFlatGroundTopic(PawStepPlannerMessagerAPI.AssumeFlatGroundTopic);
+      quadrupedMainTabController.setGlobalResetTopic(PawStepPlannerMessagerAPI.GlobalResetTopic);
+      quadrupedMainTabController.setPlannerPlaybackFractionTopic(PawStepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
+      quadrupedMainTabController.setXGaitSettingsTopic(PawStepPlannerMessagerAPI.XGaitSettingsTopic);
+      quadrupedMainTabController.setShowFootstepPreviewTopic(PawStepPlannerMessagerAPI.ShowFootstepPreviewTopic);
+      quadrupedMainTabController.setStepListMessageTopic(PawStepPlannerMessagerAPI.FootstepDataListTopic);
    }
 
    public static PawStepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
