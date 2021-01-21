@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -17,6 +16,7 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
@@ -25,21 +25,22 @@ import java.util.Random;
 public class GDXDepthSensorSimulator
 {
    private final Random random = new Random();
+
    private final float fieldOfViewY;
    private final int imageWidth;
    private final int imageHeight;
    private final float minRange;
    private final float maxRange;
+   private final Color gdxColor = new Color();
+   private final Vector3 depthPoint = new Vector3();
+
    private PerspectiveCamera camera;
    private DepthShaderProvider depthShaderProvider;
-
    private ModelBatch modelBatch;
    private ScreenViewport viewport;
    private FrameBuffer frameBuffer;
-
+   private Pixmap pixmap;
    private RecyclingArrayList<Point3D32> points;
-   private final Color tempGDXColor = new Color();
-   private final Vector3 depthPointWorld = new Vector3();
 
    public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -67,6 +68,7 @@ public class GDXDepthSensorSimulator
 
       boolean hasDepth = true;
       frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, imageWidth, imageHeight, hasDepth);
+      pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
    }
@@ -87,42 +89,48 @@ public class GDXDepthSensorSimulator
 
       modelBatch.end();
 
-      Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, imageWidth, imageHeight);
+      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+      ByteBuffer pixels = pixmap.getPixels();
+      pixels.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
+
       frameBuffer.end();
 
       points.clear();
-
       for (int y = 0; y < imageHeight; y++)
       {
          for (int x = 0; x < imageWidth; x++)
          {
             int color = pixmap.getPixel(x, y);
-            tempGDXColor.set(color);
-            float depthReading = tempGDXColor.r;
-            depthReading += tempGDXColor.g / 256.0;
-            depthReading += tempGDXColor.b / 65536.0;
-            depthReading += tempGDXColor.a / 16777216.0;
+            gdxColor.r = ((color & 0xff000000) >>> 24) / 255f;
+            gdxColor.g = ((color & 0x00ff0000) >>> 16) / 255f;
+            gdxColor.b = ((color & 0x0000ff00) >>> 8) / 255f;
+            gdxColor.a = ((color & 0x000000ff)) / 255f;
+            float depthReading = gdxColor.r;
+            depthReading += gdxColor.g / 256.0;
+            depthReading += gdxColor.b / 65536.0;
+            depthReading += gdxColor.a / 16777216.0;
 
             if (depthReading > camera.near)
             {
-               depthPointWorld.x = (2.0f * x) / imageWidth - 1.0f;
-               depthPointWorld.y = (2.0f * y) / imageHeight - 1.0f;
-               depthPointWorld.z = 2.0f * depthReading - 1.0f;
-               depthPointWorld.prj(camera.invProjectionView);
+               depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
+               depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
+               depthPoint.z = 2.0f * depthReading - 1.0f;
+               depthPoint.prj(camera.invProjectionView);
 
                Point3D32 point = points.add();
-               GDXTools.toEuclid(depthPointWorld, point);
-               point.addZ(random.nextDouble() * 0.007);
+               GDXTools.toEuclid(depthPoint, point);
+               point.addZ(random.nextDouble() * 0.007); // add some noise
             }
          }
       }
-      pixmap.dispose();
    }
 
    public void dispose()
    {
       frameBuffer.dispose();
       depthShaderProvider.dispose();
+      pixmap.dispose();
    }
 
    public void setCameraWorldTransform(Matrix4 worldTransform)
