@@ -102,9 +102,9 @@ public class GDXDepthSensorSimulator
          {
             int encodedDepthValue = pixmap.getPixel(x, y);
             float depthReading = ((encodedDepthValue & 0xff000000) >>> 24) / 255.0f;
-            depthReading += ((encodedDepthValue & 0x00ff0000) >>> 16) / 255.0f / 255.0f;
-            depthReading += ((encodedDepthValue & 0x0000ff00) >>> 8) / 255.0f / 65025.0f;
-            depthReading += ((encodedDepthValue & 0x000000ff)) / 255.0f / 16581375.0f;
+            depthReading += ((encodedDepthValue & 0x00ff0000) >>> 16) / 65025.0f;
+            depthReading += ((encodedDepthValue & 0x0000ff00) >>> 8) / 16581375.0f;
+            depthReading += ((encodedDepthValue & 0x000000ff)) / 4294967296.0f;
 
             if (depthReading > camera.near)
             {
