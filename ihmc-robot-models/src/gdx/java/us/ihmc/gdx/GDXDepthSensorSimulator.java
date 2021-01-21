@@ -12,14 +12,10 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.Random;
 
@@ -43,13 +39,7 @@ public class GDXDepthSensorSimulator
 
    private RecyclingArrayList<Point3D32> points;
    private final Color tempGDXColor = new Color();
-   private final Vector3 depthPoint = new Vector3();
    private final Vector3 depthPointWorld = new Vector3();
-
-   private final AffineTransform tempWorldTransform = new AffineTransform();
-   private final PoseReferenceFrame cameraReferenceFrame = new PoseReferenceFrame("depthCameraFrame", ReferenceFrame.getWorldFrame());
-   private final FramePoint3D depthFramePoint = new FramePoint3D();
-   private final Point3D32 euclidDepthPoint = new Point3D32();
 
    public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -115,40 +105,14 @@ public class GDXDepthSensorSimulator
 
             if (depthReading > camera.near)
             {
-               int flippedY = imageHeight - y;
-
-               int pixelX = x - (imageWidth / 2);
-               int pixelY = flippedY - (imageHeight / 2);
-
-               depthPoint.set(pixelX + 0.5f * imageWidth, pixelY + 0.5f * imageHeight, depthReading);
-
-               depthPointWorld.set(depthPoint);
-               float xx = depthPointWorld.x;
-               float yy = depthPointWorld.y;
-               xx = xx - viewport.getScreenX();
-               yy = imageHeight - yy;
-               yy = yy - viewport.getScreenY();
-               depthPointWorld.x = (2 * xx) / viewport.getScreenWidth() - 1;
-               depthPointWorld.y = (2 * yy) / viewport.getScreenHeight() - 1;
-               depthPointWorld.z = 2 * depthPointWorld.z - 1;
+               depthPointWorld.x = (2.0f * x) / imageWidth - 1.0f;
+               depthPointWorld.y = (2.0f * y) / imageHeight - 1.0f;
+               depthPointWorld.z = 2.0f * depthReading - 1.0f;
                depthPointWorld.prj(camera.invProjectionView);
 
-               GDXTools.toEuclid(depthPointWorld, euclidDepthPoint);
-
-               depthFramePoint.setToZero(cameraReferenceFrame);
-               depthFramePoint.set(euclidDepthPoint);
-//               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-
                Point3D32 point = points.add();
-               point.set(depthFramePoint);
-               if (x == 0 && y == 0)
-               {
-                  point.addZ(random.nextDouble() * 0.007);
-               }
-               else
-               {
-                  point.addZ(random.nextDouble() * 0.007);
-               }
+               GDXTools.toEuclid(depthPointWorld, point);
+               point.addZ(random.nextDouble() * 0.007);
             }
          }
       }
@@ -167,11 +131,6 @@ public class GDXDepthSensorSimulator
       camera.up.set(0.0f, 0.0f, 1.0f);
       camera.direction.set(1.0f, 0.0f, 0.0f);
       camera.transform(worldTransform);
-      GDXTools.toEuclid(worldTransform, tempWorldTransform);
-      cameraReferenceFrame.setX(tempWorldTransform.getTranslation().getX());
-      cameraReferenceFrame.setY(tempWorldTransform.getTranslation().getY());
-      cameraReferenceFrame.setZ(tempWorldTransform.getTranslation().getZ());
-      cameraReferenceFrame.setOrientationAndUpdate(tempWorldTransform.getRotationView());
    }
 
    public PerspectiveCamera getCamera()
