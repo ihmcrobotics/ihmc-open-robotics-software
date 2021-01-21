@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
@@ -43,7 +44,7 @@ public class CoPTrajectoryGeneratorStateTest
       {
          stateA.clear();
 
-         FramePoint2DReadOnly randomInitialCoP = EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame(), 10.0);
+         FramePoint3DReadOnly randomInitialCoP = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0);
          FootstepTiming randomTiming0 = CoPTrajectoryGeneratorTestTools.getRandomTiming(random);
          FootstepTiming randomTiming1 = CoPTrajectoryGeneratorTestTools.getRandomTiming(random);
 
@@ -70,7 +71,7 @@ public class CoPTrajectoryGeneratorStateTest
 
          stateB.loadValues(YoSaveableModuleStateTools.readSaveableRegistryToDataMap(YoSaveableModuleStateTools.writeStateToSaveableRegistry(stateA)));
 
-         EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming0, stateB.getTiming(0), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming1, stateB.getTiming(1), epsilon);
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep0, stateB.getFootstep(0), epsilon);

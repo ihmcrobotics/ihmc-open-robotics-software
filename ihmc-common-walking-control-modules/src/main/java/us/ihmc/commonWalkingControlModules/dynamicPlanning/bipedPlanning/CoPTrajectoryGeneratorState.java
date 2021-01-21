@@ -20,6 +20,7 @@ import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,7 +34,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
    private final YoDouble finalTransferDuration;
    private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
 
-   private final YoFramePoint2D initialCoP;
+   private final YoFramePoint3D initialCoP;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
    private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
@@ -58,8 +59,8 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 
       percentageStandingWeightDistributionOnLeftFoot.set(0.5);
 
-      initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
-      YoSaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
+      initialCoP = new YoFramePoint3D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
+      YoSaveableModuleStateTools.registerYoTuple3DToSave(initialCoP, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -108,7 +109,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       return footsteps.size();
    }
 
-   public FramePoint2DReadOnly getInitialCoP()
+   public FramePoint3DReadOnly getInitialCoP()
    {
       return initialCoP;
    }
