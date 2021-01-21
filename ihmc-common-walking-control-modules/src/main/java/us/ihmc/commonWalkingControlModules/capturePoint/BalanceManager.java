@@ -53,6 +53,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -530,6 +531,9 @@ public class BalanceManager
             comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
          }
 
+         if (comTrajectoryPlanner.getCoMTrajectory().getCurrentNumberOfSegments() < 1)
+            LogTools.info("what?");
+
          angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
          angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
          angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectory());
@@ -785,6 +789,8 @@ public class BalanceManager
 
    public void initializeICPPlanForTransferToStanding()
    {
+      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
@@ -815,6 +821,8 @@ public class BalanceManager
       }
 
       stepAdjustmentController.reset();
+
+      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);

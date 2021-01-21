@@ -51,6 +51,21 @@ public class LinearCoMTrajectoryHandler
       return hasTrajectory;
    }
 
+   public void removeCompletedSegments(double timeToCrop)
+   {
+      while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
+         comTrajectory.removeSegment(0);
+
+      if (comTrajectory.getCurrentNumberOfSegments() < 1)
+      {
+         hasTrajectory = false;
+         return;
+      }
+
+      for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments(); i++)
+         comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
+   }
+
    public MultipleSegmentPositionTrajectoryGenerator<?> getComTrajectory()
    {
       return comTrajectory;
