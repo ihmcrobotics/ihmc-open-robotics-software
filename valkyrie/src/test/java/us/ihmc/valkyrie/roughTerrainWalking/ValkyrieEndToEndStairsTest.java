@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.roughTerrainWalking;
 
 import java.util.Random;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -28,6 +29,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
@@ -36,6 +38,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
@@ -44,6 +47,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
@@ -51,6 +55,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
@@ -59,6 +64,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlowVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -67,6 +73,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlowVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -75,6 +82,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -82,6 +90,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
