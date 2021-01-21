@@ -10,11 +10,13 @@ import us.ihmc.commons.MathTools;
  * Polynomial Function with real coefficients. Immuatable.
  * </p>
  *
+ * Has been replaced with {@link us.ihmc.robotics.math.trajectories.core.Polynomial}
+ *
  * @author IHMC Biped Team
  * @version 1.0
  */
 @Deprecated
-public class Polynomial
+public class ObsoletePolynomial
 {
    private final double[] coefficients;
    private final double[] derivativeCoefficients;
@@ -23,27 +25,27 @@ public class Polynomial
    private DMatrixRMaj constraintVector;
    private DMatrixRMaj coefficientVector;
 
-   public Polynomial(double constant)
+   public ObsoletePolynomial(double constant)
    {
       this(new double[] {constant});
    }
 
-   public Polynomial(double coefficient1, double constant)
+   public ObsoletePolynomial(double coefficient1, double constant)
    {
       this(new double[] {coefficient1, constant});
    }
 
-   public Polynomial(double coefficient2, double coefficient1, double constant)
+   public ObsoletePolynomial(double coefficient2, double coefficient1, double constant)
    {
       this(new double[] {coefficient2, coefficient1, constant});
    }
 
-   public Polynomial(double coefficient3, double coefficient2, double coefficient1, double constant)
+   public ObsoletePolynomial(double coefficient3, double coefficient2, double coefficient1, double constant)
    {
       this(new double[] {coefficient3, coefficient2, coefficient1, constant});
    }
 
-   public Polynomial(double[] coefficientsHighOrderFirst)
+   public ObsoletePolynomial(double[] coefficientsHighOrderFirst)
    {
       if ((coefficientsHighOrderFirst == null) || (coefficientsHighOrderFirst.length < 1))
          throw new RuntimeException("(coefficientsHighOrderFirst == null) || (coefficientsHighOrderFirst.length < 1)");
@@ -131,49 +133,49 @@ public class Polynomial
       return maxCoefficient;
    }
 
-   public static Polynomial constructFromComplexPairRoot(ComplexNumber oneComplexRoot)
+   public static ObsoletePolynomial constructFromComplexPairRoot(ComplexNumber oneComplexRoot)
    {
       double a = oneComplexRoot.real();
       double b = oneComplexRoot.imag();
 
-      return new Polynomial(new double[] {1.0, -2.0 * a, a * a + b * b});
+      return new ObsoletePolynomial(new double[] {1.0, -2.0 * a, a * a + b * b});
    }
 
-   public static Polynomial constructFromRealRoot(double realRoot)
+   public static ObsoletePolynomial constructFromRealRoot(double realRoot)
    {
-      return new Polynomial(new double[] {1.0, -realRoot});
+      return new ObsoletePolynomial(new double[] {1.0, -realRoot});
    }
 
-   public static Polynomial constructFromScaleFactorAndRoots(double scaleFactor, double[] realRoots, ComplexNumber[] complexRootPairs)
+   public static ObsoletePolynomial constructFromScaleFactorAndRoots(double scaleFactor, double[] realRoots, ComplexNumber[] complexRootPairs)
    {
-      Polynomial scalePolynomial = new Polynomial(new double[] {scaleFactor});
+      ObsoletePolynomial scalePolynomial = new ObsoletePolynomial(new double[] {scaleFactor});
 
       if (complexRootPairs == null)
          complexRootPairs = new ComplexNumber[] {};
       if (realRoots == null)
          realRoots = new double[] {};
 
-      Polynomial[] complexRootPolynomials = new Polynomial[complexRootPairs.length];
-      Polynomial[] realRootPolynomials = new Polynomial[realRoots.length];
+      ObsoletePolynomial[] complexRootPolynomials = new ObsoletePolynomial[complexRootPairs.length];
+      ObsoletePolynomial[] realRootPolynomials = new ObsoletePolynomial[realRoots.length];
 
       for (int i = 0; i < realRoots.length; i++)
       {
-         realRootPolynomials[i] = Polynomial.constructFromRealRoot(realRoots[i]);
+         realRootPolynomials[i] = ObsoletePolynomial.constructFromRealRoot(realRoots[i]);
       }
 
       for (int i = 0; i < complexRootPairs.length; i++)
       {
-         complexRootPolynomials[i] = Polynomial.constructFromComplexPairRoot(complexRootPairs[i]);
+         complexRootPolynomials[i] = ObsoletePolynomial.constructFromComplexPairRoot(complexRootPairs[i]);
       }
 
-      Polynomial polynomialToReturn = scalePolynomial;
+      ObsoletePolynomial polynomialToReturn = scalePolynomial;
 
-      for (Polynomial polynomial : realRootPolynomials)
+      for (ObsoletePolynomial polynomial : realRootPolynomials)
       {
          polynomialToReturn = polynomialToReturn.times(polynomial);
       }
 
-      for (Polynomial polynomial : complexRootPolynomials)
+      for (ObsoletePolynomial polynomial : complexRootPolynomials)
       {
          polynomialToReturn = polynomialToReturn.times(polynomial);
       }
@@ -258,7 +260,7 @@ public class Polynomial
       return ret;
    }
 
-   public Polynomial times(double multiplier)
+   public ObsoletePolynomial times(double multiplier)
    {
       double[] coefficients = new double[this.coefficients.length];
 
@@ -267,10 +269,10 @@ public class Polynomial
          coefficients[cIndex] = this.coefficients[cIndex] * multiplier;
       }
 
-      return new Polynomial(coefficients);
+      return new ObsoletePolynomial(coefficients);
    }
 
-   public Polynomial times(Polynomial polynomialB)
+   public ObsoletePolynomial times(ObsoletePolynomial polynomialB)
    {
       // Do convolution on the coefficients:
 
@@ -293,12 +295,12 @@ public class Polynomial
          }
       }
 
-      Polynomial ret = new Polynomial(coefficients);
+      ObsoletePolynomial ret = new ObsoletePolynomial(coefficients);
 
       return ret;
    }
 
-   public Polynomial plus(Polynomial polynomial)
+   public ObsoletePolynomial plus(ObsoletePolynomial polynomial)
    {
       int newOrder = this.getOrder();
       if (polynomial.getOrder() > newOrder)
@@ -321,7 +323,7 @@ public class Polynomial
             newCoefficients[newIndex] += polynomial.coefficients[otherIndex];
       }
 
-      return new Polynomial(newCoefficients);
+      return new ObsoletePolynomial(newCoefficients);
    }
 
    public String toString()
@@ -348,7 +350,7 @@ public class Polynomial
       return builder.toString();
    }
 
-   public boolean epsilonEquals(Polynomial polynomial, double epsilon)
+   public boolean epsilonEquals(ObsoletePolynomial polynomial, double epsilon)
    {
       if (coefficients.length != polynomial.coefficients.length)
          return false;
