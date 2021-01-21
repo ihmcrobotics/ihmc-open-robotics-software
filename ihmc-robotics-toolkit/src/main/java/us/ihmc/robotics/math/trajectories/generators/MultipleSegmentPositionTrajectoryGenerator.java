@@ -191,6 +191,11 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       return currentSegmentIndex.getIntegerValue();
    }
 
+   public double getCurrentSegmentTrajectoryTime()
+   {
+      return currentSegmentTime.getDoubleValue();
+   }
+
    @Override
    public void showVisualization()
    {
@@ -232,6 +237,17 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
    public double getEndTime()
    {
       return segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime();
+   }
+
+   public T getSegment(int segmentIdx)
+   {
+      return segments.get(segmentIdx);
+   }
+
+   public void removeSegment(int segmentIdx)
+   {
+      segments.remove(segmentIdx);
+      numberOfSegments.decrement();
    }
 
    @Override

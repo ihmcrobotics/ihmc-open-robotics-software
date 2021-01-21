@@ -846,6 +846,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       return trajectoryHandler.hasTrajectory();
    }
 
+   public void removeCompletedSegments(double timeToCrop)
+   {
+      trajectoryHandler.removeCompletedSegments(timeToCrop);
+   }
+
    @Override
    public List<Polynomial3DReadOnly> getVRPTrajectories()
    {

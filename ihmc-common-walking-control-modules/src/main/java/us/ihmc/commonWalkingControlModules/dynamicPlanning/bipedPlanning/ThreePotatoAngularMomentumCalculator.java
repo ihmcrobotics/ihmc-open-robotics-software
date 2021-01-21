@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
@@ -57,6 +58,9 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoFrameVector3D predictedThirdPotatoVelocity = new YoFrameVector3D("predictedThirdPotatoVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFrameVector3D actualPotatoModelMomentum = new YoFrameVector3D("actualPotatoModelMomentum", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoDouble firstPotatoCurrentTime = new YoDouble("firstPotatoCurrentTrajectoryTime", registry);
+   private final YoInteger firstPotatoCurrentSegment = new YoInteger("firstPotatoCurrentSegmentIndex", registry);
 
    private MultipleSegmentPositionTrajectoryGenerator<?> predictedCoMTrajectory;
    private MultipleWaypointsPositionTrajectoryGenerator predictedSecondPotatoTrajectory;
@@ -175,6 +179,9 @@ public class ThreePotatoAngularMomentumCalculator
       predictedSecondPotatoVelocity.set(predictedSecondPotatoTrajectory.getVelocity());
       predictedThirdPotatoPosition.set(predictedThirdPotatoTrajectory.getPosition());
       predictedThirdPotatoVelocity.set(predictedThirdPotatoTrajectory.getVelocity());
+
+      firstPotatoCurrentSegment.set(predictedCoMTrajectory.getCurrentSegmentIndex());
+      firstPotatoCurrentTime.set(predictedCoMTrajectory.getCurrentSegmentTrajectoryTime());
 
       predictedAngularMomentum.set(totalAngularMomentum);
       predictedAngularMomentumRate.set(totalTorque);
