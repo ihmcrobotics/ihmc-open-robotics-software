@@ -243,8 +243,7 @@ public class JumpingPelvisOrientationManager
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 
-      pelvisOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
-
+      tempOrientation.setIncludingFrame(pelvisOrientationOffsetTrajectoryGenerator.getOrientation());
       tempOrientation.changeFrame(desiredPelvisFrame);
       pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
       tempOrientation.setToZero(desiredPelvisFrame);

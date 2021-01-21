@@ -146,7 +146,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
          {
             double t = startTime + dt * i;
             trajectory.compute(t);
-            trajectory.getPosition(tempPoint);
+            tempPoint.setIncludingFrame(trajectory.getPosition());
             double yaw = tempPoint.getZ();
             tempPoint.setZ(0.02);
 
@@ -169,7 +169,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    public void getPlanarPose(double time, FramePose2D poseToPack)
    {
       trajectory.compute(time);
-      trajectory.getPosition(trajectoryValue);
+      trajectoryValue.setIncludingFrame(trajectory.getPosition());
       poseToPack.setIncludingFrame(worldFrame, trajectoryValue.getX(), trajectoryValue.getY(), trajectoryValue.getZ());
       yoTrajectoryValue.set(trajectoryValue);
    }
