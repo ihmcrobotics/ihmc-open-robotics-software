@@ -49,6 +49,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
       if (toRender != null)
       {
          toRender.run();
+         toRender = null;
       }
    }
 
