@@ -1,6 +1,6 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.math.trajectories.Finishable;
+import us.ihmc.robotics.math.trajectories.interfaces.Finishable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 

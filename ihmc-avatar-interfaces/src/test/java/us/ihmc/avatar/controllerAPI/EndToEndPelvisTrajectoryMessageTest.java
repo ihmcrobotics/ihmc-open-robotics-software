@@ -68,7 +68,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
@@ -836,7 +836,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       {
          anglePolynomial.compute(t);
 
-         double angle = anglePolynomial.getPosition();
+         double angle = anglePolynomial.getValue();
          double angleDot = anglePolynomial.getVelocity();
          if (i == 0 || i == numberOfWaypoints - 1)
          {
@@ -1374,7 +1374,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                       .getValue());
       FrameVector3D controllerDesiredLinearVelocity = new FrameVector3D(supportFrame, findControllerDesiredLinearVelocityXY(scs));
       controllerDesiredLinearVelocity.changeFrame(worldFrame);
-      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator",
+      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetMultipleWaypointsTrajectoryGenerator",
                                                                           "pelvisHeightOffsetSubTrajectoryCurrentVelocity",
                                                                           scs)
                                                             .getValue());
@@ -1395,7 +1395,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                       .getValue());
       controllerDesiredLinearVelocity = new FrameVector3D(supportFrame, findControllerDesiredLinearVelocityXY(scs));
       controllerDesiredLinearVelocity.changeFrame(worldFrame);
-      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator",
+      controllerDesiredLinearVelocity.setZ(EndToEndTestTools.findYoDouble("pelvisHeightOffsetMultipleWaypointsTrajectoryGenerator",
                                                                           "pelvisHeightOffsetSubTrajectoryCurrentVelocity",
                                                                           scs)
                                                             .getValue());

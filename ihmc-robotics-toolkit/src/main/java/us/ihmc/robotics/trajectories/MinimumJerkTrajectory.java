@@ -1,6 +1,7 @@
 package us.ihmc.robotics.trajectories;
 
 
+@Deprecated
 public class MinimumJerkTrajectory
 {
    private double C0, C1, C2, C3, C4, C5;

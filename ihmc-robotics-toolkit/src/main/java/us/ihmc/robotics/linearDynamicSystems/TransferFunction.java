@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 /**
  * TransferFunction.
@@ -10,12 +10,12 @@ import us.ihmc.robotics.dataStructures.Polynomial;
  */
 public class TransferFunction
 {
-   private final Polynomial numerator, denominator;
+   private final ObsoletePolynomial numerator, denominator;
 
    public TransferFunction(double[] numerator, double[] denominator)
    {
-      Polynomial numeratorPolynomial = new Polynomial(numerator);
-      Polynomial denominatorPolynomial = new Polynomial(denominator);
+      ObsoletePolynomial numeratorPolynomial = new ObsoletePolynomial(numerator);
+      ObsoletePolynomial denominatorPolynomial = new ObsoletePolynomial(denominator);
 
       double scaleFactor = 1.0 / denominatorPolynomial.getCoefficients()[0];
 
@@ -23,7 +23,7 @@ public class TransferFunction
       this.denominator = denominatorPolynomial.times(scaleFactor);
    }
 
-   public TransferFunction(Polynomial numeratorPolynomial, Polynomial denominatorPolynomial)
+   public TransferFunction(ObsoletePolynomial numeratorPolynomial, ObsoletePolynomial denominatorPolynomial)
    {
       double scaleFactor = 1.0 / denominatorPolynomial.getCoefficients()[0];
 
@@ -112,12 +112,12 @@ public class TransferFunction
       return denominator.getCoefficients();
    }
 
-   public Polynomial getNumeratorPolynomial()
+   public ObsoletePolynomial getNumeratorPolynomial()
    {
       return numerator;
    }
 
-   public Polynomial getDenominatorPolynomial()
+   public ObsoletePolynomial getDenominatorPolynomial()
    {
       return denominator;
    }
@@ -129,7 +129,7 @@ public class TransferFunction
 
    public TransferFunction times(double d)
    {
-      Polynomial newNumerator = numerator.times(d);
+      ObsoletePolynomial newNumerator = numerator.times(d);
       if (newNumerator.equalsZero())
       {
          return constructZeroTransferFunction();
@@ -140,8 +140,8 @@ public class TransferFunction
 
    public TransferFunction plus(TransferFunction transferFunction)
    {
-      Polynomial otherNumerator = transferFunction.getNumeratorPolynomial();
-      Polynomial otherDenominator = transferFunction.getDenominatorPolynomial();
+      ObsoletePolynomial otherNumerator = transferFunction.getNumeratorPolynomial();
+      ObsoletePolynomial otherDenominator = transferFunction.getDenominatorPolynomial();
 
       if (this.equalsZero())
       {
@@ -154,15 +154,15 @@ public class TransferFunction
 
       else if (denominator.epsilonEquals(otherDenominator, 1e-7))
       {
-         Polynomial newDenominator = denominator;
-         Polynomial newNumerator = numerator.plus(otherNumerator);
+         ObsoletePolynomial newDenominator = denominator;
+         ObsoletePolynomial newNumerator = numerator.plus(otherNumerator);
 
          return new TransferFunction(newNumerator, newDenominator);
       }
       else
       {
-         Polynomial newDenominator = denominator.times(otherDenominator);
-         Polynomial newNumerator = numerator.times(otherDenominator).plus(otherNumerator.times(denominator));
+         ObsoletePolynomial newDenominator = denominator.times(otherDenominator);
+         ObsoletePolynomial newNumerator = numerator.times(otherDenominator).plus(otherNumerator.times(denominator));
 
          return new TransferFunction(newNumerator, newDenominator);
       }
@@ -175,8 +175,8 @@ public class TransferFunction
 
    public TransferFunction times(TransferFunction transferFunction)
    {
-      Polynomial otherNumerator = transferFunction.getNumeratorPolynomial();
-      Polynomial otherDenominator = transferFunction.getDenominatorPolynomial();
+      ObsoletePolynomial otherNumerator = transferFunction.getNumeratorPolynomial();
+      ObsoletePolynomial otherDenominator = transferFunction.getDenominatorPolynomial();
 
       // First check if any cancellation of numerator and denominator:
       // @todo: Implement cancellation or root finding...
@@ -191,8 +191,8 @@ public class TransferFunction
       // }
 
 
-      Polynomial newNumerator = numerator.times(otherNumerator);
-      Polynomial newDenominator = denominator.times(otherDenominator);
+      ObsoletePolynomial newNumerator = numerator.times(otherNumerator);
+      ObsoletePolynomial newDenominator = denominator.times(otherDenominator);
 
       return new TransferFunction(newNumerator, newDenominator);
    }

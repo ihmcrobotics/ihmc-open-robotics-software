@@ -8,8 +8,6 @@ import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -17,8 +15,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
@@ -336,21 +335,21 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      positionToPack.setIncludingFrame(currentPosition);
+      return currentPosition;
    }
 
    @Override
-   public void getVelocity(FrameVector3D linearVelocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      linearVelocityToPack.setIncludingFrame(currentVelocity);
+      return currentVelocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D linearAccelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      linearAccelerationToPack.setIncludingFrame(currentAcceleration);
+      return currentAcceleration;
    }
 
    public int getCurrentNumberOfWaypoints()

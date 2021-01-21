@@ -6,15 +6,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -27,8 +23,8 @@ public class StraightLinePositionTrajectoryGeneratorTest
    private ReferenceFrame referenceFrame;
    private DoubleProvider trajectoryTimeProvider;
    private StraightLinePositionTrajectoryGenerator generator;
-   private PositionProvider initialPositionProvider;
-   private PositionProvider finalPositionProvider;
+   private FramePositionProvider initialPositionProvider;
+   private FramePositionProvider finalPositionProvider;
    private FramePoint3D position;
    private YoRegistry parentRegistry;
 
@@ -43,9 +39,9 @@ public class StraightLinePositionTrajectoryGeneratorTest
       parentRegistry = new YoRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
-      initialPositionProvider = new ConstantPositionProvider(position);
-      finalPositionProvider = new ConstantPositionProvider(position);
-      trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
+      initialPositionProvider = () -> position;
+      finalPositionProvider = () -> position;
+      trajectoryTimeProvider = () -> 10.0;
    }
 
    @AfterEach
@@ -104,7 +100,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
       FramePoint3D positionToPack = new FramePoint3D();
 
-      generator.getPosition(positionToPack);
+      positionToPack.setIncludingFrame(generator.getPosition());
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
@@ -117,7 +113,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
-      generator.getVelocity(velocityToPack);
+      velocityToPack.setIncludingFrame(generator.getVelocity());
 
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
@@ -133,7 +129,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
-      generator.getAcceleration(accelerationToPack);
+      accelerationToPack.setIncludingFrame(generator.getAcceleration());
 
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
@@ -148,11 +144,11 @@ public class StraightLinePositionTrajectoryGeneratorTest
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      generator.getPosition(positionToPack);
+      positionToPack.setIncludingFrame(generator.getPosition());
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      generator.getPosition(positionToPack);
+      positionToPack.setIncludingFrame(generator.getPosition());
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
