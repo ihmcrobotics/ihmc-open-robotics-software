@@ -49,6 +49,7 @@ public class GDXDepthSensorSimulator
    private RecyclingArrayList<Point3D32> points;
    private final Color tempGDXColor = new Color();
    private final Vector3 depthPoint = new Vector3();
+   private final Vector3 depthPointWorld = new Vector3();
 
    private final AffineTransform tempWorldTransform = new AffineTransform();
    private final PoseReferenceFrame cameraReferenceFrame = new PoseReferenceFrame("depthCameraFrame", ReferenceFrame.getWorldFrame());
@@ -169,9 +170,7 @@ public class GDXDepthSensorSimulator
 ////               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far - camera.near), 0.0, 1.0));
 //               euclidDepthPoint.setZ(MathTools.clamp((depthReading - camera.near) / (camera.far), 0.0, 1.0));
 //
-//               euclidDepthPoint.setX(random.nextDouble() - 0.5);
-//               euclidDepthPoint.setY(random.nextDouble() - 0.5);
-//               euclidDepthPoint.setZ(random.nextDouble());
+
 //
 //               euclidDepthPoint.set(x, y, depthReading);
 
@@ -219,10 +218,25 @@ public class GDXDepthSensorSimulator
 //               euclidDepthPoint.setY(-viewX);
 //               euclidDepthPoint.setZ(-viewY);
 
-               depthPoint.set(pixelX + 0.5f * imageWidth, pixelY + 2.6f * imageHeight, depthReading);
-               viewport.unproject(depthPoint);
-               GDXTools.toEuclid(depthPoint, euclidDepthPoint);
+               euclidDepthPoint.setX(random.nextDouble() - 0.5);
+               euclidDepthPoint.setY(random.nextDouble() - 0.5);
+               euclidDepthPoint.setZ(random.nextDouble());
 
+//               depthPoint.set(pixelX + 0.5f * imageWidth, pixelY + 2.6f * imageHeight, depthReading);
+               depthPoint.set(pixelX + 0.5f * imageWidth, pixelY + 0.5f * imageHeight, depthReading);
+               depthPointWorld.set(depthPoint);
+
+               float xx = depthPointWorld.x;
+               float yy = depthPointWorld.y;
+               xx = xx - viewport.getScreenX();
+               yy = imageHeight - yy;
+               yy = yy - viewport.getScreenY();
+               depthPointWorld.x = (2 * xx) / viewport.getScreenWidth() - 1;
+               depthPointWorld.y = (2 * yy) / viewport.getScreenHeight() - 1;
+               depthPointWorld.z = 2 * depthPointWorld.z - 1;
+               depthPointWorld.prj(camera.invProjectionView);
+
+               GDXTools.toEuclid(depthPointWorld, euclidDepthPoint);
 
                //               depthPoint.set(percentX, percentY, depthReading);
 //               depthPoint.prj(camera.invProjectionView);
