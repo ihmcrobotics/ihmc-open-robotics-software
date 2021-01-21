@@ -11,6 +11,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -131,7 +132,7 @@ public class GDXVRManager implements RenderableProvider
       int height = context.getEyeData(eye).getFrameBuffer().getHeight();
       Gdx.gl.glViewport(0, 0, width, height);
 
-      sceneManager.glClearGray();
+      GDX3DSceneTools.glClearGray();
 
       skipHeadset = true;
       sceneManager.renderToCamera(camera);

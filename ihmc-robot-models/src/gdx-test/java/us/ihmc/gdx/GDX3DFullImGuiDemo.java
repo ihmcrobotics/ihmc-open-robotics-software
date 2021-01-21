@@ -9,6 +9,7 @@ import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
 import us.ihmc.gdx.imgui.ImGuiGDX3DWindow;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.tools.string.StringTools;
@@ -39,7 +40,7 @@ public class GDX3DFullImGuiDemo
          @Override
          public void render()
          {
-            application.glClearGray(0.3f);
+            GDX3DSceneTools.glClearGray(0.3f);
             imGui.beforeWindowManagement();
             gdx3DWindow.renderBeforeOtherWindows(application);
 
