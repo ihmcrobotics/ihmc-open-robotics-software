@@ -31,7 +31,6 @@ public class GDXDepthSensorSimulator
    private final int imageHeight;
    private final float minRange;
    private final float maxRange;
-   private final Color gdxColor = new Color();
    private final Vector3 depthPoint = new Vector3();
 
    private PerspectiveCamera camera;
@@ -101,15 +100,11 @@ public class GDXDepthSensorSimulator
       {
          for (int x = 0; x < imageWidth; x++)
          {
-            int color = pixmap.getPixel(x, y);
-            gdxColor.r = ((color & 0xff000000) >>> 24) / 255f;
-            gdxColor.g = ((color & 0x00ff0000) >>> 16) / 255f;
-            gdxColor.b = ((color & 0x0000ff00) >>> 8) / 255f;
-            gdxColor.a = ((color & 0x000000ff)) / 255f;
-            float depthReading = gdxColor.r;
-            depthReading += gdxColor.g / 256.0;
-            depthReading += gdxColor.b / 65536.0;
-            depthReading += gdxColor.a / 16777216.0;
+            int encodedDepthValue = pixmap.getPixel(x, y);
+            float depthReading = ((encodedDepthValue & 0xff000000) >>> 24) / 255.0f;
+            depthReading += ((encodedDepthValue & 0x00ff0000) >>> 16) / 255.0f / 255.0f;
+            depthReading += ((encodedDepthValue & 0x0000ff00) >>> 8) / 255.0f / 65025.0f;
+            depthReading += ((encodedDepthValue & 0x000000ff)) / 255.0f / 16581375.0f;
 
             if (depthReading > camera.near)
             {
