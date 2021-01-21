@@ -105,7 +105,7 @@ public class BalanceManager
    private final SwingSpeedUpCalculator swingSpeedUpCalculator = new SwingSpeedUpCalculator();
 
    /** CoP position according to the ICP planner */
-   private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
+   private final YoFramePoint3D yoPerfectCoP = new YoFramePoint3D("perfectCoP", worldFrame, registry);
    private final YoFrameVector2D yoPerfectCoPVelocity = new YoFrameVector2D("perfectCoPVelocity", worldFrame, registry);
    /** CMP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
@@ -445,8 +445,8 @@ public class BalanceManager
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
-      yoDesiredCoMPosition.set(desiredCoM2d);
-      yoPerfectCoP.set(perfectCoP2d);
+      yoDesiredCoMPosition.set(desiredCoM2d, comTrajectoryPlanner.getDesiredCoMPosition().getZ());
+      yoPerfectCoP.set(perfectCoP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
       yoPerfectCoPVelocity.set(comTrajectoryPlanner.getDesiredVRPVelocity());
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
@@ -471,6 +471,7 @@ public class BalanceManager
       {
          throw new IllegalArgumentException("Invalid height control type.");
       }
+      perfectCoP2d.setIncludingFrame(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
@@ -479,7 +480,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
-      linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
+      linearMomentumRateControlModuleInput.setPerfectCoP(perfectCoP2d);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
@@ -726,8 +727,10 @@ public class BalanceManager
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
       yoDesiredCoMVelocity.setToZero();
 
-      yoPerfectCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
-      copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      perfectCoP2d.setIncludingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroid());
+      perfectCoP2d.changeFrameAndProjectToXYPlane(worldFrame);
+      yoPerfectCoP.set(perfectCoP2d);
+      copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
