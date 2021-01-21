@@ -360,14 +360,6 @@ public abstract class PolynomialBasicsTest
       {
          throw new RuntimeException("TestMinimumJerkTrajectory.testZeroLength: failed on zero displacement");
       }
-
-      minimumJerkTrajectory.setQuintic(0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0);
-      minimumJerkTrajectory.compute(t);
-
-      if (Double.isNaN(minimumJerkTrajectory.getValue()) || Double.isNaN(minimumJerkTrajectory.getVelocity()) || Double.isNaN(minimumJerkTrajectory.getAcceleration()))
-      {
-         throw new RuntimeException("TestMinimumJerkTrajectory.testZeroLength: failed on zero time difference");
-      }
    }
 
 }
