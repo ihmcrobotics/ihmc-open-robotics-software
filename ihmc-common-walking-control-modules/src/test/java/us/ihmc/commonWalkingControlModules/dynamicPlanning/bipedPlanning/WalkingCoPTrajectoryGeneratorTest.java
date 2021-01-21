@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -72,7 +73,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       copTrajectory.registerState(state);
 
-      state.setInitialCoP(new FramePoint2D());
+      state.setInitialCoP(new FramePoint3D());
 
       for (RobotSide robotSide : RobotSide.values)
       {
