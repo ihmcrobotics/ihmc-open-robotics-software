@@ -1,22 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.GPUModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RawGPUPlanarRegionSubscriber;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
