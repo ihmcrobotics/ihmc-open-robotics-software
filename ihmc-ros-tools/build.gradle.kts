@@ -20,14 +20,16 @@ mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
    api("org.boofcv:boofcv-geo:0.36")
    api("org.reflections:reflections:0.9.10")
+
    api("org.ros.rosjava_core:rosjava:0.2.1") {
       exclude(group = "junit", module = "junit")
+      exclude(group = "org.ros.rosjava_messages", module = "rosjava_test_msgs")
+      exclude(group = "org.ros.rosjava_messages", module = "test_rosmaster")
    }
-   api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
-   api("org.ros.rosjava_messages:std_msgs:0.5.9")
+   api("org.ros.rosjava_bootstrap:message_generation:0.3.3")
+   api("org.ros.rosjava_messages:std_msgs:0.5.10")
    api("org.ros.rosjava_messages:std_srvs:1.11.1")
    api("org.ros.rosjava_messages:people_msgs:1.0.4")
-   api("org.ros.rosjava_messages:test_rosmaster:1.11.10")
    api("org.ros.rosjava_messages:sensor_msgs:1.11.7")
    api("org.ros.rosjava_messages:dynamic_reconfigure:1.5.38")
    api("org.ros.rosjava_messages:multisense_ros:3.4.2")
@@ -38,7 +40,7 @@ mainDependencies {
    api("org.ros.rosjava_messages:tf2_msgs:0.5.9")
    api("org.ros.rosjava_messages:tf:1.10.8")
 
-   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:euclid:0.16.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -46,4 +48,6 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("org.ros.rosjava_messages:rosjava_test_msgs:0.2.1")
+   api("org.ros.rosjava_messages:test_rosmaster:1.11.10")
 }

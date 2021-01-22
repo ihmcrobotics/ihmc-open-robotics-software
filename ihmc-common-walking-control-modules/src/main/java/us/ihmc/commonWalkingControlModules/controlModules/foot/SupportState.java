@@ -25,7 +25,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -469,8 +469,8 @@ public class SupportState extends AbstractFootControlState
       if (liftOff.getValue() && currentTime < pitchTrajectoryEndTime.getValue())
       {
          pitchTrajectory.compute(currentTime);
-         desiredPitch.set(pitchTrajectory.getPosition());
-         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+         desiredPitch.set(pitchTrajectory.getValue());
+         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getValue(), desiredOrientation.getRoll());
          desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
          desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
       }
@@ -488,8 +488,8 @@ public class SupportState extends AbstractFootControlState
          else
          {
             pitchTrajectory.compute(currentTime);
-            desiredPitch.set(pitchTrajectory.getPosition());
-            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+            desiredPitch.set(pitchTrajectory.getValue());
+            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getValue(), desiredOrientation.getRoll());
             desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
             desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
          }

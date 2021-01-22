@@ -40,14 +40,16 @@ public class RobotSideTest
 
       assertEquals("right_leg", rightRobotSide.getSideStringInRobonetFormatWithoutSlash());
       assertEquals("left_leg", leftRobotSide.getSideStringInRobonetFormatWithoutSlash());
-      
+
       assertEquals(rightRobotSide, RobotSide.getSideFromString("R"));
+      assertEquals(rightRobotSide, RobotSide.getSideFromString("Right"));
+      assertEquals(rightRobotSide, RobotSide.getSideFromString("right"));
+      assertEquals(rightRobotSide, RobotSide.getSideFromString("r"));
       assertEquals(leftRobotSide, RobotSide.getSideFromString("L"));
-      assertEquals(null, RobotSide.getSideFromString("r"));
-      assertEquals(null, RobotSide.getSideFromString("l"));
-      assertEquals(null, RobotSide.getSideFromString("right"));
-      assertEquals(null, RobotSide.getSideFromString("left"));
-      
+      assertEquals(leftRobotSide, RobotSide.getSideFromString("Left"));
+      assertEquals(leftRobotSide, RobotSide.getSideFromString("left"));
+      assertEquals(leftRobotSide, RobotSide.getSideFromString("l"));
+
       double numberToTest = 34.33;
       assertEquals(numberToTest, rightRobotSide.negateIfLeftSide(numberToTest), 1e-7);
       assertEquals(-numberToTest, leftRobotSide.negateIfLeftSide(numberToTest), 1e-7);

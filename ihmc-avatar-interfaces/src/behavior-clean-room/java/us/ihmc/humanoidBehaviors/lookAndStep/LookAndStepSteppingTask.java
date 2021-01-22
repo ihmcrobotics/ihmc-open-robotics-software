@@ -29,7 +29,7 @@ public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected FootstepPlanPostProcessHandler footstepPlanPostProcessor;
+   protected SwingPlanningModule footstepPlanPostProcessor;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
@@ -112,7 +112,7 @@ public class LookAndStepSteppingTask
       PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
       shortenedFootstepPlan.addFootstep(footstepToTake);
 
-      footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
+      footstepPlanPostProcessor.computeSwingWaypoints(footstepPlanEtc.getPlanarRegions(),
                                                       shortenedFootstepPlan,
                                                       footstepPlanEtc.getStartFootPoses(),
                                                       footstepPlanEtc.getSwingPlannerType());

@@ -130,7 +130,7 @@ public class QuadrupedCenterOfMassHeightManager
 
       if (euclideanTrajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
       {
-         centerOfMassHeightTrajectory.getPosition(desiredPosition);
+         desiredPosition.setIncludingFrame(centerOfMassHeightTrajectory.getPosition());
          desiredVelocity.setToZero(worldFrame);
 
          desiredPosition.changeFrame(supportFrame);
@@ -174,7 +174,7 @@ public class QuadrupedCenterOfMassHeightManager
 
       if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
       {
-         centerOfMassHeightTrajectory.getPosition(desiredPosition);
+         desiredPosition.setIncludingFrame(centerOfMassHeightTrajectory.getPosition());
          desiredVelocity.setToZero(worldFrame);
 
          desiredPosition.changeFrame(supportFrame);

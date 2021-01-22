@@ -245,6 +245,16 @@ public class ROS2Tools
       }
    }
 
+   public static ROS2Node createInterprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.FAST_RTPS, nodeName, RUNTIME_EXCEPTION);
+   }
+
+   public static ROS2Node createIntraprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.INTRAPROCESS, nodeName, RUNTIME_EXCEPTION);
+   }
+
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return createROS2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);

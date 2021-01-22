@@ -5,8 +5,6 @@ import static us.ihmc.robotics.Assert.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -14,7 +12,6 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -42,7 +39,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       joint.setQ(0.0);
       joint.setQd(0.0);
       joint.setQdd(0.0);
-      trajectoryTimeProvider = new ConstantDoubleProvider(timeRequired);
+      trajectoryTimeProvider = () -> timeRequired;
    }
 
 	@Test

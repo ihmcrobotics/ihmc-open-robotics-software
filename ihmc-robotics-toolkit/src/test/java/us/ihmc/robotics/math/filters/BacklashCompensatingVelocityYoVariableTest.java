@@ -8,11 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -523,9 +520,9 @@ public class BacklashCompensatingVelocityYoVariableTest
          boolean positiveVelocity)
    {
       double initialPositionSign = positiveVelocity ? -1.0 : 1.0;
-      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(initialPositionSign * RandomNumbers.nextDouble(rand, 0.1, 1000.0));
-      DoubleProvider velocityProvider = new ConstantDoubleProvider(-initialPositionProvider.getValue() / crossTime);
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
+      DoubleProvider initialPositionProvider = () -> initialPositionSign * RandomNumbers.nextDouble(rand, 0.1, 1000.0);
+      DoubleProvider velocityProvider = () -> -initialPositionProvider.getValue() / crossTime;
+      DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
       YoRegistry registry = new YoRegistry("osenroi");
       ConstantVelocityTrajectoryGenerator trajectory = new ConstantVelocityTrajectoryGenerator("hihi", initialPositionProvider, velocityProvider,
             trajectoryTimeProvider, registry);

@@ -211,7 +211,7 @@ public class PelvisICPBasedTranslationManager
                streamTimestampOffset.setToNaN();
             }
          }
-         positionTrajectoryGenerator.getPosition(tempPosition);
+         tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
          desiredPelvisPosition.set(tempPosition);
       }
@@ -414,7 +414,7 @@ public class PelvisICPBasedTranslationManager
       if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
-            positionTrajectoryGenerator.getPosition(tempPosition);
+            tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          else
             tempPosition.setToZero(pelvisZUpFrame);
          tempPosition.changeFrame(worldFrame);

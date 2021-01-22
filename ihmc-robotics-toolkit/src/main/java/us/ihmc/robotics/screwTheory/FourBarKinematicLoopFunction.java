@@ -41,6 +41,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    private static final double EPSILON = 1.0e-7;
 
    private final String name;
+   private final FourBarVertex masterVertex;
    private final FourBar fourBar = new FourBar();
    private final RevoluteJointBasics jointA;
    private final RevoluteJointBasics jointB;
@@ -97,6 +98,8 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    {
       this.name = name;
 
+      // Copy the array so it cannot modified externally and the argument doesn't get modified. 
+      joints = Arrays.copyOf(joints, joints.length);
       this.masterJointIndex = FourBarKinematicLoopFunctionTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
       actuatedJointIndices = new int[] {this.masterJointIndex};
       this.joints = Arrays.asList(joints);
@@ -104,6 +107,33 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       jointB = joints[1];
       jointC = joints[2];
       jointD = joints[3];
+
+      masterVertex = fourBar.getVertex(FourBarAngle.values[this.masterJointIndex]);
+   }
+
+   /**
+    * Tests if this four bar represents an inverted four bar as follows:
+    *
+    * <pre>
+    *    root
+    *      |
+    *      |
+    * A O-----O B
+    *    \   /
+    *     \ /
+    *      X
+    *     / \
+    *    /   \
+    * C O-----O D
+    *      |
+    * end-effector
+    * </pre>
+    * 
+    * @return {@code true} if this four bar is inverted, {@code false} otherwise.
+    */
+   public boolean isInverted()
+   {
+      return fourBar.isInverted();
    }
 
    /**
@@ -233,8 +263,15 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 
       for (int i = 0; i < 4; i++)
       {
-         FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
-         loopJacobianMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDot()));
+         if (i == masterJointIndex)
+         {
+            loopJacobianMatrix.set(i, 0, 1.0);
+         }
+         else
+         {
+            FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
+            loopJacobianMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDot()));
+         }
       }
    }
 
@@ -248,8 +285,15 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 
       for (int i = 0; i < 4; i++)
       {
-         FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
-         loopConvectiveTermMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDDot()));
+         if (i == masterJointIndex)
+         {
+            loopConvectiveTermMatrix.set(i, 0, 0.0);
+         }
+         else
+         {
+            FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
+            loopConvectiveTermMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDDot()));
+         }
       }
    }
 
@@ -386,6 +430,11 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       return masterJointIndex;
    }
 
+   public FourBarVertex getMasterVertex()
+   {
+      return masterVertex;
+   }
+
    /** {@inheritDoc} */
    @Override
    public int[] getActuatedJointIndices()
@@ -429,5 +478,15 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    public FourBar getFourBar()
    {
       return fourBar;
+   }
+
+   /**
+    * Returns the converters used to switch between four bar interior angles and joint angles.
+    * 
+    * @return the converters used to switch between four bar interior angles and joint angles.
+    */
+   public FourBarToJointConverter[] getConverters()
+   {
+      return converters;
    }
 }

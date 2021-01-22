@@ -14,7 +14,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -92,7 +91,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
 
-      trajectoryTimeProvider = new ConstantDoubleProvider(diagnosticParameters.getInitialJointSplineDuration());
+      trajectoryTimeProvider = () -> diagnosticParameters.getInitialJointSplineDuration();
       submitDiagnostic(new WaitDiagnosticTask(trajectoryTimeProvider.getValue()));
 
       for (int i = 0; i < controlledJoints.size(); i++)

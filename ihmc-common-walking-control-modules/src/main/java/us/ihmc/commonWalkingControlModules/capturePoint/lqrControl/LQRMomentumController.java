@@ -5,7 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -67,7 +67,7 @@ public class LQRMomentumController
    private final DMatrixRMaj relativeState = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj relativeDesiredVRP = new DMatrixRMaj(3, 1);
 
-   private final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final RecyclingArrayList<Polynomial3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
 
    private boolean shouldUpdateS1 = true;
 
@@ -121,22 +121,22 @@ public class LQRMomentumController
    /**
     * Sets the desired VRP trajectory for the LQR control to track.
     */
-   public void setVRPTrajectory(List<Trajectory3D> vrpTrajectory)
+   public void setVRPTrajectory(List<Polynomial3D> vrpTrajectory)
    {
       relativeVRPTrajectories.clear();
 
-      Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(Math.min(sufficientlyLarge, lastTrajectory.getFinalTime()));
+      Polynomial3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
+      lastTrajectory.compute(Math.min(sufficientlyLarge, lastTrajectory.getTimeInterval().getEndTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 
       for (int i = 0; i < vrpTrajectory.size(); i++)
       {
-         Trajectory3D trajectory = vrpTrajectory.get(i);
-         Trajectory3D relativeTrajectory = relativeVRPTrajectories.add();
+         Polynomial3D trajectory = vrpTrajectory.get(i);
+         Polynomial3D relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
+         relativeTrajectory.shiftTrajectory(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
       }
    }
 

@@ -35,6 +35,7 @@ public class HexapodMomentumController
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final HexapodReferenceFrames referenceFrames;
    private final FramePoint3D desiredComPosition = new FramePoint3D();
+   private final FrameVector3D desiredComVelocity = new FrameVector3D();
    private final StraightLineCartesianTrajectoryGenerator trajectoryGenerator;
    private final YoDouble yoTime;
    private final CenterOfMassJacobian comJacobian;
@@ -59,7 +60,7 @@ public class HexapodMomentumController
       trajectoryGenerator = new StraightLineCartesianTrajectoryGenerator("comTrajectoryGenerator", ReferenceFrame.getWorldFrame(), 3.0, 10.0, yoTime, registry);
       yoCurrentCenterOfMassPosition = new YoFramePoint3D(prefix + "centerOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
       yoCurrentCenterOfFeetPosition = new YoFramePoint3D(prefix + "centerOfFeetPosition", ReferenceFrame.getWorldFrame(), registry);
-      
+
       YoGraphicPosition comPositionGraphic = new YoGraphicPosition(prefix + "centerOfMassPosition", yoCurrentCenterOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerYoGraphic("comPositionGraphic", comPositionGraphic);
       yoGraphicsListRegistry.registerArtifact("comPositionGraphic", comPositionGraphic.createArtifact());
@@ -92,10 +93,21 @@ public class HexapodMomentumController
       desiredComPosition.changeFrame(referenceFrames.getCenterOfMassFrame());
       desiredComPosition.setZ(0.0);
       desiredComPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredComVelocity.setToZero(ReferenceFrame.getWorldFrame());
       yoCurrentCenterOfFeetPosition.set(desiredComPosition);
-      
-      trajectoryGenerator.initialize(currentCenterOfMassPosition, currentCenterOfMassVelocity, initialAcceleration, desiredComPosition, currentCenterOfMassVelocity);
-      trajectoryGenerator.computeNextTick(desiredPosition, desiredVelocity, linearMomentumRateOfChange, dt);
+
+      trajectoryGenerator.setInitialPosition(currentCenterOfMassPosition);
+      trajectoryGenerator.setInitialVelocity(currentCenterOfMassVelocity);
+      trajectoryGenerator.setInitialAcceleration(initialAcceleration);
+      trajectoryGenerator.setFinalDesiredPosition(desiredComPosition);
+      trajectoryGenerator.setFinalDesiredVelocity(desiredComVelocity);
+
+      trajectoryGenerator.initialize();
+      trajectoryGenerator.compute(dt);
+
+      desiredPosition.setIncludingFrame(trajectoryGenerator.getPosition());
+      desiredVelocity.setIncludingFrame(trajectoryGenerator.getVelocity());
+      linearMomentumRateOfChange.setIncludingFrame(trajectoryGenerator.getAcceleration());
       
       yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
       yoAngularMomentumRateOfChange.set(angularMomentumRateOfChange);

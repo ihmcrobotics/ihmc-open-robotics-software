@@ -615,9 +615,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       for (double fraction = 0.0; fraction <= 1.0; fraction += stepAmount)
       {
          twoWaypointSwingGenerator.compute(fraction);
-         FramePoint3D frameTupleUnsafe = new FramePoint3D(trajectoryPosition);
-         twoWaypointSwingGenerator.getPosition(frameTupleUnsafe);
-         trajectoryPosition.set(frameTupleUnsafe);
+         trajectoryPosition.setMatchingFrame(twoWaypointSwingGenerator.getPosition());
          solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition);
          pointOnTrajectoryToPack.set(trajectoryPosition);
 
@@ -797,14 +795,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       FramePoint3D position1 = new FramePoint3D();
 
       twoWaypointSwingGenerator.compute(0.0);
-      twoWaypointSwingGenerator.getPosition(position0);
+      position0.setIncludingFrame(twoWaypointSwingGenerator.getPosition());
       double distance = 0.0;
 
       for (int i = 0; i < numberOfTrajectorySegmentsToCalculateLength; i++)
       {
          double t = ((double) (i + 1)) / (numberOfTrajectorySegmentsToCalculateLength);
          twoWaypointSwingGenerator.compute(t);
-         twoWaypointSwingGenerator.getPosition(position1);
+         position1.setIncludingFrame(twoWaypointSwingGenerator.getPosition());
          distance += position0.distance(position1);
          position0.set(position1);
       }

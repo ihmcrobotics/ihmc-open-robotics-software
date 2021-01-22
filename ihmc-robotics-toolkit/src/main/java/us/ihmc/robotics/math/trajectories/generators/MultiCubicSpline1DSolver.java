@@ -283,7 +283,7 @@ public class MultiCubicSpline1DSolver
       }
       if (wd0 == Double.POSITIVE_INFINITY)
       {
-         getVelocityConstraintABlock(1.0, 0.0, line, 0, A);
+         getVelocityConstraintABlock(0.0, line, 0, A);
          b.set(line, xd0);
          line++;
       }
@@ -301,7 +301,7 @@ public class MultiCubicSpline1DSolver
             line++;
          }
 
-         getVelocityConstraintABlock(1.0, ti.get(i), line, colOffset, A);
+         getVelocityConstraintABlock(ti.get(i), line, colOffset, A);
          MatrixTools.setMatrixBlock(A, line, colOffset + coefficients, A, line, colOffset, 1, coefficients, -1.0);
          b.set(line, 0.0);
          line++;
@@ -316,7 +316,7 @@ public class MultiCubicSpline1DSolver
       }
       if (wd1 == Double.POSITIVE_INFINITY)
       {
-         getVelocityConstraintABlock(1.0, 1.0, line, subProblemSize - coefficients, A);
+         getVelocityConstraintABlock(1.0, line, subProblemSize - coefficients, A);
          b.set(line, xd1);
       }
    }
@@ -443,11 +443,11 @@ public class MultiCubicSpline1DSolver
     * ABlock = [ 3t<sup>2</sup> 2t 1 0 ]
     * </pre>
     */
-   static void getVelocityConstraintABlock(double scale, double t, int row, int startColumn, DMatrixRMaj A)
+   static void getVelocityConstraintABlock(double t, int row, int startColumn, DMatrixRMaj A)
    {
       A.set(row, startColumn + 3, 0.0);
-      A.set(row, startColumn + 2, scale);
-      double tpow = scale * t;
+      A.set(row, startColumn + 2, 1.0);
+      double tpow = t;
       A.set(row, startColumn + 1, 2.0 * tpow);
       tpow *= t;
       A.set(row, startColumn, 3.0 * tpow);

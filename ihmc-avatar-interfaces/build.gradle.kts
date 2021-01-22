@@ -26,12 +26,12 @@ mainDependencies {
    api("com.hierynomus:sshj:0.27.0")
 
    api("net.java.jinput:jinput:2.0.6-ihmc")
-   api("us.ihmc:euclid:0.15.2")
-   api("us.ihmc:euclid-geometry:0.15.2")
-   api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.4")
-   api("us.ihmc:simulation-construction-set:0.21.4")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
+   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid-geometry:0.16.1")
+   api("us.ihmc:ihmc-yovariables:0.9.8")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
+   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -58,13 +58,12 @@ mainDependencies {
 
 behaviorCleanRoomDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-messager-kryo:0.1.7")
 }
 
 behaviorFxUiDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("behavior-clean-room"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
@@ -85,7 +84,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.2")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
 }

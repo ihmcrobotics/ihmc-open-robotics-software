@@ -56,7 +56,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  *
  * Note the symbols "-" and "+" next to each vertex indicating their winding, i.e. "-" for
  * counter-clockwise and "+" for clockwise. In this example, a vertex is assumed to be convex when
- * its winding is clockwise.
+ * its winding is clockwise. Note that the edge with 2 concave vertices is flagged as being flipped.
  * </p>
  * <p>
  * This implementation does not handle the following kind of configuration:
@@ -78,10 +78,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  */
 public class FourBar
 {
-   private final FourBarVertex A = new FourBarVertex("A");
-   private final FourBarVertex B = new FourBarVertex("B");
-   private final FourBarVertex C = new FourBarVertex("C");
-   private final FourBarVertex D = new FourBarVertex("D");
+   private final FourBarVertex A = new FourBarVertex("A", FourBarAngle.DAB);
+   private final FourBarVertex B = new FourBarVertex("B", FourBarAngle.ABC);
+   private final FourBarVertex C = new FourBarVertex("C", FourBarAngle.BCD);
+   private final FourBarVertex D = new FourBarVertex("D", FourBarAngle.CDA);
    private final FourBarVertex[] vertices = {A, B, C, D};
 
    private final FourBarEdge AB = new FourBarEdge("AB");
@@ -261,6 +261,27 @@ public class FourBar
    public void setToMax(FourBarAngle source)
    {
       FourBarTools.setToMaxAngle(getVertex(source));
+   }
+
+   /**
+    * Tests if this four bar represents an inverted four bar as follows:
+    *
+    * <pre>
+    *  +A------B+    +D------A+    +C------D+    +B------C+
+    *    \    /        \    /        \    /        \    /
+    *     \  /          \  /          \  /          \  /
+    *      \/     or     \/     or     \/     or     \/
+    *      /\            /\            /\            /\
+    *     /  \          /  \          /  \          /  \
+    *    /    \        /    \        /    \        /    \
+    *  -C------D-    -B------C-    -A------B-    -D------A-
+    * </pre>
+    * 
+    * @return {@code true} if this four bar is inverted, {@code false} otherwise.
+    */
+   public boolean isInverted()
+   {
+      return FourBarTools.isFourBarInverted(this);
    }
 
    /**

@@ -219,7 +219,10 @@ public class TrajectoryPointOptimizer
     * @param targetPositionWeight the weight value to use for the final position condition.
     * @param targetVelocityWeight the weight value to use for the final velocity condition.
     */
-   public void setEndPointWeights(int dimension, double startPositionWeight, double startVelocityWeight, double targetPositionWeight,
+   public void setEndPointWeights(int dimension,
+                                  double startPositionWeight,
+                                  double startVelocityWeight,
+                                  double targetPositionWeight,
                                   double targetVelocityWeight)
    {
       if (dimension < 0 || dimension >= dimensions.getValue())
@@ -245,7 +248,9 @@ public class TrajectoryPointOptimizer
     * @param targetPositionWeight the weight value to use for the final position condition.
     * @param targetVelocityWeight the weight value to use for the final velocity condition.
     */
-   public void setEndPointWeights(TDoubleArrayList startPositionWeight, TDoubleArrayList startVelocityWeight, TDoubleArrayList targetPositionWeight,
+   public void setEndPointWeights(TDoubleArrayList startPositionWeight,
+                                  TDoubleArrayList startVelocityWeight,
+                                  TDoubleArrayList targetPositionWeight,
                                   TDoubleArrayList targetVelocityWeight)
    {
       if (startPositionWeight != null && startPositionWeight.size() != dimensions.getIntegerValue())
@@ -591,13 +596,109 @@ public class TrajectoryPointOptimizer
    {
       double waypointTime = getWaypointTime(waypointIndex);
       tempLine.reshape(1, coefficients);
-      MultiCubicSpline1DSolver.getVelocityConstraintABlock(1.0, waypointTime, 0, 0, tempLine);
+      MultiCubicSpline1DSolver.getVelocityConstraintABlock(waypointTime, 0, 0, tempLine);
 
       velocityToPack.reset();
       for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
       {
          DMatrixRMaj xDim = x.get(dimension);
          int index = waypointIndex * coefficients;
+         CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
+         velocityToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
+      }
+   }
+
+   /**
+    * Computes from the optimal set of coefficients the position at the start.
+    * <p>
+    * This method is only useful when the start position is configured as an objective and can thus be
+    * different from the given position.
+    * </p>
+    * 
+    * @param positionToPack modified - the start position is stored here.
+    */
+   public void getStartPosition(TDoubleArrayList positionToPack)
+   {
+      tempLine.reshape(1, coefficients);
+      MultiCubicSpline1DSolver.getPositionConstraintABlock(0.0, 0, 0, tempLine);
+
+      positionToPack.reset();
+      for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
+      {
+         DMatrixRMaj xDim = x.get(dimension);
+         CommonOps_DDRM.extract(xDim, 0, coefficients, 0, 1, tempCoeffs, 0, 0);
+         positionToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
+      }
+   }
+
+   /**
+    * Computes from the optimal set of coefficients the velocity at the start.
+    * <p>
+    * This method is only useful when the start velocity is configured as an objective and can thus be
+    * different from the given velocity.
+    * </p>
+    * 
+    * @param velocityToPack modified - the start velocity is stored here.
+    */
+   public void getStartVelocity(TDoubleArrayList velocityToPack)
+   {
+      tempLine.reshape(1, coefficients);
+      MultiCubicSpline1DSolver.getVelocityConstraintABlock(0.0, 0, 0, tempLine);
+
+      velocityToPack.reset();
+      for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
+      {
+         DMatrixRMaj xDim = x.get(dimension);
+         CommonOps_DDRM.extract(xDim, 0, coefficients, 0, 1, tempCoeffs, 0, 0);
+         velocityToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
+      }
+   }
+
+   /**
+    * Computes from the optimal set of coefficients the position for the target.
+    * <p>
+    * This method is only useful when the target position is configured as an objective and can thus be
+    * different from the given position.
+    * </p>
+    * 
+    * @param positionToPack modified - the target position is stored here.
+    */
+   public void getTargetPosition(TDoubleArrayList positionToPack)
+   {
+      tempLine.reshape(1, coefficients);
+      MultiCubicSpline1DSolver.getPositionConstraintABlock(1.0, 0, 0, tempLine);
+
+      positionToPack.reset();
+      int index = nWaypoints.getValue() * coefficients;
+
+      for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
+      {
+         DMatrixRMaj xDim = x.get(dimension);
+         CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
+         positionToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
+      }
+   }
+
+   /**
+    * Computes from the optimal set of coefficients the velocity for the target.
+    * <p>
+    * This method is only useful when the target velocity is configured as an objective and can thus be
+    * different from the given velocity.
+    * </p>
+    * 
+    * @param velocityToPack modified - the target velocity is stored here.
+    */
+   public void getTargetVelocity(TDoubleArrayList velocityToPack)
+   {
+      tempLine.reshape(1, coefficients);
+      MultiCubicSpline1DSolver.getVelocityConstraintABlock(1.0, 0, 0, tempLine);
+
+      velocityToPack.reset();
+      int index = nWaypoints.getValue() * coefficients;
+
+      for (int dimension = 0; dimension < dimensions.getIntegerValue(); dimension++)
+      {
+         DMatrixRMaj xDim = x.get(dimension);
          CommonOps_DDRM.extract(xDim, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          velocityToPack.add(CommonOps_DDRM.dot(tempCoeffs, tempLine));
       }
