@@ -8,6 +8,11 @@ import com.badlogic.gdx.graphics.TextureData;
 
 public class SensorFrameBuffer extends GLFrameBuffer<Texture>
 {
+   private Pixmap colorPixmap;
+   private FloatTextureData depthTextureData;
+   private Texture colorTexture;
+   private Texture depthTexture;
+
    protected SensorFrameBuffer(GLFrameBufferBuilder<? extends GLFrameBuffer<Texture>> bufferBuilder)
    {
       super(bufferBuilder);
@@ -16,25 +21,28 @@ public class SensorFrameBuffer extends GLFrameBuffer<Texture>
    @Override
    protected Texture createTexture(FrameBufferTextureAttachmentSpec attachmentSpec)
    {
-      TextureData data;
+      Texture texture;
       if (attachmentSpec.format == Pixmap.Format.toGlFormat(Pixmap.Format.RGBA8888))
       {
-         Pixmap pixmap = new Pixmap(bufferBuilder.width, bufferBuilder.height, Pixmap.Format.RGBA8888);
-         data = new PixmapTextureData(pixmap, null, false, false);
+         colorPixmap = new Pixmap(bufferBuilder.width, bufferBuilder.height, Pixmap.Format.RGBA8888);
+         PixmapTextureData pixmapTextureData = new PixmapTextureData(colorPixmap, null, false, false);
+         texture = colorTexture = new Texture(pixmapTextureData);
+         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+         texture.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
       }
       else
       {
-         data = new FloatTextureData(bufferBuilder.width,
+         depthTextureData = new FloatTextureData(bufferBuilder.width,
                                      bufferBuilder.height,
                                      attachmentSpec.internalFormat,
                                      attachmentSpec.format,
                                      attachmentSpec.type,
                                      attachmentSpec.isGpuOnly);
+         texture = depthTexture = new Texture(depthTextureData);
+         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+         texture.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
       }
-      Texture result = new Texture(data);
-      result.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-      result.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-      return result;
+      return texture;
    }
 
    @Override
@@ -52,5 +60,25 @@ public class SensorFrameBuffer extends GLFrameBuffer<Texture>
    public static void unbind()
    {
       GLFrameBuffer.unbind();
+   }
+
+   public Pixmap getColorPixmap()
+   {
+      return colorPixmap;
+   }
+
+   public FloatTextureData getDepthTextureData()
+   {
+      return depthTextureData;
+   }
+
+   public Texture getColorTexture()
+   {
+      return colorTexture;
+   }
+
+   public Texture getDepthTexture()
+   {
+      return depthTexture;
    }
 }
