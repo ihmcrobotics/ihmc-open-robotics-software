@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__OcTreeDataMessage__idl__
+#define __controller_msgs__msg__OcTreeDataMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * This message contains a list of occupied cells in the octree
+       * All keys are given at maximum depth
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::OcTreeDataMessage_")
+      struct OcTreeDataMessage
+      {
+        long maximum_tree_depth;
+        double tree_resolution;
+        sequence<long, 5000> x_keys;
+        sequence<long, 5000> y_keys;
+        sequence<long, 5000> z_keys;
+        sequence<long, 5000> tree_depth;
+      };
+    };
+  };
+};
+
+#endif
