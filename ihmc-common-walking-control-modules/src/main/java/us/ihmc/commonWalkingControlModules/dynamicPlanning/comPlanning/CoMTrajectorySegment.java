@@ -2,19 +2,17 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class CoMTrajectory implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider
+public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider, Settable<CoMTrajectorySegment>
 {
    private final FramePoint3D firstCoefficient = new FramePoint3D();
    private final FramePoint3D secondCoefficient = new FramePoint3D();
@@ -55,6 +53,24 @@ public class CoMTrajectory implements FixedFramePositionTrajectoryGenerator, Tim
       return timeInterval;
    }
 
+   @Override
+   public void set(CoMTrajectorySegment other)
+   {
+      getTimeInterval().set(other.getTimeInterval());
+      currentTime = other.currentTime;
+      omega = other.omega;
+      setCoefficients(other);
+
+      comPosition.set(other.comPosition);
+      comVelocity.set(other.comVelocity);
+      comAcceleration.set(other.comAcceleration);
+
+      dcmPosition.set(other.dcmPosition);
+      dcmVelocity.set(other.dcmVelocity);
+      vrpPosition.set(other.vrpPosition);
+      vrpVelocity.set(other.vrpVelocity);
+   }
+
    public void setCoefficients(DMatrixRMaj coefficients)
    {
       setCoefficients(coefficients, 0);
@@ -68,6 +84,16 @@ public class CoMTrajectory implements FixedFramePositionTrajectoryGenerator, Tim
       setFourthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 3, 0), coefficients.get(startRow + 3, 1), coefficients.get(startRow + 3, 2));
       setFifthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 4, 0), coefficients.get(startRow + 4, 1), coefficients.get(startRow + 4, 2));
       setSixthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 5, 0), coefficients.get(startRow + 5, 1), coefficients.get(startRow + 5, 2));
+   }
+
+   public void setCoefficients(CoMTrajectorySegment other)
+   {
+      setCoefficients(other.firstCoefficient,
+                      other.secondCoefficient,
+                      other.thirdCoefficient,
+                      other.fourthCoefficient,
+                      other.fifthCoefficient,
+                      other.sixthCoefficient);
    }
 
    public void setCoefficients(FramePoint3DReadOnly firstCoefficient,
