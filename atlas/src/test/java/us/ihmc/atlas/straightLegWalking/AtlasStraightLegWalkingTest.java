@@ -10,8 +10,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasLegConfigurationParameters;
 import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
@@ -19,7 +17,6 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.straightLegWalking.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -27,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.simulationConstructionSetTools.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow")
@@ -123,12 +119,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public WalkingControllerParameters getWalkingControllerParameters()
       {
          return new TestWalkingControllerParameters(getJointMap(), getContactPointParameters());
-      }
-
-      @Override
-      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-      {
-         return new TestICPPlannerParameters(getPhysicalProperties(), RobotTarget.SCS);
       }
    }
 
@@ -358,26 +348,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public double getJointAccelerationWeight()
       {
          return 0.05;
-      }
-   }
-
-   private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
-   {
-      public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties, RobotTarget target)
-      {
-         super(physicalProperties, target);
-      }
-
-      @Override
-      public double getExitCoPForwardSafetyMarginOnToes()
-      {
-         return 0.015;
-      }
-
-      @Override
-      public boolean putExitCoPOnToes()
-      {
-         return true;
       }
    }
 

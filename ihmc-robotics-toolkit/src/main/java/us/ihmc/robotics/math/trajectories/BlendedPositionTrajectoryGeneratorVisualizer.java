@@ -1,7 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.YoGraphicTrajectory3D.TrajectoryColorType;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D.TrajectoryColorType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

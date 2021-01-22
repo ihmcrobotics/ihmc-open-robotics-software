@@ -7,9 +7,10 @@ import java.util.LinkedHashMap;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -149,7 +150,18 @@ public class SCSToInverseDynamicsJointMap
 
       for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)
       {
-         if (inverseDynamicsJoint instanceof OneDoFJointBasics)
+         if (inverseDynamicsJoint instanceof InvertedFourBarJoint)
+         {
+            RevoluteJointBasics jointA = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointA();
+            RevoluteJointBasics jointB = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointB();
+            RevoluteJointBasics jointC = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointC();
+            RevoluteJointBasics jointD = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointD();
+            inverseDynamicsJointsByName.put(jointA.getName(), jointA);
+            inverseDynamicsJointsByName.put(jointB.getName(), jointB);
+            inverseDynamicsJointsByName.put(jointC.getName(), jointC);
+            inverseDynamicsJointsByName.put(jointD.getName(), jointD);
+         }
+         else if (inverseDynamicsJoint instanceof OneDoFJointBasics)
          {
             inverseDynamicsJointsByName.put(inverseDynamicsJoint.getName(), (OneDoFJointBasics) inverseDynamicsJoint);
          }

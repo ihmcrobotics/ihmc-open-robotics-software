@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +34,9 @@ public class LQRJumpMomentumControllerTest
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
-      Trajectory3D vrpTrajectory = new Trajectory3D(4);
+      Polynomial3D vrpTrajectory = new Polynomial3D(4);
       vrpTrajectory.setLinear(0.0, 1.0, vrpStart, vrpEnd);
-      List<Trajectory3D> trajectories = new ArrayList<>();
+      List<Polynomial3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
       SettableContactStateProvider contact = new SettableContactStateProvider();
@@ -271,14 +271,14 @@ public class LQRJumpMomentumControllerTest
       finalS1Function.compute(0.0, expectedStartOfS13);
       finalS1Function.compute(contactDuration, expectedEndOfS13);
 
-      Trajectory3D relativeVRPTrajectory = new Trajectory3D(4);
-      Trajectory3D initialVRPTrajectory = new Trajectory3D(4);
+      Polynomial3D relativeVRPTrajectory = new Polynomial3D(4);
+      Polynomial3D initialVRPTrajectory = new Polynomial3D(4);
       relativeVRPTrajectory.set(coMTrajectoryPlanner.getVRPTrajectories().get(2));
       initialVRPTrajectory.set(coMTrajectoryPlanner.getVRPTrajectories().get(0));
-      relativeVRPTrajectory.compute(relativeVRPTrajectory.getFinalTime());
+      relativeVRPTrajectory.compute(relativeVRPTrajectory.getTimeInterval().getEndTime());
       Point3DReadOnly finalPosition = relativeVRPTrajectory.getPosition();
-      relativeVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
-      initialVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+      relativeVRPTrajectory.shiftTrajectory(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+      initialVRPTrajectory.shiftTrajectory(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
 
       commonValues.computeS2ConstantStateMatrices(expectedStartOfS13);
       finalS2Function.set(new DMatrixRMaj(6, 1), relativeVRPTrajectory, commonValues);

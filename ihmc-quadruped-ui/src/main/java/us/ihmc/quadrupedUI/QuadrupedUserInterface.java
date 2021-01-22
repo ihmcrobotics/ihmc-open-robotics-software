@@ -27,14 +27,13 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerMenuUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.QuadrupedMainTabController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPawPathMeshViewer;
@@ -85,7 +84,7 @@ public class QuadrupedUserInterface
    @FXML
    private PawStepPlannerMenuUIController pawStepPlannerMenuUIController;
    @FXML
-   private MainTabController plannerTabController;
+   private QuadrupedMainTabController plannerTabController;
    @FXML
    private RobotControlTabController robotControlTabController;
    @FXML

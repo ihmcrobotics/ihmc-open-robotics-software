@@ -20,10 +20,8 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commons.Conversions;
@@ -52,9 +50,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -102,7 +98,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasJointMap jointMap;
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
@@ -190,8 +185,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties, target);
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
@@ -452,11 +445,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return sensorSuiteManager;
    }
 
-   @Override
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-   {
-      return capturePointPlannerParameters;
-   }
 
    @Override
    public UIParameters getUIParameters()

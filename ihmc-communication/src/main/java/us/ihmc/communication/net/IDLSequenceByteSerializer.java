@@ -31,7 +31,7 @@ public class IDLSequenceByteSerializer extends Serializer<IDLSequence.Byte>
          output.writeByte(collection.get(i));
    }
 
-   public IDLSequence.Byte read(Kryo kryo, Input input, Class<IDLSequence.Byte> type)
+   public IDLSequence.Byte read(Kryo kryo, Input input, Class<? extends IDLSequence.Byte> type)
    {
       int length = input.readInt(true);
       IDLSequence.Byte resultList = new IDLSequence.Byte(length, TYPE_CODE);

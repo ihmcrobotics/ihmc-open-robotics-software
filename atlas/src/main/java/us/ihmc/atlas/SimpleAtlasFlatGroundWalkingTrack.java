@@ -1,7 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,7 +9,6 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.simpleWholeBodyWalking.SimpleWalkingControllerStateFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;

@@ -270,7 +270,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setSnapGoalSteps(true);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
+      footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.addCustomTerminationCondition(
             (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= lookAndStepParameters.getMinimumNumberOfPlannedSteps());
       MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();

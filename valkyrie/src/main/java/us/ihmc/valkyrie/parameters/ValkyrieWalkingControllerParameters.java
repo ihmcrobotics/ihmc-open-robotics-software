@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -633,12 +632,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public FeedbackControllerSettings getFeedbackControllerSettings()
    {
       return new ValkyrieFeedbackControllerSettings(jointMap, target);
-   }
-
-   @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-   {
-      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override

@@ -6,7 +6,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.Random;
 
@@ -27,8 +27,8 @@ public class DifferentialS2SegmentTest
       Point3D startVRP2 = EuclidCoreRandomTools.nextPoint3D(random);
       Point3D endVRP1 = EuclidCoreRandomTools.nextPoint3D(random);
       Point3D endVRP2 = EuclidCoreRandomTools.nextPoint3D(random);
-      Trajectory3D vrpTrajectory1 = new Trajectory3D(3);
-      Trajectory3D vrpTrajectory2 = new Trajectory3D(3);
+      Polynomial3D vrpTrajectory1 = new Polynomial3D(3);
+      Polynomial3D vrpTrajectory2 = new Polynomial3D(3);
       vrpTrajectory1.setLinear(0.0, 1.0, startVRP1, endVRP1);
       vrpTrajectory2.setLinear(0.0, 1.0, startVRP2, endVRP2);
 

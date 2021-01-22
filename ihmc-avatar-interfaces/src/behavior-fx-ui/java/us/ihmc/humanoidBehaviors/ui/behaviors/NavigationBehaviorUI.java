@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
@@ -36,7 +36,7 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
       get3DGroup().getChildren().add(bodyPathPlanGraphic);
       behaviorMessager.registerTopicListener(BodyPathPlanForUI, bodyPathPlanGraphic::generateMeshesAsynchronously);
 
-      LivePlanarRegionsGraphic livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+      JavaFXLivePlanarRegionsGraphic livePlanarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
       get3DGroup().getChildren().add(livePlanarRegionsGraphic);
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
    }

@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;

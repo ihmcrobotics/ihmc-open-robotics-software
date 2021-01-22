@@ -79,9 +79,10 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading();
+            Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(walkToPoint1,true);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
+
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
          }
       };
@@ -92,22 +93,13 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePoint2D walkPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
-            FramePoint2D robotPosition = new FramePoint2D(midUnderPelvisFrame, 0.0, 0.0);
-            robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
-            walkingDirection.set(walkPosition2d);
-            walkingDirection.sub(robotPosition);
-            walkingDirection.normalize();
-
-            float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
-            Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
-
-            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
-                                                       JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
+            Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(walkToPoint2,false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
+
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setSquareUpEndSteps(true);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setSquareUpEndSteps(false);
          }
       };
 
@@ -148,14 +140,14 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       return WalkToObjectState.GET_READY_TO_WALK;
    }
 
-   private Pair<FramePose3D, Double> computeDesiredGoalAndHeading()
+   private Pair<FramePose3D, Double> computeDesiredGoalAndHeading(FramePoint3D pointToWalkTo, boolean keepHeadingIfClose)
    {
-      walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
+      pointToWalkTo.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D poseToWalkTo = new FramePose3D();
-      poseToWalkTo.getPosition().set(walkToPoint1);
+      poseToWalkTo.getPosition().set(pointToWalkTo);
 
-      FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
+      FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointToWalkTo.getX(), pointToWalkTo.getY(), 0);
       FramePoint3D robotPosition = new FramePoint3D(midUnderPelvisFrame, 0.0, 0.0, 0.0);
       robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
       FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -166,14 +158,14 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
       double pathToGoalYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
 
-      if (distanceToGoal < proximityToGoalToKeepOrientation)
+      if (keepHeadingIfClose && distanceToGoal < proximityToGoalToKeepOrientation)
       {
 
          double robotYaw = midUnderPelvisFrame.getTransformToWorldFrame().getRotation().getYaw();
          poseToWalkTo.getOrientation().setToYawOrientation(robotYaw);
 
          double desiredHeading = AngleTools.computeAngleDifferenceMinusPiToPi(robotYaw, pathToGoalYaw);
-         publishTextToSpeech("Door is close, keeping orientation "+distanceToGoal+"<"+proximityToGoalToKeepOrientation+" "+robotYaw);
+        // publishTextToSpeech("Door is close, keeping orientation "+distanceToGoal+"<"+proximityToGoalToKeepOrientation+" "+robotYaw);
 
          return Pair.of(poseToWalkTo, desiredHeading);
       }
@@ -182,7 +174,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
          Quaternion goalOrientation = new Quaternion(new float[] {0, 0, (float) pathToGoalYaw});
          poseToWalkTo.getOrientation().set(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(goalOrientation));
-         publishTextToSpeech("Door is far, changing orientation "+distanceToGoal+">="+proximityToGoalToKeepOrientation+" 0.0");
+        // publishTextToSpeech("Door is far, changing orientation "+distanceToGoal+">="+proximityToGoalToKeepOrientation+" 0.0");
 
          return Pair.of(poseToWalkTo, 0.0);
       }

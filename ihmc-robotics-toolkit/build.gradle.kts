@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.esotericsoftware.kryo:kryo:2.24.0")
    api("com.github.quickhull3d:quickhull3d:1.0.0")
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.georegression:georegression:0.22")
@@ -30,17 +29,18 @@ mainDependencies {
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:log-tools:0.6.1")
-   api("us.ihmc:euclid:0.15.2")
-   api("us.ihmc:euclid-frame:0.15.2")
-   api("us.ihmc:euclid-frame-shape:0.15.2")
-   api("us.ihmc:euclid-shape:0.15.2")
-   api("us.ihmc:mecano:0.7.3")
-   api("us.ihmc:mecano-yovariables:0.7.3")
+   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid-frame:0.16.1")
+   api("us.ihmc:euclid-frame-shape:0.16.1")
+   api("us.ihmc:euclid-shape:0.16.1")
+   api("us.ihmc:mecano:0.7.4")
+   api("us.ihmc:mecano-yovariables:0.7.4")
    api("us.ihmc:ihmc-commons:0.30.4")
-   api("us.ihmc:ihmc-yovariables:0.9.7")
-   api("us.ihmc:ihmc-matrix-library:0.18.1")
-   api("us.ihmc:ihmc-graphics-description:0.19.2")
-   api("us.ihmc:simulation-construction-set-utilities:0.21.4")
+   api("us.ihmc:ihmc-messager-kryo:0.1.7")
+   api("us.ihmc:ihmc-yovariables:0.9.8")
+   api("us.ihmc:ihmc-matrix-library:0.18.2")
+   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:simulation-construction-set-utilities:0.21.6")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
@@ -49,6 +49,6 @@ testDependencies {
    api("org.jfree:jfreechart:1.0.17")
    api("org.jfree:jcommon:1.0.21")
 
-   api("us.ihmc:ihmc-matrix-library-test:0.18.1")
+   api("us.ihmc:ihmc-matrix-library-test:0.18.2")
    api("us.ihmc:ihmc-commons-testing:0.30.4")
 }

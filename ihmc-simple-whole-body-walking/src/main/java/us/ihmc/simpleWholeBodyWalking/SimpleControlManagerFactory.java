@@ -7,8 +7,6 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;

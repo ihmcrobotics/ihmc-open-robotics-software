@@ -4,25 +4,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-/**
- * Shouldn't probably be returning Models.
- */
 public class GDXModelPrimitives
 {
-   public static Model createBox(float x, float y, float z, Color color)
+   public static ModelInstance createCoordinateFrameInstance(double length)
    {
-      ModelBuilder modelBuilder = new ModelBuilder();
-      Model boxDescription = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(color)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-      boxDescription.nodes.get(0).translation.set(x, y, z);
-      boxDescription.calculateTransforms();
-      return boxDescription;
+      return new ModelInstance(createCoordinateFrame(length));
    }
 
    public static Model createCoordinateFrame(double length)
@@ -43,7 +38,7 @@ public class GDXModelPrimitives
       meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, 0.0, length), new AxisAngle(), Color.BLUE);
       Mesh mesh = meshBuilder.generateMesh();
 
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
+      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
       Material material = new Material();
       Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
       material.set(TextureAttribute.createDiffuse(paletteTexture));

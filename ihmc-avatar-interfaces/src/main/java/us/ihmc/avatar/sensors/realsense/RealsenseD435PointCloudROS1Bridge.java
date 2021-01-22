@@ -21,6 +21,7 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
-      String ros1Topic = "/depthcam/depth/color/points";
+      String ros1Topic = RosTools.D435_POINT_CLOUD;
       LogTools.info("Subscribing ROS 1: {}", ros1Topic);
       ros1Node.attachSubscriber(ros1Topic, this);
 

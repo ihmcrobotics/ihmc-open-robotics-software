@@ -5,7 +5,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -86,8 +89,8 @@ public class FootstepPlanningModuleLauncher
       AtomicBoolean generateLog = new AtomicBoolean();
 
       createParametersCallbacks(ros2Node, footstepPlanningModule, inputTopic);
-      createRequestCallback(ros2Node, footstepPlanningModule, inputTopic, generateLog);
-      createStatusPublisher(ros2Node, footstepPlanningModule, outputTopic);
+      createRequestCallback(robotModel.getSimpleRobotName(), ros2Node, footstepPlanningModule, inputTopic, generateLog);
+      createStatusPublisher(robotModel.getSimpleRobotName(), ros2Node, footstepPlanningModule, outputTopic);
       createOccupancyGridCallback(ros2Node, footstepPlanningModule, outputTopic);
       createPlannerActionCallback(ros2Node, footstepPlanningModule, inputTopic, outputTopic);
       createLoggerCallback(footstepPlanningModule, generateLog);
@@ -116,7 +119,8 @@ public class FootstepPlanningModuleLauncher
       });
    }
 
-   private static void createRequestCallback(ROS2Node ros2Node,
+   private static void createRequestCallback(String robotName,
+                                             ROS2Node ros2Node,
                                              FootstepPlanningModule footstepPlanningModule,
                                              ROS2Topic inputTopic,
                                              AtomicBoolean generateLog)
@@ -129,13 +133,29 @@ public class FootstepPlanningModuleLauncher
          generateLog.set(requestPacket.getGenerateLog());
          new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlanningRequestPacket.class, inputTopic, s ->
+      {
+         SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(s.takeNextData().getRequestedSwingPlanner());
+         if (swingPlannerType == SwingPlannerType.NONE)
+         {
+            LogTools.info("Received swing replanning request with type NONE, ignoring message");
+            return;
+         }
+         else
+         {
+            LogTools.info("Replanning swing with " + swingPlannerType);
+            new Thread(() -> footstepPlanningModule.recomputeSwingTrajectories(swingPlannerType)).start();
+         }
+      });
    }
 
-   private static void createStatusPublisher(ROS2Node ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
+   private static void createStatusPublisher(String robotName, ROS2Node ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
    {
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlanningToolboxOutputStatus.class,
                                                                                                                   outputTopic);
+      IHMCROS2Publisher<FootstepDataListMessage> swingReplanPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerAPI.swingReplanOutputTopic(robotName));
 
       footstepPlanningModule.addStatusCallback(output ->
                                                {
@@ -143,6 +163,12 @@ public class FootstepPlanningModuleLauncher
                                                   output.setPacket(outputStatus);
                                                   resultPublisher.publish(outputStatus);
                                                });
+      footstepPlanningModule.addSwingReplanStatusCallback(footstepPlan ->
+                                                          {
+                                                             LogTools.info("Publishing replanned swings");
+                                                             FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0);
+                                                             swingReplanPublisher.publish(footstepDataListMessage);
+                                                          });
    }
 
    private static void createOccupancyGridCallback(ROS2Node ros2Node,

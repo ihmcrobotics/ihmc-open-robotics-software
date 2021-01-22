@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ public class JumpingMomentumRateControlModuleInput
    private double timeInState;
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
-   private List<Trajectory3D> vrpTrajectories;
+   private List<Polynomial3D> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
    public void setOmega0(double omega0)
@@ -55,12 +54,12 @@ public class JumpingMomentumRateControlModuleInput
       return inFlight;
    }
 
-   public void setVrpTrajectories(List<Trajectory3D> vrpTrajectories)
+   public void setVrpTrajectories(List<Polynomial3D> vrpTrajectories)
    {
       this.vrpTrajectories = vrpTrajectories;
    }
 
-   public List<Trajectory3D> getVrpTrajectories()
+   public List<Polynomial3D> getVrpTrajectories()
    {
       return vrpTrajectories;
    }

@@ -70,7 +70,9 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -200,6 +202,9 @@ public class BalanceManager
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final int maxNumberOfStepsToConsider;
+   private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
+   private final BooleanProvider maintainInitialCoMVelocityContinuityTransfer;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                          WalkingControllerParameters walkingControllerParameters,
@@ -255,9 +260,12 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
+      maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
+      maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
+      maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
-      copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
+      copTrajectoryState = new CoPTrajectoryGeneratorState(registry, maxNumberOfStepsToConsider);
       copTrajectoryState.registerStateToSave(copTrajectoryParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
@@ -280,7 +288,7 @@ public class BalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-//         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
+//         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -493,7 +501,7 @@ public class BalanceManager
       for (RobotSide robotSide : RobotSide.values)
       {
          if (controllerToolbox.getFootContactState(robotSide).inContact())
-            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
+            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), soleFrames.get(robotSide));
       }
       copTrajectory.compute(copTrajectoryState);
 
@@ -602,9 +610,19 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.freeze();
    }
 
+   public int getMaxNumberOfStepsToConsider()
+   {
+      return maxNumberOfStepsToConsider;
+   }
+
    public FramePoint2DReadOnly getDesiredCMP()
    {
       return desiredCMP;
+   }
+
+   public FramePoint2DReadOnly getFinalDesiredICP()
+   {
+      return yoFinalDesiredICP;
    }
 
    public FramePoint2DReadOnly getDesiredICP()
@@ -699,7 +717,7 @@ public class BalanceManager
       currentStateDuration.set(currentTiming.getStepTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
@@ -770,7 +788,7 @@ public class BalanceManager
       totalStateDuration.set(currentTiming.getStepTime());
 
       inSingleSupport.set(false);
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
 
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
