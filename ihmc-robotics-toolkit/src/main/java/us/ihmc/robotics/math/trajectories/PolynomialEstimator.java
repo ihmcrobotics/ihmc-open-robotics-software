@@ -4,10 +4,13 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class PolynomialEstimator implements TimeIntervalBasics
+public class PolynomialEstimator implements TimeIntervalProvider, Settable<PolynomialEstimator>
 {
    private static final double regularization = 1e-5;
    private static final double defaultWeight = 1.0;
@@ -29,23 +32,35 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    private int order = 0;
 
-   private double tInitial = 0.0;
-   private double tFinal = Double.POSITIVE_INFINITY;
+   private final TimeIntervalBasics timeIntervalBasics = new TimeInterval(0.0, Double.POSITIVE_INFINITY);
 
    private double position = Double.NaN;
    private double velocity = Double.NaN;
    private double acceleration = Double.NaN;
+
+   @Override
+   public TimeIntervalBasics getTimeInterval()
+   {
+      return timeIntervalBasics;
+   }
+
+   @Override
+   public void set(PolynomialEstimator other)
+   {
+      getTimeInterval().set(other.getTimeInterval());
+      reshape(other.getOrder());
+
+      coefficients.set(other.coefficients);
+   }
 
    public int getOrder()
    {
       return order;
    }
 
-   @Override
    public void reset()
    {
-      tInitial = 0.0;
-      tFinal = Double.POSITIVE_INFINITY;
+      getTimeInterval().setInterval(0.0, Double.POSITIVE_INFINITY);
 
       position = Double.NaN;
       velocity = Double.NaN;
@@ -71,30 +86,6 @@ public class PolynomialEstimator implements TimeIntervalBasics
       equalityConstraintObjective.zero();
    }
 
-   @Override
-   public void setEndTime(double tFinal)
-   {
-      this.tFinal = tFinal;
-   }
-
-   @Override
-   public void setStartTime(double t0)
-   {
-      this.tInitial = t0;
-   }
-
-   @Override
-   public double getEndTime()
-   {
-      return this.tFinal;
-   }
-
-   @Override
-   public double getStartTime()
-   {
-      return this.tInitial;
-   }
-
    public void addObjectivePosition(double time, double value)
    {
       addObjectivePosition(defaultWeight, time, value);
@@ -102,7 +93,7 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    public void addObjectivePosition(double weight, double time, double value)
    {
-      time -= getStartTime();
+      time -= getTimeInterval().getStartTime();
       double timeI = 1.0;
       for (int i = 0; i < order; i++)
       {
@@ -130,7 +121,7 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    public void addObjectiveVelocity(double weight, double time, double value)
    {
-      time -= getStartTime();
+      time -= getTimeInterval().getStartTime();
       double timeI = 1.0;
       for (int idx = 0; idx < order - 1; idx++)
       {
@@ -161,7 +152,7 @@ public class PolynomialEstimator implements TimeIntervalBasics
 
    public void addObjectiveAcceleration(double weight, double time, double value)
    {
-      time -= getStartTime();
+      time -= getTimeInterval().getStartTime();
       double timeI = 1.0;
       for (int idx = 0; idx < order - 2; idx++)
       {
@@ -275,7 +266,7 @@ public class PolynomialEstimator implements TimeIntervalBasics
       velocity = 0.0;
       acceleration = 0.0;
 
-      time -= getStartTime();
+      time -= getTimeInterval().getStartTime();
       double timeI = 1.0;
 
       int idx = 0;

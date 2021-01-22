@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,6 +33,8 @@ import java.util.List;
 
 public class ThreePotatoAngularMomentumCalculator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private static final double estimationDt = 0.05;
    private static final int maxSamplesPerSegment = 10;
    private static final int minSamplesPerSegment = 10;
@@ -75,8 +76,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final FrameVector3D relativePotatoVelocity = new FrameVector3D();
    private final FrameVector3D relativePotatoAcceleration = new FrameVector3D();
 
-   private final RecyclingArrayList<FixedFramePolynomialEstimator3D> angularMomentumEstimators = new RecyclingArrayList<>(() -> new FixedFramePolynomialEstimator3D(ReferenceFrame.getWorldFrame()));
-   private final RecyclingArrayList<FixedFramePolynomialEstimator3D> scaledAngularMomentumEstimators = new RecyclingArrayList<>(() -> new FixedFramePolynomialEstimator3D(ReferenceFrame.getWorldFrame()));
+   private final FixedFramePolynomialEstimator3D angularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
+   private final FixedFramePolynomialEstimator3D scaledAngularMomentumEstimator = new FixedFramePolynomialEstimator3D(worldFrame);
    private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> angularMomentumTrajectory;
    private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> heightScaledAngularMomentumTrajectory;
 
@@ -103,8 +104,16 @@ public class ThreePotatoAngularMomentumCalculator
       this.soleFrames = soleFrames;
       this.potatoMass.set(potatoMass);
 
-     angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum", 50, ReferenceFrame.getWorldFrame(), registry);
-     heightScaledAngularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("heightScaledAngularMomentum", 50, ReferenceFrame.getWorldFrame(), registry);
+      angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
+                                                                                   50,
+                                                                                   worldFrame,
+                                                                                   () -> new FixedFramePolynomialEstimator3D(worldFrame),
+                                                                                   registry);
+      heightScaledAngularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("heightScaledAngularMomentum",
+                                                                                               50,
+                                                                                               worldFrame,
+                                                                                               () -> new FixedFramePolynomialEstimator3D(worldFrame),
+                                                                                               registry);
 
       if (visualize)
       {
@@ -159,7 +168,8 @@ public class ThreePotatoAngularMomentumCalculator
       totalAngularMomentum.setToZero();
       totalTorque.setToZero();
 
-      if (time > predictedCoMTrajectory.getEndTime() || time > predictedSecondPotatoTrajectory.getLastWaypointTime() || time > predictedThirdPotatoTrajectory.getLastWaypointTime())
+      if (time > predictedCoMTrajectory.getEndTime() || time > predictedSecondPotatoTrajectory.getLastWaypointTime()
+          || time > predictedThirdPotatoTrajectory.getLastWaypointTime())
          return;
 
       predictedCoMTrajectory.compute(time);
@@ -190,7 +200,8 @@ public class ThreePotatoAngularMomentumCalculator
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
 
-   public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals, MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
+   public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
+                                                  MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
    {
       computeAngularMomentumTrajectories(timeIntervals,
                                          comTrajectories,
@@ -207,23 +218,21 @@ public class ThreePotatoAngularMomentumCalculator
       this.predictedSecondPotatoTrajectory = secondPotatoTrajectories;
       this.predictedThirdPotatoTrajectory = thirdPotatoTrajectories;
 
-      angularMomentumEstimators.clear();
-      scaledAngularMomentumEstimators.clear();
+      angularMomentumTrajectory.clear();
+      heightScaledAngularMomentumTrajectory.clear();
 
       for (int i = 0; i < timeIntervals.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = timeIntervals.get(i).getTimeInterval();
-         FixedFramePolynomialEstimator3D angularMomentumTrajectory = angularMomentumEstimators.add();
-         angularMomentumTrajectory.reset();
-         angularMomentumTrajectory.reshape(5);
-         FixedFramePolynomialEstimator3D scaledAngularMomentumTrajectory = scaledAngularMomentumEstimators.add();
-         scaledAngularMomentumTrajectory.reset();
-         scaledAngularMomentumTrajectory.reshape(5);
+         angularMomentumEstimator.reset();
+         angularMomentumEstimator.reshape(5);
+         scaledAngularMomentumEstimator.reset();
+         scaledAngularMomentumEstimator.reshape(5);
 
          double duration = Math.min(timeInterval.getDuration(), sufficientlyLong);
 
-         angularMomentumTrajectory.getTimeInterval().set(timeInterval);
-         scaledAngularMomentumTrajectory.getTimeInterval().set(timeInterval);
+         angularMomentumEstimator.getTimeInterval().set(timeInterval);
+         scaledAngularMomentumEstimator.getTimeInterval().set(timeInterval);
 
          double minDt = duration / maxSamplesPerSegment;
          double maxDt = duration / minSamplesPerSegment;
@@ -234,7 +243,8 @@ public class ThreePotatoAngularMomentumCalculator
          {
             double time = timeInInterval + timeInterval.getStartTime();
 
-            if (time > secondPotatoTrajectories.getLastWaypointTime() && time > thirdPotatoTrajectories.getLastWaypointTime() || time > comTrajectories.getEndTime())
+            if (time > secondPotatoTrajectories.getLastWaypointTime() && time > thirdPotatoTrajectories.getLastWaypointTime()
+                || time > comTrajectories.getEndTime())
                break;
 
             comTrajectories.compute(time);
@@ -259,35 +269,35 @@ public class ThreePotatoAngularMomentumCalculator
                totalTorque.add(torque);
             }
 
-            angularMomentumTrajectory.addObjectivePosition(timeInInterval, totalAngularMomentum);
+            angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
 
             totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
-            scaledAngularMomentumTrajectory.addObjectivePosition(timeInInterval, totalAngularMomentum);
+            scaledAngularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
          }
 
+         /*
          if (false)//i > 0)
          {
-            FixedFramePolynomialEstimator3D previousEstimator = angularMomentumEstimators.get(i - 1);
+            FixedFramePolynomialEstimator3D previousEstimator = this.angularMomentumEstimator.get(i - 1);
             previousEstimator.compute(timeIntervals.get(i - 1).getTimeInterval().getDuration());
 
-            angularMomentumTrajectory.addConstraintPosition(0.0, previousEstimator.getPosition());
+            angularMomentumEstimator.addConstraintPosition(0.0, previousEstimator.getPosition());
          }
 
-         angularMomentumTrajectory.initialize();
-         scaledAngularMomentumTrajectory.initialize();
+          */
+
+         angularMomentumEstimator.initialize();
+         scaledAngularMomentumEstimator.initialize();
+
+         angularMomentumTrajectory.appendSegment(angularMomentumEstimator);
+         heightScaledAngularMomentumTrajectory.appendSegment(scaledAngularMomentumEstimator);
       }
 
-      angularMomentumTrajectory.clear();
-      angularMomentumTrajectory.appendSegments(angularMomentumEstimators);
       angularMomentumTrajectory.initialize();
-
-      heightScaledAngularMomentumTrajectory.clear();
-      heightScaledAngularMomentumTrajectory.appendSegments(scaledAngularMomentumEstimators);
       heightScaledAngularMomentumTrajectory.initialize();
 
       visualize(comTrajectories, secondPotatoTrajectories, thirdPotatoTrajectories);
    }
-
 
    private void visualize(MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
                           MultipleWaypointsPositionTrajectoryGenerator secondPotatoTrajectories,
@@ -296,7 +306,9 @@ public class ThreePotatoAngularMomentumCalculator
       if (!visualize)
          return;
 
-      double duration = Math.min(comTrajectories.getEndTime(), Math.min(secondPotatoTrajectories.getLastWaypointTime(), Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLong)));
+      double duration = Math.min(comTrajectories.getEndTime(),
+                                 Math.min(secondPotatoTrajectories.getLastWaypointTime(),
+                                          Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLong)));
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();

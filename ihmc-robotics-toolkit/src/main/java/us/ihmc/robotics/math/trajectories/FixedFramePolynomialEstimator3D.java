@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -12,7 +13,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajector
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider
+public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider, Settable<FixedFramePolynomialEstimator3D>
 {
    private final FramePoint3DReadOnly position;
    private final FrameVector3DReadOnly velocity;
@@ -43,6 +44,14 @@ public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajec
    public void reshape(int order)
    {
       estimator.reshape(order);
+   }
+
+   @Override
+   public void set(FixedFramePolynomialEstimator3D other)
+   {
+      checkReferenceFrameMatch(other);
+
+      estimator.set(other.estimator);
    }
 
    @Override

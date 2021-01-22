@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -7,7 +8,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
-public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeIntervalProvider
+public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeIntervalProvider, Settable<PolynomialEstimator3D>
 {
    private static final double regularization = 1e-5;
    private static final double defaultWeight = 1.0;
@@ -17,29 +18,29 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
       @Override
       public void setStartTime(double startTime)
       {
-         xEstimator.setStartTime(startTime);
-         yEstimator.setStartTime(startTime);
-         zEstimator.setStartTime(startTime);
+         xEstimator.getTimeInterval().setStartTime(startTime);
+         yEstimator.getTimeInterval().setStartTime(startTime);
+         zEstimator.getTimeInterval().setStartTime(startTime);
       }
 
       @Override
       public void setEndTime(double endTime)
       {
-         xEstimator.setEndTime(endTime);
-         yEstimator.setEndTime(endTime);
-         zEstimator.setEndTime(endTime);
+         xEstimator.getTimeInterval().setEndTime(endTime);
+         yEstimator.getTimeInterval().setEndTime(endTime);
+         zEstimator.getTimeInterval().setEndTime(endTime);
       }
 
       @Override
       public double getStartTime()
       {
-         return xEstimator.getStartTime();
+         return xEstimator.getTimeInterval().getStartTime();
       }
 
       @Override
       public double getEndTime()
       {
-         return xEstimator.getEndTime();
+         return xEstimator.getTimeInterval().getEndTime();
       }
    };
 
@@ -126,6 +127,15 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
       xEstimator.reshape(order);
       yEstimator.reshape(order);
       zEstimator.reshape(order);
+   }
+
+   @Override
+   public void set(PolynomialEstimator3D other)
+   {
+      getTimeInterval().set(other.getTimeInterval());
+      xEstimator.set(other.xEstimator);
+      yEstimator.set(other.yEstimator);
+      zEstimator.set(other.zEstimator);
    }
 
    @Override

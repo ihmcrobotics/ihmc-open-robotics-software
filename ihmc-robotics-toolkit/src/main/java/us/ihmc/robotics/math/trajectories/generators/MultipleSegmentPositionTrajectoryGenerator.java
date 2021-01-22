@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.generators;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
@@ -15,11 +17,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
-// TODO, make the trajectory also extend settable, so that we can do a recyclingarraylist
-public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePositionTrajectoryGenerator & TimeIntervalProvider> implements FixedFramePositionTrajectoryGenerator
+public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePositionTrajectoryGenerator & TimeIntervalProvider & Settable<T>> implements FixedFramePositionTrajectoryGenerator
 {
    private final String namePrefix;
 
@@ -29,20 +31,23 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
 
    private final YoDouble currentSegmentTime;
 
-   private final YoInteger numberOfSegments;
+   protected final YoInteger numberOfSegments;
    private final YoInteger currentSegmentIndex;
-   private final List<T> segments;
+   protected final RecyclingArrayList<T> segments;
 
    private final FixedFramePoint3DBasics currentPosition;
    private final FixedFrameVector3DBasics currentVelocity;
    private final FixedFrameVector3DBasics currentAcceleration;
 
-   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
+   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, Supplier<T> trajectorySupplier, YoRegistry parentRegistry)
    {
-      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
+      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, trajectorySupplier, parentRegistry);
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
+   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix,
+                                                     int maximumNumberOfWaypoints,
+                                                     ReferenceFrame referenceFrame,
+                                                     Supplier<T> trajectorySupplier,
                                                      YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
@@ -53,7 +58,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       numberOfSegments = new YoInteger(namePrefix + "NumberOfSegments", registry);
       numberOfSegments.set(0);
 
-      segments = new ArrayList<>();
+      segments = new RecyclingArrayList<>(trajectorySupplier);
 
       currentSegmentTime = new YoDouble(namePrefix + "CurrentTrajectoryTime", registry);
       currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegmentIndex", registry);
@@ -88,7 +93,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
 
    private void appendSegmentsUnsafe(T segment)
    {
-      segments.add(segment);
+      segments.add().set(segment);
       numberOfSegments.increment();
    }
 
@@ -108,13 +113,13 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
          appendSegment(segments.get(i));
    }
 
-   private void checkNumberOfSegments(int length)
+   protected void checkNumberOfSegments(int length)
    {
       if (length > maximumNumberOfSegments)
          throw new RuntimeException("Cannot exceed the maximum number of segments. Number of segments provided: " + length);
    }
 
-   private void checkNextSegmentIsContinuous(T segment)
+   protected void checkNextSegmentIsContinuous(T segment)
    {
       if (getCurrentNumberOfSegments() == 0)
          return;
