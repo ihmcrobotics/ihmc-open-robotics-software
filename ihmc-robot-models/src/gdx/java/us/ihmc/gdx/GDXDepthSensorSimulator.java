@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.internal.ImGui;
 import org.lwjgl.opengl.GL32;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
@@ -24,6 +27,9 @@ import java.util.Random;
  */
 public class GDXDepthSensorSimulator
 {
+   private final String depthWindowName = "Depth";
+   private final String colorWindowName = "Color";
+
    private final Random random = new Random();
 
    private final float fieldOfViewY;
@@ -40,6 +46,9 @@ public class GDXDepthSensorSimulator
    private FrameBuffer frameBuffer;
    private Pixmap pixmap;
    private RecyclingArrayList<Point3D32> points;
+
+   private Texture depthWindowTexture;
+   private Pixmap depthWindowPixmap;
 
    public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -59,8 +68,11 @@ public class GDXDepthSensorSimulator
 
       DepthShader.Config depthShaderConfig = new DepthShader.Config();
       depthShaderConfig.defaultCullFace = GL20.GL_BACK;
-      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
-      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
+//      depthShaderConfig.defaultCullFace = 0;
+//      depthShaderConfig.depthBufferOnly = false;
+//      depthShaderConfig.defaultAlphaTest = 1.0f;
+//      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
+//      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
       depthShaderProvider = new DepthShaderProvider(depthShaderConfig);
 
       modelBatch = new ModelBatch(depthShaderProvider);
@@ -68,6 +80,9 @@ public class GDXDepthSensorSimulator
       boolean hasDepth = true;
       frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, imageWidth, imageHeight, hasDepth);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+
+      depthWindowTexture = new Texture(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+      depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
    }
@@ -96,6 +111,7 @@ public class GDXDepthSensorSimulator
       frameBuffer.end();
 
       points.clear();
+      depthWindowPixmap.getPixels().rewind();
       for (int y = 0; y < imageHeight; y++)
       {
          for (int x = 0; x < imageWidth; x++)
@@ -106,8 +122,29 @@ public class GDXDepthSensorSimulator
             depthReading += ((encodedDepthValue & 0x0000ff00) >>> 8) / 16581375.0f;
             depthReading += ((encodedDepthValue & 0x000000ff)) / 4294967296.0f;
 
-            if (depthReading > camera.near)
+            float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
+            float pastNear = clippedDepth - camera.near;
+            float worldRange = camera.far - camera.near;
+            float colorRange = 1.0f;
+            float grayscale = pastNear * colorRange / worldRange;
+            int flippedY = imageHeight - y;
+            depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+
+            if (depthReading > camera.near && depthReading < camera.far)
             {
+               float halfFieldOfViewY = (float) Math.toRadians(fieldOfViewY) / 2.0f;
+               float halfFieldOfViewX = halfFieldOfViewY * (float) imageHeight / (float) imageWidth;
+               float percentToXLimit = (2.0f * x) / imageWidth - 1.0f;
+               float percentToYLimit = (2.0f * flippedY) / imageHeight - 1.0f;
+               float angleX = percentToXLimit * halfFieldOfViewX;
+               float angleY = percentToYLimit * halfFieldOfViewY;
+
+               float alpha = (float) Math.sqrt(angleX * angleX + angleY * angleY);
+               float viewZ = depthReading * (float) Math.cos(alpha);
+               float viewX = viewZ * (float) Math.tan(angleX);
+               float viewY = viewZ * (float) Math.tan(angleY);
+               depthPoint.set(viewX, viewY, viewZ);
+
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
                depthPoint.z = 2.0f * depthReading - 1.0f;
@@ -119,6 +156,39 @@ public class GDXDepthSensorSimulator
             }
          }
       }
+
+      depthWindowTexture.bind();
+      Gdx.gl.glTexSubImage2D(Gdx.gl20.GL_TEXTURE_2D,
+                             0,
+                             0,
+                             0,
+                             imageWidth,
+                             imageHeight,
+                             Gdx.gl20.GL_RGBA,
+                             Gdx.gl20.GL_UNSIGNED_BYTE,
+                             depthWindowPixmap.getPixels());
+   }
+
+   public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
+   {
+      ImGui.begin(depthWindowName);
+
+      float posX = ImGui.getWindowPosX();
+      float posY = ImGui.getWindowPosY();
+      float sizeX = ImGui.getWindowSizeX();
+      float sizeY = ImGui.getWindowSizeY();
+
+      int textureId = depthWindowTexture.getTextureObjectHandle();
+
+      ImGui.getWindowDrawList().addImage(textureId, posX, posY, posX + sizeX, posY + sizeY);
+
+      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
+      ImGui.end();
+   }
+
+   public void renderImGuiColorWindow()
+   {
+
    }
 
    public void dispose()
@@ -144,5 +214,15 @@ public class GDXDepthSensorSimulator
    public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
+   }
+
+   public String getDepthWindowName()
+   {
+      return depthWindowName;
+   }
+
+   public String getColorWindowName()
+   {
+      return colorWindowName;
    }
 }
