@@ -69,6 +69,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
    @Test
    public void testForwardWalking() throws Exception
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupSim(getRobotModel(), false, false, null);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 

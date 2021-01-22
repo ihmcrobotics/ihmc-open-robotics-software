@@ -3,10 +3,15 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
@@ -17,10 +22,23 @@ public class ECMPTrajectoryCalculator
    private final double gravity;
    private final double weight;
 
-   public ECMPTrajectoryCalculator(double mass, double gravity)
+   private final MultipleWaypointsPositionTrajectoryGenerator desiredNetAngularMomentumTrajectory;
+
+   private final FrameVector3D desiredReactionAngularMomentumRate = new FrameVector3D();
+   private final FrameVector3D desiredReactionAngularMomentumAcceleration = new FrameVector3D();
+
+   public ECMPTrajectoryCalculator(double mass, double gravity, YoRegistry parentRegistry)
    {
       this.mass = mass;
       this.gravity = Math.abs(gravity);
+
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      desiredNetAngularMomentumTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("DesiredNetAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+      desiredNetAngularMomentumTrajectory.appendWaypoint(0.0, new FramePoint3D(), new FrameVector3D());
+      desiredNetAngularMomentumTrajectory.initialize();
+
+      parentRegistry.addChild(registry);
 
       weight = mass * gravity;
    }
@@ -49,43 +67,46 @@ public class ECMPTrajectoryCalculator
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
 
          internalAngularMomentumTrajectories.compute(startTime);
+         desiredNetAngularMomentumTrajectory.compute(startTime);
 
-         Vector3DReadOnly initialAngularRate = internalAngularMomentumTrajectories.getVelocity();
-         Vector3DReadOnly initialAngularAcceleration = internalAngularMomentumTrajectories.getAcceleration();
+         desiredReactionAngularMomentumRate.sub(desiredNetAngularMomentumTrajectory.getVelocity(), internalAngularMomentumTrajectories.getVelocity());
+         desiredReactionAngularMomentumAcceleration.sub(desiredNetAngularMomentumTrajectory.getAcceleration(), internalAngularMomentumTrajectories.getAcceleration());
 
-         // These are scaled by a negative one because we want the total angular momentum to be zero
-         ecmpPosition.setX(initialAngularRate.getY());
-         ecmpPosition.setY(-initialAngularRate.getX());
-         ecmpPosition.scale(-1.0 / weight);
-         ecmpPosition.add(copTrajectory.getECMPStartPosition());
-
-         ecmpVelocity.setX(initialAngularAcceleration.getY());
-         ecmpVelocity.setY(-initialAngularAcceleration.getX());
-         ecmpVelocity.scale(-1.0 / weight);
-         ecmpVelocity.add(copTrajectory.getECMPStartVelocity());
+         computeECMPPosition(copTrajectory.getECMPStartPosition(), desiredReactionAngularMomentumRate, ecmpPosition);
+         computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredReactionAngularMomentumAcceleration, ecmpVelocity);
 
          eCMPTrajectory.setStartCopPosition(ecmpPosition);
          eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
 
          // Make sure to do this separately, as they may be the same trajectory objects
          internalAngularMomentumTrajectories.compute(endTime);
+         desiredNetAngularMomentumTrajectory.compute(endTime);
 
-         Vector3DReadOnly finalAngularRate = internalAngularMomentumTrajectories.getVelocity();
-         Vector3DReadOnly finalAngularAcceleration = internalAngularMomentumTrajectories.getAcceleration();
+         desiredReactionAngularMomentumRate.sub(desiredNetAngularMomentumTrajectory.getVelocity(), internalAngularMomentumTrajectories.getVelocity());
+         desiredReactionAngularMomentumAcceleration.sub(desiredNetAngularMomentumTrajectory.getAcceleration(), internalAngularMomentumTrajectories.getAcceleration());
 
-         ecmpPosition.setX(finalAngularRate.getY());
-         ecmpPosition.setY(-finalAngularRate.getX());
-         ecmpPosition.scale(-1.0 / weight);
-         ecmpPosition.add(copTrajectory.getECMPEndPosition());
-
-         ecmpVelocity.setX(finalAngularAcceleration.getY());
-         ecmpVelocity.setY(-finalAngularAcceleration.getX());
-         ecmpVelocity.scale(-1.0 / weight);
-         ecmpVelocity.add(copTrajectory.getECMPEndVelocity());
+         computeECMPPosition(copTrajectory.getECMPEndPosition(), desiredReactionAngularMomentumRate, ecmpPosition);
+         computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredReactionAngularMomentumAcceleration, ecmpVelocity);
 
          eCMPTrajectory.setEndCopPosition(ecmpPosition);
          eCMPTrajectory.setEndCopVelocity(ecmpVelocity);
       }
+   }
+
+   public void computeECMPPosition(FramePoint3DReadOnly desiredCopPosition, FrameVector3DReadOnly desiredReactionAngularMomentumRate, FramePoint3DBasics ecmpPositionToPack)
+   {
+      ecmpPositionToPack.setX(desiredReactionAngularMomentumRate.getY());
+      ecmpPositionToPack.setY(-desiredReactionAngularMomentumRate.getX());
+      ecmpPositionToPack.scale(1.0 / weight);
+      ecmpPositionToPack.add(desiredCopPosition);
+   }
+
+   public void computeECMPVelocity(FrameVector3DReadOnly desiredCopVelocity, FrameVector3DReadOnly desiredReactionAngularMomentumAcceleration, FrameVector3DBasics ecmpVelocityToPack)
+   {
+      ecmpVelocityToPack.setX(desiredReactionAngularMomentumAcceleration.getY());
+      ecmpVelocityToPack.setY(-desiredReactionAngularMomentumAcceleration.getX());
+      ecmpVelocityToPack.scale(1.0 / weight);
+      ecmpVelocityToPack.add(desiredCopVelocity);
    }
 
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
