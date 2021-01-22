@@ -123,6 +123,7 @@ public class BalanceManager
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint3D perfectCoP3d = new FramePoint3D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
@@ -727,9 +728,9 @@ public class BalanceManager
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
       yoDesiredCoMVelocity.setToZero();
 
-      perfectCoP2d.setIncludingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroid());
-      perfectCoP2d.changeFrameAndProjectToXYPlane(worldFrame);
-      yoPerfectCoP.set(perfectCoP2d);
+      perfectCoP3d.setIncludingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroid(), 0.0);
+      perfectCoP3d.changeFrame(worldFrame);
+      yoPerfectCoP.set(perfectCoP3d);
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
