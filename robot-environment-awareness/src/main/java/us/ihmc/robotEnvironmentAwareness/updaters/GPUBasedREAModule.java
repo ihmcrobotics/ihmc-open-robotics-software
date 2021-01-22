@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GPUBasedREAModule implements PerceptionModule {
 
-    private static final int THREAD_PERIOD_MILLISECONDS = 1000;
+    private static final int THREAD_PERIOD_MILLISECONDS = 100;
 
     private final Messager messager;
     private final ROS2Node ros2Node;
@@ -45,7 +45,6 @@ public class GPUBasedREAModule implements PerceptionModule {
     }
 
     void mainUpdate(){
-        LogTools.info("Regions Available:{}", gpuPlanarRegionSubscriber.regionListIsAvailable());
         if(gpuPlanarRegionSubscriber.regionListIsAvailable()){
             this.rawGPUPlanarRegionList = gpuPlanarRegionSubscriber.getRawPlanarRegionList();
             PlanarRegionsList regionList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);

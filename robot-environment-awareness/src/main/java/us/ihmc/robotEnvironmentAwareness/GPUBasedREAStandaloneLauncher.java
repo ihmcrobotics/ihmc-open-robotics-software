@@ -27,7 +27,7 @@ public class GPUBasedREAStandaloneLauncher extends Application {
 
         URI rosMasterURI = new URI("http://localhost:11311/");
         rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
-        ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+        ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.GPU_REA_NODE_NAME);
 
         SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(GPUModuleAPI.API);
         ui = GPUBasedEnvironmentAwarenessUI.createIntraprocessUI(messager, primaryStage);
