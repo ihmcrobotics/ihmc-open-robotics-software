@@ -1,39 +1,33 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.utils.JsonReader;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.tools.GDXModelLoader;
 
 public class GDXModelViewer
 {
-   private final String modelFileName;
-
    public GDXModelViewer(String modelFileName)
    {
-      this.modelFileName = modelFileName;
-      GDXApplicationCreator.launchGDXApplication(new PrivateApplication(), "Model Viewer", 1100, 800);
-   }
-
-   class PrivateApplication extends GDX3DApplication
-   {
-      @Override
-      public void create()
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         super.create();
+         @Override
+         public void create()
+         {
+            sceneManager.create();
+            sceneManager.addCoordinateFrame(1.0);
 
-         addCoordinateFrame(1.0);
+            Model model = GDXModelLoader.loadG3DModel(modelFileName);
+            sceneManager.addModelInstance(new ModelInstance(model));
+         }
 
-         Model model = GDXModelLoader.loadG3DModel(modelFileName);
-
-         addModelInstance(new ModelInstance(model));
-      }
-
-      @Override
-      public void render()
-      {
-         super.render();
-      }
+         @Override
+         public void render()
+         {
+            sceneManager.render();
+         }
+      }, "Model Viewer", 1100, 800);
    }
 }

@@ -1,8 +1,9 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 
 public class GDXApplicationCreator
 {
