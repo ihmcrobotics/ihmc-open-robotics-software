@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class GDXModelPrimitives
 {

@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.SerializationException;
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.gdx.tools.GDXModelLoader;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -319,7 +321,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         GDXTools.convertEuclidAffineToGDXAffine(worldTransform, modelInstance.transform);
+         GDXTools.toGDX(worldTransform, modelInstance.transform);
       }
    }
 
