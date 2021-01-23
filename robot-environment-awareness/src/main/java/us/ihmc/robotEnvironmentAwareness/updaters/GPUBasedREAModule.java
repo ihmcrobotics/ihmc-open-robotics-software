@@ -43,7 +43,7 @@ public class GPUBasedREAModule implements PerceptionModule {
         if(gpuPlanarRegionSubscriber.regionListIsAvailable()){
             this.rawGPUPlanarRegionList = gpuPlanarRegionSubscriber.getRawPlanarRegionList();
             PlanarRegionsList regionList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-            LogTools.info("Raw:{} Generated:{}", rawGPUPlanarRegionList.getNumOfRegions(), regionList.getNumberOfPlanarRegions());
+//            LogTools.info("Raw:{} Generated:{}", rawGPUPlanarRegionList.getNumOfRegions(), regionList.getNumberOfPlanarRegions());
 
             messager.submitMessage(GPUModuleAPI.PlanarRegionData, regionList);
         }

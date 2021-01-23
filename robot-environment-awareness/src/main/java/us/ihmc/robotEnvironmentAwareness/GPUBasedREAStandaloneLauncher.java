@@ -22,6 +22,8 @@ public class GPUBasedREAStandaloneLauncher extends Application {
     private ROS2Node ros2Node;
     private RosMainNode rosMainNode;
 
+    private boolean ENABLE_UI = true;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -30,12 +32,12 @@ public class GPUBasedREAStandaloneLauncher extends Application {
         ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.GPU_REA_NODE_NAME);
 
         SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(GPUModuleAPI.API);
-        ui = GPUBasedEnvironmentAwarenessUI.createIntraprocessUI(messager, primaryStage);
+        if(ENABLE_UI) ui = GPUBasedEnvironmentAwarenessUI.createIntraprocessUI(messager, primaryStage);
         module = GPUBasedREAModule.createIntraprocess(messager, ros2Node, rosMainNode);
 
 
         rosMainNode.execute();
-        ui.show();
+        if(ENABLE_UI) ui.show();
         module.start();
     }
 
@@ -45,7 +47,7 @@ public class GPUBasedREAStandaloneLauncher extends Application {
         super.stop();
         rosMainNode.shutdown();
         ros2Node.destroy();
-        ui.stop();
+        if(ENABLE_UI) ui.stop();
         module.stop();
         Platform.exit();
     }
