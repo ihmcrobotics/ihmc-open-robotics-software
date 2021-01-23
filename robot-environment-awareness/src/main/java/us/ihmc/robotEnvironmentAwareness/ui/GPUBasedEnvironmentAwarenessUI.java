@@ -49,7 +49,7 @@ public class GPUBasedEnvironmentAwarenessUI implements PerceptionUI {
         uiMessager.notifyModuleMessagerStateListeners();
 
         primaryStage.setTitle(getClass().getSimpleName());
-        primaryStage.setMaximized(true);
+//        primaryStage.setMaximized(true);
         Scene mainScene = new Scene(mainPane, 600, 400);
 
         primaryStage.setScene(mainScene);
