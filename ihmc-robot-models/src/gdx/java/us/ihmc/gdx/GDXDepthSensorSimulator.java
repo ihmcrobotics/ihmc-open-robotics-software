@@ -21,6 +21,7 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Random;
 
@@ -106,7 +107,7 @@ public class GDXDepthSensorSimulator
       int glDepthComponent16 = GL20.GL_DEPTH_COMPONENT16;
 
       depthBufferHandle = frameBuffer.getDepthBufferHandle();
-      depthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 2);
+      depthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
 
 //      pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
 
@@ -145,11 +146,24 @@ public class GDXDepthSensorSimulator
 //      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL20.GL_LUMINANCE_ALPHA, GL20.GL_UNSIGNED_BYTE, depthByteBuffer);
 //      ShortBuffer shortBuffer = depthByteBuffer.asShortBuffer();
 
+//      Gdx.gl.glTexImage2D(target, 0, internalFormat, width, height, 0, format, GL20.GL_FLOAT, buffer);
+      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
+      depthByteBuffer.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, depthByteBuffer);
+
       frameBuffer.end();
+
+//      frameBuffer.getDepthTexture().bind();
+//      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL20.GL_UNSIGNED_BYTE, depthTextureData.getBuffer());
+//      depthTextureData.getBuffer().rewind();
+//      depthTextureData.consumeCustomData(frameBuffer.getDepthTexture().glTarget);
+//      SensorFrameBuffer.unbind();
 
       points.clear();
 
-      depthTextureData.getBuffer().rewind();
+//      depthTextureData.getBuffer().rewind();
+      depthByteBuffer.rewind();
+      FloatBuffer depthFloatBuffer = depthByteBuffer.asFloatBuffer();
       double averageDepth = 0.0;
       for (int y = 0; y < imageHeight; y++)
       {
@@ -170,19 +184,27 @@ public class GDXDepthSensorSimulator
 //            short shortValue = shortBuffer.get();
 //            int unsignedInt = Short.toUnsignedInt(shortValue);
 //            depthReading = Float.intBitsToFloat(depthValue);
-            depthReading = depthTextureData.getBuffer().get();
+//            depthReading = depthTextureData.getBuffer().get();
+            depthReading = depthFloatBuffer.get();
 
-            averageDepth += depthReading;
+            if (x == 200 && y == 300)
+            {
+               averageDepth += depthReading;
+            }
+            else
+            {
+               averageDepth += depthReading;
+            }
 //
             float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
             float pastNear = clippedDepth - camera.near;
             float worldRange = camera.far - camera.near;
             float colorRange = 1.0f;
             float grayscale = pastNear * colorRange / worldRange;
-//            grayscale = depthReading * colorRange / camera.far;
+            grayscale = depthReading * colorRange / camera.far;
             int flippedY = imageHeight - y;
 
-            colorWindowPixmap.drawPixel(x, flippedY, encodedDepthValue);
+//            colorWindowPixmap.drawPixel(x, flippedY, encodedDepthValue);
             depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
 
             if (depthReading > camera.near && depthReading < camera.far)
@@ -213,9 +235,11 @@ public class GDXDepthSensorSimulator
       }
 
       averageDepth /= imageWidth * imageHeight;
+//      System.out.println("Average depth: " + averageDepth);
 
 //      frameBuffer.getColorTexture().draw(colorWindowPixmap, 0, 0);
 //      frameBuffer.getDepthTexture().draw(depthWindowPixmap, 0, 0);
+      depthWindowTexture.draw(depthWindowPixmap, 0, 0);
    }
 
    public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
@@ -227,9 +251,11 @@ public class GDXDepthSensorSimulator
       float sizeX = ImGui.getWindowSizeX();
       float sizeY = ImGui.getWindowSizeY();
 
-      int textureId = frameBuffer.getDepthTexture().getTextureObjectHandle();
+//      int textureId = frameBuffer.getDepthTexture().getTextureObjectHandle();
+      int textureId = depthWindowTexture.getTextureObjectHandle();
 
-      ImGui.getWindowDrawList().addImage(textureId, posX, posY + sizeY, posX + sizeX, posY);
+//      ImGui.getWindowDrawList().addImage(textureId, posX, posY + sizeY, posX + sizeX, posY);
+      ImGui.getWindowDrawList().addImage(textureId, posX, posY, posX + sizeX, posY + sizeY);
 
       sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
       ImGui.end();
