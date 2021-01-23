@@ -177,7 +177,7 @@ public class LIPMDDPCalculatorVisualizer
       for (int i = 0; i < footsteps.size(); i++)
          timings.add(new FootstepTiming(singleSupportDuration, doubleSupportDuration));
 
-      copPlanner = new BasicCoPPlanner(contactableFeet, midFeetZUpFrame, registry);
+      copPlanner = new BasicCoPPlanner(contactableFeet, registry);
 
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false));

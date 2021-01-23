@@ -3,7 +3,8 @@ package us.ihmc.exampleSimulations.planarWalker;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -59,8 +60,8 @@ public class PeterPlanarWalkerController implements RobotController
    private AlphaFilteredYoVariable filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable,
                                                                                          desiredBodyVelocity);
 
-   private YoMinimumJerkTrajectory trajectorySwingHip;
-   private YoMinimumJerkTrajectory trajectorySwingKnee;
+   private PolynomialBasics trajectorySwingHip;
+   private PolynomialBasics trajectorySwingKnee;
 
    private YoEnum<RobotSide> swingLeg = new YoEnum<RobotSide>("swingLeg", registry, RobotSide.class);
 
@@ -84,8 +85,8 @@ public class PeterPlanarWalkerController implements RobotController
          hipControllers.put(robotSide, pidController);
       }
 
-      trajectorySwingHip = new YoMinimumJerkTrajectory("trajectorySwingHip", registry);
-      trajectorySwingKnee = new YoMinimumJerkTrajectory("trajectorySwingKnee", registry);
+      trajectorySwingHip = new YoPolynomial("trajectorySwingHip", 6, registry);
+      trajectorySwingKnee = new YoPolynomial("trajectorySwingKnee", 6, registry);
       desiredHeight.set(robot.nominalHeight);
       desiredKneeStance.set(robot.lowerLinkLength / 2.0);
       swingTime.set(0.3);
@@ -157,30 +158,30 @@ public class PeterPlanarWalkerController implements RobotController
          if ((timeInState > swingTimeForThisStep.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0, 0.0,
-                                          swingTimeForThisStep.getDoubleValue() / 2.0);
+            trajectorySwingKnee.setQuintic(0.0,
+                                               swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0);
             initalizedKneeExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
          else if ((timeInState > swingTimeForThisStep.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
-            trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0, 0.0, 0.125);
+            trajectorySwingKnee.setQuintic(0.0, 0.125, currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0);
             initalizedKneeDoubleExtension.set(true);
             kneeMoveStartTime.set(timeInState);
          }
 
-         trajectorySwingKnee.computeTrajectory(timeInState - kneeMoveStartTime.getDoubleValue());
-         double desiredKneePositon = trajectorySwingKnee.getPosition();
+         trajectorySwingKnee.compute(timeInState - kneeMoveStartTime.getDoubleValue());
+         double desiredKneePositon = trajectorySwingKnee.getValue();
          double desiredKneeVelocity = trajectorySwingKnee.getVelocity();
          controlKneeToPosition(swingLeg.getEnumValue(), desiredKneePositon, desiredKneeVelocity);
 
          desiredSwingLegHipAngle.set(getDesireHipAngle());
-         trajectorySwingHip.setParams(startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0, 0.0,
-                                      swingTimeForThisStep.getDoubleValue());
+         trajectorySwingHip.setQuintic(0.0,
+                                       swingTimeForThisStep.getDoubleValue(), startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0);
 
-         trajectorySwingHip.computeTrajectory(timeInState);
-         double desiredHipAngle = trajectorySwingHip.getPosition();
+         trajectorySwingHip.compute(timeInState);
+         double desiredHipAngle = trajectorySwingHip.getValue();
          double currentHipAngle = robot.getHipPosition(swingLeg.getEnumValue());
          double currentHipAngleRate = robot.getHipVelocity(swingLeg.getEnumValue());
 
@@ -217,7 +218,7 @@ public class PeterPlanarWalkerController implements RobotController
 
          double currentKneePosition = robot.getKneePosition(swingLeg.getEnumValue());
          double desiredRetractedPosition = 0.1;
-         trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0, 0.0, swingTimeForThisStep.getDoubleValue() / 2.0);
+         trajectorySwingKnee.setQuintic(0.0, swingTimeForThisStep.getDoubleValue() / 2.0, currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0);
 
          //retract knee
          robot.setKneeTorque(swingLeg.getEnumValue(), -10.0);

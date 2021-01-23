@@ -7,7 +7,7 @@ import java.util.Arrays;
 // ~--- non-JDK imports --------------------------------------------------------
 
 import Jama.Matrix;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class LinearDynamicSystem
 {
@@ -190,8 +190,8 @@ public class LinearDynamicSystem
    {
       int order = matrixA.getColumnDimension();
       PolynomialMatrix sIMinusA = PolynomialMatrix.constructSIMinusA(matrixA);
-      Polynomial characteristicEquation = sIMinusA.computeDeterminant();
-      Polynomial[][] numerators = new Polynomial[order][order];
+      ObsoletePolynomial characteristicEquation = sIMinusA.computeDeterminant();
+      ObsoletePolynomial[][] numerators = new ObsoletePolynomial[order][order];
 
       for (int i = 0; i < order; i++)
       {

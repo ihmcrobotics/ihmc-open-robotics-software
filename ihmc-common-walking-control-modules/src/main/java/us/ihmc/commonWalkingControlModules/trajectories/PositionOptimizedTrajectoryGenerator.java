@@ -20,8 +20,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -40,7 +41,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;
@@ -439,7 +440,7 @@ public class PositionOptimizedTrajectoryGenerator
          Axis3D axis = Axis3D.values[dimension];
          YoPolynomial polynomial = trajectories.get(axis).get(activeSegment);
          polynomial.compute(time);
-         desiredPosition.setElement(dimension, polynomial.getPosition());
+         desiredPosition.setElement(dimension, polynomial.getValue());
          desiredVelocity.setElement(dimension, polynomial.getVelocity());
          desiredAcceleration.setElement(dimension, polynomial.getAcceleration());
       }
@@ -549,27 +550,24 @@ public class PositionOptimizedTrajectoryGenerator
       return isDone.getBooleanValue();
    }
 
-   public void getPosition(FramePoint3D positionToPack)
+   @Override
+   public FramePoint3DReadOnly getPosition()
    {
-      positionToPack.setIncludingFrame(desiredPosition);
+      return desiredPosition;
    }
 
-   public void getVelocity(FrameVector3D velocityToPack)
+   @Override
+   public FrameVector3DReadOnly getVelocity()
    {
-      velocityToPack.setIncludingFrame(desiredVelocity);
+      return desiredVelocity;
    }
 
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
    {
-      accelerationToPack.setIncludingFrame(desiredAcceleration);
+      return desiredAcceleration;
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
-   }
 
    public void informDone()
    {
@@ -625,7 +623,7 @@ public class PositionOptimizedTrajectoryGenerator
       for (double time = 0.0; time <= 1.0; time += timeIncrement)
       {
          compute(time);
-         getVelocity(tempVelocity);
+         tempVelocity.setIncludingFrame(getVelocity());
          double speed = tempVelocity.length();
          if (speed > maxSpeed.getDoubleValue())
          {

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 
 import java.util.List;
 
@@ -12,12 +12,12 @@ public class AlgebraicS2Function implements S2Function
    private final DMatrixRMaj endValueLocal = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<AlgebraicS2Segment> s2Segments = new RecyclingArrayList<>(AlgebraicS2Segment::new);
 
-   public void set(DMatrixRMaj endValue, List<Trajectory3D> vrpTrajectories, LQRCommonValues lqrCommonValues)
+   public void set(DMatrixRMaj endValue, List<Polynomial3D> vrpTrajectories, LQRCommonValues lqrCommonValues)
    {
       set(endValue, vrpTrajectories, lqrCommonValues.getA2(), lqrCommonValues.getA2Inverse(), lqrCommonValues.getA2InverseB2());
    }
 
-   public void set(DMatrixRMaj endValue, List<Trajectory3D> vrpTrajectories,  DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
+   public void set(DMatrixRMaj endValue, List<Polynomial3D> vrpTrajectories, DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
    {
       s2Segments.clear();
       for (int j = 0; j < vrpTrajectories.size(); j++)

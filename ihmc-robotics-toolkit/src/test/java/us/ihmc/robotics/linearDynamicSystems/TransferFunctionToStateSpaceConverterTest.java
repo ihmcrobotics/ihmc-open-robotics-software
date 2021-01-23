@@ -6,7 +6,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 class TransferFunctionToStateSpaceConverterTest
 {
@@ -16,30 +16,30 @@ class TransferFunctionToStateSpaceConverterTest
    {
       boolean plotResponse = false;
 
-      Polynomial numeratorPolynomial = new Polynomial(1.0);
-      Polynomial denominatorPolynomial = new Polynomial(1.0, 1.0);
+      ObsoletePolynomial numeratorPolynomial = new ObsoletePolynomial(1.0);
+      ObsoletePolynomial denominatorPolynomial = new ObsoletePolynomial(1.0, 1.0);
       checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
       double wn = 2.0 * Math.PI;
       double zeta = 0.1;
-      numeratorPolynomial = new Polynomial(wn * wn);
-      denominatorPolynomial = new Polynomial(1.0, 2.0 * zeta * wn, wn * wn);
+      numeratorPolynomial = new ObsoletePolynomial(wn * wn);
+      denominatorPolynomial = new ObsoletePolynomial(1.0, 2.0 * zeta * wn, wn * wn);
       LinearDynamicSystem dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
       double[] initialConditions = new double[] {1.0, 0.0};
       if (plotResponse)
          simulateAndPlot(denominatorPolynomial, dynamicSystem, initialConditions);
 
-      numeratorPolynomial = new Polynomial(1.2, 0.3, 1.07);
-      denominatorPolynomial = new Polynomial(2.2, 3.3, 4.7, 9.6);
+      numeratorPolynomial = new ObsoletePolynomial(1.2, 0.3, 1.07);
+      denominatorPolynomial = new ObsoletePolynomial(2.2, 3.3, 4.7, 9.6);
       dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
       initialConditions = new double[] {1.0, 0.0, 0.0};
       if (plotResponse)
          simulateAndPlot(denominatorPolynomial, dynamicSystem, initialConditions);
 
-      numeratorPolynomial = new Polynomial(1.2, 0.3, 1.07, 3.3);
-      denominatorPolynomial = new Polynomial(2.2, 3.3, 4.7, 9.6);
+      numeratorPolynomial = new ObsoletePolynomial(1.2, 0.3, 1.07, 3.3);
+      denominatorPolynomial = new ObsoletePolynomial(2.2, 3.3, 4.7, 9.6);
       dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
       initialConditions = new double[] {1.0, 0.0, 0.0};
@@ -50,7 +50,7 @@ class TransferFunctionToStateSpaceConverterTest
          ThreadTools.sleepForever();
    }
 
-   private LinearDynamicSystem checkTransferFunctionRemainsTheSame(Polynomial numeratorPolynomial, Polynomial denominatorPolynomial)
+   private LinearDynamicSystem checkTransferFunctionRemainsTheSame(ObsoletePolynomial numeratorPolynomial, ObsoletePolynomial denominatorPolynomial)
    {
       TransferFunction transferFunction = new TransferFunction(numeratorPolynomial, denominatorPolynomial);
       LinearDynamicSystem dynamicSystem = TransferFunctionToStateSpaceConverter.convertTransferFunctionToStateSpaceObservableCanonicalForm(transferFunction);
@@ -76,7 +76,7 @@ class TransferFunctionToStateSpaceConverterTest
       assertTrue(transferFunction.epsilonEquals(transferFunctionTwo, 1.0e-7));
    }
 
-   private void simulateAndPlot(Polynomial denominatorPolynomial, LinearDynamicSystem dynamicSystem, double[] initialConditions)
+   private void simulateAndPlot(ObsoletePolynomial denominatorPolynomial, LinearDynamicSystem dynamicSystem, double[] initialConditions)
    {
       if (dynamicSystem.getOrder() != initialConditions.length)
       {

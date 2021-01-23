@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class DoubleMassSpringOscillatorTest
 {
@@ -66,11 +64,11 @@ public class DoubleMassSpringOscillatorTest
       DynamicSystemsTestHelpers.checkLeftAndRightEigenvectors(leftEigenvectorV, rightEigenvectorW);
 
       TransferFunction transferFunction = transferFunctionMatrix.get(0, 0);
-      Polynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
-      Polynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
+      ObsoletePolynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
+      ObsoletePolynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
 
-      assertTrue(denominatorPolynomial.epsilonEquals(new Polynomial(new double[] { 1.0, 0.0, 4.0, 0.0, 3.0 }), 1e-7));
-      assertTrue(numeratorPolynomial.epsilonEquals(new Polynomial(new double[] { 1.0, 0.0, 2.0 }), 1e-7));
+      assertTrue(denominatorPolynomial.epsilonEquals(new ObsoletePolynomial(new double[] {1.0, 0.0, 4.0, 0.0, 3.0 }), 1e-7));
+      assertTrue(numeratorPolynomial.epsilonEquals(new ObsoletePolynomial(new double[] {1.0, 0.0, 2.0 }), 1e-7));
 
       double stepSize = 0.001;
       int numTicks = (int) (2.0 / stepSize);
