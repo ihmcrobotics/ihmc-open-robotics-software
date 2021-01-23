@@ -1,13 +1,13 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
 import Jama.Matrix;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class PolynomialMatrix
 {
-   private final Polynomial[][] polynomials;
+   private final ObsoletePolynomial[][] polynomials;
 
-   public PolynomialMatrix(Polynomial[][] polynomials)
+   public PolynomialMatrix(ObsoletePolynomial[][] polynomials)
    {
       this.polynomials = polynomials;
    }
@@ -18,7 +18,7 @@ public class PolynomialMatrix
       if (matrixA.getColumnDimension() != order)
          throw new RuntimeException("Matrix A must be square!");
 
-      Polynomial[][] polynomials = new Polynomial[order][order];
+      ObsoletePolynomial[][] polynomials = new ObsoletePolynomial[order][order];
 
       for (int i = 0; i < order; i++)
       {
@@ -26,11 +26,11 @@ public class PolynomialMatrix
          {
             if (i == j)
             {
-               polynomials[i][j] = new Polynomial(new double[] {1.0, -matrixA.get(i, j)});
+               polynomials[i][j] = new ObsoletePolynomial(new double[] {1.0, -matrixA.get(i, j)});
             }
             else
             {
-               polynomials[i][j] = new Polynomial(new double[] {-matrixA.get(i, j)});
+               polynomials[i][j] = new ObsoletePolynomial(new double[] {-matrixA.get(i, j)});
             }
          }
       }
@@ -38,23 +38,23 @@ public class PolynomialMatrix
       return new PolynomialMatrix(polynomials);
    }
 
-   public Polynomial getPolynomial(int row, int column)
+   public ObsoletePolynomial getPolynomial(int row, int column)
    {
       return polynomials[row][column];
    }
 
-   public Polynomial computeDeterminant()
+   public ObsoletePolynomial computeDeterminant()
    {
       int order = polynomials.length;
       if (order == 1)
          return polynomials[0][0];
 
-      Polynomial ret = new Polynomial(new double[] {0.0});
+      ObsoletePolynomial ret = new ObsoletePolynomial(new double[] {0.0});
 
       for (int i = 0; i < order; i++)
       {
-         Polynomial multiplyingPolynomial = polynomials[0][i];
-         Polynomial cofactor = computeCofactor(0, i);
+         ObsoletePolynomial multiplyingPolynomial = polynomials[0][i];
+         ObsoletePolynomial cofactor = computeCofactor(0, i);
 
          ret = ret.plus(multiplyingPolynomial.times(cofactor));
       }
@@ -63,9 +63,9 @@ public class PolynomialMatrix
    }
 
 
-   public Polynomial[][] computeCofactors()
+   public ObsoletePolynomial[][] computeCofactors()
    {
-      Polynomial[][] ret = new Polynomial[polynomials.length][polynomials[0].length];
+      ObsoletePolynomial[][] ret = new ObsoletePolynomial[polynomials.length][polynomials[0].length];
 
       for (int i = 0; i < polynomials.length; i++)
       {
@@ -78,14 +78,14 @@ public class PolynomialMatrix
       return ret;
    }
 
-   public Polynomial computeCofactor(int row, int column)
+   public ObsoletePolynomial computeCofactor(int row, int column)
    {
       int order = polynomials.length;
       if (order == 1)
-         return new Polynomial(new double[] {1.0});
+         return new ObsoletePolynomial(new double[] {1.0});
 
       PolynomialMatrix rowAndColumnStriken = strikeRowAndColumn(row, column);
-      Polynomial Mij = rowAndColumnStriken.computeDeterminant();
+      ObsoletePolynomial Mij = rowAndColumnStriken.computeDeterminant();
 
       if (isEvenRowAndColumnSum(row, column))
       {
@@ -107,7 +107,7 @@ public class PolynomialMatrix
          throw new RuntimeException("Don't strike row and column if <= one!");
 
       int newOrder = order - 1;
-      Polynomial[][] newPolynomials = new Polynomial[newOrder][newOrder];
+      ObsoletePolynomial[][] newPolynomials = new ObsoletePolynomial[newOrder][newOrder];
 
       int row = 0;
       for (int i = 0; i < order; i++)

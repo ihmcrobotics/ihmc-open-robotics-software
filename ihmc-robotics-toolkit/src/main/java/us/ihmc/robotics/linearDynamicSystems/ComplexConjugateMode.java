@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class ComplexConjugateMode
 {
@@ -72,7 +72,7 @@ public class ComplexConjugateMode
       int order = leftEigenvectorV.length;
       TransferFunction[][] transferFunctions = new TransferFunction[order][order];
 
-      Polynomial denominatorPolynomial = new Polynomial(new double[] {1.0, -2.0 * eigenvalue.real(), eigenvalue.magnitudeSquared()});
+      ObsoletePolynomial denominatorPolynomial = new ObsoletePolynomial(new double[] {1.0, -2.0 * eigenvalue.real(), eigenvalue.magnitudeSquared()});
 
       for (int i = 0; i < order; i++)
       {
@@ -81,7 +81,7 @@ public class ComplexConjugateMode
             ComplexNumber Rij = leftEigenvectorV[i].times(rightEigenvectorW[j]);
 
             double[] numeratorCoefficients = new double[] {2.0 * Rij.real(), -2.0 * eigenvalue.real() * Rij.real() - 2.0 * eigenvalue.imag() * Rij.imag()};
-            Polynomial numeratorPolynomial = new Polynomial(numeratorCoefficients);
+            ObsoletePolynomial numeratorPolynomial = new ObsoletePolynomial(numeratorCoefficients);
 
             transferFunctions[i][j] = new TransferFunction(numeratorPolynomial, denominatorPolynomial);
          }

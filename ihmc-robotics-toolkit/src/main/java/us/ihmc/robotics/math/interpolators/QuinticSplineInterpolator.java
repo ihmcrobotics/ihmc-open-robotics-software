@@ -7,7 +7,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.TrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

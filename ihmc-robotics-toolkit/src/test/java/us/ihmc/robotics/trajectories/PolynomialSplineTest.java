@@ -7,10 +7,8 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 
 public class PolynomialSplineTest
 {
@@ -32,7 +30,7 @@ public class PolynomialSplineTest
       spline.setDirectly(coefficients);
       double x = random.nextDouble();
       spline.compute(x);
-      double y = spline.getPosition();
+      double y = spline.getValue();
       double yCheck = coefficients[0] + coefficients[1] * x + coefficients[2] * x * x + coefficients[3] * x * x * x + coefficients[4] * x * x * x * x;
       assertEquals(yCheck, y, 1e-12);
    }
@@ -49,10 +47,10 @@ public class PolynomialSplineTest
       double x = random.nextDouble();
       double dx = 1e-9;
       spline.compute(x);
-      double yx = spline.getPosition();
+      double yx = spline.getValue();
       double dydx = spline.getVelocity();
       spline.compute(x + dx);
-      double yxPlusdx = spline.getPosition();
+      double yxPlusdx = spline.getValue();
       double dydxNumerical = (yxPlusdx - yx) / dx;
       assertEquals(dydxNumerical, dydx, 1e-6);
    }
@@ -109,14 +107,14 @@ public class PolynomialSplineTest
 
       double epsilon = 1e-6;
       spline.compute(x0);
-      assertEquals(z0, spline.getPosition(), epsilon);
+      assertEquals(z0, spline.getValue(), epsilon);
       assertEquals(zd0, spline.getVelocity(), epsilon);
 
       spline.compute(xMid);
-      assertEquals(zMid, spline.getPosition(), epsilon);
+      assertEquals(zMid, spline.getValue(), epsilon);
 
       spline.compute(xFinal);
-      assertEquals(zFinal, spline.getPosition(), epsilon);
+      assertEquals(zFinal, spline.getValue(), epsilon);
       assertEquals(zdFinal, spline.getVelocity(), epsilon);
    }
 
@@ -136,11 +134,11 @@ public class PolynomialSplineTest
 
       double epsilon = 1e-6;
       spline.compute(x0);
-      assertEquals(z0, spline.getPosition(), epsilon);
+      assertEquals(z0, spline.getValue(), epsilon);
       assertEquals(zd0, spline.getVelocity(), epsilon);
 
       spline.compute(xFinal);
-      assertEquals(zFinal, spline.getPosition(), epsilon);
+      assertEquals(zFinal, spline.getValue(), epsilon);
       assertEquals(zdFinal, spline.getVelocity(), epsilon);
       assertEquals(zddFinal, spline.getAcceleration(), epsilon);
    }
@@ -158,7 +156,14 @@ public class PolynomialSplineTest
 
       for (int i = 1; i < coefficients.length; i++)
       {
-         assertEquals(0.0, coefficients[i], epsilon);
+         assertEquals(Double.NaN, coefficients[i], epsilon);
+      }
+      for (double time = -10.0; time <= 10.0; time += 0.05)
+      {
+         spline.compute(time);
+         assertEquals(z, spline.getValue(), epsilon);
+         assertEquals(0.0, spline.getVelocity(), epsilon);
+         assertEquals(0.0, spline.getAcceleration(), epsilon);
       }
    }
 

@@ -69,8 +69,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.initialize();
 
          traj.compute(startIntegrationTime - dt);
-         traj.getOrientation(orientationFromIntegration);
-         traj.getAngularVelocity(angularVelocityFromIntegration);
+         orientationFromIntegration.setIncludingFrame(traj.getOrientation());
+         angularVelocityFromIntegration.setIncludingFrame(traj.getAngularVelocity());
 
          for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
          {

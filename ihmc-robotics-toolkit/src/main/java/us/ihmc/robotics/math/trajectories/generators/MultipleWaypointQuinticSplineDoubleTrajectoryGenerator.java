@@ -1,14 +1,13 @@
 package us.ihmc.robotics.math.trajectories.generators;
 
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Helper class to create a one degree of freedom trajectory using the quintic spline interpolator
- * 
- * Not realtime safe. 
- * 
+ * <p>
+ * Not realtime safe.
  */
 public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -24,7 +23,7 @@ public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements D
       this.interpolator = new QuinticSplineInterpolator(name, maximumNumberOfPoints, 1, parentRegistry);
       this.time = new double[maximumNumberOfPoints];
       this.positions = new double[maximumNumberOfPoints];
-      
+
       clear();
    }
 
@@ -39,32 +38,31 @@ public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements D
       this.a0 = 0.0;
       this.af = 0.0;
    }
-   
-   
+
    public void addWaypoint(double time, double position)
    {
-      if(this.numberOfPoints >= this.interpolator.getMaximumNumberOfWaypoints())
+      if (this.numberOfPoints >= this.interpolator.getMaximumNumberOfWaypoints())
       {
          throw new RuntimeException("Number of waypoints exceeds maximum number of waypoints");
       }
-      
+
       this.time[this.numberOfPoints] = time;
       this.positions[this.numberOfPoints] = position;
       this.numberOfPoints++;
    }
-   
+
    public void setInitialConditions(double initialVelocity, double initialAcceleration)
    {
       this.v0 = initialVelocity;
       this.a0 = initialAcceleration;
    }
-   
+
    public void setFinalConditions(double finalVelocity, double finalAcceleration)
    {
       this.vf = finalVelocity;
       this.af = finalAcceleration;
    }
-   
+
    @Override
    public void initialize()
    {

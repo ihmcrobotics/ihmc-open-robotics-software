@@ -45,7 +45,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -549,7 +549,7 @@ public class SwingState extends AbstractFootControlState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      PoseTrajectoryGenerator activeTrajectory;
+      FixedFramePoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
          activeTrajectory = touchdownTrajectory;
       else
@@ -559,7 +559,7 @@ public class SwingState extends AbstractFootControlState
       if (replanTrajectory.getBooleanValue())
       {
          activeTrajectory.compute(time); // compute to get the current unadjusted position
-         activeTrajectory.getPosition(unadjustedPosition);
+         unadjustedPosition.setIncludingFrame(activeTrajectory.getPosition());
          footstepWasAdjusted = true;
       }
 
@@ -797,8 +797,7 @@ public class SwingState extends AbstractFootControlState
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
             blendedSwingTrajectory.compute(swingWaypoints.get(i).getTime());
-            blendedSwingTrajectory.getPosition(tempWaypoint);
-            swingWaypointsForViz.get(i).setMatchingFrame(tempWaypoint);
+            swingWaypointsForViz.get(i).setMatchingFrame(blendedSwingTrajectory.getPosition());
          }
       }
    }

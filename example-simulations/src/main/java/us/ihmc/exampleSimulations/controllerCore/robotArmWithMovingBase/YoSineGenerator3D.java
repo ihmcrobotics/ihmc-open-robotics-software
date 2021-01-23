@@ -1,16 +1,16 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class YoSineGenerator3D implements PositionTrajectoryGenerator
+public class YoSineGenerator3D implements FixedFramePositionTrajectoryGenerator
 {
    private final YoFrameVector3D offset;
    private final YoFrameVector3D amplitude;
@@ -97,29 +97,21 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      positionToPack.setIncludingFrame(position);
+      return position;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      velocityToPack.setIncludingFrame(velocity);
+      return velocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      accelerationToPack.setIncludingFrame(acceleration);
-   }
-
-   @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
+      return acceleration;
    }
 
    @Override

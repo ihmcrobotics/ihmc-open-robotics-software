@@ -6,17 +6,18 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoSpline3D;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class SoftTouchdownPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry;
 
-   private final YoSpline3D positionTouchdownTrajectory;
+   private final FixedFramePolynomial3DBasics positionTouchdownTrajectory;
 
    private final YoDouble timeInitial;
    private final YoDouble timeFinal;
@@ -31,7 +32,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       
-      positionTouchdownTrajectory = new YoSpline3D(3, 3, worldFrame, registry, namePrefix + "Trajectory");
+      positionTouchdownTrajectory = new YoFramePolynomial3D( namePrefix + "Trajectory", 3, worldFrame, registry);
       timeInitial = new YoDouble(namePrefix + "TimeInitial", registry);
       timeFinal = new YoDouble(namePrefix + "TimeFinal", registry);
       timeIntoTouchdown = new YoDouble(namePrefix + "TimeIntoTouchdown", registry);
@@ -57,7 +58,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    {
       double t0 = timeInitial.getDoubleValue();
       double tf = timeFinal.getDoubleValue();
-      positionTouchdownTrajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
+      positionTouchdownTrajectory.setQuadraticUsingInitialAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
    }
 
    @Override
@@ -75,21 +76,21 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      positionTouchdownTrajectory.getPosition(positionToPack);
+      return positionTouchdownTrajectory.getPosition();
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      positionTouchdownTrajectory.getVelocity(velocityToPack);
+      return positionTouchdownTrajectory.getVelocity();
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      positionTouchdownTrajectory.getAcceleration(accelerationToPack);
+      return positionTouchdownTrajectory.getAcceleration();
    }
 
    @Override

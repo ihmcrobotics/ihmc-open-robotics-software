@@ -171,8 +171,8 @@ public class QuadrupedBodyOrientationManager
 
       if (so3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
       {
-         offsetBodyOrientationTrajectory.getOrientation(desiredBodyOrientation);
-         offsetBodyOrientationTrajectory.getAngularVelocity(desiredBodyAngularVelocity);
+         desiredBodyOrientation.setIncludingFrame(offsetBodyOrientationTrajectory.getOrientation());
+         desiredBodyAngularVelocity.setIncludingFrame(offsetBodyOrientationTrajectory.getAngularVelocity());
          desiredBodyOrientation.changeFrame(worldFrame);
          desiredBodyAngularVelocity.changeFrame(worldFrame);
 

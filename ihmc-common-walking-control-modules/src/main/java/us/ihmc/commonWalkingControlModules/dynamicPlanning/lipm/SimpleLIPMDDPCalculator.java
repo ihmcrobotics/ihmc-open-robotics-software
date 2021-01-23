@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.trajectoryOptimization.*;
 import us.ihmc.trajectoryOptimization.DDPSolver;
 
@@ -50,15 +50,17 @@ public class SimpleLIPMDDPCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DMatrixRMaj currentState, SegmentedFrameTrajectory3D copDesiredPlan)
+   public void initialize(DMatrixRMaj currentState, MultipleWaypointsPositionTrajectoryGenerator copDesiredPlan)
    {
-      modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
+      modifiedDeltaT = computeDeltaT(copDesiredPlan.getLastWaypointTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
-      desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getLastWaypointTime(), deltaT);
       constants.setLength(desiredTrajectory.size());
 
       double time = 0.0;
-      copDesiredPlan.update(time, tempPoint, tempVector);
+      copDesiredPlan.compute(time);
+      tempPoint.setIncludingFrame(copDesiredPlan.getPosition());
+      tempPoint.setIncludingFrame(copDesiredPlan.getVelocity());
       DMatrixRMaj desiredState = desiredTrajectory.getState(0);
 
       desiredState.set(0, tempPoint.getX());
@@ -75,7 +77,9 @@ public class SimpleLIPMDDPCalculator
 
       for (int i = 1; i < numberOfTimeSteps; i++)
       {
-         copDesiredPlan.update(time, tempPoint, tempVector);
+         copDesiredPlan.compute(time);
+         tempPoint.setIncludingFrame(copDesiredPlan.getPosition());
+         tempPoint.setIncludingFrame(copDesiredPlan.getVelocity());
          desiredState = desiredTrajectory.getState(i);
 
          desiredState.set(0, tempPoint.getX());
