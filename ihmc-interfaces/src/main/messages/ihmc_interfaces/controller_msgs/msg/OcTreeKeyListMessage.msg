@@ -2,16 +2,9 @@
 # This message contains a list of occupied cells in the octree
 # All keys are given at maximum depth
 
-int32 maximum_tree_depth
-
+int32 tree_depth
 float64 tree_resolution
 
-int32[] x_keys
-
-int32[] y_keys
-
-int32[] z_keys
-
-int32[] tree_depth
-
-
+int32[<=5000] x_keys
+int32[<=5000] y_keys
+int32[<=5000] z_keys
