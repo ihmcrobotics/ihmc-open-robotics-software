@@ -14,46 +14,51 @@ import us.ihmc.utilities.ros.RosMainNode;
 
 import java.net.URI;
 
-public class GPUBasedREAStandaloneLauncher extends Application {
+public class GPUBasedREAStandaloneLauncher extends Application
+{
 
-    private GPUBasedEnvironmentAwarenessUI ui;
-    private GPUBasedREAModule module;
+   private GPUBasedEnvironmentAwarenessUI ui;
+   private GPUBasedREAModule module;
 
-    private ROS2Node ros2Node;
-    private RosMainNode rosMainNode;
+   private ROS2Node ros2Node;
+   private RosMainNode rosMainNode;
 
-    private boolean ENABLE_UI = true;
+   private boolean ENABLE_UI = true;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+   @Override
+   public void start(Stage primaryStage) throws Exception
+   {
 
-        URI rosMasterURI = new URI("http://localhost:11311/");
-        rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
-        ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.GPU_REA_NODE_NAME);
+      URI rosMasterURI = new URI("http://localhost:11311/");
+      rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.GPU_REA_NODE_NAME);
 
-        SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(GPUModuleAPI.API);
-        if(ENABLE_UI) ui = GPUBasedEnvironmentAwarenessUI.createIntraprocessUI(messager, primaryStage);
-        module = GPUBasedREAModule.createIntraprocess(messager, ros2Node, rosMainNode);
+      SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(GPUModuleAPI.API);
+      if (ENABLE_UI)
+         ui = GPUBasedEnvironmentAwarenessUI.createIntraprocessUI(messager, primaryStage);
+      module = GPUBasedREAModule.createIntraprocess(messager, ros2Node, rosMainNode);
 
+      rosMainNode.execute();
+      if (ENABLE_UI)
+         ui.show();
+      module.start();
+   }
 
-        rosMainNode.execute();
-        if(ENABLE_UI) ui.show();
-        module.start();
-    }
+   @Override
+   public void stop() throws Exception
+   {
 
-    @Override
-    public void stop() throws Exception {
+      super.stop();
+      rosMainNode.shutdown();
+      ros2Node.destroy();
+      if (ENABLE_UI)
+         ui.stop();
+      module.stop();
+      Platform.exit();
+   }
 
-        super.stop();
-        rosMainNode.shutdown();
-        ros2Node.destroy();
-        if(ENABLE_UI) ui.stop();
-        module.stop();
-        Platform.exit();
-    }
-
-    public static void main(String[] args)
-    {
-        launch(args);
-    }
+   public static void main(String[] args)
+   {
+      launch(args);
+   }
 }
