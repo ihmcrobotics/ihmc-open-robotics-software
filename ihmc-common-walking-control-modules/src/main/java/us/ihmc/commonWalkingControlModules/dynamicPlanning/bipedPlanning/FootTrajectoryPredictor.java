@@ -20,6 +20,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
+
 public class FootTrajectoryPredictor
 {
    private static final double swingHeight = 0.15;
@@ -65,7 +67,7 @@ public class FootTrajectoryPredictor
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
          footTrajectory.clear();
          footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(Double.POSITIVE_INFINITY, state.getFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(sufficientlyLarge, state.getFootPose(robotSide).getPosition(), zeroVector);
          footTrajectory.initialize();
       }
    }
