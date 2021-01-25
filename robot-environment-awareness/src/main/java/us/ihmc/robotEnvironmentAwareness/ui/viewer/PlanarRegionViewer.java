@@ -27,113 +27,113 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionViewer
 {
-    private static final boolean VERBOSE = false;
-    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private static final boolean VERBOSE = false;
+   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
-    private final Group root = new Group();
+   private final Group root = new Group();
 
-    private final AtomicReference<List<MeshView>> graphicsToRender = new AtomicReference<>(null);
-    private List<MeshView> graphicsRendered = null;
+   private final AtomicReference<List<MeshView>> graphicsToRender = new AtomicReference<>(null);
+   private List<MeshView> graphicsRendered = null;
 
-    private final AtomicDouble opacity = new AtomicDouble(1.0);
+   private final AtomicDouble opacity = new AtomicDouble(1.0);
 
-    private final AnimationTimer renderMeshAnimation;
-    private final AtomicBoolean show = new AtomicBoolean(true);
+   private final AnimationTimer renderMeshAnimation;
+   private final AtomicBoolean show = new AtomicBoolean(true);
 
-    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
-    {
-        this();
-        messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-        messager.registerTopicListener(showPlanarRegionsTopic, this::setVisibile);
-    }
+   public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
+   {
+      this();
+      messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
+      messager.registerTopicListener(showPlanarRegionsTopic, this::setVisibile);
+   }
 
-    public PlanarRegionViewer()
-    {
-        renderMeshAnimation = new AnimationTimer()
-        {
-            @Override
-            public void handle(long now)
+   public PlanarRegionViewer()
+   {
+      renderMeshAnimation = new AnimationTimer()
+      {
+         @Override
+         public void handle(long now)
+         {
+            if (!show.get())
+               root.getChildren().clear();
+
+            List<MeshView> localReference = graphicsToRender.getAndSet(null);
+
+            if (localReference != null)
             {
-                if (!show.get())
-                    root.getChildren().clear();
-
-                List<MeshView> localReference = graphicsToRender.getAndSet(null);
-
-                if (localReference != null)
-                {
-                    if (VERBOSE)
-                        LogTools.info("Rendering new planar regions.");
-                    graphicsRendered = localReference;
-                    root.getChildren().clear();
-                }
-
-                if (graphicsRendered != null && show.get() && root.getChildren().isEmpty())
-                    root.getChildren().addAll(graphicsRendered);
-            }
-        };
-    }
-
-    public void setOpacity(double newOpacity)
-    {
-        opacity.set(newOpacity);
-    }
-
-    public void start()
-    {
-        renderMeshAnimation.start();
-    }
-
-    public void stop()
-    {
-        renderMeshAnimation.stop();
-        executorService.shutdownNow();
-    }
-
-    public void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
-    {
-        executorService.submit(() -> buildMeshAndMaterial(planarRegionsList));
-    }
-
-    public void setVisibile(boolean visible)
-    {
-        this.show.set(visible);
-    }
-
-    private void buildMeshAndMaterial(PlanarRegionsList planarRegionsList)
-    {
-        if (VERBOSE)
-            LogTools.info("Creating mesh and material for new planar regions.", this);
-
-        RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-        List<MeshView> regionMeshViews = new ArrayList<>();
-
-        for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
-        {
-            JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
-            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
-
-            int regionId = planarRegion.getRegionId();
-            planarRegion.getTransformToWorld(transformToWorld);
-
-            meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, true);
-
-            for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
-            {
-                ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
-                meshBuilder.addPolygon(transformToWorld, convexPolygon2d);
+               if (VERBOSE)
+                  LogTools.info("Rendering new planar regions.");
+               graphicsRendered = localReference;
+               root.getChildren().clear();
             }
 
-            MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-            regionMeshView.setMaterial(new PhongMaterial(IdMappedColorFunction.INSTANCE.apply(regionId)));
-            regionMeshViews.add(regionMeshView);
-        }
+            if (graphicsRendered != null && show.get() && root.getChildren().isEmpty())
+               root.getChildren().addAll(graphicsRendered);
+         }
+      };
+   }
 
-        graphicsToRender.set(regionMeshViews);
-    }
+   public void setOpacity(double newOpacity)
+   {
+      opacity.set(newOpacity);
+   }
 
-    public Node getRoot()
-    {
-        return root;
-    }
+   public void start()
+   {
+      renderMeshAnimation.start();
+   }
+
+   public void stop()
+   {
+      renderMeshAnimation.stop();
+      executorService.shutdownNow();
+   }
+
+   public void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
+   {
+      executorService.submit(() -> buildMeshAndMaterial(planarRegionsList));
+   }
+
+   public void setVisibile(boolean visible)
+   {
+      this.show.set(visible);
+   }
+
+   private void buildMeshAndMaterial(PlanarRegionsList planarRegionsList)
+   {
+      if (VERBOSE)
+         LogTools.info("Creating mesh and material for new planar regions.", this);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
+      List<MeshView> regionMeshViews = new ArrayList<>();
+
+      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
+      {
+         JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+
+         int regionId = planarRegion.getRegionId();
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, true);
+
+         for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
+         {
+            ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
+            meshBuilder.addPolygon(transformToWorld, convexPolygon2d);
+         }
+
+         MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
+         regionMeshView.setMaterial(new PhongMaterial(IdMappedColorFunction.INSTANCE.apply(regionId)));
+         regionMeshViews.add(regionMeshView);
+      }
+
+      graphicsToRender.set(regionMeshViews);
+   }
+
+   public Node getRoot()
+   {
+      return root;
+   }
 }
