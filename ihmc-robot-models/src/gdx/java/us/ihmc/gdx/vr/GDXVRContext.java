@@ -46,6 +46,11 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -792,6 +797,7 @@ public class GDXVRContext implements Disposable {
 		private long buttons = 0;
 		private final VRControllerState state = VRControllerState.create();
 		private final ModelInstance modelInstance;
+		private String name;
 		
 		// tracker space
 		private final Vector3 position = new Vector3();
@@ -804,10 +810,15 @@ public class GDXVRContext implements Disposable {
 		private final Vector3 xAxisWorld = new Vector3();
 		private final Vector3 yAxisWorld = new Vector3();
 		private final Vector3 zAxisWorld = new Vector3();
-		
+
+		private final Matrix4 worldTransformGDX = new Matrix4();
+		private final AffineTransform worldTransformEuclid = new AffineTransform();
+		private final PoseReferenceFrame referenceFrame;
+		private final YawPitchRoll toZUpXForward = new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0));
+
 		private final Vector3 vecTmp = new Vector3();
 		private final Matrix4 matTmp = new Matrix4();
-		
+
 		VRDevice(VRDevicePose pose, VRDeviceType type, VRControllerRole role) {
 			this.pose = pose;
 			this.type = type;
@@ -815,6 +826,11 @@ public class GDXVRContext implements Disposable {
 			Model model = loadRenderModel(getStringProperty(VRDeviceProperty.RenderModelName_String));			
 			this.modelInstance = model != null ? new ModelInstance(model) : null;
 			if (model != null) this.modelInstance.transform.set(pose.transform);
+
+			String roleName = role == VRControllerRole.LeftHand ? role.name() : "";
+			roleName += role == VRControllerRole.RightHand ? role.name() : "";
+			name = type.name() + roleName;
+			referenceFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
 		}			
 
 		/**
@@ -840,6 +856,19 @@ public class GDXVRContext implements Disposable {
 			xAxisWorld.set(xAxis).mul(matTmp);
 			yAxisWorld.set(yAxis).mul(matTmp);
 			zAxisWorld.set(zAxis).mul(matTmp);
+
+			worldTransformGDX.idt()
+			                 .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
+			                 .mul(trackerSpaceToWorldspaceRotationOffset)
+			                 .mul(pose.transform);
+			GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
+			worldTransformEuclid.appendOrientation(toZUpXForward);
+			GDXTools.toGDX(worldTransformEuclid, worldTransformGDX);
+
+			referenceFrame.setX(worldTransformEuclid.getTranslation().getX());
+			referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
+			referenceFrame.setZ(worldTransformEuclid.getTranslation().getZ());
+			referenceFrame.setOrientationAndUpdate(worldTransformEuclid.getRotationView());
 		}
 		
 		/**
@@ -869,7 +898,17 @@ public class GDXVRContext implements Disposable {
 		public Vector3 getDirection(Space space) {
 			return space == Space.Tracker ? zAxis : zAxisWorld;
 		}
-		
+
+		public PoseReferenceFrame getReferenceFrame()
+		{
+			return referenceFrame;
+		}
+
+		public Matrix4 getWorldTransformGDX()
+		{
+			return worldTransformGDX;
+		}
+
 		/**
 		 * @return the {@link VRDeviceType}
 		 */

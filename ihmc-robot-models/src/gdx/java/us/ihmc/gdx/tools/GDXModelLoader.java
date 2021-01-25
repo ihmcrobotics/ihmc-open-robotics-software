@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;

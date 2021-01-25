@@ -15,8 +15,8 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.gdx.GDXMeshGraphicTools;
-import us.ihmc.gdx.GDXMultiColorMeshBuilder;
+import us.ihmc.gdx.mesh.GDXMeshGraphicTools;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.mesh.GDXIDMappedColorFunction;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -49,6 +49,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
       if (toRender != null)
       {
          toRender.run();
+         toRender = null;
       }
    }
 
