@@ -10,7 +10,6 @@ import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
@@ -20,7 +19,6 @@ public class MPTCGainsCalculator
    private final RigidBodyBasics rootBody;
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final CompositeRigidBodyMassMatrixCalculator inertiaMatrixCalculator;
-   private final CoriolisCalculator coriolisCalculator;
    private final JointIndexHandler jointIndexHandler;
    private final int numberOfDoFs;
 
@@ -31,7 +29,7 @@ public class MPTCGainsCalculator
       jointIndexHandler = new JointIndexHandler(joints);
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       inertiaMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
-      coriolisCalculator = new CoriolisCalculator(rootBody);
+      inertiaMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
    }
 
    private final DMatrixRMaj proportionalGains = new DMatrixRMaj(6, 6);
@@ -45,7 +43,6 @@ public class MPTCGainsCalculator
    public void computeMPTCGains(PID3DGains angularGains, PID3DGains linearGains, RigidBodyBasics endEffector, ReferenceFrame controlFrame)
    {
       inertiaMatrixCalculator.reset();
-      coriolisCalculator.compute();
 
       proportionalGains.zero();
       derivativeGains.zero();
@@ -105,10 +102,10 @@ public class MPTCGainsCalculator
     */
    private DMatrixRMaj computeEndEffectorInertiaMatrix(RigidBodyBasics endEffector, ReferenceFrame controlFrame)
    {
-      DMatrixRMaj M = computeEndEffectorInertiaMatrixInverse(endEffector, controlFrame);
-      DMatrixRMaj M_inv = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
-      CommonOps_DDRM.pinv(M, M_inv);
-      return M_inv;
+      DMatrixRMaj Mk_inv = computeEndEffectorInertiaMatrixInverse(endEffector, controlFrame);
+      DMatrixRMaj Mk = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
+      CommonOps_DDRM.pinv(Mk_inv, Mk);
+      return Mk;
    }
 
    /**
@@ -118,9 +115,10 @@ public class MPTCGainsCalculator
     */
    private DMatrixRMaj computeEndEffectorInertiaMatrixInverse(RigidBodyBasics endEffector, ReferenceFrame controlFrame)
    {
-      DMatrixRMaj J = computeEndEffectorJacobian(endEffector, controlFrame);
+      DMatrixRMaj Jk = computeEndEffectorJacobian(endEffector, controlFrame);
       DMatrixRMaj M_inv = computeSystemInertiaMatrixInverse();
-      return CommonOps_DDRM.transpose(MatrixTools.multQuad(CommonOps_DDRM.transpose(J, null), M_inv, null), null);
+      DMatrixRMaj Jk_T = CommonOps_DDRM.transpose(Jk, null);
+      return CommonOps_DDRM.transpose(MatrixTools.multQuad(Jk_T, M_inv, null), null);
    }
 
    /**
@@ -163,7 +161,7 @@ public class MPTCGainsCalculator
 
    /**
     * <pre>
-    * Q<sub>k</sub> = J<sub>k</sub> M<sup>-1
+    * Q<sub>k</sub> = J<sub>k</sub> M<sup>-1</sup> C - JDot<sub>k</sub>
     * </pre>
     * 
     * Equation (6)
@@ -204,10 +202,9 @@ public class MPTCGainsCalculator
       return Ck;
    }
 
-   // FIXME failing, this is probably wrong.
    DMatrixRMaj computeSystemCoriolisAndCentrifugalMatrix()
    {
-      return coriolisCalculator.getCoriolis();
+      return inertiaMatrixCalculator.getCoriolisMatrix();
    }
 
    /**
