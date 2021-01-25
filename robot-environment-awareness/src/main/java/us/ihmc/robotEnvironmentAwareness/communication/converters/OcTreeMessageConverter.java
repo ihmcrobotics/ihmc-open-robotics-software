@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
+import controller_msgs.msg.dds.OcTreeKeyListMessage;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -77,5 +78,24 @@ public class OcTreeMessageConverter
    public static OcTreeKeyMessage createOcTreeKeyMessage(OcTreeKeyReadOnly other)
    {
       return createOcTreeKeyMessage(other.getKey(0), other.getKey(1), other.getKey(2));
+   }
+
+   public static OcTreeKeyListMessage createOcTreeDataMessage(NormalOcTree normalOcTree)
+   {
+      OcTreeKeyListMessage ocTreeDataMessage = new OcTreeKeyListMessage();
+      ocTreeDataMessage.setTreeResolution(normalOcTree.getResolution());
+      ocTreeDataMessage.setTreeDepth(normalOcTree.getTreeDepth());
+
+      for (NormalOcTreeNode leaf : normalOcTree)
+      {
+         if (leaf.getDepth() == ocTreeDataMessage.getTreeDepth())
+         {
+            ocTreeDataMessage.getXKeys().add(leaf.getKey0());
+            ocTreeDataMessage.getYKeys().add(leaf.getKey1());
+            ocTreeDataMessage.getZKeys().add(leaf.getKey2());
+         }
+      }
+
+      return ocTreeDataMessage;
    }
 }

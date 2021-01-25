@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__OcTreeDataMessage__idl__
-#define __controller_msgs__msg__OcTreeDataMessage__idl__
+#ifndef __controller_msgs__msg__OcTreeKeyListMessage__idl__
+#define __controller_msgs__msg__OcTreeKeyListMessage__idl__
 
 module controller_msgs
 {
@@ -13,15 +13,14 @@ module controller_msgs
        * This message contains a list of occupied cells in the octree
        * All keys are given at maximum depth
        */
-      @TypeCode(type="controller_msgs::msg::dds_::OcTreeDataMessage_")
-      struct OcTreeDataMessage
+      @TypeCode(type="controller_msgs::msg::dds_::OcTreeKeyListMessage_")
+      struct OcTreeKeyListMessage
       {
-        long maximum_tree_depth;
+        long tree_depth;
         double tree_resolution;
         sequence<long, 5000> x_keys;
         sequence<long, 5000> y_keys;
         sequence<long, 5000> z_keys;
-        sequence<long, 5000> tree_depth;
       };
     };
   };
