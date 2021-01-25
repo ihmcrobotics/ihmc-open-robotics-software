@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
@@ -32,6 +31,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
+
 public class ThreePotatoAngularMomentumCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -39,9 +40,8 @@ public class ThreePotatoAngularMomentumCalculator
    private static final double estimationDt = 0.05;
    private static final int maxSamplesPerSegment = 10;
    private static final int minSamplesPerSegment = 10;
-   private static final double sufficientlyLong = 10.0;
 
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
@@ -68,8 +68,6 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoInteger firstPotatoCurrentSegment = new YoInteger("firstPotatoCurrentSegmentIndex", registry);
 
    private MultipleSegmentPositionTrajectoryGenerator<?> predictedCoMTrajectory;
-   private MultipleWaypointsPositionTrajectoryGenerator predictedSecondPotatoTrajectory;
-   private MultipleWaypointsPositionTrajectoryGenerator predictedThirdPotatoTrajectory;
 
    private final FrameVector3D totalAngularMomentum = new FrameVector3D();
    private final FrameVector3D totalTorque = new FrameVector3D();
@@ -98,9 +96,9 @@ public class ThreePotatoAngularMomentumCalculator
 
    public ThreePotatoAngularMomentumCalculator(double gravityZ,
                                                double potatoMass,
-                                               YoRegistry parentRegistry,
                                                CenterOfMassJacobian centerOfMassJacobian,
                                                SideDependentList<MovingReferenceFrame> soleFrames,
+                                               YoRegistry parentRegistry,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
@@ -173,30 +171,34 @@ public class ThreePotatoAngularMomentumCalculator
       }
       actualModelAngularMomentum.set(totalAngularMomentum);
 
+      MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
+      MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
+
+
       totalAngularMomentum.setToZero();
       totalTorque.setToZero();
 
-      if (time > predictedCoMTrajectory.getEndTime() || time > predictedSecondPotatoTrajectory.getLastWaypointTime()
-          || time > predictedThirdPotatoTrajectory.getLastWaypointTime())
+      if (time > predictedCoMTrajectory.getEndTime() || time > predictedLeftFootTrajectory.getLastWaypointTime()
+          || time > predictedRightFootTrajectory.getLastWaypointTime())
          return;
 
       predictedCoMTrajectory.compute(time);
-      predictedSecondPotatoTrajectory.compute(time);
-      predictedThirdPotatoTrajectory.compute(time);
+      predictedLeftFootTrajectory.compute(time);
+      predictedRightFootTrajectory.compute(time);
 
-      computeAngularMomentumAtInstant(predictedCoMTrajectory, predictedSecondPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
+      computeAngularMomentumAtInstant(predictedCoMTrajectory, predictedLeftFootTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
       totalAngularMomentum.add(angularMomentum);
       totalTorque.add(torque);
-      computeAngularMomentumAtInstant(predictedCoMTrajectory, predictedThirdPotatoTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
+      computeAngularMomentumAtInstant(predictedCoMTrajectory, predictedRightFootTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
       totalAngularMomentum.add(angularMomentum);
       totalTorque.add(torque);
 
       predictedFirstPotatoPosition.set(predictedCoMTrajectory.getPosition());
       predictedFirstPotatoVelocity.set(predictedCoMTrajectory.getVelocity());
-      predictedSecondPotatoPosition.set(predictedSecondPotatoTrajectory.getPosition());
-      predictedSecondPotatoVelocity.set(predictedSecondPotatoTrajectory.getVelocity());
-      predictedThirdPotatoPosition.set(predictedThirdPotatoTrajectory.getPosition());
-      predictedThirdPotatoVelocity.set(predictedThirdPotatoTrajectory.getVelocity());
+      predictedSecondPotatoPosition.set(predictedLeftFootTrajectory.getPosition());
+      predictedSecondPotatoVelocity.set(predictedLeftFootTrajectory.getVelocity());
+      predictedThirdPotatoPosition.set(predictedRightFootTrajectory.getPosition());
+      predictedThirdPotatoVelocity.set(predictedRightFootTrajectory.getVelocity());
 
       firstPotatoCurrentSegment.set(predictedCoMTrajectory.getCurrentSegmentIndex());
       firstPotatoCurrentTime.set(predictedCoMTrajectory.getCurrentSegmentTrajectoryTime());
@@ -218,23 +220,13 @@ public class ThreePotatoAngularMomentumCalculator
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
 
+
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
    {
-      computeAngularMomentumTrajectories(timeIntervals,
-                                         comTrajectories,
-                                         footTrajectoryPredictor.getPredictedLeftFootTrajectories(),
-                                         footTrajectoryPredictor.getPredictedRightFootTrajectories());
-   }
-
-   public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
-                                                  MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
-                                                  MultipleWaypointsPositionTrajectoryGenerator secondPotatoTrajectories,
-                                                  MultipleWaypointsPositionTrajectoryGenerator thirdPotatoTrajectories)
-   {
       this.predictedCoMTrajectory = comTrajectories;
-      this.predictedSecondPotatoTrajectory = secondPotatoTrajectories;
-      this.predictedThirdPotatoTrajectory = thirdPotatoTrajectories;
+      MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
+      MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
 
       angularMomentumTrajectory.clear();
       heightScaledAngularMomentumTrajectory.clear();
@@ -261,7 +253,7 @@ public class ThreePotatoAngularMomentumCalculator
          {
             double time = timeInInterval + timeInterval.getStartTime();
 
-            if (time > secondPotatoTrajectories.getLastWaypointTime() && time > thirdPotatoTrajectories.getLastWaypointTime()
+            if (time > predictedLeftFootTrajectory.getLastWaypointTime() && time > predictedRightFootTrajectory.getLastWaypointTime()
                 || time > comTrajectories.getEndTime())
             {
                break;
@@ -271,19 +263,19 @@ public class ThreePotatoAngularMomentumCalculator
             totalAngularMomentum.setToZero();
             totalTorque.setToZero();
 
-            if (time <= secondPotatoTrajectories.getLastWaypointTime())
+            if (time <= predictedLeftFootTrajectory.getLastWaypointTime())
             {
-               secondPotatoTrajectories.compute(time);
-               computeAngularMomentumAtInstant(comTrajectories, secondPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
+               predictedLeftFootTrajectory.compute(time);
+               computeAngularMomentumAtInstant(comTrajectories, predictedLeftFootTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
                totalAngularMomentum.add(angularMomentum);
 
                totalTorque.add(torque);
             }
 
-            if (time <= thirdPotatoTrajectories.getLastWaypointTime())
+            if (time <= predictedRightFootTrajectory.getLastWaypointTime())
             {
-               thirdPotatoTrajectories.compute(time);
-               computeAngularMomentumAtInstant(comTrajectories, thirdPotatoTrajectories, potatoMass.getDoubleValue(), angularMomentum, torque);
+               predictedRightFootTrajectory.compute(time);
+               computeAngularMomentumAtInstant(comTrajectories, predictedRightFootTrajectory, potatoMass.getDoubleValue(), angularMomentum, torque);
                totalAngularMomentum.add(angularMomentum);
 
                totalTorque.add(torque);
@@ -295,17 +287,6 @@ public class ThreePotatoAngularMomentumCalculator
             scaledAngularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
          }
 
-         /*
-         if (false)//i > 0)
-         {
-            FixedFramePolynomialEstimator3D previousEstimator = this.angularMomentumEstimator.get(i - 1);
-            previousEstimator.compute(timeIntervals.get(i - 1).getTimeInterval().getDuration());
-
-            angularMomentumEstimator.addConstraintPosition(0.0, previousEstimator.getPosition());
-         }
-
-          */
-
          angularMomentumEstimator.initialize();
          scaledAngularMomentumEstimator.initialize();
 
@@ -316,7 +297,7 @@ public class ThreePotatoAngularMomentumCalculator
       angularMomentumTrajectory.initialize();
       heightScaledAngularMomentumTrajectory.initialize();
 
-      visualize(comTrajectories, secondPotatoTrajectories, thirdPotatoTrajectories);
+      visualize(comTrajectories, predictedLeftFootTrajectory, predictedRightFootTrajectory);
    }
 
    private void visualize(MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
