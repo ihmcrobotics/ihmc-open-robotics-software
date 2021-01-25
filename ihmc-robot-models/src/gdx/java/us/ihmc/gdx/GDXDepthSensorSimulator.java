@@ -3,144 +3,192 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
-import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
-import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLOnlyTextureData;
+import com.badlogic.gdx.graphics.glutils.*;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.internal.ImGui;
+import org.lwjgl.opengl.GL32;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Random;
-
-import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_COMPONENT16;
 
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
  */
 public class GDXDepthSensorSimulator
 {
-   private float fieldOfViewY;
-   private float viewportWidth;
-   private float viewportHeight;
+   private final String depthWindowName = "Depth";
+   private final String colorWindowName = "Color";
+
+   private final Random random = new Random();
+
+   private final float fieldOfViewY;
+   private final int imageWidth;
+   private final int imageHeight;
+   private final float minRange;
+   private final float maxRange;
+   private final Vector3 depthPoint = new Vector3();
+
    private PerspectiveCamera camera;
-   private int framebufferId;
-   private DepthShaderProvider depthShaderProvider;
-
    private ModelBatch modelBatch;
-   private int depthTextureId;
    private ScreenViewport viewport;
-   private FrameBuffer frameBuffer;
-   private FloatFrameBuffer floatframeBuffer;
+   private SensorFrameBuffer frameBuffer;
+   private RecyclingArrayList<Point3D32> points;
 
-   private Point3D32[] points;
+   private Pixmap depthWindowPixmap;
+   private Texture depthWindowTexture;
 
-   public GDXDepthSensorSimulator(float fieldOfViewY, float viewportWidth, float viewportHeight)
+   private ByteBuffer depthByteBuffer;
+   private FloatBuffer depthFloatBuffer;
+
+   public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
-      this.fieldOfViewY = fieldOfViewY;
-      this.viewportWidth = viewportWidth;
-      this.viewportHeight = viewportHeight;
+      this.fieldOfViewY = (float) fieldOfViewY;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
+      this.minRange = (float) minRange;
+      this.maxRange = (float) maxRange;
    }
 
    public void create()
    {
-      camera = new PerspectiveCamera(fieldOfViewY, viewportWidth, viewportHeight);
+      camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
+      camera.near = minRange;
+      camera.far = maxRange;
       viewport = new ScreenViewport(camera);
 
-      DepthShader.Config depthShaderConfig = new DepthShader.Config();
-//      depthShaderConfig.numDirectionalLights = 0;
-//      depthShaderConfig.numPointLights = 0;
-//      depthShaderConfig.numSpotLights = 0;
-//      depthShaderConfig.numBones = 0;
-      depthShaderConfig.defaultCullFace = -1;
-      depthShaderConfig.defaultAlphaTest = 0.5f;
-//      depthShaderConfig.vertexShader = Gdx.files.classpath("depthsensor.vertex.glsl").readString();
-//      depthShaderConfig.fragmentShader = Gdx.files.classpath("depthsensor.fragment.glsl").readString();
-      //      config.depthBufferOnly = true;
-      depthShaderProvider = new DepthShaderProvider(depthShaderConfig);
+      modelBatch = new ModelBatch();
 
-      modelBatch = new ModelBatch(depthShaderProvider);
-//      modelBatch = new ModelBatch();
+      SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
+      frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
+      frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT32F, GL30.GL_FLOAT);
+      frameBuffer = frameBufferBuilder.build();
 
-      boolean hasDepth = true;
-      boolean hasStencil = true;
-      frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, (int) viewportWidth, (int) viewportHeight, hasDepth, hasStencil);
-//      GLFrameBuffer.FloatFrameBufferBuilder depthBufferBuilder = new GLFrameBuffer.FloatFrameBufferBuilder((int) viewportWidth, (int) viewportHeight);
-//      frameBuffer = new FloatFrameBuffer()FrameBuffer(depthBufferBuilder);
-      floatframeBuffer = new FloatFrameBuffer((int) viewportWidth, (int) viewportHeight, true);
+      depthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      depthFloatBuffer = depthByteBuffer.asFloatBuffer();
+
+      depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+      depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
+
+      points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
    }
 
-   public void render(GDX3DApplication gdx3DApplication)
+   public void render(GDX3DSceneManager sceneManager)
    {
       frameBuffer.begin();
-      floatframeBuffer.begin();
-      gdx3DApplication.glClearGrayscale();
 
-      Random random = new Random();
-//      viewport.getCamera().translate(-random.nextFloat(), -random.nextFloat(), -random.nextFloat());
-//      viewport.getCamera().position
+      float clear = 0.0f;
+      Gdx.gl.glClearColor(clear, clear, clear, 1.0f);
+      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
-      viewport.update((int) viewportWidth, (int) viewportHeight);
+      viewport.update(imageWidth, imageHeight);
       modelBatch.begin(camera);
+      Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
 
-      Gdx.gl.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
-
-      gdx3DApplication.renderRegisteredObjectsWithEnvironment(modelBatch);
+      sceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
-      int width = frameBuffer.getWidth();
-      int height = frameBuffer.getHeight();
-//      frameBuffer.getDepthBufferHandle();
-      Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0, 0, width, height);
-
-//      ByteBuffer underlyingBuffer = frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels();
-//      Gdx.gl.glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT16, GL32.GL_HIGH_FLOAT, underlyingBuffer);
+      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
+      depthByteBuffer.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, depthByteBuffer);
 
       frameBuffer.end();
-      floatframeBuffer.end();
 
-      points = new Point3D32[width * height];
+      points.clear();
 
-
-//            GLOnlyTextureData textureData = (GLOnlyTextureData) frameBuffer.getColorBufferTexture().getTextureData();
-//      Pixmap pixmap = textureData.consumePixmap();
-      for (int y = 0; y < height; y++)
+//      depthByteBuffer.rewind();
+      depthFloatBuffer.rewind();
+      for (int y = 0; y < imageHeight; y++)
       {
-         for (int x = 0; x < width; x++)
+         for (int x = 0; x < imageWidth; x++)
          {
-            int color = pixmap.getPixel(x, y);
-            float depthReading = new Color(color).r;
-            Vector3 worldRangePoint = viewport.unproject(new Vector3(x, y, depthReading));
-            int arrayIndex = y * width + x;
-            int arrayLength = width * height;
-            if (arrayIndex < arrayLength)
+            float depthReading = depthFloatBuffer.get();
+
+            float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
+            float pastNear = clippedDepth - camera.near;
+            float worldRange = camera.far - camera.near;
+            float colorRange = 1.0f;
+            float grayscale = pastNear * colorRange / worldRange;
+            grayscale = depthReading * colorRange / camera.far;
+            int flippedY = imageHeight - y;
+
+            depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+
+            if (depthReading > camera.near && depthReading < camera.far)
             {
-               points[arrayIndex] = new Point3D32(worldRangePoint.x, worldRangePoint.y, worldRangePoint.z);
-               points[arrayIndex].addZ(random.nextDouble() * 0.007);
-            }
-            else
-            {
-               System.out.println("why");
+               depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
+               depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
+               depthPoint.z = 2.0f * depthReading - 1.0f;
+               depthPoint.prj(camera.invProjectionView);
+
+               Point3D32 point = points.add();
+               GDXTools.toEuclid(depthPoint, point);
+               point.addZ(random.nextDouble() * 0.007); // add some noise
             }
          }
       }
-      pixmap.dispose();
 
-//      frameBuffer.getColorBufferTexture().getTextureData().consumePixmap().getPixels().
+      depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+   }
 
-      // bind original framebuffer?
+   public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
+   {
+      ImGui.begin(depthWindowName);
+
+      float posX = ImGui.getWindowPosX();
+      float posY = ImGui.getWindowPosY();
+      float sizeX = ImGui.getWindowSizeX();
+      float sizeY = ImGui.getWindowSizeY();
+
+      int textureId = depthWindowTexture.getTextureObjectHandle();
+
+      ImGui.getWindowDrawList().addImage(textureId, posX, posY, posX + sizeX, posY + sizeY);
+
+      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
+      ImGui.end();
+   }
+
+   public void renderImGuiColorWindow(GDX3DSceneManager sceneManager)
+   {
+      ImGui.begin(colorWindowName);
+
+      float posX = ImGui.getWindowPosX();
+      float posY = ImGui.getWindowPosY();
+      float sizeX = ImGui.getWindowSizeX();
+      float sizeY = ImGui.getWindowSizeY();
+
+      int textureId = frameBuffer.getColorTexture().getTextureObjectHandle();
+
+      ImGui.getWindowDrawList().addImage(textureId, posX, posY + sizeY, posX + sizeX, posY);
+
+      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
+      ImGui.end();
    }
 
    public void dispose()
    {
-      Gdx.gl.glDeleteFramebuffer(framebufferId);
-      Gdx.gl.glDeleteTexture(depthTextureId);
+      frameBuffer.dispose();
+      depthWindowTexture.dispose();
+      modelBatch.dispose();
+   }
+
+   public void setCameraWorldTransform(Matrix4 worldTransform)
+   {
+      camera.position.setZero();
+      camera.up.set(0.0f, 0.0f, 1.0f);
+      camera.direction.set(1.0f, 0.0f, 0.0f);
+      camera.transform(worldTransform);
    }
 
    public PerspectiveCamera getCamera()
@@ -148,8 +196,18 @@ public class GDXDepthSensorSimulator
       return camera;
    }
 
-   public Point3D32[] getPoints()
+   public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
+   }
+
+   public String getDepthWindowName()
+   {
+      return depthWindowName;
+   }
+
+   public String getColorWindowName()
+   {
+      return colorWindowName;
    }
 }

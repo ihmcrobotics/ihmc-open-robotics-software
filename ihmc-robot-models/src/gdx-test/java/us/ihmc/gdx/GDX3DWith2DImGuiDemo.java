@@ -10,6 +10,9 @@ import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -17,111 +20,108 @@ public class GDX3DWith2DImGuiDemo
 {
    private ModelInstance boxes;
    private ModelInstance coordinateFrame;
-
+   private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+   private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+   private String glslVersion;
+   private long windowHandle;
 
    public GDX3DWith2DImGuiDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
-   }
-
-   class PrivateGDXApplication extends GDX3DApplication
-   {
-      private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
-      private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-      private String glslVersion;
-      private long windowHandle;
-
-      @Override
-      public void create()
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         super.create();
-
-         coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-         boxes = new BoxesDemoModel().newInstance();
-
-         GLFWErrorCallback.createPrint(System.err).set();
-
-         if (!glfwInit())
+         @Override
+         public void create()
          {
-            throw new IllegalStateException("Unable to initialize GLFW");
-         }
-//         glfwDefaultWindowHints();
-//         if (SystemUtils.IS_OS_MAC) {
-//            glslVersion = "#version 150";
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-//            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-//         } else {
-//            glslVersion = "#version 130";
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-//         }
+            sceneManager.create();
 
-//         GL.createCapabilities();
+            coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+            boxes = new BoxesDemoModel().newInstance();
 
-         ImGui.createContext();
+            GLFWErrorCallback.createPrint(System.err).set();
 
-         final ImGuiIO io = ImGui.getIO();
-         io.setIniFilename(null); // We don't want to save .ini file
-//         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);  // Enable Keyboard Controls
-//         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);      // Enable Docking
-//         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);    // Enable Multi-Viewport / Platform Windows
-//         io.setConfigViewportsNoTaskBarIcon(true);
+            if (!glfwInit())
+            {
+               throw new IllegalStateException("Unable to initialize GLFW");
+            }
+            //         glfwDefaultWindowHints();
+            //         if (SystemUtils.IS_OS_MAC) {
+            //            glslVersion = "#version 150";
+            //            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            //            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+            //            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+            //            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+            //         } else {
+            //            glslVersion = "#version 130";
+            //            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            //            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+            //         }
 
-         ImGuiTools.setupFonts(io);
+            //         GL.createCapabilities();
 
-         windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
+            ImGui.createContext();
 
-         imGuiGlfw.init(windowHandle, true);
-         imGuiGl3.init(glslVersion);
-      }
+            final ImGuiIO io = ImGui.getIO();
+            io.setIniFilename(null); // We don't want to save .ini file
+            //         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);  // Enable Keyboard Controls
+            //         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);      // Enable Docking
+            //         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);    // Enable Multi-Viewport / Platform Windows
+            //         io.setConfigViewportsNoTaskBarIcon(true);
 
-      @Override
-      public void render()
-      {
-         Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-         Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+            ImGuiTools.setupFonts(io);
 
-         renderBefore();
+            windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
 
-         getModelBatch().render(coordinateFrame, getEnvironment());
-         getModelBatch().render(boxes, getEnvironment());
-
-         renderAfter();
-
-         imGuiGlfw.newFrame();
-         ImGui.newFrame();
-
-         ImGui.begin("Window");
-         ImGui.button("I'm a Button!");
-
-         float[] values = new float[100];
-         for (int i = 0; i < 100; i++)
-         {
-            values[i] = i;
+            imGuiGlfw.init(windowHandle, true);
+            imGuiGl3.init(glslVersion);
          }
 
-         ImGui.plotLines("Histogram", values, 100);
+         @Override
+         public void render()
+         {
+            Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+            Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
-         ImGui.end();
+            sceneManager.renderBefore();
 
-         ImGui.render();
-         imGuiGl3.renderDrawData(ImGui.getDrawData());
+            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
+            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
 
-         glfwSwapBuffers(windowHandle);
-         glfwPollEvents();
-      }
+            sceneManager.renderAfter();
 
-      @Override
-      public void dispose()
-      {
-         super.dispose();
-         imGuiGl3.dispose();
-         imGuiGlfw.dispose();
+            imGuiGlfw.newFrame();
+            ImGui.newFrame();
 
-         ImGui.destroyContext();
-      }
+            ImGui.begin("Window");
+            ImGui.button("I'm a Button!");
+
+            float[] values = new float[100];
+            for (int i = 0; i < 100; i++)
+            {
+               values[i] = i;
+            }
+
+            ImGui.plotLines("Histogram", values, 100);
+
+            ImGui.end();
+
+            ImGui.render();
+            imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+            glfwSwapBuffers(windowHandle);
+            glfwPollEvents();
+         }
+
+         @Override
+         public void dispose()
+         {
+            sceneManager.dispose();
+            imGuiGl3.dispose();
+            imGuiGlfw.dispose();
+
+            ImGui.destroyContext();
+         }
+      }, getClass().getSimpleName(), 1100, 800);
    }
 
    public static void main(String[] args)

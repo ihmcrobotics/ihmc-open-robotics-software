@@ -7,6 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 
 public class GDX3DWith2DUIDemo
 {
@@ -18,66 +21,65 @@ public class GDX3DWith2DUIDemo
 
    public GDX3DWith2DUIDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new PrivateGDXApplication(), "GDX3DDemo", 1100, 800);
-   }
-
-   class PrivateGDXApplication extends GDX3DApplication
-   {
-      @Override
-      public void create()
+      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         super.create();
+         @Override
+         public void create()
+         {
+            sceneManager.create();
 
-         setViewportBounds(0,
-                           (int) (getCurrentWindowHeight() * 1.0 / 4.0),
-                           (int) (getCurrentWindowWidth() * 1.0),
-                           (int) (getCurrentWindowHeight() * 3.0 / 4.0));
+            sceneManager.setViewportBounds(0,
+                              (int) (sceneManager.getCurrentWindowHeight() * 1.0 / 4.0),
+                              (int) (sceneManager.getCurrentWindowWidth() * 1.0),
+                              (int) (sceneManager.getCurrentWindowHeight() * 3.0 / 4.0));
 
-         coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-         boxes = new BoxesDemoModel().newInstance();
+            coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+            boxes = new BoxesDemoModel().newInstance();
 
-         stage = new Stage(new ScreenViewport());
-         addInputProcessor(stage);
+            stage = new Stage(new ScreenViewport());
+            sceneManager.addInputProcessor(stage);
 
-         table = new Table();
-         table.setFillParent(true);
-         //      table.setDebug(true);
-         stage.addActor(table);
+            table = new Table();
+            table.setFillParent(true);
+            //      table.setDebug(true);
+            stage.addActor(table);
 
-         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+            Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-         table.left();
-         table.top();
-         TextButton button1 = new TextButton("Button 1", skin);
-         table.add(button1);
+            table.left();
+            table.top();
+            TextButton button1 = new TextButton("Button 1", skin);
+            table.add(button1);
 
-         TextButton button2 = new TextButton("Button 2", skin);
-         table.add(button2);
-      }
+            TextButton button2 = new TextButton("Button 2", skin);
+            table.add(button2);
+         }
 
-      @Override
-      public void render()
-      {
-         renderBefore();
+         @Override
+         public void render()
+         {
+            sceneManager.renderBefore();
 
-         getModelBatch().render(coordinateFrame, getEnvironment());
-         getModelBatch().render(boxes, getEnvironment());
+            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
+            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
 
-         renderAfter();
+            sceneManager.renderAfter();
 
-         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
-         stage.getViewport().update(getCurrentWindowWidth(), getCurrentWindowHeight() * 1 / 4, true);
+            Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
+            stage.getViewport().update(sceneManager.getCurrentWindowWidth(), sceneManager.getCurrentWindowHeight() * 1 / 4, true);
 
-         stage.act(Gdx.graphics.getDeltaTime());
-         stage.draw();
-      }
+            stage.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
+         }
 
-      @Override
-      public void dispose()
-      {
-         super.dispose();
-         stage.dispose();
-      }
+         @Override
+         public void dispose()
+         {
+            sceneManager.dispose();
+            stage.dispose();
+         }
+      }, getClass().getSimpleName(), 1100, 800);
    }
 
    public static void main(String[] args)

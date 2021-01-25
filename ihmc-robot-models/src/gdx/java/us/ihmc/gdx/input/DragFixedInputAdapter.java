@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.InputProcessor;
 
