@@ -1,15 +1,22 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
@@ -17,10 +24,16 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
 
 public class ECMPTrajectoryCalculator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
    private final double mass;
    private final double gravity;
    private final double weight;
+
+   private static final int maxPoints = 20;
+
+   private final List<YoFrameVector2D> ecmpStartOffsets = new ArrayList<>();
+   private final List<YoFrameVector2D> ecmpEndOffsets = new ArrayList<>();
 
    public ECMPTrajectoryCalculator(double mass, double gravity, YoRegistry parentRegistry)
    {
@@ -28,6 +41,18 @@ public class ECMPTrajectoryCalculator
       this.gravity = Math.abs(gravity);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      for (int i = 0; i < maxPoints; i++)
+      {
+         YoFrameVector2D ecmpStartOffset = new YoFrameVector2D("ecmpStartOffset" + i, worldFrame, registry);
+         YoFrameVector2D ecmpEndOffset = new YoFrameVector2D("ecmpEndOffset" + i, worldFrame, registry);
+
+         ecmpStartOffset.setToNaN();
+         ecmpEndOffset.setToNaN();
+
+         ecmpStartOffsets.add(ecmpStartOffset);
+         ecmpEndOffsets.add(ecmpEndOffset);
+      }
 
       parentRegistry.addChild(registry);
 
@@ -45,7 +70,8 @@ public class ECMPTrajectoryCalculator
          contactStateProviders.add().set(copTrajectories.get(i));
       }
 
-      for (int i = 0; i < copTrajectories.size(); i++)
+      int i = 0;
+      for (; i < copTrajectories.size(); i++)
       {
          ContactStateProvider copTrajectory = copTrajectories.get(i);
          double startTime = Math.min(copTrajectory.getTimeInterval().getStartTime(), sufficientlyLong);
@@ -58,19 +84,34 @@ public class ECMPTrajectoryCalculator
 
          desiredAngularMomentumTrajectories.compute(startTime);
 
-         computeECMPPosition(copTrajectory.getECMPStartPosition(), desiredAngularMomentumTrajectories.getVelocity(), ecmpPosition);
+         FixedFrameVector2DBasics startOffset = ecmpStartOffsets.get(i);
+         FixedFrameVector2DBasics endOffset = ecmpEndOffsets.get(i);
+
+         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), startOffset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         ecmpPosition.set(copTrajectory.getECMPStartPosition());
+         ecmpPosition.add(startOffset.getX(), startOffset.getY(), 0.0);
 
          eCMPTrajectory.setStartCopPosition(ecmpPosition);
          eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
 
          desiredAngularMomentumTrajectories.compute(endTime);
 
-         computeECMPPosition(copTrajectory.getECMPEndPosition(), desiredAngularMomentumTrajectories.getVelocity(), ecmpPosition);
+         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), endOffset);
          computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         ecmpPosition.set(copTrajectory.getECMPEndPosition());
+         ecmpPosition.add(endOffset.getX(), endOffset.getY(), 0.0);
 
          eCMPTrajectory.setEndCopPosition(ecmpPosition);
          eCMPTrajectory.setEndCopVelocity(ecmpVelocity);
+      }
+
+      for (; i < maxPoints; i++)
+      {
+         ecmpStartOffsets.get(i).setToNaN();
+         ecmpEndOffsets.get(i).setToNaN();
       }
    }
 
@@ -82,12 +123,11 @@ public class ECMPTrajectoryCalculator
       copPositionToPack.add(desiredECMPPosition);
    }
 
-   public void computeECMPPosition(FramePoint3DReadOnly desiredCopPosition, FrameVector3DReadOnly desiredAngularMomentumRate, FixedFramePoint3DBasics ecmpPositionToPack)
+   private void computeECMPOffset(FrameVector3DReadOnly desiredAngularMomentumRate, FixedFrameVector2DBasics ecmpOffsetToPack)
    {
-      ecmpPositionToPack.setX(desiredAngularMomentumRate.getY());
-      ecmpPositionToPack.setY(-desiredAngularMomentumRate.getX());
-      ecmpPositionToPack.scale(1.0 / weight);
-      ecmpPositionToPack.add(desiredCopPosition);
+      ecmpOffsetToPack.setX(desiredAngularMomentumRate.getY());
+      ecmpOffsetToPack.setY(-desiredAngularMomentumRate.getX());
+      ecmpOffsetToPack.scale(1.0 / weight);
    }
 
    public void computeECMPVelocity(FrameVector3DReadOnly desiredCopVelocity, FrameVector3DReadOnly desiredAngularMomentumAcceleration, FixedFrameVector3DBasics ecmpVelocityToPack)

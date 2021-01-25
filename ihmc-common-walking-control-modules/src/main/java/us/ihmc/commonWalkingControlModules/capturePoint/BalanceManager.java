@@ -53,7 +53,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -228,8 +227,8 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(gravityZ, 7.5, registry, controllerToolbox.getCenterOfMassJacobian(),
-                                                                           controllerToolbox.getReferenceFrames().getSoleFrames(), yoGraphicsListRegistry);
+      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(gravityZ, 7.5, controllerToolbox.getCenterOfMassJacobian(),
+                                                                           controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -298,7 +297,7 @@ public class BalanceManager
       if (yoGraphicsListRegistry != null)
       {
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-//         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
+         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
