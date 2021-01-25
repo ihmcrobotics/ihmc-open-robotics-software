@@ -280,7 +280,7 @@ public class BalanceManager
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
-      ecmpTrajectory = new ECMPTrajectoryCalculator(fullRobotModel.getTotalMass(), controllerToolbox.getGravityZ());
+      ecmpTrajectory = new ECMPTrajectoryCalculator(fullRobotModel.getTotalMass(), controllerToolbox.getGravityZ(), registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -448,10 +448,14 @@ public class BalanceManager
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoDesiredCoMPosition.set(desiredCoM2d, comTrajectoryPlanner.getDesiredCoMPosition().getZ());
-      yoPerfectCoP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
       yoPerfectCoPVelocity.set(comTrajectoryPlanner.getDesiredVRPVelocity());
 
-      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
+      yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
+      if (computeAngularMomentum)
+         ecmpTrajectory.computeCoPPosition(yoPerfectCMP, angularMomentumCalculator.getDesiredAngularMomentumRate(), yoPerfectCoP);
+      else
+         yoPerfectCoP.set(yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -480,8 +484,8 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
-      linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
-      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
+      linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
       linearMomentumRateControlModuleInput.setPerfectCoP(perfectCoP2d);
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
@@ -526,17 +530,25 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
-      if (copTrajectoryState.getNumberOfFootstep() > 0 && computeAngularMomentum)
+      if (computeAngularMomentum)
       {
          if (!comTrajectoryPlanner.hasTrajectories())
          {
-            DynamicPlanningFootstep footstep = copTrajectoryState.getFootstep(0);
-            PlanningTiming timing = copTrajectoryState.getTiming(0);
-            comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
-         }
+            if (copTrajectoryState.getNumberOfFootstep() > 0)
+            {
+               DynamicPlanningFootstep footstep = copTrajectoryState.getFootstep(0);
+               PlanningTiming timing = copTrajectoryState.getTiming(0);
+               comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
+            }
+            else
+            {
+               centerOfMassPosition.setToZero(centerOfMassFrame);
+               centerOfMassPosition.changeFrame(worldFrame);
+               centerOfMassPosition.subZ(comTrajectoryPlanner.getNominalCoMHeight());
 
-         if (comTrajectoryPlanner.getCoMTrajectory().getCurrentNumberOfSegments() < 1)
-            LogTools.info("what?");
+               comTrajectoryPlanner.initializeForStep(centerOfMassPosition, Double.POSITIVE_INFINITY);
+            }
+         }
 
          angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
          angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
@@ -556,7 +568,8 @@ public class BalanceManager
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
-      angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+      if (computeAngularMomentum)
+         angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
@@ -636,8 +649,9 @@ public class BalanceManager
          return 0.0;
 
       controllerToolbox.getCapturePoint(capturePoint2d);
+      perfectCMP2d.set(yoPerfectCMP);
       double deltaTimeToBeAccounted = swingSpeedUpCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
-                                                                                                            yoPerfectCMP,
+                                                                                                            perfectCMP2d,
                                                                                                             yoFinalDesiredICP,
                                                                                                             capturePoint2d,
                                                                                                             controllerToolbox.getOmega0());

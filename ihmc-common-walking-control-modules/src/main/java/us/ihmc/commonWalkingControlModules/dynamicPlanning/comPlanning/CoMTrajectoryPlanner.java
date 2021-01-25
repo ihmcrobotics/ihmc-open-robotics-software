@@ -190,6 +190,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       tempPosition.set(stepPosition);
       tempPosition.addZ(getNominalCoMHeight());
 
+      stepDuration = Math.min(sufficientlyLong, stepDuration);
       trajectoryHandler.setLinear(currentCoMPosition, tempPosition, omega.getValue(), stepDuration);
    }
 
