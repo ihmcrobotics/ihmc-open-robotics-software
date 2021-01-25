@@ -282,7 +282,7 @@ public class ExperimentalPhysicsEngine
 
       for (InertialMeasurementReader reader : inertialMeasurementReaders)
       {
-         reader.read(dt);
+         reader.read(dt, gravity);
       }
 
       time.add(dt);

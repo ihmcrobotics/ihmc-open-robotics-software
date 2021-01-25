@@ -50,13 +50,13 @@ import us.ihmc.robotics.physics.MultiBodySystemStateReader;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.PhysicsEngineTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotDescription.BallAndSocketJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.robotDescription.BallAndSocketJointDescription;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.BallAndSocketJoint;
@@ -90,8 +90,7 @@ public class ExperimentalSimulation extends Simulation
    private final ExperimentalPhysicsEngine physicsEngine = new ExperimentalPhysicsEngine();
    private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
    private final SCSRobotExternalForcePointWrapper externalForcePointWrapper = new SCSRobotExternalForcePointWrapper();
-   private final SCSRobotIMUSensorReader imuSensorReader = new SCSRobotIMUSensorReader();
-   private final SCSRobotTransformUpdater robotTransformUpdater = new SCSRobotTransformUpdater();
+   private final SCSRobotPhysicsStateUpdater scsRobotPhysicsStateUpdaters = new SCSRobotPhysicsStateUpdater();
 
    private Vector3DReadOnly gravity;
 
@@ -114,7 +113,7 @@ public class ExperimentalSimulation extends Simulation
       super(robotArray, dataBufferSize);
       physicsEngine.addExternalWrenchReader(externalWrenchReader);
       physicsEngine.addExternalWrenchProvider(externalForcePointWrapper);
-      physicsEngine.addInertialMeasurementReader(imuSensorReader);
+      physicsEngine.addInertialMeasurementReader(scsRobotPhysicsStateUpdaters);
    }
 
    public void setGravity(Vector3DReadOnly gravity)
@@ -160,8 +159,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -187,8 +185,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -225,8 +222,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
    }
 
    public void addPreProcessor(Runnable preProcessor)
@@ -256,7 +252,6 @@ public class ExperimentalSimulation extends Simulation
 
       synchronized (getSimulationSynchronizer())
       {
-         robotTransformUpdater.update();
 
          externalWrenchReader.initialize();
          physicsEngine.initialize();
@@ -285,12 +280,12 @@ public class ExperimentalSimulation extends Simulation
       synchronized (getSimulationSynchronizer())
       {
          Robot[] robots = getRobots();
-         robotTransformUpdater.update();
 
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
             robot.update();
+            robot.updateIMUMountAccelerations();
             robot.doControllers();
          }
 
