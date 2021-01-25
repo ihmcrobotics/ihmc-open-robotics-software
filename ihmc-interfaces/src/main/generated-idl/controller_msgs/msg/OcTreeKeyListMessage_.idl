@@ -18,9 +18,11 @@ module controller_msgs
       {
         long tree_depth;
         double tree_resolution;
-        sequence<long, 5000> x_keys;
-        sequence<long, 5000> y_keys;
-        sequence<long, 5000> z_keys;
+        long number_of_keys;
+        /**
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConvterter for info on the compression protocol
+         */
+        sequence<octet, 200000> keys;
       };
     };
   };

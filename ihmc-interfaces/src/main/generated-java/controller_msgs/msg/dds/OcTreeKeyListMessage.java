@@ -15,17 +15,15 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
 {
    public int tree_depth_;
    public double tree_resolution_;
-   public us.ihmc.idl.IDLSequence.Integer  x_keys_;
-   public us.ihmc.idl.IDLSequence.Integer  y_keys_;
-   public us.ihmc.idl.IDLSequence.Integer  z_keys_;
+   public int number_of_keys_;
+   /**
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConvterter for info on the compression protocol
+            */
+   public us.ihmc.idl.IDLSequence.Byte  keys_;
 
    public OcTreeKeyListMessage()
    {
-      x_keys_ = new us.ihmc.idl.IDLSequence.Integer (5000, "type_2");
-
-      y_keys_ = new us.ihmc.idl.IDLSequence.Integer (5000, "type_2");
-
-      z_keys_ = new us.ihmc.idl.IDLSequence.Integer (5000, "type_2");
+      keys_ = new us.ihmc.idl.IDLSequence.Byte (200000, "type_9");
 
    }
 
@@ -41,9 +39,9 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
 
       tree_resolution_ = other.tree_resolution_;
 
-      x_keys_.set(other.x_keys_);
-      y_keys_.set(other.y_keys_);
-      z_keys_.set(other.z_keys_);
+      number_of_keys_ = other.number_of_keys_;
+
+      keys_.set(other.keys_);
    }
 
    public void setTreeDepth(int tree_depth)
@@ -64,22 +62,22 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
       return tree_resolution_;
    }
 
-
-   public us.ihmc.idl.IDLSequence.Integer  getXKeys()
+   public void setNumberOfKeys(int number_of_keys)
    {
-      return x_keys_;
+      number_of_keys_ = number_of_keys;
+   }
+   public int getNumberOfKeys()
+   {
+      return number_of_keys_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Integer  getYKeys()
+   /**
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConvterter for info on the compression protocol
+            */
+   public us.ihmc.idl.IDLSequence.Byte  getKeys()
    {
-      return y_keys_;
-   }
-
-
-   public us.ihmc.idl.IDLSequence.Integer  getZKeys()
-   {
-      return z_keys_;
+      return keys_;
    }
 
 
@@ -104,11 +102,9 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.tree_resolution_, other.tree_resolution_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.x_keys_, other.x_keys_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_keys_, other.number_of_keys_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.y_keys_, other.y_keys_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.z_keys_, other.z_keys_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.keys_, other.keys_, epsilon)) return false;
 
 
       return true;
@@ -127,9 +123,9 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
 
       if(this.tree_resolution_ != otherMyClass.tree_resolution_) return false;
 
-      if (!this.x_keys_.equals(otherMyClass.x_keys_)) return false;
-      if (!this.y_keys_.equals(otherMyClass.y_keys_)) return false;
-      if (!this.z_keys_.equals(otherMyClass.z_keys_)) return false;
+      if(this.number_of_keys_ != otherMyClass.number_of_keys_) return false;
+
+      if (!this.keys_.equals(otherMyClass.keys_)) return false;
 
       return true;
    }
@@ -144,12 +140,10 @@ public class OcTreeKeyListMessage extends Packet<OcTreeKeyListMessage> implement
       builder.append(this.tree_depth_);      builder.append(", ");
       builder.append("tree_resolution=");
       builder.append(this.tree_resolution_);      builder.append(", ");
-      builder.append("x_keys=");
-      builder.append(this.x_keys_);      builder.append(", ");
-      builder.append("y_keys=");
-      builder.append(this.y_keys_);      builder.append(", ");
-      builder.append("z_keys=");
-      builder.append(this.z_keys_);
+      builder.append("number_of_keys=");
+      builder.append(this.number_of_keys_);      builder.append(", ");
+      builder.append("keys=");
+      builder.append(this.keys_);
       builder.append("}");
       return builder.toString();
    }
