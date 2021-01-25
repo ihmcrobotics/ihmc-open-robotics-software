@@ -1,24 +1,17 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
-import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
@@ -47,7 +40,7 @@ public class FootTrajectoryPredictor
 
    public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      this.swingTrajectory = swingTrajectory;
+//      this.swingTrajectory = swingTrajectory;
    }
 
    public void compute(CoPTrajectoryGeneratorState state)
@@ -122,7 +115,8 @@ public class FootTrajectoryPredictor
    private final FramePoint3D midpoint1 = new FramePoint3D();
    private final FramePoint3D midpoint2 = new FramePoint3D();
 
-   private final FrameVector3D velocityVector = new FrameVector3D();
+   private final FrameVector3D velocityVector1 = new FrameVector3D();
+   private final FrameVector3D velocityVector2 = new FrameVector3D();
 
    void predictSwingFootTrajectory(double startTime,
                                    double endTime,
@@ -139,11 +133,14 @@ public class FootTrajectoryPredictor
       midpoint2.interpolate(endPosition, startPosition, interpolationFactor);
       midpoint2.addZ(swingHeight);
 
-      velocityVector.sub(midpoint2, midpoint1);
-      velocityVector.scale(1.0 / (time2 - time1));
+      velocityVector1.sub(midpoint2, startPosition);
+      velocityVector1.scale(1.0 / (time2 - startTime));
 
-      trajectoryToPack.appendWaypoint(time1, midpoint1, velocityVector);
-      trajectoryToPack.appendWaypoint(time2, midpoint2, velocityVector);
+      velocityVector2.sub(endPosition, midpoint1);
+      velocityVector2.scale(1.0 / (endTime - time1));
+
+      trajectoryToPack.appendWaypoint(time1, midpoint1, velocityVector1);
+      trajectoryToPack.appendWaypoint(time2, midpoint2, velocityVector2);
       trajectoryToPack.appendWaypoint(endTime, endPosition, zeroVector);
    }
 
