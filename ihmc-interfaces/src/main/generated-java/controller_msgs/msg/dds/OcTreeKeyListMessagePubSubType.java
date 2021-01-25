@@ -44,11 +44,9 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -70,15 +68,10 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getXKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getYKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getZKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getKeys().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -91,17 +84,11 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_6(data.getTreeResolution());
 
-      if(data.getXKeys().size() <= 5000)
-      cdr.write_type_e(data.getXKeys());else
-          throw new RuntimeException("x_keys field exceeds the maximum length");
+      cdr.write_type_2(data.getNumberOfKeys());
 
-      if(data.getYKeys().size() <= 5000)
-      cdr.write_type_e(data.getYKeys());else
-          throw new RuntimeException("y_keys field exceeds the maximum length");
-
-      if(data.getZKeys().size() <= 5000)
-      cdr.write_type_e(data.getZKeys());else
-          throw new RuntimeException("z_keys field exceeds the maximum length");
+      if(data.getKeys().size() <= 200000)
+      cdr.write_type_e(data.getKeys());else
+          throw new RuntimeException("keys field exceeds the maximum length");
 
    }
 
@@ -111,9 +98,9 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       	
       data.setTreeResolution(cdr.read_type_6());
       	
-      cdr.read_type_e(data.getXKeys());	
-      cdr.read_type_e(data.getYKeys());	
-      cdr.read_type_e(data.getZKeys());	
+      data.setNumberOfKeys(cdr.read_type_2());
+      	
+      cdr.read_type_e(data.getKeys());	
 
    }
 
@@ -122,9 +109,8 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_2("tree_depth", data.getTreeDepth());
       ser.write_type_6("tree_resolution", data.getTreeResolution());
-      ser.write_type_e("x_keys", data.getXKeys());
-      ser.write_type_e("y_keys", data.getYKeys());
-      ser.write_type_e("z_keys", data.getZKeys());
+      ser.write_type_2("number_of_keys", data.getNumberOfKeys());
+      ser.write_type_e("keys", data.getKeys());
    }
 
    @Override
@@ -132,9 +118,8 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setTreeDepth(ser.read_type_2("tree_depth"));
       data.setTreeResolution(ser.read_type_6("tree_resolution"));
-      ser.read_type_e("x_keys", data.getXKeys());
-      ser.read_type_e("y_keys", data.getYKeys());
-      ser.read_type_e("z_keys", data.getZKeys());
+      data.setNumberOfKeys(ser.read_type_2("number_of_keys"));
+      ser.read_type_e("keys", data.getKeys());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.OcTreeKeyListMessage src, controller_msgs.msg.dds.OcTreeKeyListMessage dest)

@@ -4,7 +4,7 @@
 
 int32 tree_depth
 float64 tree_resolution
+int32 number_of_keys
 
-int32[<=5000] x_keys
-int32[<=5000] y_keys
-int32[<=5000] z_keys
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConvterter for info on the compression protocol
+byte[<=200000] keys
