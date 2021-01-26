@@ -7,12 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -20,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
 public class ECMPTrajectoryCalculator
 {
@@ -97,8 +91,8 @@ public class ECMPTrajectoryCalculator
          ecmpPosition.set(copTrajectory.getECMPStartPosition());
          ecmpPosition.add(startOffset.getX(), startOffset.getY(), 0.0);
 
-         eCMPTrajectory.setStartCopPosition(ecmpPosition);
-         eCMPTrajectory.setStartCopVelocity(ecmpVelocity);
+         eCMPTrajectory.setStartECMPPosition(ecmpPosition);
+         eCMPTrajectory.setStartECMPVelocity(ecmpVelocity);
 
          desiredAngularMomentumTrajectories.compute(endTime);
 
@@ -108,8 +102,8 @@ public class ECMPTrajectoryCalculator
          ecmpPosition.set(copTrajectory.getECMPEndPosition());
          ecmpPosition.add(endOffset.getX(), endOffset.getY(), 0.0);
 
-         eCMPTrajectory.setEndCopPosition(ecmpPosition);
-         eCMPTrajectory.setEndCopVelocity(ecmpVelocity);
+         eCMPTrajectory.setEndECMPPosition(ecmpPosition);
+         eCMPTrajectory.setEndECMPVelocity(ecmpVelocity);
       }
 
       for (; i < maxPoints; i++)

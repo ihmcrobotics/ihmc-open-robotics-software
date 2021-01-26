@@ -90,7 +90,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       // compute cop waypoint location
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
-      contactStateProvider.setStartCopPosition(state.getInitialCoP());
+      contactStateProvider.setStartECMPPosition(state.getInitialCoP());
 
       DynamicPlanningFootstep footstep = state.getFootstep(0);
       PlanningTiming timings = state.getTiming(0);
@@ -100,15 +100,15 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       midfootCoP.interpolate(state.getInitialCoP(), tempPointForCoPCalculation, parameters.getDefaultTransferWeightDistribution());
 
       contactStateProvider.setDuration(parameters.getDefaultTransferSplitFraction() * timings.getTransferTime());
-      contactStateProvider.setEndCopPosition(midfootCoP);
-      contactStateProvider.setLinearCopVelocity();
+      contactStateProvider.setEndECMPPosition(midfootCoP);
+      contactStateProvider.setLinearECMPVelocity();
 
       SettableContactStateProvider previousContactState = contactStateProvider;
       contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration((1.0 - parameters.getDefaultTransferSplitFraction()) * timings.getTransferTime());
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
-      contactStateProvider.setLinearCopVelocity();
+      contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearECMPVelocity();
 
       previousContactState = contactStateProvider;
       contactStateProvider = contactStateProviders.add();
@@ -116,8 +116,8 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactStateProvider.setDuration(Double.POSITIVE_INFINITY);
       tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(supportSide).getCentroid(), 0.0);
       tempPointForCoPCalculation.changeFrame(worldFrame);
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
-      contactStateProvider.setLinearCopVelocity();
+      contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearECMPVelocity();
 
       if (viewer != null)
          viewer.updateWaypoints(contactStateProviders);

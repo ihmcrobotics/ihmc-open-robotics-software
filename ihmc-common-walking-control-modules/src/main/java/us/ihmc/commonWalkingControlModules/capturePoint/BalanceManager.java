@@ -547,8 +547,8 @@ public class BalanceManager
             }
          }
 
-         angularMomentumHandler.computeAngularMomentumTrajectories(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory(),
-                                                                   swingTrajectory);
+         angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory(),
+                                                                  swingTrajectory);
 
          contactStateProviders = angularMomentumHandler.computeECMPTrajectory(copTrajectory.getContactStateProviders());
       }

@@ -49,13 +49,13 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
          { // FIXME this should never be happening
             SettableContactStateProvider contactStateProvider = contactStates.add();
             contactStateProvider.reset();
-            contactStateProvider.setStartCopPosition(initialCoPPosition);
+            contactStateProvider.setStartECMPPosition(initialCoPPosition);
             contactStateProvider.getTimeInterval().setInterval(startTime.getDoubleValue(), initialPhase.getTimeInterval().getStartTime());
             contactStateProvider.setContactState(getContactState(initialPhase));
 
             copWaypointCalculator.computeCoPWaypoint(initialCoPWaypoint, initialPhase);
-            contactStateProvider.setEndCopPosition(initialCoPWaypoint);
-            contactStateProvider.setLinearCopVelocity();
+            contactStateProvider.setEndECMPPosition(initialCoPWaypoint);
+            contactStateProvider.setLinearECMPVelocity();
          }
          else
          {
@@ -74,10 +74,11 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
       {
          initialPolygon.orthogonalProjection(initialCoPWaypoint2D);
       }
+      initialCoPWaypoint.set(initialCoPWaypoint2D);
 
       SettableContactStateProvider contactStateProvider = contactStates.add();
       contactStateProvider.reset();
-      contactStateProvider.setStartCopPosition(initialCoPWaypoint2D);
+      contactStateProvider.setStartECMPPosition(initialCoPWaypoint);
       contactStateProvider.setTimeInterval(initialPhase.getTimeInterval());
       contactStateProvider.setContactState(getContactState(initialPhase));
 
@@ -90,8 +91,8 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
       T finalPhase = timedContactPhases.get(timedContactPhases.size() - 1);
       SettableContactStateProvider finalContact = contactStates.getLast();
       copWaypointCalculator.computeCoPWaypoint(initialCoPWaypoint, finalPhase);
-      finalContact.setEndCopPosition(initialCoPWaypoint);
-      finalContact.setLinearCopVelocity();
+      finalContact.setEndECMPPosition(initialCoPWaypoint);
+      finalContact.setLinearECMPVelocity();
       finalContact.setContactState(getContactState(finalPhase));
 
       return contactStates;
@@ -139,24 +140,24 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
 
       if (currentPhaseInContact)
       {
-         previousContactPhase.setEndCopPosition(tempCoPWaypoint);
+         previousContactPhase.setEndECMPPosition(tempCoPWaypoint);
       }
       else
       {
          copWaypointCalculator.computeCoPWaypoint(tempPreviousCoPWaypoint, previousContact);
-         previousContactPhase.setEndCopPosition(tempPreviousCoPWaypoint);
+         previousContactPhase.setEndECMPPosition(tempPreviousCoPWaypoint);
       }
-      previousContactPhase.setLinearCopVelocity();
+      previousContactPhase.setLinearECMPVelocity();
 
       if (previousContactPhase.getECMPStartPosition().containsNaN())
-         previousContactPhase.setStartCopPosition(previousContactPhase.getECMPEndPosition());
+         previousContactPhase.setStartECMPPosition(previousContactPhase.getECMPEndPosition());
 
-      contactPhase.setStartCopPosition(tempCoPWaypoint);
+      contactPhase.setStartECMPPosition(tempCoPWaypoint);
 
       if (!peekIsNextPhaseInContact(timedContactPhases, contactIndex))
       {
-         contactPhase.setEndCopPosition(tempCoPWaypoint);
-         contactPhase.setLinearCopVelocity();
+         contactPhase.setEndECMPPosition(tempCoPWaypoint);
+         contactPhase.setLinearECMPVelocity();
       }
    }
 

@@ -39,14 +39,14 @@ public class AngularMomentumHandler
       angularMomentumCalculator.computeAngularMomentum(time);
    }
 
-   public void computeAngularMomentumTrajectories(CoPTrajectoryGeneratorState state,
-                                                  List<? extends TimeIntervalProvider> timeIntervals,
-                                                  MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
-                                                  MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void solveForAngularMomentumTrajectory(CoPTrajectoryGeneratorState state,
+                                                 List<? extends TimeIntervalProvider> timeIntervals,
+                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory,
+                                                 MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
       angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
       angularMomentumCalculator.predictFootTrajectories(state);
-      angularMomentumCalculator.computeAngularMomentumTrajectories(timeIntervals, comTrajectories);
+      angularMomentumCalculator.computeAngularMomentumTrajectories(timeIntervals, comTrajectory);
    }
 
    public List<? extends ContactStateProvider> computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories)

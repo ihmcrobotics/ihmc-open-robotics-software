@@ -39,9 +39,9 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
       firstContact.setTimeInterval(new TimeInterval(0.0, flightDuration));
       firstContact.setContactState(ContactState.FLIGHT);
       secondContact.setTimeInterval(new TimeInterval(flightDuration, 1.25));
-      secondContact.setStartCopPosition(contactPosition);
-      secondContact.setEndCopPosition(contactPosition);
-      secondContact.setLinearCopVelocity();
+      secondContact.setStartECMPPosition(contactPosition);
+      secondContact.setEndECMPPosition(contactPosition);
+      secondContact.setLinearECMPVelocity();
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
