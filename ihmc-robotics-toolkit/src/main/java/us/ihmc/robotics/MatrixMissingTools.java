@@ -4,6 +4,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 public class MatrixMissingTools
 {
@@ -74,5 +75,12 @@ public class MatrixMissingTools
             dest.unsafe_set(destStartRow + i, destStartColumn + j, scale * src.unsafe_get(srcStartRow + i, srcStartColumn + j));
          }
       }
+   }
+
+   public static DMatrixRMaj createVector(int size, double fillValue)
+   {
+      DMatrixRMaj vector = new DMatrixRMaj(size);
+      CommonOps_DDRM.fill(vector, fillValue);
+      return vector;
    }
 }
