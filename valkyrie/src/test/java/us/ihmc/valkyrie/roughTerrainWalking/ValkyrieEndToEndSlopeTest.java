@@ -44,55 +44,95 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    public void testUpSlope(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
-      super.testSlope(testInfo, true, 0.6, 0.25, 0.4, 0.0, 0.0, false);
+      double swingDuration = 0.6;
+      double transferDuration = 0.25;
+      double maxStepLength = 0.30;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.0;
+      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
    }
 
    @Test
    public void testUpSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
-      super.testSlope(testInfo, true, 0.6, 0.25, 0.20, 0.0, Math.toRadians(45.0), true);
+      double swingDuration = 0.6;
+      double transferDuration = 0.25;
+      double maxStepLength = 0.22;
+      double heightOffset = 0.05;
+      double torsoPitch = 0.666;
+      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
    }
 
    @Test
    public void testDownSlope(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
-      super.testSlope(testInfo, false, 0.9, 0.25, 0.25, 0.0, 0.0, false);
+      double swingDuration = 0.9;
+      double transferDuration = 0.25;
+      double maxStepLength = 0.25;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.0;
+      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
    }
 
    @Test
    public void testDownSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = false;
-      super.testSlope(testInfo, false, 1.2, 0.5, 0.25, 0.0, 0.0, true);
+      double swingDuration = 1.0;
+      double transferDuration = 0.5;
+      double maxStepLength = 0.40;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.0;
+      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
    }
 
    @Test
    public void testUpSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      super.testSlope(testInfo, true, 0.8, 0.25, 0.25, 0.0, 0.0, false);
+      double swingDuration = 0.6;
+      double transferDuration = 0.25;
+      double maxStepLength = 0.25;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.666;
+      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
    }
 
    @Test
    public void testUpSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      super.testSlope(testInfo, true, 0.6, 0.25, 0.15, 0.0, Math.toRadians(45.0), true);
+      double swingDuration = 0.8;
+      double transferDuration = 0.35;
+      double maxStepLength = 0.20;
+      double heightOffset = 0.05;
+      double torsoPitch = 0.666;
+      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
    }
 
    @Test
    public void testDownSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      super.testSlope(testInfo, false, 0.8, 0.3, 0.30, 0.0, 0.0, false);
+      double swingDuration = 1.0;
+      double transferDuration = 0.35;
+      double maxStepLength = 0.30;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.0;
+      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
    }
 
    @Test
    public void testDownSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      super.testSlope(testInfo, false, 1.2, 0.5, 0.25, 0.0, 0.0, true);
+      double swingDuration = 1.0;
+      double transferDuration = 0.5;
+      double maxStepLength = 0.35;
+      double heightOffset = 0.0;
+      double torsoPitch = 0.0;
+      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
    }
 }
