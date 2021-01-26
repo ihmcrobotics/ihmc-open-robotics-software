@@ -11,6 +11,8 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTraj
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -20,7 +22,9 @@ public class AngularMomentumHandler
    private final ECMPTrajectoryCalculator ecmpTrajectoryCalculator;
    private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator;
 
-   public AngularMomentumHandler(double mass, double potatoMass, double gravity,
+
+   public AngularMomentumHandler(double totalMass,
+                                 double gravity,
                                  CenterOfMassJacobian centerOfMassJacobian,
                                  SideDependentList<MovingReferenceFrame> soleFrames,
                                  YoRegistry parentRegistry,
@@ -28,8 +32,16 @@ public class AngularMomentumHandler
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-      ecmpTrajectoryCalculator = new ECMPTrajectoryCalculator(mass, gravity, registry);
-      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(gravity, potatoMass, centerOfMassJacobian, soleFrames, registry, graphicsListRegistry);
+      DoubleProvider potatoMassFraction = new DoubleParameter("potatoMassFraction", registry, 0.05);
+
+      ecmpTrajectoryCalculator = new ECMPTrajectoryCalculator(totalMass, gravity, registry);
+      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(totalMass,
+                                                                           potatoMassFraction,
+                                                                           gravity,
+                                                                           centerOfMassJacobian,
+                                                                           soleFrames,
+                                                                           registry,
+                                                                           graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -58,5 +70,4 @@ public class AngularMomentumHandler
    {
       ecmpTrajectoryCalculator.computeCoPPosition(desiredECMPPosition, angularMomentumCalculator.getDesiredAngularMomentumRate(), copPositionToPack);
    }
-
 }

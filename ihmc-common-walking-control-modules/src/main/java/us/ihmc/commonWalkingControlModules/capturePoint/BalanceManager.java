@@ -76,7 +76,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean computeAngularMomentum = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -152,7 +151,7 @@ public class BalanceManager
    private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
    private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
 
-
+   private final BooleanProvider computeAngularMomentumOffset = new BooleanParameter("computeAngularMomentumOffset", registry, true);
 
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state is
@@ -226,7 +225,7 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumHandler = new AngularMomentumHandler(totalMass, 7.5, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
+      angularMomentumHandler = new AngularMomentumHandler(totalMass, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
                                                           controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -449,7 +448,7 @@ public class BalanceManager
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
-      if (computeAngularMomentum)
+      if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
       else
          yoPerfectCoP.set(yoPerfectCMP);
@@ -527,7 +526,7 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
-      if (computeAngularMomentum)
+      if (computeAngularMomentumOffset.getValue())
       {
          if (!comTrajectoryPlanner.hasTrajectories())
          {
@@ -563,7 +562,7 @@ public class BalanceManager
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
-      if (computeAngularMomentum)
+      if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 

@@ -25,6 +25,7 @@ import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -45,6 +46,8 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
+   private final DoubleProvider potatoMassFraction;
+   private final double totalMass;
 
    private final YoFrameVector3D desiredAngularMomentum = new YoFrameVector3D("desiredAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularMomentumRate = new YoFrameVector3D("desiredAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
@@ -94,8 +97,9 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final double gravityZ;
 
-   public ThreePotatoAngularMomentumCalculator(double gravityZ,
-                                               double potatoMass,
+   public ThreePotatoAngularMomentumCalculator(double totalMass,
+                                               DoubleProvider potatoMassFraction,
+                                               double gravityZ,
                                                CenterOfMassJacobian centerOfMassJacobian,
                                                SideDependentList<MovingReferenceFrame> soleFrames,
                                                YoRegistry parentRegistry,
@@ -104,7 +108,8 @@ public class ThreePotatoAngularMomentumCalculator
       this.gravityZ = Math.abs(gravityZ);
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.soleFrames = soleFrames;
-      this.potatoMass.set(potatoMass);
+      this.totalMass = totalMass;
+      this.potatoMassFraction = potatoMassFraction;
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
                                                                                    50,
@@ -146,6 +151,7 @@ public class ThreePotatoAngularMomentumCalculator
 
    public void computeAngularMomentum(double time)
    {
+
       angularMomentumTrajectory.compute(time);
       heightScaledAngularMomentumTrajectory.compute(time);
 
@@ -224,6 +230,8 @@ public class ThreePotatoAngularMomentumCalculator
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
    {
+      potatoMass.set(potatoMassFraction.getValue() * totalMass);
+
       this.predictedCoMTrajectory = comTrajectories;
       MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
