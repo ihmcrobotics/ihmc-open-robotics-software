@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import controller_msgs.msg.dds.OcTreeKeyListMessage;
+import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
@@ -137,7 +138,30 @@ public class OcTreeMessageConverter
          ocTreeDataMessage.getKeys().add(compressedOcTreeByteBuffer.get());
       }
 
-      ocTreeDataMessage.setNumberOfKeys(compressedOcTreeSize);
+      ocTreeDataMessage.setNumberOfKeys(ocTreeKeyList.size());
       return ocTreeDataMessage;
+   }
+
+   public static List<OcTreeKey> decompressMessage(TByteArrayList compressedOcTreeKeyData, int numberOfKeys)
+   {
+      int decompressedCapacity = numberOfKeys * 3 * 4;
+
+      ByteBuffer compressedOcTreeByteBuffer = ByteBuffer.wrap(compressedOcTreeKeyData.toArray());
+      ByteBuffer decompressedOcTreeByteBuffer = ByteBuffer.allocate(decompressedCapacity);
+      compressorThreadLocal.get().decompress(compressedOcTreeByteBuffer, decompressedOcTreeByteBuffer, decompressedCapacity);
+
+      decompressedOcTreeByteBuffer.flip();
+      IntBuffer ocTreeIntBuffer = decompressedOcTreeByteBuffer.asIntBuffer();
+      List<OcTreeKey> ocTreeKeys = new ArrayList<>();
+
+      for (int i = 0; i < numberOfKeys; i++)
+      {
+         int k0 = ocTreeIntBuffer.get();
+         int k1 = ocTreeIntBuffer.get();
+         int k2 = ocTreeIntBuffer.get();
+         ocTreeKeys.add(new OcTreeKey(k0, k1, k2));
+      }
+
+      return ocTreeKeys;
    }
 }

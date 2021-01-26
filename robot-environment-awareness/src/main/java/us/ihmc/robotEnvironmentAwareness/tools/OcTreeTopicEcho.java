@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.ROS2Node;
 
 public class OcTreeTopicEcho
@@ -15,7 +16,7 @@ public class OcTreeTopicEcho
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       YAMLSerializer<OcTreeKeyListMessage> serializer = new YAMLSerializer<>(new OcTreeKeyListMessagePubSubType());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, OcTreeKeyListMessage.class, ROS2Tools.REA.withRobot(null).withOutput(), s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, OcTreeKeyListMessage.class, REACommunicationProperties.outputTopic, s ->
       {
          try
          {
