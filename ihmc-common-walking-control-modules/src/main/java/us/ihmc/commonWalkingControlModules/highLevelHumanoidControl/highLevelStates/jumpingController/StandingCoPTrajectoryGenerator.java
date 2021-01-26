@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.saveableModule.YoSaveableModule;
@@ -17,8 +18,8 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
 
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
-   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
-   private final FramePoint2D tempPointForCoPCalculation = new FramePoint2D();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final FramePoint3D tempPointForCoPCalculation = new FramePoint3D();
 
    public StandingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, YoRegistry parentRegistry)
    {
@@ -48,34 +49,34 @@ public class StandingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPT
       // compute cop waypoint location
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartTime(0.0);
-      contactState.setStartCopPosition(state.getInitialCoP());
+      contactState.setStartECMPPosition(state.getInitialCoP());
 
       SettableContactStateProvider previousContactState = contactState;
 
-      tempPointForCoPCalculation.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid());
-      tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
-      tempFramePoint2D.setIncludingFrame(state.getFootPolygonInSole(RobotSide.RIGHT).getCentroid());
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-      tempPointForCoPCalculation.interpolate(tempFramePoint2D, 0.5);
+      tempPointForCoPCalculation.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid(), 0.0);
+      tempPointForCoPCalculation.changeFrame(worldFrame);
+      tempFramePoint.setIncludingFrame(state.getFootPolygonInSole(RobotSide.RIGHT).getCentroid(), 0.0);
+      tempFramePoint.changeFrame(worldFrame);
+      tempPointForCoPCalculation.interpolate(tempFramePoint, 0.5);
 
       double segmentDuration = parameters.getDefaultFinalTransferSplitFraction() * state.getFinalTransferDuration();
-      previousContactState.setEndCopPosition(tempPointForCoPCalculation);
+      previousContactState.setEndECMPPosition(tempPointForCoPCalculation);
       previousContactState.setDuration(segmentDuration);
-      previousContactState.setLinearCopVelocity();
+      previousContactState.setLinearECMPVelocity();
 
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
-      contactState.setLinearCopVelocity();
+      contactState.setLinearECMPVelocity();
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getECMPStartPosition());
+      contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
-      contactState.setLinearCopVelocity();
+      contactState.setLinearECMPVelocity();
 
    }
 

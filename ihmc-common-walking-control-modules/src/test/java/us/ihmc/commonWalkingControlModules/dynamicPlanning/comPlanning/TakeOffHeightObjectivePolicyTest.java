@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,8 +28,8 @@ public class TakeOffHeightObjectivePolicyTest
       SettableContactStateProvider contact0 = new SettableContactStateProvider();
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
       contact0.setContactState(ContactState.IN_CONTACT);
-      contact0.setEndCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, contactHeight));
-      contact0.setLinearCopVelocity();
+      contact0.setEndECMPPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, contactHeight));
+      contact0.setLinearECMPVelocity();
       contact1.setContactState(ContactState.FLIGHT);
 
       contactSequence.add(contact0);

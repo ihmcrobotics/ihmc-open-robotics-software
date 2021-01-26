@@ -228,7 +228,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       // compute cop waypoint location
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
-      contactStateProvider.setStartCopPosition(state.getInitialCoP());
+      contactStateProvider.setStartECMPPosition(state.getInitialCoP());
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
@@ -343,9 +343,9 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getECMPStartPosition());
+      contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
-      contactState.setLinearCopVelocity();
+      contactState.setLinearECMPVelocity();
    }
 
    private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
@@ -361,16 +361,16 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       tempPointForCoPCalculation.interpolate(tempFramePoint1, finalTransferWeightDistribution);
 
       double segmentDuration = finalTransferSplitFraction.getDoubleValue() * finalTransferDuration;
-      previousContactState.setEndCopPosition(tempPointForCoPCalculation);
+      previousContactState.setEndECMPPosition(tempPointForCoPCalculation);
       previousContactState.setDuration(segmentDuration);
-      previousContactState.setLinearCopVelocity();
+      previousContactState.setLinearECMPVelocity();
 
       segmentDuration = (1.0 - finalTransferSplitFraction.getValue()) * finalTransferDuration;
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
-      contactState.setLinearCopVelocity();
+      contactState.setLinearECMPVelocity();
    }
 
 
@@ -399,15 +399,15 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       if (setupForContinuityMaintaining)
          firstSegmentDuration = Math.min(firstSegmentDuration, parameters.getDurationForContinuityMaintenanceSegment());
       previousContactState.setDuration(firstSegmentDuration);
-      previousContactState.setEndCopPosition(midfootCoP);
-      previousContactState.setLinearCopVelocity();
+      previousContactState.setEndECMPPosition(midfootCoP);
+      previousContactState.setLinearECMPVelocity();
 
       double secondSegmentDuration = duration - firstSegmentDuration;
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration(secondSegmentDuration);
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
-      contactStateProvider.setLinearCopVelocity();
+      contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearECMPVelocity();
    }
 
    private void computeCoPPointsForFootstepSwing(double duration,
@@ -422,8 +422,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration(shiftFraction * splitFraction * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setLinearCopVelocity();
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       previousContactState = contactState;
 
@@ -432,15 +432,15 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration(shiftFraction * (1.0 - splitFraction) * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setLinearCopVelocity();
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration((1.0 - shiftFraction) * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setLinearCopVelocity();
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       contactStateProviders.add().setStartFromEnd(contactState);
    }

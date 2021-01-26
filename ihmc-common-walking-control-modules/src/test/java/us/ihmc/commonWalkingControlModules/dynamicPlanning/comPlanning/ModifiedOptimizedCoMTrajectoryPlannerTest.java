@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -48,20 +44,20 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
       SettableContactStateProvider contact2 = new SettableContactStateProvider();
 
-      contact0.setStartCopPosition(initialCMP);
-      contact0.setEndCopPosition(initialCMP);
+      contact0.setStartECMPPosition(initialCMP);
+      contact0.setEndECMPPosition(initialCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
-      contact0.setLinearCopVelocity();
+      contact0.setLinearECMPVelocity();
 
-      contact1.setStartCopPosition(initialCMP);
-      contact1.setEndCopPosition(finalCMP);
+      contact1.setStartECMPPosition(initialCMP);
+      contact1.setEndECMPPosition(finalCMP);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
-      contact1.setLinearCopVelocity();
+      contact1.setLinearECMPVelocity();
 
-      contact2.setStartCopPosition(finalCMP);
-      contact2.setEndCopPosition(finalCMP);
+      contact2.setStartECMPPosition(finalCMP);
+      contact2.setEndECMPPosition(finalCMP);
       contact2.getTimeInterval().setInterval(firstDuration + secondDuration, firstDuration + secondDuration + thirdDuration);
-      contact2.setLinearCopVelocity();
+      contact2.setLinearECMPVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -139,18 +135,18 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
       SettableContactStateProvider contact2 = new SettableContactStateProvider();
 
-      contact0.setStartCopPosition(initialCMP);
-      contact0.setEndCopPosition(initialCMP);
+      contact0.setStartECMPPosition(initialCMP);
+      contact0.setEndECMPPosition(initialCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
-      contact0.setLinearCopVelocity();
+      contact0.setLinearECMPVelocity();
 
       contact1.setContactState(ContactState.FLIGHT);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
 
-      contact2.setStartCopPosition(finalCMP);
-      contact2.setEndCopPosition(finalCMP);
+      contact2.setStartECMPPosition(finalCMP);
+      contact2.setEndECMPPosition(finalCMP);
       contact2.getTimeInterval().setInterval(firstDuration + secondDuration, firstDuration + secondDuration + thirdDuration);
-      contact2.setLinearCopVelocity();
+      contact2.setLinearECMPVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -234,15 +230,15 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       SettableContactStateProvider contact0 = new SettableContactStateProvider();
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
 
-      contact0.setStartCopPosition(initialCMP);
-      contact0.setEndCopPosition(finalCMP);
+      contact0.setStartECMPPosition(initialCMP);
+      contact0.setEndECMPPosition(finalCMP);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
-      contact0.setLinearCopVelocity();
+      contact0.setLinearECMPVelocity();
 
-      contact1.setStartCopPosition(finalCMP);
-      contact1.setEndCopPosition(finalCMP);
+      contact1.setStartECMPPosition(finalCMP);
+      contact1.setEndECMPPosition(finalCMP);
       contact1.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
-      contact1.setLinearCopVelocity();
+      contact1.setLinearECMPVelocity();
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
@@ -297,10 +293,10 @@ public class ModifiedOptimizedCoMTrajectoryPlannerTest
       List<ContactStateProvider> contactSequence = new ArrayList<>();
       SettableContactStateProvider contact0 = new SettableContactStateProvider();
 
-      contact0.setStartCopPosition(vrp);
-      contact0.setEndCopPosition(vrp);
+      contact0.setStartECMPPosition(vrp);
+      contact0.setEndECMPPosition(vrp);
       contact0.getTimeInterval().setInterval(0.0, firstDuration);
-      contact0.setLinearCopVelocity();
+      contact0.setLinearECMPVelocity();
 
       contactSequence.add(contact0);
 

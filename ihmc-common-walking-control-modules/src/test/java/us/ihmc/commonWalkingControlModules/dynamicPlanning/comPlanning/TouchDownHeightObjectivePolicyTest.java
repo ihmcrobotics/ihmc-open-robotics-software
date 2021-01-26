@@ -34,7 +34,7 @@ public class TouchDownHeightObjectivePolicyTest
       contact0.setContactState(ContactState.FLIGHT);
       contact0.getTimeInterval().setInterval(0.0, duration);
       contact1.setContactState(ContactState.IN_CONTACT);
-      contact1.setStartCopPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, contactHeight));
+      contact1.setStartECMPPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, contactHeight));
 
       contactSequence.add(contact0);
       contactSequence.add(contact1);
