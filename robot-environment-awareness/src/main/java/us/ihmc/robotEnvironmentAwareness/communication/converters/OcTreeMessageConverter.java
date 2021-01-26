@@ -6,7 +6,9 @@ import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.node.baseImplementation.AbstractOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.ocTree.baseImplementation.AbstractOcTreeBase;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
@@ -91,14 +93,14 @@ public class OcTreeMessageConverter
       return createOcTreeKeyMessage(other.getKey(0), other.getKey(1), other.getKey(2));
    }
 
-   public static OcTreeKeyListMessage createOcTreeDataMessage(NormalOcTree normalOcTree)
+   public static <N extends AbstractOcTreeNode<N>> OcTreeKeyListMessage createOcTreeDataMessage(AbstractOcTreeBase<N> ocTree)
    {
       OcTreeKeyListMessage ocTreeDataMessage = new OcTreeKeyListMessage();
-      ocTreeDataMessage.setTreeResolution(normalOcTree.getResolution());
-      ocTreeDataMessage.setTreeDepth(normalOcTree.getTreeDepth());
+      ocTreeDataMessage.setTreeResolution(ocTree.getResolution());
+      ocTreeDataMessage.setTreeDepth(ocTree.getTreeDepth());
 
       List<OcTreeKey> ocTreeKeyList = new ArrayList<>();
-      for (NormalOcTreeNode leaf : normalOcTree)
+      for (N leaf : ocTree)
       {
          if (leaf.getDepth() == ocTreeDataMessage.getTreeDepth())
          {
