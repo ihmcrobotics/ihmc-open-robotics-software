@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -46,6 +47,46 @@ public abstract class Polynomial3DBasicsTest
 
 //      assertEquals(2, traj.getCoefficient(1), SMALL_EPSILON);
 //      assertEquals(1, traj.getCoefficient(0), SMALL_EPSILON);
+   }
+
+   @Test
+   public void testTimeInterval()
+   {
+      Polynomial3DBasics traj = getPolynomial(2);
+      assertEquals(2, traj.getMaximumNumberOfCoefficients());
+
+      assertEquals(0, traj.getNumberOfCoefficients());
+      Point3D start = new Point3D(3.0, 4.0, 5.0);
+      Point3D end = new Point3D(6.0, 7.0, 8.0);
+      traj.setLinear(1, 2, start, end);
+
+      assertEquals(1, traj.getTimeInterval().getStartTime(), SMALL_EPSILON);
+      assertEquals(2, traj.getTimeInterval().getEndTime(), SMALL_EPSILON);
+      traj.compute(traj.getTimeInterval().getStartTime());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, traj.getPosition(), SMALL_EPSILON);
+      traj.compute(traj.getTimeInterval().getEndTime());
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(end, traj.getPosition(), SMALL_EPSILON);
+
+      assertEquals(1.0, traj.getAxis(Axis3D.X).getTimeInterval().getStartTime(), SMALL_EPSILON);
+      assertEquals(1.0, traj.getAxis(Axis3D.Y).getTimeInterval().getStartTime(), SMALL_EPSILON);
+      assertEquals(1.0, traj.getAxis(Axis3D.Z).getTimeInterval().getStartTime(), SMALL_EPSILON);
+
+      assertEquals(2.0, traj.getAxis(Axis3D.X).getTimeInterval().getEndTime(), SMALL_EPSILON);
+      assertEquals(2.0, traj.getAxis(Axis3D.Y).getTimeInterval().getEndTime(), SMALL_EPSILON);
+      assertEquals(2.0, traj.getAxis(Axis3D.Z).getTimeInterval().getEndTime(), SMALL_EPSILON);
+
+      traj.getTimeInterval().setInterval(3.5, 7.2);
+
+      assertEquals(3.5, traj.getAxis(Axis3D.X).getTimeInterval().getStartTime(), SMALL_EPSILON);
+      assertEquals(3.5, traj.getAxis(Axis3D.Y).getTimeInterval().getStartTime(), SMALL_EPSILON);
+      assertEquals(3.5, traj.getAxis(Axis3D.Z).getTimeInterval().getStartTime(), SMALL_EPSILON);
+
+      assertEquals(7.2, traj.getAxis(Axis3D.X).getTimeInterval().getEndTime(), SMALL_EPSILON);
+      assertEquals(7.2, traj.getAxis(Axis3D.Y).getTimeInterval().getEndTime(), SMALL_EPSILON);
+      assertEquals(7.2, traj.getAxis(Axis3D.Z).getTimeInterval().getEndTime(), SMALL_EPSILON);
+
+      //      assertEquals(2, traj.getCoefficient(1), SMALL_EPSILON);
+      //      assertEquals(1, traj.getCoefficient(0), SMALL_EPSILON);
    }
 
    @Test
