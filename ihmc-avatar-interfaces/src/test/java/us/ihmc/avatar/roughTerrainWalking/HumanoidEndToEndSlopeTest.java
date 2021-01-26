@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -16,9 +17,12 @@ import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -56,19 +60,22 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testSlope(TestInfo testInfo, boolean up, double swingDuration, double transferDuration, double stepLength, double heightOffset) throws Exception
+   public void testSlope(TestInfo testInfo, boolean up, double swingDuration, double transferDuration, double stepLength, double heightOffset, double torsoPitch,
+                         boolean useExperimentalPhysicsEngine)
+         throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
       double slopeAngle = Math.toRadians(30.0);
       double slopeLength = 3.0;
       double topZ = Math.tan(slopeAngle) * slopeLength;
-      double startX = up ? 0.0 : 1.2 + slopeLength;
+      double startX = (up ? 0.0 : 1.2 + slopeLength) + 0.6 - 0.5 * robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength() - 0.02;
       double startZ = up ? 0.0 : topZ;
 
       simulationTestingParameters.setKeepSCSUp(true);
       SlopeEnvironment environment = new SlopeEnvironment(slopeAngle, 1.5, slopeLength);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -80,6 +87,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       scs.setCameraDolly(true, true, true, true);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      pitchTorsoForward(torsoPitch);
 
       FootstepDataListMessage footsteps = createSlopeFootsteps(startX, slopeAngle, 0.30, stepLength, environment);
       computeSwingWaypoints(robotModel, footsteps);
@@ -88,6 +96,16 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       scs.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
+   }
+
+   private void pitchTorsoForward(double angle) throws Exception
+   {
+      if (angle != 0.0)
+      {
+         ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(0.5, new YawPitchRoll(0.0, angle, 0.0), ReferenceFrame.getWorldFrame());
+         drcSimulationTestHelper.publishToController(message);
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      }
    }
 
    private void computeSwingWaypoints(DRCRobotModel robotModel, FootstepDataListMessage footsteps)
