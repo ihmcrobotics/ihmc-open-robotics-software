@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -178,6 +179,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
 
    public void computeCoMPosition(double time, FixedFramePoint3DBasics comPositionToPack)
    {
+      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
       CoMTrajectoryPlannerTools.constructDesiredCoMPosition(comPositionToPack,
                                                             firstCoefficient,
                                                             secondCoefficient,
@@ -191,6 +193,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
 
    public void computeCoMVelocity(double time, FixedFrameVector3DBasics comVelocityToPack)
    {
+      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
       CoMTrajectoryPlannerTools.constructDesiredCoMVelocity(comVelocityToPack,
                                                             firstCoefficient,
                                                             secondCoefficient,
@@ -204,6 +207,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
 
    public void computeCoMAcceleration(double time, FixedFrameVector3DBasics comAccelerationToPack)
    {
+      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
       CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack,
                                                                 firstCoefficient,
                                                                 secondCoefficient,
@@ -217,6 +221,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
 
    public void computeVRPVelocity(double time, FixedFrameVector3DBasics vrpVelocityToPack)
    {
+      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
       CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityToPack,
                                                                 firstCoefficient,
                                                                 secondCoefficient,
@@ -248,6 +253,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
                        FixedFramePoint3DBasics vrpPositionToPack,
                        FixedFrameVector3DBasics vrpVelocityTPack)
    {
+      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
       currentTime = time;
       computeCoMPosition(time, comPositionToPack);
       computeCoMVelocity(time, comVelocityToPack);

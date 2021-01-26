@@ -59,13 +59,17 @@ public class ECMPTrajectoryCalculator
    public List<? extends ContactStateProvider> computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
-      for (int i = 0; i < copTrajectories.size(); i++)
+      int length = copTrajectories.size();
+
+      for (int i = 0; i < length; i++)
       {
          contactStateProviders.add().set(copTrajectories.get(i));
       }
 
+      boolean endsOnLongSegment = copTrajectories.get(length - 1).getTimeInterval().getDuration() > 5.0;
+      int endingSize = endsOnLongSegment ? length - 1 : length;
       int i = 0;
-      for (; i < copTrajectories.size(); i++)
+      for (; i < endingSize; i++)
       {
          ContactStateProvider copTrajectory = copTrajectories.get(i);
          double startTime = Math.min(copTrajectory.getTimeInterval().getStartTime(), sufficientlyLong);
@@ -79,11 +83,12 @@ public class ECMPTrajectoryCalculator
          }
 
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
+         FixedFrameVector2DBasics startOffset = ecmpStartOffsets.get(i);
+         FixedFrameVector2DBasics endOffset = ecmpEndOffsets.get(i);
+
 
          desiredAngularMomentumTrajectories.compute(startTime);
 
-         FixedFrameVector2DBasics startOffset = ecmpStartOffsets.get(i);
-         FixedFrameVector2DBasics endOffset = ecmpEndOffsets.get(i);
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), startOffset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
@@ -93,6 +98,7 @@ public class ECMPTrajectoryCalculator
 
          eCMPTrajectory.setStartECMPPosition(ecmpPosition);
          eCMPTrajectory.setStartECMPVelocity(ecmpVelocity);
+
 
          desiredAngularMomentumTrajectories.compute(endTime);
 

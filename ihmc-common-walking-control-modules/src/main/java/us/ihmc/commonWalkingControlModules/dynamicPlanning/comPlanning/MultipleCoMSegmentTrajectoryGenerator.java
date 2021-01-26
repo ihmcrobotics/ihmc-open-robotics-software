@@ -1,27 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
-import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
@@ -55,6 +39,10 @@ public class MultipleCoMSegmentTrajectoryGenerator extends MultipleSegmentPositi
       double rateY = (endPosition.getY() - startPosition.getY()) / duration;
       double rateZ = (endPosition.getZ() - startPosition.getZ()) / duration;
 
+      segment.setFirstCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      segment.setSecondCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      segment.setThirdCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      segment.setFourthCoefficient(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
       segment.setFifthCoefficient(ReferenceFrame.getWorldFrame(), rateX, rateY, rateZ);
       segment.setSixthCoefficient(ReferenceFrame.getWorldFrame(), startPosition.getX(), startPosition.getY(), startPosition.getZ());
 

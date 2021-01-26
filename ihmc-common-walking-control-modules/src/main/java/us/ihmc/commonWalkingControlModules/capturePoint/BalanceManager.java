@@ -153,7 +153,9 @@ public class BalanceManager
    private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
    private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
 
-   private final BooleanProvider computeAngularMomentumOffset = new BooleanParameter("computeAngularMomentumOffset", registry, true);
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, true);
+   private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
+   private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state is
@@ -204,7 +206,6 @@ public class BalanceManager
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
-   // fixme static mass
    private final AngularMomentumHandler angularMomentumHandler;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
@@ -513,6 +514,7 @@ public class BalanceManager
 
    public void computeFlamingoStateICPPlan()
    {
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
       computeICPPlanInternal(flamingoCopTrajectory);
    }
 
@@ -764,6 +766,7 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       inSingleSupport.set(true);
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
       stepAdjustmentController.reset();
@@ -786,9 +789,13 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
+
+
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+      comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
 
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
@@ -805,6 +812,7 @@ public class BalanceManager
    public void initializeICPPlanForTransferToStanding()
    {
       comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
 
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -829,6 +837,7 @@ public class BalanceManager
 
    public void initializeICPPlanForTransfer()
    {
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();

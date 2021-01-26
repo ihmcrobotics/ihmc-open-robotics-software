@@ -43,7 +43,7 @@ public class ThreePotatoAngularMomentumCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
@@ -258,7 +258,7 @@ public class ThreePotatoAngularMomentumCalculator
          scaledAngularMomentumEstimator.reset();
          scaledAngularMomentumEstimator.reshape(5);
 
-         double duration = Math.min(timeInterval.getDuration(), sufficientlyLong);
+         double duration = Math.min(timeInterval.getDuration(), 10.0);
 
          angularMomentumEstimator.getTimeInterval().set(timeInterval);
          scaledAngularMomentumEstimator.getTimeInterval().set(timeInterval);
