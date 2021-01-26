@@ -204,8 +204,7 @@ public class BalanceManager
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
    // fixme static mass
-   private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator;
-   private final ECMPTrajectoryCalculator ecmpTrajectory;
+   private final AngularMomentumHandler angularMomentumHandler;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
@@ -227,8 +226,8 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(gravityZ, 7.5, controllerToolbox.getCenterOfMassJacobian(),
-                                                                           controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
+      angularMomentumHandler = new AngularMomentumHandler(totalMass, 7.5, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
+                                                          controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -279,7 +278,6 @@ public class BalanceManager
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
-      ecmpTrajectory = new ECMPTrajectoryCalculator(fullRobotModel.getTotalMass(), controllerToolbox.getGravityZ(), registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -452,7 +450,7 @@ public class BalanceManager
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
       if (computeAngularMomentum)
-         ecmpTrajectory.computeCoPPosition(yoPerfectCMP, angularMomentumCalculator.getDesiredAngularMomentumRate(), yoPerfectCoP);
+         angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
       else
          yoPerfectCoP.set(yoPerfectCMP);
 
@@ -549,12 +547,10 @@ public class BalanceManager
             }
          }
 
-         angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
-         angularMomentumCalculator.predictFootTrajectories(copTrajectoryState);
-         angularMomentumCalculator.computeAngularMomentumTrajectories(contactStateProviders, comTrajectoryPlanner.getCoMTrajectory());
+         angularMomentumHandler.computeAngularMomentumTrajectories(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory(),
+                                                                   swingTrajectory);
 
-         ecmpTrajectory.computeECMPTrajectory(copTrajectory.getContactStateProviders(), angularMomentumCalculator.getHeightScaledAngularMomentumTrajectories());
-         contactStateProviders = ecmpTrajectory.getContactStateProviders();
+         contactStateProviders = angularMomentumHandler.computeECMPTrajectory(copTrajectory.getContactStateProviders());
       }
       else
       {
@@ -568,7 +564,7 @@ public class BalanceManager
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
       if (computeAngularMomentum)
-         angularMomentumCalculator.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+         angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
