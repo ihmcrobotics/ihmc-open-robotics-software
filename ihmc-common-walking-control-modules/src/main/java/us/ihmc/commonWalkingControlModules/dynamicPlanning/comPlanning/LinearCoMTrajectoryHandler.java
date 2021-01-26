@@ -21,6 +21,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
+
 public class LinearCoMTrajectoryHandler
 {
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
@@ -121,16 +123,17 @@ public class LinearCoMTrajectoryHandler
 
          comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
 
+         double duration = Math.min(timeInterval.getDuration(), sufficientlyLong);
          computeVRPBoundaryConditionsFromCoefficients(startRow,
                                                       coefficientArray,
                                                       omega,
-                                                      timeInterval.getDuration(),
+                                                      duration,
                                                       vrpStartPosition,
                                                       vrpStartVelocity,
                                                       vrpEndPosition,
                                                       vrpEndVelocity);
          Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
-         vrpTrajectory.setCubic(0.0, timeInterval.getDuration(), vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          this.vrpTrajectories.add(vrpTrajectory);
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
