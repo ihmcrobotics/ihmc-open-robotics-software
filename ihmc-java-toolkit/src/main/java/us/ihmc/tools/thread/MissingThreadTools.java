@@ -1,5 +1,8 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.concurrent.*;
@@ -37,5 +40,15 @@ public class MissingThreadTools
             createNamedThreadFactory(prefix, daemon),
             new ThreadPoolExecutor.AbortPolicy())
       );
+   }
+
+   public static Thread startAsDaemon(String threadName, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
+   {
+      return ThreadTools.startAsDaemon(() -> ExceptionTools.handle(runnable, exceptionHandler), threadName);
+   }
+
+   public static Thread startAThread(String threadName, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
+   {
+      return ThreadTools.startAThread(() -> ExceptionTools.handle(runnable, exceptionHandler), threadName);
    }
 }
