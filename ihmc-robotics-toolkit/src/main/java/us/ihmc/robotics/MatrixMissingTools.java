@@ -79,7 +79,7 @@ public class MatrixMissingTools
 
    public static DMatrixRMaj createVector(int size, double fillValue)
    {
-      DMatrixRMaj vector = new DMatrixRMaj(size);
+      DMatrixRMaj vector = new DMatrixRMaj(size, 1);
       CommonOps_DDRM.fill(vector, fillValue);
       return vector;
    }
