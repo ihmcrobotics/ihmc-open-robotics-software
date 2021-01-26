@@ -178,20 +178,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.comContinuityCalculator = comContinuityCalculator;
    }
 
-   private final FramePoint3D tempPosition = new FramePoint3D();
-
    public void reset()
    {
       trajectoryHandler.clearTrajectory();
    }
 
-   public void initializeForStep(FramePoint3DReadOnly stepPosition, double stepDuration)
+   public void initializeTrajectory(FramePoint3DReadOnly endPosition, double stepDuration)
    {
-      tempPosition.set(stepPosition);
-      tempPosition.addZ(getNominalCoMHeight());
-
       stepDuration = Math.min(sufficientlyLong, stepDuration);
-      trajectoryHandler.setLinear(currentCoMPosition, tempPosition, omega.getValue(), stepDuration);
+      trajectoryHandler.setLinear(currentCoMPosition, endPosition, omega.getValue(), stepDuration);
    }
 
    /**

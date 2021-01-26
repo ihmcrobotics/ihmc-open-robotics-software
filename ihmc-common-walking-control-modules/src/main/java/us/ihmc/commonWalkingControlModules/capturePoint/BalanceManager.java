@@ -125,6 +125,8 @@ public class BalanceManager
    private final FramePoint2D perfectCMP2d = new FramePoint2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
    private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
@@ -533,17 +535,18 @@ public class BalanceManager
          {
             if (copTrajectoryState.getNumberOfFootstep() > 0)
             {
-               DynamicPlanningFootstep footstep = copTrajectoryState.getFootstep(0);
+               tempPoint.setIncludingFrame(copTrajectoryState.getFootstep(0).getFootstepPose().getPosition());
+               tempPoint.addZ(comTrajectoryPlanner.getNominalCoMHeight());
                PlanningTiming timing = copTrajectoryState.getTiming(0);
-               comTrajectoryPlanner.initializeForStep(footstep.getFootstepPose().getPosition(), timing.getSwingTime() + timing.getTransferTime());
+
+               comTrajectoryPlanner.initializeTrajectory(tempPoint, timing.getSwingTime() + timing.getTransferTime());
             }
             else
             {
                centerOfMassPosition.setToZero(centerOfMassFrame);
                centerOfMassPosition.changeFrame(worldFrame);
-               centerOfMassPosition.subZ(comTrajectoryPlanner.getNominalCoMHeight());
 
-               comTrajectoryPlanner.initializeForStep(centerOfMassPosition, Double.POSITIVE_INFINITY);
+               comTrajectoryPlanner.initializeTrajectory(centerOfMassPosition, Double.POSITIVE_INFINITY);
             }
          }
 
