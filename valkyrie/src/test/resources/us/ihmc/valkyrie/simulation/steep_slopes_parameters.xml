@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+   <registry name="DRCControllerThread">
+      <registry name="DRCMomentumBasedController">
+         <registry name="HumanoidHighLevelControllerManager">
+            <registry name="HighLevelHumanoidControllerFactory">
+               <registry name="HighLevelControlManagerFactory">
+                  <registry name="FeetManager">
+                     <registry name="FootControlModuleParameters">
+                        <parameter name="CoefficientOfFriction" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                     </registry>
+                     <registry name="ToeOffManager">
+                        <parameter name="doToeOffIfPossibleInDoubleSupport" type="BooleanParameter" value="true" />
+                        <parameter name="doToeOffIfPossibleInSingleSupport" type="BooleanParameter" value="false" />
+                     </registry>
+                     <parameter name="useWorldSurfaceNormalWhenFullyConstrained" type="BooleanParameter" value="false" />
+                  </registry>
+               </registry>
+            </registry>
+         </registry>
+      </registry>
+   </registry>
+</parameters>
