@@ -1,12 +1,10 @@
 package us.ihmc.utilities.ros.subscriber;
 
-import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.utilities.ros.RosMainNode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 public class RawGPUPlanarRegionSubscriber extends AbstractRosTopicSubscriber<map_sense.RawGPUPlanarRegionList>
 {

@@ -1,14 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.google.common.util.concurrent.AtomicDouble;
-
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -25,6 +16,13 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class PlanarRegionViewer
 {
    private static final boolean VERBOSE = false;
@@ -34,8 +32,6 @@ public class PlanarRegionViewer
 
    private final AtomicReference<List<MeshView>> graphicsToRender = new AtomicReference<>(null);
    private List<MeshView> graphicsRendered = null;
-
-   private final AtomicDouble opacity = new AtomicDouble(1.0);
 
    private final AnimationTimer renderMeshAnimation;
    private final AtomicBoolean show = new AtomicBoolean(true);
@@ -71,11 +67,6 @@ public class PlanarRegionViewer
                root.getChildren().addAll(graphicsRendered);
          }
       };
-   }
-
-   public void setOpacity(double newOpacity)
-   {
-      opacity.set(newOpacity);
    }
 
    public void start()

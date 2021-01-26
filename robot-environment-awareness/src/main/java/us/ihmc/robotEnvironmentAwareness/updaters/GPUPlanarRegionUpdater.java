@@ -109,6 +109,21 @@ public class GPUPlanarRegionUpdater
       }
    }
 
+   public PlanarRegionSegmentationRawData getSegmentationRawData(RawGPUPlanarRegion rawGPUPlanarRegion)
+   {
+
+      List<Point3D> pointCloud = rawGPUPlanarRegion.getVertices().stream().map(this::toPoint3D).collect(Collectors.toList());
+      PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(rawGPUPlanarRegion.getId(),
+                                                                                    new Vector3D(rawGPUPlanarRegion.getNormal().getX(),
+                                                                                                 rawGPUPlanarRegion.getNormal().getY(),
+                                                                                                 rawGPUPlanarRegion.getNormal().getZ()),
+                                                                                    new Point3D(rawGPUPlanarRegion.getCentroid().getX(),
+                                                                                                rawGPUPlanarRegion.getCentroid().getY(),
+                                                                                                rawGPUPlanarRegion.getCentroid().getZ()),
+                                                                                    pointCloud);
+      return rawData;
+   }
+
    private PlanarRegionsList updatePolygons(List<PlanarRegionSegmentationRawData> rawData)
    {
       return PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
