@@ -11,36 +11,36 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
 public class FootTrajectoryPredictor
 {
-   private static final double swingHeight = 0.15;
-   private static final double interpolationFactor = 0.25;
+   private static final double defaultSwingHeight = 0.15;
+   private static final double defaultPredictorWaypointProportion = 0.25;
 
-   private final MultipleWaypointsPositionTrajectoryGenerator leftFootTrajectory;
-   private final MultipleWaypointsPositionTrajectoryGenerator rightFootTrajectory;
-   private final SideDependentList<MultipleWaypointsPositionTrajectoryGenerator> footTrajectories;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final MultipleWaypointsPositionTrajectoryGenerator leftFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("leftFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
+   private final MultipleWaypointsPositionTrajectoryGenerator rightFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("rightFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
+   private final SideDependentList<MultipleWaypointsPositionTrajectoryGenerator> footTrajectories = new SideDependentList<>(leftFootTrajectory, rightFootTrajectory);
+
+   private final DoubleProvider predictorSwingHeight = new DoubleParameter("predictorSwingHeight", registry, defaultSwingHeight);
+   private final DoubleProvider predictorWaypointProportion = new DoubleParameter("predictorWaypointProportion", registry, defaultPredictorWaypointProportion);
 
    private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
 
    public FootTrajectoryPredictor(YoRegistry parentRegistry)
    {
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-
-      leftFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("leftFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
-      rightFootTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("rightFootPredictedTrajectory", ReferenceFrame.getWorldFrame(), registry);
-
-      footTrajectories = new SideDependentList<>(leftFootTrajectory, rightFootTrajectory);
-
       parentRegistry.addChild(registry);
    }
 
    public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-//      this.swingTrajectory = swingTrajectory;
+      this.swingTrajectory = swingTrajectory;
    }
 
    public void compute(CoPTrajectoryGeneratorState state)
@@ -88,7 +88,7 @@ public class FootTrajectoryPredictor
       {
          predictSwingFootTrajectory(timing.getTransferTime(),
                                     timing.getSwingTime() + timing.getTransferTime(),
-                                    swingHeight,
+                                    predictorSwingHeight.getValue(),
                                     state.getFootPose(swingSide).getPosition(),
                                     footstep.getFootstepPose().getPosition(),
                                     footTrajectories.get(swingSide));
@@ -125,12 +125,12 @@ public class FootTrajectoryPredictor
                                    FramePoint3DReadOnly endPosition,
                                    MultipleWaypointsPositionTrajectoryGenerator trajectoryToPack)
    {
-      double time1 = InterpolationTools.linearInterpolate(startTime, endTime, interpolationFactor);
-      midpoint1.interpolate(startPosition, endPosition, interpolationFactor);
+      double time1 = InterpolationTools.linearInterpolate(startTime, endTime, predictorWaypointProportion.getValue());
+      midpoint1.interpolate(startPosition, endPosition, predictorWaypointProportion.getValue());
       midpoint1.addZ(swingHeight);
 
-      double time2 = InterpolationTools.linearInterpolate(endTime, startTime, interpolationFactor);
-      midpoint2.interpolate(endPosition, startPosition, interpolationFactor);
+      double time2 = InterpolationTools.linearInterpolate(endTime, startTime, predictorWaypointProportion.getValue());
+      midpoint2.interpolate(endPosition, startPosition, predictorWaypointProportion.getValue());
       midpoint2.addZ(swingHeight);
 
       velocityVector1.sub(midpoint2, startPosition);
