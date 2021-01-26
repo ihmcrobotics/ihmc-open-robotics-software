@@ -5,6 +5,7 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class MatrixMissingTools
 {
@@ -82,5 +83,19 @@ public class MatrixMissingTools
       DMatrixRMaj vector = new DMatrixRMaj(size, 1);
       CommonOps_DDRM.fill(vector, fillValue);
       return vector;
+   }
+
+   public static boolean epsilonEquals(DMatrix1Row a, DMatrix1Row b, double epsilon)
+   {
+      if (a.numRows != b.numRows)
+         return false;
+      if (a.numCols != b.numCols)
+         return false;
+      for (int i = 0; i < a.getNumElements(); i++)
+      {
+         if (!EuclidCoreTools.epsilonEquals(a.get(i), b.get(i), epsilon))
+            return false;
+      }
+      return true;
    }
 }
