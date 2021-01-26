@@ -123,7 +123,7 @@ public class ECMPTrajectoryCalculator
       copPositionToPack.add(desiredECMPPosition);
    }
 
-   private void computeECMPOffset(FrameVector3DReadOnly desiredAngularMomentumRate, FixedFrameVector2DBasics ecmpOffsetToPack)
+   public void computeECMPOffset(FrameVector3DReadOnly desiredAngularMomentumRate, FixedFrameVector2DBasics ecmpOffsetToPack)
    {
       ecmpOffsetToPack.setX(desiredAngularMomentumRate.getY());
       ecmpOffsetToPack.setY(-desiredAngularMomentumRate.getX());
