@@ -309,7 +309,7 @@ public class LIDARBasedREAModule implements PerceptionModule
             timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose.getPosition()), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
-            networkProvider.update(planarRegionFeatureUpdater, ocTreeUpdateSuccess);
+            networkProvider.update(planarRegionFeatureUpdater, ocTreeUpdateSuccess, mainOctree);
             networkProvider.publishCurrentState();
          }
 
