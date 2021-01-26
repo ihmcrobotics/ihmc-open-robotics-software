@@ -134,6 +134,7 @@ public class LinearCoMTrajectoryHandler
                                                       vrpEndVelocity);
          Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
          vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         vrpTrajectory.getTimeInterval().setInterval(0.0, timeInterval.getDuration());
          this.vrpTrajectories.add(vrpTrajectory);
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
