@@ -25,7 +25,10 @@ import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -38,9 +41,7 @@ public class ThreePotatoAngularMomentumCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double estimationDt = 0.05;
-   private static final int maxSamplesPerSegment = 10;
-   private static final int minSamplesPerSegment = 10;
+
 
    private static final boolean visualize = true;
 
@@ -48,6 +49,10 @@ public class ThreePotatoAngularMomentumCalculator
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
    private final DoubleProvider potatoMassFraction;
    private final double totalMass;
+
+   private final DoubleProvider idealAngularMomentumSampleDt = new DoubleParameter("idealAngularMomentumSampleDt", registry, 0.05);
+   private final IntegerProvider maxAngularMomentumSamplesPerSegment = new IntegerParameter("maxAngularMomentumSamplesPerSegment", registry, 10);
+   private final IntegerProvider minAngularMomentumSamplesPerSegment = new IntegerParameter("minAngularMomentumSamplesPerSegment", registry, 5);
 
    private final YoFrameVector3D desiredAngularMomentum = new YoFrameVector3D("desiredAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularMomentumRate = new YoFrameVector3D("desiredAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
@@ -252,9 +257,9 @@ public class ThreePotatoAngularMomentumCalculator
          angularMomentumEstimator.getTimeInterval().set(timeInterval);
          scaledAngularMomentumEstimator.getTimeInterval().set(timeInterval);
 
-         double minDt = duration / maxSamplesPerSegment;
-         double maxDt = duration / minSamplesPerSegment;
-         double segmentDt = duration / estimationDt;
+         double minDt = duration / maxAngularMomentumSamplesPerSegment.getValue();
+         double maxDt = duration / minAngularMomentumSamplesPerSegment.getValue();
+         double segmentDt = duration / idealAngularMomentumSampleDt.getValue();
          segmentDt = MathTools.clamp(segmentDt, minDt, maxDt);
 
          for (double timeInInterval = 0.0; timeInInterval <= duration; timeInInterval += segmentDt)
@@ -323,7 +328,7 @@ public class ThreePotatoAngularMomentumCalculator
       secondPotatoVis.reset();
       thirdPotatoVis.reset();
 
-      for (double time = 0.0; time <= duration; time += estimationDt)
+      for (double time = 0.0; time <= duration; time += idealAngularMomentumSampleDt.getValue())
       {
          comTrajectories.compute(time);
          secondPotatoTrajectories.compute(time);
