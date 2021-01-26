@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class FootTrajectoryPredictor
 {
@@ -70,24 +71,27 @@ public class FootTrajectoryPredictor
       PlanningTiming timing = state.getTiming(0);
       DynamicPlanningFootstep footstep = state.getFootstep(0);
 
+      double transferDuration = Math.min(timing.getTransferTime(), sufficientlyLongTime);
+      double swingDuration = Math.min(timing.getSwingTime(), sufficientlyLongTime);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
          footTrajectory.clear();
          footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(timing.getTransferTime(), state.getFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(transferDuration, state.getFootPose(robotSide).getPosition(), zeroVector);
       }
 
       RobotSide swingSide = footstep.getRobotSide();
       RobotSide stanceSide = swingSide.getOppositeSide();
 
       footTrajectories.get(stanceSide)
-                      .appendWaypoint(timing.getTransferTime() + timing.getSwingTime(), state.getFootPose(stanceSide).getPosition(), zeroVector);
+                      .appendWaypoint(transferDuration + swingDuration, state.getFootPose(stanceSide).getPosition(), zeroVector);
 
       if (swingTrajectory == null)
       {
-         predictSwingFootTrajectory(timing.getTransferTime(),
-                                    timing.getSwingTime() + timing.getTransferTime(),
+         predictSwingFootTrajectory(transferDuration,
+                                    transferDuration + swingDuration,
                                     predictorSwingHeight.getValue(),
                                     state.getFootPose(swingSide).getPosition(),
                                     footstep.getFootstepPose().getPosition(),
