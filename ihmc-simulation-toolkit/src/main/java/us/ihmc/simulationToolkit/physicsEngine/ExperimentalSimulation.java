@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -33,13 +32,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -61,8 +57,6 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.BallAndSocketJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -262,7 +256,8 @@ public class ExperimentalSimulation extends Simulation
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
-            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
+            robot.update();
+            robot.updateAllGroundContactPointVelocities();
          }
 
          getDataBuffer().fillBuffer();
@@ -286,6 +281,7 @@ public class ExperimentalSimulation extends Simulation
             Robot robot = robots[i];
             robot.update();
             robot.updateIMUMountAccelerations();
+            robot.updateAllGroundContactPointVelocities();
             robot.doControllers();
          }
 
@@ -296,7 +292,6 @@ public class ExperimentalSimulation extends Simulation
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
-            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
             robot.getYoTime().add(getDT());
          }
       }
@@ -616,29 +611,6 @@ public class ExperimentalSimulation extends Simulation
             allIDJoints = multiBodySystem.getAllJoints();
          }
       };
-   }
-
-   private static void updateGroundContactPointsVelocity(RigidBodyReadOnly rootBody, Robot scsRobot)
-   {
-      List<GroundContactPoint> scsGroundContactPoints = scsRobot.getAllGroundContactPoints();
-      JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
-      FramePoint3D position = new FramePoint3D();
-      FrameVector3D linearVelocity = new FrameVector3D();
-      FrameVector3D angularVelocity = new FrameVector3D();
-
-      for (GroundContactPoint scsGroundContactPoint : scsGroundContactPoints)
-      {
-         Joint scsJoint = scsGroundContactPoint.getParentJoint();
-         scsGroundContactPoint.getOffset(position);
-         JointReadOnly joint = Stream.of(allJoint).filter(candidate -> candidate.getName().equals(scsJoint.getName())).findFirst().get();
-         position.setReferenceFrame(joint.getFrameAfterJoint());
-         TwistReadOnly twistOfFrame = joint.getFrameAfterJoint().getTwistOfFrame();
-         twistOfFrame.getLinearVelocityAt(position, linearVelocity);
-         linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         angularVelocity.setMatchingFrame(twistOfFrame.getAngularPart());
-         scsGroundContactPoint.setVelocity(linearVelocity);
-         scsGroundContactPoint.setAngularVelocity(angularVelocity);
-      }
    }
 
    static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)

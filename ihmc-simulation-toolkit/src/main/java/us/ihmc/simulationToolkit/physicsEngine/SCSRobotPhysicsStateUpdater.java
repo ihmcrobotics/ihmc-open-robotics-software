@@ -40,6 +40,7 @@ public class SCSRobotPhysicsStateUpdater implements InertialMeasurementReader
       {
          singleRobotIMUSensorReaders.setProviders(accelerationProvider, twistChangeProvider);
          singleRobotIMUSensorReaders.setInertialFrame(multiBodySystem.getInertialFrame());
+         singleRobotIMUSensorReaders.initialize();
       }
    }
 
@@ -51,31 +52,36 @@ public class SCSRobotPhysicsStateUpdater implements InertialMeasurementReader
 
    private class SingleRobotPhysicsStateUpdaters
    {
-      private final List<PhysicsStateUpdater> imuMountReaders;
+      private final List<PhysicsStateUpdater> physicsStateUpdaters;
 
       public SingleRobotPhysicsStateUpdaters(RigidBodyReadOnly rootBody, Robot scsRobot)
       {
-         imuMountReaders = new ArrayList<>();
+         physicsStateUpdaters = new ArrayList<>();
 
          for (JointReadOnly joint : rootBody.childrenSubtreeIterable())
          {
-            imuMountReaders.add(new PhysicsStateUpdater(joint, scsRobot.getJoint(joint.getName())));
+            physicsStateUpdaters.add(new PhysicsStateUpdater(joint, scsRobot.getJoint(joint.getName())));
          }
       }
 
       public void setProviders(RigidBodyAccelerationProvider accelerationProvider, RigidBodyTwistProvider twistChangeProvider)
       {
-         imuMountReaders.forEach(reader -> reader.setProviders(accelerationProvider, twistChangeProvider));
+         physicsStateUpdaters.forEach(reader -> reader.setProviders(accelerationProvider, twistChangeProvider));
       }
 
       public void setInertialFrame(ReferenceFrame inertialFrame)
       {
-         imuMountReaders.forEach(reader -> reader.setInertialFrame(inertialFrame));
+         physicsStateUpdaters.forEach(reader -> reader.setInertialFrame(inertialFrame));
+      }
+
+      public void initialize()
+      {
+         physicsStateUpdaters.forEach(PhysicsStateUpdater::initialize);
       }
 
       public void read(double dt, Vector3DReadOnly gravity)
       {
-         imuMountReaders.forEach(reader -> reader.read(dt, gravity));
+         physicsStateUpdaters.forEach(reader -> reader.read(dt, gravity));
       }
    }
 
@@ -105,6 +111,20 @@ public class SCSRobotPhysicsStateUpdater implements InertialMeasurementReader
          this.inertialFrame = inertialFrame;
       }
 
+      public void initialize()
+      {
+         ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
+         twist.setIncludingFrame(rigidBody.getBodyFixedFrame().getTwistOfFrame());
+
+         scsJoint.jointTransform3D.set(frameAfterJoint.getTransformToParent());
+         scsJoint.transformToNext.set(frameAfterJoint.getTransformToRoot());
+         scsJoint.physics.Ri_0.setAndTranspose(scsJoint.transformToNext.getRotation());
+         scsJoint.physics.w_i.set(twist.getAngularPart());
+         scsJoint.physics.v_i.set(twist.getLinearPart());
+         scsJoint.physics.a_hat_i.top.setToZero();
+         scsJoint.physics.a_hat_i.bottom.setToZero();
+      }
+
       private final Twist twist = new Twist();
       private final SpatialAcceleration acceleration = new SpatialAcceleration();
       private final FrameVector3D localGravity = new FrameVector3D();
@@ -123,6 +143,7 @@ public class SCSRobotPhysicsStateUpdater implements InertialMeasurementReader
 
          scsJoint.jointTransform3D.set(frameAfterJoint.getTransformToParent());
          scsJoint.transformToNext.set(frameAfterJoint.getTransformToRoot());
+         scsJoint.physics.Ri_0.setAndTranspose(scsJoint.transformToNext.getRotation());
          scsJoint.physics.w_i.set(twist.getAngularPart());
          scsJoint.physics.v_i.set(twist.getLinearPart());
          scsJoint.physics.a_hat_i.top.set(acceleration.getAngularPart());
