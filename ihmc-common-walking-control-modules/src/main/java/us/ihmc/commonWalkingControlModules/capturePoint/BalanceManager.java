@@ -448,6 +448,7 @@ public class BalanceManager
 
       CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, perfectCMP2d);
       yoPerfectCMP.set(perfectCMP2d, comTrajectoryPlanner.getDesiredECMPPosition().getZ());
+
       if (computeAngularMomentumOffset.getValue())
          angularMomentumHandler.computeCoPPosition(yoPerfectCMP, yoPerfectCoP);
       else
@@ -549,7 +550,8 @@ public class BalanceManager
          angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory(),
                                                                   swingTrajectory);
 
-         contactStateProviders = angularMomentumHandler.computeECMPTrajectory(copTrajectory.getContactStateProviders());
+         contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
+         angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       }
       else
       {
@@ -562,8 +564,6 @@ public class BalanceManager
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
-      if (computeAngularMomentumOffset.getValue())
-         angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
