@@ -62,7 +62,7 @@ public class ECMPTrajectoryCalculator
    private final FramePoint3D ecmpPosition = new FramePoint3D();
    private final FrameVector3D ecmpVelocity = new FrameVector3D();
 
-   public void computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
+   public List<? extends ContactStateProvider> computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
       for (int i = 0; i < copTrajectories.size(); i++)
@@ -78,7 +78,11 @@ public class ECMPTrajectoryCalculator
          double endTime = Math.min(copTrajectory.getTimeInterval().getEndTime(), sufficientlyLong);
 
          if (startTime > desiredAngularMomentumTrajectories.getEndTime() || endTime > desiredAngularMomentumTrajectories.getEndTime())
-            return;
+         {
+            ecmpStartOffsets.get(i).setToNaN();
+            ecmpEndOffsets.get(i).setToNaN();
+            break;
+         }
 
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
 
@@ -113,6 +117,8 @@ public class ECMPTrajectoryCalculator
          ecmpStartOffsets.get(i).setToNaN();
          ecmpEndOffsets.get(i).setToNaN();
       }
+
+      return contactStateProviders;
    }
 
    public void computeCoPPosition(FramePoint3DReadOnly desiredECMPPosition, FrameVector3DReadOnly desiredAngularMomentumRate, FixedFramePoint3DBasics copPositionToPack)
