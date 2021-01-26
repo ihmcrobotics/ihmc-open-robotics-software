@@ -1,10 +1,12 @@
 package map_sense;
 
 import geometry_msgs.Point;
+import geometry_msgs.Vector3;
+import org.ros.internal.message.Message;
 
 import java.util.List;
 
-public interface RawGPUPlanarRegion extends org.ros.internal.message.Message
+public interface RawGPUPlanarRegion extends Message
 {
    static final String _TYPE = "map_sense/RawGPUPlanarRegion";
    static final String _DEFINITION =
@@ -18,15 +20,15 @@ public interface RawGPUPlanarRegion extends org.ros.internal.message.Message
 
    void setNumOfPatches(Short numOfPatches);
 
-   geometry_msgs.Point getCentroid();
+   Point getCentroid();
 
-   void setCentroid(geometry_msgs.Point value);
+   void setCentroid(Point value);
 
-   geometry_msgs.Vector3 getNormal();
+   Vector3 getNormal();
 
-   void setNormal(geometry_msgs.Vector3 value);
+   void setNormal(Vector3 value);
 
    List<Point> getVertices();
 
-   void setVertices(List<geometry_msgs.Point> value);
+   void setVertices(List<Point> value);
 }

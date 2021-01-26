@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import map_sense.RawGPUPlanarRegionList;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.GPUModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
