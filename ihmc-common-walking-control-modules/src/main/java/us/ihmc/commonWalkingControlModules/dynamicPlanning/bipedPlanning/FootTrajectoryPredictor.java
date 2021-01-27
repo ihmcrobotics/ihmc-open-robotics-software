@@ -15,7 +15,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class FootTrajectoryPredictor
@@ -61,7 +60,7 @@ public class FootTrajectoryPredictor
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
          footTrajectory.clear();
          footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(sufficientlyLarge, state.getFootPose(robotSide).getPosition(), zeroVector);
+         footTrajectory.appendWaypoint(sufficientlyLongTime, state.getFootPose(robotSide).getPosition(), zeroVector);
          footTrajectory.initialize();
       }
    }
