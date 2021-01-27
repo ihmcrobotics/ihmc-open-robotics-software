@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class ECMPTrajectoryCalculator
 {
@@ -66,14 +66,12 @@ public class ECMPTrajectoryCalculator
          contactStateProviders.add().set(copTrajectories.get(i));
       }
 
-      boolean endsOnLongSegment = copTrajectories.get(length - 1).getTimeInterval().getDuration() > 5.0;
-      int endingSize = endsOnLongSegment ? length - 1 : length;
       int i = 0;
-      for (; i < endingSize; i++)
+      for (; i < length - 1; i++)
       {
          ContactStateProvider copTrajectory = copTrajectories.get(i);
-         double startTime = Math.min(copTrajectory.getTimeInterval().getStartTime(), sufficientlyLong);
-         double endTime = Math.min(copTrajectory.getTimeInterval().getEndTime(), sufficientlyLong);
+         double startTime = Math.min(copTrajectory.getTimeInterval().getStartTime(), sufficientlyLongTime);
+         double endTime = Math.min(copTrajectory.getTimeInterval().getEndTime(), sufficientlyLongTime);
 
          if (startTime > desiredAngularMomentumTrajectories.getEndTime() || endTime > desiredAngularMomentumTrajectories.getEndTime())
          {
@@ -86,9 +84,7 @@ public class ECMPTrajectoryCalculator
          FixedFrameVector2DBasics startOffset = ecmpStartOffsets.get(i);
          FixedFrameVector2DBasics endOffset = ecmpEndOffsets.get(i);
 
-
          desiredAngularMomentumTrajectories.compute(startTime);
-
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), startOffset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
@@ -98,7 +94,6 @@ public class ECMPTrajectoryCalculator
 
          eCMPTrajectory.setStartECMPPosition(ecmpPosition);
          eCMPTrajectory.setStartECMPVelocity(ecmpVelocity);
-
 
          desiredAngularMomentumTrajectories.compute(endTime);
 

@@ -33,6 +33,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
+
 /**
  * <p>
  * This is the main class of the trajectory-based CoM Trajectory Planner.
@@ -63,7 +65,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static boolean verbose = false;
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   public static final double sufficientlyLong = 1e2;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -185,7 +186,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    public void initializeTrajectory(FramePoint3DReadOnly endPosition, double stepDuration)
    {
-      stepDuration = Math.min(sufficientlyLong, stepDuration);
+      stepDuration = Math.min(sufficientlyLongTime, stepDuration);
       trajectoryHandler.setLinear(currentCoMPosition, endPosition, omega.getValue(), stepDuration);
    }
 
