@@ -37,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class ThreePotatoAngularMomentumCalculator
 {
@@ -155,6 +155,25 @@ public class ThreePotatoAngularMomentumCalculator
       footTrajectoryPredictor.compute(state);
    }
 
+   public void reset()
+   {
+      predictedCoMTrajectory = null;
+      angularMomentumEstimator.reset();
+      angularMomentumEstimator.reshape(1);
+      totalAngularMomentum.setToZero();
+      angularMomentumEstimator.addObjectivePosition(0.0, totalAngularMomentum);
+      angularMomentumEstimator.initialize();
+
+      angularMomentumTrajectory.clear();
+      heightScaledAngularMomentumTrajectory.clear();
+
+      angularMomentumTrajectory.appendSegment(angularMomentumEstimator);
+      heightScaledAngularMomentumTrajectory.appendSegment(angularMomentumEstimator);
+
+      angularMomentumTrajectory.initialize();
+      heightScaledAngularMomentumTrajectory.initialize();
+   }
+
    public void computeAngularMomentum(double time)
    {
       angularMomentumTrajectory.compute(time);
@@ -185,13 +204,17 @@ public class ThreePotatoAngularMomentumCalculator
       MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();
 
-
       totalAngularMomentum.setToZero();
       totalTorque.setToZero();
 
+      if (predictedCoMTrajectory == null)
+         return;
+
       if (time > predictedCoMTrajectory.getEndTime() || time > predictedLeftFootTrajectory.getLastWaypointTime()
           || time > predictedRightFootTrajectory.getLastWaypointTime())
+      {
          return;
+      }
 
       predictedCoMTrajectory.compute(time);
       predictedLeftFootTrajectory.compute(time);
@@ -328,7 +351,7 @@ public class ThreePotatoAngularMomentumCalculator
 
       double duration = Math.min(comTrajectories.getEndTime(),
                                  Math.min(secondPotatoTrajectories.getLastWaypointTime(),
-                                          Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLong)));
+                                          Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLongTime)));
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();

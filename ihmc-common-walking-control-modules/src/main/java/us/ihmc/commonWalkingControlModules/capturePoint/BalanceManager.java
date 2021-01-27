@@ -533,29 +533,19 @@ public class BalanceManager
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       if (computeAngularMomentumOffset.getValue())
       {
-         if (!comTrajectoryPlanner.hasTrajectories())
+         if (comTrajectoryPlanner.hasTrajectories())
          {
-            if (copTrajectoryState.getNumberOfFootstep() > 0)
-            {
-               tempPoint.setIncludingFrame(copTrajectoryState.getFootstep(0).getFootstepPose().getPosition());
-               tempPoint.addZ(comTrajectoryPlanner.getNominalCoMHeight());
-               PlanningTiming timing = copTrajectoryState.getTiming(0);
-
-               comTrajectoryPlanner.initializeTrajectory(tempPoint, timing.getSwingTime() + timing.getTransferTime());
-            }
-            else
-            {
-               centerOfMassPosition.setToZero(centerOfMassFrame);
-               centerOfMassPosition.changeFrame(worldFrame);
-
-               comTrajectoryPlanner.initializeTrajectory(centerOfMassPosition, Double.POSITIVE_INFINITY);
-            }
+            angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
+                                                                     contactStateProviders,
+                                                                     comTrajectoryPlanner.getCoMTrajectory(),
+                                                                     swingTrajectory);
+            contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
+         }
+         else
+         {
+            angularMomentumHandler.resetAngularMomentum();
          }
 
-         angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState, contactStateProviders, comTrajectoryPlanner.getCoMTrajectory(),
-                                                                  swingTrajectory);
-
-         contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
          angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
       }
       else
