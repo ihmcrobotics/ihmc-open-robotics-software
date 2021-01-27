@@ -80,11 +80,14 @@ public class GPUPlanarRegionUpdater
 
    public PlanarRegionsList generatePlanarRegions(RawGPUPlanarRegionList rawGPUPlanarRegionList)
    {
-      List<PlanarRegionSegmentationRawData> rawData = new ArrayList<>();
-      getSegmentationRawData(rawGPUPlanarRegionList, rawData);
-      logSegmentationRawData(rawData);
+      List<PlanarRegionSegmentationRawData> rawData = getSegmentationRawDataAsList(rawGPUPlanarRegionList);
+
+//      List<PlanarRegionSegmentationRawData> rawData = new ArrayList<>();
+//      getSegmentationRawData(rawGPUPlanarRegionList, rawData);
+
+//      logSegmentationRawData(rawData);
       PlanarRegionsList planarRegionsList = updatePolygons(rawData);
-      logFinalGPUPlanarRegions(planarRegionsList);
+//      logFinalGPUPlanarRegions(planarRegionsList);
       return planarRegionsList;
    }
 
@@ -109,7 +112,11 @@ public class GPUPlanarRegionUpdater
       }
    }
 
-   public PlanarRegionSegmentationRawData getSegmentationRawData(RawGPUPlanarRegion rawGPUPlanarRegion)
+   public List<PlanarRegionSegmentationRawData> getSegmentationRawDataAsList(RawGPUPlanarRegionList rawGPUPlanarRegionList){
+      return rawGPUPlanarRegionList.getRegions().parallelStream().map(this::convertToSegmentationRawData).collect(Collectors.toList());
+   }
+
+   public PlanarRegionSegmentationRawData convertToSegmentationRawData(RawGPUPlanarRegion rawGPUPlanarRegion)
    {
 
       List<Point3D> pointCloud = rawGPUPlanarRegion.getVertices().stream().map(this::toPoint3D).collect(Collectors.toList());
