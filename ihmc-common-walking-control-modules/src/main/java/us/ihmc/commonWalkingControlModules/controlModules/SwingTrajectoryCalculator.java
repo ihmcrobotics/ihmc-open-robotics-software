@@ -261,68 +261,14 @@ public class SwingTrajectoryCalculator
 
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
-      boolean appendFootstepPose = true;
-      double swingDuration = this.swingDuration.getValue();
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
-         if (swingWaypoints.get(0).getTime() > 1.0e-5)
-         {
-            swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
-            swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
-         }
-
-         for (int i = 0; i < swingWaypoints.size(); i++)
-         {
-            swingTrajectory.appendPoseWaypoint(swingWaypoints.get(i));
-         }
-
-         appendFootstepPose = !Precision.equals(swingWaypoints.getLast().getTime(), swingDuration);
+         setTrajectoryFromCustomWaypoints();
       }
       else
       {
-         swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
-         swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
-
-         // TODO: initialize optimizer somewhere else
-         if (initializeOptimizer)
-         {
-            initializeTrajectoryOptimizer();
-         }
-
-         for (int i = 0; i < swingTrajectoryOptimizer.getNumberOfWaypoints(); i++)
-         {
-            swingTrajectoryOptimizer.getWaypointData(i, tempPositionTrajectoryPoint);
-            swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
-         }
-
-         // make the foot orientation better for avoidance
-         if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
-         {
-            tmpOrientation.setToZero(worldFrame);
-            tmpVector.setToZero(worldFrame);
-            tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.getMidpointOrientationInterpolationForObstacleClearance());
-            swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
-         }
-      }
-
-      // append footstep pose if not provided in the waypoints
-      if (appendFootstepPose)
-      {
-         modifyFinalOrientationForTouchdown(finalOrientation);
-         if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && initializeOptimizer)
-            swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
-         swingTrajectory.appendPositionWaypoint(swingDuration, finalPosition, finalLinearVelocity);
-         swingTrajectory.appendOrientationWaypoint(swingDuration, finalOrientation, finalAngularVelocity);
-      }
-      else
-      {
-         // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
-         FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
-         lastPoint.getPositionIncludingFrame(finalPosition);
-         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
-         lastPoint.getOrientationIncludingFrame(finalOrientation);
-         lastPoint.getAngularVelocity(finalAngularVelocity);
+         setTrajectoryFromOptimizer(initializeOptimizer);
       }
 
       swingTrajectory.initialize();
@@ -339,11 +285,6 @@ public class SwingTrajectoryCalculator
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
       return swingTrajectory;
-   }
-
-   public FrameSE3TrajectoryPointBasics getSwingWaypoint(int i)
-   {
-      return swingWaypoints.get(i);
    }
 
    public FrameSE3TrajectoryPointBasics getLastSwingWaypoint()
@@ -402,5 +343,68 @@ public class SwingTrajectoryCalculator
       }
 
       finalOrientationToPack.appendPitchRotation(footstepPitchModification);
+   }
+
+   private void setTrajectoryFromCustomWaypoints()
+   {
+      if (swingWaypoints.get(0).getTime() > 1.0e-5)
+      {
+         swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+         swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+      }
+
+      for (int i = 0; i < swingWaypoints.size(); i++)
+      {
+         swingTrajectory.appendPoseWaypoint(swingWaypoints.get(i));
+      }
+
+      boolean appendFootstepPose = !Precision.equals(swingWaypoints.getLast().getTime(), swingDuration.getDoubleValue());
+
+      // append footstep pose if not provided in the waypoints
+      if (appendFootstepPose)
+      {
+         modifyFinalOrientationForTouchdown(finalOrientation);
+         swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
+         swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
+      }
+      else
+      {
+         // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
+         FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
+         lastPoint.getPositionIncludingFrame(finalPosition);
+         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
+         lastPoint.getOrientationIncludingFrame(finalOrientation);
+         lastPoint.getAngularVelocity(finalAngularVelocity);
+      }
+   }
+
+   private void setTrajectoryFromOptimizer(boolean initializeOptimizer)
+   {
+      if (initializeOptimizer)
+         initializeTrajectoryOptimizer();
+
+      swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+      swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+
+      for (int i = 0; i < swingTrajectoryOptimizer.getNumberOfWaypoints(); i++)
+      {
+         swingTrajectoryOptimizer.getWaypointData(i, tempPositionTrajectoryPoint);
+         swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
+      }
+
+      // make the foot orientation better for avoidance
+      if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+      {
+         tmpOrientation.setToZero(worldFrame);
+         tmpVector.setToZero(worldFrame);
+         tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.getMidpointOrientationInterpolationForObstacleClearance());
+         swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
+      }
+
+      modifyFinalOrientationForTouchdown(finalOrientation);
+      if (initializeOptimizer)
+         swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
+      swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
+      swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
    }
 }
