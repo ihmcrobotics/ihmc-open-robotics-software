@@ -44,6 +44,7 @@ public class FootControlHelper
 
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
+                            YoSwingTrajectoryParameters swingTrajectoryParameters,
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
@@ -56,7 +57,7 @@ public class FootControlHelper
       this.explorationParameters = explorationParameters;
       this.footholdRotationParameters = footholdRotationParameters;
 
-      this.swingTrajectoryParameters = new YoSwingTrajectoryParameters(robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing", walkingControllerParameters.getSwingTrajectoryParameters(), registry);
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -154,11 +155,6 @@ public class FootControlHelper
       return walkingControllerParameters.getToeOffParameters();
    }
 
-   public SwingTrajectoryParameters getSwingTrajectoryParameters()
-   {
-      return walkingControllerParameters.getSwingTrajectoryParameters();
-   }
-
    public PartialFootholdControlModule getPartialFootholdControlModule()
    {
       return partialFootholdControlModule;
@@ -197,7 +193,7 @@ public class FootControlHelper
       return footholdRotationParameters;
    }
 
-   public YoSwingTrajectoryParameters getYoSwingTrajectoryParameters()
+   public YoSwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
    }

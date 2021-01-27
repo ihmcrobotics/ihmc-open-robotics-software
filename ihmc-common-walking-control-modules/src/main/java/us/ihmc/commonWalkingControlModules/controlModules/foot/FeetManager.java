@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
@@ -117,12 +118,15 @@ public class FeetManager
       DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
 
       WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
+      YoSwingTrajectoryParameters swingTrajectoryParameters = new YoSwingTrajectoryParameters("FootSwing", walkingControllerParameters.getSwingTrajectoryParameters(), registry);
+
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide,
                                                                      toeOffCalculator,
                                                                      walkingControllerParameters,
+                                                                     swingTrajectoryParameters,
                                                                      workspaceLimiterParameters,
                                                                      swingFootGains,
                                                                      holdFootGains,
