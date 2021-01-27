@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -56,6 +57,8 @@ public class ECMPTrajectoryCalculator
    private final FramePoint3D ecmpPosition = new FramePoint3D();
    private final FrameVector3D ecmpVelocity = new FrameVector3D();
 
+   private final FrameVector2D offset = new FrameVector2D();
+
    public List<? extends ContactStateProvider> computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
@@ -75,33 +78,39 @@ public class ECMPTrajectoryCalculator
 
          if (startTime > desiredAngularMomentumTrajectories.getEndTime() || endTime > desiredAngularMomentumTrajectories.getEndTime())
          {
-            ecmpStartOffsets.get(i).setToNaN();
-            ecmpEndOffsets.get(i).setToNaN();
+            if (i < ecmpStartOffsets.size())
+            {
+               ecmpStartOffsets.get(i).setToNaN();
+               ecmpEndOffsets.get(i).setToNaN();
+            }
+
             break;
          }
 
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
-         FixedFrameVector2DBasics startOffset = ecmpStartOffsets.get(i);
-         FixedFrameVector2DBasics endOffset = ecmpEndOffsets.get(i);
 
          desiredAngularMomentumTrajectories.compute(startTime);
 
-         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), startOffset);
+         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
 
          ecmpPosition.set(copTrajectory.getECMPStartPosition());
-         ecmpPosition.add(startOffset.getX(), startOffset.getY(), 0.0);
+         ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
+         if (i < ecmpStartOffsets.size())
+            ecmpStartOffsets.get(i).set(offset);
 
          eCMPTrajectory.setStartECMPPosition(ecmpPosition);
          eCMPTrajectory.setStartECMPVelocity(ecmpVelocity);
 
          desiredAngularMomentumTrajectories.compute(endTime);
 
-         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), endOffset);
+         computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
 
          ecmpPosition.set(copTrajectory.getECMPEndPosition());
-         ecmpPosition.add(endOffset.getX(), endOffset.getY(), 0.0);
+         ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
+         if (i < ecmpEndOffsets.size())
+            ecmpEndOffsets.get(i).set(offset);
 
          eCMPTrajectory.setEndECMPPosition(ecmpPosition);
          eCMPTrajectory.setEndECMPVelocity(ecmpVelocity);
