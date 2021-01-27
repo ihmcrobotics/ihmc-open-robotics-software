@@ -90,7 +90,7 @@ public class SwingTrajectoryCalculator
                                     HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
                                     YoSwingTrajectoryParameters swingTrajectoryParameters,
-                                    YoRegistry registry)
+                                    YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
@@ -101,6 +101,8 @@ public class SwingTrajectoryCalculator
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
       currentStateProvider = new CurrentRigidBodyStateProvider(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
+
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
       swingHeight = new YoDouble(namePrefix + "Height", registry);
@@ -129,6 +131,8 @@ public class SwingTrajectoryCalculator
       footstepPose.setToNaN();
 
       setupViz(controllerToolbox.getYoGraphicsListRegistry(), registry);
+
+      parentRegistry.addChild(registry);
    }
 
    private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
