@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -349,9 +350,7 @@ public class ThreePotatoAngularMomentumCalculator
       if (!visualize)
          return;
 
-      double duration = Math.min(comTrajectories.getEndTime(),
-                                 Math.min(secondPotatoTrajectories.getLastWaypointTime(),
-                                          Math.min(thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLongTime)));
+      double duration = EuclidCoreTools.min(comTrajectories.getEndTime(), secondPotatoTrajectories.getLastWaypointTime(), thirdPotatoTrajectories.getLastWaypointTime(), sufficientlyLongTime);
 
       comTrajectoryVis.reset();
       secondPotatoVis.reset();
