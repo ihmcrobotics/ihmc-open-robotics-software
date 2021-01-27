@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner.sufficientlyLong;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class LinearCoMTrajectoryHandler
 {
@@ -123,7 +123,7 @@ public class LinearCoMTrajectoryHandler
 
          comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
 
-         double duration = Math.min(timeInterval.getDuration(), sufficientlyLong);
+         double duration = Math.min(timeInterval.getDuration(), sufficientlyLongTime);
          computeVRPBoundaryConditionsFromCoefficients(startRow,
                                                       coefficientArray,
                                                       omega,
