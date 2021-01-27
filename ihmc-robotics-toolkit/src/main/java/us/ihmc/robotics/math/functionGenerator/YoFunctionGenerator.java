@@ -99,7 +99,7 @@ public class YoFunctionGenerator
       frequency = new YoDouble(name + "Freq", registry);
       phase = new YoDouble(name + "Phase", registry);
 
-      alphaFilter = new YoDouble("alphaFilter", registry);
+      alphaFilter = new YoDouble(name + "SmoothingAlphaFilter", registry);
       if (!smoothParameters)
          alphaFilter.set(0.0);
       else
