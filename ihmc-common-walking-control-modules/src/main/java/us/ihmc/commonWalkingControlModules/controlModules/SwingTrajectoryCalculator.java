@@ -81,9 +81,6 @@ public class SwingTrajectoryCalculator
 
    private final RobotSide robotSide;
 
-   private final YoBoolean ignoreInitialAngularVelocityZ;
-   private final YoDouble maxInitialLinearVelocityMagnitude;
-   private final YoDouble maxInitialAngularVelocityMagnitude;
 
    public SwingTrajectoryCalculator(String namePrefix,
                                     RobotSide robotSide,
@@ -108,7 +105,6 @@ public class SwingTrajectoryCalculator
       swingHeight = new YoDouble(namePrefix + "Height", registry);
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
 
-
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix,
@@ -119,13 +115,6 @@ public class SwingTrajectoryCalculator
                                                                controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
-
-      ignoreInitialAngularVelocityZ = new YoBoolean(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
-      maxInitialLinearVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialLinearVelocityMagnitude", registry);
-      maxInitialAngularVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialAngularVelocityMagnitude", registry);
-      ignoreInitialAngularVelocityZ.set(walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
-      maxInitialLinearVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
-      maxInitialAngularVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
@@ -247,13 +236,13 @@ public class SwingTrajectoryCalculator
       initialPose.getPosition().setMatchingFrame(initialPosition);
       initialPose.getOrientation().setMatchingFrame(initialOrientation);
 
-      if (ignoreInitialAngularVelocityZ.getBooleanValue())
+      if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
          initialAngularVelocity.changeFrame(worldFrame);
          initialAngularVelocity.setZ(0.0);
       }
-      initialLinearVelocity.clipToMaxLength(maxInitialLinearVelocityMagnitude.getDoubleValue());
-      initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
+      initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
 
