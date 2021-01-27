@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.math3.util.Precision;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -11,7 +10,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,12 +19,11 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -76,8 +73,6 @@ public class SwingTrajectoryCalculator
    private final FramePose3D footstepPose = new FramePose3D();
    private final FramePose3D lastFootstepPose = new FramePose3D();
 
-   private final MovingReferenceFrame soleFrame;
-
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
 
    private final double[] waypointProportions = new double[2];
@@ -95,8 +90,7 @@ public class SwingTrajectoryCalculator
                                     HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
                                     YoSwingTrajectoryParameters swingTrajectoryParameters,
-                                    YoRegistry registry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    YoRegistry registry)
    {
       this.robotSide = robotSide;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
@@ -104,14 +98,14 @@ public class SwingTrajectoryCalculator
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
 
-      soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
-      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
+      currentStateProvider = new CurrentRigidBodyStateProvider(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
-      swingDuration = new YoDouble(namePrefix + "Duration", registry);
       swingHeight = new YoDouble(namePrefix + "Height", registry);
+      swingDuration = new YoDouble(namePrefix + "Duration", registry);
+
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
@@ -120,7 +114,7 @@ public class SwingTrajectoryCalculator
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
                                                                registry,
-                                                               yoGraphicsListRegistry);
+                                                               controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
 
@@ -133,6 +127,8 @@ public class SwingTrajectoryCalculator
 
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
+
+      setupViz(controllerToolbox.getYoGraphicsListRegistry(), registry);
    }
 
    private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
@@ -161,9 +157,14 @@ public class SwingTrajectoryCalculator
       }
    }
 
-   public void doOptimizationUpdate()
+   public TrajectoryType getActiveTrajectoryType()
    {
-      swingTrajectoryOptimizer.doOptimizationUpdate();
+      return activeTrajectoryType.getEnumValue();
+   }
+
+   public boolean doOptimizationUpdate()
+   {
+      return swingTrajectoryOptimizer.doOptimizationUpdate();
    }
 
    public void setFootstep(Footstep footstep)
@@ -227,7 +228,12 @@ public class SwingTrajectoryCalculator
       }
    }
 
-   private void initializeTrajectory()
+   public void setSwingDuration(double swingDuration)
+   {
+      this.swingDuration.set(swingDuration);
+   }
+
+   public void initializeTrajectoryStartConditions()
    {
       currentStateProvider.getPosition(initialPosition);
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
@@ -245,11 +251,9 @@ public class SwingTrajectoryCalculator
       initialLinearVelocity.clipToMaxLength(maxInitialLinearVelocityMagnitude.getDoubleValue());
       initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
-
-      fillAndInitializeTrajectories(true);
    }
 
-   public void fillAndInitializeTrajectories(boolean initializeOptimizer)
+   public void initializeTrajectoryWaypoints(boolean initializeOptimizer)
    {
       footstepPose.get(finalPosition, finalOrientation);
       finalLinearVelocity.setIncludingFrame(swingTrajectoryParameters.getDesiredTouchdownVelocity());
@@ -258,7 +262,7 @@ public class SwingTrajectoryCalculator
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
       boolean appendFootstepPose = true;
-      double swingDuration = this.swingDuration.getDoubleValue();
+      double swingDuration = this.swingDuration.getValue();
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
@@ -283,7 +287,7 @@ public class SwingTrajectoryCalculator
          // TODO: initialize optimizer somewhere else
          if (initializeOptimizer)
          {
-            initializeOptimizer();
+            initializeTrajectoryOptimizer();
          }
 
          for (int i = 0; i < swingTrajectoryOptimizer.getNumberOfWaypoints(); i++)
@@ -332,12 +336,27 @@ public class SwingTrajectoryCalculator
       }
    }
 
-   private void initializeOptimizer()
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
+   {
+      return swingTrajectory;
+   }
+
+   public FrameSE3TrajectoryPointBasics getSwingWaypoint(int i)
+   {
+      return swingWaypoints.get(i);
+   }
+
+   public FrameSE3TrajectoryPointBasics getLastSwingWaypoint()
+   {
+      return swingWaypoints.getLast();
+   }
+
+   private void initializeTrajectoryOptimizer()
    {
       swingTrajectoryOptimizer.setInitialConditions(initialPosition, initialLinearVelocity);
       swingTrajectoryOptimizer.setFinalConditions(finalPosition, finalLinearVelocity);
       swingTrajectoryOptimizer.setFinalConditionWeights(null, swingTrajectoryParameters.getTouchdownVelocityWeight());
-      swingTrajectoryOptimizer.setStepTime(swingDuration.getDoubleValue());
+      swingTrajectoryOptimizer.setStepTime(swingDuration.getValue());
       swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType.getEnumValue(), positionWaypointsForSole);
       swingTrajectoryOptimizer.setSwingHeight(swingHeight.getDoubleValue());
       swingTrajectoryOptimizer.setStanceFootPosition(stanceFootPosition);
