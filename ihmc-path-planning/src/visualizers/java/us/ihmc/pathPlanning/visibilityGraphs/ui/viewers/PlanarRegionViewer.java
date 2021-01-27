@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class PlanarRegionViewer
 {
    private static final boolean VERBOSE = false;
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
 
