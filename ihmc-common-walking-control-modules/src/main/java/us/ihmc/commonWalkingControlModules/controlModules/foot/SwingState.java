@@ -120,7 +120,6 @@ public class SwingState extends AbstractFootControlState
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
    private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
-   private final FramePoint3D tempWaypoint = new FramePoint3D();
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
