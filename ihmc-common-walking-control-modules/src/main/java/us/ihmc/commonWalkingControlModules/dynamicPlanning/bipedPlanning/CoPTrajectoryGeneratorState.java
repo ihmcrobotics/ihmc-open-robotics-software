@@ -181,11 +181,6 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
       this.initialCoP.set(initialCoP);
    }
 
-//   public void setInitialCoP(FramePoint2DReadOnly initialCoP)
-//   {
-//      this.initialCoP.set(initialCoP);
-//   }
-
    private int footstepCounter = 0;
 
    private DynamicPlanningFootstep createFootstep(YoRegistry registry)
