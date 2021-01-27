@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories.abstracts;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -33,44 +34,6 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    private final PolynomialBasics yPolynomial;
    private final PolynomialBasics zPolynomial;
 
-   private final TimeIntervalBasics timeInterval = new TimeIntervalBasics()
-   {
-      @Override
-      public void setStartTime(double startTime)
-      {
-         xPolynomial.getTimeInterval().setStartTime(startTime);
-         yPolynomial.getTimeInterval().setStartTime(startTime);
-         zPolynomial.getTimeInterval().setStartTime(startTime);
-      }
-
-      @Override
-      public void setEndTime(double endTime)
-      {
-         xPolynomial.getTimeInterval().setEndTime(endTime);
-         yPolynomial.getTimeInterval().setEndTime(endTime);
-         zPolynomial.getTimeInterval().setEndTime(endTime);
-      }
-
-      @Override
-      public double getStartTime()
-      {
-         if (!MathTools.epsilonEquals(xPolynomial.getTimeInterval().getStartTime(), yPolynomial.getTimeInterval().getStartTime(), 1e-5) ||
-             !MathTools.epsilonEquals(xPolynomial.getTimeInterval().getStartTime(), zPolynomial.getTimeInterval().getStartTime(), 1e-5))
-            throw new RuntimeException("Time intervals are wrong.");
-
-         return xPolynomial.getTimeInterval().getStartTime();
-      }
-
-      @Override
-      public double getEndTime()
-      {
-         if (!MathTools.epsilonEquals(xPolynomial.getTimeInterval().getEndTime(), yPolynomial.getTimeInterval().getEndTime(), 1e-5) ||
-             !MathTools.epsilonEquals(xPolynomial.getTimeInterval().getEndTime(), zPolynomial.getTimeInterval().getEndTime(), 1e-5))
-            throw new RuntimeException("Time intervals are wrong.");
-
-         return xPolynomial.getTimeInterval().getEndTime();
-      }
-   };
 
    private final PolynomialBasics[] polynomials;
 
@@ -78,6 +41,7 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    private double yIntegralResult = Double.NaN;
    private double zIntegralResult = Double.NaN;
 
+   private final TimeIntervalBasics timeInterval;
    private final Point3DReadOnly position;
    private final Vector3DReadOnly velocity;
    private final Vector3DReadOnly acceleration;
@@ -110,10 +74,11 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
       this.zPolynomial = zPolynomial;
       polynomials = new PolynomialBasics[] {xPolynomial, yPolynomial, zPolynomial};
 
-      position = Trajectory3DFactories.newLinkedPoint3DReadOnly(xPolynomial, yPolynomial, zPolynomial);
-      velocity = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
-      acceleration = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
-      integralResult = Trajectory3DFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
+      timeInterval = Trajectory3DFactories.newLinkedTimeInterval(xPolynomial, yPolynomial, zPolynomial);
+      position = EuclidCoreFactories.newLinkedPoint3DReadOnly(xPolynomial::getValue, yPolynomial::getValue, zPolynomial::getValue);
+      velocity = EuclidCoreFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
+      acceleration = EuclidCoreFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
+      integralResult = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
 
       coefficients = new Tuple3DBasics[getMaximumNumberOfCoefficients()];
       coefficients[0] = Trajectory3DFactories.newLinkedPoint3DBasics(() -> xPolynomial.getCoefficient(0),
