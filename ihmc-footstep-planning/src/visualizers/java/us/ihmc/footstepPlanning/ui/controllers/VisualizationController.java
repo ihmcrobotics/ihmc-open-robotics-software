@@ -25,6 +25,8 @@ public class VisualizationController
    @FXML
    private CheckBox showPlanarRegionsToggleButton;
    @FXML
+   private CheckBox showOcTreeToggleButton;
+   @FXML
    private CheckBox showStart;
    @FXML
    private CheckBox showGoal;
@@ -61,6 +63,7 @@ public class VisualizationController
       // General
       messager.bindBidirectional(ShowRobot, showRobotToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowOcTree, showOcTreeToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowStart, showStart.selectedProperty(), true);
       messager.bindBidirectional(ShowGoal, showGoal.selectedProperty(), true);
       messager.bindBidirectional(ShowCoordinateSystem, showCoordinateSystem.selectedProperty(), true);

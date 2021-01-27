@@ -184,6 +184,10 @@ public class RemoteUIMessageConverter
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    OcTreeKeyListMessage.class,
+                                                    REACommunicationProperties.outputTopic,
+                                                    s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            FootstepPlannerAPI.swingReplanOutputTopic(robotName),
                                            s ->
