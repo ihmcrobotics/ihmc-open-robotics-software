@@ -8,7 +8,6 @@ import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
 import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -26,8 +25,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -888,6 +885,6 @@ public class OptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvider
    @Override
    public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
    {
-      throw new NotImplementedException();
+      throw new UnsupportedOperationException();
    }
 }
