@@ -10,6 +10,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -39,6 +39,7 @@ public class SwingTrajectoryCalculator
 {
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
 
+   private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
 
@@ -70,8 +71,7 @@ public class SwingTrajectoryCalculator
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
    private final FrameVector3D tmpVector = new FrameVector3D();
 
-   private final FramePose3D footstepPose = new FramePose3D();
-   private final FramePose3D lastFootstepPose = new FramePose3D();
+   private final FramePoint3D lastFootstepPosition = new FramePoint3D();
 
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
 
@@ -95,9 +95,10 @@ public class SwingTrajectoryCalculator
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
 
+      soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
-      currentStateProvider = new CurrentRigidBodyStateProvider(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
+      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
@@ -116,8 +117,9 @@ public class SwingTrajectoryCalculator
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
 
-      lastFootstepPose.setToNaN();
-      footstepPose.setToNaN();
+      lastFootstepPosition.setToNaN();
+      finalPosition.setToNaN();
+      finalOrientation.setToNaN();
 
       setupViz(controllerToolbox.getYoGraphicsListRegistry(), registry);
 
@@ -141,6 +143,9 @@ public class SwingTrajectoryCalculator
       }
    }
 
+   /**
+    * Resets the optimizer and the swing waypoints.
+    */
    public void informDone()
    {
       swingTrajectoryOptimizer.informDone();
@@ -155,16 +160,30 @@ public class SwingTrajectoryCalculator
       return activeTrajectoryType.getEnumValue();
    }
 
+   /**
+    * Updates the gradient descent module in the {@link TwoWaypointSwingGenerator}. If that optimizer has already converged, does nothing.
+    * @return true if it did something, false if it's converged
+    */
    public boolean doOptimizationUpdate()
    {
       return swingTrajectoryOptimizer.doOptimizationUpdate();
    }
 
+   /**
+    * Sets the footstep to be used for this calculator. Also passes in the waypoints to be used for the swing trajectory.
+    * @param footstep
+    */
    public void setFootstep(Footstep footstep)
    {
-      footstepPose.setIncludingFrame(footstep.getFootstepPose());
-      footstepPose.changeFrame(worldFrame);
-      footstepPose.setZ(footstepPose.getZ() + swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
+      lastFootstepPosition.setIncludingFrame(finalPosition);
+      if (lastFootstepPosition.containsNaN())
+         lastFootstepPosition.setToZero(soleFrame);
+
+      finalPosition.setIncludingFrame(footstep.getFootstepPose().getPosition());
+      finalOrientation.setIncludingFrame(footstep.getFootstepPose().getOrientation());
+      finalPosition.changeFrame(worldFrame);
+      finalOrientation.changeFrame(worldFrame);
+      finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -174,50 +193,22 @@ public class SwingTrajectoryCalculator
       {
          activeTrajectoryType.set(footstep.getTrajectoryType());
       }
+
       this.positionWaypointsForSole.clear();
       this.swingWaypoints.clear();
-      lastFootstepPose.changeFrame(worldFrame);
+      lastFootstepPosition.changeFrame(worldFrame);
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
-         List<FramePoint3D> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
-         for (int i = 0; i < positionWaypointsForSole.size(); i++)
-            this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
+         setWaypointsFromCustomMidpoints(footstep.getCustomPositionWaypoints());
       }
       else if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
-         List<FrameSE3TrajectoryPoint> swingWaypoints = footstep.getSwingTrajectory();
-         for (int i = 0; i < swingWaypoints.size(); i++)
-         {
-            this.swingWaypoints.add().set(swingWaypoints.get(i));
-         }
+         setWaypointsFromExternal(footstep.getSwingTrajectory());
       }
       else
       {
-         swingHeight.set(footstep.getSwingHeight());
-
-         if (checkStepUpOrDown(footstepPose))
-            activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
-
-         RecyclingArrayList<MutableDouble> customWaypointProportions = footstep.getCustomWaypointProportions();
-         if (customWaypointProportions.size() != 2)
-         {
-            if (!customWaypointProportions.isEmpty())
-            {
-               LogTools.warn("Ignoring custom waypoint proportions. Expected 2, got: " + customWaypointProportions.size());
-            }
-
-            List<DoubleProvider> waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ?
-                  swingTrajectoryParameters.getObstacleClearanceProportions() :
-                  swingTrajectoryParameters.getSwingWaypointProportions();
-            this.waypointProportions[0] = waypointProportions.get(0).getValue();
-            this.waypointProportions[1] = waypointProportions.get(1).getValue();
-         }
-         else
-         {
-            waypointProportions[0] = customWaypointProportions.get(0).getValue();
-            waypointProportions[1] = customWaypointProportions.get(1).getValue();
-         }
+         setWaypointsFromStepPosition(footstep);
       }
    }
 
@@ -226,7 +217,10 @@ public class SwingTrajectoryCalculator
       this.swingDuration.set(swingDuration);
    }
 
-   public void initializeTrajectoryStartConditions()
+   /**
+    * Sets the initial conditions that the calculator uses to the calculate the swing trajectory to the current state of the sole frame.
+    */
+   public void setInitialConditionsToCurrent()
    {
       currentStateProvider.getPosition(initialPosition);
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
@@ -246,9 +240,16 @@ public class SwingTrajectoryCalculator
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
 
+   /**
+    * Computes the trajectory waypoints. If the foot is executing a custom waypoint trajectory provided in the footstep (see {@link Footstep#swingTrajectory},
+    * those are what are used. Otherwise, it uses the {@link TwoWaypointSwingGenerator} to optimize the waypoint times and velocities. If these waypoint
+    * positions have been provided using the custom waypoints interface in the {@link Footstep} class ({@link Footstep#customPositionWaypoints}), these are
+    * used, otherwise they are computed using the default waypoint proportions or {@link Footstep#customWaypointProportions} if provided.
+    *
+    * @param initializeOptimizer set to true on the first initialization in the state, as it sets the constraints for the {@link TwoWaypointSwingGenerator}.
+    */
    public void initializeTrajectoryWaypoints(boolean initializeOptimizer)
    {
-      footstepPose.get(finalPosition, finalOrientation);
       finalLinearVelocity.setIncludingFrame(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       finalAngularVelocity.setToZero(worldFrame);
 
@@ -257,7 +258,7 @@ public class SwingTrajectoryCalculator
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
-         setTrajectoryFromCustomWaypoints();
+         setTrajectoryFromWaypoints();
       }
       else
       {
@@ -298,9 +299,9 @@ public class SwingTrajectoryCalculator
       swingTrajectoryOptimizer.initialize();
    }
 
-   private boolean checkStepUpOrDown(FramePose3D footstepPose)
+   private boolean checkStepUpOrDown(FramePoint3DReadOnly footstepPosition)
    {
-      double zDifference = Math.abs(footstepPose.getZ() - lastFootstepPose.getZ());
+      double zDifference = Math.abs(footstepPosition.getZ() - lastFootstepPosition.getZ());
       return zDifference > swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown();
    }
 
@@ -338,7 +339,50 @@ public class SwingTrajectoryCalculator
       finalOrientationToPack.appendPitchRotation(footstepPitchModification);
    }
 
-   private void setTrajectoryFromCustomWaypoints()
+   private void setWaypointsFromStepPosition(Footstep footstep)
+   {
+      swingHeight.set(footstep.getSwingHeight());
+
+      if (checkStepUpOrDown(finalPosition))
+         activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
+
+      RecyclingArrayList<MutableDouble> customWaypointProportions = footstep.getCustomWaypointProportions();
+      if (customWaypointProportions.size() != 2)
+      {
+         if (!customWaypointProportions.isEmpty())
+         {
+            LogTools.warn("Ignoring custom waypoint proportions. Expected 2, got: " + customWaypointProportions.size());
+         }
+
+         List<DoubleProvider> waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ?
+               swingTrajectoryParameters.getObstacleClearanceProportions() :
+               swingTrajectoryParameters.getSwingWaypointProportions();
+         this.waypointProportions[0] = waypointProportions.get(0).getValue();
+         this.waypointProportions[1] = waypointProportions.get(1).getValue();
+      }
+      else
+      {
+         waypointProportions[0] = customWaypointProportions.get(0).getValue();
+         waypointProportions[1] = customWaypointProportions.get(1).getValue();
+      }
+   }
+
+
+   private void setWaypointsFromCustomMidpoints(List<FramePoint3D> positionWaypointsForSole)
+   {
+      for (int i = 0; i < positionWaypointsForSole.size(); i++)
+         this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
+   }
+
+   private void setWaypointsFromExternal(List<FrameSE3TrajectoryPoint> swingWaypoints)
+   {
+      for (int i = 0; i < swingWaypoints.size(); i++)
+      {
+         this.swingWaypoints.add().set(swingWaypoints.get(i));
+      }
+   }
+
+   private void setTrajectoryFromWaypoints()
    {
       if (swingWaypoints.get(0).getTime() > 1.0e-5)
       {

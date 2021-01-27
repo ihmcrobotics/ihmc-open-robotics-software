@@ -259,7 +259,7 @@ public class SwingState extends AbstractFootControlState
    {
       initialPose.setToZero(soleFrame);
 
-      swingTrajectoryCalculator.initializeTrajectoryStartConditions();
+      swingTrajectoryCalculator.setInitialConditionsToCurrent();
 
       fillAndInitializeTrajectories(true);
    }
