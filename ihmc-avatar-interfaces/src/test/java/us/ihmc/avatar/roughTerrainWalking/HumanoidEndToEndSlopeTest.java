@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -62,25 +63,32 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testSlope(TestInfo testInfo, boolean up, double swingDuration, double transferDuration, double maxStepLength, double heightOffset,
-                         double torsoPitch, boolean useExperimentalPhysicsEngine)
+   public void testSlope(TestInfo testInfo, boolean up, boolean useSideSteps, double swingDuration, double transferDuration, double maxStepLength,
+                         double heightOffset, double torsoPitch, boolean useExperimentalPhysicsEngine, boolean disableToeOff)
          throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
       double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootWidth();
       double slopeAngle = Math.toRadians(30.0);
       double slopeLength = 3.0;
       double topZ = Math.tan(slopeAngle) * slopeLength;
       double startX = (up ? 0.0 : 1.2 + slopeLength) + 0.3;
       double startZ = up ? 0.0 : topZ;
+      double startYaw = useSideSteps ? -Math.PI / 2.0 : 0.0;
 
+      simulationTestingParameters.setKeepSCSUp(true);
       SlopeEnvironment environment = new SlopeEnvironment(slopeAngle, 1.5, slopeLength);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
+      drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ, startYaw));
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
-      ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
-      contactParameters.setCoulombMomentFrictionRatio(0.6);
-      drcSimulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
+      if (useExperimentalPhysicsEngine)
+      {
+         ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
+         contactParameters.setCoefficientOfFriction(0.9);
+         contactParameters.setCoulombMomentFrictionRatio(0.8);
+         drcSimulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
+      }
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -91,6 +99,11 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       scs.setCameraTracking(true, true, true, true);
       scs.setCameraDolly(true, true, true, true);
 
+      if (disableToeOff)
+      {
+         scs.findVariable("ToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
+      }
+
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       publishHeightOffset(heightOffset);
       pitchTorsoForward(torsoPitch);
@@ -99,14 +112,25 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       double slopeEndX = slopeStartX + slopeLength;
       double slopeStartZ = up ? 0.0 : topZ;
       double stanceWidth = 0.30;
-      FootstepDataListMessage footsteps = createSlopeFootsteps(slopeStartX,
-                                                               slopeEndX,
-                                                               slopeStartZ,
-                                                               up ? -slopeAngle : slopeAngle,
-                                                               footLength,
-                                                               stanceWidth,
-                                                               maxStepLength);
-      computeSwingWaypoints(robotModel, footsteps);
+      FootstepDataListMessage footsteps;
+
+      if (useSideSteps)
+      {
+         double minStanceWidth = 0.20;
+         footsteps = createSlopeSideFootsteps(slopeStartX,
+                                              slopeEndX,
+                                              slopeStartZ,
+                                              up ? -slopeAngle : slopeAngle,
+                                              footWidth,
+                                              stanceWidth,
+                                              minStanceWidth,
+                                              maxStepLength);
+      }
+      else
+      {
+         footsteps = createSlopeFootsteps(slopeStartX, slopeEndX, slopeStartZ, up ? -slopeAngle : slopeAngle, footLength, stanceWidth, maxStepLength);
+         computeSwingWaypoints(robotModel, footsteps);
+      }
       setStepDurations(footsteps, swingDuration, transferDuration);
 
       scs.setInPoint();
@@ -249,6 +273,89 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
          footstep.getLocation().set(x, y, z);
 
          stepSide = stepSide.getOppositeSide();
+      }
+
+      return footsteps;
+   }
+
+   private static FootstepDataListMessage createSlopeSideFootsteps(double xSlopeStart, double xSlopeEnd, double zSlopeStart, double slopeAngle,
+                                                                   double footWidth, double stanceWidth, double minStanceWidth, double maxStepLength)
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+      double margin = 0.035;
+      FootstepDataMessage footstep;
+
+      for (RobotSide stepSide : RobotSide.values)
+      {
+         double x = xSlopeStart - margin - 0.5 * footWidth - 0.5 * minStanceWidth + stepSide.negateIfRightSide(0.5 * minStanceWidth);
+         double y = 0.0;
+         double z = zSlopeStart;
+
+         footstep = footsteps.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(x, y, z);
+      }
+
+      SideDependentList<Pose3D> footPoses = new SideDependentList<>();
+      RobotSide stepSide = RobotSide.LEFT;
+
+      Pose3D pose = new Pose3D();
+      pose.appendTranslation(xSlopeStart, 0.0, zSlopeStart);
+      pose.appendPitchRotation(slopeAngle);
+      pose.appendTranslation(0.5 * footWidth + minStanceWidth + margin, 0, 0);
+      footPoses.put(stepSide, pose);
+
+      footstep = footsteps.getFootstepDataList().add();
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(pose.getPosition());
+      footstep.getOrientation().set(pose.getOrientation());
+
+      stepSide = stepSide.getOppositeSide();
+      pose = new Pose3D();
+      pose.appendTranslation(xSlopeStart, 0.0, zSlopeStart);
+      pose.appendPitchRotation(slopeAngle);
+      pose.appendTranslation(0.5 * footWidth + margin, 0, 0);
+      footPoses.put(stepSide, pose);
+
+      footstep = footsteps.getFootstepDataList().add();
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(pose.getPosition());
+      footstep.getOrientation().set(pose.getOrientation());
+
+      double slopeLength = (xSlopeEnd - xSlopeStart) / Math.cos(slopeAngle);
+      int numberOfSteps = (int) Math.ceil((slopeLength - footWidth - 2.0 * margin - minStanceWidth) / maxStepLength);
+      double stepLength = (slopeLength - footWidth - 2.0 * margin - minStanceWidth) / (numberOfSteps);
+      assertTrue(stepLength <= maxStepLength);
+
+      stepSide = stepSide.getOppositeSide();
+
+      for (int i = 0; i < 2 * numberOfSteps; i++)
+      {
+         footPoses.get(stepSide).appendTranslation(stepLength, 0.0, 0.0);
+
+         footstep = footsteps.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(footPoses.get(stepSide).getPosition());
+         footstep.getOrientation().set(footPoses.get(stepSide).getOrientation());
+
+         stepSide = stepSide.getOppositeSide();
+      }
+
+      double zSlopeEnd = zSlopeStart - slopeLength * Math.sin(slopeAngle);
+
+      footstep = footsteps.getFootstepDataList().add();
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(xSlopeEnd + margin + 0.5 * footWidth + minStanceWidth, 0.0, zSlopeEnd);
+
+      stepSide = stepSide.getOppositeSide();
+      footstep = footsteps.getFootstepDataList().add();
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(xSlopeEnd + margin + 0.5 * footWidth, 0.0, zSlopeEnd);
+
+      // Yaw all the footsteps
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+      {
+         footsteps.getFootstepDataList().get(i).getOrientation().appendYawRotation(-0.5 * Math.PI);
       }
 
       return footsteps;
