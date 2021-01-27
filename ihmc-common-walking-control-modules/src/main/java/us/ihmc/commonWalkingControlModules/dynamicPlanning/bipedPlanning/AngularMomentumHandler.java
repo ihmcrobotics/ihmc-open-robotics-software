@@ -49,6 +49,11 @@ public class AngularMomentumHandler
       parentRegistry.addChild(registry);
    }
 
+   public void resetAngularMomentum()
+   {
+      angularMomentumCalculator.reset();
+   }
+
    public void computeAngularMomentum(double time)
    {
       angularMomentumCalculator.computeAngularMomentum(time);
