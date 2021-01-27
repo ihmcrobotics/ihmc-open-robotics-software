@@ -8,8 +8,11 @@ import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +42,16 @@ public class YoSwingTrajectoryParameters
    private final FrameParameterVector3D touchdownVelocity;
    private final FrameParameterVector3D touchdownAcceleration;
 
-   public YoSwingTrajectoryParameters(String namePrefix, SwingTrajectoryParameters parameters, YoRegistry registry)
+   private final BooleanProvider ignoreInitialAngularVelocityZ;
+   private final DoubleProvider maxInitialLinearVelocityMagnitude;
+   private final DoubleProvider maxInitialAngularVelocityMagnitude;
+
+   public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, YoRegistry registry)
+   {
+      this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
+   }
+
+   public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, SwingTrajectoryParameters parameters, YoRegistry registry)
    {
       doHeelTouchdownIfPossible = new BooleanParameter(namePrefix + "DoHeelTouchdownIfPossible", registry, parameters.doHeelTouchdownIfPossible());
       heelTouchdownAngle = new DoubleParameter(namePrefix + "HeelTouchdownAngle", registry, parameters.getHeelTouchdownAngle());
@@ -92,6 +104,10 @@ public class YoSwingTrajectoryParameters
                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                 defaultTouchdownAcceleration,
                                                                                 registry);
+
+      ignoreInitialAngularVelocityZ = new BooleanParameter(namePrefix + "IgnoreInitialAngularVelocityZ", registry, walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
+      maxInitialLinearVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialLinearVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -177,5 +193,20 @@ public class YoSwingTrajectoryParameters
    public FrameVector3DReadOnly getDesiredTouchdownAcceleration()
    {
       return touchdownAcceleration;
+   }
+
+   public boolean ignoreSwingInitialAngularVelocityZ()
+   {
+      return ignoreInitialAngularVelocityZ.getValue();
+   }
+
+   public double getMaxSwingInitialLinearVelocityMagnitude()
+   {
+      return maxInitialLinearVelocityMagnitude.getValue();
+   }
+
+   public double getMaxSwingInitialAngularVelocityMagnitude()
+   {
+      return maxInitialAngularVelocityMagnitude.getValue();
    }
 }
