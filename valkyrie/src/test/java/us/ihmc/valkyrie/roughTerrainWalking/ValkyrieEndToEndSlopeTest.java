@@ -3,12 +3,17 @@ package us.ihmc.valkyrie.roughTerrainWalking;
 import java.io.InputStream;
 import java.util.Objects;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndSlopeTest;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundFastWalkingTest;
@@ -18,6 +23,16 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    private static final String STEEP_SLOPES_PARAMETERS_XML = "/us/ihmc/valkyrie/simulation/steep_slopes_parameters.xml";
 
    private boolean useVal2Scale = false;
+   private boolean removeAnkleJointLimits = false;
+
+   private boolean goUp = true;
+   private double swingDuration = 0.6;
+   private double transferDuration = 0.25;
+   private double maxStepLength = 0.30;
+   private double heightOffset = 0.0;
+   private double torsoPitch = 0.0;
+   private boolean useSideSteps = false;
+   private boolean disableToeOff = false;
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -32,107 +47,141 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
             return resourceAsStream;
          }
       };
+
       if (useVal2Scale)
       {
          robotModel.setModelSizeScale(0.925170);
          robotModel.setModelMassScale(0.925170);
       }
+
+      if (removeAnkleJointLimits)
+      {
+         robotModel.setSDFDescriptionMutator(new SDFDescriptionMutatorList(robotModel.getSDFDescriptionMutator(), new SDFDescriptionMutator()
+         {
+            @Override
+            public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
+            {
+               if (jointHolder.getName().contains("Ankle"))
+               {
+                  jointHolder.setLimits(-Math.PI, Math.PI);
+               }
+            }
+         }));
+      }
+
       return robotModel;
+   }
+
+   @BeforeEach
+   public void initializeTest()
+   {
+      useVal2Scale = false;
+      removeAnkleJointLimits = false;
+
+      goUp = true;
+      swingDuration = 0.6;
+      transferDuration = 0.25;
+      maxStepLength = 0.30;
+      heightOffset = 0.0;
+      torsoPitch = 0.0;
+      useSideSteps = false;
    }
 
    @Test
    public void testUpSlope(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
-      double swingDuration = 0.6;
-      double transferDuration = 0.25;
-      double maxStepLength = 0.30;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.0;
-      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false, disableToeOff);
    }
 
    @Test
    public void testUpSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
-      double swingDuration = 0.6;
-      double transferDuration = 0.25;
-      double maxStepLength = 0.22;
-      double heightOffset = 0.05;
-      double torsoPitch = 0.666;
-      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
+      maxStepLength = 0.10;
+      heightOffset = 0.00;
+      torsoPitch = 0.0;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 
    @Test
    public void testDownSlope(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
-      double swingDuration = 0.9;
-      double transferDuration = 0.25;
-      double maxStepLength = 0.25;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.0;
-      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
+      goUp = false;
+      swingDuration = 0.9;
+      maxStepLength = 0.25;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false, disableToeOff);
    }
 
    @Test
    public void testDownSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
-      double swingDuration = 1.0;
-      double transferDuration = 0.5;
-      double maxStepLength = 0.40;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.0;
-      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
+      goUp = false;
+      swingDuration = 1.0;
+      transferDuration = 0.5;
+      maxStepLength = 0.40;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 
    @Test
    public void testUpSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      double swingDuration = 0.6;
-      double transferDuration = 0.25;
-      double maxStepLength = 0.25;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.666;
-      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
+      maxStepLength = 0.25;
+      torsoPitch = 0.666;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false, disableToeOff);
    }
 
    @Test
    public void testUpSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      double swingDuration = 0.8;
-      double transferDuration = 0.35;
-      double maxStepLength = 0.20;
-      double heightOffset = 0.05;
-      double torsoPitch = 0.666;
-      testSlope(testInfo, true, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
+      swingDuration = 0.8;
+      transferDuration = 0.35;
+      maxStepLength = 0.20;
+      heightOffset = 0.05;
+      torsoPitch = 0.666;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 
    @Test
    public void testDownSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      double swingDuration = 1.0;
-      double transferDuration = 0.35;
-      double maxStepLength = 0.30;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.0;
-      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false);
+      goUp = false;
+      swingDuration = 1.0;
+      transferDuration = 0.35;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false, disableToeOff);
    }
 
    @Test
    public void testDownSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
-      double swingDuration = 1.0;
-      double transferDuration = 0.5;
-      double maxStepLength = 0.35;
-      double heightOffset = 0.0;
-      double torsoPitch = 0.0;
-      testSlope(testInfo, false, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true);
+      goUp = false;
+      swingDuration = 1.0;
+      transferDuration = 0.5;
+      maxStepLength = 0.35;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
+   }
+
+   @Test
+   public void testUpSlopeVal2ScaleExperimentalPhysicsEngineNoLimits(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      removeAnkleJointLimits = true;
+      maxStepLength = 0.25;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
+   }
+
+   @Test
+   public void testUpSlopeVal2ScaleExperimentalPhysicsEngineNoLimitsSideSteps(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      removeAnkleJointLimits = true;
+      useSideSteps = true;
+      swingDuration = 0.8;
+      transferDuration = 0.5;
+      maxStepLength = 0.25;
+      disableToeOff = true;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 }
