@@ -10,9 +10,11 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,8 +22,13 @@ import java.util.stream.Collectors;
 public class GPUPlanarRegionUpdater
 {
 
+   private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = true;
+
    private ConcaveHullFactoryParameters concaveHullFactoryParameters;
    private PolygonizerParameters polygonizerParameters;
+   private final PlanarRegionSegmentationDataExporter dataExporter = EXPORT_SEGMENTATION_ON_EXCEPTION
+         ? new PlanarRegionSegmentationDataExporter(new File("DataThrowingException/Segmentation"))
+         : null;
 
    public GPUPlanarRegionUpdater()
    {
@@ -133,6 +140,10 @@ public class GPUPlanarRegionUpdater
 
    private PlanarRegionsList updatePolygons(List<PlanarRegionSegmentationRawData> rawData)
    {
-      return PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      if(EXPORT_SEGMENTATION_ON_EXCEPTION){
+         return PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters, dataExporter);
+      }else{
+         return PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      }
    }
 }
