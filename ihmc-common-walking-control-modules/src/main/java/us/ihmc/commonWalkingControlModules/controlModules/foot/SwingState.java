@@ -18,11 +18,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -49,6 +52,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SwingState extends AbstractFootControlState
 {
    private static final boolean visualizeAdjustedSwing = false;
@@ -66,6 +72,8 @@ public class SwingState extends AbstractFootControlState
    private final BlendedPositionTrajectoryGeneratorVisualizer swingVisualizer;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
    private double swingTrajectoryBlendDuration = 0.0;
+
+   private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
 
    private final ReferenceFrame soleFrame;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
@@ -238,7 +246,27 @@ public class SwingState extends AbstractFootControlState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+
+      setupViz(yoGraphicsListRegistry, registry);
    }
+
+   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
+   {
+      if (yoGraphicsListRegistry == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
+      {
+         YoFramePoint3D yoWaypoint = new YoFramePoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
+         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.01, YoAppearance.GreenYellow());
+         yoWaypoint.setToNaN();
+         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointViz);
+         swingWaypointsForViz.add(yoWaypoint);
+      }
+   }
+
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
    {
@@ -293,6 +321,10 @@ public class SwingState extends AbstractFootControlState
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
       swingTrajectoryCalculator.informDone();
+      for (int i = 0; i < swingWaypointsForViz.size(); i++)
+      {
+         swingWaypointsForViz.get(i).setToNaN();
+      }
 
       adjustmentVelocityCorrection.setToZero();
 
@@ -552,6 +584,15 @@ public class SwingState extends AbstractFootControlState
       touchdownTrajectory.initialize();
       if (swingVisualizer != null)
          swingVisualizer.visualize();
+
+      if (!swingWaypointsForViz.isEmpty() && swingTrajectoryCalculator.getActiveTrajectoryType() == TrajectoryType.WAYPOINTS)
+      {
+         for (int i = 0; i < swingTrajectoryCalculator.getNumberOfSwingWaypoints(); i++)
+         {
+            blendedSwingTrajectory.compute(swingTrajectoryCalculator.getSwingWaypoint(i).getTime());
+            swingWaypointsForViz.get(i).setMatchingFrame(blendedSwingTrajectory.getPosition());
+         }
+      }
    }
 
    private void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
