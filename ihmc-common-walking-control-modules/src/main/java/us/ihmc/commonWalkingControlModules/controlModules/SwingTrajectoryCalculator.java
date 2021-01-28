@@ -8,13 +8,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -25,13 +24,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
@@ -56,7 +53,6 @@ public class SwingTrajectoryCalculator
 
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
-   private final FramePose3D initialPose = new FramePose3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
@@ -66,6 +62,7 @@ public class SwingTrajectoryCalculator
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
+
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
@@ -79,9 +76,6 @@ public class SwingTrajectoryCalculator
 
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
 
-   private final RobotSide robotSide;
-
-
    public SwingTrajectoryCalculator(String namePrefix,
                                     RobotSide robotSide,
                                     HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -89,7 +83,6 @@ public class SwingTrajectoryCalculator
                                     YoSwingTrajectoryParameters swingTrajectoryParameters,
                                     YoRegistry parentRegistry)
    {
-      this.robotSide = robotSide;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
@@ -209,9 +202,6 @@ public class SwingTrajectoryCalculator
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
-
-      initialPose.getPosition().setMatchingFrame(initialPosition);
-      initialPose.getOrientation().setMatchingFrame(initialOrientation);
 
       if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
