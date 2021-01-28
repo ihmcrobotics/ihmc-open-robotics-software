@@ -48,4 +48,24 @@ public class GDXModelPrimitives
 
       return modelBuilder.end();
    }
+
+   public static ModelInstance createSphere(float radius, Color color)
+   {
+      ModelBuilder modelBuilder = new ModelBuilder();
+      modelBuilder.begin();
+      modelBuilder.node().id = "sphere"; // optional
+
+      GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+      meshBuilder.addSphere(radius, color);
+      Mesh mesh = meshBuilder.generateMesh();
+
+      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+      Material material = new Material();
+      Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+      material.set(TextureAttribute.createDiffuse(paletteTexture));
+      material.set(ColorAttribute.createDiffuse(Color.WHITE));
+      modelBuilder.part(meshPart, material);
+
+      return new ModelInstance(modelBuilder.end());
+   }
 }

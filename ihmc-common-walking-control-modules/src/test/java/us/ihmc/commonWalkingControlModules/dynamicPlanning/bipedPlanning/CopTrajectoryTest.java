@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.function.multiary.MultiaryFunction.Convex;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -113,18 +112,18 @@ public class CopTrajectoryTest
       assertEquals(2.0 * swingTime + transferTime + initialTransferTime, supportSequence.getSupportTimes().get(5), 1e-7);
 
 //      assertEquals(5.25, supportSequence.getSupportTimes().get(5), 1e-7);
-      assertTrue(firstTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(0).getCopStartPosition()))); // start
-      assertTrue(firstTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(0).getCopEndPosition()))); // end of initial transfer
-      assertTrue(firstSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(1).getCopStartPosition()))); // end of initial transfer
-      assertTrue(firstSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(1).getCopEndPosition()))); // end of first swing
-      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(2).getCopStartPosition()))); // end of first swing
-      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(2).getCopEndPosition()))); // halfway through transfer
-      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(3).getCopStartPosition()))); // halfway through transfer
-      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(3).getCopEndPosition()))); // end of transfer
-      assertTrue(secondSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(4).getCopStartPosition()))); // end of transfer
-      assertTrue(secondSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(4).getCopEndPosition()))); // end of swing
-      assertTrue(thirdTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(5).getCopStartPosition()))); // end of transfer
-      assertTrue(thirdTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(5).getCopEndPosition()))); // end of swing
+      assertTrue(firstTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(0).getECMPStartPosition()))); // start
+      assertTrue(firstTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(0).getECMPEndPosition()))); // end of initial transfer
+      assertTrue(firstSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(1).getECMPStartPosition()))); // end of initial transfer
+      assertTrue(firstSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(1).getECMPEndPosition()))); // end of first swing
+      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(2).getECMPStartPosition()))); // end of first swing
+      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(2).getECMPEndPosition()))); // halfway through transfer
+      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(3).getECMPStartPosition()))); // halfway through transfer
+      assertTrue(secondTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(3).getECMPEndPosition()))); // end of transfer
+      assertTrue(secondSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(4).getECMPStartPosition()))); // end of transfer
+      assertTrue(secondSwingSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(4).getECMPEndPosition()))); // end of swing
+      assertTrue(thirdTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(5).getECMPStartPosition()))); // end of transfer
+      assertTrue(thirdTransferSupportPolygon.isPointInside(new Point2D(copTrajectory.getContactStates().get(5).getECMPEndPosition()))); // end of swing
    }
 
    private static SideDependentList<PoseReferenceFrame> createSoleFrames(double width)

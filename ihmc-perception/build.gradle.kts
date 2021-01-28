@@ -39,9 +39,9 @@ mainDependencies {
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:ihmc-yovariables:0.9.8")
-   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
    api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -90,7 +90,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.4")
-   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -13,66 +15,93 @@ import java.util.List;
 
 /**
  * This is the most basic implementation fo a contact state provider for the {@link CoMTrajectoryPlannerInterface}. This is really useful for visualizing
- * what will happen for certain sequenes, as it allows the user to directly specify where the start and end CoP positions are and the contact time intervals.
+ * what will happen for certain sequences, as it allows the user to directly specify where the start and end ECMP positions are and the contact time intervals.
  */
 public class SettableContactStateProvider implements ContactStateProvider
 {
    private ContactState contactState = ContactState.IN_CONTACT;
-   private final FramePoint3D startCopPosition = new FramePoint3D();
-   private final FramePoint3D endCopPosition = new FramePoint3D();
+   private final FramePoint3D startECMPPosition = new FramePoint3D();
+   private final FramePoint3D endECMPPosition = new FramePoint3D();
+   private final FrameVector3D startECMPVelocity = new FrameVector3D();
+   private final FrameVector3D endECMPVelocity = new FrameVector3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
    private final List<String> bodiesInContact = new ArrayList<>();
 
    public SettableContactStateProvider()
    {
-      startCopPosition.setToNaN();
-      endCopPosition.setToNaN();
+      startECMPPosition.setToNaN();
+      endECMPPosition.setToNaN();
+      startECMPVelocity.setToNaN();
+      endECMPVelocity.setToNaN();
    }
 
    public void reset()
    {
-      startCopPosition.setToNaN();
-      endCopPosition.setToNaN();
+      startECMPPosition.setToNaN();
+      startECMPVelocity.setToNaN();
+      endECMPPosition.setToNaN();
+      endECMPVelocity.setToNaN();
       bodiesInContact.clear();
    }
 
    public void set(ContactStateProvider other)
    {
-      setStartCopPosition(other.getCopStartPosition());
-      setEndCopPosition(other.getCopEndPosition());
+      setStartECMPPosition(other.getECMPStartPosition());
+      setEndECMPPosition(other.getECMPEndPosition());
+      setStartECMPVelocity(other.getECMPStartVelocity());
+      setEndECMPVelocity(other.getECMPEndVelocity());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
    }
 
-   public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
+   public void setStartECMPPosition(FramePoint3DReadOnly startECMPPosition)
    {
-      this.startCopPosition.set(startCopPosition);
+      this.startECMPPosition.set(startECMPPosition);
    }
 
-   public void setStartCopPosition(FramePoint2DReadOnly startCopPosition)
+   public void setStartECMPVelocity(FrameVector3DReadOnly startECMPVelocity)
    {
-      this.startCopPosition.set(startCopPosition, 0.0);
+      this.startECMPVelocity.set(startECMPVelocity);
    }
 
-   public void setStartCopPosition(Point2DReadOnly startCopPosition)
+   public void setStartECMPPosition(FramePoint2DReadOnly startECMPPosition, double height)
    {
-      this.startCopPosition.set(startCopPosition, 0.0);
+      this.startECMPPosition.checkReferenceFrameMatch(startECMPPosition);
+      setStartECMPPosition((Point2DReadOnly) startECMPPosition, height);
    }
 
-   public void setEndCopPosition(FramePoint3DReadOnly endCopPosition)
+   public void setStartECMPPosition(Point2DReadOnly startECMPPosition, double height)
    {
-      this.endCopPosition.set(endCopPosition);
+      this.startECMPPosition.set(startECMPPosition, height);
    }
 
-   public void setEndCopPosition(FramePoint2DReadOnly endCopPosition)
+   public void setEndECMPPosition(FramePoint3DReadOnly endECMPPosition)
    {
-      this.endCopPosition.set(endCopPosition, 0.0);
+      this.endECMPPosition.set(endECMPPosition);
    }
 
-   public void setEndCopPosition(Point2DReadOnly endCopPosition)
+   public void setEndECMPVelocity(FrameVector3DReadOnly endECMPVelocity)
    {
-      this.endCopPosition.set(endCopPosition, 0.0);
+      this.endECMPVelocity.set(endECMPVelocity);
+   }
+
+   public void setEndECMPPosition(FramePoint2DReadOnly endECMPPosition, double height)
+   {
+      this.endECMPPosition.checkReferenceFrameMatch(endECMPPosition);
+      setEndECMPPosition((Point2DReadOnly) endECMPPosition, height);
+   }
+
+   public void setEndECMPPosition(Point2DReadOnly endECMPPosition, double height)
+   {
+      this.endECMPPosition.set(endECMPPosition, height);
+   }
+
+   public void setLinearECMPVelocity()
+   {
+      startECMPVelocity.sub(getECMPEndPosition(), getECMPStartPosition());
+      startECMPVelocity.scale(1.0 / Math.min(getTimeInterval().getDuration(), 10.0));
+      endECMPVelocity.set(startECMPVelocity);
    }
 
    public void setTimeInterval(TimeIntervalReadOnly timeInterval)
@@ -90,14 +119,28 @@ public class SettableContactStateProvider implements ContactStateProvider
       bodiesInContact.add(name);
    }
 
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
-      return startCopPosition;
+      return startECMPPosition;
    }
 
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
-      return endCopPosition;
+      return endECMPPosition;
+   }
+
+   public FrameVector3DReadOnly getECMPStartVelocity()
+   {
+      if (startECMPVelocity.containsNaN())
+         setLinearECMPVelocity();
+      return startECMPVelocity;
+   }
+
+   public FrameVector3DReadOnly getECMPEndVelocity()
+   {
+      if (endECMPVelocity.containsNaN())
+         setLinearECMPVelocity();
+      return endECMPVelocity;
    }
 
    public ContactState getContactState()
@@ -128,7 +171,7 @@ public class SettableContactStateProvider implements ContactStateProvider
    public void setStartFromEnd(ContactStateProvider previousContactState)
    {
       setStartTime(previousContactState.getTimeInterval().getEndTime());
-      setStartCopPosition(previousContactState.getCopEndPosition());
+      setStartECMPPosition(previousContactState.getECMPEndPosition());
    }
 
    public List<String> getBodiesInContact()

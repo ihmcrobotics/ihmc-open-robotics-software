@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.generators;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
@@ -15,10 +17,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
-public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePositionTrajectoryGenerator & TimeIntervalProvider> implements FixedFramePositionTrajectoryGenerator
+public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePositionTrajectoryGenerator & TimeIntervalProvider & Settable<T>> implements FixedFramePositionTrajectoryGenerator
 {
    private final String namePrefix;
 
@@ -28,22 +31,23 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
 
    private final YoDouble currentSegmentTime;
 
-   private final YoInteger numberOfSegments;
+   protected final YoInteger numberOfSegments;
    private final YoInteger currentSegmentIndex;
-   private final List<T> segments;
+   protected final RecyclingArrayList<T> segments;
 
    private final FixedFramePoint3DBasics currentPosition;
    private final FixedFrameVector3DBasics currentVelocity;
    private final FixedFrameVector3DBasics currentAcceleration;
 
-   private T activeSubTrajectory;
-
-   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
+   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, Supplier<T> trajectorySupplier, YoRegistry parentRegistry)
    {
-      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
+      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, trajectorySupplier, parentRegistry);
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
+   public MultipleSegmentPositionTrajectoryGenerator(String namePrefix,
+                                                     int maximumNumberOfWaypoints,
+                                                     ReferenceFrame referenceFrame,
+                                                     Supplier<T> trajectorySupplier,
                                                      YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
@@ -54,7 +58,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       numberOfSegments = new YoInteger(namePrefix + "NumberOfSegments", registry);
       numberOfSegments.set(0);
 
-      segments = new ArrayList<>();
+      segments = new RecyclingArrayList<>(trajectorySupplier);
 
       currentSegmentTime = new YoDouble(namePrefix + "CurrentTrajectoryTime", registry);
       currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegmentIndex", registry);
@@ -89,7 +93,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
 
    private void appendSegmentsUnsafe(T segment)
    {
-      segments.add(segment);
+      segments.add().set(segment);
       numberOfSegments.increment();
    }
 
@@ -109,18 +113,18 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
          appendSegment(segments.get(i));
    }
 
-   private void checkNumberOfSegments(int length)
+   protected void checkNumberOfSegments(int length)
    {
       if (length > maximumNumberOfSegments)
          throw new RuntimeException("Cannot exceed the maximum number of segments. Number of segments provided: " + length);
    }
 
-   private void checkNextSegmentIsContinuous(T segment)
+   protected void checkNextSegmentIsContinuous(T segment)
    {
       if (getCurrentNumberOfSegments() == 0)
          return;
 
-      if (MathTools.epsilonEquals(segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime(), segment.getTimeInterval().getStartTime(), 5e-3))
+      if (!MathTools.epsilonEquals(segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime(), segment.getTimeInterval().getStartTime(), 5e-3))
          throw new RuntimeException("The next segment doesn't start where the previous one ended.");
    }
 
@@ -133,7 +137,6 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       }
 
       currentSegmentIndex.set(0);
-      activeSubTrajectory = segments.get(0);
    }
 
    @Override
@@ -145,40 +148,30 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       }
 
       currentSegmentTime.set(time);
-      boolean changedSubTrajectory = false;
 
       if (!TimeIntervalTools.isTimeSequenceContinuous(segments))
          throw new RuntimeException("The segments do not represent a continuous time trajectory.");
 
-      if (currentSegmentIndex.getIntegerValue() > numberOfSegments.getIntegerValue() - 1
-          && time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
+      if (time < segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getStartTime())
       {
          currentSegmentIndex.set(0);
-         changedSubTrajectory = true;
       }
 
       while (currentSegmentIndex.getIntegerValue() < numberOfSegments.getIntegerValue() - 1
-             && time >= segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getEndTime())
+             && time > segments.get(currentSegmentIndex.getIntegerValue()).getTimeInterval().getEndTime())
       {
          currentSegmentIndex.increment();
-         changedSubTrajectory = true;
-      }
-
-      if (changedSubTrajectory)
-      {
-         activeSubTrajectory = segments.get(currentSegmentIndex.getIntegerValue());
       }
 
       T segment = segments.get(currentSegmentIndex.getValue());
       TimeIntervalReadOnly timeInterval = segment.getTimeInterval();
-      time = MathTools.clamp(time, timeInterval.getStartTime(), timeInterval.getEndTime());
 
       double subTrajectoryTime = MathTools.clamp(time - timeInterval.getStartTime(), 0.0, timeInterval.getDuration());
-      activeSubTrajectory.compute(subTrajectoryTime);
+      segment.compute(subTrajectoryTime);
 
-      currentPosition.set(activeSubTrajectory.getPosition());
-      currentVelocity.set(activeSubTrajectory.getVelocity());
-      currentAcceleration.set(activeSubTrajectory.getAcceleration());
+      currentPosition.set(segment.getPosition());
+      currentVelocity.set(segment.getVelocity());
+      currentAcceleration.set(segment.getAcceleration());
    }
 
    @Override
@@ -187,7 +180,7 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
       if (isEmpty())
          return true;
 
-      boolean isLastWaypoint = currentSegmentIndex.getIntegerValue() >= numberOfSegments.getIntegerValue() - 2;
+      boolean isLastWaypoint = currentSegmentIndex.getIntegerValue() >= numberOfSegments.getIntegerValue() - 1;
       if (!isLastWaypoint)
          return false;
       return currentSegmentTime.getValue() >= getEndTime();
@@ -201,6 +194,11 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
    public int getCurrentSegmentIndex()
    {
       return currentSegmentIndex.getIntegerValue();
+   }
+
+   public double getCurrentSegmentTrajectoryTime()
+   {
+      return currentSegmentTime.getDoubleValue();
    }
 
    @Override
@@ -244,6 +242,17 @@ public class MultipleSegmentPositionTrajectoryGenerator<T extends FixedFramePosi
    public double getEndTime()
    {
       return segments.get(getCurrentNumberOfSegments() - 1).getTimeInterval().getEndTime();
+   }
+
+   public T getSegment(int segmentIdx)
+   {
+      return segments.get(segmentIdx);
+   }
+
+   public void removeSegment(int segmentIdx)
+   {
+      segments.remove(segmentIdx);
+      numberOfSegments.decrement();
    }
 
    @Override

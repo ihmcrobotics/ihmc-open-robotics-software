@@ -240,8 +240,8 @@ public class JumpingBalanceManager
       yoDesiredCoMPosition.setZ(comTrajectoryPlanner.getNominalCoMHeight());
       yoDesiredCoMVelocity.setToZero();
 
-      yoPerfectVRP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
-      copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      yoPerfectVRP.setMatchingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroid(), 0.0);
+      copTrajectoryState.setInitialCoP(yoPerfectVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       startTimeForSupportSequence.set(yoTime.getValue());

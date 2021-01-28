@@ -73,7 +73,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.22;
       super.testPushICPOptimizationInwardPushInSwing();
    }
 

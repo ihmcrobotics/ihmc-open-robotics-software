@@ -17,7 +17,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.16.1")
+   api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("commons-net:commons-net:3.3")
    api("org.yaml:snakeyaml:1.17") //1.11
@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-java-toolkit:source")

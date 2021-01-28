@@ -39,6 +39,8 @@ public class GDX3DSceneManager
 
    private boolean firstRenderStarted = false;
 
+   private boolean addFocusSphere = true;
+
    public void create()
    {
       create(GDX3DSceneTools.createDefaultEnvironment());
@@ -57,7 +59,8 @@ public class GDX3DSceneManager
       Gdx.input.setInputProcessor(inputMultiplexer);
 
       camera3D = new FocusBasedGDXCamera();
-      addModelInstance(camera3D.getFocusPointSphere());
+      if (addFocusSphere)
+         addModelInstance(camera3D.getFocusPointSphere());
       inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
@@ -214,5 +217,10 @@ public class GDX3DSceneManager
    public Environment getEnvironment()
    {
       return environment;
+   }
+
+   public void setAddFocusSphere(boolean addFocusSphere)
+   {
+      this.addFocusSphere = addFocusSphere;
    }
 }
