@@ -29,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -103,7 +104,6 @@ public class SwingState extends AbstractFootControlState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
-   private final DoubleParameter velocityAdjustmentDamping;
    private final YoFrameVector3D adjustmentVelocityCorrection;
    private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
@@ -184,13 +184,10 @@ public class SwingState extends AbstractFootControlState
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
       replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
-      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry,
-                                                      swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector3D(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
 
       rateLimitedAdjustedPose = new RateLimitedYoFramePose(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
@@ -462,7 +459,7 @@ public class SwingState extends AbstractFootControlState
          adjustmentVelocityCorrection.sub(unadjustedPosition);
          adjustmentVelocityCorrection.scale(1.0 / controlDT);
          adjustmentVelocityCorrection.setZ(0.0);
-         adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getValue());
+         adjustmentVelocityCorrection.scale(swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
 
          desiredLinearVelocity.add(adjustmentVelocityCorrection);
       }
@@ -483,6 +480,8 @@ public class SwingState extends AbstractFootControlState
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
+      swingTrajectoryCalculator.setFootstep(footstep);
+
       setFootstepInternal(footstep);
       setFootstepDurationInternal(swingTime);
 
@@ -515,7 +514,7 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
 
-      adjustedFootstep.getPose(adjustedFootstepPose);
+      adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
 
       setFootstepDurationInternal(swingTime);
    }
@@ -572,6 +571,8 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
+            LogTools.info("Adjusted pose = " + rateLimitedAdjustedPose);
+
             blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
@@ -646,7 +647,6 @@ public class SwingState extends AbstractFootControlState
       footstepPose.changeFrame(worldFrame);
       footstepPose.setZ(footstepPose.getZ() + swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
 
-      swingTrajectoryCalculator.setFootstep(footstep);
 
       if (swingTrajectoryCalculator.getActiveTrajectoryType() == TrajectoryType.WAYPOINTS)
          swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();

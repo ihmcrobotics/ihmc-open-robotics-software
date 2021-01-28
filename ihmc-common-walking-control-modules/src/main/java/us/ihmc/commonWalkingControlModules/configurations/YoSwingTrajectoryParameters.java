@@ -11,8 +11,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +43,8 @@ public class YoSwingTrajectoryParameters
    private final BooleanProvider ignoreInitialAngularVelocityZ;
    private final DoubleProvider maxInitialLinearVelocityMagnitude;
    private final DoubleProvider maxInitialAngularVelocityMagnitude;
+
+   private final DoubleProvider velocityAdjustmentDamping;
 
    public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, YoRegistry registry)
    {
@@ -108,6 +108,9 @@ public class YoSwingTrajectoryParameters
       ignoreInitialAngularVelocityZ = new BooleanParameter(namePrefix + "IgnoreInitialAngularVelocityZ", registry, walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
       maxInitialLinearVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialLinearVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
       maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
+
+      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry,
+                                                      parameters.getSwingFootVelocityAdjustmentDamping());
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -208,5 +211,10 @@ public class YoSwingTrajectoryParameters
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return maxInitialAngularVelocityMagnitude.getValue();
+   }
+
+   public double getSwingFootVelocityAdjustmentDamping()
+   {
+      return velocityAdjustmentDamping.getValue();
    }
 }
