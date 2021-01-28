@@ -60,6 +60,11 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements FixedFramePoseT
       activeFrame = referenceFrame;
    }
 
+   public MultipleWaypointsPositionTrajectoryGenerator getPositionTrajectory()
+   {
+      return positionTrajectory;
+   }
+
    public void appendPoseWaypoint(FrameSE3TrajectoryPoint waypoint)
    {
       waypoint.changeFrame(activeFrame);

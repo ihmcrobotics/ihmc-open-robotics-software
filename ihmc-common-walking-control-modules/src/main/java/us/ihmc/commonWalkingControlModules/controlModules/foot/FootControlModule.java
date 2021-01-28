@@ -30,6 +30,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -560,5 +562,13 @@ public class FootControlModule
    public void touchDown(double initialPitch, double initialPitchVelocity, double pitch, double duration)
    {
       supportState.touchDown(initialPitch, initialPitchVelocity, pitch, duration);
+   }
+
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
+   {
+      if (stateMachine.getCurrentStateKey() == ConstraintType.SWING)
+         return swingState.getSwingTrajectory();
+      else
+         return null;
    }
 }

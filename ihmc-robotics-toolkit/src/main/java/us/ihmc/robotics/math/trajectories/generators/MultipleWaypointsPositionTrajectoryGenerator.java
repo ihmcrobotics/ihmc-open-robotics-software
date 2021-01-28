@@ -357,6 +357,11 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       return numberOfWaypoints.getIntegerValue();
    }
 
+   public YoFrameEuclideanTrajectoryPoint getWaypoint(int idx)
+   {
+      return waypoints.get(idx);
+   }
+
    public int getMaximumNumberOfWaypoints()
    {
       return maximumNumberOfWaypoints;

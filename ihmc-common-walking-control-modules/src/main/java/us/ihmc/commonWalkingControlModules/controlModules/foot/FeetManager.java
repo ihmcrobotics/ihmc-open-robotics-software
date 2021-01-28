@@ -32,6 +32,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -634,5 +636,10 @@ public class FeetManager
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
       footControlModules.get(side).touchDown(initialPitch, initialPitchVelocity, pitch, duration);
+   }
+
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getSwingTrajectory();
    }
 }
