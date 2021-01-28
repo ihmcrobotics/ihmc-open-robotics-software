@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -40,6 +41,8 @@ public class FootControlHelper
 
    private final ExplorationParameters explorationParameters;
    private final FootholdRotationParameters footholdRotationParameters;
+
+   private final SwingTrajectoryCalculator swingTrajectoryCalculator;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
    public FootControlHelper(RobotSide robotSide,
@@ -58,6 +61,10 @@ public class FootControlHelper
       this.footholdRotationParameters = footholdRotationParameters;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
+      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
+                                                                     walkingControllerParameters,
+                                                                     swingTrajectoryParameters,
+                                                                     registry);
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -196,5 +203,10 @@ public class FootControlHelper
    public YoSwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
+   }
+
+   public SwingTrajectoryCalculator getSwingTrajectoryCalculator()
+   {
+      return swingTrajectoryCalculator;
    }
 }
