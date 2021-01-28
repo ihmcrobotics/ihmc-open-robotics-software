@@ -65,13 +65,12 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
-      behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
+      behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
 
       LogTools.info("Creating behavior user interface");
       behaviorUI = BehaviorUI.create(behaviorRegistry,
                                      createRobotModel(),
-                                     COMMUNICATION_MODE_ROS2,
-                                     COMMUNICATION_MODE_KRYO,
+                                     COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER,
                                      "localhost",
                                      behaviorModule.getMessager());
       behaviorUI.addOnCloseRequestListener(() -> ThreadTools.startAThread(() -> {
