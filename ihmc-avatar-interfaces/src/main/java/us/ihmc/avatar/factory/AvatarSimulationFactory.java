@@ -189,6 +189,8 @@ public class AvatarSimulationFactory
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
          experimentalSimulation.configureRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
+         if (scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters() != null)
+            experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters());
 
          simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
                                                                    guiInitialSetup.get().getGraphics3DAdapter(),
