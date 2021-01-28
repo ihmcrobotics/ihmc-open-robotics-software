@@ -493,12 +493,12 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(initializeOptimizer);
 
       // Setup touchdown trajectory.
+      actualDesiredTouchdownVelocity.set(swingTrajectoryCalculator.getFinalLinearVelocity());
       touchdownTrajectory.setLinearTrajectory(swingDuration.getDoubleValue(),
                                               footstepPose.getPosition(),
-                                              swingTrajectoryParameters.getDesiredTouchdownVelocity(),
+                                              swingTrajectoryCalculator.getFinalLinearVelocity(),
                                               swingTrajectoryParameters.getDesiredTouchdownAcceleration());
       touchdownTrajectory.setOrientation(footstepPose.getOrientation(), finalAngularVelocity);
-      actualDesiredTouchdownVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
 
       fillAndInitializeBlendedTrajectories();
    }
@@ -534,7 +534,7 @@ public class SwingState extends AbstractFootControlState
             blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     adjustedWaypoint.getPosition(),
-                                                    swingTrajectoryParameters.getDesiredTouchdownVelocity(),
+                                                    swingTrajectoryCalculator.getFinalLinearVelocity(),
                                                     swingTrajectoryParameters.getDesiredTouchdownAcceleration());
             touchdownTrajectory.setOrientation(adjustedWaypoint.getOrientation());
          }
@@ -543,7 +543,7 @@ public class SwingState extends AbstractFootControlState
             blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
-                                                    swingTrajectoryParameters.getDesiredTouchdownVelocity(),
+                                                    swingTrajectoryCalculator.getFinalLinearVelocity(),
                                                     swingTrajectoryParameters.getDesiredTouchdownAcceleration());
             touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
          }
