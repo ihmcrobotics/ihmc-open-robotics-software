@@ -85,6 +85,17 @@ public class MatrixMissingTools
       return vector;
    }
 
+   public static DMatrixRMaj createRowVector(double... values)
+   {
+      DMatrixRMaj vector = new DMatrixRMaj(1, values.length);
+      for (int i = 0; i < values.length; i++)
+      {
+         vector.set(i, values[i]);
+      }
+
+      return vector;
+   }
+
    public static boolean epsilonEquals(DMatrix1Row a, DMatrix1Row b, double epsilon)
    {
       if (a.numRows != b.numRows)

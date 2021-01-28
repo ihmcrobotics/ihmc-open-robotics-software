@@ -76,7 +76,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
-      firstContact.setStartCopPosition(new FramePoint3D());
+      firstContact.setStartECMPPosition(new FramePoint3D());
 
       List<RobotQuadrant> feetInContact = new ArrayList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -111,7 +111,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
       firstContact.setTimeInterval(new TimeInterval(0.0, Double.POSITIVE_INFINITY));
-      firstContact.setStartCopPosition(new FramePoint3D());
+      firstContact.setStartECMPPosition(new FramePoint3D());
 
       List<RobotQuadrant> feetInContact = new ArrayList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)

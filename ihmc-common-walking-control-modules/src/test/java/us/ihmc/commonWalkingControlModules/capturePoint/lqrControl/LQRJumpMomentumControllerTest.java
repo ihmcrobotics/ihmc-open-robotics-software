@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +37,12 @@ public class LQRJumpMomentumControllerTest
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
       Polynomial3D vrpTrajectory = new Polynomial3D(4);
       vrpTrajectory.setLinear(0.0, 1.0, vrpStart, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
       SettableContactStateProvider contact = new SettableContactStateProvider();
-      contact.setStartCopPosition(new Point2D(vrpStart));
-      contact.setEndCopPosition(new Point2D(vrpEnd));
+      contact.setStartECMPPosition(new Point2D(vrpStart), 0.0);
+      contact.setEndECMPPosition(new Point2D(vrpEnd), 0.0);
       contact.getTimeInterval().setInterval(0.0, 1.0);
       contact.setContactState(ContactState.IN_CONTACT);
 
@@ -210,8 +211,8 @@ public class LQRJumpMomentumControllerTest
       double startTime = 0.0;
 
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
-      contact1.setStartCopPosition(new Point2D(vrpStart1));
-      contact1.setEndCopPosition(new Point2D(vrpEnd1));
+      contact1.setStartECMPPosition(new Point2D(vrpStart1), 0.0);
+      contact1.setEndECMPPosition(new Point2D(vrpEnd1), 0.0);
       contact1.getTimeInterval().setInterval(startTime, startTime + contactDuration);
       contact1.setContactState(ContactState.IN_CONTACT);
 
@@ -224,8 +225,8 @@ public class LQRJumpMomentumControllerTest
       startTime += flightDuration;
 
       SettableContactStateProvider contact3 = new SettableContactStateProvider();
-      contact3.setStartCopPosition(new Point2D(vrpStart2));
-      contact3.setEndCopPosition(new Point2D(vrpEnd2));
+      contact3.setStartECMPPosition(new Point2D(vrpStart2), 0.0);
+      contact3.setEndECMPPosition(new Point2D(vrpEnd2), 0.0);
       contact3.getTimeInterval().setInterval(startTime, startTime + contactDuration);
       contact3.setContactState(ContactState.IN_CONTACT);
 

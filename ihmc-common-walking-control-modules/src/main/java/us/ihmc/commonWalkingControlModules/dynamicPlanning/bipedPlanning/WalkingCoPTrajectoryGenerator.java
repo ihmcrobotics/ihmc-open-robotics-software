@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.MathTools;
@@ -12,10 +13,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -47,12 +45,12 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
    private final FramePoint3D tempFramePoint1 = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
-   private final FramePoint2D tempPointForCoPCalculation = new FramePoint2D();
-   private final FramePoint2D previousCoPPosition = new FramePoint2D();
-   private final FramePoint2D midfootCoP = new FramePoint2D();
+   private final FramePoint3D tempPointForCoPCalculation = new FramePoint3D();
+   private final FramePoint3D previousCoPPosition = new FramePoint3D();
+   private final FramePoint3D midfootCoP = new FramePoint3D();
+   private final FramePoint2D copInFootFrame = new FramePoint2D();
 
    private final YoDouble finalTransferSplitFraction;
    private final YoDouble finalTransferWeightDistribution;
@@ -231,7 +229,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       // compute cop waypoint location
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
-      contactStateProvider.setStartCopPosition(state.getInitialCoP());
+      contactStateProvider.setStartECMPPosition(state.getInitialCoP());
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
@@ -262,7 +260,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                 currentPolygon,
                                                 supportSide,
                                                 footstepIndex == 0);
-            computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), CoMTrajectoryPlanner.sufficientlyLong),
+            computeCoPPointsForFootstepSwing(Math.min(timings.getSwingTime(), CoMTrajectoryPlannerTools.sufficientlyLongTime),
                                              parameters.getDefaultSwingDurationShiftFraction(),
                                              parameters.getDefaultSwingSplitFraction(),
                                              currentPolygon,
@@ -295,7 +293,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          if (contactStateProvider.getTimeInterval().intervalContains(time))
          {
             double alpha = (time - contactStateProvider.getTimeInterval().getStartTime()) / contactStateProvider.getTimeInterval().getDuration();
-            desiredCoP.interpolate(contactStateProvider.getCopStartPosition(), contactStateProvider.getCopEndPosition(), alpha);
+            desiredCoP.interpolate(contactStateProvider.getECMPStartPosition(), contactStateProvider.getECMPEndPosition(), alpha);
             break;
          }
          else
@@ -346,8 +344,9 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getCopStartPosition());
+      contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
+      contactState.setLinearECMPVelocity();
    }
 
    private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
@@ -356,21 +355,23 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
 
-      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid());
-      tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
-      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid());
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-      tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
+      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid(), 0.0);
+      tempPointForCoPCalculation.changeFrame(worldFrame);
+      tempFramePoint1.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid(), 0.0);
+      tempFramePoint1.changeFrame(worldFrame);
+      tempPointForCoPCalculation.interpolate(tempFramePoint1, finalTransferWeightDistribution);
 
       double segmentDuration = finalTransferSplitFraction.getDoubleValue() * finalTransferDuration;
-      previousContactState.setEndCopPosition(tempPointForCoPCalculation);
+      previousContactState.setEndECMPPosition(tempPointForCoPCalculation);
       previousContactState.setDuration(segmentDuration);
+      previousContactState.setLinearECMPVelocity();
 
       segmentDuration = (1.0 - finalTransferSplitFraction.getValue()) * finalTransferDuration;
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
+      contactState.setLinearECMPVelocity();
    }
 
 
@@ -383,15 +384,15 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                     boolean setupForContinuityMaintaining)
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      previousCoPPosition.setIncludingFrame(previousContactState.getCopStartPosition());
-      previousCoPPosition.changeFrameAndProjectToXYPlane(previousPolygon.getReferenceFrame());
+      previousCoPPosition.setIncludingFrame(previousContactState.getECMPStartPosition());
+      previousCoPPosition.changeFrame(previousPolygon.getReferenceFrame());
 
-      if (!previousPolygon.isPointInside(previousCoPPosition))
+      if (!previousPolygon.isPointInside(previousCoPPosition.getX(), previousCoPPosition.getY()))
       {
          computeExitCoPLocation(previousCoPPosition, previousPolygon, nextPolygon, supportSide.getOppositeSide());
       }
 
-      previousCoPPosition.changeFrameAndProjectToXYPlane(worldFrame);
+      previousCoPPosition.changeFrame(worldFrame);
       computeEntryCoPPointLocation(tempPointForCoPCalculation, previousPolygon, nextPolygon, supportSide);
       midfootCoP.interpolate(previousCoPPosition, tempPointForCoPCalculation, weightDistribution);
 
@@ -399,13 +400,15 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       if (setupForContinuityMaintaining)
          firstSegmentDuration = Math.min(firstSegmentDuration, parameters.getDurationForContinuityMaintenanceSegment());
       previousContactState.setDuration(firstSegmentDuration);
-      previousContactState.setEndCopPosition(midfootCoP);
+      previousContactState.setEndECMPPosition(midfootCoP);
+      previousContactState.setLinearECMPVelocity();
 
       double secondSegmentDuration = duration - firstSegmentDuration;
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration(secondSegmentDuration);
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
+      contactStateProvider.setEndECMPPosition(tempPointForCoPCalculation);
+      contactStateProvider.setLinearECMPVelocity();
    }
 
    private void computeCoPPointsForFootstepSwing(double duration,
@@ -420,7 +423,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration(shiftFraction * splitFraction * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       previousContactState = contactState;
 
@@ -429,18 +433,20 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration(shiftFraction * (1.0 - splitFraction) * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration((1.0 - shiftFraction) * duration);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setEndECMPPosition(tempPointForCoPCalculation);
+      contactState.setLinearECMPVelocity();
 
       contactStateProviders.add().setStartFromEnd(contactState);
    }
 
-   private void computeEntryCoPPointLocation(FramePoint2DBasics copLocationToPack,
+   private void computeEntryCoPPointLocation(FramePoint3DBasics copLocationToPack,
                                              FrameConvexPolygon2DReadOnly previousFootPolygon,
                                              FrameConvexPolygon2DReadOnly footPolygon,
                                              RobotSide supportSide)
@@ -455,7 +461,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                          supportSide);
    }
 
-   private void computeBallCoPLocation(FramePoint2DBasics copLocationToPack,
+   private void computeBallCoPLocation(FramePoint3DBasics copLocationToPack,
                                        FrameConvexPolygon2DReadOnly footPolygon,
                                        FrameConvexPolygon2DReadOnly nextFootPolygon,
                                        RobotSide supportSide)
@@ -470,7 +476,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                          supportSide);
    }
 
-   private void computeExitCoPLocation(FramePoint2DBasics copLocationToPack,
+   private void computeExitCoPLocation(FramePoint3DBasics copLocationToPack,
                                        FrameConvexPolygon2DReadOnly footPolygon,
                                        FrameConvexPolygon2DReadOnly nextFootPolygon,
                                        RobotSide supportSide)
@@ -488,7 +494,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                          supportSide);
    }
 
-   private void computeCoPLocation(FramePoint2DBasics copLocationToPack,
+   private void computeCoPLocation(FramePoint3DBasics copLocationToPack,
                                    double lengthOffsetFactor,
                                    Vector2DReadOnly copOffset,
                                    double minXOffset,
@@ -498,15 +504,17 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                    RobotSide supportSide)
    {
       // FIXME this should be done in the sole frame, not the world frame
-      copLocationToPack.setIncludingFrame(basePolygon.getCentroid());
+      copInFootFrame.setIncludingFrame(basePolygon.getCentroid());
 
       double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon),
                                           minXOffset,
                                           maxXOffset);
-      copLocationToPack.add(copXOffset, supportSide.negateIfLeftSide(copOffset.getY()));
+      copInFootFrame.add(copXOffset, supportSide.negateIfLeftSide(copOffset.getY()));
 
-      constrainToPolygon(copLocationToPack, basePolygon, parameters.getMinimumDistanceInsidePolygon());
-      copLocationToPack.changeFrameAndProjectToXYPlane(worldFrame);
+      constrainToPolygon(copInFootFrame, basePolygon, parameters.getMinimumDistanceInsidePolygon());
+
+      copLocationToPack.setMatchingFrame(copInFootFrame, 0.);
+      copLocationToPack.changeFrame(worldFrame);
    }
 
    /**
@@ -517,7 +525,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
     *
     * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
     */
-   private boolean setExitCoPUnderSpecialCases(FramePoint2DBasics framePointToPack,
+   private boolean setExitCoPUnderSpecialCases(FramePoint3DBasics framePointToPack,
                                                FrameConvexPolygon2DReadOnly supportFootPolygon,
                                                FrameConvexPolygon2DReadOnly upcomingSwingFootPolygon,
                                                RobotSide supportSide)
@@ -531,26 +539,31 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       { // FIXME this is bad if it's a line, right?
          if (supportFootPolygon.getNumberOfVertices() == 2)
          {
-            framePointToPack.setToZero(supportFootPolygon.getReferenceFrame());
-            framePointToPack.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
-            framePointToPack.addY(supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
-            supportFootPolygon.orthogonalProjection(framePointToPack);
+            copInFootFrame.setToZero(supportFootPolygon.getReferenceFrame());
+            copInFootFrame.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
+            copInFootFrame.addY(supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
+            supportFootPolygon.orthogonalProjection(copInFootFrame);
          }
          else
          {
-            framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
+            copInFootFrame.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
 
          }
-         framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
+         copInFootFrame.changeFrameAndProjectToXYPlane(worldFrame);
+
+         framePointToPack.setIncludingFrame(copInFootFrame, 0.0);
+         framePointToPack.changeFrame(worldFrame);
          return true;
       }
       else if (parameters.getPlanForToeOffCalculator().shouldPutCMPOnToes(supportToSwingStepLength, supportToSwingStepHeight))
       {
-         framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid());
-         framePointToPack.add(supportFootPolygon.getMaxX() - parameters.getExitCoPForwardSafetyMarginOnToes(),
+         copInFootFrame.setIncludingFrame(supportFootPolygon.getCentroid());
+         copInFootFrame.add(supportFootPolygon.getMaxX() - parameters.getExitCoPForwardSafetyMarginOnToes(),
                               supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
-         constrainToPolygon(framePointToPack, supportFootPolygon, parameters.getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown());
-         framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
+         constrainToPolygon(copInFootFrame, supportFootPolygon, parameters.getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown());
+
+         framePointToPack.setIncludingFrame(copInFootFrame, 0.0);
+         framePointToPack.changeFrame(worldFrame);
          return true;
       }
       else
