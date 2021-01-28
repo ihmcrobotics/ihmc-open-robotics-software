@@ -50,7 +50,6 @@ public class SwingTrajectoryCalculator
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint3D.class);
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
-   private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
@@ -122,27 +121,9 @@ public class SwingTrajectoryCalculator
       finalPosition.setToNaN();
       finalOrientation.setToNaN();
 
-      setupViz(controllerToolbox.getYoGraphicsListRegistry(), registry);
-
       parentRegistry.addChild(registry);
    }
 
-   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
-   {
-      if (yoGraphicsListRegistry == null)
-      {
-         return;
-      }
-
-      for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
-      {
-         YoFramePoint3D yoWaypoint = new YoFramePoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.01, YoAppearance.GreenYellow());
-         yoWaypoint.setToNaN();
-         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointViz);
-         swingWaypointsForViz.add(yoWaypoint);
-      }
-   }
 
    /**
     * Resets the optimizer and the swing waypoints.
@@ -150,10 +131,6 @@ public class SwingTrajectoryCalculator
    public void informDone()
    {
       swingTrajectoryOptimizer.informDone();
-      for (int i = 0; i < swingWaypointsForViz.size(); i++)
-      {
-         swingWaypointsForViz.get(i).setToNaN();
-      }
    }
 
    public TrajectoryType getActiveTrajectoryType()
@@ -272,19 +249,21 @@ public class SwingTrajectoryCalculator
       }
 
       swingTrajectory.initialize();
-
-      if (!swingWaypointsForViz.isEmpty() && activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
-      {
-         for (int i = 0; i < swingWaypoints.size(); i++)
-         {
-            swingWaypointsForViz.get(i).setMatchingFrame(swingWaypoints.get(i).getPosition());
-         }
-      }
    }
 
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
       return swingTrajectory;
+   }
+
+   public int getNumberOfSwingWaypoints()
+   {
+      return swingWaypoints.size();
+   }
+
+   public FrameSE3TrajectoryPointBasics getSwingWaypoint(int index)
+   {
+      return swingWaypoints.get(index);
    }
 
    public FrameSE3TrajectoryPointBasics getLastSwingWaypoint()
