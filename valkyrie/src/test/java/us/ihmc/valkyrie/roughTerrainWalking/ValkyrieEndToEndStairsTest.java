@@ -1,25 +1,52 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
+import java.io.InputStream;
+import java.util.Objects;
 import java.util.Random;
+import java.util.function.Consumer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundFastWalkingTest;
 
 public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
+   private static final String OSHA_DOWNSTAIRS_PARAMETERS_XML = "/us/ihmc/valkyrie/simulation/fast_walking_parameters.xml";
+
    private boolean useVal2Scale = false;
+   private boolean useCustomDownstairsParameters = false;
 
    @Override
    public DRCRobotModel getRobotModel()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS)
+      {
+         @Override
+         public InputStream getParameterOverwrites()
+         {
+            if (useCustomDownstairsParameters)
+            {
+               InputStream resourceAsStream = ValkyrieFlatGroundFastWalkingTest.class.getResourceAsStream(OSHA_DOWNSTAIRS_PARAMETERS_XML);
+               Objects.requireNonNull(resourceAsStream);
+               return resourceAsStream;
+            }
+            else
+            {
+               return null;
+            }
+         }
+      };
       if (useVal2Scale)
       {
          robotModel.setModelSizeScale(0.925170);
@@ -28,11 +55,17 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
       return robotModel;
    }
 
+   @BeforeEach
+   public void initializeTest()
+   {
+      useVal2Scale = false;
+      useCustomDownstairsParameters = false;
+   }
+
    @Test
    @Tag("humanoid-rough-terrain-slow")
    public void testUpStairsSlow(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
       Random random = new Random(53415);
       testStairs(testInfo, true, true, 0.6, 0.25, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
    }
@@ -41,7 +74,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Tag("humanoid-rough-terrain-slow")
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
       Random random = new Random(53415);
       testStairs(testInfo, true, false, 0.9, 0.25, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
    }
@@ -50,7 +82,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Tag("humanoid-rough-terrain-slow")
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
       testStairs(testInfo, false, true, 1.0, 0.25, 0.0);
    }
 
@@ -58,7 +89,6 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Tag("humanoid-rough-terrain-slow")
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
-      useVal2Scale = false;
       Random random = new Random(53415);
       testStairs(testInfo, false, false, 1.0, 0.35, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
    }
@@ -96,5 +126,122 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
       useVal2Scale = true;
       Random random = new Random(53415);
       testStairs(testInfo, false, false, 1.0, 0.35, 0.0, createFootstepCorruptor(random, 0.02, 0.05, 0.05, 0.2, 0.2, 0.2));
+   }
+
+   @Test
+   @Tag("humanoid-rough-terrain-slow")
+   public void testUpStairsSlowVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      setUseExperimentalPhysicsEngine(true);
+      Random random = new Random(53415);
+      Consumer<FootstepDataListMessage> footstepCorruptor = createFootstepCorruptor(random, 0.02, 0.05, 0.05, 0.2, 0.2, 0.2);
+
+      testStairs(testInfo, true, true, 0.6, 0.25, 0.04, footsteps ->
+      {
+         for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+            footsteps.getFootstepDataList().get(i).getLocation().subX(0.05);
+         footstepCorruptor.accept(footsteps);
+      });
+   }
+
+   @Test
+   @Tag("humanoid-rough-terrain-slow")
+   public void testDownStairsSlowVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      useCustomDownstairsParameters = true;
+      setUseExperimentalPhysicsEngine(true);
+      DRCRobotModel robotModel = getRobotModel();
+      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
+      double rightFootOffsetX = 0.05;
+
+      testStairs(testInfo, true, false, 0.8, 0.25, 0.0, footsteps ->
+      {
+         int numberOfSteps = footsteps.getFootstepDataList().size();
+
+         for (int i = 0; i < numberOfSteps; i++)
+         {
+            FootstepDataMessage footstep = footsteps.getFootstepDataList().get(i);
+
+            if (footstep.getRobotSide() == RobotSide.RIGHT.toByte() && i != numberOfSteps - 1)
+            {
+               footstep.getLocation().addX(0.035);
+               footstep.getLocation().addX(rightFootOffsetX);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength - rightFootOffsetX, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength - rightFootOffsetX, -0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength, -0.5 * footWidth, 0);
+            }
+            else
+            {
+               footstep.getLocation().subX(0.01);
+            }
+         }
+      });
+   }
+
+   @Test
+   @Tag("humanoid-rough-terrain-slow")
+   public void testUpStairsVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      setUseExperimentalPhysicsEngine(true);
+      DRCRobotModel robotModel = getRobotModel();
+      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
+      double footOffsetX = 0.05;
+
+      testStairs(testInfo, false, true, 1.2, 0.25, 0.0, footsteps ->
+      {
+         int numberOfSteps = footsteps.getFootstepDataList().size();
+         for (int i = 0; i < numberOfSteps; i++)
+         {
+            FootstepDataMessage footstep = footsteps.getFootstepDataList().get(i);
+
+            if (i > 1 && i < numberOfSteps - 2)
+            {
+               footstep.getLocation().subX(0.05);
+               footstep.getLocation().subX(footOffsetX);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength, -0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength + footOffsetX, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength + footOffsetX, -0.5 * footWidth, 0);
+            }
+         }
+      });
+   }
+
+   @Test
+   @Tag("humanoid-rough-terrain-slow")
+   public void testDownStairsVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
+   {
+      useVal2Scale = true;
+      useCustomDownstairsParameters = true;
+      setUseExperimentalPhysicsEngine(true);
+      DRCRobotModel robotModel = getRobotModel();
+      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
+      double footOffsetX = 0.025;
+
+      testStairs(testInfo, false, false, 1.0, 0.25, 0.0, footsteps ->
+      {
+         int numberOfSteps = footsteps.getFootstepDataList().size();
+         for (int i = 0; i < numberOfSteps; i++)
+         {
+            FootstepDataMessage footstep = footsteps.getFootstepDataList().get(i);
+
+            if (i < numberOfSteps - 2)
+            {
+               footstep.getLocation().addX(0.035);
+               footstep.getLocation().addX(footOffsetX);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength - footOffsetX, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength - footOffsetX, -0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength, -0.5 * footWidth, 0);
+            }
+         }
+      });
    }
 }
