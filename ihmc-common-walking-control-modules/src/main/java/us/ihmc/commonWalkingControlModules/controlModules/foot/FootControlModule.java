@@ -573,12 +573,6 @@ public class FootControlModule
 
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
-      ConstraintType currentState = stateMachine.getCurrentStateKey();
-      if (currentState == ConstraintType.SWING)
-         return swingState.getSwingTrajectory();
-      else if (currentState == ConstraintType.FULL)
-
-      else
-         return null;
+      return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
    }
 }
