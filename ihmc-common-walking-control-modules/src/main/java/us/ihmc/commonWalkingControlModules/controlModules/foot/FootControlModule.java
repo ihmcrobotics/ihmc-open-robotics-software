@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -299,6 +300,22 @@ public class FootControlModule
       resetLoadConstraints();
    }
 
+   public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setInitialConditionsToCurrent();
+      swingTrajectoryCalculator.setFootstep(footstep);
+      swingTrajectoryCalculator.setSwingDuration(swingDuration);
+      swingTrajectoryCalculator.doOptimizationUpdate();
+   }
+
+   public void updateSwingTrajectoryPreview()
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.doOptimizationUpdate();
+   }
+
+
    public void doControl()
    {
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction.getValue());
@@ -556,8 +573,11 @@ public class FootControlModule
 
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
-      if (stateMachine.getCurrentStateKey() == ConstraintType.SWING)
+      ConstraintType currentState = stateMachine.getCurrentStateKey();
+      if (currentState == ConstraintType.SWING)
          return swingState.getSwingTrajectory();
+      else if (currentState == ConstraintType.FULL)
+
       else
          return null;
    }

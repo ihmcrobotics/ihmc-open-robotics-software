@@ -203,9 +203,7 @@ public class SwingState extends AbstractFootControlState
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
-      swingTrajectoryCalculator = new SwingTrajectoryCalculator(namePrefix, robotSide, footControlHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                walkingControllerParameters, footControlHelper.getSwingTrajectoryParameters(),
-                                                                registry);
+      swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
 
