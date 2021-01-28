@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -72,7 +73,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       copTrajectory.registerState(state);
 
-      state.setInitialCoP(new FramePoint2D());
+      state.setInitialCoP(new FramePoint3D());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -100,7 +101,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getCopEndPosition(), contactStateProviders.get(i + 1).getCopStartPosition(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
          assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
       }
 

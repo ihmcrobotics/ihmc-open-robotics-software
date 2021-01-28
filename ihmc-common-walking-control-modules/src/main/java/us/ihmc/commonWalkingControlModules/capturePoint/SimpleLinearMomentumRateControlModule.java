@@ -46,6 +46,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -104,7 +105,7 @@ public class SimpleLinearMomentumRateControlModule
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoPInMidFeet;
-   private final List<Polynomial3D> vrpTrajectories = new ArrayList<>();
+   private final List<Polynomial3DReadOnly> vrpTrajectories = new ArrayList<>();
    private double timeInContactPhase = 0;
    
    private boolean controlHeightWithMomentum;

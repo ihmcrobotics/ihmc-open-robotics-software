@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrix;
-import org.ejml.data.DMatrixSparseCSC;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
@@ -32,7 +30,7 @@ public class TakeOffHeightObjectivePolicy implements CoMTrajectoryPlanningCostPo
          if (!isStartTakeOff)
             continue;
 
-         double copHeight = contactSequence.get(sequenceId - 1).getCopEndPosition().getZ();
+         double copHeight = contactSequence.get(sequenceId - 1).getECMPEndPosition().getZ();
          double objectiveCoMHeight = copHeight + comTrajectoryPlanner.getNominalCoMHeight();
          CoMTrajectoryPlannerTools.addValueObjective(weight,
                                                      sequenceId,

@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -620,5 +621,11 @@ public class ModifiedOptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvi
    public List<Polynomial3D> getVRPTrajectories()
    {
       return vrpTrajectories;
+   }
+
+   @Override
+   public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
+   {
+      throw new UnsupportedOperationException();
    }
 }

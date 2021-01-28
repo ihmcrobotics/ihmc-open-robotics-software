@@ -4,9 +4,11 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeInterval;
@@ -32,6 +34,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
 
    private final FramePoint3D startCopPosition = new FramePoint3D();
    private final FramePoint3D endCopPosition = new FramePoint3D();
+   private final FrameVector3D copVelocity = new FrameVector3D();
 
    private boolean isUpToDate = false;
 
@@ -51,7 +54,7 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");
@@ -60,12 +63,30 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
       if (!isUpToDate)
          throw new RuntimeException("The CoP positions are not up to date.");
 
       return endCopPosition;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getECMPStartVelocity()
+   {
+      if (!isUpToDate)
+         throw new RuntimeException("The CoP positions are not up to date.");
+
+      return copVelocity;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getECMPEndVelocity()
+   {
+      if (!isUpToDate)
+         throw new RuntimeException("The CoP positions are not up to date.");
+
+      return copVelocity;
    }
 
    @Override
@@ -204,6 +225,9 @@ public class SimpleBipedContactPhase implements ContactStateProvider
          }
          endCopPosition.scale(1.0 / endFeet.size());
       }
+
+      copVelocity.sub(endCopPosition, startCopPosition);
+      copVelocity.scale(1.0 / getTimeInterval().getDuration());
 
       isUpToDate = true;
    }
