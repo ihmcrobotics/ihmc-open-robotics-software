@@ -3,14 +3,12 @@ package us.ihmc.valkyrie.roughTerrainWalking;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.Random;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -134,14 +132,29 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    {
       useVal2Scale = true;
       setUseExperimentalPhysicsEngine(true);
-      Random random = new Random(53415);
-      Consumer<FootstepDataListMessage> footstepCorruptor = createFootstepCorruptor(random, 0.02, 0.05, 0.05, 0.2, 0.2, 0.2);
+      DRCRobotModel robotModel = getRobotModel();
+      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
+      double leftFootOffsetX = 0.05;
 
       testStairs(testInfo, true, true, 0.6, 0.25, 0.04, footsteps ->
       {
-         for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
-            footsteps.getFootstepDataList().get(i).getLocation().subX(0.05);
-         footstepCorruptor.accept(footsteps);
+         int numberOfSteps = footsteps.getFootstepDataList().size();
+
+         for (int i = 0; i < numberOfSteps; i++)
+         {
+            FootstepDataMessage footstep = footsteps.getFootstepDataList().get(i);
+            footstep.getLocation().subX(0.05);
+
+            if (i > 1 && i < numberOfSteps - 2 && footstep.getRobotSide() == RobotSide.LEFT.toByte())
+            {
+               footstep.getLocation().subX(leftFootOffsetX);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(0.5 * footLength, -0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength + leftFootOffsetX, 0.5 * footWidth, 0);
+               footstep.getPredictedContactPoints2d().add().set(-0.5 * footLength + leftFootOffsetX, -0.5 * footWidth, 0);
+            }
+         }
       });
    }
 
@@ -191,7 +204,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
       DRCRobotModel robotModel = getRobotModel();
       double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootLength();
       double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
-      double footOffsetX = 0.05;
+      double footOffsetX = 0.10;
 
       testStairs(testInfo, false, true, 1.2, 0.25, 0.0, footsteps ->
       {
