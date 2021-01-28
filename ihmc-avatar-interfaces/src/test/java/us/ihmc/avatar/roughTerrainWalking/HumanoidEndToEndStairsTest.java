@@ -40,11 +40,14 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private int numberOfSteps = 6;
    private double stepHeight = 9.25 * 0.0254;
    private double stepLength = 0.32;
+   private boolean useExperimentalPhysicsEngine = false;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      useExperimentalPhysicsEngine = false;
    }
 
    @AfterEach
@@ -60,6 +63,11 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
    }
 
    public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset) throws Exception
@@ -79,6 +87,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -91,7 +100,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
-      FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.30, numberOfSteps);
+      FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.25, numberOfSteps);
       if (up)
          translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
       else
