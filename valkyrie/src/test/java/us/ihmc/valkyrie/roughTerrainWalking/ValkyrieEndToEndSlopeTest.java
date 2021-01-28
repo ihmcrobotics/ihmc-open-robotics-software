@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -88,12 +89,14 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlope(TestInfo testInfo) throws Exception
    {
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, false, disableToeOff);
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       maxStepLength = 0.10;
@@ -103,6 +106,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownSlope(TestInfo testInfo) throws Exception
    {
       goUp = false;
@@ -112,6 +116,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       goUp = false;
@@ -122,6 +127,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -131,6 +137,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -143,6 +150,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownSlopeVal2Scale(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -153,6 +161,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testDownSlopeVal2ScaleExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -164,6 +173,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeVal2ScaleExperimentalPhysicsEngineNoLimits(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;
@@ -173,6 +183,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeVal2ScaleExperimentalPhysicsEngineNoLimitsSideSteps(TestInfo testInfo) throws Exception
    {
       useVal2Scale = true;

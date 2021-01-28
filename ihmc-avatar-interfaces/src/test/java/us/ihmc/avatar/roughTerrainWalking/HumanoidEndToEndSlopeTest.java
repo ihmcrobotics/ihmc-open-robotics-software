@@ -77,7 +77,6 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       double startZ = up ? 0.0 : topZ;
       double startYaw = useSideSteps ? -Math.PI / 2.0 : 0.0;
 
-      simulationTestingParameters.setKeepSCSUp(true);
       SlopeEnvironment environment = new SlopeEnvironment(slopeAngle, 1.5, slopeLength);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ, startYaw));
