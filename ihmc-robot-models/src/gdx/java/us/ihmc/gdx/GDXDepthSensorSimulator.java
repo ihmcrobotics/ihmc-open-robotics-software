@@ -64,7 +64,7 @@ public class GDXDepthSensorSimulator
    {
       camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
       camera.near = minRange;
-      camera.far = maxRange;
+      camera.far = 2.0f; // should render camera farther
       viewport = new ScreenViewport(camera);
 
       modelBatch = new ModelBatch();
@@ -125,16 +125,16 @@ public class GDXDepthSensorSimulator
 
             depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
 
-            if (depthReading > camera.near && depthReading < camera.far)
+            if (depthReading > camera.near && depthReading < maxRange)
             {
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
                depthPoint.z = 2.0f * depthReading - 1.0f;
+               depthPoint.z += random.nextDouble() * 0.001 - 0.0005;
                depthPoint.prj(camera.invProjectionView);
 
                Point3D32 point = points.add();
                GDXTools.toEuclid(depthPoint, point);
-               point.addZ(random.nextDouble() * 0.007); // add some noise
             }
          }
       }
