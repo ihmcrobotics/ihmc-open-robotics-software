@@ -29,7 +29,7 @@ visualizersDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:simulation-construction-set:0.21.7")
 }
 
 gdxDependencies {
