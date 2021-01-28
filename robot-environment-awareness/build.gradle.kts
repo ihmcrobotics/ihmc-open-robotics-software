@@ -54,6 +54,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
    api(dependencyNotation) {
       exclude(group = "org.bytedeco")
    }
+   api("us.ihmc:ihmc-ros-tools:source")
 }
 
 applicationDependencies {
