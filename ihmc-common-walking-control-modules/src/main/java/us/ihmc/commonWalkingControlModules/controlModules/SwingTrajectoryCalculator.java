@@ -11,6 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -158,6 +159,11 @@ public class SwingTrajectoryCalculator
    public TrajectoryType getActiveTrajectoryType()
    {
       return activeTrajectoryType.getEnumValue();
+   }
+
+   public FrameVector3DReadOnly getFinalLinearVelocity()
+   {
+      return finalLinearVelocity;
    }
 
    /**
