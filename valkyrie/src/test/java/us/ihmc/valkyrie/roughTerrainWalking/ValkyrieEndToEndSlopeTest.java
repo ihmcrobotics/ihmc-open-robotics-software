@@ -195,4 +195,19 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
       disableToeOff = true;
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
+
+   @Test
+   @Tag("humanoid-rough-terrain-slow")
+   public void testDownSlopeVal2ScaleExperimentalPhysicsEngineNoLimitsSideSteps(TestInfo testInfo) throws Exception
+   {
+      goUp = false;
+      useVal2Scale = true;
+      removeAnkleJointLimits = true;
+      useSideSteps = true;
+      swingDuration = 0.8;
+      transferDuration = 0.5;
+      maxStepLength = 0.20;
+      disableToeOff = true;
+      testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
+   }
 }
