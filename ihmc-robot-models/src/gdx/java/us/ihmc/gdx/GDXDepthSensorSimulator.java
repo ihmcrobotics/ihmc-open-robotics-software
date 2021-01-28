@@ -51,6 +51,8 @@ public class GDXDepthSensorSimulator
    private ByteBuffer depthByteBuffer;
    private FloatBuffer depthFloatBuffer;
 
+   private boolean depthWindowEnabledOptimization = true;
+
    public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
       this.fieldOfViewY = (float) fieldOfViewY;
@@ -107,7 +109,6 @@ public class GDXDepthSensorSimulator
 
       points.clear();
 
-//      depthByteBuffer.rewind();
       depthFloatBuffer.rewind();
       for (int y = 0; y < imageHeight; y++)
       {
@@ -115,15 +116,18 @@ public class GDXDepthSensorSimulator
          {
             float depthReading = depthFloatBuffer.get();
 
-            float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
-            float pastNear = clippedDepth - camera.near;
-            float worldRange = camera.far - camera.near;
-            float colorRange = 1.0f;
-            float grayscale = pastNear * colorRange / worldRange;
-            grayscale = depthReading * colorRange / camera.far;
-            int flippedY = imageHeight - y;
+            if (depthWindowEnabledOptimization)
+            {
+               float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
+               float pastNear = clippedDepth - camera.near;
+               float worldRange = camera.far - camera.near;
+               float colorRange = 1.0f;
+               float grayscale = pastNear * colorRange / worldRange;
+               grayscale = depthReading * colorRange / camera.far;
+               int flippedY = imageHeight - y;
 
-            depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+               depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+            }
 
             if (depthReading > camera.near && depthReading < maxRange)
             {
@@ -139,38 +143,58 @@ public class GDXDepthSensorSimulator
          }
       }
 
-      depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+      if (depthWindowEnabledOptimization)
+         depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+      depthWindowEnabledOptimization = false;
    }
 
    public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
    {
-      ImGui.begin(depthWindowName);
-
-      float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY();
-      float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY();
-
-      int textureId = depthWindowTexture.getTextureObjectHandle();
-
-      ImGui.getWindowDrawList().addImage(textureId, posX, posY, posX + sizeX, posY + sizeY);
-
-      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
-      ImGui.end();
+      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false, sceneManager);
+      depthWindowEnabledOptimization = true;
    }
 
    public void renderImGuiColorWindow(GDX3DSceneManager sceneManager)
    {
-      ImGui.begin(colorWindowName);
+      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true, sceneManager);
+   }
 
+   private void renderImGuiWindow(String name, int textureId, boolean flipY, GDX3DSceneManager sceneManager)
+   {
+      ImGui.begin(name);
+
+//      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
+//      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
+//      float sizeX = ImGui.getWindowContentRegionMaxX();
+//      float sizeY = ImGui.getWindowContentRegionMaxY();
+      float tableHeader = 22.0f;
       float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY();
+      float posY = ImGui.getWindowPosY() + tableHeader;
       float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY();
+      float sizeY = ImGui.getWindowSizeY() - tableHeader;
 
-      int textureId = frameBuffer.getColorTexture().getTextureObjectHandle();
+      float windowAspect = sizeX / sizeY;
+      float cameraAspect = (float) imageWidth / (float) imageHeight;
+      float drawSizeX = sizeX;
+      float drawSizeY = sizeY;
+      float centeringX = 0.0f;
+      float centeringY = 0.0f;
+      if (windowAspect > cameraAspect)
+      {
+         drawSizeX = drawSizeY * cameraAspect;
+         centeringX = (sizeX - drawSizeX) / 2.0f;
+      }
+      else
+      {
+         drawSizeY = drawSizeX / cameraAspect;
+         centeringY = (sizeY - drawSizeY) / 2.0f;
+      }
+      float startX = posX + centeringX;
+      float startY = flipY ? posY + centeringY + drawSizeY : posY + centeringY;
+      float endX = posX + centeringX + drawSizeX;
+      float endY = flipY ? posY + centeringY : posY + centeringY + drawSizeY;
 
-      ImGui.getWindowDrawList().addImage(textureId, posX, posY + sizeY, posX + sizeX, posY);
+      ImGui.getWindowDrawList().addImage(textureId, startX, startY, endX, endY);
 
       sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
       ImGui.end();
