@@ -31,9 +31,8 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
-   private final MessagerAPI messagerAPI;
    private final Messager messager;
-   private final StatusLogger statusLogger;
+   private StatusLogger statusLogger;
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
    private final ROS2Node ros2Node;
@@ -55,7 +54,7 @@ public class BehaviorModule
    {
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
 
-      messagerAPI = behaviorRegistry.getMessagerAPI();
+      MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
 
       PubSubImplementation pubSubImplementation;
       if (ros2CommunicationMode == CommunicationMode.INTERPROCESS)
@@ -77,9 +76,27 @@ public class BehaviorModule
          messager = new SharedMemoryMessager(messagerAPI);
       }
 
-      statusLogger = new StatusLogger(messager::submitMessage);
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
+
+      init(behaviorRegistry, robotModel, ros2Node, messager);
+
+   }
+
+   public BehaviorModule(BehaviorRegistry behaviorRegistry,
+                         DRCRobotModel robotModel,
+                         ROS2Node ros2Node,
+                         Messager messager)
+   {
+      this.ros2Node = ros2Node;
+      this.messager = messager;
+
+      init(behaviorRegistry, robotModel, ros2Node, messager);
+   }
+
+   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, ROS2Node ros2Node, Messager messager)
+   {
+      statusLogger = new StatusLogger(messager::submitMessage);
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
@@ -90,7 +107,7 @@ public class BehaviorModule
 
       messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
 
-      new IHMCROS2Callback<>(ros2Node, BehaviorModule.API.SHUTDOWN, message ->
+      new IHMCROS2Callback<>(ros2Node, API.SHUTDOWN, message ->
       {
          statusLogger.info("Received SHUTDOWN. Shutting down...");
 

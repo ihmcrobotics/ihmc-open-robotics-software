@@ -39,10 +39,10 @@ public class AtlasSimulationBasics
    protected int numberOfContactPointsX = 8;
    protected int numberOfContactPointsY = 3;
    private static boolean USE_INTERPROCESS_ROS2 = Boolean.parseBoolean(System.getProperty("use.interprocess.ros2"));
-   private static boolean USE_INTERPROCESS_KRYO = Boolean.parseBoolean(System.getProperty("use.interprocess.kryo"));
+   private static boolean USE_INTERPROCESS_MESSAGER = Boolean.parseBoolean(System.getProperty("use.interprocess.messager"));
 
    protected static final CommunicationMode COMMUNICATION_MODE_ROS2 = USE_INTERPROCESS_ROS2 ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
-   protected static final CommunicationMode COMMUNICATION_MODE_KRYO = USE_INTERPROCESS_KRYO ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
+   protected static final CommunicationMode COMMUNICATION_MODE_MESSAGER = USE_INTERPROCESS_MESSAGER ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
 
    protected final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
 
