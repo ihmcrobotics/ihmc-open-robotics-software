@@ -192,20 +192,24 @@ public class ThreePotatoAngularMomentumCalculator
       desiredScaledAngularMomentumRate.set(heightScaledAngularMomentumTrajectory.getVelocity());
 
       totalAngularMomentum.setToZero();
-      for (RobotSide robotSide : RobotSide.values)
+      if (centerOfMassJacobian != null && soleFrames != null)
       {
-         FramePoint3DReadOnly comPosition = centerOfMassJacobian.getCenterOfMass();
-         FrameVector3DReadOnly comVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint3DReadOnly comPosition = centerOfMassJacobian.getCenterOfMass();
+            FrameVector3DReadOnly comVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
 
-         potatoPosition.setToZero(soleFrames.get(robotSide));
-         potatoPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         potatoVelocity.setIncludingFrame(soleFrames.get(robotSide).getTwistOfFrame().getLinearPart());
-         potatoVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+            potatoPosition.setToZero(soleFrames.get(robotSide));
+            potatoPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            potatoVelocity.setIncludingFrame(soleFrames.get(robotSide).getTwistOfFrame().getLinearPart());
+            potatoVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
-         computeAngularMomentumAtInstant(comPosition, comVelocity, potatoPosition, potatoVelocity, potatoMass.getDoubleValue(), angularMomentum);
-         totalAngularMomentum.add(angularMomentum);
+            computeAngularMomentumAtInstant(comPosition, comVelocity, potatoPosition, potatoVelocity, potatoMass.getDoubleValue(), angularMomentum);
+            totalAngularMomentum.add(angularMomentum);
+         }
+         actualModelAngularMomentum.set(totalAngularMomentum);
       }
-      actualModelAngularMomentum.set(totalAngularMomentum);
+
 
       MultipleWaypointsPositionTrajectoryGenerator predictedLeftFootTrajectory = footTrajectoryPredictor.getPredictedLeftFootTrajectories();
       MultipleWaypointsPositionTrajectoryGenerator predictedRightFootTrajectory = footTrajectoryPredictor.getPredictedRightFootTrajectories();

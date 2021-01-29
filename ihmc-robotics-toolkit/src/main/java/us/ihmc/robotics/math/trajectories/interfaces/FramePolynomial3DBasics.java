@@ -1,10 +1,18 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
+import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
 
-public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, FrameChangeable, FramePositionTrajectoryGenerator
+public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, FrameChangeable, FramePositionTrajectoryGenerator, Settable<FramePolynomial3DBasics>
 {
+   @Override
+   default void set(FramePolynomial3DBasics other)
+   {
+      setIncludingReferenceFrame(other);
+   }
+
    default void setIncludingReferenceFrame(FixedFramePolynomial3DBasics other)
    {
       setReferenceFrame(other.getReferenceFrame());
