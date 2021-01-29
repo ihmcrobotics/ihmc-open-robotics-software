@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -135,11 +134,14 @@ public class TransferToWalkingSingleSupportState extends TransferState
    public void doAction(double timeInState)
    {
       feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
-      balanceManager.setSwingTrajectory(feetManager.getSwingTrajectory(transferToSide.getOppositeSide()));
+      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(transferToSide.getOppositeSide()));
       balanceManager.computeICPPlan();
 
       if (!doManualLiftOff())
-         switchToToeOffIfPossible();
+      {
+         if (switchToToeOffIfPossible())
+            feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+      }
 
       super.doAction(timeInState);
 
@@ -165,8 +167,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
          tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
          feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
-
-      feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
    }
 
    private boolean doManualLiftOff()

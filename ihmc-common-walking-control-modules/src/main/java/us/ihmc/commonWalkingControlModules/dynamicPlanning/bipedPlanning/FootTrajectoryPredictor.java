@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,12 +9,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
@@ -31,7 +35,7 @@ public class FootTrajectoryPredictor
    private final DoubleProvider predictorSwingHeight = new DoubleParameter("predictorSwingHeight", registry, defaultSwingHeight);
    private final DoubleProvider predictorWaypointProportion = new DoubleParameter("predictorWaypointProportion", registry, defaultPredictorWaypointProportion);
 
-   private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
+   private final RecyclingArrayList<SE3TrajectoryPoint> swingWaypoints = new RecyclingArrayList<>(SE3TrajectoryPoint::new);
 
    public FootTrajectoryPredictor(YoRegistry parentRegistry)
    {
@@ -40,7 +44,19 @@ public class FootTrajectoryPredictor
 
    public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      this.swingTrajectory = swingTrajectory;
+      if (swingTrajectory == null)
+         return;
+
+      swingWaypoints.clear();
+      for (int i = 0; i < swingTrajectory.getPositionTrajectory().getCurrentNumberOfWaypoints(); i++)
+      {
+         swingWaypoints.add().set(swingTrajectory.getPositionTrajectory().getWaypoint(i));
+      }
+   }
+
+   public void clearSwingTrajectory()
+   {
+      swingWaypoints.clear();
    }
 
    public void compute(CoPTrajectoryGeneratorState state)
@@ -55,6 +71,8 @@ public class FootTrajectoryPredictor
 
    private void computeStanding(CoPTrajectoryGeneratorState state)
    {
+      swingWaypoints.clear();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
@@ -87,7 +105,7 @@ public class FootTrajectoryPredictor
       footTrajectories.get(stanceSide)
                       .appendWaypoint(transferDuration + swingDuration, state.getFootPose(stanceSide).getPosition(), zeroVector);
 
-      if (swingTrajectory == null)
+      if (swingWaypoints.isEmpty())
       {
          predictSwingFootTrajectory(transferDuration,
                                     transferDuration + swingDuration,
@@ -98,7 +116,7 @@ public class FootTrajectoryPredictor
       }
       else
       {
-         setSwingFootTrajectory(swingTrajectory.getPositionTrajectory(), footTrajectories.get(swingSide));
+         setSwingFootTrajectory(swingWaypoints, footTrajectories.get(swingSide));
       }
 
       leftFootTrajectory.initialize();
@@ -147,14 +165,14 @@ public class FootTrajectoryPredictor
       trajectoryToPack.appendWaypoint(endTime, endPosition, zeroVector);
    }
 
-   private static void setSwingFootTrajectory(MultipleWaypointsPositionTrajectoryGenerator swingTrajectory,
+   private static void setSwingFootTrajectory(List<SE3TrajectoryPoint> swingWaypoints,
                                               MultipleWaypointsPositionTrajectoryGenerator trajectoriesToPack)
    {
 
-      double timeShift = trajectoriesToPack.getLastWaypointTime() - swingTrajectory.getWaypoint(0).getTime();
-      for (int waypointIdx = 1; waypointIdx < swingTrajectory.getCurrentNumberOfWaypoints(); waypointIdx++)
+      double timeShift = trajectoriesToPack.getLastWaypointTime() - swingWaypoints.get(0).getTime();
+      for (int waypointIdx = 0; waypointIdx < swingWaypoints.size(); waypointIdx++)
       {
-         YoFrameEuclideanTrajectoryPoint waypoint = swingTrajectory.getWaypoint(waypointIdx);
+         SE3TrajectoryPoint waypoint = swingWaypoints.get(waypointIdx);
          trajectoriesToPack.appendWaypoint(waypoint.getTime() + timeShift, waypoint.getPosition(), waypoint.getLinearVelocity());
       }
    }

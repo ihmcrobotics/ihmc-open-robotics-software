@@ -134,6 +134,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 

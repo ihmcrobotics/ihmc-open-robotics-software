@@ -312,7 +312,8 @@ public class FootControlModule
    public void updateSwingTrajectoryPreview()
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
-      swingTrajectoryCalculator.doOptimizationUpdate();
+      if (swingTrajectoryCalculator.doOptimizationUpdate())
+         swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
    }
 
 
