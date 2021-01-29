@@ -9,6 +9,7 @@ import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,7 +22,7 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
 {
    private final YoDouble finalTransferDuration;
 
-   private final YoFramePoint2D initialCoP;
+   private final YoFramePoint3D initialCoP;
 
    private final JumpingGoalVariable jumpingGoal;
 
@@ -37,8 +38,8 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
       finalTransferDuration = new YoDouble("finalTransferDuration", registry);
       registerVariableToSave(finalTransferDuration);
 
-      initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
-      YoSaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
+      initialCoP = new YoFramePoint3D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
+      YoSaveableModuleStateTools.registerYoTuple3DToSave(initialCoP, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -87,7 +88,7 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
       this.jumpingGoal.set(jumpingGoal);
    }
 
-   public FramePoint2DReadOnly getInitialCoP()
+   public FramePoint3DReadOnly getInitialCoP()
    {
       return initialCoP;
    }
@@ -122,11 +123,6 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
    }
 
    public void setInitialCoP(FramePoint3DReadOnly initialCoP)
-   {
-      this.initialCoP.set(initialCoP);
-   }
-
-   public void setInitialCoP(FramePoint2DReadOnly initialCoP)
    {
       this.initialCoP.set(initialCoP);
    }

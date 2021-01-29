@@ -3,13 +3,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.ObjDoubleConsumer;
-
-import org.apache.commons.math3.util.Precision;
 
 import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -18,7 +13,6 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -64,8 +58,8 @@ public class CopTrajectory
 
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.getTimeInterval().setInterval(0.0, Double.POSITIVE_INFINITY);
-      contactState.setStartCopPosition(constantCop);
-      contactState.setEndCopPosition(constantCop);
+      contactState.setStartECMPPosition(constantCop, 0.0);
+      contactState.setEndECMPPosition(constantCop, 0.0);
 
       updateViz();
    }
@@ -87,14 +81,14 @@ public class CopTrajectory
       // First waypoint is a center of initial support.
       Point2DReadOnly centroid = supportPolygons.get(0).getCentroid();
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
-      contactStateProvider.setStartCopPosition(centroid);
+      contactStateProvider.setStartECMPPosition(centroid, 0.0);
       contactStateProvider.getTimeInterval().setStartTime(0.0);
 
       for (int i = 1; i < supportPolygons.size(); i++)
          addPolygon(supportPolygons, supportTimes, i);
 
       // Last waypoint is at center of final support.
-      contactStateProviders.getLast().setEndCopPosition(supportPolygons.get(supportPolygons.size() - 1).getCentroid());
+      contactStateProviders.getLast().setEndECMPPosition(supportPolygons.get(supportPolygons.size() - 1).getCentroid(), 0.0);
       contactStateProviders.getLast().getTimeInterval().setEndTime(supportTimes.get(supportTimes.size() - 1) + finalTransferDuration);
 
       updateViz();
@@ -124,8 +118,8 @@ public class CopTrajectory
          previousPolygon.intersectionWith(tempLine, waypoint, waypoint);
       }
 
-      previousContactState.setEndCopPosition(waypoint);
-      contactState.setStartCopPosition(waypoint);
+      previousContactState.setEndECMPPosition(waypoint, 0.0);
+      contactState.setStartECMPPosition(waypoint, 0.0);
    }
 
    public List<? extends ContactStateProvider> getContactStates()
@@ -137,7 +131,7 @@ public class CopTrajectory
    {
       int max = Math.min(yoWaypoints.size(), contactStateProviders.size());
       for (int i = 0; i < max; i++)
-         yoWaypoints.get(i).set(contactStateProviders.get(i).getCopStartPosition());
+         yoWaypoints.get(i).set(contactStateProviders.get(i).getECMPStartPosition());
       for (int i = max; i < yoWaypoints.size(); i++)
          yoWaypoints.get(i).setToNaN();
    }

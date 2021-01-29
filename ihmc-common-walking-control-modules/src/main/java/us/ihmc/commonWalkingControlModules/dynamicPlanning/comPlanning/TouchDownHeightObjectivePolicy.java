@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrix;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class TouchDownHeightObjectivePolicy implements CoMTrajectoryPlanningCost
 
          double duration = contactState.getTimeInterval().getDuration();
 
-         double copHeight = contactSequence.get(sequenceId + 1).getCopStartPosition().getZ();
+         double copHeight = contactSequence.get(sequenceId + 1).getECMPStartPosition().getZ();
          double objectiveCoMHeight = copHeight + comTrajectoryPlanner.getNominalCoMHeight();
          CoMTrajectoryPlannerTools.addValueObjective(weight,
                                                      sequenceId,

@@ -39,11 +39,6 @@ public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeI
       return getTimeInterval().getDuration();
    }
 
-   default TimeIntervalBasics getTimeInterval()
-   {
-      return getAxis(0).getTimeInterval();
-   }
-
    default boolean timeIntervalContains(double timeToCheck, double EPSILON)
    {
       return getTimeInterval().epsilonContains(timeToCheck, EPSILON);

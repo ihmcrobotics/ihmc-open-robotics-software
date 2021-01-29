@@ -11,6 +11,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3DFrameFactories;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 
 public class AbstractFramePolynomial3D implements FramePolynomial3DBasics
 {
@@ -85,4 +86,9 @@ public class AbstractFramePolynomial3D implements FramePolynomial3DBasics
       return polynomial3D.getCoefficients();
    }
 
+   @Override
+   public TimeIntervalBasics getTimeInterval()
+   {
+      return polynomial3D.getTimeInterval();
+   }
 }
