@@ -571,8 +571,6 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            LogTools.info("Adjusted pose = " + rateLimitedAdjustedPose);
-
             blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
