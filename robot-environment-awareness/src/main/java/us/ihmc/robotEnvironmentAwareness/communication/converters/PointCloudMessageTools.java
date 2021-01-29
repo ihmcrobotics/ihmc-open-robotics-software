@@ -30,6 +30,11 @@ public class PointCloudMessageTools
 
    public static LidarScanMessage toLidarScanMessage(List<? extends Point3DReadOnly> scan, Pose3DReadOnly scanSensorPose)
    {
+      return toLidarScanMessage(System.nanoTime(), scan, scanSensorPose);
+   }
+
+   public static LidarScanMessage toLidarScanMessage(long timestamp, List<? extends Point3DReadOnly> scan, Pose3DReadOnly scanSensorPose)
+   {
       LidarScanMessage message = new LidarScanMessage();
 
       // TODO: apply filters
@@ -41,7 +46,7 @@ public class PointCloudMessageTools
          message.getScan().add(scanPoint.getZ32());
       }
 
-      message.setRobotTimestamp(System.nanoTime());
+      message.setRobotTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
       message.setPointCloudConfidence(1.0);
       message.getLidarPosition().set(scanSensorPose.getPosition());
