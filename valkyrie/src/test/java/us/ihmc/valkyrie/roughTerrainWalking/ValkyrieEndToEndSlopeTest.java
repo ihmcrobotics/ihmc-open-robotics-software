@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -17,7 +18,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundFastWalkingTest;
 
 public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
 {
@@ -43,7 +43,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
          @Override
          public InputStream getParameterOverwrites()
          {
-            InputStream resourceAsStream = ValkyrieFlatGroundFastWalkingTest.class.getResourceAsStream(STEEP_SLOPES_PARAMETERS_XML);
+            InputStream resourceAsStream = ValkyrieEndToEndSlopeTest.class.getResourceAsStream(STEEP_SLOPES_PARAMETERS_XML);
             Objects.requireNonNull(resourceAsStream);
             return resourceAsStream;
          }
@@ -89,6 +89,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Disabled // Quite redundant with the Val2Scale tests.
    @Tag("humanoid-rough-terrain-slow")
    public void testUpSlope(TestInfo testInfo) throws Exception
    {
@@ -96,16 +97,20 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Disabled // Quite redundant with the Val2Scale tests.
    @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
-      maxStepLength = 0.10;
-      heightOffset = 0.00;
-      torsoPitch = 0.0;
+      swingDuration = 0.8;
+      transferDuration = 0.35;
+      maxStepLength = 0.20;
+      heightOffset = 0.025;
+      torsoPitch = 0.666;
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 
    @Test
+   @Disabled // Quite redundant with the Val2Scale tests.
    @Tag("humanoid-rough-terrain-slow")
    public void testDownSlope(TestInfo testInfo) throws Exception
    {
@@ -116,6 +121,7 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    }
 
    @Test
+   @Disabled // Quite redundant with the Val2Scale tests.
    @Tag("humanoid-rough-terrain-slow")
    public void testDownSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
