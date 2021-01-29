@@ -20,6 +20,7 @@ import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -44,6 +45,7 @@ public class GDXDepthSensorSimulator
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
    private RecyclingArrayList<Point3D32> points;
+   private ArrayList<Integer> colors;
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
@@ -83,6 +85,7 @@ public class GDXDepthSensorSimulator
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
+      colors = new ArrayList<>(imageWidth * imageHeight);
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -108,6 +111,7 @@ public class GDXDepthSensorSimulator
       frameBuffer.end();
 
       points.clear();
+      colors.clear();
 
       depthFloatBuffer.rewind();
       for (int y = 0; y < imageHeight; y++)
@@ -139,6 +143,7 @@ public class GDXDepthSensorSimulator
 
                Point3D32 point = points.add();
                GDXTools.toEuclid(depthPoint, point);
+               colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
             }
          }
       }
@@ -223,6 +228,11 @@ public class GDXDepthSensorSimulator
    public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
+   }
+
+   public ArrayList<Integer> getColors()
+   {
+      return colors;
    }
 
    public String getDepthWindowName()
