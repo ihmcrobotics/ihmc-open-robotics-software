@@ -291,6 +291,7 @@ public class SwingState extends AbstractFootControlState
    public void onEntry()
    {
       super.onEntry();
+      swingTrajectoryCalculator.setShouldVisualize(true);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);

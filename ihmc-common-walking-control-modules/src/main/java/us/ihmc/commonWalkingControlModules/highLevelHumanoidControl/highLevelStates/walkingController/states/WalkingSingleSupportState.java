@@ -113,7 +113,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
-//      balanceManager.setSwingTrajectory(feetManager.getSwingTrajectory(swingSide));
+      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
       super.doAction(timeInState);

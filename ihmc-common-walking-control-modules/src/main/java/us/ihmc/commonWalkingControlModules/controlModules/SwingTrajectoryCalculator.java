@@ -117,6 +117,10 @@ public class SwingTrajectoryCalculator
       parentRegistry.addChild(registry);
    }
 
+   public void setShouldVisualize(boolean visualize)
+   {
+      swingTrajectoryOptimizer.setShouldVisualize(visualize);
+   }
 
    /**
     * Resets the optimizer and the swing waypoints.

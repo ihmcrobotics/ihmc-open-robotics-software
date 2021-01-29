@@ -306,6 +306,7 @@ public class FootControlModule
       swingTrajectoryCalculator.setInitialConditionsToCurrent();
       swingTrajectoryCalculator.setFootstep(footstep);
       swingTrajectoryCalculator.setSwingDuration(swingDuration);
+      swingTrajectoryCalculator.setShouldVisualize(false);
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
    }
 
