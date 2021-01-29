@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DMatrix;
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -71,9 +70,9 @@ public class CoMTrajectoryPlannerTools
          FramePoint3D start = startVRPPositionsToPack.add();
          FramePoint3D end = endVRPPositionsToPack.add();
 
-         start.set(contactStateProvider.getCopStartPosition());
+         start.set(contactStateProvider.getECMPStartPosition());
          start.addZ(nominalCoMHeight);
-         end.set(contactStateProvider.getCopEndPosition());
+         end.set(contactStateProvider.getECMPEndPosition());
          end.addZ(nominalCoMHeight);
 
          if (adjustWaypointHeightForHeightChange)
@@ -89,8 +88,8 @@ public class CoMTrajectoryPlannerTools
                if (!finalContact && !nextContactStateProvider.getContactState().isLoadBearing())
                { // next is a jump, current one is load bearing
                   ContactStateProvider nextNextContactStateProvider = contactSequence.get(i + 2);
-                  double heightBeforeJump = contactStateProvider.getCopEndPosition().getZ();
-                  double finalHeightAfterJump = nextNextContactStateProvider.getCopStartPosition().getZ();
+                  double heightBeforeJump = contactStateProvider.getECMPEndPosition().getZ();
+                  double finalHeightAfterJump = nextNextContactStateProvider.getECMPStartPosition().getZ();
 
                   double heightChangeWhenJumping = finalHeightAfterJump - heightBeforeJump;
                   double durationOfJump = nextContactStateProvider.getTimeInterval().getDuration();
@@ -120,9 +119,9 @@ public class CoMTrajectoryPlannerTools
       FramePoint3D start = startVRPPositionsToPack.add();
       FramePoint3D end = endVRPPositionsToPack.add();
 
-      start.set(contactStateProvider.getCopStartPosition());
+      start.set(contactStateProvider.getECMPStartPosition());
       start.addZ(nominalCoMHeight);
-      end.set(contactStateProvider.getCopEndPosition());
+      end.set(contactStateProvider.getECMPEndPosition());
       end.addZ(nominalCoMHeight);
    }
 

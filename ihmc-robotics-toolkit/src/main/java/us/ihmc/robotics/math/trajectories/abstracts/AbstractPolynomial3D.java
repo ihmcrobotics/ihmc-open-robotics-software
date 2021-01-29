@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.abstracts;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -9,6 +11,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 
 import java.util.List;
 
@@ -31,12 +34,14 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    private final PolynomialBasics yPolynomial;
    private final PolynomialBasics zPolynomial;
 
+
    private final PolynomialBasics[] polynomials;
 
    private double xIntegralResult = Double.NaN;
    private double yIntegralResult = Double.NaN;
    private double zIntegralResult = Double.NaN;
 
+   private final TimeIntervalBasics timeInterval;
    private final Point3DReadOnly position;
    private final Vector3DReadOnly velocity;
    private final Vector3DReadOnly acceleration;
@@ -69,10 +74,11 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
       this.zPolynomial = zPolynomial;
       polynomials = new PolynomialBasics[] {xPolynomial, yPolynomial, zPolynomial};
 
-      position = Trajectory3DFactories.newLinkedPoint3DReadOnly(xPolynomial, yPolynomial, zPolynomial);
-      velocity = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
-      acceleration = Trajectory3DFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
-      integralResult = Trajectory3DFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
+      timeInterval = Trajectory3DFactories.newLinkedTimeInterval(xPolynomial, yPolynomial, zPolynomial);
+      position = EuclidCoreFactories.newLinkedPoint3DReadOnly(xPolynomial::getValue, yPolynomial::getValue, zPolynomial::getValue);
+      velocity = EuclidCoreFactories.newLinkedVector3DReadOnly(xPolynomial::getVelocity, yPolynomial::getVelocity, zPolynomial::getVelocity);
+      acceleration = EuclidCoreFactories.newLinkedVector3DReadOnly(xPolynomial::getAcceleration, yPolynomial::getAcceleration, zPolynomial::getAcceleration);
+      integralResult = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> xIntegralResult, () -> yIntegralResult, () -> zIntegralResult);
 
       coefficients = new Tuple3DBasics[getMaximumNumberOfCoefficients()];
       coefficients[0] = Trajectory3DFactories.newLinkedPoint3DBasics(() -> xPolynomial.getCoefficient(0),
@@ -145,5 +151,11 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    public String toString()
    {
       return "X: " + xPolynomial.toString() + "\n" + "Y: " + yPolynomial.toString() + "\n" + "Z: " + zPolynomial.toString();
+   }
+
+   @Override
+   public TimeIntervalBasics getTimeInterval()
+   {
+      return timeInterval;
    }
 }

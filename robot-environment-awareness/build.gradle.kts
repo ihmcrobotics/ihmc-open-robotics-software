@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.5")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.6")
 
    apiBytedecoNatives("javacpp", "1.5.4")
    apiBytedecoNatives("openblas", "0.3.10-1.5.4")
@@ -54,6 +54,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
    api(dependencyNotation) {
       exclude(group = "org.bytedeco")
    }
+   api("us.ihmc:ihmc-ros-tools:source")
 }
 
 applicationDependencies {
@@ -61,7 +62,7 @@ applicationDependencies {
 
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
-   api("us.ihmc:simulation-construction-set:0.21.6")
+   api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

@@ -1,14 +1,12 @@
 package us.ihmc.robotics.math.trajectories.core;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameIOTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.function.DoubleConsumer;
@@ -17,73 +15,53 @@ import static us.ihmc.euclid.tools.EuclidHashCodeTools.toIntHashCode;
 
 public class Trajectory3DFactories
 {
-   public static Point3DReadOnly newLinkedPoint3DReadOnly(DoubleProvider xProvider, DoubleProvider yProvider, DoubleProvider zProvider)
+   public static TimeIntervalBasics newLinkedTimeInterval(TimeIntervalProvider xInterval,
+                                                          TimeIntervalProvider yInterval,
+                                                          TimeIntervalProvider zInterval)
    {
-      return new Point3DReadOnly()
-      {
-         @Override
-         public double getX()
-         {
-            return xProvider.getValue();
-         }
-
-         @Override
-         public double getY()
-         {
-            return yProvider.getValue();
-         }
-
-         @Override
-         public double getZ()
-         {
-            return zProvider.getValue();
-         }
-
-         @Override
-         public boolean equals(Object object)
-         {
-            if (object == this)
-               return true;
-            else if (object instanceof Point3DReadOnly)
-               return equals((Point3DReadOnly) object);
-            else
-               return false;
-         }
-
-         @Override
-         public int hashCode()
-         {
-            return toIntHashCode(toIntHashCode(getX(), getY(), getZ()));
-         }
-
-         @Override
-         public String toString()
-         {
-            return EuclidCoreIOTools.getTuple3DString(this);
-         }
-      };
+      return newLinkedTimeInterval(xInterval.getTimeInterval(), yInterval.getTimeInterval(), zInterval.getTimeInterval());
    }
 
-   public static Vector3DReadOnly newLinkedVector3DReadOnly(DoubleProvider xProvider, DoubleProvider yProvider, DoubleProvider zProvider)
+   public static TimeIntervalBasics newLinkedTimeInterval(TimeIntervalBasics xInterval,
+                                                          TimeIntervalBasics yInterval,
+                                                          TimeIntervalBasics zInterval)
    {
-      return new Vector3DReadOnly()
+      return new TimeIntervalBasics()
       {
          @Override
-         public double getX()
+         public void setStartTime(double startTime)
          {
-            return xProvider.getValue();
+            xInterval.setStartTime(startTime);
+            yInterval.setStartTime(startTime);
+            zInterval.setStartTime(startTime);
          }
 
          @Override
-         public double getY()
+         public void setEndTime(double endTime)
          {
-            return yProvider.getValue();
+            xInterval.setEndTime(endTime);
+            yInterval.setEndTime(endTime);
+            zInterval.setEndTime(endTime);
          }
 
          @Override
-         public double getZ()
+         public double getStartTime()
          {
-            return zProvider.getValue();
+            if (!MathTools.epsilonEquals(xInterval.getStartTime(), yInterval.getStartTime(), 1e-5) ||
+                !MathTools.epsilonEquals(xInterval.getStartTime(), zInterval.getStartTime(), 1e-5))
+               throw new RuntimeException("Time intervals are wrong.");
+
+            return xInterval.getStartTime();
+         }
+
+         @Override
+         public double getEndTime()
+         {
+            if (!MathTools.epsilonEquals(xInterval.getEndTime(), yInterval.getEndTime(), 1e-5) ||
+                !MathTools.epsilonEquals(xInterval.getEndTime(), zInterval.getEndTime(), 1e-5))
+               throw new RuntimeException("Time intervals are wrong.");
+
+            return xInterval.getEndTime();
          }
 
          @Override
@@ -91,8 +69,8 @@ public class Trajectory3DFactories
          {
             if (object == this)
                return true;
-            else if (object instanceof Vector3DReadOnly)
-               return equals((Vector3DReadOnly) object);
+            else if (object instanceof TimeIntervalBasics)
+               return equals((TimeIntervalBasics) object);
             else
                return false;
          }
@@ -100,13 +78,13 @@ public class Trajectory3DFactories
          @Override
          public int hashCode()
          {
-            return toIntHashCode(toIntHashCode(getX(), getY(), getZ()));
+            return toIntHashCode(toIntHashCode(getStartTime(), getEndTime()));
          }
 
          @Override
          public String toString()
          {
-            return EuclidCoreIOTools.getTuple3DString(this);
+            return xInterval.toString();
          }
       };
    }

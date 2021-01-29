@@ -14,6 +14,7 @@ import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class LQRJumpMomentumControllerNoFlightTest
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
       Polynomial3D vrpTrajectory = new Polynomial3D(4);
       vrpTrajectory.setLinear(0.0, 1.0, vrpStart, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
       List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
       contactStateProviders.add(new SettableContactStateProvider());
@@ -184,7 +185,7 @@ public class LQRJumpMomentumControllerNoFlightTest
       Polynomial3D vrpTrajectory = new Polynomial3D(4);
       double finalTime = 1.5;
       vrpTrajectory.setLinear(0.0, finalTime, vrpStart, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
       List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
       contactStateProviders.add(new SettableContactStateProvider());
@@ -423,7 +424,7 @@ public class LQRJumpMomentumControllerNoFlightTest
       Polynomial3D vrpTrajectory = new Polynomial3D(4);
       double finalTime = 1.5;
       vrpTrajectory.setCubic(0.0, finalTime, vrpStart, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
       List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
       contactStateProviders.add(new SettableContactStateProvider());
@@ -647,19 +648,19 @@ public class LQRJumpMomentumControllerNoFlightTest
       double finalTime2 = 3.1;
       vrpTrajectory1.setLinear(0.0, finalTime1, vrpStart, vrpMiddle);
       vrpTrajectory2.setLinear(0.0, finalTime2 - finalTime1, vrpMiddle, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
 
       List<Polynomial3D> relativeVRPTrajectories = new ArrayList<>();
-      Polynomial3D lastTrajectory = trajectories.get(trajectories.size() - 1);
+      Polynomial3DReadOnly lastTrajectory = trajectories.get(trajectories.size() - 1);
       lastTrajectory.compute(lastTrajectory.getTimeInterval().getEndTime());
       DMatrixRMaj finalVRPState = new DMatrixRMaj(3, 1);
       lastTrajectory.getPosition().get(finalVRPState);
 
       for (int i = 0; i < trajectories.size(); i++)
       {
-         Polynomial3D trajectory = trajectories.get(i);
+         Polynomial3DReadOnly trajectory = trajectories.get(i);
          Polynomial3D relativeTrajectory = new Polynomial3D(5);
          relativeVRPTrajectories.add(relativeTrajectory);
 
@@ -1103,7 +1104,7 @@ public class LQRJumpMomentumControllerNoFlightTest
       vrpTrajectory1.setCubic(0.0, finalTime1, vrpStart, vrpMiddle);
       vrpTrajectory2.setCubic(0.0, finalTime2 - finalTime1, vrpMiddle, vrpMiddle2);
       vrpTrajectory3.setCubic(0.0, finalTime3 - finalTime2, vrpMiddle2, vrpEnd);
-      List<Polynomial3D> trajectories = new ArrayList<>();
+      List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
       trajectories.add(vrpTrajectory3);

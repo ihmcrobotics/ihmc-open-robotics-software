@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -33,13 +32,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -50,19 +46,17 @@ import us.ihmc.robotics.physics.MultiBodySystemStateReader;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.PhysicsEngineTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotDescription.BallAndSocketJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.robotDescription.BallAndSocketJointDescription;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.BallAndSocketJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -90,8 +84,7 @@ public class ExperimentalSimulation extends Simulation
    private final ExperimentalPhysicsEngine physicsEngine = new ExperimentalPhysicsEngine();
    private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
    private final SCSRobotExternalForcePointWrapper externalForcePointWrapper = new SCSRobotExternalForcePointWrapper();
-   private final SCSRobotIMUSensorReader imuSensorReader = new SCSRobotIMUSensorReader();
-   private final SCSRobotTransformUpdater robotTransformUpdater = new SCSRobotTransformUpdater();
+   private final SCSRobotPhysicsStateUpdater scsRobotPhysicsStateUpdaters = new SCSRobotPhysicsStateUpdater();
 
    private Vector3DReadOnly gravity;
 
@@ -114,7 +107,7 @@ public class ExperimentalSimulation extends Simulation
       super(robotArray, dataBufferSize);
       physicsEngine.addExternalWrenchReader(externalWrenchReader);
       physicsEngine.addExternalWrenchProvider(externalForcePointWrapper);
-      physicsEngine.addInertialMeasurementReader(imuSensorReader);
+      physicsEngine.addInertialMeasurementReader(scsRobotPhysicsStateUpdaters);
    }
 
    public void setGravity(Vector3DReadOnly gravity)
@@ -160,8 +153,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -187,8 +179,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -225,8 +216,7 @@ public class ExperimentalSimulation extends Simulation
                              physicsOutputStateReader);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       externalForcePointWrapper.addRobot(rootBody, scsRobot);
-      imuSensorReader.addRobot(rootBody, scsRobot);
-      robotTransformUpdater.addRobot(rootBody, scsRobot);
+      scsRobotPhysicsStateUpdaters.addRobot(rootBody, scsRobot);
    }
 
    public void addPreProcessor(Runnable preProcessor)
@@ -256,7 +246,6 @@ public class ExperimentalSimulation extends Simulation
 
       synchronized (getSimulationSynchronizer())
       {
-         robotTransformUpdater.update();
 
          externalWrenchReader.initialize();
          physicsEngine.initialize();
@@ -267,7 +256,8 @@ public class ExperimentalSimulation extends Simulation
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
-            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
+            robot.update();
+            robot.updateAllGroundContactPointVelocities();
          }
 
          getDataBuffer().fillBuffer();
@@ -285,12 +275,13 @@ public class ExperimentalSimulation extends Simulation
       synchronized (getSimulationSynchronizer())
       {
          Robot[] robots = getRobots();
-         robotTransformUpdater.update();
 
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
             robot.update();
+            robot.updateIMUMountAccelerations();
+            robot.updateAllGroundContactPointVelocities();
             robot.doControllers();
          }
 
@@ -301,7 +292,6 @@ public class ExperimentalSimulation extends Simulation
          for (int i = 0; i < robots.length; i++)
          {
             Robot robot = robots[i];
-            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
             robot.getYoTime().add(getDT());
          }
       }
@@ -621,29 +611,6 @@ public class ExperimentalSimulation extends Simulation
             allIDJoints = multiBodySystem.getAllJoints();
          }
       };
-   }
-
-   private static void updateGroundContactPointsVelocity(RigidBodyReadOnly rootBody, Robot scsRobot)
-   {
-      List<GroundContactPoint> scsGroundContactPoints = scsRobot.getAllGroundContactPoints();
-      JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
-      FramePoint3D position = new FramePoint3D();
-      FrameVector3D linearVelocity = new FrameVector3D();
-      FrameVector3D angularVelocity = new FrameVector3D();
-
-      for (GroundContactPoint scsGroundContactPoint : scsGroundContactPoints)
-      {
-         Joint scsJoint = scsGroundContactPoint.getParentJoint();
-         scsGroundContactPoint.getOffset(position);
-         JointReadOnly joint = Stream.of(allJoint).filter(candidate -> candidate.getName().equals(scsJoint.getName())).findFirst().get();
-         position.setReferenceFrame(joint.getFrameAfterJoint());
-         TwistReadOnly twistOfFrame = joint.getFrameAfterJoint().getTwistOfFrame();
-         twistOfFrame.getLinearVelocityAt(position, linearVelocity);
-         linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         angularVelocity.setMatchingFrame(twistOfFrame.getAngularPart());
-         scsGroundContactPoint.setVelocity(linearVelocity);
-         scsGroundContactPoint.setAngularVelocity(angularVelocity);
-      }
    }
 
    static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)

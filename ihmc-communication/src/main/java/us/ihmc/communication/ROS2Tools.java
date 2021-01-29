@@ -23,6 +23,7 @@ public class ROS2Tools
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
    public static final String REA_NODE_NAME = "REA_module";
+   public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";
    public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
    public static final String STEREO_REA_NODE_NAME = "SREA_module";
    public static final String LLAMA_NODE_NAME = "llama_network";

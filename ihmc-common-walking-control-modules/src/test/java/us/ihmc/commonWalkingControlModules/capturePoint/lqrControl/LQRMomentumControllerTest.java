@@ -1565,16 +1565,16 @@ public class LQRMomentumControllerTest
       double finalTime3 = 1.0;
 
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
-      firstContact.setStartCopPosition(vrpStart);
-      firstContact.setEndCopPosition(vrpMiddle);
+      firstContact.setStartECMPPosition(vrpStart, 0.0);
+      firstContact.setEndECMPPosition(vrpMiddle, 0.0);
 
       secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
-      secondContact.setStartCopPosition(vrpMiddle);
-      secondContact.setEndCopPosition(vrpMiddle2);
+      secondContact.setStartECMPPosition(vrpMiddle, 0.0);
+      secondContact.setEndECMPPosition(vrpMiddle2, 0.0);
 
       thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
-      thirdContact.setStartCopPosition(vrpMiddle2);
-      thirdContact.setEndCopPosition(vrpEnd);
+      thirdContact.setStartECMPPosition(vrpMiddle2, 0.0);
+      thirdContact.setEndECMPPosition(vrpEnd, 0.0);
 
       contactSequence.add(firstContact);
 //      contactSequence.add(secondContact);
