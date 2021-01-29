@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -39,6 +40,7 @@ public class GDXDepthSensorSimulator
    private final float minRange;
    private final float maxRange;
    private final Vector3 depthPoint = new Vector3();
+   private final Vector3D32 noiseVector = new Vector3D32();
 
    private PerspectiveCamera camera;
    private ModelBatch modelBatch;
@@ -68,7 +70,7 @@ public class GDXDepthSensorSimulator
    {
       camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
       camera.near = minRange;
-      camera.far = 2.0f; // should render camera farther
+      camera.far = maxRange * 2.0f; // should render camera farther
       viewport = new ScreenViewport(camera);
 
       modelBatch = new ModelBatch();
@@ -138,11 +140,17 @@ public class GDXDepthSensorSimulator
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
                depthPoint.z = 2.0f * depthReading - 1.0f;
-               depthPoint.z += random.nextDouble() * 0.001 - 0.0005;
                depthPoint.prj(camera.invProjectionView);
 
                Point3D32 point = points.add();
                GDXTools.toEuclid(depthPoint, point);
+
+               GDXTools.toEuclid(camera.position, noiseVector);
+               noiseVector.sub(point);
+               noiseVector.normalize();
+               noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
+               point.add(noiseVector);
+
                colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
             }
          }
