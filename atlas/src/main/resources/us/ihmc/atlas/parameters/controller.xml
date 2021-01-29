@@ -225,6 +225,7 @@
                      <parameter name="Verification_TransverseCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="5.0E-4" />
                      <parameter name="Cropping_FootDropThresholdForCrop" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                      <parameter name="applyPartialFootholds" type="BooleanParameter" value="true" />
+                     <parameter name="useWorldSurfaceNormalWhenFullyConstrained" type="BooleanParameter" value="true" />
                   </registry>
                   <registry name="BalanceManager">
                      <registry name="PelvisICPBasedTranslationManager">
