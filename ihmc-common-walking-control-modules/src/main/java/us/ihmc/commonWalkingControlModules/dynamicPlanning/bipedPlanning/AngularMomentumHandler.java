@@ -49,6 +49,16 @@ public class AngularMomentumHandler
       parentRegistry.addChild(registry);
    }
 
+   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingFootTrajectory)
+   {
+      angularMomentumCalculator.setSwingTrajectory(swingFootTrajectory);
+   }
+
+   public void clearSwingFootTrajectory()
+   {
+      angularMomentumCalculator.clearSwingTrajectory();
+   }
+
    public void resetAngularMomentum()
    {
       angularMomentumCalculator.reset();
@@ -60,12 +70,11 @@ public class AngularMomentumHandler
       ecmpTrajectoryCalculator.computeECMPOffset(angularMomentumCalculator.getDesiredAngularMomentumRate(), desiredECMPOffset);
    }
 
+
    public void solveForAngularMomentumTrajectory(CoPTrajectoryGeneratorState state,
                                                  List<? extends TimeIntervalProvider> timeIntervals,
-                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory,
-                                                 MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory)
    {
-      angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
       angularMomentumCalculator.predictFootTrajectories(state);
       angularMomentumCalculator.computeAngularMomentumTrajectories(timeIntervals, comTrajectory);
    }

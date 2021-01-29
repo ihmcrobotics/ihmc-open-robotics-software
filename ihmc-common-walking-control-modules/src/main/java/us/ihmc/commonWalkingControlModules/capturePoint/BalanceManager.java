@@ -377,19 +377,22 @@ public class BalanceManager
       return footstepWasAdjusted;
    }
 
-   private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = null;
 
    public void clearICPPlan()
    {
-      swingTrajectory = null;
       copTrajectoryState.clear();
       footsteps.clear();
       footstepTimings.clear();
    }
 
-   public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      this.swingTrajectory = swingTrajectory;
+      angularMomentumHandler.setSwingFootTrajectory(swingTrajectory);
+   }
+
+   public void clearSwingFootTrajectory()
+   {
+      angularMomentumHandler.clearSwingFootTrajectory();
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
@@ -537,8 +540,7 @@ public class BalanceManager
          {
             angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
                                                                      contactStateProviders,
-                                                                     comTrajectoryPlanner.getCoMTrajectory(),
-                                                                     swingTrajectory);
+                                                                     comTrajectoryPlanner.getCoMTrajectory());
             contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
          }
          else
@@ -781,6 +783,7 @@ public class BalanceManager
       }
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
 
+      angularMomentumHandler.clearSwingFootTrajectory();
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);

@@ -151,6 +151,11 @@ public class ThreePotatoAngularMomentumCalculator
       footTrajectoryPredictor.setSwingTrajectory(swingTrajectory);
    }
 
+   public void clearSwingTrajectory()
+   {
+      footTrajectoryPredictor.clearSwingTrajectory();
+   }
+
    public void predictFootTrajectories(CoPTrajectoryGeneratorState state)
    {
       footTrajectoryPredictor.compute(state);
