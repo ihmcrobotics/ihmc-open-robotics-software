@@ -21,8 +21,6 @@ public class ECMPTrajectoryCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
-   private final double mass;
-   private final double gravity;
    private final double weight;
 
    private static final int maxPoints = 20;
@@ -32,8 +30,7 @@ public class ECMPTrajectoryCalculator
 
    public ECMPTrajectoryCalculator(double mass, double gravity, YoRegistry parentRegistry)
    {
-      this.mass = mass;
-      this.gravity = Math.abs(gravity);
+      gravity = Math.abs(gravity);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -89,7 +86,7 @@ public class ECMPTrajectoryCalculator
 
          SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
 
-         desiredAngularMomentumTrajectories.compute(startTime);
+         desiredAngularMomentumTrajectories.compute(startTime + 1e-8);
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
