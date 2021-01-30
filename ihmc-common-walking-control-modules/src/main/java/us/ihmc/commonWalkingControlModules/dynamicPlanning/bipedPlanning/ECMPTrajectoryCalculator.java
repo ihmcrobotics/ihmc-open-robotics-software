@@ -99,7 +99,7 @@ public class ECMPTrajectoryCalculator
          eCMPTrajectory.setStartECMPPosition(ecmpPosition);
          eCMPTrajectory.setStartECMPVelocity(ecmpVelocity);
 
-         desiredAngularMomentumTrajectories.compute(endTime);
+         desiredAngularMomentumTrajectories.compute(endTime - 1e-8);
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
