@@ -149,16 +149,19 @@ public class SwingTrajectoryCalculator
       return swingTrajectoryOptimizer.doOptimizationUpdate();
    }
 
+   public void saveAsLastFootstep()
+   {
+      lastFootstepPosition.setIncludingFrame(finalPosition);
+      if (lastFootstepPosition.containsNaN())
+         lastFootstepPosition.setToZero(soleFrame);
+   }
+
    /**
     * Sets the footstep to be used for this calculator. Also passes in the waypoints to be used for the swing trajectory.
     * @param footstep
     */
    public void setFootstep(Footstep footstep)
    {
-      lastFootstepPosition.setIncludingFrame(finalPosition);
-      if (lastFootstepPosition.containsNaN())
-         lastFootstepPosition.setToZero(soleFrame);
-
       finalPosition.setIncludingFrame(footstep.getFootstepPose().getPosition());
       finalOrientation.setIncludingFrame(footstep.getFootstepPose().getOrientation());
       finalPosition.changeFrame(worldFrame);

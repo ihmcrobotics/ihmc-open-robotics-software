@@ -140,7 +140,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (!doManualLiftOff())
       {
          if (switchToToeOffIfPossible())
-            feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+            feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime(), false);
       }
 
       super.doAction(timeInState);
@@ -180,7 +180,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onEntry();
 
-      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime(), true);
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();

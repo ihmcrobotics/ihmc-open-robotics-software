@@ -194,9 +194,9 @@ public class FeetManager
       setContactStateForSwing(upcomingSwingSide);
    }
 
-   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, boolean firstOfThisStep)
    {
-      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstep, swingTime);
+      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstep, swingTime, firstOfThisStep);
    }
 
    public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)

@@ -300,10 +300,12 @@ public class FootControlModule
       resetLoadConstraints();
    }
 
-   public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
+   public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration, boolean firstOfThisStep)
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
       swingTrajectoryCalculator.setInitialConditionsToCurrent();
+      if (firstOfThisStep)
+         swingTrajectoryCalculator.saveAsLastFootstep();
       swingTrajectoryCalculator.setFootstep(footstep);
       swingTrajectoryCalculator.setSwingDuration(swingDuration);
       swingTrajectoryCalculator.setShouldVisualize(false);
