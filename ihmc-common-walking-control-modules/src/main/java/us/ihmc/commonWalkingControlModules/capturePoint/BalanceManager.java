@@ -78,6 +78,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean viewCoPHistory = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -301,8 +302,16 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         perfectCoPTrajectory = new BagOfBalls(150, 0.002,"perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
-         perfectCMPTrajectory = new BagOfBalls(150, 0.002,"perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
+         if (viewCoPHistory)
+         {
+            perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
+            perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
+         }
+         else
+         {
+            perfectCoPTrajectory = null;
+            perfectCMPTrajectory = null;
+         }
 
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
          copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
@@ -494,8 +503,11 @@ public class BalanceManager
          throw new IllegalArgumentException("Invalid height control type.");
       }
 
-      perfectCMPTrajectory.setBallLoop(yoPerfectCMP);
-      perfectCoPTrajectory.setBallLoop(yoPerfectCoP);
+      if (perfectCMPTrajectory != null)
+      {
+         perfectCMPTrajectory.setBallLoop(yoPerfectCMP);
+         perfectCoPTrajectory.setBallLoop(yoPerfectCoP);
+      }
 
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCoP);
