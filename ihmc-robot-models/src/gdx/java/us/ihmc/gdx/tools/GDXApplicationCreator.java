@@ -22,7 +22,15 @@ public class GDXApplicationCreator
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
-      applicationConfiguration.useVsync(true);
+      if (Boolean.parseBoolean(System.getProperty("enable.vr")))
+      {
+         applicationConfiguration.useVsync(false); // important to disable vsync for VR
+         applicationConfiguration.setIdleFPS(90);
+      }
+      else
+      {
+         applicationConfiguration.useVsync(true);
+      }
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
       applicationConfiguration.useOpenGL3(true, 3, 2);
       return applicationConfiguration;
