@@ -93,9 +93,12 @@ public class SwingTrajectoryCalculator
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
+      namePrefix += "FootSwing";
+
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
+
       swingHeight = new YoDouble(namePrefix + "Height", registry);
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
 
