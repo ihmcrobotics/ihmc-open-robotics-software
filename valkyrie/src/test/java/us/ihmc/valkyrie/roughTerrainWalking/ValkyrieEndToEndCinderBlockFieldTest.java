@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -73,6 +74,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   @Tag("humanoid-rough-terrain-slow")
    @Test
    public void testSteppingStonesA() throws Exception
    {
@@ -80,6 +82,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   @Tag("humanoid-rough-terrain-slow")
    @Test
    public void testSteppingStonesB() throws Exception
    {
@@ -87,13 +90,15 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testSteppingStonesB();
    }
 
+   @Tag("humanoid-rough-terrain-slow")
    @Test
    public void testSlantedCinderBlockLeveledFieldA() throws Exception
    {
       removeAnkleJointLimits = true;
       super.testSlantedCinderBlockLeveledField(false);
    }
-   
+
+   @Tag("humanoid-rough-terrain-slow")
    @Test
    public void testSlantedCinderBlockLeveledFieldB() throws Exception
    {
