@@ -46,6 +46,10 @@ public class CollidableVisualizer
       {
          shape3DGraphicUpdater = new Box3DGraphicUpdater(name, (FrameBox3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
+      else if (collidable.getShape() instanceof FrameRamp3DReadOnly)
+      {
+         shape3DGraphicUpdater = new Ramp3DGraphicUpdater(name, (FrameRamp3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
+      }
       else if (collidable.getShape() instanceof FrameCapsule3DReadOnly)
       {
          shape3DGraphicUpdater = new Capsule3DGraphicUpdater(name, (FrameCapsule3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
@@ -151,6 +155,45 @@ public class CollidableVisualizer
          Graphics3DObject boxGraphicDefinition = new Graphics3DObject();
          boxGraphicDefinition.addCube(shape.getSizeX(), shape.getSizeY(), shape.getSizeZ(), true, appearanceDefinition);
          graphicBox = new YoGraphicShape(name, boxGraphicDefinition, pose, 1.0);
+      }
+
+      @Override
+      public void hide()
+      {
+         pose.setToNaN();
+      }
+
+      private final FramePose3D tempPose = new FramePose3D();
+
+      @Override
+      public void update()
+      {
+         tempPose.setIncludingFrame(shape.getReferenceFrame(), shape.getPose());
+         pose.setMatchingFrame(tempPose);
+      }
+
+      @Override
+      public YoGraphic getYoGraphic()
+      {
+         return graphicBox;
+      }
+   }
+
+   private static class Ramp3DGraphicUpdater implements Shape3DGraphicUpdater
+   {
+      private final YoFramePoseUsingYawPitchRoll pose;
+      private final YoGraphicShape graphicBox;
+      private final FrameRamp3DReadOnly shape;
+
+      public Ramp3DGraphicUpdater(String name, FrameRamp3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
+      {
+         this.shape = shape;
+         pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
+         Graphics3DObject rampGraphicDefinition = new Graphics3DObject();
+         rampGraphicDefinition.translate(0.5 * shape.getSizeX(), 0.0, 0.0);
+         rampGraphicDefinition.addWedge(shape.getSizeX(), shape.getSizeY(), shape.getSizeZ(), appearanceDefinition);
+         graphicBox = new YoGraphicShape(name, rampGraphicDefinition, pose, 1.0);
+         update();
       }
 
       @Override
@@ -296,8 +339,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicConvexPolytope;
       private final FrameConvexPolytope3DReadOnly shape;
 
-      public ConvexPolytope3DGraphicUpdater(String name, FrameConvexPolytope3DReadOnly shape, YoRegistry registry,
-                                            AppearanceDefinition appearanceDefinition)
+      public ConvexPolytope3DGraphicUpdater(String name, FrameConvexPolytope3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);

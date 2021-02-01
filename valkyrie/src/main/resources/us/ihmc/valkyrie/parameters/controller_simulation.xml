@@ -322,6 +322,7 @@
                      <parameter name="doPartialFootholdDetection" type="BooleanParameter" value="true" />
                      <parameter name="applyPartialFootholds" type="BooleanParameter" value="false" />
                      <parameter name="blindFootstepsHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
+                     <parameter name="useWorldSurfaceNormalWhenFullyConstrained" type="BooleanParameter" value="true" />
                   </registry>
                   <registry name="PelvisOrientationManager">
                      <registry name="ControllerPelvisOrientationManager">
