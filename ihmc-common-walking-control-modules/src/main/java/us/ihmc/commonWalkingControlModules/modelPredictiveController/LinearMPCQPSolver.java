@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SparseSimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -89,8 +88,9 @@ public class LinearMPCQPSolver
 
       if (useSparse)
       {
-         qpSolver = new SparseSimpleEfficientActiveSetQPSolver();
-         ((SparseSimpleEfficientActiveSetQPSolver) qpSolver).setInverseCostCalculator(new SparseInverseCalculator(indexHandler));
+         qpSolver = null;
+//         qpSolver = new SparseSimpleEfficientActiveSetQPSolver();
+//         ((SparseSimpleEfficientActiveSetQPSolver) qpSolver).setInverseCostCalculator(new SparseInverseCalculator(indexHandler));
       }
       else
       {
@@ -500,6 +500,7 @@ public class LinearMPCQPSolver
 
       if (useSparse)
       {
+         /*
          DMatrixSparseCSC sparseH = new DMatrixSparseCSC(problemSize, problemSize);
          DMatrixSparseCSC sparseAin = new DMatrixSparseCSC(numberOfEqualityConstraints.getIntegerValue(), problemSize);
          DMatrixSparseCSC sparseAeq = new DMatrixSparseCSC(numberOfInequalityConstraints.getIntegerValue(), problemSize);
@@ -512,6 +513,8 @@ public class LinearMPCQPSolver
          //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
          qpSolver.setLinearInequalityConstraints(sparseAin, solverInput_bin);
          qpSolver.setLinearEqualityConstraints(sparseAeq, solverInput_beq);
+
+          */
       }
       else
       {

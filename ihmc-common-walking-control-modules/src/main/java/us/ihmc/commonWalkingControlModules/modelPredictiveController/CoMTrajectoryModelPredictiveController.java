@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -676,7 +676,7 @@ public class CoMTrajectoryModelPredictiveController
       return desiredECMPPosition;
    }
 
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
    {
       return cornerPointCalculator.getVrpTrajectories();
    }

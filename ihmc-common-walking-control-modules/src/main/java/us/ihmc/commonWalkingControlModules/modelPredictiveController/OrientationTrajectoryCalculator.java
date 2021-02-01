@@ -73,8 +73,8 @@ public class OrientationTrajectoryCalculator
    {
       trajectory.compute(time);
 
-      trajectory.getOrientation(desiredOrientation);
-      trajectory.getAngularVelocity(desiredAngularVelocity);
+      desiredOrientation.setIncludingFrame(trajectory.getOrientation());
+      desiredAngularVelocity.setIncludingFrame(trajectory.getAngularVelocity());
    }
 
    public FrameOrientation3DReadOnly getDesiredOrientation()

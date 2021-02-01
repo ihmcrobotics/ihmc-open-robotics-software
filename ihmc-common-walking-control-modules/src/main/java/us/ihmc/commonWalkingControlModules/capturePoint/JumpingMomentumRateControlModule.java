@@ -57,7 +57,7 @@ public class JumpingMomentumRateControlModule
    private double totalMass;
    private double timeInContactPhase;
 
-   private List<Polynomial3DReadOnly> vrpTrajectories;
+   private List<? extends Polynomial3DReadOnly> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
    private final ReferenceFrame centerOfMassFrame;

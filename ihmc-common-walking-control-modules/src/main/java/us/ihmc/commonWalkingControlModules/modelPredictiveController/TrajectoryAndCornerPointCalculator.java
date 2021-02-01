@@ -5,7 +5,9 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +31,8 @@ public class TrajectoryAndCornerPointCalculator
    private final RecyclingArrayList<LineSegment3D> comSegments = new RecyclingArrayList<>(LineSegment3D::new);
    private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
 
-   private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
-   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
+   private final List<Polynomial3DBasics> vrpTrajectories = new ArrayList<>();
 
    public void setViewer(SegmentPointViewer viewer)
    {
@@ -68,7 +70,7 @@ public class TrajectoryAndCornerPointCalculator
          vrpEndPosition.set(mpc.trajectoryHandler.getDesiredVRPPosition());
          vrpEndVelocity.set(mpc.trajectoryHandler.getDesiredVRPVelocity());
 
-         Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+         Polynomial3DBasics trajectory3D = vrpTrajectoryPool.add();
 //         trajectory3D.setLinear(0.0, duration, vrpStartPosition,  vrpEndPosition);
          trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          vrpTrajectories.add(trajectory3D);
@@ -96,7 +98,7 @@ public class TrajectoryAndCornerPointCalculator
          vrpEndPosition.set(mpc.trajectoryHandler.getDesiredVRPPosition());
          vrpEndVelocity.set(mpc.trajectoryHandler.getDesiredVRPVelocity());
 
-         Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+         Polynomial3DBasics trajectory3D = vrpTrajectoryPool.add();
 //         trajectory3D.setLinear(0.0, duration, vrpStartPosition,  vrpEndPosition);
                   trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          vrpTrajectories.add(trajectory3D);
@@ -116,7 +118,7 @@ public class TrajectoryAndCornerPointCalculator
       }
    }
 
-   public List<Trajectory3D> getVrpTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
    }

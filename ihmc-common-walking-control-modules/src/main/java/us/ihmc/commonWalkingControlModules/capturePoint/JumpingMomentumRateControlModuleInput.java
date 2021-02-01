@@ -14,7 +14,7 @@ public class JumpingMomentumRateControlModuleInput
    private double timeAtStartOfSignal;
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
-   private List<Polynomial3DReadOnly> vrpTrajectories;
+   private List<? extends Polynomial3DReadOnly> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
    public void setOmega0(double omega0)
@@ -57,12 +57,12 @@ public class JumpingMomentumRateControlModuleInput
       return inFlight;
    }
 
-   public void setVrpTrajectories(List<Polynomial3DReadOnly> vrpTrajectories)
+   public void setVrpTrajectories(List<? extends Polynomial3DReadOnly> vrpTrajectories)
    {
       this.vrpTrajectories = vrpTrajectories;
    }
 
-   public List<Polynomial3DReadOnly> getVrpTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
    }
