@@ -37,6 +37,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -315,7 +316,7 @@ public class FootControlModule
    public void updateSwingTrajectoryPreview()
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
-      if (swingTrajectoryCalculator.doOptimizationUpdate())
+      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
          swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
    }
 
