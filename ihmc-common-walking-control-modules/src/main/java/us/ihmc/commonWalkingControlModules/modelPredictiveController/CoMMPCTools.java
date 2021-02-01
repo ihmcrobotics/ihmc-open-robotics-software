@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrix;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.continuous.ContinuousMPCIndexHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -161,6 +160,7 @@ public class CoMMPCTools
       vrpVelocityToPack.scaleAdd(2.0 * timeInPhase, fourthCoefficient, vrpVelocityToPack);
       vrpVelocityToPack.add(fifthCoefficient);
    }
+
 
    public static void constructedDesiredBodyOrientation(FixedFrameOrientation3DBasics orientationToPack,
                                                         FramePoint3DReadOnly firstCoefficient,

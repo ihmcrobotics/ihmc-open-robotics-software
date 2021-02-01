@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.discrete.DiscreteMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -213,7 +212,7 @@ public class ContactStateMagnitudeToForceMatrixHelper
       for (int rhoIndex = 0; rhoIndex < rhoSize; rhoIndex++)
       {
          FrameVector3D basisVector = basisVectors[rhoIndex];
-         for (int coeffIdx = 0; coeffIdx < DiscreteMPCIndexHandler.coefficientsPerRho; coeffIdx++)
+         for (int coeffIdx = 0; coeffIdx < LinearMPCIndexHandler.coefficientsPerRho; coeffIdx++)
          {
             double rhoCoeff = solutionVector.get(startIdx++, 0);
             contactWrenchCoefficientMatrix.add(0, coeffIdx, basisVector.getX() * rhoCoeff);
