@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectorySegment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
-public class LinearTrajectoryHandler
+public class LinearMPCTrajectoryHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final CoMTrajectoryPlanner positionInitializationCalculator;
@@ -53,7 +54,9 @@ public class LinearTrajectoryHandler
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    private double currentTimeInState;
 
-   public LinearTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
+   private final CoMTrajectorySegment segmentToAppend = new CoMTrajectorySegment();
+
+   public LinearMPCTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
@@ -137,40 +140,57 @@ public class LinearTrajectoryHandler
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
-      // TODO add the stuff outside the preview window
+
+      while (comTrajectory.getEndTime() < positionInitializationCalculator.getCoMTrajectory().getEndTime())
+      {
+         CoMTrajectorySegment segmentToAdd = getSegmentContainingTime(comTrajectory.getEndTime() + 1e-5, positionInitializationCalculator.getCoMTrajectory());
+         if (segmentToAdd == null)
+            throw new RuntimeException("oops.");
+
+         CoMTrajectorySegment lastSegmentOfPreview = comTrajectory.getSegment(comTrajectory.getCurrentNumberOfSegments() - 1);
+         if (MathTools.epsilonEquals(lastSegmentOfPreview.getTimeInterval().getEndTime(), segmentToAdd.getTimeInterval().getStartTime(), 1e-3))
+         {
+            segmentToAppend.set(segmentToAdd);
+         }
+         else
+         {
+            double durationToRemove = lastSegmentOfPreview.getTimeInterval().getEndTime() - segmentToAdd.getTimeInterval().getStartTime();
+            segmentToAppend.set(segmentToAdd);
+            segmentToAppend.shiftStartOfSegment(durationToRemove);
+         }
+
+         comTrajectory.appendSegment(segmentToAppend);
+
+         double duration = Math.min(segmentToAppend.getTimeInterval().getDuration(), sufficientlyLongTime);
+         computeVRPBoundaryConditionsFromCoefficients(segmentToAppend,
+                                                      omega,
+                                                      vrpStartPosition,
+                                                      vrpStartVelocity,
+                                                      vrpEndPosition,
+                                                      vrpEndVelocity);
+         Polynomial3DBasics vrpTrajectory = vrpTrajectories.add();
+         vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         vrpTrajectory.getTimeInterval().setInterval(0.0, segmentToAppend.getTimeInterval().getDuration());
+      }
       comTrajectory.initialize();
    }
 
-   public void compute(double timeInPhase, double omega)
+   private CoMTrajectorySegment getSegmentContainingTime(double time, MultipleCoMSegmentTrajectoryGenerator trajectory)
    {
-      boolean success;
-      // TODO once all the stuff related to getting the solution outside the preview window is finished, this is unneccessary
+      for (int i = 0; i < trajectory.getCurrentNumberOfSegments(); i++)
+      {
+         CoMTrajectorySegment segment = trajectory.getSegment(i);
+         if (segment.getTimeInterval().intervalContains(time))
+            return segment;
+      }
 
-      if (isTimeInPlanningWindow(timeInPhase))
-         success = computeInPlanningWindow(timeInPhase, omega);
-      else
-         success = false;
-
-      if (!success)
-         computeOutsideOfPlanningWindow(timeInPhase);
+      return null;
    }
 
-   protected boolean isTimeInPlanningWindow(double time)
+   public void compute(double timeInPhase)
    {
-      return time < comTrajectory.getEndTime();
+      comTrajectory.compute(timeInPhase);
    }
-
-   private boolean computeInPlanningWindow(double timeInPhase, double omega)
-   {
-      int segmentNumber = getPreviewWindowSegmentNumber(timeInPhase);
-      if (segmentNumber < 0)
-         return false;
-
-      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
-
-      return computeInPlanningWindow(segmentNumber, timeInSegment, omega);
-   }
-
 
    protected boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
    {
@@ -191,82 +211,39 @@ public class LinearTrajectoryHandler
       return true;
    }
 
-   public int getPreviewWindowSegmentNumber(double time)
-   {
-      for (int i = 0; i < planningWindow.size(); i++)
-      {
-         if (planningWindow.get(i).getTimeInterval().intervalContains(time))
-            return i;
-      }
-
-      return -1;
-   }
-
-   public double getTimeInSegment(int segmentNumber, double timeInPhase)
-   {
-      timeInPhase -= currentTimeInState;
-
-      for (int i = 0; i < segmentNumber; i++)
-         timeInPhase -= planningWindow.get(i).getTimeInterval().getDuration();
-
-      return timeInPhase;
-   }
-
-   protected void computeOutsideOfPlanningWindow(double time)
-   {
-      positionInitializationCalculator.compute(time);
-
-      desiredCoMPosition.set(positionInitializationCalculator.getDesiredCoMPosition());
-      desiredCoMVelocity.set(positionInitializationCalculator.getDesiredCoMVelocity());
-      desiredCoMAcceleration.set(positionInitializationCalculator.getDesiredCoMAcceleration());
-
-      desiredVRPPosition.set(positionInitializationCalculator.getDesiredVRPPosition());
-      desiredVRPVelocity.set(positionInitializationCalculator.getDesiredVRPVelocity());
-
-      desiredDCMPosition.set(positionInitializationCalculator.getDesiredDCMPosition());
-      desiredDCMVelocity.set(positionInitializationCalculator.getDesiredDCMVelocity());
-
-      desiredECMPPosition.set(positionInitializationCalculator.getDesiredECMPPosition());
-   }
-
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
-      return desiredCoMPosition;
+      return comTrajectory.getPosition();
    }
 
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
-      return desiredCoMVelocity;
+      return comTrajectory.getVelocity();
    }
 
    public FrameVector3DReadOnly getDesiredCoMAcceleration()
    {
-      return desiredCoMAcceleration;
+      return comTrajectory.getAcceleration();
    }
 
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
-      return desiredVRPPosition;
+      return comTrajectory.getSegment(comTrajectory.getCurrentSegmentIndex()).getVRPPosition();
    }
 
    public FrameVector3DReadOnly getDesiredVRPVelocity()
    {
-      return desiredVRPVelocity;
+      return comTrajectory.getSegment(comTrajectory.getCurrentSegmentIndex()).getVRPVelocity();
    }
 
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
-      return desiredDCMPosition;
+      return comTrajectory.getSegment(comTrajectory.getCurrentSegmentIndex()).getDCMPosition();
    }
 
    public FrameVector3DReadOnly getDesiredDCMVelocity()
    {
-      return desiredDCMVelocity;
-   }
-
-   public FramePoint3DReadOnly getDesiredECMPPosition()
-   {
-      return desiredECMPPosition;
+      return comTrajectory.getSegment(comTrajectory.getCurrentSegmentIndex()).getDCMVelocity();
    }
 
    private void computeCoMSegmentCoefficients(DMatrixRMaj solutionCoefficients,
@@ -370,4 +347,40 @@ public class LinearTrajectoryHandler
       }
    }
 
+   private static void computeVRPBoundaryConditionsFromCoefficients(CoMTrajectorySegment segment,
+                                                                    double omega,
+                                                                    FixedFramePoint3DBasics startPosition,
+                                                                    FixedFrameVector3DBasics startVelocity,
+                                                                    FixedFramePoint3DBasics endPosition,
+                                                                    FixedFrameVector3DBasics endVelocity)
+   {
+      startPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      startVelocity.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      endPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      endVelocity.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      double duration = segment.getTimeInterval().getDuration();
+      double omega2 = omega * omega;
+      double t2 = duration * duration;
+      double t3 = duration * t2;
+
+      for (Axis3D axis : Axis3D.values)
+      {
+         int element = axis.ordinal();
+         double startPositionElement = segment.getSixthCoefficient().getElement(element) - 2.0 / omega2 * segment.getFourthCoefficient().getElement(element);
+         double startVelocityElement = segment.getFifthCoefficient().getElement(element) - 6.0 / omega2 * segment.getThirdCoefficient().getElement(element);
+         startPosition.setElement(element, startPositionElement);
+         startVelocity.setElement(element, startVelocityElement);
+
+         double endPositionElement =
+               segment.getThirdCoefficient().getElement(element) * t3 + segment.getFourthCoefficient().getElement(element) * t2 + startVelocityElement * duration
+               + startPositionElement;
+         double endVelocityElement =
+               3.0 * segment.getThirdCoefficient().getElement(element) * t2 + 2.0 * segment.getFourthCoefficient().getElement(element) * duration
+               + startVelocityElement;
+
+         endPosition.setElement(element, endPositionElement);
+         endVelocity.setElement(element, endVelocityElement);
+      }
+   }
 }

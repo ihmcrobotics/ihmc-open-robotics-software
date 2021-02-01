@@ -825,7 +825,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ThreadTools.sleepForever();
    }
 
-   private static void assertCoefficientsEqual(DMatrixRMaj solution, LinearTrajectoryHandler trajectoryHandler)
+   private static void assertCoefficientsEqual(DMatrixRMaj solution, LinearMPCTrajectoryHandler trajectoryHandler)
    {
       for (int i = 0; i < 6; i++)
       {
