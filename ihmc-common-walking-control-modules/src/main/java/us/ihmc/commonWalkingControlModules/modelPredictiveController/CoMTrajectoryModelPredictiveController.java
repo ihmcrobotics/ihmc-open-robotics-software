@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -85,7 +86,7 @@ public class CoMTrajectoryModelPredictiveController
    final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
-   final LinearTrajectoryHandler trajectoryHandler;
+   final LinearMPCTrajectoryHandler trajectoryHandler;
 
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
@@ -109,7 +110,7 @@ public class CoMTrajectoryModelPredictiveController
       indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
-      trajectoryHandler = new LinearTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
+      trajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -181,7 +182,7 @@ public class CoMTrajectoryModelPredictiveController
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
 
       trajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
-      trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime(), omega.getValue());
+      trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
 
       comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPosition());
       comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocity());
@@ -588,7 +589,7 @@ public class CoMTrajectoryModelPredictiveController
                        FixedFrameVector3DBasics vrpVelocityToPack,
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
-      trajectoryHandler.compute(timeInPhase, omega.getValue());
+      trajectoryHandler.compute(timeInPhase);
 
       comPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredCoMPosition());
       comVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredCoMVelocity());
@@ -597,7 +598,11 @@ public class CoMTrajectoryModelPredictiveController
       dcmVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredDCMVelocity());
       vrpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(trajectoryHandler.getDesiredVRPVelocity());
-      ecmpPositionToPack.setMatchingFrame(trajectoryHandler.getDesiredECMPPosition());
+
+      ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
+      double nominalHeight = gravityZ / MathTools.square(omega.getValue());
+      ecmpPositionToPack.set(desiredVRPPosition);
+      ecmpPositionToPack.subZ(nominalHeight);
    }
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)

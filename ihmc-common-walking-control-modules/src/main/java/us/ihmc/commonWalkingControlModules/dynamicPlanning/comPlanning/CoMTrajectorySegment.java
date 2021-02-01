@@ -315,6 +315,51 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       return dcmPosition;
    }
 
+   public FrameVector3DReadOnly getDCMVelocity()
+   {
+      return dcmVelocity;
+   }
+
+   public FramePoint3DReadOnly getVRPPosition()
+   {
+      return vrpPosition;
+   }
+
+   public FrameVector3DReadOnly getVRPVelocity()
+   {
+      return vrpVelocity;
+   }
+
+   public FramePoint3DReadOnly getFirstCoefficient()
+   {
+      return firstCoefficient;
+   }
+
+   public FramePoint3DReadOnly getSecondCoefficient()
+   {
+      return secondCoefficient;
+   }
+
+   public FramePoint3DReadOnly getThirdCoefficient()
+   {
+      return thirdCoefficient;
+   }
+
+   public FramePoint3DReadOnly getFourthCoefficient()
+   {
+      return fourthCoefficient;
+   }
+
+   public FramePoint3DReadOnly getFifthCoefficient()
+   {
+      return fifthCoefficient;
+   }
+
+   public FramePoint3DReadOnly getSixthCoefficient()
+   {
+      return sixthCoefficient;
+   }
+
    @Override
    public boolean isDone()
    {

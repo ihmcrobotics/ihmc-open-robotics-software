@@ -66,7 +66,7 @@ public class LinearCoMTrajectoryHandler
          comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator<?> getComTrajectory()
+   public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
    {
       return comTrajectory;
    }
