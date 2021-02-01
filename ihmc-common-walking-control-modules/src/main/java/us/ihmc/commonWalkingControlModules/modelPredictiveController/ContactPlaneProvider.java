@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -21,8 +21,10 @@ public class ContactPlaneProvider implements ContactStateProvider
 {
    private int planeProviderId = -1;
    private ContactState contactState = ContactState.IN_CONTACT;
-   private final FramePoint3D startCopPosition = new FramePoint3D();
-   private final FramePoint3D endCopPosition = new FramePoint3D();
+   private final FramePoint3D startECMPPosition = new FramePoint3D();
+   private final FramePoint3D endECMPPosition = new FramePoint3D();
+   private final FrameVector3D startECMPVelocity = new FrameVector3D();
+   private final FrameVector3D endECMPVelocity = new FrameVector3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
    private final List<ConvexPolygon2DReadOnly> contactPointsInBodyFrame = new ArrayList<>();
@@ -32,15 +34,19 @@ public class ContactPlaneProvider implements ContactStateProvider
 
    public ContactPlaneProvider()
    {
-      startCopPosition.setToNaN();
-      endCopPosition.setToNaN();
+      startECMPPosition.setToNaN();
+      endECMPPosition.setToNaN();
+      startECMPVelocity.setToNaN();
+      endECMPVelocity.setToNaN();
    }
 
    public void reset()
    {
       planeProviderId = -1;
-      startCopPosition.setToNaN();
-      endCopPosition.setToNaN();
+      startECMPPosition.setToNaN();
+      endECMPPosition.setToNaN();
+      startECMPVelocity.setToNaN();
+      endECMPVelocity.setToNaN();
       totalContactPoints = 0;
       contactPointsInBodyFrame.clear();
       contactPoses.clear();
@@ -50,8 +56,8 @@ public class ContactPlaneProvider implements ContactStateProvider
    {
       reset();
       setPlaneProviderId(other.getPlaneProviderId());
-      setStartCopPosition(other.getCopStartPosition());
-      setEndCopPosition(other.getCopEndPosition());
+      setStartECMPPosition(other.getECMPStartPosition());
+      setEndECMPPosition(other.getECMPEndPosition());
       setTimeInterval(other.getTimeInterval());
       setContactState(other.getContactState());
       for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
@@ -68,34 +74,51 @@ public class ContactPlaneProvider implements ContactStateProvider
       return planeProviderId;
    }
 
-   public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
+   public void setStartECMPPosition(FramePoint3DReadOnly startECMPPosition)
    {
-      this.startCopPosition.set(startCopPosition);
+      this.startECMPPosition.set(startECMPPosition);
    }
 
-   public void setStartCopPosition(FramePoint2DReadOnly startCopPosition)
+   public void setStartECMPPosition(FramePoint2DReadOnly startECMPPosition, double height)
    {
-      this.startCopPosition.set(startCopPosition, 0.0);
+      this.startECMPPosition.set(startECMPPosition, height);
    }
 
-   public void setStartCopPosition(Point2DReadOnly startCopPosition)
+   public void setStartECMPPosition(Point2DReadOnly startECMPPosition, double height)
    {
-      this.startCopPosition.set(startCopPosition, 0.0);
+      this.startECMPPosition.set(startECMPPosition, height);
    }
 
-   public void setEndCopPosition(FramePoint3DReadOnly endCopPosition)
+   public void setStartECMPVelocity(FrameVector3DReadOnly startECMPVelocity)
    {
-      this.endCopPosition.set(endCopPosition);
+      this.startECMPVelocity.set(startECMPVelocity);
    }
 
-   public void setEndCopPosition(FramePoint2DReadOnly endCopPosition)
+   public void setEndECMPPosition(FramePoint3DReadOnly endECMPPosition)
    {
-      this.endCopPosition.set(endCopPosition, 0.0);
+      this.endECMPPosition.set(endECMPPosition);
    }
 
-   public void setEndCopPosition(Point2DReadOnly endCopPosition)
+   public void setEndECMPPosition(FramePoint2DReadOnly endECMPPosition, double height)
    {
-      this.endCopPosition.set(endCopPosition, 0.0);
+      this.endECMPPosition.set(endECMPPosition, height);
+   }
+
+   public void setEndECMPPosition(Point2DReadOnly endECMPPosition, double height)
+   {
+      this.endECMPPosition.set(endECMPPosition, height);
+   }
+
+   public void setEndECMPVelocity(FrameVector3DReadOnly endECMPVelocity)
+   {
+      this.endECMPVelocity.set(endECMPVelocity);
+   }
+
+   public void setLinearECMPVelocity()
+   {
+      startECMPVelocity.sub(getECMPEndPosition(), getECMPStartPosition());
+      startECMPVelocity.scale(1.0 / Math.min(getTimeInterval().getDuration(), 10.0));
+      endECMPVelocity.set(startECMPVelocity);
    }
 
    public void setTimeInterval(TimeIntervalReadOnly timeInterval)
@@ -108,14 +131,28 @@ public class ContactPlaneProvider implements ContactStateProvider
       this.contactState = contactState;
    }
 
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
-      return startCopPosition;
+      return startECMPPosition;
    }
 
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
-      return endCopPosition;
+      return endECMPPosition;
+   }
+
+   public FrameVector3DReadOnly getECMPStartVelocity()
+   {
+      if (startECMPVelocity.containsNaN())
+         setLinearECMPVelocity();
+      return startECMPVelocity;
+   }
+
+   public FrameVector3DReadOnly getECMPEndVelocity()
+   {
+      if (endECMPVelocity.containsNaN())
+         setLinearECMPVelocity();
+      return endECMPVelocity;
    }
 
    public ContactState getContactState()
@@ -153,7 +190,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartFromEnd(ContactStateProvider previousContactState)
    {
       setStartTime(previousContactState.getTimeInterval().getEndTime());
-      setStartCopPosition(previousContactState.getCopEndPosition());
+      setStartECMPPosition(previousContactState.getECMPEndPosition());
    }
 
    public int getNumberOfContactPlanes()
