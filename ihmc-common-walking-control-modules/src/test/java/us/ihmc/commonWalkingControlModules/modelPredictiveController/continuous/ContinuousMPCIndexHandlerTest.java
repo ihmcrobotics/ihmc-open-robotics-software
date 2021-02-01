@@ -28,8 +28,8 @@ public class ContinuousMPCIndexHandlerTest
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
       contact.addContact(contactPose, contactPolygon);
-      contact.setStartCopPosition(new FramePoint3D());
-      contact.setEndCopPosition(new FramePoint3D());
+      contact.setStartECMPPosition(new FramePoint3D());
+      contact.setEndECMPPosition(new FramePoint3D());
 
       contactProviders.add(contact);
 

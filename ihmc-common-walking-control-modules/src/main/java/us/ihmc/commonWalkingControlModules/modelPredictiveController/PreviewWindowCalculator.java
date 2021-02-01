@@ -132,10 +132,10 @@ public class PreviewWindowCalculator
 
       double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
       double alphaIntoSegment = (timeAtStartOfWindow - timeInterval.getStartTime()) / segmentDuration;
-      modifiedCoPLocation.interpolate(contact.getCopStartPosition(), contact.getCopEndPosition(), alphaIntoSegment);
+      modifiedCoPLocation.interpolate(contact.getECMPStartPosition(), contact.getECMPEndPosition(), alphaIntoSegment);
 
       timeInterval.setStartTime(timeAtStartOfWindow);
-      contact.setStartCopPosition(modifiedCoPLocation);
+      contact.setStartECMPPosition(modifiedCoPLocation);
    }
 
    private final ContactPlaneProvider splitSegmentRemaining = new ContactPlaneProvider();
@@ -149,17 +149,17 @@ public class PreviewWindowCalculator
 
       double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
       double alphaIntoSegment = maxSegmentDuration / segmentDuration;
-      modifiedCoPLocation.interpolate(contact.getCopStartPosition(), contact.getCopEndPosition(), alphaIntoSegment);
+      modifiedCoPLocation.interpolate(contact.getECMPStartPosition(), contact.getECMPEndPosition(), alphaIntoSegment);
 
       splitSegmentRemaining.set(contact);
 
       double splitTime = maxSegmentDuration + timeInterval.getStartTime();
 
       contact.setEndTime(splitTime);
-      contact.setEndCopPosition(modifiedCoPLocation);
+      contact.setEndECMPPosition(modifiedCoPLocation);
 
       splitSegmentRemaining.setStartTime(splitTime);
-      splitSegmentRemaining.setStartCopPosition(modifiedCoPLocation);
+      splitSegmentRemaining.setStartECMPPosition(modifiedCoPLocation);
 
       return splitSegmentRemaining;
    }

@@ -58,8 +58,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, duration);
       contact.addContact(contactPose, contactPolygon);
-      contact.setStartCopPosition(contactPose.getPosition());
-      contact.setEndCopPosition(contactPose.getPosition());
+      contact.setStartECMPPosition(contactPose.getPosition());
+      contact.setEndECMPPosition(contactPose.getPosition());
 
       contactProviders.add(contact);
 
@@ -186,13 +186,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ContactPlaneProvider contact1 = new ContactPlaneProvider();
       contact1.getTimeInterval().setInterval(0.0, duration);
       contact1.addContact(contactPose, contactPolygon);
-      contact1.setStartCopPosition(contactPose.getPosition());
-      contact1.setEndCopPosition(contactPose.getPosition());
+      contact1.setStartECMPPosition(contactPose.getPosition());
+      contact1.setEndECMPPosition(contactPose.getPosition());
       ContactPlaneProvider contact2 = new ContactPlaneProvider();
       contact2.getTimeInterval().setInterval(duration, 2.0 * duration);
       contact2.addContact(contactPose, contactPolygon);
-      contact2.setStartCopPosition(contactPose.getPosition());
-      contact2.setEndCopPosition(contactPose.getPosition());
+      contact2.setStartECMPPosition(contactPose.getPosition());
+      contact2.setEndECMPPosition(contactPose.getPosition());
 
       contactProviders.add(contact1);
       contactProviders.add(contact2);
@@ -370,15 +370,15 @@ public class CoMTrajectoryModelPredictiveControllerTest
       contact1.getTimeInterval().setInterval(0.0, duration);
       contact1.addContact(leftContactPose, contactPolygon);
       contact1.addContact(rightContactPose, contactPolygon);
-      contact1.setStartCopPosition(vrp);
-      contact1.setEndCopPosition(vrp);
+      contact1.setStartECMPPosition(vrp);
+      contact1.setEndECMPPosition(vrp);
 
       ContactPlaneProvider contact2 = new ContactPlaneProvider();
       contact2.getTimeInterval().setInterval(duration, 2.0 * duration);
       contact2.addContact(leftContactPose, contactPolygon);
       contact2.addContact(rightContactPose, contactPolygon);
-      contact2.setStartCopPosition(vrp);
-      contact2.setEndCopPosition(vrp);
+      contact2.setStartECMPPosition(vrp);
+      contact2.setEndECMPPosition(vrp);
 
       contactProviders.add(contact1);
       contactProviders.add(contact2);
@@ -547,14 +547,14 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ContactPlaneProvider contact1 = new ContactPlaneProvider();
       contact1.getTimeInterval().setInterval(0.0, duration);
       contact1.addContact(contactPose1, contactPolygon);
-      contact1.setStartCopPosition(contactPose1.getPosition());
-      contact1.setEndCopPosition(contactPose1.getPosition());
+      contact1.setStartECMPPosition(contactPose1.getPosition());
+      contact1.setEndECMPPosition(contactPose1.getPosition());
 
       ContactPlaneProvider contact2 = new ContactPlaneProvider();
       contact2.getTimeInterval().setInterval(duration, 2 * duration);
       contact2.addContact(contactPose2, contactPolygon);
-      contact2.setStartCopPosition(contactPose2.getPosition());
-      contact2.setEndCopPosition(contactPose2.getPosition());
+      contact2.setStartECMPPosition(contactPose2.getPosition());
+      contact2.setEndECMPPosition(contactPose2.getPosition());
 
       contactProviders.add(contact1);
       contactProviders.add(contact2);
@@ -722,8 +722,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, duration);
       contact.addContact(contactPose, contactPolygon);
-      contact.setStartCopPosition(contactPose.getPosition());
-      contact.setEndCopPosition(contactPose.getPosition());
+      contact.setStartECMPPosition(contactPose.getPosition());
+      contact.setEndECMPPosition(contactPose.getPosition());
 
       contactProviders.add(contact);
 

@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCTestHelper;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,8 +26,8 @@ public class LinearMPCIndexHandlerTest
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
       contact.addContact(contactPose, contactPolygon);
-      contact.setStartCopPosition(new FramePoint3D());
-      contact.setEndCopPosition(new FramePoint3D());
+      contact.setStartECMPPosition(new FramePoint3D());
+      contact.setEndECMPPosition(new FramePoint3D());
 
       contactProviders.add(contact);
 
