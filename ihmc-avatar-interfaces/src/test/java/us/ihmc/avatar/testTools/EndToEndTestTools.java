@@ -655,4 +655,25 @@ public class EndToEndTestTools
       else
          return duration;
    }
+
+   public static FootstepDataListMessage setStepDurations(FootstepDataListMessage message, double swingDuration, double transferDuration)
+   {
+      if (Double.isFinite(swingDuration) && swingDuration > 0.0)
+      {
+         for (int i = 0; i < message.getFootstepDataList().size(); i++)
+         {
+            message.getFootstepDataList().get(i).setSwingDuration(swingDuration);
+         }
+      }
+   
+      if (Double.isFinite(transferDuration) && transferDuration > 0.0)
+      {
+         for (int i = 0; i < message.getFootstepDataList().size(); i++)
+         {
+            message.getFootstepDataList().get(i).setTransferDuration(transferDuration);
+         }
+      }
+   
+      return message;
+   }
 }

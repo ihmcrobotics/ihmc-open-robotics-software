@@ -78,7 +78,7 @@ public class LidarFastSimulation
       environmentsGraphics.put(GroundType.OBSTACLE_COURSE, new DefaultCommonAvatarEnvironment().getTerrainObject3D().getLinkGraphics());
       environmentsGraphics.put(GroundType.FLAT, new FlatGroundEnvironment().getTerrainObject3D().getLinkGraphics());
       environmentsGraphics.put(GroundType.NOTHING, new Graphics3DObject());
-      environmentsGraphics.put(GroundType.CINDER_BLOCKS, new CinderBlockFieldEnvironment().getTerrainObject3D().getLinkGraphics());
+      environmentsGraphics.put(GroundType.CINDER_BLOCKS, CinderBlockFieldEnvironment.drcCinderBlockField().getTerrainObject3D().getLinkGraphics());
       environmentsGraphics.put(GroundType.BLOCK, createBlock());
       environmentsGraphics.put(GroundType.BLOCKS, createBlocks());
       environmentsGraphics.put(GroundType.BLOCKS2, createBlocks2());
