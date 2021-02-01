@@ -10,6 +10,7 @@ public interface FramePolynomial3DBasics extends FixedFramePolynomial3DBasics, F
    @Override
    default void set(FramePolynomial3DBasics other)
    {
+      checkReferenceFrameMatch(other);
       setIncludingReferenceFrame(other);
    }
 
