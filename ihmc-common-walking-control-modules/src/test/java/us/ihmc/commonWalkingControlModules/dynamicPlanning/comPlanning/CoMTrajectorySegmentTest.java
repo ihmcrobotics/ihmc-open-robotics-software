@@ -141,7 +141,7 @@ public class CoMTrajectorySegmentTest
 
          CoMTrajectorySegment segmentToCrop = getRandomSegment(random);
          segmentToCrop.set(originalSegment);
-         segmentToCrop.removeStartOfSegment(timeToCrop);
+         segmentToCrop.shiftStartOfSegment(timeToCrop);
 
          for (double time = timeToCrop; time <= duration; time += 1e-3)
          {
