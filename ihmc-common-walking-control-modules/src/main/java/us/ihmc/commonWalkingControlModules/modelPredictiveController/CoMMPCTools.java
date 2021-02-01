@@ -162,6 +162,7 @@ public class CoMMPCTools
    }
 
 
+   /*
    public static void constructedDesiredBodyOrientation(FixedFrameOrientation3DBasics orientationToPack,
                                                         FramePoint3DReadOnly firstCoefficient,
                                                         FramePoint3DReadOnly secondCoefficient,
@@ -235,4 +236,5 @@ public class CoMMPCTools
          angularRateToPack.add(thirdCoefficient);
       }
    }
+   */
 }
