@@ -6,11 +6,11 @@ import org.ejml.interfaces.linsol.LinearSolverSparse;
 import org.ejml.sparse.FillReducing;
 import org.ejml.sparse.csc.CommonOps_DSCC;
 import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
-import us.ihmc.convexOptimization.quadraticProgram.InverseCostCalculator;
+//import us.ihmc.convexOptimization.quadraticProgram.InverseCostCalculator;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-public class SparseInverseCalculator implements InverseCostCalculator<DMatrixSparseCSC>
+public class SparseInverseCalculator// implements InverseCostCalculator<DMatrixSparseCSC>
 {
    private static final boolean useSparse = true;
    private final LinearMPCIndexHandler indexHandler;
@@ -28,7 +28,7 @@ public class SparseInverseCalculator implements InverseCostCalculator<DMatrixSpa
    private final DMatrixRMaj denseInvertedBlock = new DMatrixRMaj(0, 0);
    private final DMatrixSparseCSC identity = new DMatrixSparseCSC(0, 0);
 
-   @Override
+//   @Override
    public void computeInverse(DMatrixSparseCSC matrix, DMatrixSparseCSC inverseMatrix)
    {
       inverseMatrix.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
