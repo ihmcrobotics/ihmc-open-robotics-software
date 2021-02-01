@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -923,7 +923,7 @@ public class ContinuousModelPredictiveController
       return desiredBodyAngularVelocity;
    }
 
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
    {
       return cornerPointCalculator.getVrpTrajectories();
    }
