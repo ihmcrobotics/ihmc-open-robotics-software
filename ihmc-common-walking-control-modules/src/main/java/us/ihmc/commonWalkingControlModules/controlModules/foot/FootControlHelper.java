@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -39,9 +40,11 @@ public class FootControlHelper
 
    private final ExplorationParameters explorationParameters;
    private final FootholdRotationParameters footholdRotationParameters;
+   private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
+                            YoSwingTrajectoryParameters swingTrajectoryParameters,
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
@@ -53,6 +56,8 @@ public class FootControlHelper
       this.walkingControllerParameters = walkingControllerParameters;
       this.explorationParameters = explorationParameters;
       this.footholdRotationParameters = footholdRotationParameters;
+
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -150,11 +155,6 @@ public class FootControlHelper
       return walkingControllerParameters.getToeOffParameters();
    }
 
-   public SwingTrajectoryParameters getSwingTrajectoryParameters()
-   {
-      return walkingControllerParameters.getSwingTrajectoryParameters();
-   }
-
    public PartialFootholdControlModule getPartialFootholdControlModule()
    {
       return partialFootholdControlModule;
@@ -191,5 +191,10 @@ public class FootControlHelper
    public FootholdRotationParameters getFootholdRotationParameters()
    {
       return footholdRotationParameters;
+   }
+
+   public YoSwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
    }
 }
