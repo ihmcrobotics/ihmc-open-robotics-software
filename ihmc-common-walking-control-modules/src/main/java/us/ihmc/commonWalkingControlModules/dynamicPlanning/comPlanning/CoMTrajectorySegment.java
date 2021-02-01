@@ -172,6 +172,18 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       sixthCoefficient.set(frame, x, y, z);
    }
 
+   public void removeStartOfSegment(double durationToRemove)
+   {
+      double endTime = getTimeInterval().getEndTime();
+      if (durationToRemove > endTime)
+         throw new IllegalArgumentException("New start time " + durationToRemove + " must be less than end time " + endTime);
+
+      // TODO do stuff
+      getTimeInterval().setInterval(0.0, endTime - durationToRemove);
+      computeCoMPosition(durationToRemove, comPosition);
+      sixthCoefficient.sub(comPosition);
+   }
+
    public void setOmega(double omega)
    {
       this.omega = omega;
