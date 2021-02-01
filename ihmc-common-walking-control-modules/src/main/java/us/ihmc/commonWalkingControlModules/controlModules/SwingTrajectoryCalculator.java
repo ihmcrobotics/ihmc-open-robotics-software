@@ -130,6 +130,7 @@ public class SwingTrajectoryCalculator
     */
    public void informDone()
    {
+      saveAsLastFootstep();
       swingTrajectoryOptimizer.informDone();
    }
 
