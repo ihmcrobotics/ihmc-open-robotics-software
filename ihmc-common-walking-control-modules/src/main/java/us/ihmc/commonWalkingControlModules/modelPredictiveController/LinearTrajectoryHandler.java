@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
@@ -51,7 +50,7 @@ public class LinearTrajectoryHandler
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
    private final MultipleCoMSegmentTrajectoryGenerator comTrajectory;
-   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
+   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    private double currentTimeInState;
 
    public LinearTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
@@ -61,6 +60,12 @@ public class LinearTrajectoryHandler
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
+   }
+
+   public void clearTrajectory()
+   {
+      comTrajectory.clear();
+      vrpTrajectories.clear();
    }
 
    public void setNominalCoMHeight(double nominalCoMHeight)
@@ -78,10 +83,16 @@ public class LinearTrajectoryHandler
       positionInitializationCalculator.solveForTrajectory(fullContactSequence);
    }
 
+   private final FramePoint3D vrpStartPosition = new FramePoint3D();
+   private final FrameVector3D vrpStartVelocity = new FrameVector3D();
+   private final FramePoint3D vrpEndPosition = new FramePoint3D();
+   private final FrameVector3D vrpEndVelocity = new FrameVector3D();
+
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
                                                List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
-                                               double currentTimeInState)
+                                               double currentTimeInState,
+                                               double omega)
    {
       this.currentTimeInState = currentTimeInState;
       int numberOfPhases = planningWindow.size();
@@ -89,62 +100,13 @@ public class LinearTrajectoryHandler
       for (int i = 0; i < numberOfPhases; i++)
          this.planningWindow.add(planningWindow.get(i));
 
-      xCoefficientVector.reshape(6 * numberOfPhases, 1);
-      yCoefficientVector.reshape(6 * numberOfPhases, 1);
-      zCoefficientVector.reshape(6 * numberOfPhases, 1);
-      xCoefficientVector.zero();
-      yCoefficientVector.zero();
-      zCoefficientVector.zero();
+      computeCoMSegmentCoefficients(solutionCoefficients,
+                                    contactPlaneHelpers,
+                                    xCoefficientVector,
+                                    yCoefficientVector,
+                                    zCoefficientVector);
 
-      for (int sequence = 0; sequence < contactPlaneHelpers.size(); sequence++)
-      {
-         int coeffStartIdx = indexHandler.getRhoCoefficientStartIndex(sequence);
-
-         for (int contact = 0; contact < contactPlaneHelpers.get(sequence).size(); contact++)
-         {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(sequence).get(contact);
-            contactPlaneHelper.computeContactForceCoefficientMatrix(solutionCoefficients, coeffStartIdx);
-            coeffStartIdx += contactPlaneHelper.getCoefficientSize();
-         }
-      }
-
-      for (int i = 0; i < numberOfPhases; i++)
-      {
-         int positionVectorStart = 6 * i;
-
-         xCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
-         yCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
-         zCoefficientVector.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
-
-         xCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
-         yCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
-         zCoefficientVector.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
-
-         for (int contactIdx = 0; contactIdx < contactPlaneHelpers.get(i).size(); contactIdx++)
-         {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
-            DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
-
-            xCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(0, 0));
-            yCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(1, 0));
-            zCoefficientVector.add(positionVectorStart, 0, contactCoefficientMatrix.get(2, 0));
-
-            xCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
-            yCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
-            zCoefficientVector.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
-
-            xCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
-            yCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
-            zCoefficientVector.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
-
-            xCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
-            yCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
-            zCoefficientVector.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
-         }
-         zCoefficientVector.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
-      }
-
-
+      int numRows = xCoefficientVector.getNumRows();
       coefficientArray.reshape(numRows, 3);
 
       MatrixTools.setMatrixBlock(coefficientArray, 0, 0, xCoefficientVector, 0, 0, numRows, 1, 1.0);
@@ -169,19 +131,20 @@ public class LinearTrajectoryHandler
                                                       vrpStartVelocity,
                                                       vrpEndPosition,
                                                       vrpEndVelocity);
-         Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
+         Polynomial3DBasics vrpTrajectory = vrpTrajectories.add();
          vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          vrpTrajectory.getTimeInterval().setInterval(0.0, timeInterval.getDuration());
-         this.vrpTrajectories.add(vrpTrajectory);
 
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
+      // TODO add the stuff outside the preview window
       comTrajectory.initialize();
    }
 
    public void compute(double timeInPhase, double omega)
    {
       boolean success;
+      // TODO once all the stuff related to getting the solution outside the preview window is finished, this is unneccessary
 
       if (isTimeInPlanningWindow(timeInPhase))
          success = computeInPlanningWindow(timeInPhase, omega);
@@ -190,19 +153,6 @@ public class LinearTrajectoryHandler
 
       if (!success)
          computeOutsideOfPlanningWindow(timeInPhase);
-   }
-
-   public void fastComputePosition(double timeInPhase, double omega, FixedFramePoint3DBasics desiredCoMPosition)
-   {
-      boolean success;
-
-      if (isTimeInPlanningWindow(timeInPhase))
-         success = fastComputePositionInPlanningWindow(timeInPhase, omega, desiredCoMPosition);
-      else
-         success = false;
-
-      if (!success)
-         fastComputePositionOutsideOfPlanningWindow(timeInPhase, desiredCoMPosition);
    }
 
    protected boolean isTimeInPlanningWindow(double time)
@@ -241,18 +191,6 @@ public class LinearTrajectoryHandler
       return true;
    }
 
-   private boolean fastComputePositionInPlanningWindow(double timeInPhase, double omega, FixedFramePoint3DBasics desiredCoMPositionToPack)
-   {
-      int segmentNumber = getPreviewWindowSegmentNumber(timeInPhase);
-      if (segmentNumber < 0)
-         return false;
-
-      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
-
-      comTrajectory.getSegment(segmentNumber).computeCoMPosition(timeInSegment, desiredCoMPositionToPack);
-      return true;
-   }
-
    public int getPreviewWindowSegmentNumber(double time)
    {
       for (int i = 0; i < planningWindow.size(); i++)
@@ -264,8 +202,6 @@ public class LinearTrajectoryHandler
       return -1;
    }
 
-
-
    public double getTimeInSegment(int segmentNumber, double timeInPhase)
    {
       timeInPhase -= currentTimeInState;
@@ -274,11 +210,6 @@ public class LinearTrajectoryHandler
          timeInPhase -= planningWindow.get(i).getTimeInterval().getDuration();
 
       return timeInPhase;
-   }
-
-   private void fastComputePositionOutsideOfPlanningWindow(double time, FixedFramePoint3DBasics desiredCoMPositionToPack)
-   {
-      positionInitializationCalculator.fastComputeDesiredPosition(time, desiredCoMPositionToPack);
    }
 
    protected void computeOutsideOfPlanningWindow(double time)
@@ -336,6 +267,70 @@ public class LinearTrajectoryHandler
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;
+   }
+
+   private void computeCoMSegmentCoefficients(DMatrixRMaj solutionCoefficients,
+                                              List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
+                                              DMatrixRMaj xCoefficientVectorToPack,
+                                              DMatrixRMaj yCoefficientVectorToPack,
+                                              DMatrixRMaj zCoefficientVectorToPack)
+   {
+      int numberOfPhases = contactPlaneHelpers.size();
+
+      xCoefficientVectorToPack.reshape(6 * numberOfPhases, 1);
+      yCoefficientVectorToPack.reshape(6 * numberOfPhases, 1);
+      zCoefficientVectorToPack.reshape(6 * numberOfPhases, 1);
+      xCoefficientVectorToPack.zero();
+      yCoefficientVectorToPack.zero();
+      zCoefficientVectorToPack.zero();
+
+      for (int sequence = 0; sequence < contactPlaneHelpers.size(); sequence++)
+      {
+         int coeffStartIdx = indexHandler.getRhoCoefficientStartIndex(sequence);
+
+         for (int contact = 0; contact < contactPlaneHelpers.get(sequence).size(); contact++)
+         {
+            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(sequence).get(contact);
+            contactPlaneHelper.computeContactForceCoefficientMatrix(solutionCoefficients, coeffStartIdx);
+            coeffStartIdx += contactPlaneHelper.getCoefficientSize();
+         }
+      }
+
+      for (int i = 0; i < numberOfPhases; i++)
+      {
+         int positionVectorStart = 6 * i;
+
+         xCoefficientVectorToPack.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0), 0));
+         yCoefficientVectorToPack.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1), 0));
+         zCoefficientVectorToPack.set(positionVectorStart + 4, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2), 0));
+
+         xCoefficientVectorToPack.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 0) + 1, 0));
+         yCoefficientVectorToPack.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
+         zCoefficientVectorToPack.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
+
+         for (int contactIdx = 0; contactIdx < contactPlaneHelpers.get(i).size(); contactIdx++)
+         {
+            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
+            DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
+
+            xCoefficientVectorToPack.add(positionVectorStart, 0, contactCoefficientMatrix.get(0, 0));
+            yCoefficientVectorToPack.add(positionVectorStart, 0, contactCoefficientMatrix.get(1, 0));
+            zCoefficientVectorToPack.add(positionVectorStart, 0, contactCoefficientMatrix.get(2, 0));
+
+            xCoefficientVectorToPack.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(0, 1));
+            yCoefficientVectorToPack.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(1, 1));
+            zCoefficientVectorToPack.add(positionVectorStart + 1, 0, contactCoefficientMatrix.get(2, 1));
+
+            xCoefficientVectorToPack.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(0, 2));
+            yCoefficientVectorToPack.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(1, 2));
+            zCoefficientVectorToPack.add(positionVectorStart + 2, 0, contactCoefficientMatrix.get(2, 2));
+
+            xCoefficientVectorToPack.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(0, 3));
+            yCoefficientVectorToPack.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(1, 3));
+            zCoefficientVectorToPack.add(positionVectorStart + 3, 0, contactCoefficientMatrix.get(2, 3));
+         }
+         zCoefficientVectorToPack.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
+      }
    }
 
    private static void computeVRPBoundaryConditionsFromCoefficients(int startRow,

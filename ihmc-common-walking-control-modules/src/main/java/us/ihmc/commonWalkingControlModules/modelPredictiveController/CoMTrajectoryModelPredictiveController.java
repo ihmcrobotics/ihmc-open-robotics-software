@@ -213,7 +213,7 @@ public class CoMTrajectoryModelPredictiveController
       DMatrixRMaj solutionCoefficients = solveQP();
 
       if (solutionCoefficients != null)
-         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue());
+         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue(), omega.getValue());
 
       cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
