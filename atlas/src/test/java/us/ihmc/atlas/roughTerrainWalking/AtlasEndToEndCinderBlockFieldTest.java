@@ -44,4 +44,23 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
       super.testWalkingOverCinderBlockField();
    }
 
+   @Override
+   @Test
+   public void testSteppingStonesA() throws Exception
+   {
+      super.testSteppingStonesA();
+   }
+
+   @Override
+   @Test
+   public void testSteppingStonesB() throws Exception
+   {
+      super.testSteppingStonesB();
+   }
+
+   @Test
+   public void testSlantedCinderBlockLeveledFieldA() throws Exception
+   {
+      super.testSlantedCinderBlockLeveledField(false);
+   }
 }
