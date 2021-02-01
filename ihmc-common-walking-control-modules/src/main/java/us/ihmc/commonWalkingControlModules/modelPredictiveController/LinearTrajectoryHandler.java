@@ -3,15 +3,25 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class LinearTrajectoryHandler
 {
@@ -38,6 +48,10 @@ public class LinearTrajectoryHandler
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
+
+   private final MultipleCoMSegmentTrajectoryGenerator comTrajectory;
+   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    private double currentTimeInState;
 
    public LinearTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
@@ -46,6 +60,7 @@ public class LinearTrajectoryHandler
       this.gravityZ = Math.abs(gravityZ);
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
+      comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
    }
 
    public void setNominalCoMHeight(double nominalCoMHeight)
@@ -128,6 +143,40 @@ public class LinearTrajectoryHandler
          }
          zCoefficientVector.add(positionVectorStart + 3, 0, -0.5 * gravityZ);
       }
+
+
+      coefficientArray.reshape(numRows, 3);
+
+      MatrixTools.setMatrixBlock(coefficientArray, 0, 0, xCoefficientVector, 0, 0, numRows, 1, 1.0);
+      MatrixTools.setMatrixBlock(coefficientArray, 0, 1, yCoefficientVector, 0, 0, numRows, 1, 1.0);
+      MatrixTools.setMatrixBlock(coefficientArray, 0, 2, zCoefficientVector, 0, 0, numRows, 1, 1.0);
+
+      clearTrajectory();
+
+      int startRow = 0;
+      for (int i = 0; i < planningWindow.size(); i++)
+      {
+         TimeIntervalReadOnly timeInterval = planningWindow.get(i).getTimeInterval();
+
+         comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
+
+         double duration = Math.min(timeInterval.getDuration(), sufficientlyLongTime);
+         computeVRPBoundaryConditionsFromCoefficients(startRow,
+                                                      coefficientArray,
+                                                      omega,
+                                                      duration,
+                                                      vrpStartPosition,
+                                                      vrpStartVelocity,
+                                                      vrpEndPosition,
+                                                      vrpEndVelocity);
+         Polynomial3DBasics vrpTrajectory = vrpTrajectoryPool.add();
+         vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+         vrpTrajectory.getTimeInterval().setInterval(0.0, timeInterval.getDuration());
+         this.vrpTrajectories.add(vrpTrajectory);
+
+         startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
+      }
+      comTrajectory.initialize();
    }
 
    public void compute(double timeInPhase, double omega)
@@ -158,18 +207,8 @@ public class LinearTrajectoryHandler
 
    protected boolean isTimeInPlanningWindow(double time)
    {
-      if (planningWindow.size() > 0)
-         return time < planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime();
-
-      return false;
+      return time < comTrajectory.getEndTime();
    }
-
-   private final FramePoint3D firstPositionCoefficient = new FramePoint3D();
-   private final FramePoint3D secondPositionCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdPositionCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthPositionCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthPositionCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthPositionCoefficient = new FramePoint3D();
 
    private boolean computeInPlanningWindow(double timeInPhase, double omega)
    {
@@ -182,64 +221,18 @@ public class LinearTrajectoryHandler
       return computeInPlanningWindow(segmentNumber, timeInSegment, omega);
    }
 
-   private void setActivePositionCoefficients(int segmentNumber)
-   {
-      int positionStartIndex = 6 * segmentNumber;
-      firstPositionCoefficient.setX(xCoefficientVector.get(positionStartIndex, 0));
-      firstPositionCoefficient.setY(yCoefficientVector.get(positionStartIndex, 0));
-      firstPositionCoefficient.setZ(zCoefficientVector.get(positionStartIndex, 0));
-
-      int secondPositionCoefficientIndex = positionStartIndex + 1;
-      secondPositionCoefficient.setX(xCoefficientVector.get(secondPositionCoefficientIndex, 0));
-      secondPositionCoefficient.setY(yCoefficientVector.get(secondPositionCoefficientIndex, 0));
-      secondPositionCoefficient.setZ(zCoefficientVector.get(secondPositionCoefficientIndex, 0));
-
-      int thirdPositionCoefficientIndex = positionStartIndex + 2;
-      thirdPositionCoefficient.setX(xCoefficientVector.get(thirdPositionCoefficientIndex, 0));
-      thirdPositionCoefficient.setY(yCoefficientVector.get(thirdPositionCoefficientIndex, 0));
-      thirdPositionCoefficient.setZ(zCoefficientVector.get(thirdPositionCoefficientIndex, 0));
-
-      int fourthPositionCoefficientIndex = positionStartIndex + 3;
-      fourthPositionCoefficient.setX(xCoefficientVector.get(fourthPositionCoefficientIndex, 0));
-      fourthPositionCoefficient.setY(yCoefficientVector.get(fourthPositionCoefficientIndex, 0));
-      fourthPositionCoefficient.setZ(zCoefficientVector.get(fourthPositionCoefficientIndex, 0));
-
-      int fifthCoefficientIndex = positionStartIndex + 4;
-      fifthPositionCoefficient.setX(xCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthPositionCoefficient.setY(yCoefficientVector.get(fifthCoefficientIndex, 0));
-      fifthPositionCoefficient.setZ(zCoefficientVector.get(fifthCoefficientIndex, 0));
-
-      int sixthCoefficientIndex = positionStartIndex + 5;
-      sixthPositionCoefficient.setX(xCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthPositionCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex, 0));
-      sixthPositionCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex, 0));
-   }
 
    protected boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
    {
-      setActivePositionCoefficients(segmentNumber);
+      comTrajectory.getSegment(segmentNumber).compute(timeInSegment,
+                                                      desiredCoMPosition,
+                                                      desiredCoMVelocity,
+                                                      desiredCoMAcceleration,
+                                                      desiredDCMPosition,
+                                                      desiredDCMVelocity,
+                                                      desiredVRPPosition,
+                                                      desiredVRPVelocity);
 
-      CoMMPCTools.constructDesiredCoMPosition(desiredCoMPosition, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
-                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
-                                              timeInSegment,
-                                              omega);
-      CoMMPCTools.constructDesiredCoMVelocity(desiredCoMVelocity, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
-                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
-                                              timeInSegment,
-                                              omega);
-      CoMMPCTools.constructDesiredCoMAcceleration(desiredCoMAcceleration, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
-                                                  fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
-                                                  timeInSegment,
-                                                  omega);
-
-      CoMMPCTools.constructDesiredVRPVelocity(desiredVRPVelocity, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
-                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
-                                              timeInSegment,
-                                              omega);
-
-      CapturePointTools.computeCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
-      CapturePointTools.computeCapturePointVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, desiredDCMVelocity);
-      CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega, desiredVRPPosition);
 
       double nominalHeight = gravityZ / MathTools.square(omega);
       desiredECMPPosition.set(desiredVRPPosition);
@@ -256,18 +249,7 @@ public class LinearTrajectoryHandler
 
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
 
-      return fastComputePositionInPlanningWindow(segmentNumber, timeInSegment, omega, desiredCoMPositionToPack);
-   }
-
-   private boolean fastComputePositionInPlanningWindow(int segmentNumber, double timeInSegment, double omega, FixedFramePoint3DBasics desiredCoMPositionToPack)
-   {
-      setActivePositionCoefficients(segmentNumber);
-
-      CoMMPCTools.constructDesiredCoMPosition(desiredCoMPositionToPack, firstPositionCoefficient, secondPositionCoefficient, thirdPositionCoefficient,
-                                              fourthPositionCoefficient, fifthPositionCoefficient, sixthPositionCoefficient,
-                                              timeInSegment,
-                                              omega);
-
+      comTrajectory.getSegment(segmentNumber).computeCoMPosition(timeInSegment, desiredCoMPositionToPack);
       return true;
    }
 
@@ -281,6 +263,8 @@ public class LinearTrajectoryHandler
 
       return -1;
    }
+
+
 
    public double getTimeInSegment(int segmentNumber, double timeInPhase)
    {
@@ -353,4 +337,42 @@ public class LinearTrajectoryHandler
    {
       return desiredECMPPosition;
    }
+
+   private static void computeVRPBoundaryConditionsFromCoefficients(int startRow,
+                                                                    DMatrixRMaj coefficientArray,
+                                                                    double omega,
+                                                                    double duration,
+                                                                    FixedFramePoint3DBasics startPosition,
+                                                                    FixedFrameVector3DBasics startVelocity,
+                                                                    FixedFramePoint3DBasics endPosition,
+                                                                    FixedFrameVector3DBasics endVelocity)
+   {
+      startPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      startVelocity.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      endPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      endVelocity.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      double omega2 = omega * omega;
+      double t2 = duration * duration;
+      double t3 = duration * t2;
+
+      for (Axis3D axis : Axis3D.values)
+      {
+         int element = axis.ordinal();
+         double startPositionElement = coefficientArray.get(startRow + 5, element) - 2.0 / omega2 * coefficientArray.get(startRow + 3, element);
+         double startVelocityElement = coefficientArray.get(startRow + 4, element) - 6.0 / omega2 * coefficientArray.get(startRow + 2, element);
+         startPosition.setElement(element, startPositionElement);
+         startVelocity.setElement(element, startVelocityElement);
+
+         double endPositionElement =
+               coefficientArray.get(startRow + 2, element) * t3 + coefficientArray.get(startRow + 3, element) * t2 + startVelocityElement * duration
+               + startPositionElement;
+         double endVelocityElement =
+               3.0 * coefficientArray.get(startRow + 2, element) * t2 + 2.0 * coefficientArray.get(startRow + 3, element) * duration + startVelocityElement;
+
+         endPosition.setElement(element, endPositionElement);
+         endVelocity.setElement(element, endVelocityElement);
+      }
+   }
+
 }
