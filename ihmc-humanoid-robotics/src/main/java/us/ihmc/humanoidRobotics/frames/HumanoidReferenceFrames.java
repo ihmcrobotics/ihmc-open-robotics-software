@@ -86,9 +86,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
       }
 
-      String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
-      if (lidarSensorName != null && !lidarSensorName.isEmpty())
+      if (!fullRobotModel.getLidarSensorNames().isEmpty()
+          && fullRobotModel.getLidarSensorNames().get(0) != null &&
+            !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
       {
+         String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
          ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
          RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
          if (lidarBaseFrame != null && lidarBaseToSensorTransform != null)
