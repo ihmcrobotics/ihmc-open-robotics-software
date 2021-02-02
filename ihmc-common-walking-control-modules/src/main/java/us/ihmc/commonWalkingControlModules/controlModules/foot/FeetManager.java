@@ -204,6 +204,12 @@ public class FeetManager
       footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
    }
 
+   public void saveCurrentPositionsAsLastFootstepPositions()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footControlModules.get(robotSide).saveCurrentPositionAsLastFootstepPosition();
+   }
+
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       RobotSide robotSide = command.getRobotSide();
