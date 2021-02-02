@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -25,7 +26,6 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
 
 public class LinearMPCTrajectoryHandler
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final CoMTrajectoryPlanner positionInitializationCalculator;
 
    protected final List<ContactPlaneProvider> planningWindow = new ArrayList<>();
@@ -37,22 +37,10 @@ public class LinearMPCTrajectoryHandler
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
 
-   private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
-   private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
-   private final FixedFrameVector3DBasics desiredCoMAcceleration = new FrameVector3D(worldFrame);
-
-   private final FixedFramePoint3DBasics desiredDCMPosition = new FramePoint3D(worldFrame);
-   private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
-
-   private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
-   private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
-   private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
-
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
    private final MultipleCoMSegmentTrajectoryGenerator comTrajectory;
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
-   private double currentTimeInState;
 
    private final CoMTrajectorySegment segmentToAppend = new CoMTrajectorySegment();
 
@@ -84,6 +72,15 @@ public class LinearMPCTrajectoryHandler
    public void solveForTrajectoryOutsidePreviewWindow(List<ContactPlaneProvider> fullContactSequence)
    {
       positionInitializationCalculator.solveForTrajectory(fullContactSequence);
+
+      comTrajectory.clear();
+      for (int i = 0; i < positionInitializationCalculator.getCoMTrajectory().getCurrentNumberOfSegments(); i++)
+         comTrajectory.appendSegment(positionInitializationCalculator.getCoMTrajectory().getSegment(i));
+      comTrajectory.initialize();
+
+      vrpTrajectories.clear();
+      for (int i = 0; i < positionInitializationCalculator.getVRPTrajectories().size(); i++)
+         vrpTrajectories.add().set(positionInitializationCalculator.getVRPTrajectories().get(i));
    }
 
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
@@ -97,7 +94,6 @@ public class LinearMPCTrajectoryHandler
                                                double currentTimeInState,
                                                double omega)
    {
-      this.currentTimeInState = currentTimeInState;
       int numberOfPhases = planningWindow.size();
       this.planningWindow.clear();
       for (int i = 0; i < numberOfPhases; i++)
@@ -141,50 +137,63 @@ public class LinearMPCTrajectoryHandler
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
 
-      while (comTrajectory.getEndTime() < positionInitializationCalculator.getCoMTrajectory().getEndTime())
+      MultipleCoMSegmentTrajectoryGenerator comTrajectoryOutsideWindow = positionInitializationCalculator.getCoMTrajectory();
+      List<Polynomial3DReadOnly> vrpTrajectoryOutsideWindow = positionInitializationCalculator.getVRPTrajectories();
+      while (comTrajectory.getEndTime() < comTrajectoryOutsideWindow.getEndTime())
       {
-         CoMTrajectorySegment segmentToAdd = getSegmentContainingTime(comTrajectory.getEndTime() + 1e-5, positionInitializationCalculator.getCoMTrajectory());
-         if (segmentToAdd == null)
+         int segmentIndexToAdd = getSegmentIndexContainingTime(comTrajectory.getEndTime() + 1e-5, positionInitializationCalculator.getCoMTrajectory());
+         if (segmentIndexToAdd == -1)
             throw new RuntimeException("oops.");
 
+         CoMTrajectorySegment segmentToAdd = comTrajectoryOutsideWindow.getSegment(segmentIndexToAdd);
          CoMTrajectorySegment lastSegmentOfPreview = comTrajectory.getSegment(comTrajectory.getCurrentNumberOfSegments() - 1);
          if (MathTools.epsilonEquals(lastSegmentOfPreview.getTimeInterval().getEndTime(), segmentToAdd.getTimeInterval().getStartTime(), 1e-3))
          {
-            segmentToAppend.set(segmentToAdd);
+            comTrajectory.appendSegment(segmentToAdd);
+            vrpTrajectories.add().set(vrpTrajectoryOutsideWindow.get(segmentIndexToAdd));
          }
          else
          {
             double durationToRemove = lastSegmentOfPreview.getTimeInterval().getEndTime() - segmentToAdd.getTimeInterval().getStartTime();
             segmentToAppend.set(segmentToAdd);
             segmentToAppend.shiftStartOfSegment(durationToRemove);
+            comTrajectory.appendSegment(segmentToAppend);
+
+            // TODO make this cleaner
+            double duration = Math.min(segmentToAppend.getTimeInterval().getDuration(), sufficientlyLongTime);
+            computeVRPBoundaryConditionsFromCoefficients(segmentToAppend,
+                                                         duration,
+                                                         omega,
+                                                         vrpStartPosition,
+                                                         vrpStartVelocity,
+                                                         vrpEndPosition,
+                                                         vrpEndVelocity);
+            Polynomial3DBasics vrpTrajectory = vrpTrajectories.add();
+            vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+            vrpTrajectory.getTimeInterval().setInterval(0.0, segmentToAppend.getTimeInterval().getDuration());
          }
 
-         comTrajectory.appendSegment(segmentToAppend);
 
-         double duration = Math.min(segmentToAppend.getTimeInterval().getDuration(), sufficientlyLongTime);
-         computeVRPBoundaryConditionsFromCoefficients(segmentToAppend,
-                                                      omega,
-                                                      vrpStartPosition,
-                                                      vrpStartVelocity,
-                                                      vrpEndPosition,
-                                                      vrpEndVelocity);
-         Polynomial3DBasics vrpTrajectory = vrpTrajectories.add();
-         vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
-         vrpTrajectory.getTimeInterval().setInterval(0.0, segmentToAppend.getTimeInterval().getDuration());
+         segmentIndexToAdd++;
+         for (;segmentIndexToAdd < comTrajectoryOutsideWindow.getCurrentNumberOfSegments(); segmentIndexToAdd++)
+         {
+            comTrajectory.appendSegment(comTrajectoryOutsideWindow.getSegment(segmentIndexToAdd));
+            vrpTrajectories.add().set(vrpTrajectoryOutsideWindow.get(segmentIndexToAdd));
+         }
       }
       comTrajectory.initialize();
    }
 
-   private CoMTrajectorySegment getSegmentContainingTime(double time, MultipleCoMSegmentTrajectoryGenerator trajectory)
+   private int getSegmentIndexContainingTime(double time, MultipleCoMSegmentTrajectoryGenerator trajectory)
    {
       for (int i = 0; i < trajectory.getCurrentNumberOfSegments(); i++)
       {
          CoMTrajectorySegment segment = trajectory.getSegment(i);
          if (segment.getTimeInterval().intervalContains(time))
-            return segment;
+            return i;
       }
 
-      return null;
+      return -1;
    }
 
    public void compute(double timeInPhase)
@@ -192,23 +201,9 @@ public class LinearMPCTrajectoryHandler
       comTrajectory.compute(timeInPhase);
    }
 
-   protected boolean computeInPlanningWindow(int segmentNumber, double timeInSegment, double omega)
+   public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
-      comTrajectory.getSegment(segmentNumber).compute(timeInSegment,
-                                                      desiredCoMPosition,
-                                                      desiredCoMVelocity,
-                                                      desiredCoMAcceleration,
-                                                      desiredDCMPosition,
-                                                      desiredDCMVelocity,
-                                                      desiredVRPPosition,
-                                                      desiredVRPVelocity);
-
-
-      double nominalHeight = gravityZ / MathTools.square(omega);
-      desiredECMPPosition.set(desiredVRPPosition);
-      desiredECMPPosition.subZ(nominalHeight);
-
-      return true;
+      return vrpTrajectories;
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()
@@ -348,6 +343,7 @@ public class LinearMPCTrajectoryHandler
    }
 
    private static void computeVRPBoundaryConditionsFromCoefficients(CoMTrajectorySegment segment,
+                                                                    double duration,
                                                                     double omega,
                                                                     FixedFramePoint3DBasics startPosition,
                                                                     FixedFrameVector3DBasics startVelocity,
@@ -359,7 +355,6 @@ public class LinearMPCTrajectoryHandler
       endPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       endVelocity.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      double duration = segment.getTimeInterval().getDuration();
       double omega2 = omega * omega;
       double t2 = duration * duration;
       double t3 = duration * t2;
