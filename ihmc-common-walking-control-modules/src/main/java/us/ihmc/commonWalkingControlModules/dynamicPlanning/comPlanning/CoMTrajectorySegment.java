@@ -185,7 +185,7 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       double d2 = durationToShift * durationToShift;
       double d3 = d2 * durationToShift;
       double startTime = getTimeInterval().getStartTime();
-      getTimeInterval().setInterval(startTime, startTime + originalDuration - durationToShift);
+      getTimeInterval().setInterval(startTime + durationToShift, getTimeInterval().getEndTime());
       double exponential = Math.exp(omega * durationToShift);
       firstCoefficient.scale(exponential);
       secondCoefficient.scale(1.0 / exponential);

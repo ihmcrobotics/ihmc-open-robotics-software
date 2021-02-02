@@ -216,7 +216,7 @@ public class CoMTrajectoryModelPredictiveController
       if (solutionCoefficients != null)
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue(), omega.getValue());
 
-      cornerPointCalculator.updateCornerPoints(this, planningWindow.size(), previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
+      cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
       if (trajectoryViewer != null)
       {
@@ -683,7 +683,7 @@ public class CoMTrajectoryModelPredictiveController
 
    public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
    {
-      return cornerPointCalculator.getVrpTrajectories();
+      return trajectoryHandler.getVrpTrajectories();
    }
 
    public List<ContactPlaneProvider> getContactStateProviders()
