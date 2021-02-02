@@ -301,6 +301,11 @@ public class FootControlModule
       resetLoadConstraints();
    }
 
+   public void saveCurrentPositionAsLastFootstepPosition()
+   {
+      footControlHelper.getSwingTrajectoryCalculator().saveCurrentPositionAsLastFootstepPosition();
+   }
+
    public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();

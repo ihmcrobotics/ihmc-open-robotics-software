@@ -130,7 +130,7 @@ public class SwingTrajectoryCalculator
     */
    public void informDone()
    {
-      saveAsLastFootstep();
+      saveFinalPositionAsLastFootstep();
       swingTrajectoryOptimizer.informDone();
    }
 
@@ -153,11 +153,16 @@ public class SwingTrajectoryCalculator
       return swingTrajectoryOptimizer.doOptimizationUpdate();
    }
 
-   public void saveAsLastFootstep()
+   public void saveFinalPositionAsLastFootstep()
    {
-      lastFootstepPosition.setIncludingFrame(finalPosition);
-      if (lastFootstepPosition.containsNaN())
-         lastFootstepPosition.setToZero(soleFrame);
+      this.lastFootstepPosition.setIncludingFrame(finalPosition);
+      if (this.lastFootstepPosition.containsNaN())
+         this.lastFootstepPosition.setToZero(soleFrame);
+   }
+
+   public void saveCurrentPositionAsLastFootstepPosition()
+   {
+      this.lastFootstepPosition.setToZero(soleFrame);
    }
 
    /**
