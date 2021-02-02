@@ -37,6 +37,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockStackDescription;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockType;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -145,7 +146,12 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, cinderBlockFieldEnvironment);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
+      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
+      scs.setCameraFix(1.6, 0.0, 1.0);
+      scs.setCameraPosition(1.6, -6.0, 2.4);
+
       assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      scs.setInPoint();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       simulationTestHelper.publishToController(footsteps);
@@ -175,7 +181,12 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
+      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
+      scs.setCameraFix(2.0, 1.3, 1.0);
+      scs.setCameraPosition(6.0, 7.0, 3.25);
+
       assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      scs.setInPoint();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
@@ -184,7 +195,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testSlantedCinderBlockLeveledField(boolean varyHeight) throws Exception
+   public void testSlantedCinderBlockField(boolean varyHeight) throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
@@ -210,7 +221,16 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
+      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
+      scs.setCameraFix(0.0, 0.0, 0.9);
+      scs.setCameraPosition(0.0, -6.0, 2.25);
+      scs.setCameraTracking(true, true, false, false);
+      scs.setCameraDolly(true, true, false, false);
+      scs.setCameraTrackingOffsets(0.0, 0.0, 0.0);
+      scs.setCameraDollyOffsets(0.0, 0.0, 0.0);
+
       assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      scs.setInPoint();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
@@ -239,7 +259,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            addFootstepFromCBPose(footsteps, robotSide, columns.get(robotSide).get(row), 0.0, 0.0, zOffset, 0.0);
+            addFootstepFromCBPose(footsteps, robotSide, columns.get(robotSide).get(row), 0.0, robotSide.negateIfLeftSide(0.08), zOffset, 0.0);
          }
       }
 
@@ -359,18 +379,15 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(6), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(5), 0.0, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(6), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.20 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(5), 0.0, -0.08, zOffset, yawOffset);
-      yawOffset = 0.30 * Math.PI;
-      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(6), 0.0, -0.08, zOffset, yawOffset);
-      yawOffset = 0.40 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(6), 0.0, 0.08, zOffset, yawOffset);
+      yawOffset = 0.25 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(5), 0.0, 0.0, zOffset, yawOffset);
-      yawOffset = 0.55 * Math.PI;
+      yawOffset = 0.50 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(4), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.70 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(3), 0.0, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(2), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.90 * Math.PI;
+      yawOffset = 0.75 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.04, zOffset, yawOffset);
       yawOffset = Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);
@@ -382,8 +399,9 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
       yawOffset = Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
 
       return footsteps;
    }

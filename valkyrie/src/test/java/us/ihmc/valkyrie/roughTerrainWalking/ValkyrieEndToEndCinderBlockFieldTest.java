@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -17,12 +18,15 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
+   private boolean useVal2Scale = false;
    private boolean removeAnkleJointLimits = false;
 
    @Override
    public DRCRobotModel getRobotModel()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      if (useVal2Scale)
+         robotModel.setVal2Scale();
 
       if (removeAnkleJointLimits)
       {
@@ -45,6 +49,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @BeforeEach
    public void initializeTest()
    {
+      useVal2Scale = false;
       removeAnkleJointLimits = false;
    }
 
@@ -73,6 +78,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testWalkingOverCinderBlockField();
    }
 
+   @Disabled
    @Override
    @Tag("humanoid-rough-terrain-slow")
    @Test
@@ -81,6 +87,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testSteppingStonesA();
    }
 
+   @Disabled
    @Override
    @Tag("humanoid-rough-terrain-slow")
    @Test
@@ -90,19 +97,63 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
       super.testSteppingStonesB();
    }
 
+   @Disabled
    @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSlantedCinderBlockLeveledFieldA() throws Exception
+   public void testSlantedCinderBlockFieldA() throws Exception
    {
       removeAnkleJointLimits = true;
-      super.testSlantedCinderBlockLeveledField(false);
+      super.testSlantedCinderBlockField(false);
+   }
+
+   @Disabled
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSlantedCinderBlockFieldB() throws Exception
+   {
+      removeAnkleJointLimits = true;
+      super.testSlantedCinderBlockField(true);
+   }
+
+   @Test
+   public void testWalkingOverCinderBlockFieldVal2Scale() throws Exception
+   {
+      useVal2Scale = true;
+      super.testWalkingOverCinderBlockField();
    }
 
    @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSlantedCinderBlockLeveledFieldB() throws Exception
+   public void testSteppingStonesAVal2Scale() throws Exception
    {
+      useVal2Scale = true;
+      super.testSteppingStonesA();
+   }
+
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSteppingStonesBVal2Scale() throws Exception
+   {
+      useVal2Scale = true;
       removeAnkleJointLimits = true;
-      super.testSlantedCinderBlockLeveledField(true);
+      super.testSteppingStonesB();
+   }
+
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSlantedCinderBlockFieldAVal2Scale() throws Exception
+   {
+      useVal2Scale = true;
+      removeAnkleJointLimits = true;
+      super.testSlantedCinderBlockField(false);
+   }
+
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSlantedCinderBlockFieldBVal2Scale() throws Exception
+   {
+      useVal2Scale = true;
+      removeAnkleJointLimits = true;
+      super.testSlantedCinderBlockField(true);
    }
 }

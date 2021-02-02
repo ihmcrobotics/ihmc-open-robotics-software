@@ -53,18 +53,10 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
       super.testSteppingStonesA();
    }
 
-   @Override
    @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSteppingStonesB() throws Exception
+   public void testSlantedCinderBlockFieldA() throws Exception
    {
-      super.testSteppingStonesB();
-   }
-
-   @Tag("humanoid-rough-terrain-slow")
-   @Test
-   public void testSlantedCinderBlockLeveledFieldA() throws Exception
-   {
-      super.testSlantedCinderBlockLeveledField(false);
+      super.testSlantedCinderBlockField(false);
    }
 }
