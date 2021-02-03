@@ -93,9 +93,12 @@ public class SwingTrajectoryCalculator
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
+      namePrefix += "FootSwing";
+
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
+
       swingHeight = new YoDouble(namePrefix + "Height", registry);
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
 
@@ -117,12 +120,17 @@ public class SwingTrajectoryCalculator
       parentRegistry.addChild(registry);
    }
 
+   public void setShouldVisualize(boolean visualize)
+   {
+      swingTrajectoryOptimizer.setShouldVisualize(visualize);
+   }
 
    /**
     * Resets the optimizer and the swing waypoints.
     */
    public void informDone()
    {
+      saveFinalPositionAsLastFootstep();
       swingTrajectoryOptimizer.informDone();
    }
 
@@ -145,16 +153,24 @@ public class SwingTrajectoryCalculator
       return swingTrajectoryOptimizer.doOptimizationUpdate();
    }
 
+   public void saveFinalPositionAsLastFootstep()
+   {
+      this.lastFootstepPosition.setIncludingFrame(finalPosition);
+      if (this.lastFootstepPosition.containsNaN())
+         this.lastFootstepPosition.setToZero(soleFrame);
+   }
+
+   public void saveCurrentPositionAsLastFootstepPosition()
+   {
+      this.lastFootstepPosition.setToZero(soleFrame);
+   }
+
    /**
     * Sets the footstep to be used for this calculator. Also passes in the waypoints to be used for the swing trajectory.
     * @param footstep
     */
    public void setFootstep(Footstep footstep)
    {
-      lastFootstepPosition.setIncludingFrame(finalPosition);
-      if (lastFootstepPosition.containsNaN())
-         lastFootstepPosition.setToZero(soleFrame);
-
       finalPosition.setIncludingFrame(footstep.getFootstepPose().getPosition());
       finalOrientation.setIncludingFrame(footstep.getFootstepPose().getOrientation());
       finalPosition.changeFrame(worldFrame);

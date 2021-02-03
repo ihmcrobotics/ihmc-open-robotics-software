@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -33,6 +34,7 @@ public class StandingState extends WalkingState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
+   private final FeetManager feetManager;
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -68,6 +70,7 @@ public class StandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
+      feetManager = managerFactory.getOrCreateFeetManager();
    }
 
    @Override
@@ -113,6 +116,7 @@ public class StandingState extends WalkingState
    @Override
    public void onExit()
    {
+      feetManager.saveCurrentPositionsAsLastFootstepPositions();
       for (RobotSide robotSide : RobotSide.values)
       {
          if (handManagers.get(robotSide) != null)

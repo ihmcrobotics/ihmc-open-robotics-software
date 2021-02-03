@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -49,6 +50,16 @@ public class AngularMomentumHandler
       parentRegistry.addChild(registry);
    }
 
+   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingFootTrajectory)
+   {
+      angularMomentumCalculator.setSwingTrajectory(swingFootTrajectory);
+   }
+
+   public void clearSwingFootTrajectory()
+   {
+      angularMomentumCalculator.clearSwingTrajectory();
+   }
+
    public void resetAngularMomentum()
    {
       angularMomentumCalculator.reset();
@@ -60,12 +71,11 @@ public class AngularMomentumHandler
       ecmpTrajectoryCalculator.computeECMPOffset(angularMomentumCalculator.getDesiredAngularMomentumRate(), desiredECMPOffset);
    }
 
+
    public void solveForAngularMomentumTrajectory(CoPTrajectoryGeneratorState state,
                                                  List<? extends TimeIntervalProvider> timeIntervals,
-                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory,
-                                                 MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory)
    {
-      angularMomentumCalculator.setSwingTrajectory(swingTrajectory);
       angularMomentumCalculator.predictFootTrajectories(state);
       angularMomentumCalculator.computeAngularMomentumTrajectories(timeIntervals, comTrajectory);
    }
@@ -80,5 +90,20 @@ public class AngularMomentumHandler
       copPositionToPack.set(desiredECMPPosition);
       copPositionToPack.subX(desiredECMPOffset.getX());
       copPositionToPack.subY(desiredECMPOffset.getY());
+   }
+
+   public MultipleSegmentPositionTrajectoryGenerator<?> getAngularMomentumTrajectories()
+   {
+      return angularMomentumCalculator.getAngularMomentumTrajectories();
+   }
+
+   public FrameVector3DReadOnly getDesiredAngularMomentum()
+   {
+      return angularMomentumCalculator.getDesiredAngularMomentum();
+   }
+
+   public FrameVector3DReadOnly getDesiredAngularMomentumRate()
+   {
+      return angularMomentumCalculator.getDesiredAngularMomentumRate();
    }
 }
