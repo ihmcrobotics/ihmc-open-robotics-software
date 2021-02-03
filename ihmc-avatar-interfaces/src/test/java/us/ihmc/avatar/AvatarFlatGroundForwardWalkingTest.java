@@ -278,7 +278,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
 
-      simulationTestingParameters.setKeepSCSUp(true);
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setCheckForDesiredICPContinuity(true, getMaxPlanICPChange());
