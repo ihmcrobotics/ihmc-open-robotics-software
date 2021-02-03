@@ -21,6 +21,7 @@ public class MPTCGainsCalculator
    private final CompositeRigidBodyMassMatrixCalculator inertiaMatrixCalculator;
    private final JointIndexHandler jointIndexHandler;
    private final int numberOfDoFs;
+   private final boolean enableCrossComponents = false;
 
    public MPTCGainsCalculator(RigidBodyBasics rootBody)
    {
@@ -81,6 +82,20 @@ public class MPTCGainsCalculator
       proportionalGains.set(temp);
       CommonOps_DDRM.mult(Mk_inv, derivativeGains, temp);
       derivativeGains.set(temp);
+
+      if (!enableCrossComponents)
+      {
+         for (int i = 0; i < 3; i++)
+         {
+            for (int j = 0; j < 3; j++)
+            {
+               proportionalGains.set(i, j + 3, 0.0);
+               proportionalGains.set(i + 3, j, 0.0);
+               derivativeGains.set(i, j + 3, 0.0);
+               derivativeGains.set(i + 3, j, 0.0);
+            }
+         }
+      }
    }
 
    public DMatrixRMaj getProportionalGains()

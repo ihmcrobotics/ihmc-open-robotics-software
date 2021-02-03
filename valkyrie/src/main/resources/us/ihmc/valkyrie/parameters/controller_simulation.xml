@@ -24,18 +24,18 @@
                   <parameter name="integralLeakRatioUserModeComHeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                </registry>
                <registry name="FootGains">
-                  <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="15.0" />
-                  <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="15.0" />
-                  <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
-                  <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
-                  <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
-                  <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="20.0" />
+                  <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="400.0" />
+                  <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="300.0" />
+                  <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0" />
+                  <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                  <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="4.0" />
+                  <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
                   <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="zetaYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                  <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                  <parameter name="zetaYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                  <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
