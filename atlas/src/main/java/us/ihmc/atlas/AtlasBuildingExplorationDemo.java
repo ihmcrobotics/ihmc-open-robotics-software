@@ -102,7 +102,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       }
 
       LogTools.info("Starting building exploration behavior");
-      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_KRYO);
+      AtlasBuildingExplorationBehaviorUI.start(createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
    }
