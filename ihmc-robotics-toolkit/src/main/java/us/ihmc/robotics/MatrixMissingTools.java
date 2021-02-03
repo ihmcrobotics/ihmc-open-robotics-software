@@ -5,6 +5,7 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class MatrixMissingTools
@@ -108,5 +109,22 @@ public class MatrixMissingTools
             return false;
       }
       return true;
+   }
+
+   public static SimpleMatrix toSkewSymmetricMatrix(DMatrix1Row vector)
+   {
+      SimpleMatrix skewSymmetric = new SimpleMatrix(vector.getNumElements(), vector.getNumElements());
+      skewSymmetric.set(0, 0, 0.0);
+      skewSymmetric.set(0, 1, -vector.get(2));
+      skewSymmetric.set(0, 2, vector.get(1));
+
+      skewSymmetric.set(1, 0, vector.get(2));
+      skewSymmetric.set(1, 1, 0.0);
+      skewSymmetric.set(1, 2, -vector.get(0));
+
+      skewSymmetric.set(2, 0, -vector.get(1));
+      skewSymmetric.set(2, 1, vector.get(0));
+      skewSymmetric.set(2, 2, 0.0);
+      return skewSymmetric;
    }
 }
