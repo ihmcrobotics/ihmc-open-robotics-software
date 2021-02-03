@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -36,6 +37,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -299,6 +301,29 @@ public class FootControlModule
       resetLoadConstraints();
    }
 
+   public void saveCurrentPositionAsLastFootstepPosition()
+   {
+      footControlHelper.getSwingTrajectoryCalculator().saveCurrentPositionAsLastFootstepPosition();
+   }
+
+   public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setInitialConditionsToCurrent();
+      swingTrajectoryCalculator.setFootstep(footstep);
+      swingTrajectoryCalculator.setSwingDuration(swingDuration);
+      swingTrajectoryCalculator.setShouldVisualize(false);
+      swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
+   }
+
+   public void updateSwingTrajectoryPreview()
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
+         swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
+   }
+
+
    public void doControl()
    {
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction.getValue());
@@ -556,9 +581,6 @@ public class FootControlModule
 
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
-      if (stateMachine.getCurrentStateKey() == ConstraintType.SWING)
-         return swingState.getSwingTrajectory();
-      else
-         return null;
+      return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
    }
 }

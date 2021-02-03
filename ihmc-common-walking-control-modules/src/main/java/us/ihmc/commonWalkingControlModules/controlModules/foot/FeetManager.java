@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
@@ -194,6 +195,22 @@ public class FeetManager
       setContactStateForSwing(upcomingSwingSide);
    }
 
+   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   {
+      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstep, swingTime);
+   }
+
+   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)
+   {
+      footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
+   }
+
+   public void saveCurrentPositionsAsLastFootstepPositions()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footControlModules.get(robotSide).saveCurrentPositionAsLastFootstepPosition();
+   }
+
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       RobotSide robotSide = command.getRobotSide();
@@ -373,6 +390,7 @@ public class FeetManager
    {
       return toeOffManager;
    }
+
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
