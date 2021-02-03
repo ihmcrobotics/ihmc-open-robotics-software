@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -20,6 +21,7 @@ import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -38,18 +40,22 @@ public class GDXDepthSensorSimulator
    private final float minRange;
    private final float maxRange;
    private final Vector3 depthPoint = new Vector3();
+   private final Vector3D32 noiseVector = new Vector3D32();
 
    private PerspectiveCamera camera;
    private ModelBatch modelBatch;
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
    private RecyclingArrayList<Point3D32> points;
+   private ArrayList<Integer> colors;
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
 
    private ByteBuffer depthByteBuffer;
    private FloatBuffer depthFloatBuffer;
+
+   private boolean depthWindowEnabledOptimization = true;
 
    public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -64,7 +70,7 @@ public class GDXDepthSensorSimulator
    {
       camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
       camera.near = minRange;
-      camera.far = maxRange;
+      camera.far = maxRange * 2.0f; // should render camera farther
       viewport = new ScreenViewport(camera);
 
       modelBatch = new ModelBatch();
@@ -81,6 +87,7 @@ public class GDXDepthSensorSimulator
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
+      colors = new ArrayList<>(imageWidth * imageHeight);
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -106,8 +113,8 @@ public class GDXDepthSensorSimulator
       frameBuffer.end();
 
       points.clear();
+      colors.clear();
 
-//      depthByteBuffer.rewind();
       depthFloatBuffer.rewind();
       for (int y = 0; y < imageHeight; y++)
       {
@@ -115,17 +122,20 @@ public class GDXDepthSensorSimulator
          {
             float depthReading = depthFloatBuffer.get();
 
-            float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
-            float pastNear = clippedDepth - camera.near;
-            float worldRange = camera.far - camera.near;
-            float colorRange = 1.0f;
-            float grayscale = pastNear * colorRange / worldRange;
-            grayscale = depthReading * colorRange / camera.far;
-            int flippedY = imageHeight - y;
+            if (depthWindowEnabledOptimization)
+            {
+               float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
+               float pastNear = clippedDepth - camera.near;
+               float worldRange = camera.far - camera.near;
+               float colorRange = 1.0f;
+               float grayscale = pastNear * colorRange / worldRange;
+               grayscale = depthReading * colorRange / camera.far;
+               int flippedY = imageHeight - y;
 
-            depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+               depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+            }
 
-            if (depthReading > camera.near && depthReading < camera.far)
+            if (depthReading > camera.near && depthReading < maxRange)
             {
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
@@ -134,43 +144,70 @@ public class GDXDepthSensorSimulator
 
                Point3D32 point = points.add();
                GDXTools.toEuclid(depthPoint, point);
-               point.addZ(random.nextDouble() * 0.007); // add some noise
+
+               GDXTools.toEuclid(camera.position, noiseVector);
+               noiseVector.sub(point);
+               noiseVector.normalize();
+               noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
+               point.add(noiseVector);
+
+               colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
             }
          }
       }
 
-      depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+      if (depthWindowEnabledOptimization)
+         depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+      depthWindowEnabledOptimization = false;
    }
 
    public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
    {
-      ImGui.begin(depthWindowName);
-
-      float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY();
-      float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY();
-
-      int textureId = depthWindowTexture.getTextureObjectHandle();
-
-      ImGui.getWindowDrawList().addImage(textureId, posX, posY, posX + sizeX, posY + sizeY);
-
-      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
-      ImGui.end();
+      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false, sceneManager);
+      depthWindowEnabledOptimization = true;
    }
 
    public void renderImGuiColorWindow(GDX3DSceneManager sceneManager)
    {
-      ImGui.begin(colorWindowName);
+      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true, sceneManager);
+   }
 
+   private void renderImGuiWindow(String name, int textureId, boolean flipY, GDX3DSceneManager sceneManager)
+   {
+      ImGui.begin(name);
+
+//      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
+//      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
+//      float sizeX = ImGui.getWindowContentRegionMaxX();
+//      float sizeY = ImGui.getWindowContentRegionMaxY();
+      float tableHeader = 22.0f;
       float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY();
+      float posY = ImGui.getWindowPosY() + tableHeader;
       float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY();
+      float sizeY = ImGui.getWindowSizeY() - tableHeader;
 
-      int textureId = frameBuffer.getColorTexture().getTextureObjectHandle();
+      float windowAspect = sizeX / sizeY;
+      float cameraAspect = (float) imageWidth / (float) imageHeight;
+      float drawSizeX = sizeX;
+      float drawSizeY = sizeY;
+      float centeringX = 0.0f;
+      float centeringY = 0.0f;
+      if (windowAspect > cameraAspect)
+      {
+         drawSizeX = drawSizeY * cameraAspect;
+         centeringX = (sizeX - drawSizeX) / 2.0f;
+      }
+      else
+      {
+         drawSizeY = drawSizeX / cameraAspect;
+         centeringY = (sizeY - drawSizeY) / 2.0f;
+      }
+      float startX = posX + centeringX;
+      float startY = flipY ? posY + centeringY + drawSizeY : posY + centeringY;
+      float endX = posX + centeringX + drawSizeX;
+      float endY = flipY ? posY + centeringY : posY + centeringY + drawSizeY;
 
-      ImGui.getWindowDrawList().addImage(textureId, posX, posY + sizeY, posX + sizeX, posY);
+      ImGui.getWindowDrawList().addImage(textureId, startX, startY, endX, endY);
 
       sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
       ImGui.end();
@@ -199,6 +236,11 @@ public class GDXDepthSensorSimulator
    public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
+   }
+
+   public ArrayList<Integer> getColors()
+   {
+      return colors;
    }
 
    public String getDepthWindowName()

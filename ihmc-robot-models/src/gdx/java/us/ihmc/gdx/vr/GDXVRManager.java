@@ -27,7 +27,6 @@ public class GDXVRManager implements RenderableProvider
    private ModelInstance headsetModelInstance;
    private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
-   private HashMap<Integer, Runnable> buttonCallbacks = new HashMap<>();
 
    public void create()
    {
@@ -94,11 +93,6 @@ public class GDXVRManager implements RenderableProvider
          public void buttonPressed(GDXVRContext.VRDevice device, int button)
          {
             LogTools.info("{} button pressed: {}", device, button);
-            buttonCallbacks.computeIfPresent(button, (key, value) ->
-            {
-               value.run();
-               return value;
-            });
          }
 
          @Override
@@ -169,8 +163,8 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
-   public void addButtonCallback(int button, Runnable runnable)
+   public GDXVRContext getContext()
    {
-      buttonCallbacks.put(button, runnable);
+      return context;
    }
 }

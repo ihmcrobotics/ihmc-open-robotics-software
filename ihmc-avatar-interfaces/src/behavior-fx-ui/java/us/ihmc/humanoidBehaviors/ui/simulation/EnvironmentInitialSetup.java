@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 
@@ -13,6 +14,7 @@ public class EnvironmentInitialSetup
    private final double initialYaw;
    private final double initialX;
    private final double initialY;
+   private Point3D initialPosition;
 
    public EnvironmentInitialSetup(Supplier<PlanarRegionsList> planarRegionsSupplier,
                                   double groundZ,
@@ -36,6 +38,8 @@ public class EnvironmentInitialSetup
       this.initialYaw = initialYaw;
       this.initialX = initialX;
       this.initialY = initialY;
+
+      initialPosition = new Point3D(initialX, initialY, groundZ);
    }
 
    public Supplier<PlanarRegionsList> getPlanarRegionsSupplier()
@@ -51,6 +55,11 @@ public class EnvironmentInitialSetup
    public CommonAvatarEnvironmentInterface getCommonAvatarEnvironmentInterface()
    {
       return commonAvatarEnvironmentInterface;
+   }
+
+   public Point3D getInitialPosition()
+   {
+      return initialPosition;
    }
 
    public double getGroundZ()
