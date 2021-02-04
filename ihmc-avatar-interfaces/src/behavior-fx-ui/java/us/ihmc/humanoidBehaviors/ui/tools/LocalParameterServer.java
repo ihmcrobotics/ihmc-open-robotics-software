@@ -48,7 +48,7 @@ public class LocalParameterServer
                                                                                       port,
                                                                                       null),
                                                                0.01);
-      yoVariableServer.setMainRegistry(registry, null, null);
+      yoVariableServer.setMainRegistry(registry, null);
       ExceptionTools.handle(() -> yoVariableServer.start(), DefaultExceptionHandler.PRINT_STACKTRACE);
       scheduler = new ExceptionHandlingThreadScheduler(clazz.getSimpleName() + "YoVariableServer");
       AtomicLong timestamp = new AtomicLong();

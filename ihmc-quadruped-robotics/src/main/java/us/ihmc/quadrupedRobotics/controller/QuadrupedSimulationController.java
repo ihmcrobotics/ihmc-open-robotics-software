@@ -50,7 +50,7 @@ public class QuadrupedSimulationController implements RobotController
 
       if (robotVisualizer != null)
       {
-         robotVisualizer.setMainRegistry(getYoRegistry(), null, null);
+         robotVisualizer.setMainRegistry(getYoRegistry(), null);
       }
    }
 

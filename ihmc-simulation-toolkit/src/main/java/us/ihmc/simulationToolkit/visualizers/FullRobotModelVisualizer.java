@@ -1,13 +1,14 @@
 package us.ihmc.simulationToolkit.visualizers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -55,7 +56,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
          ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
          revoluteJoints.add(jointPair);
       }
-      setMainRegistry(robotRegistry, null, null);
+      setMainRegistry(robotRegistry, null);
    }
 
    public FloatingRootJointRobot getSDFRobot()
@@ -79,7 +80,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
    
    @Override
-   public void setMainRegistry(YoRegistry registry, RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoRegistry registry, List<? extends JointBasics> jointsToPublish, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
             
       if( robot.getRobotsYoRegistry() != registry)
