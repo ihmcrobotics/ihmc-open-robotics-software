@@ -36,7 +36,7 @@ public class YoVariableConnectionBurstTest
 
 	  //start server
       final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, new DataServerSettings(false), 0.001);
-      server.setMainRegistry(registry, null, null);
+      server.setMainRegistry(registry, null);
       server.start();
 
       
