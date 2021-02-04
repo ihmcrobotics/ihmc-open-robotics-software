@@ -39,6 +39,7 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJ
 public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 {
    private static final double EPSILON = 1.0e-7;
+   private static final boolean DEBUG = false;
 
    private final String name;
    private final FourBarVertex masterVertex;
@@ -310,12 +311,18 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 
       if (masterJoint.getQ() < masterJoint.getJointLimitLower())
       {
-         LogTools.warn("{} is beyond its lower limit: {}, clamping it to {}.", masterJoint.getName(), masterJoint.getQ(), masterJoint.getJointLimitLower());
+         if(DEBUG)
+         {
+            LogTools.warn("{} is beyond its lower limit: {}, clamping it to {}.", masterJoint.getName(), masterJoint.getQ(), masterJoint.getJointLimitLower());
+         }
          masterJoint.setQ(masterJoint.getJointLimitLower());
       }
       else if (masterJoint.getQ() > masterJoint.getJointLimitUpper())
       {
-         LogTools.warn("{} is beyond its upper limit: {}, clamping it to {}.", masterJoint.getName(), masterJoint.getQ(), masterJoint.getJointLimitUpper());
+         if(DEBUG)
+         {
+            LogTools.warn("{} is beyond its upper limit: {}, clamping it to {}.", masterJoint.getName(), masterJoint.getQ(), masterJoint.getJointLimitUpper());
+         }
          masterJoint.setQ(masterJoint.getJointLimitUpper());
       }
    }

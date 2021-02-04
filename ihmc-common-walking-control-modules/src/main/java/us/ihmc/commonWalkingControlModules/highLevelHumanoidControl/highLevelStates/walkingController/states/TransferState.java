@@ -142,7 +142,10 @@ public abstract class TransferState extends WalkingState
       return false;
    }
 
-   public void switchToToeOffIfPossible()
+   /**
+    * @return whether or not it switched
+    */
+   public boolean switchToToeOffIfPossible()
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
 
@@ -164,10 +167,17 @@ public abstract class TransferState extends WalkingState
                                                      balanceManager.getFinalDesiredICP());
 
          if (feetManager.okForPointToeOff())
+         {
             feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            return true;
+         }
          else if (feetManager.okForLineToeOff())
+         {
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            return true;
+         }
       }
+      return false;
    }
 
    @Override

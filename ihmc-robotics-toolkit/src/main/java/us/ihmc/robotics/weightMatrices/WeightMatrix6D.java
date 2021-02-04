@@ -3,6 +3,7 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
@@ -332,6 +333,34 @@ public class WeightMatrix6D
    {
       angularWeights.scale(scalar);
       linearWeights.scale(scalar);
+   }
+
+   /**
+    * Applies the angular part of this weight matrix on the given vector:<br>
+    * v' = A<sub>3x3</sub> * v<br>
+    * where v is the given vector, A<sub>3x3</sub> the angular part of this weight matrix, and v'
+    * the result of the weight.
+    * 
+    * @param vectorToBeModified the vector on which the angular part of this weight matrix to be
+    *           applied. Modified.
+    */
+   public void applyAngularWeight(FrameVector3D vectorToBeModified)
+   {
+      angularWeights.applyWeight(vectorToBeModified);
+   }
+
+   /**
+    * Applies this weight matrix on the given vector:<br>
+    * v' = L<sub>3x3</sub> * v<br>
+    * where v is the given vector, L<sub>3x3</sub> the linear part of this weight matrix, and v'
+    * the result of the weight.
+    * 
+    * @param vectorToBeModified the vector on which the linear part of this weight matrix to be
+    *           applied. Modified.
+    */
+   public void applyLinearWeight(FrameVector3D vectorToBeModified)
+   {
+      linearWeights.applyWeight(vectorToBeModified);
    }
 
    /**

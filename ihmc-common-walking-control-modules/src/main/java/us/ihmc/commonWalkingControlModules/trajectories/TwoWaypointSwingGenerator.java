@@ -83,6 +83,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
 
+   private boolean visualize = true;
+
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
                                     YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -306,7 +308,16 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       trajectory.setWaypoints(waypointPositions);
       trajectory.initialize();
 
-      visualize();
+      if (visualize)
+         visualize();
+      else
+         hide();
+   }
+
+   public void setShouldVisualize(boolean visualize)
+   {
+      this.visualize = visualize;
+      trajectory.setShouldVisualize(visualize);
    }
 
    private final FrameVector2D xyDistanceToStance = new FrameVector2D();
@@ -411,6 +422,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          tempPoint3D.setMatchingFrame(waypointPositions.get(i));
          waypointViz.setBall(tempPoint3D, i);
       }
+   }
+
+   public void hide()
+   {
+      if (waypointViz == null)
+         return;
+      waypointViz.reset();
    }
 
    @Override
