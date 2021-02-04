@@ -54,7 +54,7 @@ public class BarrierSchedulerMatrixMultiplyBenchmark
       final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), null, new DataServerSettings(false),
                                                                      Conversions.nanosecondsToSeconds(SCHEDULER_PERIOD_NANOSECONDS));
 
-      yoVariableServer.setMainRegistry(registry, null, null);
+      yoVariableServer.setMainRegistry(registry, null);
 
       MultiplySmallMatricesALotTask fastTask = new MultiplySmallMatricesALotTask(actualFastTaskDTMillis, registry, SCHEDULER_PERIOD_NANOSECONDS, 1,
                                                                                  useNativeCommonOps); // 1KHz

@@ -203,7 +203,7 @@ public class ROS2NetworkTest
 
          // start YoVariableServer
          yoVariableServer = new YoVariableServer(profile.getMachineName() + profileName, null, new DataServerSettings(false), UPDATE_PERIOD);
-         yoVariableServer.setMainRegistry(profile.getYoRegistry(), null, null);
+         yoVariableServer.setMainRegistry(profile.getYoRegistry(), null);
          LogTools.info("Starting YoVariableServer...");
          yoVariableServer.start();
 
