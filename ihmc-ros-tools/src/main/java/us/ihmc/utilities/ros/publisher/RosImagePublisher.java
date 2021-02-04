@@ -69,7 +69,7 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
 
       message.setHeight(height);
       message.setWidth(width);
-      message.setEncoding("mono16");
+      message.setEncoding("16UC1");
 
       message.setData(channelBuffer);
 
