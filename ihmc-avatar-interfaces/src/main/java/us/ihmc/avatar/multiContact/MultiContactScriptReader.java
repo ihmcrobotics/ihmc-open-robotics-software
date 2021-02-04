@@ -2,7 +2,9 @@ package us.ihmc.avatar.multiContact;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,9 +45,27 @@ public class MultiContactScriptReader
 
       try
       {
-         FileInputStream fileInputStream = new FileInputStream(scriptFile);
+         return loadScript(new FileInputStream(scriptFile));
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
+   public boolean loadScript(InputStream inputStream)
+   {
+      if (inputStream == null)
+      {
+         LogTools.info("Stream is null");
+         return false;
+      }
+
+      try
+      {
          ObjectMapper objectMapper = new ObjectMapper();
-         JsonNode jsonNode = objectMapper.readTree(fileInputStream);
+         JsonNode jsonNode = objectMapper.readTree(inputStream);
 
          List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
 

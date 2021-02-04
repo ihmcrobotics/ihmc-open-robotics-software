@@ -1,9 +1,5 @@
 package us.ihmc.valkyrie.simulation;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -13,7 +9,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -22,14 +17,6 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
 {
    private final double dt = 8.0e-4;
    private ValkyrieRobotModel robotModel;
-
-   public static Path scriptFolderPath()
-   {
-      Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      folderPath = Paths.get(folderPath.toFile().getParentFile().getAbsolutePath(),
-                             "/ihmc-open-robotics-software/valkyrie/src/main/resources/multiContact/scripts");
-      return folderPath;
-   }
 
    @Override
    public ValkyrieRobotModel getRobotModel()
@@ -77,7 +64,7 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
    public void testCrawl1ToDabScript(TestInfo testInfo) throws Exception
    {
       runProcessedScriptTest(testInfo,
-                             new File(scriptFolderPath().toFile(), "20200930_144631_Crawl1ToDab.json"),
+                             ValkyrieRobotModel.class.getClassLoader().getResourceAsStream("multiContact/scripts/20200930_144631_Crawl1ToDab.json"),
                              ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
                              new FlatGroundEnvironment());
    }

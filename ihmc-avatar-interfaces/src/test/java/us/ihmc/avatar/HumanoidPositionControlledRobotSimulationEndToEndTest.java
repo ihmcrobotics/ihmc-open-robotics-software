@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -237,13 +238,13 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       ghostRobot.update();
    }
 
-   public void runProcessedScriptTest(TestInfo testInfo, File scriptFile, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+   public void runProcessedScriptTest(TestInfo testInfo, InputStream scriptInputStream, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment)
          throws Exception
    {
       createSimulation(testInfo, initialSetup, environment);
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      assertTrue(scriptReader.loadScript(scriptFile), "Failed to load the script");
+      assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
       assertTrue(scriptReader.hasNext(), "Script is empty");
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
