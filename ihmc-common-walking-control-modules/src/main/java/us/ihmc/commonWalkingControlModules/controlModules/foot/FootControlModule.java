@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -35,6 +37,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -104,6 +107,7 @@ public class FootControlModule
    public FootControlModule(RobotSide robotSide,
                             ToeOffCalculator toeOffCalculator,
                             WalkingControllerParameters walkingControllerParameters,
+                            YoSwingTrajectoryParameters swingTrajectoryParameters,
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             PIDSE3GainsReadOnly swingFootControlGains,
                             PIDSE3GainsReadOnly holdPositionFootControlGains,
@@ -118,13 +122,13 @@ public class FootControlModule
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
 
-      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
       registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide,
                                                 walkingControllerParameters,
+                                                swingTrajectoryParameters,
                                                 workspaceLimiterParameters,
                                                 controllerToolbox,
                                                 explorationParameters,
@@ -144,22 +148,10 @@ public class FootControlModule
 
       setupContactStatesMap();
 
-      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity",
-                                                                            ReferenceFrame.getWorldFrame(),
-                                                                            defaultTouchdownVelocity,
-                                                                            registry);
-
-      Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration",
-                                                                                ReferenceFrame.getWorldFrame(),
-                                                                                defaultTouchdownAcceleration,
-                                                                                registry);
-
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
-      swingState = new SwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
+      swingState = new SwingState(footControlHelper, swingFootControlGains, registry);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
@@ -308,6 +300,29 @@ public class FootControlModule
       stateMachine.resetToInitialState();
       resetLoadConstraints();
    }
+
+   public void saveCurrentPositionAsLastFootstepPosition()
+   {
+      footControlHelper.getSwingTrajectoryCalculator().saveCurrentPositionAsLastFootstepPosition();
+   }
+
+   public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setInitialConditionsToCurrent();
+      swingTrajectoryCalculator.setFootstep(footstep);
+      swingTrajectoryCalculator.setSwingDuration(swingDuration);
+      swingTrajectoryCalculator.setShouldVisualize(false);
+      swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
+   }
+
+   public void updateSwingTrajectoryPreview()
+   {
+      SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
+         swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
+   }
+
 
    public void doControl()
    {
@@ -566,9 +581,6 @@ public class FootControlModule
 
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
-      if (stateMachine.getCurrentStateKey() == ConstraintType.SWING)
-         return swingState.getSwingTrajectory();
-      else
-         return null;
+      return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
    }
 }

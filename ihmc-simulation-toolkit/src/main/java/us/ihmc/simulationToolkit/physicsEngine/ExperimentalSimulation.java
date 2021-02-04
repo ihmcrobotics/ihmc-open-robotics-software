@@ -11,6 +11,9 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameRamp3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -253,7 +256,7 @@ public class ExperimentalSimulation extends Simulation
 
          Robot[] robots = getRobots();
 
-         for (int i = 0; i < robots.length; i++)
+         for (int i = 0; i < Math.min(robots.length, rootBodies.size()); i++)
          {
             Robot robot = robots[i];
             robot.update();
@@ -289,7 +292,7 @@ public class ExperimentalSimulation extends Simulation
          physicsEngine.simulate(getDT(), gravity);
          externalWrenchReader.updateSCSGroundContactPoints();
 
-         for (int i = 0; i < robots.length; i++)
+         for (int i = 0; i < Math.min(robots.length, rootBodies.size()); i++)
          {
             Robot robot = robots[i];
             robot.getYoTime().add(getDT());
@@ -503,10 +506,12 @@ public class ExperimentalSimulation extends Simulation
 
       for (Shape3DReadOnly terrainShape : terrainObject3D.getTerrainCollisionShapes())
       {
-         collidables.add(new Collidable(null,
-                                        collisionMask,
-                                        collisionGroup,
-                                        PhysicsEngineTools.toFrameShape3DBasics(ReferenceFrame.getWorldFrame(), terrainShape)));
+         FrameShape3DBasics frameShape3DBasics = PhysicsEngineTools.toFrameShape3DBasics(ReferenceFrame.getWorldFrame(), terrainShape);
+         if (frameShape3DBasics instanceof FrameRamp3DBasics)
+         { // FIXME: Workaround the RampTerrainObject that doesn't initialize the Ramp3D shape properly.
+            ((FrameRamp3DBasics) frameShape3DBasics).getPose().appendTranslation(-0.5 * ((Ramp3DReadOnly) frameShape3DBasics).getSizeX(), 0.0, 0.0);
+         }
+         collidables.add(new Collidable(null, collisionMask, collisionGroup, frameShape3DBasics));
       }
 
       return collidables;

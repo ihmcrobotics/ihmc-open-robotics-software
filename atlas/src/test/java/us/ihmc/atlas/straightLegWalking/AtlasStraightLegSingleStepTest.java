@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Disabled
 @Tag("humanoid-flat-ground")
 public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepTest
 {
@@ -28,7 +29,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    @Test
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.3;
+      double stepLength = 1.0;
       double stepWidth = 0.25 ;
 
       setStepLength(stepLength);

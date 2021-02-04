@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
@@ -39,17 +41,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FeetManager
 {
-   private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final BooleanParameter useWorldSurfaceNormalWhenFullyConstrained = new BooleanParameter("useWorldSurfaceNormalWhenFullyConstrained", registry, true);
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
@@ -117,12 +120,15 @@ public class FeetManager
       DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
 
       WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
+      YoSwingTrajectoryParameters swingTrajectoryParameters = new YoSwingTrajectoryParameters("FootSwing", walkingControllerParameters, registry);
+
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide,
                                                                      toeOffCalculator,
                                                                      walkingControllerParameters,
+                                                                     swingTrajectoryParameters,
                                                                      workspaceLimiterParameters,
                                                                      swingFootGains,
                                                                      holdFootGains,
@@ -187,6 +193,22 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
       footControlModule.setFootstep(footstep, swingTime);
       setContactStateForSwing(upcomingSwingSide);
+   }
+
+   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   {
+      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstep, swingTime);
+   }
+
+   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)
+   {
+      footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
+   }
+
+   public void saveCurrentPositionsAsLastFootstepPositions()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footControlModules.get(robotSide).saveCurrentPositionAsLastFootstepPosition();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -342,7 +364,7 @@ public class FeetManager
 
    public void setFlatFootContactState(RobotSide robotSide)
    {
-      if (USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED)
+      if (useWorldSurfaceNormalWhenFullyConstrained.getValue())
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
@@ -368,6 +390,7 @@ public class FeetManager
    {
       return toeOffManager;
    }
+
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
@@ -633,8 +656,7 @@ public class FeetManager
 
    public void touchDown(RobotSide side, double initialPitch, double initialPitchVelocity, double pitch, double duration)
    {
-      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
+      setFlatFootContactState(side);
       footControlModules.get(side).touchDown(initialPitch, initialPitchVelocity, pitch, duration);
    }
 

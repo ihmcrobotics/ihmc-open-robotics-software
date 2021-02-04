@@ -82,6 +82,8 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
    private final YoDouble maxSpeedTime;
    private final FrameVector3D tempVelocity = new FrameVector3D();
 
+   private boolean visualize = true;
+
    public PositionOptimizedTrajectoryGenerator()
    {
       this("", null, ReferenceFrame.getWorldFrame());
@@ -369,7 +371,16 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       }
 
       isDone.set(false);
-      visualize();
+
+      if (visualize)
+         visualize();
+      else
+         hide();
+   }
+
+   public void setShouldVisualize(boolean shouldVisualize)
+   {
+      this.visualize = shouldVisualize;
    }
 
    private void visualize()
@@ -378,6 +389,14 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
          return;
 
       trajectoryViz.showGraphic();
+   }
+
+   private void hide()
+   {
+      if (trajectoryViz == null)
+         return;
+
+      trajectoryViz.hideGraphic();
    }
 
    /**

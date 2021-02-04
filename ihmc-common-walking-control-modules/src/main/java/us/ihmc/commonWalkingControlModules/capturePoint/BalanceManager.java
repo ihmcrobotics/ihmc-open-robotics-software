@@ -11,6 +11,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import org.apache.commons.collections.Bag;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
@@ -43,6 +44,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -76,6 +78,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean viewCoPHistory = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -107,6 +110,9 @@ public class BalanceManager
    private final YoFrameVector2D yoPerfectCoPVelocity = new YoFrameVector2D("perfectCoPVelocity", worldFrame, registry);
    /** CMP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCMP = new YoFramePoint3D("perfectCMP", worldFrame, registry);
+
+   private final BagOfBalls perfectCoPTrajectory;
+   private final BagOfBalls perfectCMPTrajectory;
 
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
 
@@ -296,6 +302,17 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
+         if (viewCoPHistory)
+         {
+            perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
+            perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
+         }
+         else
+         {
+            perfectCoPTrajectory = null;
+            perfectCMPTrajectory = null;
+         }
+
          comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
          copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
@@ -317,6 +334,11 @@ public class BalanceManager
          YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
          perfectCoPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
+      }
+      else
+      {
+         perfectCoPTrajectory = null;
+         perfectCMPTrajectory = null;
       }
       yoDesiredCapturePoint.setToNaN();
       yoFinalDesiredICP.setToNaN();
@@ -377,19 +399,22 @@ public class BalanceManager
       return footstepWasAdjusted;
    }
 
-   private MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = null;
 
    public void clearICPPlan()
    {
-      swingTrajectory = null;
       copTrajectoryState.clear();
       footsteps.clear();
       footstepTimings.clear();
    }
 
-   public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      this.swingTrajectory = swingTrajectory;
+      angularMomentumHandler.setSwingFootTrajectory(swingTrajectory);
+   }
+
+   public void clearSwingFootTrajectory()
+   {
+      angularMomentumHandler.clearSwingFootTrajectory();
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
@@ -477,6 +502,13 @@ public class BalanceManager
       {
          throw new IllegalArgumentException("Invalid height control type.");
       }
+
+      if (perfectCMPTrajectory != null)
+      {
+         perfectCMPTrajectory.setBallLoop(yoPerfectCMP);
+         perfectCoPTrajectory.setBallLoop(yoPerfectCoP);
+      }
+
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
@@ -537,8 +569,7 @@ public class BalanceManager
          {
             angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
                                                                      contactStateProviders,
-                                                                     comTrajectoryPlanner.getCoMTrajectory(),
-                                                                     swingTrajectory);
+                                                                     comTrajectoryPlanner.getCoMTrajectory());
             contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
          }
          else
@@ -781,6 +812,7 @@ public class BalanceManager
       }
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue() && useAngularMomentumOffsetInStanding.getValue());
 
+      angularMomentumHandler.clearSwingFootTrajectory();
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);

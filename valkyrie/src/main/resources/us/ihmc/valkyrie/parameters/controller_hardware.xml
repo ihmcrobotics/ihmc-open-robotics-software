@@ -178,29 +178,7 @@
                            <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="leftFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
-                        <parameter name="leftFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                        <parameter name="leftFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="leftFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
-                        <parameter name="leftFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="leftFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                        <parameter name="leftFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
-                        <parameter name="leftFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
-                        <parameter name="leftFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                        <parameter name="leftFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
-                        <parameter name="leftFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                        <parameter name="leftFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="leftFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                        <parameter name="leftFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+
                      </registry>
                      <registry name="rightFootControlModule">
                         <registry name="FootLeapOfFaithModule">
@@ -226,30 +204,30 @@
                            <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
-                        <parameter name="rightFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
-                        <parameter name="rightFootTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                        <parameter name="rightFootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="rightFootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
-                        <parameter name="rightFootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="rightFootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
-                        <parameter name="rightFootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
-                        <parameter name="rightFootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
-                        <parameter name="rightFootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                        <parameter name="rightFootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
-                        <parameter name="rightFootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
-                        <parameter name="rightFootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
-                        <parameter name="rightFootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
-                        <parameter name="rightFootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
                      </registry>
+                     <parameter name="FootSwingTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.1" />
+                     <parameter name="FootSwingTouchdownAccelerationX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingTouchdownAccelerationY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
+                     <parameter name="FootSwingFinalHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingMinHeightDifferenceForObstacleClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
+                     <parameter name="FootSwingVelocityAdjustmentDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     <parameter name="FootSwingDoHeelTouchdownIfPossible" type="BooleanParameter" value="false" />
+                     <parameter name="FootSwingHeelTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="-0.3490658503988659" />
+                     <parameter name="FootSwingMaximumHeightForHeelTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                     <parameter name="FootSwingHeelTouchdownLengthRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
+                     <parameter name="FootSwingDoToeTouchdownIfPossible" type="BooleanParameter" value="false" />
+                     <parameter name="FootSwingToeTouchdownAngle" type="DoubleParameter" min="0.0" max="1.0" value="0.3490658503988659" />
+                     <parameter name="FootSwingStepDownHeightForToeTouchdown" type="DoubleParameter" min="0.0" max="1.0" value="-0.05" />
+                     <parameter name="FootSwingToeTouchdownDepthRatio" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                     <parameter name="FootSwingAddOrientationMidpointForClearance" type="BooleanParameter" value="false" />
+                     <parameter name="FootSwingMidpointOrientationInterpolationForClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                     <parameter name="FootSwingWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                     <parameter name="FootSwingObstacleClearanceWaypointProportion0" type="DoubleParameter" min="0.0" max="1.0" value="0.15" />
+                     <parameter name="FootSwingWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
+                     <parameter name="FootSwingObstacleClearanceWaypointProportion1" type="DoubleParameter" min="0.0" max="1.0" value="0.85" />
                      <parameter name="blindFootstepsHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
                   </registry>
                   <registry name="PelvisOrientationManager">
