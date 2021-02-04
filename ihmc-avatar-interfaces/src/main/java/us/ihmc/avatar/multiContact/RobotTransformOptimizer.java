@@ -47,7 +47,7 @@ public class RobotTransformOptimizer
    private final Map<String, Pair<RigidBodyReadOnly, RigidBodyReadOnly>> nameBToBodyMap = new HashMap<>();
 
    private boolean initializeWithHeaviestBody = false;
-   private int maxIterations = 100;
+   private int maxIterations = 500;
    private double convergenceThreshold = 1.0e-7;
 
    private final RigidBodyTransform transformFromBToA = new RigidBodyTransform();
