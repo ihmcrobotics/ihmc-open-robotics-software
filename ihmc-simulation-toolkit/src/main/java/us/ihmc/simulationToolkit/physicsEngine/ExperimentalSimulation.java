@@ -256,7 +256,7 @@ public class ExperimentalSimulation extends Simulation
 
          Robot[] robots = getRobots();
 
-         for (int i = 0; i < robots.length; i++)
+         for (int i = 0; i < Math.min(robots.length, rootBodies.size()); i++)
          {
             Robot robot = robots[i];
             robot.update();
@@ -292,7 +292,7 @@ public class ExperimentalSimulation extends Simulation
          physicsEngine.simulate(getDT(), gravity);
          externalWrenchReader.updateSCSGroundContactPoints();
 
-         for (int i = 0; i < robots.length; i++)
+         for (int i = 0; i < Math.min(robots.length, rootBodies.size()); i++)
          {
             Robot robot = robots[i];
             robot.getYoTime().add(getDT());
