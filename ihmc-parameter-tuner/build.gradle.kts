@@ -21,7 +21,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-yovariables:0.9.8")
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.6")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.7")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
