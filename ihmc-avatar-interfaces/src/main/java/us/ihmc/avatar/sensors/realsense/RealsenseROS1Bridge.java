@@ -16,10 +16,12 @@ public class RealsenseROS1Bridge
 {
    private final RealsenseVideoROS1Bridge d435VideoBridge;
    private final RealsenseVideoROS1Bridge l515VideoBridge;
-   private final RealsenseD435PointCloudROS1Bridge pointCloudBridge;
-   private final RealsensePlanarRegionROS1Bridge planarRegionBridge;
+   private final RealsenseD435PointCloudROS1Bridge d435PointCloudBridge;
+   private final RealsenseD435PointCloudROS1Bridge l515PointCloudBridge;
+   private final RealsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
-   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform pelvisToSensorTransform)
+   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform d435PelvisToSensorTransform,
+                              RigidBodyTransform l515PelvisToSensorTransform)
    {
       URI masterURI = NetworkParameters.getROSURI();
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
@@ -29,8 +31,24 @@ public class RealsenseROS1Bridge
 
       d435VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.D435_VIDEO, ROS2Tools.D435_VIDEO);
       l515VideoBridge = new RealsenseVideoROS1Bridge(ros1Node, ros2Node, RosTools.L515_VIDEO, ROS2Tools.L515_VIDEO);
-      pointCloudBridge = new RealsenseD435PointCloudROS1Bridge(robotModel, ros1Node, ros2Node, pelvisToSensorTransform);
-      planarRegionBridge = new RealsensePlanarRegionROS1Bridge(robotModel, ros1Node, ros2Node, RosTools.MAPSENSE_REGIONS, ROS2Tools.MAPSENSE_REGIONS);
+      d435PointCloudBridge = new RealsenseD435PointCloudROS1Bridge(robotModel,
+                                                                   ros1Node,
+                                                                   ros2Node,
+                                                                   d435PelvisToSensorTransform,
+                                                                   RosTools.D435_POINT_CLOUD,
+                                                                   ROS2Tools.D435_POINT_CLOUD);
+      l515PointCloudBridge = new RealsenseD435PointCloudROS1Bridge(robotModel,
+                                                                   ros1Node,
+                                                                   ros2Node,
+                                                                   l515PelvisToSensorTransform,
+                                                                   RosTools.L515_POINT_CLOUD,
+                                                                   ROS2Tools.L515_POINT_CLOUD);
+      l515PlanarRegionBridge = new RealsensePlanarRegionROS1Bridge(robotModel,
+                                                                   ros1Node,
+                                                                   ros2Node,
+                                                                   RosTools.MAPSENSE_REGIONS,
+                                                                   ROS2Tools.MAPSENSE_REGIONS,
+                                                                   l515PelvisToSensorTransform);
 
       ros1Node.execute();
    }

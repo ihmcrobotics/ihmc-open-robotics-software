@@ -21,38 +21,23 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RealsensePlanarRegionROS1Bridge
 {
-   private static final double pelvisToMountOrigin = 0.19;
-   private static final double depthOffsetX = 0.058611;
-   private static final double depthOffsetZ = 0.01;
-   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
-   private static final double depthRollOffset = Math.toRadians(-0.5);
-   private static final double depthThickness = 0.0245;
-   public static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
-   static
-   {
-      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
-      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformPelvisToDepthCamera.appendRollRotation(depthRollOffset);
-      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
-
-      transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
-   }
-
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ResettableExceptionHandlingExecutorService executorService;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
    private final MovingReferenceFrame pelvisFrame;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform pelvisToSensorTransform;
 
    public RealsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
                                           RosMainNode ros1Node,
                                           ROS2NodeInterface ros2Node,
                                           String ros1InputTopic,
-                                          ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic)
+                                          ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic,
+                                          RigidBodyTransform pelvisToSensorTransform)
    {
+      this.pelvisToSensorTransform = pelvisToSensorTransform;
+
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
@@ -80,7 +65,7 @@ public class RealsensePlanarRegionROS1Bridge
          syncedRobot.update();
 
          pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-         transformToWorld.multiply(transformPelvisToDepthCamera);
+         transformToWorld.multiply(pelvisToSensorTransform);
 
          PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
          planarRegionsList.applyTransform(transformToWorld);
