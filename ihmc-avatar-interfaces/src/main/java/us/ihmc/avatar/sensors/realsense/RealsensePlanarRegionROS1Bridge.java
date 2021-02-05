@@ -7,7 +7,9 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -42,6 +44,8 @@ public class RealsensePlanarRegionROS1Bridge
    private final ResettableExceptionHandlingExecutorService executorService;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
+   private final MovingReferenceFrame pelvisFrame;
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public RealsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
                                           RosMainNode ros1Node,
@@ -50,6 +54,7 @@ public class RealsensePlanarRegionROS1Bridge
                                           ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic)
    {
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
       ros1Node.attachSubscriber(ros1InputTopic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
       {
@@ -74,8 +79,11 @@ public class RealsensePlanarRegionROS1Bridge
       {
          syncedRobot.update();
 
+         pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+         transformToWorld.multiply(transformPelvisToDepthCamera);
+
          PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-         planarRegionsList.applyTransform(transformPelvisToDepthCamera);
+         planarRegionsList.applyTransform(transformToWorld);
          publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       });
    }
