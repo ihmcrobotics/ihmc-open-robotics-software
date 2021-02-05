@@ -11,13 +11,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class RealsenseD435PlanarRegionROS1Bridge
+public class RealsensePlanarRegionROS1Bridge
 {
    private static final double pelvisToMountOrigin = 0.19;
    private static final double depthOffsetX = 0.058611;
@@ -43,11 +43,15 @@ public class RealsenseD435PlanarRegionROS1Bridge
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
 
-   public RealsenseD435PlanarRegionROS1Bridge(DRCRobotModel robotModel, RosMainNode ros1Node, ROS2NodeInterface ros2Node)
+   public RealsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
+                                          RosMainNode ros1Node,
+                                          ROS2NodeInterface ros2Node,
+                                          String ros1InputTopic,
+                                          ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic)
    {
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
-      ros1Node.attachSubscriber(RosTools.MAPSENSE_REGIONS, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
+      ros1Node.attachSubscriber(ros1InputTopic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
       {
          @Override
          public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
@@ -56,7 +60,7 @@ public class RealsenseD435PlanarRegionROS1Bridge
          }
       });
 
-      publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MAPSENSE_REGIONS);
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic);
 
       boolean daemon = true;
       int queueSize = 1;
