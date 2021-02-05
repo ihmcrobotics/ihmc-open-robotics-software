@@ -179,6 +179,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void onEntry()
    {
+      if (balanceManager.getICPErrorMagnitude() > 0.10)
+      {
+         walkingMessageHandler.peekTiming(0, footstepTimings[0]);
+         walkingMessageHandler.setUpcomingFootstepTransferDuration(Math.max(0.5, 2.0 * footstepTimings[0].getTouchdownDuration()));
+      }
+
       super.onEntry();
 
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
