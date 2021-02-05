@@ -15,6 +15,7 @@ public class RealsenseD435ROS1Bridge
 {
    private final RealsenseD435VideoROS1Bridge videoBridge;
    private final RealsenseD435PointCloudROS1Bridge pointCloudBridge;
+   private final RealsenseD435PlanarRegionROS1Bridge planarRegionBridge;
 
    public RealsenseD435ROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform pelvisToSensorTransform)
    {
@@ -26,6 +27,7 @@ public class RealsenseD435ROS1Bridge
 
       videoBridge = new RealsenseD435VideoROS1Bridge(ros1Node, ros2Node);
       pointCloudBridge = new RealsenseD435PointCloudROS1Bridge(robotModel, ros1Node, ros2Node, pelvisToSensorTransform);
+      planarRegionBridge = new RealsenseD435PlanarRegionROS1Bridge(robotModel, ros1Node, ros2Node);
 
       ros1Node.execute();
    }
