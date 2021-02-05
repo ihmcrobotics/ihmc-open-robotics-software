@@ -15,7 +15,6 @@ import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import javax.imageio.ImageIO;
@@ -23,7 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
-public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
+public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private static final boolean THROTTLE = false;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(24.0);
@@ -35,15 +34,15 @@ public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sen
    private final YUVPictureConverter converter = new YUVPictureConverter();
    private final JPEGEncoder encoder = new JPEGEncoder();
 
-   public RealsenseD435VideoROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node)
+   public RealsenseVideoROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node, String ros1InputTopic, ROS2Topic<VideoPacket> ros2OutputTopic)
    {
       super(sensor_msgs.CompressedImage._TYPE);
 
-      String ros1Topic = RosTools.D435_VIDEO;
+      String ros1Topic = ros1InputTopic;
       LogTools.info("Subscribing ROS 1: {}", ros1Topic);
       ros1Node.attachSubscriber(ros1Topic, this);
 
-      ROS2Topic<VideoPacket> ros2Topic = ROS2Tools.D435_VIDEO;
+      ROS2Topic<VideoPacket> ros2Topic = ros2OutputTopic;
       LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
       publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
    }
