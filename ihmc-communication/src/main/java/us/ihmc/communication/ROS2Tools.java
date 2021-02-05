@@ -110,6 +110,8 @@ public class ROS2Tools
 
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
+                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    /** Output regions from Lidar (Multisense) from REA */

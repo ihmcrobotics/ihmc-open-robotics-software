@@ -121,30 +121,30 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final String depthCameraTopic = depth_camera_namespace + "/depth/color/points";
    public static final String trackingCameraTopic = tracking_camera_namespace + "/odom/sample";
 
-   private static final double depthOffsetX = 0.058611;
-   private static final double depthOffsetZ = 0.01;
-   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
-   private static final double depthRollOffset = Math.toRadians(-0.5);
-   private static final double depthThickness = 0.0245;
+   private static final double d435DepthOffsetX = 0.058611;
+   private static final double d435DepthOffsetZ = 0.01;
+   private static final double d435DepthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double d435DepthRollOffset = Math.toRadians(-0.5);
+   private static final double d435DepthThickness = 0.0245;
 
    private static final double trackingOffsetX = 0.0358;
    private static final double trackingOffsetZ = 0.0994;
    private static final double trackingPitchingAngle = 0.0 / 180.0 * Math.PI;
    private static final double trackingThickness = 0.0125;
 
-   private static final double pelvisToMountOrigin = 0.19;
+   private static final double pelvisToMountD435Origin = 0.19;
 
-   public static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
+   public static final RigidBodyTransform transformPelvisToD435DepthCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
-      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformPelvisToDepthCamera.appendRollRotation(depthRollOffset);
-      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
+      transformPelvisToD435DepthCamera.appendTranslation(pelvisToMountD435Origin, 0.0, 0.0);
+      transformPelvisToD435DepthCamera.appendTranslation(d435DepthOffsetX, 0.0, d435DepthOffsetZ);
+      transformPelvisToD435DepthCamera.appendRollRotation(d435DepthRollOffset);
+      transformPelvisToD435DepthCamera.appendPitchRotation(d435DepthPitchingAngle);
+      transformPelvisToD435DepthCamera.appendTranslation(d435DepthThickness, 0.0, 0.0);
 
-      transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
+      transformPelvisToD435DepthCamera.appendYawRotation(-Math.PI / 2);
+      transformPelvisToD435DepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
    /**
@@ -155,20 +155,20 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendTranslation(-depthThickness, 0.0, 0.0);
-      transformDepthCameraToTrackingCamera.appendPitchRotation(-depthPitchingAngle);
-      transformDepthCameraToTrackingCamera.appendTranslation(-depthOffsetX, 0.0, -depthOffsetZ);
+      transformDepthCameraToTrackingCamera.appendTranslation(-d435DepthThickness, 0.0, 0.0);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(-d435DepthPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(-d435DepthOffsetX, 0.0, -d435DepthOffsetZ);
 
       transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
-      transformDepthCameraToTrackingCamera.appendRollRotation(-depthRollOffset);
+      transformDepthCameraToTrackingCamera.appendRollRotation(-d435DepthRollOffset);
       transformDepthCameraToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
+      transformPelvisToTrackingCamera.multiply(transformPelvisToD435DepthCamera);
       transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
    }
 
@@ -177,6 +177,27 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformTrackingCameraToDepthCamera.multiply(transformDepthCameraToTrackingCamera);
       transformTrackingCameraToDepthCamera.invert();
+   }
+
+   private static final double l515DepthOffsetX = 0.058611;
+   private static final double l515DepthOffsetZ = 0.01;
+   private static final double l515DepthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double l515DepthRollOffset = Math.toRadians(-0.5);
+   private static final double l515DepthThickness = 0.0245;
+
+   private static final double pelvisToMountL515Origin = 0.19;
+
+   public static final RigidBodyTransform transformPelvisToL515DepthCamera = new RigidBodyTransform();
+   static
+   {
+      transformPelvisToL515DepthCamera.appendTranslation(pelvisToMountL515Origin, 0.0, 0.0);
+      transformPelvisToL515DepthCamera.appendTranslation(l515DepthOffsetX, 0.0, l515DepthOffsetZ);
+      transformPelvisToL515DepthCamera.appendRollRotation(l515DepthRollOffset);
+      transformPelvisToL515DepthCamera.appendPitchRotation(l515DepthPitchingAngle);
+      transformPelvisToL515DepthCamera.appendTranslation(l515DepthThickness, 0.0, 0.0);
+
+      transformPelvisToL515DepthCamera.appendYawRotation(-Math.PI / 2);
+      transformPelvisToL515DepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)

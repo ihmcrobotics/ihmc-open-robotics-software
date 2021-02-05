@@ -21,7 +21,6 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
@@ -40,7 +39,11 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-   public RealsenseD435PointCloudROS1Bridge(DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, RigidBodyTransform pelvisToSensorTransform)
+   public RealsenseD435PointCloudROS1Bridge(DRCRobotModel robotModel,
+                                            RosMainNode ros1Node,
+                                            ROS2Node ros2Node,
+                                            RigidBodyTransform pelvisToSensorTransform,
+                                            String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
@@ -49,13 +52,11 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
-      String ros1Topic = RosTools.D435_POINT_CLOUD;
-      LogTools.info("Subscribing ROS 1: {}", ros1Topic);
-      ros1Node.attachSubscriber(ros1Topic, this);
+      LogTools.info("Subscribing ROS 1: {}", ros1InputTopic);
+      ros1Node.attachSubscriber(ros1InputTopic, this);
 
-      ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.D435_POINT_CLOUD;
-      LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+      LogTools.info("Publishing ROS 2: {}", ros2OutputTopic.getName());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic, ROS2QosProfile.DEFAULT());
    }
 
    @Override
