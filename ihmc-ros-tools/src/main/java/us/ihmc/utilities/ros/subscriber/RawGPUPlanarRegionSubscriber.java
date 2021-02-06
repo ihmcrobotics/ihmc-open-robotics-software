@@ -2,6 +2,7 @@ package us.ihmc.utilities.ros.subscriber;
 
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,7 +52,7 @@ public class RawGPUPlanarRegionSubscriber extends AbstractRosTopicSubscriber<map
       URI rosMasterURI = new URI("http://localhost:11311/");
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
       RawGPUPlanarRegionSubscriber subscriber = new RawGPUPlanarRegionSubscriber();
-      rosMainNode.attachSubscriber("/map/regions/test", subscriber);
+      rosMainNode.attachSubscriber(RosTools.MAPSENSE_REGIONS, subscriber);
       rosMainNode.execute();
    }
 }
