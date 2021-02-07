@@ -70,7 +70,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       DRCRobotModel robotModel = getRobotModel();
 
       Point2D holeCenter = new Point2D(1.40, 0.25);
-      Vector3D holeSize = new Vector3D(0.75, 0.5, 0.10);
+      Vector3D holeSize = new Vector3D(0.85, 0.5, 0.10);
       FlatGroundWithHoleEnvironment environment = new FlatGroundWithHoleEnvironment(holeCenter, holeSize);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
@@ -78,6 +78,9 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      scs.findVariable("controllerMaxReachabilityLength").setValueFromDouble(10.0);
+      scs.findVariable("controllerMaxReachabilityWidth").setValueFromDouble(10.0);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       scs.setInPoint();
