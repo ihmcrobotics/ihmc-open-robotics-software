@@ -139,7 +139,7 @@ public class LinearMPCTrajectoryHandler
 
       MultipleCoMSegmentTrajectoryGenerator comTrajectoryOutsideWindow = positionInitializationCalculator.getCoMTrajectory();
       List<Polynomial3DReadOnly> vrpTrajectoryOutsideWindow = positionInitializationCalculator.getVRPTrajectories();
-      while (comTrajectory.getEndTime() < comTrajectoryOutsideWindow.getEndTime())
+      if (comTrajectory.getEndTime() < comTrajectoryOutsideWindow.getEndTime())
       {
          int segmentIndexToAdd = getSegmentIndexContainingTime(comTrajectory.getEndTime() + 1e-5, positionInitializationCalculator.getCoMTrajectory());
          if (segmentIndexToAdd == -1)

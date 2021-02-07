@@ -113,6 +113,11 @@ public class PreviewWindowCalculator
          for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
             fullContactSet.add().set(fullContactSequence.get(i));
       }
+      else
+      {
+         for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
+            fullContactSet.add().set(fullContactSequence.get(i));
+      }
 
       if (!ContactStateProviderTools.checkContactSequenceIsValid(previewWindowContacts))
          throw new IllegalArgumentException("The preview window is not valid.");
