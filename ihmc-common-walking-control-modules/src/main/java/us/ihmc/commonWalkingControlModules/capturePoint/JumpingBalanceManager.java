@@ -201,6 +201,7 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
@@ -241,6 +242,7 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
