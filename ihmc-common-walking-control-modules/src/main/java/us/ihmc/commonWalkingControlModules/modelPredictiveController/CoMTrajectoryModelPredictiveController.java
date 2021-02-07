@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -91,6 +92,10 @@ public class CoMTrajectoryModelPredictiveController
    private final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
 
+   private final ExecutionTimer mpcTotalTime = new ExecutionTimer("mpcTotalTime", registry);
+   private final ExecutionTimer mpcAssemblyTime = new ExecutionTimer("mpcAssemblyTime", registry);
+   private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
+   private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
    final LinearMPCQPSolver qpSolver;
    private final TrajectoryAndCornerPointCalculator cornerPointCalculator = new TrajectoryAndCornerPointCalculator();
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
@@ -178,6 +183,8 @@ public class CoMTrajectoryModelPredictiveController
       if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
          throw new IllegalArgumentException("The contact sequence is not valid.");
 
+      mpcTotalTime.startMeasurement();
+      mpcAssemblyTime.startMeasurement();
       previewWindowCalculator.compute(contactSequence, currentTimeInState.getDoubleValue());
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
 
@@ -211,8 +218,13 @@ public class CoMTrajectoryModelPredictiveController
 
       computeMatrixHelpers(planningWindow);
       computeObjectives(planningWindow);
-      DMatrixRMaj solutionCoefficients = solveQP();
 
+      mpcAssemblyTime.stopMeasurement();
+      mpcQPTime.startMeasurement();
+      DMatrixRMaj solutionCoefficients = solveQP();
+      mpcQPTime.stopMeasurement();
+
+      mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue(), omega.getValue());
 
@@ -222,6 +234,8 @@ public class CoMTrajectoryModelPredictiveController
       {
          updateCoMTrajectoryViewer();
       }
+      mpcExtractionTime.stopMeasurement();
+      mpcTotalTime.stopMeasurement();
    }
 
    private void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)

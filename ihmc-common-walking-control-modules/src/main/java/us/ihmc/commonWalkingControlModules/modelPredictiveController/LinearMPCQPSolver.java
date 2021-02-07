@@ -23,7 +23,7 @@ public class LinearMPCQPSolver
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
-   private final ActiveSetQPSolver qpSolver;
+   private final SimpleEfficientActiveSetQPSolver qpSolver;
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
@@ -95,6 +95,7 @@ public class LinearMPCQPSolver
       else
       {
          qpSolver = new SimpleEfficientActiveSetQPSolver();
+         qpSolver.setInverseCostCalculator(new BlockInverseCalculator(indexHandler));
       }
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
