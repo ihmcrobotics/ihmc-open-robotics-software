@@ -289,9 +289,9 @@ public class LinearMPCQPSolver
 
    public void submitMPCValueObjective(MPCValueCommand command)
    {
-      boolean success = inputCalculator.calculateValueObjective(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
+      int offset = inputCalculator.calculateValueObjective(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitContinuityObjective(MPCContinuityCommand command)
@@ -319,7 +319,7 @@ public class LinearMPCQPSolver
       {
          case OBJECTIVE:
             if (input.useWeightScalar())
-               addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+               addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), offset);
             else
                throw new IllegalArgumentException("Not yet implemented.");
             break;
@@ -339,13 +339,19 @@ public class LinearMPCQPSolver
 
    public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight)
    {
-      addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
+      addObjective(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
+   public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, int offset)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, problemSize, offset, solverInput_H, solverInput_f);
    }
 
    public static void addObjective(DMatrixRMaj taskJacobian,
                                    DMatrixRMaj taskObjective,
                                    double taskWeight,
                                    int problemSize,
+                                   int offset,
                                    DMatrixRMaj solverInput_H,
                                    DMatrixRMaj solverInput_f)
    {
@@ -360,12 +366,12 @@ public class LinearMPCQPSolver
       }
 
       // Compute: H += J^T W J
-      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, 0, 0);
+      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
       if (MatrixTools.containsNaN(solverInput_H))
          throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
-      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, 0, 0);
+      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
    }
 
    public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
