@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
@@ -10,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -308,6 +310,11 @@ public class LinearMPCQPSolver
 
    public void addInput(QPInputTypeA input)
    {
+      addInput(input, 0);
+   }
+
+   public void addInput(QPInputTypeA input, int offset)
+   {
       switch (input.getConstraintType())
       {
          case OBJECTIVE:
@@ -317,13 +324,13 @@ public class LinearMPCQPSolver
                throw new IllegalArgumentException("Not yet implemented.");
             break;
          case EQUALITY:
-            addEqualityConstraint(input.taskJacobian, input.taskObjective);
+            addEqualityConstraint(input.taskJacobian, input.taskObjective, offset);
             break;
          case LEQ_INEQUALITY:
-            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, offset);
             break;
          case GEQ_INEQUALITY:
-            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, offset);
             break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
@@ -363,12 +370,27 @@ public class LinearMPCQPSolver
 
    public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
-      addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
+      addEqualityConstraint(taskJacobian, taskObjective, 0);
    }
 
-   public static void addEqualityConstraint(DMatrixRMaj taskJacobian,
-                                            DMatrixRMaj taskObjective,
+   public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int taskColOffset)
+   {
+      addEqualityConstraint(taskJacobian, taskObjective, problemSize, taskColOffset, solverInput_Aeq, solverInput_beq);
+   }
+
+   public static void addEqualityConstraint(DMatrix taskJacobian,
+                                            DMatrix taskObjective,
                                             int problemSize,
+                                            DMatrixRMaj solverInput_Aeq,
+                                            DMatrixRMaj solverInput_beq)
+   {
+      addEqualityConstraint(taskJacobian, taskObjective, problemSize, 0, solverInput_Aeq, solverInput_beq);
+   }
+
+   public static void addEqualityConstraint(DMatrix taskJacobian,
+                                            DMatrix taskObjective,
+                                            int problemSize,
+                                            int colOffset,
                                             DMatrixRMaj solverInput_Aeq,
                                             DMatrixRMaj solverInput_beq)
    {
@@ -390,42 +412,57 @@ public class LinearMPCQPSolver
       solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps_DDRM.extract(taskJacobian, 0, taskJacobian.getNumRows(), colOffset, colOffset + taskJacobian.getNumCols(), solverInput_Aeq, previousSize, 0);
       CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
-   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+
+
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
    {
-      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, 0);
    }
 
-   public static void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian,
-                                                                 DMatrixRMaj taskObjective,
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective, int colOffset)
+   {
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+   }
+
+   public static void addMotionLesserOrEqualInequalityConstraint(DMatrix taskJacobian,
+                                                                 DMatrix taskObjective,
                                                                  int problemSize,
+                                                                 int colOffset,
                                                                  DMatrixRMaj solverInput_Ain,
                                                                  DMatrixRMaj solverInput_bin)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
-   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
    {
-      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, 0);
    }
 
-   public static void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian,
-                                                                  DMatrixRMaj taskObjective,
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective, int colOffset)
+   {
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+   }
+
+   public static void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian,
+                                                                  DMatrix taskObjective,
                                                                   int problemSize,
+                                                                  int colOffset,
                                                                   DMatrixRMaj solverInput_Ain,
                                                                   DMatrixRMaj solverInput_bin)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
-   private static void addInequalityConstraintInternal(DMatrixRMaj taskJacobian,
-                                                       DMatrixRMaj taskObjective,
+   private static void addInequalityConstraintInternal(DMatrix taskJacobian,
+                                                       DMatrix taskObjective,
                                                        double sign,
                                                        int problemSize,
+                                                       int colOffset,
                                                        DMatrixRMaj solverInput_Ain,
                                                        DMatrixRMaj solverInput_bin)
    {
@@ -442,8 +479,8 @@ public class LinearMPCQPSolver
       solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, variables, sign);
-      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
+      MatrixMissingTools.setMatrixBlock(solverInput_Ain, previousSize, colOffset, taskJacobian, 0, 0, taskSize, variables, sign);
+      MatrixMissingTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public void addInput(QPInputTypeC input)
