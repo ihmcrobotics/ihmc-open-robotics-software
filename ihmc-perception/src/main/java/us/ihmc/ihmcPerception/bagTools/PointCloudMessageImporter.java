@@ -1,6 +1,8 @@
 package us.ihmc.ihmcPerception.bagTools;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -17,10 +19,19 @@ import java.util.List;
  */
 public class PointCloudMessageImporter
 {
+   /** PointCloud2 PointField data */
+   private static final ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
+   private static final int height = 1;
+   private static final int pointStep = 20;
+
+   private static final Point3D sensorPosition = new Point3D(0.0, 0.0, 0.0);
+
    public PointCloudMessageImporter() throws Exception
    {
       JFileChooser fileChooser = new JFileChooser();
       int chooserState = fileChooser.showOpenDialog(null);
+
+      AxisAngle transform = new AxisAngle(1.0, 0.0, 0.0, Math.toRadians(-135.0));
 
       if (chooserState != JFileChooser.APPROVE_OPTION)
       {
@@ -29,28 +40,32 @@ public class PointCloudMessageImporter
 
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileChooser.getSelectedFile())));
 
-      int height = 1;
-      int width = 40494;
-      int pointStep = 32;
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
-
-      int numberOfPoints = height * width;
 
       while (true)
       {
          String line = bufferedReader.readLine();
-         if (!line.startsWith("data"))
+
+         if (line == null)
+         {
+            break;
+         }
+         else if (!line.startsWith("data"))
          {
             continue;
          }
 
-         String[] csv = line.substring(7, line.length() - 1).split(", ");
+         int initialCharacter = 7; // length of "data: ["
+         int finalCharacter = line.length() - 1; // ignore trailing bracket
+
+         String[] csv = line.substring(initialCharacter, finalCharacter).split(", ");
          byte[] data = new byte[csv.length];
          for (int i = 0; i < csv.length; i++)
          {
             data[i] = (byte) Integer.parseInt(csv[i]);
          }
 
+         int numberOfPoints = csv.length / pointStep;
          float[] points = new float[3 * numberOfPoints];
          byte[] bytes = new byte[4];
 
@@ -64,16 +79,19 @@ public class PointCloudMessageImporter
             packBytes(bytes, startIndex + 8, data);
             float z = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
 
-            points[3 * i + 0] = x;
-            points[3 * i + 1] = y;
-            points[3 * i + 2] = z;
+            Point3D point = new Point3D(x, y, z);
+            transform.transform(point);
+
+            points[3 * i + 0] = (float) point.getX();
+            points[3 * i + 1] = (float) point.getY();
+            points[3 * i + 2] = (float) point.getZ();
          }
 
          lidarScanMessage.getScan().add(points);
          break;
       }
 
-      lidarScanMessage.getLidarPosition().set(0.0, 0.0, 1.5);
+      lidarScanMessage.getLidarPosition().set(sensorPosition);
       List<LidarScanMessage> messageList = new ArrayList<>();
       messageList.add(lidarScanMessage);
 

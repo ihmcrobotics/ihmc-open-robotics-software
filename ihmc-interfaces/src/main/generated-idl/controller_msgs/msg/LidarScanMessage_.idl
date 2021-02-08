@@ -37,7 +37,7 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double point_cloud_confidence;
-        sequence<float, 200000> scan;
+        sequence<float, 1000000> scan;
       };
     };
   };

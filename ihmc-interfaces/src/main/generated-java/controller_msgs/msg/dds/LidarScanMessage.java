@@ -36,7 +36,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
    {
       lidar_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       lidar_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      scan_ = new us.ihmc.idl.IDLSequence.Float (200000, "type_5");
+      scan_ = new us.ihmc.idl.IDLSequence.Float (1000000, "type_5");
 
    }
 

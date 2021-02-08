@@ -25,7 +25,7 @@ import java.util.List;
 public class LidarScanMessageImporter
 {
    private static final long WAYMO_PUBLISH_PERIOD = 100; // 10Hz update rate
-   private static final long CATPACK_PUBLISH_PERIOD = 10; // 100Hz update rate
+   private static final long CATPACK_PUBLISH_PERIOD = 4; // 100Hz update rate
 
    private static final long PUBLISH_PERIOD = CATPACK_PUBLISH_PERIOD;
 
