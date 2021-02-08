@@ -7,6 +7,7 @@ import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,7 +52,7 @@ public class YoFunctionGenerator
    private final YoVariable[] createdVariables;
    private final YoSignalDerivative signalDerivative;
 
-   private final YoDouble time;
+   private final DoubleProvider time;
    private double sweepFrequencyLowHz = 0.001;
    private double previousResetTime, previousChirpFrequency;
    private boolean previousChirpUpAndDown;
@@ -73,12 +74,12 @@ public class YoFunctionGenerator
       this(name, null, registry, smoothParameters, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoRegistry parentRegistry)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry)
    {
       this(name, time, parentRegistry, false, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoRegistry parentRegistry, boolean smoothParameters, double dT)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry, boolean smoothParameters, double dT)
    {
       this.smoothParameters = smoothParameters;
 
@@ -290,7 +291,7 @@ public class YoFunctionGenerator
                "Function Generator wasn't created with a time YoVariable. Need to create with a time variable or call getValue(double time) instead");
       }
 
-      return getValue(time.getDoubleValue());
+      return getValue(time.getValue());
    }
 
    public double getValueDot()
