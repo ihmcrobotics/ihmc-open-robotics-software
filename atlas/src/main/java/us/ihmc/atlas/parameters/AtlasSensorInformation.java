@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.*;
@@ -179,13 +180,13 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformTrackingCameraToDepthCamera.invert();
    }
 
-   private static final double l515DepthOffsetX = 0.058611;
+   private static final double l515DepthOffsetX = 0.10315;
    private static final double l515DepthOffsetZ = 0.01;
    private static final double l515DepthPitchingAngle = 70.0 / 180.0 * Math.PI;
    private static final double l515DepthRollOffset = Math.toRadians(-0.5);
    private static final double l515DepthThickness = 0.0245;
 
-   private static final double pelvisToMountL515Origin = 0.19;
+   private static final double pelvisToMountL515Origin = 0.175;
 
    public static final RigidBodyTransform transformPelvisToL515DepthCamera = new RigidBodyTransform();
    static
@@ -198,6 +199,13 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 
       transformPelvisToL515DepthCamera.appendYawRotation(-Math.PI / 2);
       transformPelvisToL515DepthCamera.appendRollRotation(-Math.PI / 2);
+
+
+
+      Point3D pelvisBoltOffset = new Point3D(0.175, 0.0, 0.0);
+      Point3D boltToPitchJoint = new Point3D(0.022, 0.0, 0.01425);
+
+      Point3D jointToSensor = new Point3D(0.04975 + 0.03015, 0.0, 0.0112522 - 0.0215);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
