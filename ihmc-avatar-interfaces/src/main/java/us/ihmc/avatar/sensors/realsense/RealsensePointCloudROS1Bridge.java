@@ -25,7 +25,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
 
-public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
+public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
 {
    private static final int MAX_POINTS = 5000;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
@@ -39,11 +39,11 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-   public RealsenseD435PointCloudROS1Bridge(DRCRobotModel robotModel,
-                                            RosMainNode ros1Node,
-                                            ROS2Node ros2Node,
-                                            RigidBodyTransform pelvisToSensorTransform,
-                                            String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
+   public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
+                                        RosMainNode ros1Node,
+                                        ROS2Node ros2Node,
+                                        RigidBodyTransform pelvisToSensorTransform,
+                                        String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
