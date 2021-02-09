@@ -2,7 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.GPUModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.GPUPerceptionModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -50,7 +50,7 @@ public class GPUBasedREAModule implements PerceptionModule
          PlanarRegionsList regionList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
          //            LogTools.info("Raw:{} Generated:{}", rawGPUPlanarRegionList.getNumOfRegions(), regionList.getNumberOfPlanarRegions());
 
-         messager.submitMessage(GPUModuleAPI.PlanarRegionData, regionList);
+         messager.submitMessage(GPUPerceptionModuleAPI.PlanarRegionData, regionList);
       }
    }
 
