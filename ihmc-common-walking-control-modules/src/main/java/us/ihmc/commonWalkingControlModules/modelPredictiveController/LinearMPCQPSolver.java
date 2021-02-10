@@ -15,8 +15,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class LinearMPCQPSolver
 {
-   private static final boolean useSparse = false;
-
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
@@ -38,19 +36,13 @@ public class LinearMPCQPSolver
    final DMatrixRMaj solverOutput_beq;
    final DMatrixRMaj solverOutput_bin;
 
-   //   private final DMatrixRMaj solverInput_lb;
-   //   private final DMatrixRMaj solverInput_ub;
-
-   //   private final DMatrixRMaj solverInput_lb_previous;
-   //   private final DMatrixRMaj solverInput_ub_previous;
-
    private final DMatrixRMaj solverOutput;
 
-   private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
-   private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
-   private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
-   private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
-   private final YoInteger numberOfConstraints = new YoInteger("numberOfConstraints", registry);
+   private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveMPCVariables", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfMPCIterations", registry);
+   private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfMPCEqualityConstraints", registry);
+   private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfMPCInequalityConstraints", registry);
+   private final YoInteger numberOfConstraints = new YoInteger("numberOfMPCConstraints", registry);
 
    private final YoDouble comCoefficientRegularization = new YoDouble("comCoefficientRegularization", registry);
    private final YoDouble rhoCoefficientRegularization = new YoDouble("rhoCoefficientRegularization", registry);
@@ -83,17 +75,8 @@ public class LinearMPCQPSolver
       rhoRateCoefficientRegularization.set(1e-6);
       comRateCoefficientRegularization.set(1e-6);
 
-      if (useSparse)
-      {
-         qpSolver = null;
-//         qpSolver = new SparseSimpleEfficientActiveSetQPSolver();
-//         ((SparseSimpleEfficientActiveSetQPSolver) qpSolver).setInverseCostCalculator(new SparseInverseCalculator(indexHandler));
-      }
-      else
-      {
-         qpSolver = new SimpleEfficientActiveSetQPSolver();
-         qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
-      }
+      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
@@ -109,15 +92,6 @@ public class LinearMPCQPSolver
       solverInput_bin = new DMatrixRMaj(0, 1);
       solverOutput_bin = new DMatrixRMaj(0, 1);
       solverOutput_beq = new DMatrixRMaj(0, 1);
-
-      //      solverInput_lb = new DMatrixRMaj(problemSize, 1);
-      //      solverInput_ub = new DMatrixRMaj(problemSize, 1);
-
-      //      solverInput_lb_previous = new DMatrixRMaj(problemSize, 1);
-      //      solverInput_ub_previous = new DMatrixRMaj(problemSize, 1);
-
-      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       solverOutput = new DMatrixRMaj(problemSize, 1);
 
@@ -183,12 +157,6 @@ public class LinearMPCQPSolver
          solverInput_H_previous.reshape(problemSize, problemSize);
          solverInput_f_previous.reshape(problemSize, 1);
 
-         //         solverInput_lb.reshape(problemSize, 1);
-         //         solverInput_ub.reshape(problemSize, 1);
-
-         //         solverInput_lb_previous.reshape(problemSize, 1);
-         //         solverInput_ub_previous.reshape(problemSize, 1);
-
          solverOutput.reshape(problemSize, 1);
 
          resetRateRegularization();
@@ -209,9 +177,6 @@ public class LinearMPCQPSolver
 
       solverInput_H.zero();
       solverInput_f.zero();
-
-      //      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      //      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
    }
 
    public void resetRateRegularization()
@@ -296,7 +261,6 @@ public class LinearMPCQPSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
    }
-
 
    public void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
@@ -496,31 +460,9 @@ public class LinearMPCQPSolver
 
       numberOfActiveVariables.set(problemSize);
 
-      if (useSparse)
-      {
-         /*
-         DMatrixSparseCSC sparseH = new DMatrixSparseCSC(problemSize, problemSize);
-         DMatrixSparseCSC sparseAin = new DMatrixSparseCSC(numberOfEqualityConstraints.getIntegerValue(), problemSize);
-         DMatrixSparseCSC sparseAeq = new DMatrixSparseCSC(numberOfInequalityConstraints.getIntegerValue(), problemSize);
-
-         ConvertDMatrixStruct.convert(solverInput_H, sparseH, 1e-8);
-         ConvertDMatrixStruct.convert(solverInput_Ain, sparseAin, 1e-8);
-         ConvertDMatrixStruct.convert(solverInput_Aeq, sparseAeq, 1e-8);
-
-         qpSolver.setQuadraticCostFunction(sparseH, solverInput_f);
-         //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-         qpSolver.setLinearInequalityConstraints(sparseAin, solverInput_bin);
-         qpSolver.setLinearEqualityConstraints(sparseAeq, solverInput_beq);
-
-          */
-      }
-      else
-      {
-         qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
-         //      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-         qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-         qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-      }
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
+      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
 
@@ -546,9 +488,6 @@ public class LinearMPCQPSolver
 
       CommonOps_DDRM.mult(solverInput_Ain, solverOutput, solverOutput_bin);
       CommonOps_DDRM.mult(solverInput_Aeq, solverOutput, solverOutput_beq);
-
-      //      solverInput_lb_previous.set(solverInput_lb);
-      //      solverInput_ub_previous.set(solverInput_ub);
 
       return true;
    }
