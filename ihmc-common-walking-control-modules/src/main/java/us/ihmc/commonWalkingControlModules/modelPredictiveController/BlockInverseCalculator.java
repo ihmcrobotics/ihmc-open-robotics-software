@@ -3,6 +3,10 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.matrixlib.NativeMatrix;
 
+/**
+ * This is a custom inverse matrix calculator that exploits the block diagonal nature of the cost Hessian in the MPC problem. Note that this has the underlying
+ * assumption that the Hessian is block diagonal, which is not the case if the continuity functions are set as objectives, rather than constraints.
+ */
 public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMatrix>
 {
    private final LinearMPCIndexHandler indexHandler;
