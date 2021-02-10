@@ -131,7 +131,7 @@
         </geometry>
       </visual>
       <visual name='l515_mount_base_visual'>
-        <pose>0.175 0 0 0 -0 0</pose>
+        <pose>10.175 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -166,33 +166,6 @@
         <pose>-0.0905 -0.04 -0.0125 0 0 0</pose>
       </sensor>
       
-    </link>
-    <link name='sensor_base'>
-      <pose>0.175 0 0 0 0 0</pose>
-      <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.01</mass>
-        <inertia>
-          <ixx>0.0</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0</izz>
-        </inertia>
-      </inertial>
-      <visual name='sensor_base_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://l515_adjustable_mount/AtlasL515AdjustableMountBase.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <gravity>1</gravity>
-      <velocity_decay/>
-      <self_collide>0</self_collide>
     </link>
     <link name='ltorso'>
       <pose>-0.0125 0 0 0 -0 0</pose>
