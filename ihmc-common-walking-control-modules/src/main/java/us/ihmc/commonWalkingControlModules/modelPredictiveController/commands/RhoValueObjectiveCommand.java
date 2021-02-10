@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
@@ -13,55 +14,120 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Specifies an objective value for each of the contact force vectors contained in the contact plane.
+ *
+ * Can be used to both specify a direct value, as well as upper and lower bounds for those forces.
+ */
 public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCommand>
 {
+   /**
+    * Contact planes containing the generalized contact force vectors.
+    */
    private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
 
+   /**
+    * Segment numbers for those forces.
+    */
    private int segmentNumber;
+   /**
+    * Time of this command.
+    */
    private double timeOfObjective;
+   /**
+    * Time constant for the motion function
+    */
    private double omega;
 
+   /**
+    * Constraint type to be used for achieving this command.
+    */
    private ConstraintType constraintType;
 
-   private double objective = 0.0;
+   /**
+    * Singular scalar value to be used as the objective for all the generalized contact force values.
+    */
+   private double objective = Double.NaN;
+   /**
+    * Vector of scalar values objectives for each generalized contact force.
+    */
    private final DMatrixRMaj objectiveVector = new DMatrixRMaj(0, 0);
+   /**
+    * Whether or not to use the scalar objective for every contact force, or to use specific objective values.
+    */
    private boolean useScalarObjective = true;
 
+   /**
+    * Resets this command.
+    */
    public void clear()
    {
       contactPlaneHelpers.clear();
+      objective = 0.0;
+      objectiveVector.reshape(0, 0);
+      segmentNumber = -1;
+      timeOfObjective = Double.NaN;
    }
 
+   /**
+    * Adds a contact that contain the contact points that define the direction of the generalized contact forces.
+    */
    public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
 
+   /**
+    * Set the constraint type for this objective (lower ineq, upper ineq, objective, etc.)
+    */
    public void setConstraintType(ConstraintType constraintType)
    {
       this.constraintType = constraintType;
    }
 
+   /**
+    * Sets the motion segment that defines the variables for this command
+    */
    public void setSegmentNumber(int segmentNumber)
    {
       this.segmentNumber = segmentNumber;
    }
 
+   /**
+    * Sets the time in the motion segment for this command.
+    */
    public void setTimeOfObjective(double timeOfObjective)
    {
       this.timeOfObjective = timeOfObjective;
    }
 
+   /**
+    * Sets the time constant for the motion function
+    */
    public void setOmega(double omega)
    {
       this.omega = omega;
    }
 
+   /**
+    * Sets the scalar objective value for all the generalized contact forces.
+    */
    public void setScalarObjective(double objective)
    {
       this.objective = objective;
    }
 
+   /**
+    * Sets the objective values for the generalized contact forces.
+    */
+   public void setObjectiveVector(DMatrix objective)
+   {
+      this.objectiveVector.set(objective);
+   }
+
+   /**
+    * Sets whether or not to use the same objective value for every generalized contact force.
+    */
    public void setUseScalarObjective(boolean useScalarObjective)
    {
       this.useScalarObjective = useScalarObjective;
