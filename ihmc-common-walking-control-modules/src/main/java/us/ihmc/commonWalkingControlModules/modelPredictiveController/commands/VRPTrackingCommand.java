@@ -21,6 +21,8 @@ import java.util.function.DoubleConsumer;
  */
 public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
 {
+   private int commandId;
+
    /**
     * Contact planes to be used to track the VRP
     */
@@ -174,9 +176,93 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       this.costToGoConsumer = costToGoConsumer;
    }
 
+   public DoubleConsumer getCostToGoConsumer()
+   {
+      return costToGoConsumer;
+   }
+
    public void setCostToGo(double costToGo)
    {
       if (costToGoConsumer != null)
          costToGoConsumer.accept(costToGo);
+   }
+
+   @Override
+   public void set(VRPTrackingCommand other)
+   {
+      clear();
+      setCommandId(other.getCommandId());
+      setSegmentNumber(other.getSegmentNumber());
+      setSegmentDuration(other.getSegmentDuration());
+      setOmega(other.getOmega());
+      setWeight(other.getWeight());
+      setStartVRP(other.getStartVRP());
+      setEndVRP(other.getEndVRP());
+      setCostToGoConsumer(other.getCostToGoConsumer());
+      for (int i = 0; i < other.getNumberOfContacts(); i++)
+         addContactPlaneHelper(other.getContactPlaneHelper(i));
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VRPTrackingCommand)
+      {
+         VRPTrackingCommand other = (VRPTrackingCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (segmentNumber != other.segmentNumber)
+            return false;
+         if (segmentDuration != other.segmentDuration)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (weight != other.weight)
+            return false;
+         if (!startVRP.equals(other.startVRP))
+            return false;
+         if (!endVRP.equals(other.endVRP))
+            return false;
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < contactPlaneHelpers.size(); i++)
+         {
+            if (!contactPlaneHelpers.get(i).equals(other.contactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", segment duration: " + segmentDuration + ", omega: " + omega
+                      + ", weight: " + weight + ", start vrp: " + startVRP + ", end vrp: " + endVRP + ".";
+      for (int i = 0; i < contactPlaneHelpers.size(); i++)
+      {
+         string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);
+      }
+      return string;
    }
 }
