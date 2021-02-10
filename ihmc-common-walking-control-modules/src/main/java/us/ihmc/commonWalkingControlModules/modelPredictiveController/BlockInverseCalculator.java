@@ -1,18 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
-import org.ejml.interfaces.linsol.LinearSolverSparse;
-import org.ejml.sparse.FillReducing;
-import org.ejml.sparse.csc.CommonOps_DSCC;
-import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
-import us.ihmc.convexOptimization.quadraticProgram.InverseCostCalculator;
-import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.matrixlib.NativeMatrix;
 
-public class BlockInverseCalculator implements InverseCostCalculator<NativeMatrix>
+public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMatrix>
 {
    private final LinearMPCIndexHandler indexHandler;
 
@@ -25,10 +16,10 @@ public class BlockInverseCalculator implements InverseCostCalculator<NativeMatri
    }
 
    @Override
-   public void computeInverse(NativeMatrix matrix, NativeMatrix inverseMatrix)
+   public void computeInverse(NativeMatrix matrix, NativeMatrix inverseMatrixToPack)
    {
-      inverseMatrix.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
-      inverseMatrix.zero();
+      inverseMatrixToPack.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
+      inverseMatrixToPack.zero();
 
       for (int i = 0; i < indexHandler.getNumberOfSegments(); i++)
       {
@@ -46,7 +37,7 @@ public class BlockInverseCalculator implements InverseCostCalculator<NativeMatri
          invertedBlock.invert(blockToInvert);
 
          // TODO add a set block method
-         inverseMatrix.addBlock(invertedBlock, start, start, 0, 0, blockSize, blockSize, 1.0);
+         inverseMatrixToPack.addBlock(invertedBlock, start, start, 0, 0, blockSize, blockSize, 1.0);
       }
    }
 }
