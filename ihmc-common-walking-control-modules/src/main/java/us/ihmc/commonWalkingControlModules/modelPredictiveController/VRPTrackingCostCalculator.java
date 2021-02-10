@@ -8,6 +8,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used to compute the cost functions for tracking a desired VRP function.
+ * This tracking function can be computed as a convex quadratic cost term.
+ *
+ * TODO improve this cost calculator to allow tracking cubic VRP trajectories, rather than just linear ones.
+ */
 public class VRPTrackingCostCalculator
 {
    private final LinearMPCIndexHandler indexHandler;
@@ -23,6 +29,14 @@ public class VRPTrackingCostCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
+   /**
+    * Calculates the quadratic cost function for tracking a nominal VRP trajectory, which is specified by the {@link VRPTrackingCommand}
+    *
+    * @param costHessianToPack hessian of the quadratic cost function to pack
+    * @param costGradientToPack gradient of the quadratic cost function to pack
+    * @param objective objective object containing the desired VRP trajectory information
+    * @return whether the computation was successful
+    */
    public boolean calculateVRPTrackingObjective(DMatrixRMaj costHessianToPack, DMatrixRMaj costGradientToPack, VRPTrackingCommand objective)
    {
       int segmentNumber = objective.getSegmentNumber();
