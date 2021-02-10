@@ -12,6 +12,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
+/**
+ * Class meant to calculate the preview window over which the model predictive controller operates. It is very unlikely that the MPC will calculate over the
+ * full time horizon of steps. That means that some subset over a shorter horizon is needed to be computed for that. This class is used to compute what the
+ * contact sequence is over that preview window.
+ */
 public class PreviewWindowCalculator
 {
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -37,6 +42,12 @@ public class PreviewWindowCalculator
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Computes the preview window contacts from the full contact sequence.
+    *
+    * @param fullContactSequence entire contact sequence. It may start before {@param timeAtStartOfWindow}
+    * @param timeAtStartOfWindow time at the start of the preview window
+    */
    public void compute(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
       previewWindowContacts.clear();
@@ -46,6 +57,10 @@ public class PreviewWindowCalculator
       segmentsInPreviewWindow.set(previewWindowContacts.size());
    }
 
+   /**
+    * Gets the total duration that the preview window consists of.
+    * @return duration of preview window
+    */
    public double getPreviewWindowDuration()
    {
       return previewWindowDuration.getDoubleValue();
@@ -169,16 +184,30 @@ public class PreviewWindowCalculator
       return splitSegmentRemaining;
    }
 
+   /**
+    * Gets the contact sequence that composes the preview window
+    * @return contacts in the preview window
+    */
    public List<ContactPlaneProvider> getPlanningWindow()
    {
       return previewWindowContacts;
    }
 
+   /**
+    * Gets the full contact sequence. Note that this is likely different than the contact sequence passed in in {@link #computePlanningHorizon(List, double)},
+    * as it the preview sequence likely includes only a partial contact. The contact set returned by this function includes breaking that contact sequence into
+    * a portion that is included in the preview window, and a portion that is not.
+    * @return all the contacts for the entire plan
+    */
    public List<ContactPlaneProvider> getFullPlanningSequence()
    {
       return fullContactSet;
    }
 
+   /**
+    * Computes whether or not a segment in the {@link #getFullPlanningSequence()} was completed, and then excluded from {@link #getPlanningWindow()}.
+    * @return if a segment was just completed
+    */
    public boolean activeSegmentChanged()
    {
       return activeSegmentChanged.getBooleanValue();

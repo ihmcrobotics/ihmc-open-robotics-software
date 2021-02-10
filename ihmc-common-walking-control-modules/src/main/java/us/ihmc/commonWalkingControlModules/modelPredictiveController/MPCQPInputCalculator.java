@@ -7,6 +7,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.matrixlib.MatrixTools;
 
+/**
+ * This is a helper class that is meant to convert {@link MPCCommand}s to QP inputs that can be consumed by quadratic program solver.
+ */
 public class MPCQPInputCalculator
 {
    public static final double sufficientlyLongTime = 5.0;
@@ -26,6 +29,13 @@ public class MPCQPInputCalculator
       this.gravityZ = -Math.abs(gravityZ);
    }
 
+   /**
+    * Computes a {@link QPInputTypeA} from a {@link MPCContinuityCommand}. This can consist of a continuity command that is either an objective or equality
+    * constraint.
+    * @param inputToPack QP Input that contains the encoded continuity command
+    * @param objective continuity command to process
+    * @return whether or not the calculation was successful.
+    */
    public boolean calculateContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
       switch (objective.getValueType())
@@ -41,6 +51,13 @@ public class MPCQPInputCalculator
       }
    }
 
+   /**
+    * Computes a {@link QPInputTypeA} from a {@link MPCContinuityCommand} if {@link MPCContinuityCommand#getValueType()} indicates the center of mass. This can
+    * consist of a continuity command that is either an objective or equality constraint.
+    * @param inputToPack QP Input that contains the encoded continuity command
+    * @param objective continuity command to process
+    * @return whether or not the calculation was successful.
+    */
    public boolean calculateCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
       inputToPack.reshape(3);
@@ -111,6 +128,13 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   /**
+    * Computes a {@link QPInputTypeA} from a {@link MPCContinuityCommand} if {@link MPCContinuityCommand#getValueType()} indicates the virtual repellent point.
+    * This can consist of a continuity command that is either an objective or equality constraint.
+    * @param inputToPack QP Input that contains the encoded continuity command
+    * @param objective continuity command to process
+    * @return whether or not the calculation was successful.
+    */
    public boolean calculateVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
       inputToPack.reshape(3);
@@ -234,6 +258,12 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   /**
+    * Processes a {@link MPCValueCommand} to compute a {@link QPInputTypeA}. This can then be fed to MPC QP solver.
+    * @param inputToPack QP input to calculate
+    * @param objective value command to process
+    * @return whether or not the calculation was successful
+    */
    public boolean calculateValueObjective(QPInputTypeA inputToPack, MPCValueCommand objective)
    {
       switch (objective.getValueType())
@@ -377,6 +407,13 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   /**
+    * Calculates a {@link QPInputTypeA} based on a {@link RhoValueObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
+    * values.
+    * @param inputToPack QP input to compute
+    * @param command command to process
+    * @return whether or not the calculation was successful.
+    */
    public boolean calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
    {
       int problemSize = 0;
@@ -432,6 +469,12 @@ public class MPCQPInputCalculator
       return true;
    }
 
+   /**
+    * Directly calculates a quadratic cost function in the form of {@link QPInputTypeC} from a {@link VRPTrackingCommand}
+    * @param inputToPack QP cost function to compute
+    * @param objective objective to process
+    * @return whether or not that calculation was successful.
+    */
    public boolean calculateVRPTrackingObjective(QPInputTypeC inputToPack, VRPTrackingCommand objective)
    {
       inputToPack.reshape();

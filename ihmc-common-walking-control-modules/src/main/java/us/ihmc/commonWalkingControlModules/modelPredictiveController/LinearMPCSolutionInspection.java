@@ -8,6 +8,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
+/**
+ * This class is meant to compute the cost-to-gos for the individual MPC commands submitted to the core, using the solution to the MPC problem.
+ */
 public class LinearMPCSolutionInspection
 {
    protected static final double epsilon = 1e-3;

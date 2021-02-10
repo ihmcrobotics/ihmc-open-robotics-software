@@ -10,6 +10,9 @@ import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * This class is currently unused.
+ */
 public class SparseInverseCalculator// implements InverseCostCalculator<DMatrixSparseCSC>
 {
    private static final boolean useSparse = true;

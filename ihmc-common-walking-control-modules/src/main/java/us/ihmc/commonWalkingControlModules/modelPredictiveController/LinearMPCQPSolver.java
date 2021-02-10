@@ -13,6 +13,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * This is the wrapper class for the quadratic program solver. It receives all the MPC Commands, converting them to quadratic costs or linear constraints.
+ * It then submits these costs and constraints to a quadratic program solver, and computes the optimal solution. It then provides these solution coefficients
+ * as an output.
+ */
 public class LinearMPCQPSolver
 {
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());

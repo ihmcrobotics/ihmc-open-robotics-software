@@ -226,7 +226,7 @@ public class CoMTrajectoryModelPredictiveController
 
       mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
-         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, currentTimeInState.getDoubleValue(), omega.getValue());
+         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, omega.getValue());
 
       cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
 
@@ -621,7 +621,7 @@ public class CoMTrajectoryModelPredictiveController
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
-      trajectoryHandler.setInitialCenterOfMassPositionState(centerOfMassPosition, centerOfMassVelocity);
+      trajectoryHandler.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
    }
 
    public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition,

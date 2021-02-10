@@ -24,6 +24,12 @@ import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
+/**
+ * This class is meant to handle the trajectory from the MPC module. It includes the trajectory for the full planning window, which is overwritten with the
+ * solution for the planning window at the beginning.
+ *
+ * It assembles all this solution into a continuous multi-segment trajectory for the center of mass, and a list of polynomials for the VRP.
+ */
 public class LinearMPCTrajectoryHandler
 {
    private final CoMTrajectoryPlanner positionInitializationCalculator;
@@ -53,22 +59,41 @@ public class LinearMPCTrajectoryHandler
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
    }
 
+   /**
+    * Clears the CoM and VRP solution trajectories
+    */
    public void clearTrajectory()
    {
       comTrajectory.clear();
       vrpTrajectories.clear();
    }
 
+   /**
+    * Sets the nominal CoM height for the trajectory that is generated outside the preview window
+    * @param nominalCoMHeight nominal height
+    */
    public void setNominalCoMHeight(double nominalCoMHeight)
    {
       positionInitializationCalculator.setNominalCoMHeight(nominalCoMHeight);
    }
 
-   public void setInitialCenterOfMassPositionState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
+   /**
+    * Sets the initial center of mass state, both the position and velocity, which ins needed for computing the CoM trajectory
+    * outside the preview window.
+    * @param centerOfMassPosition initial CoM position at the start of the calculation
+    * @param centerOfMassVelocity initial CoM velocity at the start of the calculation
+    */
+   public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       positionInitializationCalculator.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
    }
 
+   /**
+    * Computes the full CoM trajectory for the trajectory starting from the CoM state set by
+    * {@link #setInitialCenterOfMassState(FramePoint3DReadOnly, FrameVector3DReadOnly)} and ending with convergence to the final state specified in
+    * {@param fullContactSequence}
+    * @param fullContactSequence contact sequence to use to calculate the full CoM trajectory.
+    */
    public void solveForTrajectoryOutsidePreviewWindow(List<ContactPlaneProvider> fullContactSequence)
    {
       positionInitializationCalculator.solveForTrajectory(fullContactSequence);
@@ -88,10 +113,16 @@ public class LinearMPCTrajectoryHandler
    private final FramePoint3D vrpEndPosition = new FramePoint3D();
    private final FrameVector3D vrpEndVelocity = new FrameVector3D();
 
+   /**
+    * Extracts the solution from the MPC module into the CoM and VRP trajectories for the preview window
+    * @param solutionCoefficients full set of coefficients that go into calculate the motion function.
+    * @param planningWindow nominal contact sequence for the preview window used to compute the solution coefficients
+    * @param contactPlaneHelpers contact planes that contain the generalized contact vectors for the MPC planning window
+    * @param omega time constant for the motion function
+    */
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
                                                List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
-                                               double currentTimeInState,
                                                double omega)
    {
       int numberOfPhases = planningWindow.size();
