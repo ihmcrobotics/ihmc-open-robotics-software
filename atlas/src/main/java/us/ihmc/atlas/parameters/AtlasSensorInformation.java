@@ -188,14 +188,14 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final RigidBodyTransform transformPelvisToL515DepthCamera = new RigidBodyTransform();
    static
    {
-      Point3D pelvisBoltOffset = new Point3D(0.175, 0.0, 0.0);
+      Point3D pelvisBoltOffset = new Point3D(0.175, 0.015, 0.035);
       Point3D boltToPitchJoint = new Point3D(0.022, 0.0, 0.01425);
       Point3D pelvisToPitchJoint = new Point3D(pelvisBoltOffset);
       pelvisToPitchJoint.add(boltToPitchJoint);
 
       transformPelvisToL515DepthCamera.appendTranslation(pelvisBoltOffset);
       transformPelvisToL515DepthCamera.appendTranslation(boltToPitchJoint);
-      double pitch = Math.toRadians(60.0);
+      double pitch = Math.toRadians(61.5);
       transformPelvisToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
       double c = 0.04975 + 0.03015;
       transformPelvisToL515DepthCamera.appendTranslation(c * Math.cos(pitch), 0.0, c * Math.sin(pitch));
