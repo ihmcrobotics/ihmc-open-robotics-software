@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.ops.ConvertDMatrixStruct;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;

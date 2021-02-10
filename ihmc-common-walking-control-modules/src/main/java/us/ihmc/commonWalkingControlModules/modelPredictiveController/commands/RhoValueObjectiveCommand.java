@@ -5,11 +5,6 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactStateMagnitudeToForceMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 import java.util.ArrayList;
 import java.util.List;
