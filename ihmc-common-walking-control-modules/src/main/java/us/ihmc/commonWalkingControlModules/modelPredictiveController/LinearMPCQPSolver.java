@@ -95,7 +95,7 @@ public class LinearMPCQPSolver
       else
       {
          qpSolver = new SimpleEfficientActiveSetQPSolver();
-         qpSolver.setInverseCostCalculator(new BlockInverseCalculator(indexHandler));
+         qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
       }
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
