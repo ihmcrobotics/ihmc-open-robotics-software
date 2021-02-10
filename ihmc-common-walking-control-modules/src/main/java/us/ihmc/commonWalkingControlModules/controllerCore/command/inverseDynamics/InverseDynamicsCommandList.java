@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 
 /**
  * A {@code InverseDynamicsCommandList} gathers several commands to be submitted to the controller
@@ -108,7 +107,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    /**
-    * Gets the number of {@link FeedbackControlCommand}s contained in this list.
+    * Gets the number of {@link InverseDynamicsCommand}s contained in this list.
     * 
     * @return the number of commands.
     */
@@ -118,7 +117,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    /**
-    * Tests if this list of {@link FeedbackControlCommand}s is empty.
+    * Tests if this list of {@link InverseDynamicsCommand}s is empty.
     * 
     * @return {@code true} if this command is empty, {@code false} otherwise.
     */
