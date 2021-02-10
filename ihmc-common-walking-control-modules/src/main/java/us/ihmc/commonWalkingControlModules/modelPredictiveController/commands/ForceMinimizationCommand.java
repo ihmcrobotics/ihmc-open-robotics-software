@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCCommand;
 
 import java.util.ArrayList;
 import java.util.List;
