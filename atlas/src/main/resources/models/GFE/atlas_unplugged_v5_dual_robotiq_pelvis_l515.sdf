@@ -130,15 +130,6 @@
           </box>
         </geometry>
       </visual>
-      <visual name='l515_mount_base_visual'>
-        <pose>10.175 0 0 0 0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://l515_adjustable_mount/AtlasL515AdjustableMountBase.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay/>
       <gravity>1</gravity>
       <velocity_decay/>
