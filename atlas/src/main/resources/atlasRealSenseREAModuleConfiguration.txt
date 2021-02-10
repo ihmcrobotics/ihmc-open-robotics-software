@@ -1,5 +1,22 @@
 #
-#Fri Sep 04 16:17:07 CDT 2020
+#Tue Feb 09 10:07:05 CST 2021
+REA/Module/Lidar/Range/Max=5.0
+REA/Module/Lidar/Range/Min=0.2
+REA/Module/NormalEstimation/Enable=true
+REA/Module/NormalEstimation/Parameters=search radius\: 0.08, max distance from plane\: 0.02, min consensus ratio\: 0.5, max average deviation ratio\: 0.75, number of iterations\: 7, least squares estimation\: true, weight by number of hits\: true
+REA/Module/OcTree/BoundingBox/Enable=false
+REA/Module/OcTree/BoundingBox/Parameters=min\: (-2.0, -2.0, -2.0), max\: (2.0, 2.0, 2.0)
+REA/Module/OcTree/DepthCloud/Buffer/Enable=false
+REA/Module/OcTree/DepthCloud/Buffer/Message/Capacity=1
+REA/Module/OcTree/DepthCloud/Buffer/OcTree/Capacity=1000000
+REA/Module/OcTree/Enable=true
+REA/Module/OcTree/Lidar/Buffer/Enable=false
+REA/Module/OcTree/Lidar/Buffer/Message/Capacity=500
+REA/Module/OcTree/Lidar/Buffer/OcTree/Capacity=10000
+REA/Module/OcTree/Node/Lifetime=6000000
+REA/Module/OcTree/StereoVision/Buffer/Enable=true
+REA/Module/OcTree/StereoVision/Buffer/Message/Capacity=1
+REA/Module/OcTree/StereoVision/Buffer/OcTree/Capacity=1000000
 REA/Module/OcTree/SurfaceNormal/Parameters=surfaceNormalUpperBound\: 0.6981317007977318, surfaceNormalLowerBound\: -0.6981317007977318, useSurfaceNormalFilter\: true
 REA/Module/PlanarRegions/ConcaveHull/Parameters=edge length threshold\: 0.1, remove any triangle with two borderedges\: true, allow splitting concave hull\: true, maximum number of iterations\: 5000, triangulation tolerance\: 0.0
 REA/Module/PlanarRegions/Custom/Enable=true

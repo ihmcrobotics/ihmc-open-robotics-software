@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.bagTools;
+package us.ihmc.robotEnvironmentAwareness.ros.bagTools;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

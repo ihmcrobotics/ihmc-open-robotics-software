@@ -28,7 +28,7 @@ import java.util.ArrayList;
 
 public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
 {
-   private static final int MAX_POINTS = 5000;
+   private static final int MAX_POINTS = 100000;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;

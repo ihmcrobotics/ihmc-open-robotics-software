@@ -23,7 +23,6 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 public class RealSenseREANetworkProvider implements REANetworkProvider
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
-   private final IHMCROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
 
    private final ROS2Node ros2Node;
    private final ROS2Topic inputTopic;
@@ -41,7 +40,6 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
       this.inputTopic = inputTopic;
 
       stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
-      ocTreePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, OcTreeKeyListMessage.class, stereoOutputTopic);
    }
 
    @Override
@@ -73,12 +71,6 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
             lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
 
          stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
-      }
-
-      if (ocTree != null && ocTree.getRoot() != null)
-      {
-         OcTreeKeyListMessage ocTreeMessage = OcTreeMessageConverter.createOcTreeDataMessage(ocTree);
-         ocTreePublisher.publish(ocTreeMessage);
       }
    }
 

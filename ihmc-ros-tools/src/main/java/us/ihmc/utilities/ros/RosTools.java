@@ -36,9 +36,9 @@ public class RosTools
 {
    public static final String MULTISENSE_VIDEO = "/multisense/left/image_rect_color/compressed";
    public static final String MULTISENSE_CAMERA_INFO = "/multisense/left/image_rect_color/camera_info";
-   public static final String D435_VIDEO = "/depthcam/color/image_raw/compressed";
+   public static final String D435_VIDEO = "camera/color/image_raw"; // "/depthcam/color/image_raw/compressed";
    public static final String D435_CAMERA_INFO = "/depthcam/color/camera_info";
-   public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
+   public static final String D435_POINT_CLOUD = "camera/depth/color/points"; // "/depthcam/depth/color/points";
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {

@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.bagTools;
+package us.ihmc.robotEnvironmentAwareness.ros.bagTools;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
