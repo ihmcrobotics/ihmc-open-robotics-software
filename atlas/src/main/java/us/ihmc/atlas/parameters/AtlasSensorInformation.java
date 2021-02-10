@@ -193,63 +193,15 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       Point3D pelvisToPitchJoint = new Point3D(pelvisBoltOffset);
       pelvisToPitchJoint.add(boltToPitchJoint);
 
-      ReferenceFrame realsenseJoint = new ReferenceFrame("RealsenseJoint", ReferenceFrame.getWorldFrame())
-      {
-         private RigidBodyTransform transformToParent;
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            this.transformToParent = transformToParent;
-         }
-      };
-      realsenseJoint.getTransformToWorldFrame().appendTranslation(pelvisToPitchJoint);
-
-      Point3D jointToSensor = new Point3D(0.04975 + 0.03015, 0.0, 0.0112522 - 0.0215);
-      ReferenceFrame realsenseSensor = new ReferenceFrame("RealsenseSensor", realsenseJoint)
-      {
-         private RigidBodyTransform transformToParent;
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            this.transformToParent = transformToParent;
-         }
-      };
-      realsenseSensor.getTransformToWorldFrame().appendTranslation(jointToSensor);
-      realsenseSensor.getTransformToWorldFrame().appendOrientation(new YawPitchRoll(0.0, Math.toRadians(0.0), 0.0));
-
-      FramePose3D realsenseSensorFramePose = new FramePose3D(realsenseSensor);
-      realsenseSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      realsenseSensorFramePose.get(transformPelvisToL515DepthCamera);
-      LogTools.info(realsenseSensorFramePose);
-
-      transformPelvisToL515DepthCamera.setToZero();
       transformPelvisToL515DepthCamera.appendTranslation(pelvisBoltOffset);
       transformPelvisToL515DepthCamera.appendTranslation(boltToPitchJoint);
-      double pitch = Math.toRadians(30.0);
+      double pitch = Math.toRadians(60.0);
       transformPelvisToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
       double c = 0.04975 + 0.03015;
       transformPelvisToL515DepthCamera.appendTranslation(c * Math.cos(pitch), 0.0, c * Math.sin(pitch));
 
       transformPelvisToL515DepthCamera.appendYawRotation(-Math.PI / 2);
       transformPelvisToL515DepthCamera.appendRollRotation(-Math.PI / 2);
-
-
-//      double d435DepthOffsetX = 0.058611;
-//      double d435DepthOffsetZ = 0.01;
-//      double d435DepthPitchingAngle = 70.0 / 180.0 * Math.PI;
-//      double d435DepthRollOffset = Math.toRadians(-0.5);
-//      double d435DepthThickness = 0.0245;
-//      double pelvisToMountD435Origin = 0.19;
-//      transformPelvisToL515DepthCamera.appendTranslation(pelvisToMountD435Origin, 0.0, 0.0);
-//      transformPelvisToL515DepthCamera.appendTranslation(d435DepthOffsetX, 0.0, d435DepthOffsetZ);
-//      transformPelvisToL515DepthCamera.appendRollRotation(d435DepthRollOffset);
-//      transformPelvisToL515DepthCamera.appendPitchRotation(d435DepthPitchingAngle);
-//      transformPelvisToL515DepthCamera.appendTranslation(d435DepthThickness, 0.0, 0.0);
-//
-//      transformPelvisToL515DepthCamera.appendYawRotation(-Math.PI / 2);
-//      transformPelvisToL515DepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
