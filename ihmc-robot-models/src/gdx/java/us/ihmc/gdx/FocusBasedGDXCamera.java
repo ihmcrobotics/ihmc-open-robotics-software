@@ -49,7 +49,7 @@ public class FocusBasedGDXCamera extends Camera
    private double zoomSpeedFactor = 0.1;
    private double latitudeSpeed = 0.005;
    private double longitudeSpeed = 0.005;
-   private double translateSpeed = 5.0;
+   private double translateSpeedFactor = 0.5;
 
    private final FramePose3D focusPointPose = new FramePose3D();
    private double latitude = 0.0;
@@ -267,27 +267,27 @@ public class FocusBasedGDXCamera extends Camera
 
       if (Gdx.input.isKeyPressed(Input.Keys.W))
       {
-         focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
+         focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
       if (Gdx.input.isKeyPressed(Input.Keys.S))
       {
-         focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
+         focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
       if (Gdx.input.isKeyPressed(Input.Keys.A))
       {
-         focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
+         focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
       }
       if (Gdx.input.isKeyPressed(Input.Keys.D))
       {
-         focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
+         focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
       }
       if (Gdx.input.isKeyPressed(Input.Keys.Q))
       {
-         focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
+         focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
       }
       if (Gdx.input.isKeyPressed(Input.Keys.Z))
       {
-         focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
+         focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
       }
 
       updateCameraPose();
@@ -343,5 +343,10 @@ public class FocusBasedGDXCamera extends Camera
    public void clearInputExclusionBoxes()
    {
       exclusionBoundingBoxes.clear();
+   }
+
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * zoom;
    }
 }
