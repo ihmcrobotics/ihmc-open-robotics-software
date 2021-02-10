@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 
+/**
+ * This provider class is designed to provide a garbage-free way of generating all the desired input commands for the MPC core.
+ */
 public class CommandProvider
 {
    private final RecyclingArrayList<CoMPositionCommand> comPositionCommandPool = new RecyclingArrayList<>(CoMPositionCommand::new);
@@ -16,6 +19,9 @@ public class CommandProvider
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoValueObjectiveCommand> rhoValueObjectiveCommandPool = new RecyclingArrayList<>(RhoValueObjectiveCommand::new);
 
+   /**
+    * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
+    */
    public void reset()
    {
       comPositionCommandPool.clear();
