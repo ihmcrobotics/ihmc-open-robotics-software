@@ -89,8 +89,8 @@ public class VRPTrackingCommandTest
          jacobian.zero();
 
          CoMCoefficientJacobianCalculator.calculateVRPJacobian(0, omega, time, jacobian, 0, 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearPositionJacobian(), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearAccelerationJacobian(), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(0), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(2), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
 
          CommonOps_DDRM.mult(jacobian, solution, solutionPosition);
 

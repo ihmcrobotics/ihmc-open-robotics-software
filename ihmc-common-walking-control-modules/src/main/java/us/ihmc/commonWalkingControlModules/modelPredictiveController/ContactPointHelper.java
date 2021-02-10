@@ -33,9 +33,6 @@ public class ContactPointHelper
    private double maxContactForce;
    private double timeOfContact = Double.NaN;
 
-//   private final DMatrixRMaj totalJacobianInWorldFrame;
-//   private final DMatrixRMaj linearJacobianInWorldFrame;
-
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
    private final DMatrixRMaj linearPositionJacobianMatrix;
@@ -53,7 +50,6 @@ public class ContactPointHelper
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
-
 
    private final FrameVector3D contactAcceleration = new FrameVector3D();
    private final FrameVector3D[] basisMagnitudes;
@@ -76,9 +72,6 @@ public class ContactPointHelper
       basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
-
-//      totalJacobianInWorldFrame = new DMatrixRMaj(Wrench.SIZE, this.numberOfBasisVectorsPerContactPoint);
-//      linearJacobianInWorldFrame = new DMatrixRMaj(3, this.numberOfBasisVectorsPerContactPoint);
 
       linearPositionJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
       linearVelocityJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
@@ -111,31 +104,59 @@ public class ContactPointHelper
       this.viewer = viewer;
    }
 
+   /**
+    * Sets the maximum net force allowed in the normal force for this contact point.
+    * @param maxNormalForce maximum normal force
+    */
    public void setMaxNormalForce(double maxNormalForce)
    {
       this.maxContactForce = maxNormalForce;
    }
 
+   /**
+    * Gets the total number of generalized contact value vectors for this contact point
+    * @return total number of vectors
+    */
    public int getRhoSize()
    {
       return numberOfBasisVectorsPerContactPoint;
    }
 
+   /**
+    * Gets the total number of coefficients used to express the force at this contact point
+    * @return total number of coefficients
+    */
    public int getCoefficientsSize()
    {
       return coefficientsSize;
    }
 
+   /**
+    * Gets the basis vector along which the generalized contact value acts.
+    * @param index index of the basis vector to query
+    * @return basis vector direction
+    */
    public FrameVector3DReadOnly getBasisVector(int index)
    {
       return basisVectors[index];
    }
 
+   /**
+    * Gets the origin of the basis vectors. Should correspond to the contact point location.
+    * @return origin of the basis vectors.
+    */
    public FramePoint3DReadOnly getBasisVectorOrigin()
    {
       return basisVectorOrigin;
    }
 
+   /**
+    * Computes the basis vectors for the contact point along which the generalized contact values act.
+    *
+    * @param contactPointInPlaneFrame origin of the basis vectors.
+    * @param framePose pose of the plane, which gives the contact normal
+    * @param mu coefficient of friction
+    */
    public void computeBasisVectors(Point2DReadOnly contactPointInPlaneFrame, FramePose3DReadOnly framePose, double rotationOffset, double mu)
    {
       timeOfContact = Double.NaN;
@@ -164,10 +185,16 @@ public class ContactPointHelper
 
          rhoIndex++;
       }
-
-//      computeWrenchJacobianInFrame(ReferenceFrame.getWorldFrame(), totalJacobianInWorldFrame, linearJacobianInWorldFrame);
    }
 
+   /**
+    * Computes the Jacobians at time {@param time} that map from the coefficient values to the motion function value.
+    *
+    * If this has been called for the same time and the same basis vectors, the Jacobians are not recomputed to save computation.
+    *
+    * @param time time to compute the function
+    * @param omega time constant for the motion function
+    */
    public void computeJacobians(double time, double omega)
    {
       if (MathTools.epsilonEquals(time, timeOfContact, 1e-5))
@@ -262,6 +289,12 @@ public class ContactPointHelper
       timeOfContact = time;
    }
 
+   /**
+    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the point over some time
+    * @param duration duration for the integration
+    * @param omega time constant for the motion function
+    * @param goalValueForPoint nominal value for the acceleration to track.
+    */
    public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
    {
       duration = Math.min(duration, sufficientlyLongTime);
@@ -366,6 +399,11 @@ public class ContactPointHelper
       }
    }
 
+   /**
+    * Computes the equivalent quadratic cost function components that minimize the integral of the jerk over the duration
+    * @param duration duration for the integration
+    * @param omega time constant for the motion function
+    */
    public void computeJerkIntegrationMatrix(double duration, double omega)
    {
       duration = Math.min(duration, sufficientlyLongTime);
@@ -473,24 +511,13 @@ public class ContactPointHelper
       basisVectorToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-//   private final SpatialForce unitSpatialForceVector = new SpatialForce();
-//
-//   public void computeWrenchJacobianInFrame(ReferenceFrame frame, DMatrixRMaj wrenchMatrixToPack, DMatrixRMaj forceMatrixToPack)
-//   {
-//      wrenchMatrixToPack.reshape(Wrench.SIZE, numberOfBasisVectorsPerContactPoint);
-//      forceMatrixToPack.reshape(3, numberOfBasisVectorsPerContactPoint);
-//      basisVectorOrigin.changeFrame(frame);
-//
-//      for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
-//      {
-//         FrameVector3D basisVector = basisVectors[rhoIndex];
-//         basisVector.changeFrame(frame);
-//         unitSpatialForceVector.setIncludingFrame(null, basisVector, basisVectorOrigin);
-//         unitSpatialForceVector.get(0, rhoIndex, wrenchMatrixToPack);
-//         unitSpatialForceVector.getLinearPart().get(0, rhoIndex, forceMatrixToPack);
-//      }
-//   }
-
+   /**
+    * Returns the Jacobian that maps from the generalized contact value coefficients to the corresponding linear Euclidean motion function value for all the
+    * coefficients in this contact point.
+    *
+    * @param derivativeOrder order of the Euclidean motion function Jacobian to return, where position is zero.
+    * @return Euclidean motion function Jacobian.
+    */
    public DMatrixRMaj getLinearJacobian(int derivativeOrder)
    {
       switch (derivativeOrder)
@@ -508,6 +535,13 @@ public class ContactPointHelper
       }
    }
 
+   /**
+    * Returns the Jacobian that maps from the generalized contact value coefficients to a vector of generalized contact force values for all the coefficients
+    * in this contact point.
+    *
+    * @param derivativeOrder order of the generalized contact forces to return, where position is zero.
+    * @return vector of generalized contact values.
+    */
    public DMatrixRMaj getRhoJacobian(int derivativeOrder)
    {
       switch (derivativeOrder)
@@ -530,43 +564,42 @@ public class ContactPointHelper
       return rhoMaxMatrix;
    }
 
-   public DMatrixRMaj getLinearPositionJacobian()
+   private DMatrixRMaj getLinearPositionJacobian()
    {
       return linearPositionJacobianMatrix;
    }
 
-   public DMatrixRMaj getLinearVelocityJacobian()
+   private DMatrixRMaj getLinearVelocityJacobian()
    {
       return linearVelocityJacobianMatrix;
    }
 
-   public DMatrixRMaj getLinearAccelerationJacobian()
+   private DMatrixRMaj getLinearAccelerationJacobian()
    {
       return linearAccelerationJacobianMatrix;
    }
 
-   public DMatrixRMaj getLinearJerkJacobian()
+   private DMatrixRMaj getLinearJerkJacobian()
    {
       return linearJerkJacobianMatrix;
    }
 
-
-   public DMatrixRMaj getRhoMagnitudeJacobian()
+   private DMatrixRMaj getRhoMagnitudeJacobian()
    {
       return rhoMagnitudeJacobianMatrix;
    }
 
-   public DMatrixRMaj getRhoRateJacobian()
+   private DMatrixRMaj getRhoRateJacobian()
    {
       return rhoRateJacobianMatrix;
    }
 
-   public DMatrixRMaj getRhoAccelerationJacobian()
+   private DMatrixRMaj getRhoAccelerationJacobian()
    {
       return rhoAccelerationJacobianMatrix;
    }
 
-   public DMatrixRMaj getRhoJerkJacobian()
+   private DMatrixRMaj getRhoJerkJacobian()
    {
       return rhoJerkJacobianMatrix;
    }
@@ -586,6 +619,13 @@ public class ContactPointHelper
       return jerkIntegrationHessian;
    }
 
+   /**
+    * Computes the collapsed wrench function. That is, it adds all the generalized contact force functions together in Euclidean space to get a much more
+    * compact time function.
+    *
+    * @param solutionVector vector containing all the coefficients for the generalized contact force functions
+    * @param solutionStartIdx index of the vector where the coefficients for this plane start
+    */
    public void computeContactForceCoefficientMatrix(DMatrixRMaj solutionVector, int solutionStartIdx)
    {
       contactWrenchCoefficientMatrix.zero();
@@ -608,6 +648,11 @@ public class ContactPointHelper
       }
    }
 
+   /**
+    * Returns the collapsed wrench function. This is the sum of all the generalized contact forces in Euclidean space. This function should be a 3x4 matrix,
+    * where the rows match the corresponding Euclidean coordinate axis.
+    * @return contact wrench matrix
+    */
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
@@ -643,5 +688,50 @@ public class ContactPointHelper
    public FrameVector3DReadOnly getContactAcceleration()
    {
       return contactAcceleration;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof ContactPointHelper)
+      {
+         ContactPointHelper other = (ContactPointHelper) object;
+         if (numberOfBasisVectorsPerContactPoint != other.numberOfBasisVectorsPerContactPoint)
+            return false;
+         if (coefficientsSize != other.coefficientsSize)
+            return false;
+         if (!planeFrame.equals(other.planeFrame))
+            return false;
+         if (!basisVectorOrigin.equals(other.basisVectorOrigin))
+            return false;
+         if (basisVectors.length != other.basisVectors.length)
+            return false;
+         if (timeOfContact != other.timeOfContact)
+            return false;
+         if (maxContactForce != other.maxContactForce)
+            return false;
+         if (basisCoefficients.length != other.basisCoefficients.length)
+            return false;
+         for (int i = 0; i < basisCoefficients.length; i++)
+         {
+            if (!basisCoefficients[i].equals(other.basisCoefficients[i]))
+               return false;
+         }
+         for (int i = 0; i < basisVectors.length; i++)
+         {
+            if (!basisVectors[i].equals(other.basisVectors[i]))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }

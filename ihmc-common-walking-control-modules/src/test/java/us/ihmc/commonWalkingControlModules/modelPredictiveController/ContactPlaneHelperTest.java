@@ -63,7 +63,7 @@ public class ContactPlaneHelperTest
          DMatrixRMaj jacobianExpected = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
          CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getPositionJacobianMatrix(), jacobianExpected);
 
-         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearPositionJacobian(), 1e-5);
+         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearJacobian(0), 1e-5);
       }
    }
 }
