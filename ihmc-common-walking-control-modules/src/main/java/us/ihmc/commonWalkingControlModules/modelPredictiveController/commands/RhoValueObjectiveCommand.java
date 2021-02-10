@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoefficientJacobianMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.List;
  */
 public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCommand>
 {
+   private int commandId;
    /**
     * Contact planes containing the generalized contact force vectors.
     */
@@ -177,5 +177,91 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.RHO_VALUE;
+   }
+
+   @Override
+   public void set(RhoValueObjectiveCommand other)
+   {
+      clear();
+      setCommandId(other.getCommandId());
+      setSegmentNumber(other.getSegmentNumber());
+      setTimeOfObjective(other.getTimeOfObjective());
+      setOmega(other.getOmega());
+      setConstraintType(other.getConstraintType());
+      setObjectiveVector(other.getObjectiveVector());
+      setUseScalarObjective(other.getUseScalarObjective());
+      setScalarObjective(other.getScalarObjective());
+      for (int i = 0; i < other.getNumberOfContacts(); i++)
+         addContactPlaneHelper(other.getContactPlaneHelper(i));
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof RhoValueObjectiveCommand)
+      {
+         RhoValueObjectiveCommand other = (RhoValueObjectiveCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (segmentNumber != other.segmentNumber)
+            return false;
+         if (timeOfObjective != other.timeOfObjective)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (useScalarObjective != other.useScalarObjective)
+            return false;
+         if (useScalarObjective)
+         {
+            if (objective != other.objective)
+               return false;
+         }
+         else if (objectiveVector != other.objectiveVector)
+            return false;
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < contactPlaneHelpers.size(); i++)
+         {
+            if (!contactPlaneHelpers.get(i).equals(other.contactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", time of objective: " + timeOfObjective + ", omega: " + omega
+                      + ", constraint type: " + constraintType;
+      if (useScalarObjective)
+         string += "objective value: " + objective;
+      else
+         string += "objective vector: " + objectiveVector + ".";
+      for (int i = 0; i < contactPlaneHelpers.size(); i++)
+      {
+         string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);
+      }
+      return string;
    }
 }

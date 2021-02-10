@@ -18,6 +18,7 @@ import java.util.List;
  */
 public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCommand>
 {
+   private int commandId;
    /**
     * Contact planes used to generate the motion in the first segment.
     */
@@ -181,5 +182,103 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
    public ContactPlaneHelper getSecondSegmentContactPlaneHelper(int i )
    {
       return secondSegmentContactPlaneHelpers.get(i);
+   }
+
+   @Override
+   public void set(MPCContinuityCommand other)
+   {
+      if (getValueType() != other.getValueType())
+         throw new IllegalArgumentException("Cannot set a command of type " + getValueType() + " from a command of type " + other.getValueType());
+      if (getDerivativeOrder() != other.getDerivativeOrder())
+         throw new IllegalArgumentException("Cannot set a command of derivative order " + getDerivativeOrder() + " from a command of derivative order " + other.getDerivativeOrder());
+
+      clear();
+      setCommandId(other.getCommandId());
+      setFirstSegmentNumber(other.getFirstSegmentNumber());
+      setFirstSegmentDuration(other.getFirstSegmentDuration());
+      setOmega(other.getOmega());
+      setWeight(other.getWeight());
+      setConstraintType(other.getConstraintType());
+      for (int i = 0; i < other.getFirstSegmentNumberOfContacts(); i++)
+         addFirstSegmentContactPlaneHelper(other.getFirstSegmentContactPlaneHelper(i));
+      for (int i = 0; i < other.getSecondSegmentNumberOfContacts(); i++)
+         addSecondSegmentContactPlaneHelper(other.getSecondSegmentContactPlaneHelper(i));
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof MPCContinuityCommand)
+      {
+         MPCContinuityCommand other = (MPCContinuityCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (constraintType != other.constraintType)
+            return false;
+         if (getValueType() != other.getValueType())
+            return false;
+         if (getDerivativeOrder() != other.getDerivativeOrder())
+            return false;
+         if (firstSegmentNumber != other.firstSegmentNumber)
+            return false;
+         if (firstSegmentDuration != other.firstSegmentDuration)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (weight != other.weight)
+            return false;
+         if (firstSegmentContactPlaneHelpers.size() != other.firstSegmentContactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < firstSegmentContactPlaneHelpers.size(); i++)
+         {
+            if (!firstSegmentContactPlaneHelpers.get(i).equals(other.firstSegmentContactPlaneHelpers.get(i)))
+               return false;
+         }
+         if (secondSegmentContactPlaneHelpers.size() != other.secondSegmentContactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < secondSegmentContactPlaneHelpers.size(); i++)
+         {
+            if (!secondSegmentContactPlaneHelpers.get(i).equals(other.secondSegmentContactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": value: " + getValueType() + ", derivative order: " + getDerivativeOrder() + ", first segment number: "
+                    + firstSegmentNumber + ", constraint type: " + constraintType + ", first segment duration: " + firstSegmentDuration + ", omega: " + omega
+                      + ", weight: " + weight + ".";
+      for (int i = 0; i < firstSegmentContactPlaneHelpers.size(); i++)
+      {
+         string += "\nfirst segment contact " + i + ": " + firstSegmentContactPlaneHelpers.get(i);
+      }
+      for (int i = 0; i < secondSegmentContactPlaneHelpers.size(); i++)
+      {
+         string += "\nsecond segment contact " + i + ": " + secondSegmentContactPlaneHelpers.get(i);
+      }
+      return string;
    }
 }

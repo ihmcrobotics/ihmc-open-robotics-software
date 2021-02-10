@@ -17,6 +17,7 @@ import java.util.function.DoubleConsumer;
  */
 public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
 {
+   private int commandId;
    /**
     * Holder for the objective value for this command.
     */
@@ -186,9 +187,103 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       this.costToGoConsumer = costToGoConsumer;
    }
 
+   public DoubleConsumer getCostToGoConsumer()
+   {
+      return costToGoConsumer;
+   }
+
    public void setCostToGo(double costToGo)
    {
       if (costToGoConsumer != null)
          costToGoConsumer.accept(costToGo);
+   }
+
+   @Override
+   public void set(MPCValueCommand other)
+   {
+      if (getValueType() != other.getValueType())
+         throw new IllegalArgumentException("Cannot set a command of type " + getValueType() + " from a command of type " + other.getValueType());
+      if (getDerivativeOrder() != other.getDerivativeOrder())
+         throw new IllegalArgumentException("Cannot set a command of derivative order " + getDerivativeOrder() + " from a command of derivative order " + other.getDerivativeOrder());
+
+      clear();
+      setCommandId(other.getCommandId());
+      setObjective(other.getObjective());
+      setSegmentNumber(other.getSegmentNumber());
+      setTimeOfObjective(other.getTimeOfObjective());
+      setOmega(other.getOmega());
+      setWeight(other.getWeight());
+      setConstraintType(other.getConstraintType());
+      setCostToGoConsumer(other.getCostToGoConsumer());
+      for (int i = 0; i < other.getNumberOfContacts(); i++)
+         addContactPlaneHelper(other.getContactPlaneHelper(i));
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof MPCValueCommand)
+      {
+         MPCValueCommand other = (MPCValueCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (constraintType != other.constraintType)
+            return false;
+         if (getValueType() != other.getValueType())
+            return false;
+         if (getDerivativeOrder() != other.getDerivativeOrder())
+            return false;
+         if (segmentNumber != other.segmentNumber)
+            return false;
+         if (timeOfObjective != other.timeOfObjective)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (weight != other.weight)
+            return false;
+         if (!objective.equals(other.objective))
+            return false;
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < contactPlaneHelpers.size(); i++)
+         {
+            if (!contactPlaneHelpers.get(i).equals(other.contactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": value: " + getValueType() + ", derivative order: " + getDerivativeOrder() + ", segment number: "
+                      + segmentNumber + ", constraint type: " + constraintType + ", time of objective: " + timeOfObjective + ", omega: " + omega + ", weight: "
+                      + weight + ", objective: " + objective + ".";
+      for (int i = 0; i < getNumberOfContacts(); i++)
+      {
+         string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);
+      }
+      return string;
    }
 }

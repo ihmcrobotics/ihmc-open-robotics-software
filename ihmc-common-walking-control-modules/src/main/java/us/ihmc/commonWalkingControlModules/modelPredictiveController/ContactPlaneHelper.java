@@ -418,4 +418,6 @@ public class ContactPlaneHelper
       if (viewer != null)
          viewer.update(contactCentroid, contactAcceleration);
    }
+
+   // TODO implement an equals function
 }

@@ -98,16 +98,19 @@ public class MPCCommandList implements MPCCommand<MPCCommandList>
       return commandList.size();
    }
 
+   @Override
    public void setCommandId(int id)
    {
       commandId = id;
    }
 
+   @Override
    public int getCommandId()
    {
       return commandId;
    }
 
+   @Override
    public void set(MPCCommandList other)
    {
       clear();
@@ -143,5 +146,11 @@ public class MPCCommandList implements MPCCommand<MPCCommandList>
       {
          return false;
       }
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Nb of commands: " + getNumberOfCommands() + "\n" + commandList;
    }
 }
