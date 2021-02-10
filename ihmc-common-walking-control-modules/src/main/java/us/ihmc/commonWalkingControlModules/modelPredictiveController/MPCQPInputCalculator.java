@@ -407,7 +407,7 @@ public class MPCQPInputCalculator
          MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
                                     startRow,
                                     startCol,
-                                    contactPlaneHelper.getRhoAccelerationJacobian(),
+                                    contactPlaneHelper.getRhoJacobian(2),
                                     0,
                                     0,
                                     contactPlaneHelper.getRhoSize(),
