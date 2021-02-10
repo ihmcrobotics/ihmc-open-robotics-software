@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
@@ -36,7 +35,7 @@ public class MPCQPInputCalculator
          case VRP:
             return calculateVRPContinuityObjective(inputToPack, objective);
          case DCM:
-            throw new NotImplementedException();
+            throw new IllegalArgumentException();
          default:
             return false;
       }
