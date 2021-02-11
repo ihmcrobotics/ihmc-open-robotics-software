@@ -76,7 +76,7 @@ public class AtlasPointCloudSensorManager
    {
       return new StereoVisionWorldTransformCalculator()
       {
-         private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToDepthCamera;
+         private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToD435DepthCamera;
 
          @Override
          public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
