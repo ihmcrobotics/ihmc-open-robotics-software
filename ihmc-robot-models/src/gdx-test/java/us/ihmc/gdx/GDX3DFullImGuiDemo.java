@@ -16,7 +16,7 @@ import us.ihmc.tools.string.StringTools;
 
 public class GDX3DFullImGuiDemo
 {
-   private final GDX3DSceneManager application = new GDX3DSceneManager();
+   private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
    private final GDXImGuiWindowAndDockSystem imGui = new GDXImGuiWindowAndDockSystem();
    private final ImGuiGDX3DWindow gdx3DWindow = new ImGuiGDX3DWindow();
 
@@ -29,10 +29,10 @@ public class GDX3DFullImGuiDemo
          @Override
          public void create()
          {
-            application.create();
+            sceneManager.create();
 
-            application.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            application.addModelInstance(new BoxesDemoModel().newInstance());
+            sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
             imGui.create();
          }
@@ -42,7 +42,7 @@ public class GDX3DFullImGuiDemo
          {
             GDX3DSceneTools.glClearGray(0.3f);
             imGui.beforeWindowManagement();
-            gdx3DWindow.renderBeforeOtherWindows(application);
+            gdx3DWindow.renderBeforeOtherWindows(sceneManager);
 
             {
                ImGui.begin("Window");
@@ -63,13 +63,13 @@ public class GDX3DFullImGuiDemo
                   values[i] = i;
                }
                ImGui.plotLines("Histogram", values, 100);
-               application.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
+               sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
                ImGui.end();
             }
 
             if (imGui.isFirstRenderCall())
             {
-               ImGui.dockBuilderSetNodeSize(imGui.getCentralDockspaceId(), application.getCurrentWindowWidth(), application.getCurrentWindowHeight());
+               ImGui.dockBuilderSetNodeSize(imGui.getCentralDockspaceId(), sceneManager.getCurrentWindowWidth(), sceneManager.getCurrentWindowHeight());
                ImInt outIdAtOppositeDir = new ImInt();
                int dockRightId = ImGui.dockBuilderSplitNode(imGui.getCentralDockspaceId(), ImGuiDir.Right, 0.20f, null, outIdAtOppositeDir);
                ImGui.dockBuilderDockWindow(gdx3DWindow.getWindowName(), imGui.getCentralDockspaceId());
@@ -78,7 +78,7 @@ public class GDX3DFullImGuiDemo
             }
 
             imGui.afterWindowManagement();
-            application.render();
+            sceneManager.render();
             imGui.afterGDXRender();
          }
 
