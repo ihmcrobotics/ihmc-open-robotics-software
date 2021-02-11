@@ -79,7 +79,7 @@ public class MapsensePlanarRegionROS1Bridge
             PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
             planarRegionsList.applyTransform(transformToWorld);
             publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-            LogTools.info("Total Planar Regions: {}", planarRegionsList.getNumberOfPlanarRegions());
+//            LogTools.info("Total Planar Regions: {}", planarRegionsList.getNumberOfPlanarRegions());
          }
       });
    }
