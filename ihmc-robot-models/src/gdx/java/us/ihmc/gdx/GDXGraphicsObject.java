@@ -96,13 +96,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          String objFileName = splitSlash[splitSlash.length - 1];
          String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
 
-         if (modifiedFileName.contains("AtlasL515AdjustableMountBase"))
-         {
-            System.out.println("0");
-         }
-
          Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
-//               Model model = GDXModelLoader.loadObjModel(modelFileName);
          models.add(model);
 
          ModelInstance modelInstance = new ModelInstance(model);
