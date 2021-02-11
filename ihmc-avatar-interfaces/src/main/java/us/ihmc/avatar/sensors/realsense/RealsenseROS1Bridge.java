@@ -18,7 +18,7 @@ public class RealsenseROS1Bridge
    private final RealsenseVideoROS1Bridge l515VideoBridge;
    private final RealsensePointCloudROS1Bridge d435PointCloudBridge;
    private final RealsensePointCloudROS1Bridge l515PointCloudBridge;
-   private final RealsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
+   private final MapsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
    public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform d435PelvisToSensorTransform,
                               RigidBodyTransform l515PelvisToSensorTransform)
@@ -43,12 +43,12 @@ public class RealsenseROS1Bridge
                                                                l515PelvisToSensorTransform,
                                                                RosTools.L515_POINT_CLOUD,
                                                                ROS2Tools.L515_POINT_CLOUD);
-      l515PlanarRegionBridge = new RealsensePlanarRegionROS1Bridge(robotModel,
-                                                                   ros1Node,
-                                                                   ros2Node,
-                                                                   RosTools.MAPSENSE_REGIONS,
-                                                                   ROS2Tools.MAPSENSE_REGIONS,
-                                                                   l515PelvisToSensorTransform);
+      l515PlanarRegionBridge = new MapsensePlanarRegionROS1Bridge(robotModel,
+                                                                  ros1Node,
+                                                                  ros2Node,
+                                                                  RosTools.MAPSENSE_REGIONS,
+                                                                  ROS2Tools.MAPSENSE_REGIONS,
+                                                                  l515PelvisToSensorTransform);
 
       ros1Node.execute();
    }

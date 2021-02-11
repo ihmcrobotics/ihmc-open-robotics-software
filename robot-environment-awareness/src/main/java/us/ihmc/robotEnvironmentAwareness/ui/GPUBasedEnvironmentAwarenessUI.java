@@ -6,7 +6,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.GPUModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.GPUPerceptionModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.PlanarRegionViewer;
@@ -35,7 +35,7 @@ public class GPUBasedEnvironmentAwarenessUI implements PerceptionUI
       if (!uiMessager.isInternalMessagerOpen())
          uiMessager.startMessager();
 
-      planarRegionViewer = new PlanarRegionViewer(messager, GPUModuleAPI.PlanarRegionData, GPUModuleAPI.ShowPlanarRegions);
+      planarRegionViewer = new PlanarRegionViewer(messager, GPUPerceptionModuleAPI.PlanarRegionData, GPUPerceptionModuleAPI.ShowPlanarRegions);
       planarRegionViewer.start();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -44,7 +44,7 @@ public class GPUBasedEnvironmentAwarenessUI implements PerceptionUI
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
-      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, GPUModuleAPI.RequestEntireModuleState);
+      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, GPUPerceptionModuleAPI.RequestEntireModuleState);
       uiConnectionHandler.start();
 
       uiMessager.notifyModuleMessagerStateListeners();
