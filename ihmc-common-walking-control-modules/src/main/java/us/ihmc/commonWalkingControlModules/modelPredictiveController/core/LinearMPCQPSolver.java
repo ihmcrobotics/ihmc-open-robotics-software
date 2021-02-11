@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.sparse.csc.CommonOps_DSCC;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.BlockInverseCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
@@ -25,6 +26,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class LinearMPCQPSolver
 {
+   private static  final boolean debug = false;
+
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
@@ -282,9 +285,9 @@ public class LinearMPCQPSolver
 
    public void submitRhoValueCommand(RhoValueObjectiveCommand command)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
+      int offset = inputCalculator.calculateCompactRhoValueCommand(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitMPCValueObjective(MPCValueCommand command)
@@ -298,14 +301,14 @@ public class LinearMPCQPSolver
    {
       int offset = inputCalculator.calculateContinuityObjective(qpInputTypeA, command);
       if (offset != -1)
-         addInput(qpInputTypeA);
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitVRPTrackingCommand(VRPTrackingCommand command)
    {
-      boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
-      if (success)
-         addInput(qpInputTypeC);
+      int offset = inputCalculator.calculateCompactVRPTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC, offset);
    }
 
    public void addInput(QPInputTypeA input)
@@ -367,19 +370,19 @@ public class LinearMPCQPSolver
 
       // Compute: H += J^T W J
       MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
-      if (MatrixTools.containsNaN(solverInput_H))
+      if (debug && MatrixTools.containsNaN(solverInput_H))
          throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
    }
 
-   public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
+   public void addEqualityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
    {
       addEqualityConstraint(taskJacobian, taskObjective, 0);
    }
 
-   public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int taskColOffset)
+   public void addEqualityConstraint(DMatrix taskJacobian, DMatrix taskObjective, int taskColOffset)
    {
       addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset, solverInput_Aeq, solverInput_beq);
    }
@@ -499,13 +502,19 @@ public class LinearMPCQPSolver
 
    public void addInput(QPInputTypeC input)
    {
+      addInput(input, 0);
+   }
+
+   public void addInput(QPInputTypeC input, int offset)
+   {
       if (!input.useWeightScalar())
          throw new IllegalArgumentException("Not yet implemented.");
 
-      CommonOps_DDRM.addEquals(solverInput_H, input.getWeightScalar(), input.directCostHessian);
-      if (MatrixTools.containsNaN(solverInput_H))
+      int size = input.directCostHessian.numCols;
+      MatrixTools.addMatrixBlock(solverInput_H, offset, offset, input.directCostHessian, 0, 0, size, size, input.getWeightScalar());
+      if (debug && MatrixTools.containsNaN(solverInput_H))
          throw new RuntimeException("error");
-      CommonOps_DDRM.addEquals(solverInput_f, input.getWeightScalar(), input.directCostGradient);
+      MatrixTools.addMatrixBlock(solverInput_f, offset, 0, input.directCostGradient, 0, 0, size, 1, input.getWeightScalar());
    }
 
    public boolean solve()

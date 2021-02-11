@@ -62,8 +62,8 @@ public class LinearMPCSolutionInspection
 
    public void inspectRhoValueCommand(RhoValueObjectiveCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
+      if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
@@ -83,8 +83,8 @@ public class LinearMPCSolutionInspection
 
    public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
-      if (success)
+      int offset = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
          command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
 

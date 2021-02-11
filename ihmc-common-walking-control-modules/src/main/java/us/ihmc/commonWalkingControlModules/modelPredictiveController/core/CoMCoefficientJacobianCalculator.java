@@ -109,6 +109,6 @@ public class CoMCoefficientJacobianCalculator
     */
    private static void add(DMatrix matrixToPack, int row, int col, double value)
    {
-      matrixToPack.set(row, col, value + matrixToPack.get(row, col));
+      matrixToPack.set(row, col, value + matrixToPack.unsafe_get(row, col));
    }
 }

@@ -115,9 +115,9 @@ public class MPCQPInputCalculator
 
    public int calculateCompactCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
-      int variableSize = indexHandler.getTotalProblemSize();
       int firstSegmentNumber = objective.getFirstSegmentNumber();
       int secondSegmentNumber = firstSegmentNumber + 1;
+      int variableSize = 2 * LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(firstSegmentNumber) + indexHandler.getRhoCoefficientsInSegment(secondSegmentNumber);
       int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
       int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
       int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
@@ -135,9 +135,9 @@ public class MPCQPInputCalculator
 
    public int calculateCompactVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
-      int variableSize = indexHandler.getTotalProblemSize();
       int firstSegmentNumber = objective.getFirstSegmentNumber();
       int secondSegmentNumber = firstSegmentNumber + 1;
+      int variableSize = 2 * LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(firstSegmentNumber) + indexHandler.getRhoCoefficientsInSegment(secondSegmentNumber);
       int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
       int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
       int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
@@ -311,6 +311,7 @@ public class MPCQPInputCalculator
 
    public boolean calculateForceMinimizationObjective(QPInputTypeC inputToPack, ForceMinimizationCommand objective)
    {
+      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape();
 
       inputToPack.getDirectCostHessian().zero();
@@ -596,7 +597,39 @@ public class MPCQPInputCalculator
     * @param command command to process
     * @return whether or not the calculation was successful.
     */
-   public boolean calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
+   public int calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
+   {
+      int numberOfVariables = indexHandler.getTotalProblemSize();
+      int rhoStartIdx = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
+
+      if (calculateRhoValueCommandInternal(inputToPack, command, numberOfVariables, rhoStartIdx))
+         return 0;
+
+      return -1;
+   }
+
+   /**
+    * Calculates a {@link QPInputTypeA} based on a {@link RhoValueObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
+    * values.
+    * @param inputToPack QP input to compute
+    * @param command command to process
+    * @return whether or not the calculation was successful.
+    */
+   public int calculateCompactRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
+   {
+      int numberOfVariables = 0;
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+         numberOfVariables += command.getContactPlaneHelper(i).getCoefficientSize();
+
+      int segmentNumber = command.getSegmentNumber();
+
+      if (calculateRhoValueCommandInternal(inputToPack, command, numberOfVariables, 0))
+         return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+
+      return -1;
+   }
+
+   public boolean calculateRhoValueCommandInternal(QPInputTypeA inputToPack, RhoValueObjectiveCommand command, int numberOfVariables, int rhoStartIdx)
    {
       int problemSize = 0;
 
@@ -608,15 +641,15 @@ public class MPCQPInputCalculator
       if (problemSize < 1)
          return false;
 
+      inputToPack.setNumberOfVariables(numberOfVariables);
       inputToPack.reshape(problemSize);
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      int segmentNumber = command.getSegmentNumber();
       double timeOfObjective = command.getTimeOfObjective();
       double omega = command.getOmega();
 
-      int startCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      int startCol = rhoStartIdx;
       int startRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
@@ -657,8 +690,9 @@ public class MPCQPInputCalculator
     * @param objective objective to process
     * @return whether or not that calculation was successful.
     */
-   public boolean calculateVRPTrackingObjective(QPInputTypeC inputToPack, VRPTrackingCommand objective)
+   public int calculateVRPTrackingObjective(QPInputTypeC inputToPack, VRPTrackingCommand objective)
    {
+      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape();
 
       inputToPack.getDirectCostHessian().zero();
@@ -672,7 +706,34 @@ public class MPCQPInputCalculator
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
 
-      return success;
+      if (success)
+         return 0;
+      else
+         return -1;
+   }
+
+   public int calculateCompactVRPTrackingObjective(QPInputTypeC inputToPack, VRPTrackingCommand objective)
+   {
+      int segmentNumber = objective.getSegmentNumber();
+
+      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber) + LinearMPCIndexHandler.comCoefficientsPerSegment);
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      boolean success = vrpTrackingCostCalculator.calculateCompactVRPTrackingObjective(inputToPack.getDirectCostHessian(),
+                                                                                       inputToPack.getDirectCostGradient(),
+                                                                                       objective);
+      double weight = objective.getWeight();
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      if (success)
+         return indexHandler.getComCoefficientStartIndex(segmentNumber);
+      else
+         return -1;
    }
 
    private double getGravityZObjective(int derivativeOrder, double time)

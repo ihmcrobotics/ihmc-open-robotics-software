@@ -40,6 +40,8 @@ import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core
 
 public class CoMTrajectoryModelPredictiveController
 {
+   private static final boolean debug = false;
+
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
@@ -136,7 +138,11 @@ public class CoMTrajectoryModelPredictiveController
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
-      solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
+
+      if (debug)
+         solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
+      else
+         solutionInspection = null;
 
       parentRegistry.addChild(registry);
    }
@@ -583,7 +589,8 @@ public class CoMTrajectoryModelPredictiveController
 
       DMatrixRMaj solutionCoefficients = qpSolver.getSolution();
 
-      solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
+      if (solutionInspection != null)
+         solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
       return solutionCoefficients;
    }
