@@ -26,6 +26,10 @@ public class CenterOfMassMotionControlAnchorDescription
 
    public CenterOfMassMotionControlAnchorDescription()
    {
+      inputMessage = new KinematicsToolboxCenterOfMassMessage();
+      inputMessage.getSelectionMatrix().setXSelected(false);
+      inputMessage.getSelectionMatrix().setYSelected(false);
+      inputMessage.getSelectionMatrix().setZSelected(false);
    }
 
    public CenterOfMassMotionControlAnchorDescription(CenterOfMassMotionControlAnchorDescription other)
@@ -37,7 +41,7 @@ public class CenterOfMassMotionControlAnchorDescription
    public static CenterOfMassMotionControlAnchorDescription fromJSON(JsonNode node)
    {
       if (node == null)
-         return null;
+         return new CenterOfMassMotionControlAnchorDescription();
 
       JsonNode anchorNode = node.get(ANCHOR_JSON);
 
