@@ -289,15 +289,15 @@ public class LinearMPCQPSolver
 
    public void submitMPCValueObjective(MPCValueCommand command)
    {
-      int offset = inputCalculator.calculateValueObjective(qpInputTypeA, command);
+      int offset = inputCalculator.calculateCompactValueObjective(qpInputTypeA, command);
       if (offset != -1)
          addInput(qpInputTypeA, offset);
    }
 
    public void submitContinuityObjective(MPCContinuityCommand command)
    {
-      boolean success = inputCalculator.calculateContinuityObjective(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateContinuityObjective(qpInputTypeA, command);
+      if (offset != -1)
          addInput(qpInputTypeA);
    }
 
@@ -344,7 +344,7 @@ public class LinearMPCQPSolver
 
    public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, int offset)
    {
-      addObjective(taskJacobian, taskObjective, taskWeight, problemSize, offset, solverInput_H, solverInput_f);
+      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset, solverInput_H, solverInput_f);
    }
 
    public static void addObjective(DMatrixRMaj taskJacobian,
@@ -381,7 +381,7 @@ public class LinearMPCQPSolver
 
    public void addEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int taskColOffset)
    {
-      addEqualityConstraint(taskJacobian, taskObjective, problemSize, taskColOffset, solverInput_Aeq, solverInput_beq);
+      addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset, solverInput_Aeq, solverInput_beq);
    }
 
    public static void addEqualityConstraint(DMatrix taskJacobian,
@@ -390,12 +390,13 @@ public class LinearMPCQPSolver
                                             DMatrixRMaj solverInput_Aeq,
                                             DMatrixRMaj solverInput_beq)
    {
-      addEqualityConstraint(taskJacobian, taskObjective, problemSize, 0, solverInput_Aeq, solverInput_beq);
+      addEqualityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Aeq, solverInput_beq);
    }
 
    public static void addEqualityConstraint(DMatrix taskJacobian,
                                             DMatrix taskObjective,
                                             int problemSize,
+                                            int totalProblemSize,
                                             int colOffset,
                                             DMatrixRMaj solverInput_Aeq,
                                             DMatrixRMaj solverInput_beq)
@@ -407,7 +408,7 @@ public class LinearMPCQPSolver
 
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
-      if (variables > problemSize)
+      if (variables + colOffset > totalProblemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
@@ -415,10 +416,10 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps_DDRM.extract(taskJacobian, 0, taskJacobian.getNumRows(), colOffset, colOffset + taskJacobian.getNumCols(), solverInput_Aeq, previousSize, 0);
+      CommonOps_DDRM.extract(taskJacobian, 0, taskJacobian.getNumRows(), 0, variables, solverInput_Aeq, previousSize, colOffset);
       CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
@@ -431,17 +432,18 @@ public class LinearMPCQPSolver
 
    public void addMotionLesserOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective, int colOffset)
    {
-      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
    public static void addMotionLesserOrEqualInequalityConstraint(DMatrix taskJacobian,
                                                                  DMatrix taskObjective,
                                                                  int problemSize,
+                                                                 int totalProblemSize,
                                                                  int colOffset,
                                                                  DMatrixRMaj solverInput_Ain,
                                                                  DMatrixRMaj solverInput_bin)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
    public void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
@@ -451,30 +453,36 @@ public class LinearMPCQPSolver
 
    public void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian, DMatrix taskObjective, int colOffset)
    {
-      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
    public static void addMotionGreaterOrEqualInequalityConstraint(DMatrix taskJacobian,
                                                                   DMatrix taskObjective,
                                                                   int problemSize,
+                                                                  int totalProblemSize,
                                                                   int colOffset,
                                                                   DMatrixRMaj solverInput_Ain,
                                                                   DMatrixRMaj solverInput_bin)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset, solverInput_Ain, solverInput_bin);
    }
 
    private static void addInequalityConstraintInternal(DMatrix taskJacobian,
                                                        DMatrix taskObjective,
                                                        double sign,
                                                        int problemSize,
+                                                       int totalProblemSize,
                                                        int colOffset,
                                                        DMatrixRMaj solverInput_Ain,
                                                        DMatrixRMaj solverInput_bin)
    {
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
-      if (variables > problemSize)
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      if (variables > totalProblemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
@@ -482,7 +490,7 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_Ain.reshape(previousSize + taskSize, totalProblemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
       MatrixMissingTools.setMatrixBlock(solverInput_Ain, previousSize, colOffset, taskJacobian, 0, 0, taskSize, variables, sign);

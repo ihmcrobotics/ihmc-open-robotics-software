@@ -6,6 +6,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -16,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,6 +147,7 @@ public class MPCQPInputCalculatorTest
          EjmlUnitTests.assertEquals(expectedVelocityObjective, comVelocityQPInput.getTaskObjective(), 1e-4);
       }
    }
+
 
    @Test
    public void testCoMObjectiveTwoSegment()
@@ -499,4 +502,264 @@ public class MPCQPInputCalculatorTest
          EjmlUnitTests.assertEquals(expectedVelocityObjective, vrpVelocityQPInput.getTaskObjective(), 1e-4);
       }
    }
+
+   @Test
+   public void testCalculateCompactCoMValueObjective()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FramePose3D contactPose = new FramePose3D();
+      contactPose.getPosition().set(0.3, 0.7, 0.0);
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      LinearMPCQPSolver qpSolver1 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry1"));
+      LinearMPCQPSolver qpSolver2 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry2"));
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      QPInputTypeA comPositionQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA comVelocityQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA comPositionQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA comVelocityQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+
+      Random random = new Random(1738L);
+
+      double dt = 0.05;
+      for (ConstraintType constraintType : ConstraintType.values())
+      {
+         for (double time = 0.0; time < 2.0; time += dt)
+         {
+            helper.reshape(contactPolygon.getNumberOfVertices());
+            helper.computeMatrices(time, omega);
+
+            rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+            contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+            contactPlaneHelper.computeJacobians(time, omega);
+
+            FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+            FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+            CoMPositionCommand comPositionCommand = new CoMPositionCommand();
+            comPositionCommand.addContactPlaneHelper(contactPlaneHelper);
+            comPositionCommand.setOmega(omega);
+            comPositionCommand.setSegmentNumber(1);
+            comPositionCommand.setTimeOfObjective(time);
+            comPositionCommand.setObjective(comPositionObjective);
+            comPositionCommand.setConstraintType(constraintType);
+
+            CoMVelocityCommand comVelocityCommand = new CoMVelocityCommand();
+            comVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
+            comVelocityCommand.setOmega(omega);
+            comVelocityCommand.setSegmentNumber(1);
+            comVelocityCommand.setTimeOfObjective(time);
+            comVelocityCommand.setObjective(comVelocityObjective);
+            comVelocityCommand.setConstraintType(constraintType);
+
+            inputCalculator.calculateValueObjective(comPositionQPInput, comPositionCommand);
+            inputCalculator.calculateValueObjective(comVelocityQPInput, comVelocityCommand);
+
+            qpSolver1.initialize();
+            qpSolver2.initialize();
+
+            qpSolver1.addInput(comPositionQPInput);
+            qpSolver1.addInput(comVelocityQPInput);
+
+            int positionOffset = inputCalculator.calculateCompactValueObjective(comPositionQPInputCompact, comPositionCommand);
+            int velocityOffset = inputCalculator.calculateCompactValueObjective(comVelocityQPInputCompact, comVelocityCommand);
+            qpSolver2.addInput(comPositionQPInputCompact, positionOffset);
+            qpSolver2.addInput(comVelocityQPInputCompact, velocityOffset);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+         }
+      }
+   }
+
+   @Test
+   public void testCalculateCompactDCMValueObjective()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FramePose3D contactPose = new FramePose3D();
+      contactPose.getPosition().set(0.3, 0.7, 0.0);
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      LinearMPCQPSolver qpSolver1 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry1"));
+      LinearMPCQPSolver qpSolver2 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry2"));
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      QPInputTypeA dcmPositionQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA dcmVelocityQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA dcmPositionQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA dcmVelocityQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+
+      Random random = new Random(1738L);
+
+      for (ConstraintType constraintType : ConstraintType.values())
+      {
+         for (double time = 0.0; time < 2.0; time += 0.05)
+         {
+            helper.reshape(contactPolygon.getNumberOfVertices());
+            helper.computeMatrices(time, omega);
+
+            rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+            contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+            contactPlaneHelper.computeJacobians(time, omega);
+
+            FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+            FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+            DCMPositionCommand dcmPositionCommand = new DCMPositionCommand();
+            dcmPositionCommand.addContactPlaneHelper(contactPlaneHelper);
+            dcmPositionCommand.setOmega(omega);
+            dcmPositionCommand.setSegmentNumber(1);
+            dcmPositionCommand.setTimeOfObjective(time);
+            dcmPositionCommand.setObjective(comPositionObjective);
+            dcmPositionCommand.setConstraintType(constraintType);
+
+            DCMVelocityCommand dcmVelocityCommand = new DCMVelocityCommand();
+            dcmVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
+            dcmVelocityCommand.setOmega(omega);
+            dcmVelocityCommand.setSegmentNumber(1);
+            dcmVelocityCommand.setTimeOfObjective(time);
+            dcmVelocityCommand.setObjective(comVelocityObjective);
+            dcmVelocityCommand.setConstraintType(constraintType);
+
+            inputCalculator.calculateValueObjective(dcmPositionQPInput, dcmPositionCommand);
+            inputCalculator.calculateValueObjective(dcmVelocityQPInput, dcmVelocityCommand);
+
+            qpSolver1.initialize();
+            qpSolver2.initialize();
+
+            qpSolver1.addInput(dcmPositionQPInput);
+            qpSolver1.addInput(dcmVelocityQPInput);
+
+            int positionOffset = inputCalculator.calculateCompactValueObjective(dcmPositionQPInputCompact, dcmPositionCommand);
+            int velocityOffset = inputCalculator.calculateCompactValueObjective(dcmVelocityQPInputCompact, dcmVelocityCommand);
+            qpSolver2.addInput(dcmPositionQPInputCompact, positionOffset);
+            qpSolver2.addInput(dcmVelocityQPInputCompact, velocityOffset);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+         }
+      }
+   }
+
+   @Test
+   public void testCalculateCompactVRPValueObjective()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
+      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FramePose3D contactPose = new FramePose3D();
+      contactPose.getPosition().set(0.3, 0.7, 0.0);
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
+      LinearMPCQPSolver qpSolver1 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry1"));
+      LinearMPCQPSolver qpSolver2 = new LinearMPCQPSolver(indexHandler, 0.01, gravityZ, new YoRegistry("testRegistry2"));
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      QPInputTypeA vrpPositionQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA vrpVelocityQPInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA vrpPositionQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      QPInputTypeA vrpVelocityQPInputCompact = new QPInputTypeA(indexHandler.getTotalProblemSize());
+
+      Random random = new Random(1738L);
+
+      for (ConstraintType constraintType : ConstraintType.values())
+      {
+         for (double time = 0.0; time < 2.0; time += 0.05)
+         {
+            helper.reshape(contactPolygon.getNumberOfVertices());
+            helper.computeMatrices(time, omega);
+
+            rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
+
+            contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+            contactPlaneHelper.computeJacobians(time, omega);
+
+            FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+            FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+            VRPPositionCommand vrpPositionCommand = new VRPPositionCommand();
+            vrpPositionCommand.addContactPlaneHelper(contactPlaneHelper);
+            vrpPositionCommand.setOmega(omega);
+            vrpPositionCommand.setSegmentNumber(1);
+            vrpPositionCommand.setTimeOfObjective(time);
+            vrpPositionCommand.setObjective(comPositionObjective);
+            vrpPositionCommand.setConstraintType(constraintType);
+
+            VRPVelocityCommand vrpVelocityCommand = new VRPVelocityCommand();
+            vrpVelocityCommand.addContactPlaneHelper(contactPlaneHelper);
+            vrpVelocityCommand.setOmega(omega);
+            vrpVelocityCommand.setSegmentNumber(1);
+            vrpVelocityCommand.setTimeOfObjective(time);
+            vrpVelocityCommand.setObjective(comVelocityObjective);
+            vrpVelocityCommand.setConstraintType(constraintType);
+
+            inputCalculator.calculateValueObjective(vrpPositionQPInput, vrpPositionCommand);
+            inputCalculator.calculateValueObjective(vrpVelocityQPInput, vrpVelocityCommand);
+
+            qpSolver1.initialize();
+            qpSolver2.initialize();
+
+            qpSolver1.addInput(vrpPositionQPInput);
+            qpSolver1.addInput(vrpVelocityQPInput);
+
+            int positionOffset = inputCalculator.calculateCompactValueObjective(vrpPositionQPInputCompact, vrpPositionCommand);
+            int velocityOffset = inputCalculator.calculateCompactValueObjective(vrpVelocityQPInputCompact, vrpVelocityCommand);
+            qpSolver2.addInput(vrpPositionQPInputCompact, positionOffset);
+            qpSolver2.addInput(vrpVelocityQPInputCompact, velocityOffset);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+         }
+      }
+   }
+
 }

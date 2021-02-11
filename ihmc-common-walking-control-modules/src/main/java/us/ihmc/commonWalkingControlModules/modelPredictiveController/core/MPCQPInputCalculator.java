@@ -37,7 +37,7 @@ public class MPCQPInputCalculator
     * @param objective continuity command to process
     * @return whether or not the calculation was successful.
     */
-   public boolean calculateContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   public int calculateContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
       switch (objective.getValueType())
       {
@@ -48,7 +48,22 @@ public class MPCQPInputCalculator
          case DCM:
             throw new IllegalArgumentException();
          default:
-            return false;
+            return -1;
+      }
+   }
+
+   public int calculateCompactContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      switch (objective.getValueType())
+      {
+         case COM:
+            return calculateCompactCoMContinuityObjective(inputToPack, objective);
+         case VRP:
+            return calculateCompactVRPContinuityObjective(inputToPack, objective);
+         case DCM:
+            throw new IllegalArgumentException();
+         default:
+            return -1;
       }
    }
 
@@ -59,31 +74,112 @@ public class MPCQPInputCalculator
     * @param objective continuity command to process
     * @return whether or not the calculation was successful.
     */
-   public boolean calculateCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   public int calculateCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
    {
+      int variableSize = indexHandler.getTotalProblemSize();
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+      int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int secondRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+
+      if (calculateCoMContinuityObjectiveInternal(inputToPack, objective, variableSize, firstCoMStartIndex, secondCoMStartIndex, firstRhoStartIndex, secondRhoStartIndex))
+         return 0;
+
+      return -1;
+   }
+
+   /**
+    * Computes a {@link QPInputTypeA} from a {@link MPCContinuityCommand} if {@link MPCContinuityCommand#getValueType()} indicates the virtual repellent point.
+    * This can consist of a continuity command that is either an objective or equality constraint.
+    * @param inputToPack QP Input that contains the encoded continuity command
+    * @param objective continuity command to process
+    * @return whether or not the calculation was successful.
+    */
+   public int calculateVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      int variableSize = indexHandler.getTotalProblemSize();
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+      int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int secondRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+
+      if (calculateVRPContinuityObjectiveInternal(inputToPack, objective, variableSize, firstCoMStartIndex, secondCoMStartIndex, firstRhoStartIndex, secondRhoStartIndex))
+         return 0;
+
+      return -1;
+   }
+
+   public int calculateCompactCoMContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      int variableSize = indexHandler.getTotalProblemSize();
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+      int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int secondRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+
+      secondCoMStartIndex -= firstCoMStartIndex;
+      firstRhoStartIndex -= firstCoMStartIndex;
+      secondRhoStartIndex -= firstRhoStartIndex;
+
+      if (calculateCoMContinuityObjectiveInternal(inputToPack, objective, variableSize, 0, secondCoMStartIndex, firstRhoStartIndex, secondRhoStartIndex))
+         return firstCoMStartIndex;
+
+      return -1;
+   }
+
+   public int calculateCompactVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   {
+      int variableSize = indexHandler.getTotalProblemSize();
+      int firstSegmentNumber = objective.getFirstSegmentNumber();
+      int secondSegmentNumber = firstSegmentNumber + 1;
+      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
+      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
+      int firstRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int secondRhoStartIndex = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+
+      secondCoMStartIndex -= firstCoMStartIndex;
+      firstRhoStartIndex -= firstCoMStartIndex;
+      secondRhoStartIndex -= firstRhoStartIndex;
+
+      if (calculateVRPContinuityObjectiveInternal(inputToPack, objective, variableSize, 0, secondCoMStartIndex, firstRhoStartIndex, secondRhoStartIndex))
+         return firstCoMStartIndex;
+
+      return -1;
+   }
+
+   public boolean calculateCoMContinuityObjectiveInternal(QPInputTypeA inputToPack,
+                                                          MPCContinuityCommand objective,
+                                                          int variableSize,
+                                                          int firstComStartCol,
+                                                          int secondComStartCol,
+                                                          int firstRhoStartCol,
+                                                          int secondRhoStartCol)
+   {
+      inputToPack.setNumberOfVariables(variableSize);
       inputToPack.reshape(3);
       inputToPack.setConstraintType(objective.getConstraintType());
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      int firstSegmentNumber = objective.getFirstSegmentNumber();
-      int secondSegmentNumber = firstSegmentNumber + 1;
       double firstSegmentDuration = objective.getFirstSegmentDuration();
       double omega = objective.getOmega();
       double weight = objective.getWeight();
 
-      int firstCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
-      int secondCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
-
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstCoMStartIndex,
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(firstComStartCol,
                                                             firstSegmentDuration,
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondCoMStartIndex, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondComStartCol, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
 
-      int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int startCol = firstRhoStartCol;
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
@@ -101,7 +197,7 @@ public class MPCQPInputCalculator
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
-      startCol = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+      startCol = secondRhoStartCol;
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
@@ -129,44 +225,40 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   /**
-    * Computes a {@link QPInputTypeA} from a {@link MPCContinuityCommand} if {@link MPCContinuityCommand#getValueType()} indicates the virtual repellent point.
-    * This can consist of a continuity command that is either an objective or equality constraint.
-    * @param inputToPack QP Input that contains the encoded continuity command
-    * @param objective continuity command to process
-    * @return whether or not the calculation was successful.
-    */
-   public boolean calculateVRPContinuityObjective(QPInputTypeA inputToPack, MPCContinuityCommand objective)
+   public boolean calculateVRPContinuityObjectiveInternal(QPInputTypeA inputToPack,
+                                                          MPCContinuityCommand objective,
+                                                          int variableSize,
+                                                          int firstComStartCol,
+                                                          int secondComStartCol,
+                                                          int firstRhoStartCol,
+                                                          int secondRhoStartCol)
    {
+      inputToPack.setNumberOfVariables(variableSize);
       inputToPack.reshape(3);
       inputToPack.setConstraintType(objective.getConstraintType());
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      int firstSegmentNumber = objective.getFirstSegmentNumber();
-      int secondSegmentNumber = firstSegmentNumber + 1;
       double firstSegmentDuration = objective.getFirstSegmentDuration();
       double omega = objective.getOmega();
       double omega2 = omega * omega;
       double weight = objective.getWeight();
 
-      int firstSegmentCoMStartIndex = indexHandler.getComCoefficientStartIndex(firstSegmentNumber);
-      int secondSegmentCoMStartIndex = indexHandler.getComCoefficientStartIndex(secondSegmentNumber);
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(firstSegmentCoMStartIndex,
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(firstComStartCol,
                                                             omega,
                                                             firstSegmentDuration,
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             1.0);
-      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondSegmentCoMStartIndex,
+      CoMCoefficientJacobianCalculator.calculateVRPJacobian(secondComStartCol,
                                                             omega,
                                                             0.0,
                                                             inputToPack.getTaskJacobian(),
                                                             objective.getDerivativeOrder(),
                                                             -1.0);
 
-      int startCol = indexHandler.getRhoCoefficientStartIndex(firstSegmentNumber);
+      int startCol = firstRhoStartCol;
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
@@ -183,7 +275,7 @@ public class MPCQPInputCalculator
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
-      startCol = indexHandler.getRhoCoefficientStartIndex(secondSegmentNumber);
+      startCol = secondRhoStartCol;
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
@@ -301,6 +393,7 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       int comStartCol = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int rhoStartCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      inputToPack.setNumberOfVariables(variableSize);
 
       if (calculateCoMValueObjectiveInternal(inputToPack, objective, variableSize, comStartCol, rhoStartCol))
          return 0;
@@ -314,6 +407,7 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       int comStartCol = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int rhoStartCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      inputToPack.setNumberOfVariables(variableSize);
 
       if (calculateVRPValueObjectiveInternal(inputToPack, objective, variableSize, comStartCol, rhoStartCol))
          return 0;
@@ -327,6 +421,7 @@ public class MPCQPInputCalculator
       int segmentNumber = objective.getSegmentNumber();
       int comStartCol = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int rhoStartCol = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+      inputToPack.setNumberOfVariables(variableSize);
 
       if (calculateDCMValueObjectiveInternal(inputToPack, objective, variableSize, comStartCol, rhoStartCol))
          return 0;
