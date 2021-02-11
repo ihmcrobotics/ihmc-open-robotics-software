@@ -76,8 +76,8 @@ public class LinearMPCSolutionInspection
 
    public void inspectCoMContinuityObjective(MPCContinuityCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
+      if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
@@ -197,7 +197,7 @@ public class LinearMPCSolutionInspection
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
 
-      LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, 0, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();
@@ -222,7 +222,7 @@ public class LinearMPCSolutionInspection
       solverInput_Ain.zero();
       solverInput_bin.zero();
 
-      LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, 0, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();
