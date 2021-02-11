@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
 import org.lwjgl.opengl.GL32;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -124,12 +123,8 @@ public class GDXDepthSensorSimulator
 
             if (depthWindowEnabledOptimization)
             {
-               float clippedDepth = (float) MathTools.clamp(depthReading, camera.near, camera.far);
-               float pastNear = clippedDepth - camera.near;
-               float worldRange = camera.far - camera.near;
                float colorRange = 1.0f;
-               float grayscale = pastNear * colorRange / worldRange;
-               grayscale = depthReading * colorRange / camera.far;
+               float grayscale = depthReading * colorRange / camera.far;
                int flippedY = imageHeight - y;
 
                depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
@@ -158,6 +153,7 @@ public class GDXDepthSensorSimulator
 
       if (depthWindowEnabledOptimization)
          depthWindowTexture.draw(depthWindowPixmap, 0, 0);
+
       depthWindowEnabledOptimization = false;
    }
 
@@ -231,6 +227,11 @@ public class GDXDepthSensorSimulator
    public PerspectiveCamera getCamera()
    {
       return camera;
+   }
+
+   public FloatBuffer getDepthFloatBuffer()
+   {
+      return depthFloatBuffer;
    }
 
    public RecyclingArrayList<Point3D32> getPoints()

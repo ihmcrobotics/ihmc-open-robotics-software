@@ -21,15 +21,14 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
 
-public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
+public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
 {
    private static final int MAX_POINTS = 5000;
-   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
+   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(10.0);
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
@@ -40,7 +39,11 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-   public RealsenseD435PointCloudROS1Bridge(DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, RigidBodyTransform pelvisToSensorTransform)
+   public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
+                                        RosMainNode ros1Node,
+                                        ROS2Node ros2Node,
+                                        RigidBodyTransform pelvisToSensorTransform,
+                                        String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
@@ -49,13 +52,11 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
-      String ros1Topic = RosTools.D435_POINT_CLOUD;
-      LogTools.info("Subscribing ROS 1: {}", ros1Topic);
-      ros1Node.attachSubscriber(ros1Topic, this);
+      LogTools.info("Subscribing ROS 1: {}", ros1InputTopic);
+      ros1Node.attachSubscriber(ros1InputTopic, this);
 
-      ROS2Topic<StereoVisionPointCloudMessage> ros2Topic = ROS2Tools.D435_POINT_CLOUD;
-      LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+      LogTools.info("Publishing ROS 2: {}", ros2OutputTopic.getName());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic, ROS2QosProfile.DEFAULT());
    }
 
    @Override
@@ -76,33 +77,24 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    {
       try
       {
-         TimerSnapshot dataReceptionTimerSnapshot = syncedRobot.getDataReceptionTimerSnapshot();
-         if (!dataReceptionTimerSnapshot.isRunning(2.0))
+         boolean hasColors = true;
+         PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
+
+         syncedRobot.update();
+         pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+         transformToWorld.multiply(pelvisToSensorTransform);
+         tempSensorFramePose.set(transformToWorld);
+         pointCloudData.applyTransform(transformToWorld);
+
+         ArrayList<Point3D> pointCloud = new ArrayList<>();
+         for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
          {
-            LogTools.info("No robot data in {} s", dataReceptionTimerSnapshot.getTimePassedSinceReset());
+            pointCloud.add(new Point3D(pointCloudData.getPointCloud()[i]));
          }
-         else
-         {
-            syncedRobot.update();
 
-            boolean hasColors = true;
-            PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
-
-            pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-            transformToWorld.multiply(pelvisToSensorTransform);
-            tempSensorFramePose.set(transformToWorld);
-
-            pointCloudData.applyTransform(transformToWorld);
-            ArrayList<Point3D> pointCloud = new ArrayList<>();
-            for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
-            {
-               pointCloud.add(new Point3D(pointCloudData.getPointCloud()[i]));
-            }
-
-            StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, tempSensorFramePose);
-            LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-            publisher.publish(message);
-         }
+         StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, tempSensorFramePose);
+//         LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
+         publisher.publish(message);
       }
       catch (Exception e)
       {

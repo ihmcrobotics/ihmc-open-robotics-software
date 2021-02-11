@@ -17,7 +17,7 @@ public class LookAndStepBehaviorAPI
 {
    private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step");
 
-   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.REALSENSE_SLAM_REGIONS;
+   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.MAPSENSE_REGIONS;
 
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.

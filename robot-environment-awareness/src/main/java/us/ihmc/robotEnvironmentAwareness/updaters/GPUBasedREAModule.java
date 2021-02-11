@@ -2,12 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.GPUModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.GPUPerceptionModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.RawGPUPlanarRegionSubscriber;
 
 import java.net.URISyntaxException;
@@ -38,7 +39,7 @@ public class GPUBasedREAModule implements PerceptionModule
       this.rosMainNode = rosMainNode;
       this.ros2Node = ros2Node;
       this.messager = messager;
-      rosMainNode.attachSubscriber("/map/regions/test", gpuPlanarRegionSubscriber);
+      rosMainNode.attachSubscriber(RosTools.MAPSENSE_REGIONS, gpuPlanarRegionSubscriber);
    }
 
    void mainUpdate()
@@ -49,7 +50,7 @@ public class GPUBasedREAModule implements PerceptionModule
          PlanarRegionsList regionList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
          //            LogTools.info("Raw:{} Generated:{}", rawGPUPlanarRegionList.getNumOfRegions(), regionList.getNumberOfPlanarRegions());
 
-         messager.submitMessage(GPUModuleAPI.PlanarRegionData, regionList);
+         messager.submitMessage(GPUPerceptionModuleAPI.PlanarRegionData, regionList);
       }
    }
 

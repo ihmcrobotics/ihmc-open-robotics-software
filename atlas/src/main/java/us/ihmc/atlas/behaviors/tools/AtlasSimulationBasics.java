@@ -27,8 +27,8 @@ import java.util.Random;
 
 public class AtlasSimulationBasics
 {
-   protected static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    protected static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
+   protected static AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 
    protected static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
    protected static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));

@@ -3,7 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class GPUModuleAPI
+public class GPUPerceptionModuleAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("GPUBasedREARoot");

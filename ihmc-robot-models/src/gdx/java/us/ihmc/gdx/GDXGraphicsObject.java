@@ -97,7 +97,6 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
 
          Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
-//               Model model = GDXModelLoader.loadObjModel(modelFileName);
          models.add(model);
 
          ModelInstance modelInstance = new ModelInstance(model);
@@ -106,6 +105,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       catch (SerializationException e)
       {
          LogTools.error(e.getMessage());
+         e.printStackTrace();
       }
 
       //      if (graphics3DAddModelFile.getAppearance() != null)
