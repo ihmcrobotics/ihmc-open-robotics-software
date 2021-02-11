@@ -21,7 +21,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class RealsensePlanarRegionROS1Bridge
+public class MapsensePlanarRegionROS1Bridge
 {
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -31,12 +31,12 @@ public class RealsensePlanarRegionROS1Bridge
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform pelvisToSensorTransform;
 
-   public RealsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
-                                          RosMainNode ros1Node,
-                                          ROS2NodeInterface ros2Node,
-                                          String ros1InputTopic,
-                                          ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic,
-                                          RigidBodyTransform pelvisToSensorTransform)
+   public MapsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
+                                         RosMainNode ros1Node,
+                                         ROS2NodeInterface ros2Node,
+                                         String ros1InputTopic,
+                                         ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic,
+                                         RigidBodyTransform pelvisToSensorTransform)
    {
       this.pelvisToSensorTransform = pelvisToSensorTransform;
 
@@ -79,6 +79,7 @@ public class RealsensePlanarRegionROS1Bridge
             PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
             planarRegionsList.applyTransform(transformToWorld);
             publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+            LogTools.info("Total Planar Regions: {}", planarRegionsList.getNumberOfPlanarRegions());
          }
       });
    }

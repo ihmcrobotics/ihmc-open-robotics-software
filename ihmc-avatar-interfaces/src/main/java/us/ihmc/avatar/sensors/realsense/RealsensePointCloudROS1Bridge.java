@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
 {
    private static final int MAX_POINTS = 5000;
-   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(3.0);
+   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(10.0);
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
@@ -77,33 +77,24 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    {
       try
       {
-         TimerSnapshot dataReceptionTimerSnapshot = syncedRobot.getDataReceptionTimerSnapshot();
-         if (!dataReceptionTimerSnapshot.isRunning(2.0))
+         boolean hasColors = true;
+         PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
+
+         syncedRobot.update();
+         pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+         transformToWorld.multiply(pelvisToSensorTransform);
+         tempSensorFramePose.set(transformToWorld);
+         pointCloudData.applyTransform(transformToWorld);
+
+         ArrayList<Point3D> pointCloud = new ArrayList<>();
+         for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
          {
-            LogTools.info("No robot data in {} s", dataReceptionTimerSnapshot.getTimePassedSinceReset());
+            pointCloud.add(new Point3D(pointCloudData.getPointCloud()[i]));
          }
-         else
-         {
-            syncedRobot.update();
 
-            boolean hasColors = true;
-            PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
-
-            pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-            transformToWorld.multiply(pelvisToSensorTransform);
-            tempSensorFramePose.set(transformToWorld);
-
-            pointCloudData.applyTransform(transformToWorld);
-            ArrayList<Point3D> pointCloud = new ArrayList<>();
-            for (int i = 0; i < pointCloudData.getNumberOfPoints(); i++)
-            {
-               pointCloud.add(new Point3D(pointCloudData.getPointCloud()[i]));
-            }
-
-            StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, tempSensorFramePose);
-            LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-            publisher.publish(message);
-         }
+         StereoVisionPointCloudMessage message = PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, tempSensorFramePose);
+//         LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
+         publisher.publish(message);
       }
       catch (Exception e)
       {
