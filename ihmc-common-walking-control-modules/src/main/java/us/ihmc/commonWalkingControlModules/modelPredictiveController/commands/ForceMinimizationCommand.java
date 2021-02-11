@@ -15,6 +15,7 @@ import java.util.function.DoubleConsumer;
  */
 public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCommand>
 {
+   private int commandId;
    /**
     * Defines the contact planes to be used in the force minimization.
     */
@@ -118,9 +119,83 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
       this.costToGoConsumer = costToGoConsumer;
    }
 
+   public DoubleConsumer getCostToGoConsumer()
+   {
+      return costToGoConsumer;
+   }
+
    public void setCostToGo(double costToGo)
    {
       if (costToGoConsumer != null)
          costToGoConsumer.accept(costToGo);
+   }
+
+   @Override
+   public void set(ForceMinimizationCommand other)
+   {
+      clear();
+      setCommandId(other.getCommandId());
+      setSegmentNumber(other.getSegmentNumber());
+      setOmega(other.getOmega());
+      setWeight(other.getWeight());
+      setCostToGoConsumer(other.getCostToGoConsumer());
+      for (int i = 0; i < other.getNumberOfContacts(); i++)
+         addContactPlaneHelper(other.getContactPlaneHelper(i));
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof ForceMinimizationCommand)
+      {
+         ForceMinimizationCommand other = (ForceMinimizationCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (segmentNumber != other.segmentNumber)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (weight != other.weight)
+            return false;
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < contactPlaneHelpers.size(); i++)
+         {
+            if (!contactPlaneHelpers.get(i).equals(other.contactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", omega: " + omega + ", weight: " + weight + ".";
+      for (int i = 0; i < getNumberOfContacts(); i++)
+      {
+         string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);
+      }
+      return string;
    }
 }
