@@ -5,6 +5,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -53,7 +55,9 @@ public class GDX3DSceneManager
 
       this.environment = environment;
 
-      modelBatch = new ModelBatch();
+      DefaultShader.Config defaultShaderConfig = new DefaultShader.Config();
+      // we could set shader options or even swap out the shader here
+      modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
 
       inputMultiplexer = new InputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
