@@ -170,4 +170,10 @@ public class MatrixMissingTools
       skewSymmetric.set(2, 2, 0.0);
       return skewSymmetric;
    }
+
+   public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
+   {
+      matrix.data[ row * matrix.numCols + col ] += value;
+   }
+
 }
