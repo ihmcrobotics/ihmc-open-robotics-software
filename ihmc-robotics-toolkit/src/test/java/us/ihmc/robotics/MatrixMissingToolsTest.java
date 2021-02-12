@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -63,23 +64,4 @@ public class MatrixMissingToolsTest
       }
    }
 
-   @Test
-   public void testFast3x3Inverse()
-   {
-      int iters = 500;
-      double epsilon = 1e-8;
-      Random random = new Random(1738L);
-      for (int i = 0; i < iters; i++)
-      {
-         DMatrixRMaj matrix = new DMatrixRMaj(3, 3);
-         DMatrixRMaj matrixInverseExpected = new DMatrixRMaj(3, 3);
-         DMatrixRMaj matrixInverse = new DMatrixRMaj(3, 3);
-         matrix.setData(RandomNumbers.nextDoubleArray(random, 9, 10.0));
-
-         NativeCommonOps.invert(matrix, matrixInverseExpected);
-         MatrixMissingTools.fast3x3Inverse(matrix, matrixInverse);
-
-         MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
-      }
-   }
 }

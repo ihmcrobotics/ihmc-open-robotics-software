@@ -22,7 +22,6 @@ public class QPInputTypeC
     * </p>
     * where:
     * <ul>
-    * <li>u is the general objective
     * <li>Q is {@link #taskWeightMatrix}
     * <li>H is {@link #directCostHessian}
     * <li>g is {@link #directCostGradient}
