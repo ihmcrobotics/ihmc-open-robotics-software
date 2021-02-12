@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoMPositionContinuityCommandTest
@@ -33,7 +34,6 @@ public class CoMPositionContinuityCommandTest
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper1 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactStateMagnitudeToForceMatrixHelper rhoHelper2 = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
 
       MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane contactPlaneHelper2 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
@@ -91,13 +91,8 @@ public class CoMPositionContinuityCommandTest
       taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(0), duration1, taskJacobianExpected, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(1), 0.0, taskJacobianExpected, 0, -1.0);
-
-      helper.computeMatrices(duration1, omega);
-      MatrixTools.multAddBlock(rhoHelper1.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(0));
-      helper.computeMatrices(0.0, omega);
-      MatrixTools.multAddBlock(-1.0, rhoHelper2.getLinearJacobianInWorldFrame(), helper.getPositionJacobianMatrix(), taskJacobianExpected, 0, indexHandler.getRhoCoefficientStartIndex(1));
+      MatrixMissingTools.addMatrixBlock(taskJacobianExpected, 0, indexHandler.getComCoefficientStartIndex(0), MPCTestHelper.getCoMPositionJacobian(duration1, omega, contactPlaneHelper1));
+      MatrixMissingTools.addMatrixBlock(taskJacobianExpected, 0, indexHandler.getComCoefficientStartIndex(1), MPCTestHelper.getCoMPositionJacobian(0.0, omega, contactPlaneHelper2), -1.0);
 
       valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
       valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));

@@ -32,9 +32,7 @@ public class CoMPositionCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
-      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -43,10 +41,13 @@ public class CoMPositionCommandTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
-      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
-      contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
+
+      int numberOfVectors = 4 * contactPolygon.getNumberOfVertices();
+      int rhoCoefficients =  numberOfVectors * LinearMPCIndexHandler.coefficientsPerRho;
+      int totalCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + rhoCoefficients;
 
       double timeOfConstraint = 0.7;
 
@@ -56,7 +57,7 @@ public class CoMPositionCommandTest
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
-      command.addContactPlaneHelper(contactPlaneHelper);
+      command.addContactPlaneHelper(contactPlane);
 
       double regularization = 1e-5;
       solver.initialize();
@@ -67,74 +68,28 @@ public class CoMPositionCommandTest
       solver.solve();
 
       FramePoint3D solvedPositionAtConstraint = new FramePoint3D();
-      FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
       DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
 
+
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
-      solvedPositionAtConstraint.addX(timeOfConstraint * solution.get(0, 0));
-      solvedPositionAtConstraint.addX(solution.get(1, 0));
-      solvedPositionAtConstraint.addY(timeOfConstraint * solution.get(2, 0));
-      solvedPositionAtConstraint.addY(solution.get(3, 0));
-      solvedPositionAtConstraint.addZ(timeOfConstraint * solution.get(4, 0));
-      solvedPositionAtConstraint.addZ(solution.get(5, 0));
-
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
-
-      helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
-
       CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
-      solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -0.5 * timeOfConstraint * timeOfConstraint * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
-      taskJacobianExpected.set(0, 0, timeOfConstraint);
-      taskJacobianExpected.set(0, 1, 1.0);
-      taskJacobianExpected.set(1, 2, timeOfConstraint);
-      taskJacobianExpected.set(1, 3, 1.0);
-      taskJacobianExpected.set(2, 4, timeOfConstraint);
-      taskJacobianExpected.set(2, 5, 1.0);
+      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMPositionJacobian(timeOfConstraint, omega, contactPlane);
 
 
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
-      {
-         int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
-         double rhoValue = Math.exp(omega * timeOfConstraint) * solution.get(startIdx, 0);
-         rhoValue += Math.exp(-omega * timeOfConstraint) * solution.get(startIdx + 1, 0);
-         rhoValue += timeOfConstraint * timeOfConstraint * timeOfConstraint * solution.get(startIdx + 2, 0);
-         rhoValue += timeOfConstraint * timeOfConstraint * solution.get(startIdx + 3, 0);
-
-         assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
-         solvedPositionAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedPositionAtConstraint);
-
-         taskJacobianExpected.set(0, startIdx, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(0, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint);
-      }
+      solvedPositionAtConstraint.set(solvedObjectivePosition);
       solvedPositionAtConstraint.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedPositionAtConstraint);
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
+      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(totalCoefficients, totalCoefficients);
+      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(totalCoefficients, 1);
 
       CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
       CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
@@ -147,7 +102,6 @@ public class CoMPositionCommandTest
       CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
    }
 
@@ -161,10 +115,6 @@ public class CoMPositionCommandTest
       double mu = 0.8;
       double dt = 1e-3;
 
-      FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
-
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
@@ -175,7 +125,6 @@ public class CoMPositionCommandTest
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
 
@@ -198,37 +147,20 @@ public class CoMPositionCommandTest
 
       solver.solve();
 
-      FramePoint3D solvedPositionAtConstraint = new FramePoint3D();
-      FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      DMatrixRMaj rhoValueVector = new DMatrixRMaj(contactPlaneHelper.getRhoSize(), 1);
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
-      solvedPositionAtConstraint.addX(timeOfConstraint * solution.get(0, 0));
-      solvedPositionAtConstraint.addX(solution.get(1, 0));
-      solvedPositionAtConstraint.addY(timeOfConstraint * solution.get(2, 0));
-      solvedPositionAtConstraint.addY(solution.get(3, 0));
-      solvedPositionAtConstraint.addZ(timeOfConstraint * solution.get(4, 0));
-      solvedPositionAtConstraint.addZ(solution.get(5, 0));
 
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
-
-      helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
-
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
-      solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedObjectivePositionTuple);
+      CommonOps_DDRM.mult(MPCTestHelper.getContactValueJacobian(timeOfConstraint, omega, contactPlaneHelper.getRhoSize()), solution, rhoValueVector);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
       DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -0.5 * timeOfConstraint * timeOfConstraint * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMPositionJacobian(timeOfConstraint, omega, rhoHelper);
+      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMPositionJacobian(timeOfConstraint, omega, contactPlaneHelper);
 
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
+      for (int rhoIdx  = 0; rhoIdx < contactPlaneHelper.getRhoSize(); rhoIdx++)
       {
          int startIdx = 6 + 4 * rhoIdx;
          double rhoValue = Math.exp(omega * timeOfConstraint) * solution.get(startIdx, 0);
@@ -237,9 +169,7 @@ public class CoMPositionCommandTest
          rhoValue += timeOfConstraint * timeOfConstraint * solution.get(startIdx + 3, 0);
 
          assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
-         solvedPositionAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedPositionAtConstraint);
       }
-      solvedPositionAtConstraint.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedPositionAtConstraint);
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
@@ -260,8 +190,7 @@ public class CoMPositionCommandTest
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
 
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, MPCTestHelper.computeCoMPosition(timeOfConstraint, omega, gravityZ, solution, contactPlaneHelper), 1e-4);
    }
 
 
@@ -277,8 +206,6 @@ public class CoMPositionCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
@@ -288,11 +215,12 @@ public class CoMPositionCommandTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
-      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
       contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
 
+      int numberOfBases = 4 * contactPolygon.getNumberOfVertices();
+      int basisCoefficients = numberOfBases * LinearMPCIndexHandler.coefficientsPerRho;
       double timeOfConstraint = 0.7;
 
       CoMPositionCommand command = new CoMPositionCommand();
@@ -312,46 +240,21 @@ public class CoMPositionCommandTest
       solver.solve();
 
       FramePoint3D solvedPositionAtConstraint = new FramePoint3D();
-      FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
-      int startOfSegment1 = indexHandler.getComCoefficientStartIndex(1);
+      DMatrixRMaj secondSegmentSolution = new DMatrixRMaj(LinearMPCIndexHandler.comCoefficientsPerSegment + basisCoefficients, 1);
+      DMatrixRMaj rhoSolution = new DMatrixRMaj(basisCoefficients, 1);
 
-      solvedPositionAtConstraint.addX(timeOfConstraint * solution.get(startOfSegment1, 0));
-      solvedPositionAtConstraint.addX(solution.get(startOfSegment1 + 1, 0));
-      solvedPositionAtConstraint.addY(timeOfConstraint * solution.get(startOfSegment1 + 2, 0));
-      solvedPositionAtConstraint.addY(solution.get(startOfSegment1 + 3, 0));
-      solvedPositionAtConstraint.addZ(timeOfConstraint * solution.get(startOfSegment1 + 4, 0));
-      solvedPositionAtConstraint.addZ(solution.get(startOfSegment1 + 5, 0));
-
+      MatrixTools.setMatrixBlock(secondSegmentSolution, 0, 0, solution, indexHandler.getComCoefficientStartIndex(1), 0, secondSegmentSolution.getNumRows(), 1, 1.0);
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(1), 0, indexHandler.getRhoCoefficientsInSegment(1), 1, 1.0);
 
-      helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
-
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
-      solvedObjectivePositionTuple.set(solvedObjectivePosition);
-      solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -0.5 * timeOfConstraint * timeOfConstraint * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
-      taskJacobianExpected.set(0, startOfSegment1, timeOfConstraint);
-      taskJacobianExpected.set(0, startOfSegment1 + 1, 1.0);
-      taskJacobianExpected.set(1, startOfSegment1 + 2, timeOfConstraint);
-      taskJacobianExpected.set(1, startOfSegment1 + 3, 1.0);
-      taskJacobianExpected.set(2, startOfSegment1 + 4, timeOfConstraint);
-      taskJacobianExpected.set(2, startOfSegment1 + 5, 1.0);
 
-
-
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
+      for (int rhoIdx  = 0; rhoIdx < contactPlaneHelper.getRhoSize(); rhoIdx++)
       {
          int startIdx = indexHandler.getRhoCoefficientStartIndex(1) + 4 * rhoIdx;
          double rhoValue = Math.exp(omega * timeOfConstraint) * solution.get(startIdx, 0);
@@ -360,42 +263,15 @@ public class CoMPositionCommandTest
          rhoValue += timeOfConstraint * timeOfConstraint * solution.get(startIdx + 3, 0);
 
 //         assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
-         solvedPositionAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedPositionAtConstraint);
+         solvedPositionAtConstraint.scaleAdd(rhoValue, contactPlaneHelper.getBasisVector(rhoIdx), solvedPositionAtConstraint);
 
-         taskJacobianExpected.set(0, startIdx, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getX() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(0, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(0, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getX() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getY() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(1, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(1, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getY() * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 1, rhoHelper.getBasisVector(rhoIdx).getZ() * Math.exp(-omega * timeOfConstraint));
-         taskJacobianExpected.set(2, startIdx + 2, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint * timeOfConstraint);
-         taskJacobianExpected.set(2, startIdx + 3, rhoHelper.getBasisVector(rhoIdx).getZ() * timeOfConstraint * timeOfConstraint);
       }
       solvedPositionAtConstraint.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint, gravityVector, solvedPositionAtConstraint);
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getCoMPositionJacobian(timeOfConstraint, omega, contactPlaneHelper), solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
-
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
-
-      CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
-      CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
-
-      MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
-
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
-
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
-      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, MPCTestHelper.computeCoMPosition(timeOfConstraint, omega, gravityZ, secondSegmentSolution, contactPlaneHelper), 1e-4);
    }
 
 

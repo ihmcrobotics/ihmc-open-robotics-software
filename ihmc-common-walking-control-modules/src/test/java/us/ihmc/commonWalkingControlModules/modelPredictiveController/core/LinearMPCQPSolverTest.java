@@ -371,7 +371,7 @@ public class LinearMPCQPSolverTest
       double timeOfConstraint = 0.7;
       double minRho = 0.001;
 
-      RhoValueObjectiveCommand rhoCommandStart1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandStart1 = new RhoAccelerationObjectiveCommand();
       rhoCommandStart1.setOmega(omega);
       rhoCommandStart1.setTimeOfObjective(0.0);
       rhoCommandStart1.setSegmentNumber(0);
@@ -380,7 +380,7 @@ public class LinearMPCQPSolverTest
       rhoCommandStart1.setUseScalarObjective(true);
       rhoCommandStart1.addContactPlaneHelper(contactPlaneHelper1);
 
-      RhoValueObjectiveCommand rhoCommandEnd1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandEnd1 = new RhoAccelerationObjectiveCommand();
       rhoCommandEnd1.setOmega(omega);
       rhoCommandEnd1.setTimeOfObjective(timeOfConstraint);
       rhoCommandEnd1.setSegmentNumber(0);
@@ -389,7 +389,7 @@ public class LinearMPCQPSolverTest
       rhoCommandEnd1.setUseScalarObjective(true);
       rhoCommandEnd1.addContactPlaneHelper(contactPlaneHelper1);
 
-      RhoValueObjectiveCommand rhoCommandStart2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandStart2 = new RhoAccelerationObjectiveCommand();
       rhoCommandStart2.setOmega(omega);
       rhoCommandStart2.setTimeOfObjective(0.0);
       rhoCommandStart2.setSegmentNumber(1);
@@ -398,7 +398,7 @@ public class LinearMPCQPSolverTest
       rhoCommandStart2.setUseScalarObjective(true);
       rhoCommandStart2.addContactPlaneHelper(contactPlaneHelper2);
 
-      RhoValueObjectiveCommand rhoCommandEnd2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandEnd2 = new RhoAccelerationObjectiveCommand();
       rhoCommandEnd2.setOmega(omega);
       rhoCommandEnd2.setTimeOfObjective(timeOfConstraint);
       rhoCommandEnd2.setSegmentNumber(1);

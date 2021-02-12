@@ -177,23 +177,20 @@ public class MPCQPInputCalculator
                                                             1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(secondComStartCol, 0.0, inputToPack.getTaskJacobian(), objective.getDerivativeOrder(), -1.0);
 
-      int startCol = firstRhoStartCol;
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
-         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), firstSegmentDuration, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), firstSegmentDuration, omega, firstRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
-         startCol += contactPlaneHelper.getCoefficientSize();
+         firstRhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
 
-      startCol = secondRhoStartCol;
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
-         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), firstSegmentDuration, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, objective.getDerivativeOrder(), 0.0, omega, secondRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
-
-         startCol += contactPlaneHelper.getCoefficientSize();
+         secondRhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
 
       inputToPack.getTaskObjective().zero();
@@ -239,27 +236,25 @@ public class MPCQPInputCalculator
                                                             objective.getDerivativeOrder(),
                                                             -1.0);
 
-      int startCol = firstRhoStartCol;
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
 
-         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), firstSegmentDuration, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
-         ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0 / omega2, objective.getDerivativeOrder() + 2, firstSegmentDuration, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), firstSegmentDuration, omega, firstRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0 / omega2, objective.getDerivativeOrder() + 2, firstSegmentDuration, omega, firstRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
 
-         startCol += contactPlaneHelper.getCoefficientSize();
+         firstRhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
 
-      startCol = secondRhoStartCol;
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
 
-         ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, objective.getDerivativeOrder(), 0.0, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
-         ContactPlaneJacobianCalculator.computeLinearJacobian(1.0 / omega2, objective.getDerivativeOrder() + 2, 0.0, omega, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, objective.getDerivativeOrder(), 0.0, omega, secondRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(1.0 / omega2, objective.getDerivativeOrder() + 2, 0.0, omega, secondRhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
-         startCol += contactPlaneHelper.getCoefficientSize();
+         secondRhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
 
       inputToPack.getTaskObjective().zero();
@@ -541,13 +536,13 @@ public class MPCQPInputCalculator
    }
 
    /**
-    * Calculates a {@link QPInputTypeA} based on a {@link RhoValueObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
+    * Calculates a {@link QPInputTypeA} based on a {@link RhoObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
     * values.
     * @param inputToPack QP input to compute
     * @param command command to process
     * @return whether or not the calculation was successful.
     */
-   public int calculateRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
+   public int calculateRhoValueCommand(QPInputTypeA inputToPack, RhoObjectiveCommand command)
    {
       int numberOfVariables = indexHandler.getTotalProblemSize();
       int rhoStartIdx = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
@@ -559,13 +554,13 @@ public class MPCQPInputCalculator
    }
 
    /**
-    * Calculates a {@link QPInputTypeA} based on a {@link RhoValueObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
+    * Calculates a {@link QPInputTypeA} based on a {@link RhoObjectiveCommand}. Is typically used to set upper and lower bounds for the generalized contact
     * values.
     * @param inputToPack QP input to compute
     * @param command command to process
     * @return whether or not the calculation was successful.
     */
-   public int calculateCompactRhoValueCommand(QPInputTypeA inputToPack, RhoValueObjectiveCommand command)
+   public int calculateCompactRhoValueCommand(QPInputTypeA inputToPack, RhoObjectiveCommand command)
    {
       int numberOfVariables = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
@@ -579,7 +574,7 @@ public class MPCQPInputCalculator
       return -1;
    }
 
-   public boolean calculateRhoValueCommandInternal(QPInputTypeA inputToPack, RhoValueObjectiveCommand command, int numberOfVariables, int rhoStartIdx)
+   public boolean calculateRhoValueCommandInternal(QPInputTypeA inputToPack, RhoObjectiveCommand command, int numberOfVariables, int rhoStartIdx)
    {
       int problemSize = 0;
 
@@ -605,7 +600,7 @@ public class MPCQPInputCalculator
       {
          MPCContactPlane contactPlaneHelper = command.getContactPlaneHelper(i);
 
-         ContactPlaneJacobianCalculator.computeRhoJacobian(2, timeOfObjective, omega, startRow, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeRhoJacobian(command.getDerivativeOrder(), timeOfObjective, omega, startRow, startCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
          startRow += contactPlaneHelper.getRhoSize();
          startCol += contactPlaneHelper.getCoefficientSize();
