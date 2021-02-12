@@ -19,6 +19,7 @@ public class ContactPlaneHelperTest
       CoefficientJacobianMatrixHelper coefficientHelper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneTestHelper contactPlaneTestHelper = new ContactPlaneTestHelper(contactPlaneHelper, 4);
 
       double mu = 0.8;
       double omega = 3.0;
@@ -31,14 +32,18 @@ public class ContactPlaneHelperTest
       for (double time = 0.0; time < 1.5; time += 0.001)
       {
          coefficientHelper.computeMatrices(time, omega);
-         contactPlaneHelper.computeJacobians(time, omega);
+         contactPlaneTestHelper.computeJacobians(time, omega);
 
          for (int i = 0; i < 4; i++)
          {
             DMatrixRMaj jacobianExpected = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
+            DMatrixRMaj jacobianExpected2 = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
             CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getJacobianMatrix(i), jacobianExpected);
 
-            EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearJacobian(i), 1e-5);
+            ContactPlaneJacobianCalculator.computeLinearJacobian(i, time, omega, 0, contactPlaneHelper, jacobianExpected2);
+
+            EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneTestHelper.getLinearJacobian(i), 1e-5);
+            EjmlUnitTests.assertEquals(jacobianExpected, jacobianExpected2, 1e-5);
          }
       }
    }
@@ -49,6 +54,7 @@ public class ContactPlaneHelperTest
       CoefficientJacobianMatrixHelper coefficientHelper = new CoefficientJacobianMatrixHelper(4, 4);
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneTestHelper contactPlaneTestHelper = new ContactPlaneTestHelper(contactPlaneHelper, 4);
 
       double mu = 0.8;
       double omega = 3.0;
@@ -61,12 +67,16 @@ public class ContactPlaneHelperTest
       for (double time = 0.0; time < 1.5; time += 0.001)
       {
          coefficientHelper.computeMatrices(time, omega);
-         contactPlaneHelper.computeJacobians(time, omega);
+         contactPlaneTestHelper.computeJacobians(time, omega);
 
          DMatrixRMaj jacobianExpected = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
-         CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getPositionJacobianMatrix(), jacobianExpected);
+         DMatrixRMaj jacobianExpected2 = new DMatrixRMaj(3, coefficientHelper.getCoefficientSize());
 
-         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneHelper.getLinearJacobian(0), 1e-5);
+         CommonOps_DDRM.mult(rhoHelper.getLinearJacobianInWorldFrame(), coefficientHelper.getPositionJacobianMatrix(), jacobianExpected);
+         ContactPlaneJacobianCalculator.computeLinearJacobian(0, time, omega, 0, contactPlaneHelper, jacobianExpected2);
+
+         EjmlUnitTests.assertEquals(jacobianExpected, contactPlaneTestHelper.getLinearJacobian(0), 1e-5);
+         EjmlUnitTests.assertEquals(jacobianExpected, jacobianExpected2, 1e-5);
       }
    }
 }

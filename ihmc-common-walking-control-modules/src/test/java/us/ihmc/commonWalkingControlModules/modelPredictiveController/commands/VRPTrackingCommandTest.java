@@ -32,6 +32,7 @@ public class VRPTrackingCommandTest
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
       ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      ContactPlaneTestHelper contactPlaneTestHelper = new ContactPlaneTestHelper(contactPlaneHelper, 4);
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -86,13 +87,13 @@ public class VRPTrackingCommandTest
          assembledValue.setY(time * solution.get(2, 0) + solution.get(3, 0));
          assembledValue.setZ(time * solution.get(4, 0) + solution.get(5, 0));
 
-         contactPlaneHelper.computeJacobians(time, omega);
+         contactPlaneTestHelper.computeJacobians(time, omega);
 
          jacobian.zero();
 
          CoMCoefficientJacobianCalculator.calculateVRPJacobian(0, omega, time, jacobian, 0, 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(0), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(2), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneTestHelper.getLinearJacobian(0), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneTestHelper.getLinearJacobian(2), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
 
          CommonOps_DDRM.mult(jacobian, solution, solutionPosition);
 
