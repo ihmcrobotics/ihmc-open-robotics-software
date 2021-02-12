@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPointHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
@@ -99,10 +98,10 @@ public class VRPTrackingCostCalculator
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
       {
-         ContactPlaneHelper contactPlane = objective.getContactPlaneHelper(contactPlaneIdx);
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(contactPlaneIdx);
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
-            ContactPointHelper contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
             for (int i = 0; i < contactPoint.getRhoSize(); i++)
             {
                allBasisVectors.add(contactPoint.getBasisVector(i));

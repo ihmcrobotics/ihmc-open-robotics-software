@@ -1,11 +1,10 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -18,14 +17,14 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
  * This class is a helper class to compute the Jacobians that map from generalized contact force coefficient values to the motion function. That is, they scale
  * the contact force along the reaction vector, and compute the value along the desired derivative order.
  */
-public class ContactPlaneHelper
+public class MPCContactPlane
 {
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
    private int numberOfContactPoints;
    private int coefficientSize;
    private int rhoSize;
-   private final ContactPointHelper[] contactPoints;
+   private final MPCContactPoint[] contactPoints;
    private final PoseReferenceFrame planeFrame;
 
    private final FrictionConeRotationCalculator coneRotationCalculator;
@@ -40,7 +39,7 @@ public class ContactPlaneHelper
 
    private ContactPlaneForceViewer viewer;
 
-   public ContactPlaneHelper(int maxNumberOfContactPoints, int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator)
+   public MPCContactPlane(int maxNumberOfContactPoints, int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator)
    {
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
@@ -50,12 +49,12 @@ public class ContactPlaneHelper
       rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       coefficientSize = LinearMPCIndexHandler.coefficientsPerRho * maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
 
-      contactPoints = new ContactPointHelper[maxNumberOfContactPoints];
+      contactPoints = new MPCContactPoint[maxNumberOfContactPoints];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < numberOfContactPoints; i++)
       {
-         contactPoints[i] = new ContactPointHelper(numberOfBasisVectorsPerContactPoint);
+         contactPoints[i] = new MPCContactPoint(numberOfBasisVectorsPerContactPoint);
       }
 
       int coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
@@ -73,7 +72,7 @@ public class ContactPlaneHelper
    {
       this.viewer = viewer;
 
-      for (ContactPointHelper pointHelper : contactPoints)
+      for (MPCContactPoint pointHelper : contactPoints)
          pointHelper.setContactPointForceViewer(viewer.getNextPointForceViewer());
    }
 
@@ -124,12 +123,12 @@ public class ContactPlaneHelper
    }
 
    /**
-    * Gets the {@link ContactPointHelper} for the {@param index}th contact point.
+    * Gets the {@link MPCContactPoint} for the {@param index}th contact point.
     *
     * @param index contact point query.
-    * @return {@link ContactPointHelper} for the {@param index} point.
+    * @return {@link MPCContactPoint} for the {@param index} point.
     */
-   public ContactPointHelper getContactPointHelper(int index)
+   public MPCContactPoint getContactPointHelper(int index)
    {
       return contactPoints[index];
    }
@@ -203,7 +202,7 @@ public class ContactPlaneHelper
          point.set(contactPointsInPlaneFrame.getVertex(contactPointIndex));
          double angleOffset = coneRotationCalculator.computeConeRotation(contactPointsInPlaneFrame, point);
 
-         ContactPointHelper contactPoint = contactPoints[contactPointIndex];
+         MPCContactPoint contactPoint = contactPoints[contactPointIndex];
          contactPoint.computeBasisVectors(contactPointLocation, framePose, angleOffset, mu);
          MatrixTools.setMatrixBlock(rhoMaxMatrix, rowStart, 0, contactPoint.getRhoMaxMatrix(), 0, 0, contactPoint.getRhoSize(), 1, 1.0);
 
@@ -230,7 +229,7 @@ public class ContactPlaneHelper
       int startIdx = 0;
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
-         ContactPointHelper contactPoint = contactPoints[contactPointIdx];
+         MPCContactPoint contactPoint = contactPoints[contactPointIdx];
          contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
 
          MatrixTools.setMatrixBlock(accelerationIntegrationHessian,
@@ -268,7 +267,7 @@ public class ContactPlaneHelper
       int startIdx = 0;
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
-         ContactPointHelper contactPoint = contactPoints[contactPointIdx];
+         MPCContactPoint contactPoint = contactPoints[contactPointIdx];
          contactPoint.computeJerkIntegrationMatrix(duration, omega);
 
          MatrixTools.setMatrixBlock(jerkIntegrationHessian,
@@ -308,7 +307,7 @@ public class ContactPlaneHelper
       contactWrenchCoefficientMatrix.zero();
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
-         ContactPointHelper contactPointHelper = contactPoints[contactPointIdx];
+         MPCContactPoint contactPointHelper = contactPoints[contactPointIdx];
          contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
          CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
          startIdx += contactPointHelper.getCoefficientsSize();
@@ -333,9 +332,9 @@ public class ContactPlaneHelper
       {
          return true;
       }
-      else if (object instanceof ContactPlaneHelper)
+      else if (object instanceof MPCContactPlane)
       {
-         ContactPlaneHelper other = (ContactPlaneHelper) object;
+         MPCContactPlane other = (MPCContactPlane) object;
          if (contactPoints.length != other.contactPoints.length)
             return false;
          if (maxNumberOfContactPoints != other.maxNumberOfContactPoints)

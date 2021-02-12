@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajec
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectorySegment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commons.MathTools;
@@ -125,7 +124,7 @@ public class LinearMPCTrajectoryHandler
     */
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
-                                               List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
+                                               List<? extends List<MPCContactPlane>> contactPlaneHelpers,
                                                double omega)
    {
       int numberOfPhases = planningWindow.size();
@@ -291,7 +290,7 @@ public class LinearMPCTrajectoryHandler
    }
 
    private void computeCoMSegmentCoefficients(DMatrixRMaj solutionCoefficients,
-                                              List<? extends List<ContactPlaneHelper>> contactPlaneHelpers,
+                                              List<? extends List<MPCContactPlane>> contactPlaneHelpers,
                                               DMatrixRMaj xCoefficientVectorToPack,
                                               DMatrixRMaj yCoefficientVectorToPack,
                                               DMatrixRMaj zCoefficientVectorToPack)
@@ -311,7 +310,7 @@ public class LinearMPCTrajectoryHandler
 
          for (int contact = 0; contact < contactPlaneHelpers.get(sequence).size(); contact++)
          {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(sequence).get(contact);
+            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.get(sequence).get(contact);
             contactPlaneHelper.computeContactForceCoefficientMatrix(solutionCoefficients, coeffStartIdx);
             coeffStartIdx += contactPlaneHelper.getCoefficientSize();
          }
@@ -331,7 +330,7 @@ public class LinearMPCTrajectoryHandler
 
          for (int contactIdx = 0; contactIdx < contactPlaneHelpers.get(i).size(); contactIdx++)
          {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
+            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
             DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
 
             xCoefficientVectorToPack.add(positionVectorStart, 0, contactCoefficientMatrix.get(0, 0));

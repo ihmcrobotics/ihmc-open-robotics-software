@@ -1,14 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPointHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.matrixlib.MatrixTools;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
 
@@ -18,7 +14,7 @@ public class ContactPlaneJacobianCalculator
                                             double time,
                                             double omega,
                                             int startColumn,
-                                            ContactPlaneHelper contactPlane,
+                                            MPCContactPlane contactPlane,
                                             DMatrixRMaj jacobianToPack)
    {
       computeLinearJacobian(1.0, derivativeOrder, time, omega, startColumn, contactPlane, jacobianToPack);
@@ -29,7 +25,7 @@ public class ContactPlaneJacobianCalculator
                                             double time,
                                             double omega,
                                             int startColumn,
-                                            ContactPlaneHelper contactPlane,
+                                            MPCContactPlane contactPlane,
                                             DMatrixRMaj jacobianToPack)
    {
       switch (derivativeOrder)
@@ -55,7 +51,7 @@ public class ContactPlaneJacobianCalculator
                                                     double time,
                                                     double omega,
                                                     int startColumn,
-                                                    ContactPlaneHelper contactPlane,
+                                                    MPCContactPlane contactPlane,
                                                     DMatrixRMaj positionJacobianToPack)
    {
       double t2 = scale * time * time;
@@ -70,7 +66,7 @@ public class ContactPlaneJacobianCalculator
                                                     double time,
                                                     double omega,
                                                     int startColumn,
-                                                    ContactPlaneHelper contactPlane,
+                                                    MPCContactPlane contactPlane,
                                                     DMatrixRMaj velocityJacobianToPack)
    {
       double scaleOmega = scale * omega;
@@ -93,7 +89,7 @@ public class ContactPlaneJacobianCalculator
                                                         double time,
                                                         double omega,
                                                         int startColumn,
-                                                        ContactPlaneHelper contactPlane,
+                                                        MPCContactPlane contactPlane,
                                                         DMatrixRMaj accelerationJacobianToPack)
    {
       double scaleOmega2 = scale * omega * omega;
@@ -116,7 +112,7 @@ public class ContactPlaneJacobianCalculator
                                                 double time,
                                                 double omega,
                                                 int startColumn,
-                                                ContactPlaneHelper contactPlane,
+                                                MPCContactPlane contactPlane,
                                                 DMatrixRMaj jerkJacobianToPack)
    {
       double scaleOmega3 = scale * omega * omega * omega;
@@ -135,7 +131,7 @@ public class ContactPlaneJacobianCalculator
                                     jerkJacobianToPack);
    }
 
-   private static void setLinearJacobianCoefficients(ContactPlaneHelper contactPlane,
+   private static void setLinearJacobianCoefficients(MPCContactPlane contactPlane,
                                                      double firstCoefficient,
                                                      double secondCoefficient,
                                                      double thirdCoefficient,
@@ -145,7 +141,7 @@ public class ContactPlaneJacobianCalculator
    {
       for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
       {
-         ContactPointHelper contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+         MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
 
          for (int rhoIdx = 0; rhoIdx < contactPoint.getRhoSize(); rhoIdx++)
          {
@@ -171,7 +167,7 @@ public class ContactPlaneJacobianCalculator
                                          double omega,
                                          int startRow,
                                          int startColumn,
-                                         ContactPlaneHelper contactPlane,
+                                         MPCContactPlane contactPlane,
                                          DMatrixRMaj jacobianToPack)
    {
       computeRhoJacobian(1.0, derivativeOrder, time, omega, startRow, startColumn, contactPlane, jacobianToPack);
@@ -183,7 +179,7 @@ public class ContactPlaneJacobianCalculator
                                          double omega,
                                          int startRow,
                                          int startColumn,
-                                         ContactPlaneHelper contactPlane,
+                                         MPCContactPlane contactPlane,
                                          DMatrixRMaj jacobianToPack)
    {
       switch (derivativeOrder)
@@ -210,7 +206,7 @@ public class ContactPlaneJacobianCalculator
                                                   double omega,
                                                   int startRow,
                                                   int startColumn,
-                                                  ContactPlaneHelper contactPlane,
+                                                  MPCContactPlane contactPlane,
                                                   DMatrixRMaj positionJacobianToPack)
    {
       double t2 = scale * time * time;
@@ -226,7 +222,7 @@ public class ContactPlaneJacobianCalculator
                                              double omega,
                                              int startRow,
                                              int startColumn,
-                                             ContactPlaneHelper contactPlane,
+                                             MPCContactPlane contactPlane,
                                              DMatrixRMaj velocityJacobianToPack)
    {
       double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
@@ -251,7 +247,7 @@ public class ContactPlaneJacobianCalculator
                                                      double omega,
                                                      int startRow,
                                                      int startColumn,
-                                                     ContactPlaneHelper contactPlane,
+                                                     MPCContactPlane contactPlane,
                                                      DMatrixRMaj accelerationJacobianToPack)
    {
       double scaleOmega2 = scale * omega * omega;
@@ -276,7 +272,7 @@ public class ContactPlaneJacobianCalculator
                                              double omega,
                                              int startRow,
                                              int startColumn,
-                                             ContactPlaneHelper contactPlane,
+                                             MPCContactPlane contactPlane,
                                              DMatrixRMaj jerkJacobianToPack)
    {
       double scaleOmega3 = scale * omega * omega * omega;
@@ -296,7 +292,7 @@ public class ContactPlaneJacobianCalculator
                                  jerkJacobianToPack);
    }
 
-   private static void setRhoJacobianCoefficients(ContactPlaneHelper contactPlane,
+   private static void setRhoJacobianCoefficients(MPCContactPlane contactPlane,
                                                   double firstCoefficient,
                                                   double secondCoefficient,
                                                   double thirdCoefficient,
@@ -307,7 +303,7 @@ public class ContactPlaneJacobianCalculator
    {
       for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
       {
-         ContactPointHelper contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+         MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
 
          for (int basisVectorIndex = 0; basisVectorIndex < contactPoint.getRhoSize(); basisVectorIndex++)
          {
