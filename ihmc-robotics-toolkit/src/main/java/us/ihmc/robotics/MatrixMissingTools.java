@@ -37,37 +37,6 @@ public class MatrixMissingTools
       inverseToPack.set(0, 1, -determinantInverse * matrix.get(0, 1));
       inverseToPack.set(1, 0, -determinantInverse * matrix.get(1, 0));
    }
-
-   // TODO do this without the transpose operation
-   public static void fast3x3Inverse(DMatrixRMaj matrix, DMatrixRMaj inverseToPack)
-   {
-      double determinant = CommonOps_DDRM.det(matrix);
-
-      double c00 = matrix.get(1, 1) * matrix.get(2, 2) - matrix.get(2, 1) * matrix.get(1, 2);
-      double c01 = -matrix.get(0, 1) * matrix.get(2, 2) + matrix.get(2, 1) * matrix.get(0, 2);
-      double c02 = matrix.get(0, 1) * matrix.get(1, 2) - matrix.get(1, 1) * matrix.get(0, 2);
-
-      double c10 = -matrix.get(1, 0) * matrix.get(2, 2) + matrix.get(2, 0) * matrix.get(1, 2);
-      double c11 = matrix.get(0, 0) * matrix.get(2, 2) - matrix.get(2, 0) * matrix.get(0, 2);
-      double c12 = -matrix.get(0, 0) * matrix.get(1, 2) + matrix.get(1, 0) * matrix.get(0, 2);
-
-      double c20 = matrix.get(1, 0) * matrix.get(2, 1) - matrix.get(2, 0) * matrix.get(1, 1);
-      double c21 = -matrix.get(0, 0) * matrix.get(2, 1) + matrix.get(2, 0) * matrix.get(0, 1);
-      double c22 = matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(1, 0) * matrix.get(0, 1);
-
-      inverseToPack.set(0, 0, c00 / determinant);
-      inverseToPack.set(0, 1, c01 / determinant);
-      inverseToPack.set(0, 2, c02 / determinant);
-
-      inverseToPack.set(1, 0, c10 / determinant);
-      inverseToPack.set(1, 1, c11 / determinant);
-      inverseToPack.set(1, 2, c12 / determinant);
-
-      inverseToPack.set(2, 0, c20 / determinant);
-      inverseToPack.set(2, 1, c21 / determinant);
-      inverseToPack.set(2, 2, c22 / determinant);
-   }
-
    public static void setDiagonal(DMatrix3x3 mat, double diagonalValue)
    {
       for (int row = 0; row < 3; row++)
