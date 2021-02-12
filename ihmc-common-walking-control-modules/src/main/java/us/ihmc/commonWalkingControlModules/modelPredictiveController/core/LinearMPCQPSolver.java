@@ -76,6 +76,11 @@ public class LinearMPCQPSolver
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
+      this(indexHandler, dt, gravityZ, true, parentRegistry);
+   }
+
+   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, boolean useBlockInverse, YoRegistry parentRegistry)
+   {
       this.indexHandler = indexHandler;
       this.dt = dt;
 
@@ -86,7 +91,8 @@ public class LinearMPCQPSolver
       comRateCoefficientRegularization.set(1e-6);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
-      qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
+      if (useBlockInverse)
+         qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;

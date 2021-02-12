@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.matrixlib.NativeMatrix;
 
@@ -37,7 +36,7 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
          blockToInvert.zero();
          invertedBlock.zero();
 
-         blockToInvert.insert(matrix, start, start, end, end, 0, 0);
+         blockToInvert.insert(matrix, start, end, start, end, 0, 0);
 
          invertedBlock.invert(blockToInvert);
 
