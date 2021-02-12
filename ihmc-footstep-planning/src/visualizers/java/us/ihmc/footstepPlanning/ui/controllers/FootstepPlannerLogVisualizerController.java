@@ -151,6 +151,8 @@ public class FootstepPlannerLogVisualizerController
 
       iterationLoadSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0, 1));
       iterationLoadSpinner.valueProperty().addListener((obs, oldValue, newValue) -> loadIteration());
+
+      childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
    }
 
    public void onPrimaryStageLoaded()
@@ -482,7 +484,6 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.StanceStepToVisualize, Pair.of(stepProperty.parentNode.getSecondStep(), stepProperty.endStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
 
-      childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
       childTable.getSelectionModel().select(0);
       childTable.getFocusModel().focus(0);
    }
