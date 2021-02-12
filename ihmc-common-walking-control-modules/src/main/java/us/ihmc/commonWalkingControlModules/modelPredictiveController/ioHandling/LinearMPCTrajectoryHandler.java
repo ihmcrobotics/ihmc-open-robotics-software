@@ -36,7 +36,7 @@ public class LinearMPCTrajectoryHandler
 {
    private final CoMTrajectoryPlanner positionInitializationCalculator;
 
-   protected final List<ContactPlaneProvider> planningWindow = new ArrayList<>();
+   protected final RecyclingArrayList<ContactPlaneProvider> planningWindowForSolution = new RecyclingArrayList<>(ContactPlaneProvider::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
    private final LinearMPCIndexHandler indexHandler;
@@ -133,9 +133,9 @@ public class LinearMPCTrajectoryHandler
                                                double omega)
    {
       int numberOfPhases = planningWindow.size();
-      this.planningWindow.clear();
+      this.planningWindowForSolution.clear();
       for (int i = 0; i < numberOfPhases; i++)
-         this.planningWindow.add(planningWindow.get(i));
+         this.planningWindowForSolution.add().set(planningWindow.get(i));
 
       computeCoMSegmentCoefficients(solutionCoefficients,
                                     contactPlaneHelpers,
@@ -227,6 +227,11 @@ public class LinearMPCTrajectoryHandler
 
       if (vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
+   }
+
+   private void overwriteTrajectoryOutsidePreviewWindow()
+   {
+
    }
 
    private int getSegmentIndexContainingTime(double time, MultipleCoMSegmentTrajectoryGenerator trajectory)
