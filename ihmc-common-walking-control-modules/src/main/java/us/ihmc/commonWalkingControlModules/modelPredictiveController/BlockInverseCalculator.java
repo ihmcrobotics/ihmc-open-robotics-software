@@ -29,19 +29,18 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
       {
          int start = indexHandler.getComCoefficientStartIndex(i);
          int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
+         int end = start + blockSize;
 
          blockToInvert.reshape(blockSize, blockSize);
          invertedBlock.reshape(blockSize, blockSize);
          blockToInvert.zero();
          invertedBlock.zero();
 
-         // TODO add a set block method
-         blockToInvert.addBlock(matrix, 0, 0, start, start, blockSize, blockSize, 1.0);
+         blockToInvert.insert(matrix, start, start, end, end, 0, 0);
 
          invertedBlock.invert(blockToInvert);
 
-         // TODO add a set block method
-         inverseMatrixToPack.addBlock(invertedBlock, start, start, 0, 0, blockSize, blockSize, 1.0);
+         inverseMatrixToPack.insert(invertedBlock, start, start);
       }
    }
 }
