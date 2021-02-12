@@ -69,7 +69,6 @@ public class MPCQPInputCalculatorTest
          helper.computeMatrices(time, omega);
 
          contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-         contactPlaneHelper.computeJacobians(time, omega);
 
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
@@ -185,7 +184,6 @@ public class MPCQPInputCalculatorTest
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
          contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-         contactPlaneHelper.computeJacobians(time, omega);
 
          DMatrixRMaj rhoMagnitudesJacobian = MPCTestHelper.getCoMPositionJacobian(time, omega, rhoHelper);
          DMatrixRMaj rhoRatesJacobian = MPCTestHelper.getCoMVelocityJacobian(time, omega, rhoHelper);
@@ -283,7 +281,6 @@ public class MPCQPInputCalculatorTest
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
          contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-         contactPlaneHelper.computeJacobians(time, omega);
 
          DMatrixRMaj rhoMagnitudesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
          DMatrixRMaj rhoRatesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
@@ -414,7 +411,6 @@ public class MPCQPInputCalculatorTest
          rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
          contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-         contactPlaneHelper.computeJacobians(time, omega);
 
          DMatrixRMaj rhoMagnitudesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
          DMatrixRMaj rhoRatesJacobian = new DMatrixRMaj(rhoSize, rhoCoefficients);
@@ -543,7 +539,6 @@ public class MPCQPInputCalculatorTest
             rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
             contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-            contactPlaneHelper.computeJacobians(time, omega);
 
             FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
             FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -629,7 +624,6 @@ public class MPCQPInputCalculatorTest
             rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
             contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-            contactPlaneHelper.computeJacobians(time, omega);
 
             FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
             FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -715,7 +709,6 @@ public class MPCQPInputCalculatorTest
             rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-5, 1e-7, mu);
 
             contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
-            contactPlaneHelper.computeJacobians(time, omega);
 
             FramePoint3D comPositionObjective = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
             FrameVector3D comVelocityObjective = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
