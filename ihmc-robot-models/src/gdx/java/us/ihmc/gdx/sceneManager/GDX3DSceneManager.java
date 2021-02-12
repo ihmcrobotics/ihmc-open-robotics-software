@@ -2,7 +2,6 @@ package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
@@ -180,11 +179,6 @@ public class GDX3DSceneManager
       renderables.add(new GDXRenderable(renderableProvider, sceneLevel));
    }
 
-   public void addInputProcessor(InputProcessor inputProcessor)
-   {
-      inputMultiplexer.addProcessor(inputProcessor);
-   }
-
    /**
     * Coordinates in xy bottom left
     */
@@ -194,8 +188,6 @@ public class GDX3DSceneManager
       this.y = y;
       this.width = width;
       this.height = height;
-
-      camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
    }
 
    public int getCurrentWindowWidth()
@@ -211,6 +203,11 @@ public class GDX3DSceneManager
    public FocusBasedGDXCamera getCamera3D()
    {
       return camera3D;
+   }
+
+   public InputMultiplexer getInputMultiplexer()
+   {
+      return inputMultiplexer;
    }
 
    public ModelBatch getModelBatch()
