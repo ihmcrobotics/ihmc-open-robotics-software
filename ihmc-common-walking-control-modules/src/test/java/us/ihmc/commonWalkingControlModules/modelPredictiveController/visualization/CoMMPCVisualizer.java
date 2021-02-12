@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SegmentPointViewer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -30,7 +28,7 @@ public class CoMMPCVisualizer
       this.mpc = mpc;
       this.scs = scs;
 
-      mpc.setCornerPointViewer(new SegmentPointViewer(registry, graphicsListRegistry));
+      mpc.setCornerPointViewer(new MPCCornerPointViewer(registry, graphicsListRegistry));
       mpc.setupCoMTrajectoryViewer(graphicsListRegistry);
       mpc.setContactPlaneViewers(() -> getNextContactPlaneForceViewer(registry, graphicsListRegistry));
 
