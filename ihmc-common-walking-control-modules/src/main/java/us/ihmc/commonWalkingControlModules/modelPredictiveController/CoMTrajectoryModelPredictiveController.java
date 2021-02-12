@@ -235,7 +235,11 @@ public class CoMTrajectoryModelPredictiveController
 
       mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
+      {
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, omega.getValue());
+         if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
+            throw new RuntimeException("Somehow these didn't match up.");
+      }
 
       cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity);
 
