@@ -122,7 +122,7 @@ public class MPCTestHelper
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
-         int startIdx = 6 + 4 * rhoIdx;
+         int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoIdx;
 
          FrameVector3DReadOnly basisVector = rhoHelper.getBasisVector(rhoIdx);
          jacobian.set(0, startIdx, basisVector.getX() * (c2));

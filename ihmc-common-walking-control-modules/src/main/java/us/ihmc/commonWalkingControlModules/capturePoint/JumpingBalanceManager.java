@@ -162,7 +162,6 @@ public class JumpingBalanceManager
 
       jumpingMomentumRateControlModuleInput.setOmega0(omega0);
       jumpingMomentumRateControlModuleInput.setTimeInState(0.0);
-      jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setMinimizeAngularMomentumRate(minimizeAngularMomentumRate.getBooleanValue());
    }
 
@@ -200,8 +199,11 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      if (comTrajectoryPlanner.getContactStateProviders().size() != comTrajectoryPlanner.getVRPTrajectories().size())
+         throw new IllegalArgumentException("What?");
+
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }
@@ -240,8 +242,10 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      if (comTrajectoryPlanner.getContactStateProviders().size() != comTrajectoryPlanner.getVRPTrajectories().size())
+         throw new IllegalArgumentException("What?");
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }
