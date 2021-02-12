@@ -38,7 +38,7 @@ public class GDX3DWith2DUIDemo
             boxes = new BoxesDemoModel().newInstance();
 
             stage = new Stage(new ScreenViewport());
-            sceneManager.addInputProcessor(stage);
+            sceneManager.getInputMultiplexer().addProcessor(stage);
 
             table = new Table();
             table.setFillParent(true);
