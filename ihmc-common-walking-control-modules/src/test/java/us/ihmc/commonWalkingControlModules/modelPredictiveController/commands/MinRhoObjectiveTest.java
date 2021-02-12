@@ -78,9 +78,10 @@ public class MinRhoObjectiveTest
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(16, 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
+      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(rhoHelper.getRhoSize(), indexHandler.getRhoCoefficientsInSegment(0));
+      MatrixTools.setMatrixBlock(taskJacobianExpected, 0, 0, MPCTestHelper.getContactAccelerationJacobian(timeOfConstraint, omega, contactPlaneHelper), 0, 6, rhoHelper.getRhoSize(), indexHandler.getRhoCoefficientsInSegment(0), 1.0);
 
-      EjmlUnitTests.assertEquals(MPCTestHelper.getContactAccelerationJacobian(timeOfConstraint, omega, contactPlaneHelper), solver.qpInputTypeA.taskJacobian, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
       double omega2 = omega * omega;
@@ -89,6 +90,8 @@ public class MinRhoObjectiveTest
       double a1 = omega2 * Math.exp(-omega * timeOfConstraint);
       double a2 = 6.0 * timeOfConstraint;
       double a3 = 2.0;
+
+      DMatrixRMaj taskJacobianExpectedAlt = new DMatrixRMaj(rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
@@ -100,21 +103,21 @@ public class MinRhoObjectiveTest
 
          assertTrue(rhoValue >= rhoValueVector.get(rhoIdx));
 
-         taskJacobianExpected.set(rhoIdx, startColIdx, a0);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 1, a1);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 2, a2);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 3, a3);
+         taskJacobianExpectedAlt.set(rhoIdx, startColIdx, a0);
+         taskJacobianExpectedAlt.set(rhoIdx, startColIdx + 1, a1);
+         taskJacobianExpectedAlt.set(rhoIdx, startColIdx + 2, a2);
+         taskJacobianExpectedAlt.set(rhoIdx, startColIdx + 3, a3);
       }
 
 
 
-      CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
+      CommonOps_DDRM.scale(-1.0, taskJacobianExpectedAlt);
       CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Ain, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpectedAlt, solver.solverInput_Ain, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
 
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
+      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpectedAlt.getNumCols(), taskJacobianExpectedAlt.getNumCols());
+      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpectedAlt.getNumCols(), 1);
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
