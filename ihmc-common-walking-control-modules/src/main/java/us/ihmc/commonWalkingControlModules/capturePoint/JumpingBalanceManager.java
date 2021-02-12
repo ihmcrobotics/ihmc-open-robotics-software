@@ -188,7 +188,6 @@ public class JumpingBalanceManager
       chestPose.changeFrame(worldFrame);
       comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
                                                        controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
-                                                       yoPerfectVRP,
                                                        timeInSupportSequence.getDoubleValue());
 //      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
@@ -225,7 +224,6 @@ public class JumpingBalanceManager
       chestPose.changeFrame(worldFrame);
       comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
                                                        controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
-                                                       yoPerfectVRP,
                                                        timeInSupportSequence.getDoubleValue());
 //      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 

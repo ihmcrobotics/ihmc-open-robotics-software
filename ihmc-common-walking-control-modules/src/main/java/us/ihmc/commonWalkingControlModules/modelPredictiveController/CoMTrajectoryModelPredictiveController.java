@@ -635,7 +635,6 @@ public class CoMTrajectoryModelPredictiveController
 
    public void setCurrentCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition,
                                            FrameVector3DReadOnly centerOfMassVelocity,
-                                           FramePoint3DReadOnly currentVRPPosition,
                                            double timeInState)
    {
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
