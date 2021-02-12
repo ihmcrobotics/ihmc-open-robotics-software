@@ -103,7 +103,6 @@ public class CoMPositionCommandTest
       taskJacobianExpected.set(2, 5, 1.0);
 
 
-
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
          int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
@@ -133,8 +132,6 @@ public class CoMPositionCommandTest
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
       DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
       DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
@@ -147,6 +144,8 @@ public class CoMPositionCommandTest
       EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
 
+      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedPositionAtConstraint, 1e-4);
