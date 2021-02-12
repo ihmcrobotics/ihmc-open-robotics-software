@@ -449,8 +449,7 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getContactPlaneHelper(i);
-
-         contactPlaneHelper.computeLinearJacobian(timeOfObjective, omega, objective.getDerivativeOrder(), rhoStartCol, inputToPack.getTaskJacobian());
+         ContactPlaneJacobianCalculator.computeLinearJacobian(objective.getDerivativeOrder(), timeOfObjective, omega, rhoStartCol, contactPlaneHelper, inputToPack.getTaskJacobian());
 
          rhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
