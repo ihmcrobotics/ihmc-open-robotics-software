@@ -16,6 +16,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -70,7 +71,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(contactPose.getPosition());
       initialCoM.setZ(nominalHeight);
 
-      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
+      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), 0.0);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -130,11 +132,14 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       assertEquals(previewWindowLength.getDoubleValue(), comPositionCommands.get(1).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
-//      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
 
       assertEquals(previewWindowLength.getDoubleValue(), vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, vrpPositionCommands.get(0).getObjective(), epsilon);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialCoM, vrpTrackingCommands.get(0).getStartVRP(), epsilon);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialCoM, vrpTrackingCommands.get(0).getEndVRP(), epsilon);
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, 0.8);
@@ -204,7 +209,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(contactPose.getPosition());
       initialCoM.setZ(nominalHeight);
 
-      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
+      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), 0.0);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -390,7 +396,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(vrp);
       initialCoM.setZ(nominalHeight);
 
-      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
+      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), 0.0);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -512,7 +519,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
          modifiedCoM.set(initialCoM);
          modifiedCoM.add(EuclidCoreRandomTools.nextVector3D(random, -0.05, 0.05));
 
-         mpc.setCurrentCenterOfMassState(modifiedCoM, new FrameVector3D(), initialCoM, time);
+         mpc.setCurrentCenterOfMassState(modifiedCoM, new FrameVector3D(), time);
          mpc.solveForTrajectory(contactProviders);
          mpc.compute(time);
 
@@ -570,7 +577,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D finalDCM = new FramePoint3D(contactPose2.getPosition());
       finalDCM.setZ(nominalHeight);
 
-      mpc.setCurrentCenterOfMassState(initialCoM, initialCoMVelocity, initialCoM, 0.0);
+      mpc.setCurrentCenterOfMassState(initialCoM, initialCoMVelocity, 0.0);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -695,8 +702,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionEndOfPreview, dcmPositionEndOfPreviewAfter, epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionEndOfPreview, comPositionEndOfPreviewAfter, epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 3e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, 2e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 6e-3);
 
       visualize(mpc, contactProviders, duration);
    }
@@ -734,7 +741,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
       FramePoint3D initialCoM = new FramePoint3D(contactPose.getPosition());
       initialCoM.setZ(nominalHeight);
 
-      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), initialCoM, 0.0);
+      mpc.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
+      mpc.setCurrentCenterOfMassState(initialCoM, new FrameVector3D(), 0.0);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
